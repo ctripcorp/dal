@@ -71,6 +71,10 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		this.mapper = mapper;
 		return this;
 	}
+	
+	public <T> FreeSelectSqlBuilder<K> mapWith(Class<T> type) {
+		return mapWith(new DalObjectRowMapper(type));
+	}
 
 	public FreeSelectSqlBuilder<K> simpleType() {
 		return mapWith(new DalObjectRowMapper());

@@ -90,8 +90,9 @@ public class DatabasePoolConfigParser {
 				parse(url.openStream());
 				logger.info("datasource property will use file :" + url.getFile());
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
+			throw new RuntimeException(e);
 		}
 	}
 	

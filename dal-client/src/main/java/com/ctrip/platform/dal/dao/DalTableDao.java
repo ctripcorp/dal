@@ -200,7 +200,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public <K> List<K> query(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<K>()).nullable(), hints);
+		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<>(clazz)).nullable(), hints);
 	}
 
 	/**
@@ -241,7 +241,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public <K> K queryObject(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<K>()), hints);
+		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<>(clazz)), hints);
 	}
 
 	public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {

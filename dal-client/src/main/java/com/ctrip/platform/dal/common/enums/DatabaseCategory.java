@@ -14,7 +14,7 @@ public enum DatabaseCategory {
 			new int[]{1021,1037,1038,1039,1040,1041,1154,1158,1160,1189,1190,1205,1218,1219,1220}
 			){
 		public String quote(String fieldName){
-			return "[" + fieldName + "]";
+			return "`" + fieldName + "`";
 		}
 		
 		public boolean isTimeOutException(ErrorContext ctx){
@@ -37,7 +37,7 @@ public enum DatabaseCategory {
 			return String.format(selectSqlTemplate + " limit %d, %d", start, count);
 		}
 	},
-			
+
 	SqlServer(
 			"%s=ISNULL(?,%s) ",
 			"getDate()",
@@ -45,7 +45,7 @@ public enum DatabaseCategory {
 			new int[]{2,53,701,802,945,1204,1222}
 			){
 		public String quote(String fieldName){
-			return "`" + fieldName + "`";
+			return "[" + fieldName + "]";
 		}
 		
 		public String buildList(String effectiveTableName, String columns, String whereExp){
@@ -118,15 +118,16 @@ public enum DatabaseCategory {
 		if(provider == null)
 			throw new RuntimeException("The provider value can not be NULL");
 		
-		if(provider.equals(SQL_PROVIDER)) {
+		switch (provider) {
+		case SQL_PROVIDER:
 			return DatabaseCategory.SqlServer;
-		}
-		
-		if(provider.equals(MYSQL_PROVIDER)) {
+		case MYSQL_PROVIDER:
 			return DatabaseCategory.MySql;
+		case ORACLE_PROVIDER:
+			return DatabaseCategory.Oracle;
+		default:
+			throw new RuntimeException("The provider: " + provider + " can not be recoganized");
 		}
-		
-		throw new RuntimeException("The provider: " + provider + " can not be recoganized");
 	}
 	
 	public Set<Integer> getDefaultRetriableErrorCodes() {
@@ -145,6 +146,27 @@ public enum DatabaseCategory {
 	
 	public String getTimestampExp() {
 		return timestampExp;
+	}
+	
+	/**
+	 * This is for compatible with code generated for dal 1.4.1 and previouse version. Such code is like:
+	 * 		
+	 * 	SelectSqlBuilder builder = new SelectSqlBuilder("person", dbCategory, true);
+	 * 	...
+	 *	int index =  builder.getStatementParameterIndex();
+	 *	parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
+	 *  parameters.set(index++, Types.INTEGER, pageSize);
+	 *	return queryDao.query(sql, parameters, hints, parser);
+	 */
+	public String getPageSuffixTpl() {
+		switch (this) {
+		case MySql:
+			return " limit %d, %d";
+		case SqlServer:
+			return " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY";
+		default:
+			return null;
+		}
 	}
 
 	public abstract boolean isTimeOutException(ErrorContext ctx);

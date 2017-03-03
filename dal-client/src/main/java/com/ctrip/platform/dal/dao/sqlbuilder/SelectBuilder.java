@@ -31,6 +31,8 @@ public interface SelectBuilder extends SqlBuilder {
 
 	<T> SelectBuilder mapWith(DalRowMapper<T> mapper);
 	
+	<T> SelectBuilder mapWith(Class<T> type);
+	
 	<T> SelectBuilder extractorWith(DalResultSetExtractor<T> extractor);
 	
 	<T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) throws SQLException;

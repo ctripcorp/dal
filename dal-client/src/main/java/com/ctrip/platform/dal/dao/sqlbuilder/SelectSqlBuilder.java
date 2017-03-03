@@ -148,6 +148,12 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 		return this;
 	}
 	
+	@Override
+	public <T> SelectBuilder mapWith(Class<T> type) {
+		queryBuilder.mapWith(type);
+		return null;
+	}
+	
 	public SelectSqlBuilder simpleType() {
 		queryBuilder.simpleType();
 		return this;
@@ -181,7 +187,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 
 		String sql = queryBuilder.build();
 		String suffix = queryBuilder.getDbCategory().getPageSuffixTpl();
-
+	
 		// If it is the old code gen case, we need to append page suffix
 		return isPagination ? sql + suffix : sql;
 	}

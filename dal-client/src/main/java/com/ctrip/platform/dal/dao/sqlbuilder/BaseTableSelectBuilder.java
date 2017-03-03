@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -124,6 +123,10 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	public <T> BaseTableSelectBuilder mapWith(DalRowMapper<T> mapper) {
 		this.mapper = mapper;
 		return this;
+	}
+	
+	public <T> BaseTableSelectBuilder mapWith(Class<T> type) {
+		return mapWith(new DalObjectRowMapper(type));
 	}
 	
 	public BaseTableSelectBuilder simpleType() {

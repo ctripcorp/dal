@@ -53,7 +53,7 @@ public class EntityManager {
 	}
 	
 	public static <T> DalRowMapper<T> getMapper(Class<T> clazz) throws SQLException {
-		return clazz.getAnnotation(Entity.class) == null ? new DalObjectRowMapper<T>() : new DalDefaultJpaMapper<T>(clazz);
+		return clazz.getAnnotation(Entity.class) == null ? new DalObjectRowMapper<>(clazz) : new DalDefaultJpaMapper<T>(clazz);
 	}	
 	
 	private <T> EntityManager(Class<T> clazz) throws SQLException {

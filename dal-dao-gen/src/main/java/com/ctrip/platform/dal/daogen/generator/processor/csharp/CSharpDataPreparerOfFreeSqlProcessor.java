@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
     private static Logger log = Logger.getLogger(CSharpDataPreparerOfFreeSqlProcessor.class);
@@ -146,21 +145,26 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         method.setScalarType(task.getScalarType());
         method.setPojoType(task.getPojoType());
 
+        /*
         Pattern ptn = Pattern.compile("@([^\\s\\(\\)]+)", Pattern.CASE_INSENSITIVE);
         Matcher mt = ptn.matcher(method.getSql());
         Queue<String> sqlParamQueue = new LinkedList<>();
         while (mt.find()) {
             sqlParamQueue.add(mt.group(1));
         }
+        */
 
         List<CSharpParameterHost> params = new ArrayList<>();
         for (String param : StringUtils.split(task.getParameters(), ";")) {
             String[] splitedParam = StringUtils.split(param, ",");
             CSharpParameterHost p = new CSharpParameterHost();
             p.setName(splitedParam[0]);
+            /*
             String sqlParamName = sqlParamQueue.poll();
             if (sqlParamName == null)
                 sqlParamName = splitedParam[0];
+            */
+            String sqlParamName = splitedParam[0];
             p.setSqlParamName(sqlParamName);
             p.setInParameter(inParams.contains(p.getName()));
             p.setDbType(DbType.getDbTypeFromJdbcType(Integer.valueOf(splitedParam[1])));

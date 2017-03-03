@@ -41,10 +41,13 @@ public class DalGroupMemberResource {
             group.setChildren(false);
         }
 
+        return groups;
+        /*
         String userNo = RequestUtil.getUserNo(request);
         return sortGroups(groups, userNo);
+        */
     }
-
+    /*
     private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
         List<DalGroup> result = new ArrayList<>(groups.size());
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
@@ -64,6 +67,7 @@ public class DalGroupMemberResource {
         }
         return result;
     }
+    */
 
     @GET
     @Path("groupuser")

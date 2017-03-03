@@ -1,8 +1,5 @@
 <dal name="dal.prize.test">
   <databaseSets>
-<!-- 	 <databaseSet name="MultiThreadingTest" provider="sqlProvider">
-        <add  name="MultiThreadingTest_M" databaseType="Master" sharding="" connectionString="MultiThreadingTest"/>
-     </databaseSet>-->
     <databaseSet name="dao_test" provider="mySqlProvider">
       <add  name="dao_test_M" databaseType="Master" sharding="" connectionString="dao_test"/>
     </databaseSet>
@@ -51,12 +48,6 @@
 	<databaseSet name="DAL_TEST" provider="sqlProvider">
         <add name="DAL_TEST" databaseType="Master" sharding="" connectionString="dal_test_new"/>   
 	</databaseSet>
-	<!--
-	<databaseSet name="DB_TABLE_SHARD" provider="sqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=id;mod=2;tableColumns=index;tableMod=4;separator=_;shardedTables=dal_client_test">
-      <add name="HotelPubDB" databaseType="Master" sharding="0" connectionString="HotelPubDB"/>   
-      <add name="dao_test" databaseType="Master" sharding="1" connectionString="dao_test"/>
-	</databaseSet>
-	-->
     <databaseSet name="dao_test_sqlsvr_tableShard" provider="sqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;tableColumns=index,tableIndex;tableMod=4;separator=_;shardedTables=dal_client_test" >
       <add  name="dao_test_sqlsvr_M" databaseType="Master" sharding="" connectionString="dao_test_sqlsvr"/>
     </databaseSet>
@@ -97,6 +88,20 @@
         <add name="dal_shard_0" databaseType="Master" sharding="0" connectionString="dal_shard_0"/>   
         <add name="dal_shard_1" databaseType="Master" sharding="1" connectionString="dal_shard_1"/>   
     </databaseSet>
+    <databaseSet name="dao_test_oracle" provider="oracleProvider" >
+        <add name="dao_test_oracle" databaseType="Master" sharding="" connectionString="OracleShard_0"/>   
+    </databaseSet>
+    <databaseSet name="dao_test_oracle_tableShard" provider="oracleProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;tableColumns=index,tableIndex;tableMod=4;separator=_;shardedTables=dal_client_test" >
+        <add name="dao_test_oracle" databaseType="Master" sharding="" connectionString="OracleShard_0"/>   
+    </databaseSet>
+    <databaseSet name="dao_test_oracle_dbShard" provider="oracleProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=index,tableIndex;mod=2;">
+        <add name="dao_test_oracle_0" databaseType="Master" sharding="0" connectionString="OracleShard_0"/>   
+        <add name="dao_test_oracle_1" databaseType="Master" sharding="1" connectionString="OracleShard_1"/>   
+    </databaseSet>
+    <databaseSet name="dao_test_oracle_dbTableShard" provider="oracleProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=index,dbIndex;mod=2;tableColumns=table,tableIndex;tableMod=4;separator=_;shardedTables=dal_client_test">
+        <add name="dao_test_oracle" databaseType="Master" sharding="0" connectionString="OracleShard_0"/>   
+        <add name="dao_test_oracle" databaseType="Master" sharding="1" connectionString="OracleShard_1"/>   
+    </databaseSet>
   </databaseSets>
   <LogListener enabled="true">
   	  <!--<logger>com.ctrip.platform.dal.dao.client.DefaultLogger</logger>-->
@@ -113,6 +118,7 @@
         <asyncLogging>false</asyncLogging>
       </settings>
   </LogListener>
+  <!--
   <ConnectionLocator>
       <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
       <settings>
@@ -120,6 +126,7 @@
 		 <dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
 	  </settings>
   </ConnectionLocator>
+  -->
   <TaskFactory>
       <settings>
 		 <maxPoolSize>100</maxPoolSize>

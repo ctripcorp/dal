@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.unittests;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +23,6 @@ import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import com.google.common.collect.Sets;
 
 /**
  * This test case is too complex, we need to refactor it to make it focus on more "unit" testable
@@ -375,6 +375,15 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, ErrorCode.MarkdownConnection);
 	}
 	
+	private Set<String> newHashSet(String... v) {
+		Set<String> hset = new HashSet<>(); 	
+		for(String s: v){
+			hset.add(s);
+		}
+		
+		return hset;
+	}
+	
 	@Test
 	public void notMasterOnlyHaTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
@@ -385,7 +394,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
 		DatabaseSelector selector;
-		Set<String> matched = Sets.newHashSet(S1, S2, S3);
+		Set<String> matched = newHashSet(S1, S2, S3);
 		
 		DalHints hints = new DalHints().setHA(new DalHA());
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
@@ -397,7 +406,7 @@ public class DatabaseSelectorTest {
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
 		assertSelector(selector, matched);
 		
-		matched = Sets.newHashSet(M1, M2);
+		matched = newHashSet(M1, M2);
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
 		assertSelector(selector, matched);
 
@@ -421,7 +430,7 @@ public class DatabaseSelectorTest {
 		Set<String> matched;
 		
 		autoMarkdown(S1);
-		matched = Sets.newHashSet(S2, S3);
+		matched = newHashSet(S2, S3);
 		DalHints hints = new DalHints().setHA(new DalHA());
 		
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
@@ -552,7 +561,7 @@ public class DatabaseSelectorTest {
 		
 		Set<String> matched;
 		
-		matched = Sets.newHashSet(M1, M2);
+		matched = newHashSet(M1, M2);
 		DalHints hints = new DalHints().setHA(new DalHA());
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
 		assertSelector(selector, matched);
@@ -561,7 +570,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, matched);
 		
 		// reset
-		matched = Sets.newHashSet(M1, M2);
+		matched = newHashSet(M1, M2);
 		hints = new DalHints().setHA(new DalHA());
 		selector = new DatabaseSelector(hints, ms, ss, false, false);
 		assertSelector(selector, matched);
@@ -570,7 +579,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, matched);
 		
 		// Master only
-		matched = Sets.newHashSet(M1, M2);
+		matched = newHashSet(M1, M2);
 		hints = new DalHints().setHA(new DalHA());
 		selector = new DatabaseSelector(hints, ms, ss, true, true);
 		assertSelector(selector, M1, M2);
@@ -579,7 +588,7 @@ public class DatabaseSelectorTest {
 		assertSelector(selector, M1, M2);
 
 		// reset
-		matched = Sets.newHashSet(M1, M2);
+		matched = newHashSet(M1, M2);
 		hints = new DalHints().setHA(new DalHA());
 		selector = new DatabaseSelector(hints, ms, ss, true, false);
 		assertSelector(selector, M1, M2);
@@ -656,7 +665,7 @@ public class DatabaseSelectorTest {
 		DatabaseSelector selector;
 		
 		Set<String> matched;
-		matched = Sets.newHashSet(S1, S2, S3);
+		matched = newHashSet(S1, S2, S3);
 
 		DalHints hints = new DalHints().setHA(new DalHA());
 
@@ -686,7 +695,7 @@ public class DatabaseSelectorTest {
 
 		autoMarkdown(S1);
 		DalHints hints = new DalHints().setHA(new DalHA());
-		matched = Sets.newHashSet(S2, S3);
+		matched = newHashSet(S2, S3);
 
 		selector = new DatabaseSelector(hints, ms, ss, false, true);
 		assertSelector(selector, matched);

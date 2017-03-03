@@ -29,5 +29,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/dal-client"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ctrip-dal-client"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

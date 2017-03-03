@@ -8,6 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	DalDirectClientMySqlTest.class,
 	DalDirectClientSqlServerTest.class,
+	DalDirectClientOracleTest.class,
 	DalQueryDaoMySqlTest.class,
 	DalQueryDaoSqlServerTest.class,
 	DalTabelDaoMySqlTest.class,

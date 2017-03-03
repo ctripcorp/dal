@@ -8,5 +8,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	DalQueryDaoMySqlTest.class,
 	DalQueryDaoSqlSvrTest.class,
+	DalQueryDaoOracleTest.class,
 })
 public class AllTest {}

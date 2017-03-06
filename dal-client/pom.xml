@@ -18,6 +18,8 @@
 		<javax.servlet-version>3.0.0.v201103241009</javax.servlet-version>
 		<slf4j-api-version>1.7.2</slf4j-api-version>
 		<commons-lang-version>2.5</commons-lang-version>
+		<junit-version>4.4</junit-version>
+		<easymock-version>2.3</easymock-version>
 		<file_encoding>UTF-8</file_encoding>
 	</properties>
 	<dependencies>
@@ -73,6 +75,18 @@
 			<artifactId>commons-lang</artifactId>
 			<version>${commons-lang-version}</version>
 		</dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymockclassextension</artifactId>
+            <version>${easymock-version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>

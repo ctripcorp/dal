@@ -161,9 +161,9 @@ public enum DatabaseCategory {
 	public String getPageSuffixTpl() {
 		switch (this) {
 		case MySql:
-			return " limit %d, %d";
+			return " limit ?, ?";
 		case SqlServer:
-			return " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY";
+			return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 		default:
 			return null;
 		}

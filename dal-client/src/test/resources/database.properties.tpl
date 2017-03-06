@@ -90,12 +90,12 @@ dao_test_select.driverClassName=com.mysql.jdbc.Driver
 
 dal_shard_0.userName=
 dal_shard_0.password=
-dal_shard_0.connectionUrl=jdbc:mysql://pub.mysql.db.dev.sh.ctripcorp.com:28747/dal_shard_0
+dal_shard_0.connectionUrl=jdbc:mysql://testDbSvrIp:3306/dal_shard_0
 dal_shard_0.driverClassName=com.mysql.jdbc.Driver
 
 dal_shard_1.userName=
 dal_shard_1.password=
-dal_shard_1.connectionUrl=jdbc:mysql://pub.mysql.db.dev.sh.ctripcorp.com:28747/dal_shard_1
+dal_shard_1.connectionUrl=jdbc:mysql://testDbSvrIp:3306/dal_shard_1
 dal_shard_1.driverClassName=com.mysql.jdbc.Driver
 
 allinonelessdatasource.userName=

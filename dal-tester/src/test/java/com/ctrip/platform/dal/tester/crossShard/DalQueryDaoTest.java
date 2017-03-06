@@ -524,7 +524,7 @@ public abstract class DalQueryDaoTest {
 		
 		MultipleSqlBuilder builder = new MultipleSqlBuilder();
 		// TODO add all add method
-		builder.addQuery("select 1", new StatementParameters(), new ClientTestDalRowMapper());//mapper
+		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper());//mapper
 //		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
 //		builder.addQuery(sqlList, new StatementParameters(), ClientTestModel.class, new ClientTestModelComparator());//sorter
 //		builder.addQuery(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger

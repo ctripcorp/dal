@@ -9,6 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	test.com.ctrip.platform.dal.dao.client.AllTest.class,
 	test.com.ctrip.platform.dal.dao.datasource.AllTests.class,
 	test.com.ctrip.platform.dal.dao.dialet.mysql.MySqlHelperTest.class,
+	test.com.ctrip.platform.dal.dao.helper.AllTests.class,
 	test.com.ctrip.platform.dal.dao.markdown.AllTests.class,
 	test.com.ctrip.platform.dal.dao.parser.AllTest.class,
 	test.com.ctrip.platform.dal.dao.shard.AllTest.class,

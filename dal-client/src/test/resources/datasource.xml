@@ -128,8 +128,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               defaultTransactionIsolation="SERIALIZABLE"
-              connectionProperties=""
-              option=""
+              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"
               /><!--  rewriteBatchedStatements=true;allowMultiQueries=true -->
     <Datasource name="dao_test_mysql_0"
               testWhileIdle="true"

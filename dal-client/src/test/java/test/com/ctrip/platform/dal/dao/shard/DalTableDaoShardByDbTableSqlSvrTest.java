@@ -12,8 +12,8 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class DalTableDaoShardByDbTableTest extends BaseDalTableDaoShardByDbTableTest {
-	public DalTableDaoShardByDbTableTest() {
+public class DalTableDaoShardByDbTableSqlSvrTest extends BaseDalTableDaoShardByDbTableTest {
+	public DalTableDaoShardByDbTableSqlSvrTest() {
 		super(DATABASE_NAME_SQLSVR);
 	}
 

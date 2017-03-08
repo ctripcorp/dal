@@ -3,33 +3,33 @@ package test.com.ctrip.platform.dal.dao.unitbase;
 import java.sql.Timestamp;
 
 public class ClientTestModel {
-	private int id;
-	private int quantity;
-	private short type;
+	private Integer id;
+	private Integer quantity;
+	private Short type;
 	private String address;
 	private Timestamp lastChanged;
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(int quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
 
-	public short getType() {
+	public Short getType() {
 		return type;
 	}
 
-	public void setType(short type) {
+	public void setType(Short type) {
 		this.type = type;
 	}
 

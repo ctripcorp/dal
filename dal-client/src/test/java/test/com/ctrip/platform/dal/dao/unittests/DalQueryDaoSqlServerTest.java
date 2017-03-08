@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -21,20 +23,11 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalQueryDaoSqlServerTest {
+	private static SqlServerDatabaseInitializer initializer = new SqlServerDatabaseInitializer();
+	private final static String DATABASE_NAME = initializer.DATABASE_NAME;
+
 	private final static int ROW_COUNT = 1000;
-	private final static String DATABASE_NAME = "dao_test_sqlsvr";
 	private final static String TABLE_NAME = "dal_client_test";
-
-	private final static String DROP_TABLE_SQL = "IF EXISTS ("
-			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
-			+ "WHERE TABLE_NAME = '" + TABLE_NAME + "') " + "DROP TABLE  "
-			+ TABLE_NAME;
-
-	// Create the the table
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME
-			+ "(" + "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
-			+ "quantity int,type smallint, " + "address varchar(64) not null,"
-			+ "last_changed datetime default getdate())";
 
 	private static DalClient baseClient = null;
 	private static DalQueryDao client = null;
@@ -51,12 +44,10 @@ public class DalQueryDaoSqlServerTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		initializer.setUpBeforeClass();
+		
 		DalHints hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
-		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL };
-		for (int i = 0; i < sqls.length; i++) {
-			baseClient.update(sqls[i], parameters, hints);
-		}
 
 		/*baseClient.update("SET IDENTITY_INSERT " + TABLE_NAME + " ON",
 				parameters, hints);*/
@@ -82,12 +73,7 @@ public class DalQueryDaoSqlServerTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		DalHints hints = new DalHints();
-		StatementParameters parameters = new StatementParameters();
-		String[] sqls = new String[] { DROP_TABLE_SQL };
-		for (int i = 0; i < sqls.length; i++) {
-			baseClient.update(sqls[i], parameters, hints);
-		}
+		initializer.tearDownAfterClass();
 	}
 
 	/**

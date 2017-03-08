@@ -5,71 +5,37 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import test.com.ctrip.platform.dal.dao.unitbase.ClientTestDalParser;
 import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
-import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class DalTableDaoSqlServerTest {
-	private static SqlServerDatabaseInitializer initializer = new SqlServerDatabaseInitializer();
-	private final static String DATABASE_NAME = initializer.DATABASE_NAME;
-	private final static String TABLE_NAME = initializer.TABLE_NAME;
+public class DalTabelDaoTestStub {
+	private boolean validateBatchUpdateCount;
+	private boolean supportGetGeneratedKeys;
+	private boolean supportInsertValues;
 	
-	private static DalClient client = null;
-	private static DalTableDao<ClientTestModel> dao = null;
-
-	static {
+	public DalTabelDaoTestStub(String dbName, boolean validateBatchUpdateCount, boolean supportGetGeneratedKeys, boolean supportInsertValues) {
+		this.validateBatchUpdateCount = validateBatchUpdateCount;
+		this.supportGetGeneratedKeys = supportGetGeneratedKeys;
+		this.supportInsertValues = supportInsertValues;
 		try {
-			DalClientFactory.initClientFactory();
-			client = DalClientFactory.getClient(DATABASE_NAME);
-			dao = new DalTableDao<ClientTestModel>(new ClientTestDalParser(DATABASE_NAME));
+			dao = new DalTableDao<ClientTestModel>(new ClientTestDalParser(dbName));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	/**
-	 * Create the test tables
-	 * @throws Exception
-	 */
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		initializer.setUpBeforeClass();
-	}
+	private final static String TABLE_NAME = "dal_client_test";
+	private DalTableDao<ClientTestModel> dao = null;
 
-	/**
-	 * Drop the test tables
-	 * @throws Exception
-	 */
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		initializer.tearDownAfterClass();
-	}
-
-	@Before
-	public void setUp() throws Exception {
-		initializer.setUp2();
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		initializer.tearDown();
-	}
-	
 	/**
 	 * Test Query by Primary key
 	 * @throws SQLException
@@ -268,13 +234,7 @@ public class DalTableDaoSqlServerTest {
 		int[] res = dao.insert(new DalHints(), models);
 		assertEquals(0, res);
 	}
-
-	private void assertEquals(int expected, int[] res) {
-		int total = 0;
-		for(int t: res)total+=t;
-		Assert.assertEquals(expected, total);
-	}
-
+		
 	/**
 	 * Test Insert multiple entities one by one
 	 * @throws SQLException
@@ -286,7 +246,7 @@ public class DalTableDaoSqlServerTest {
 		model.setType(((Number)(1%3)).shortValue());
 		model.setAddress("CTRIP");
 		int res = dao.insert(new DalHints(), model);
-		Assert.assertEquals(4+1, DalTestHelper.getCount(dao));
+		Assert.assertEquals(1, res);
 	}
 	
 	/**
@@ -303,10 +263,11 @@ public class DalTableDaoSqlServerTest {
 			model.setAddress("CTRIP");
 			entities.add(model);
 		}
-		dao.insert(new DalHints(), entities);
+		int[] res = dao.insert(new DalHints(), entities);
+		assertEquals(3, res);
 		Assert.assertEquals(3, DalTestHelper.getCount(dao, "address='CTRIP'"));
 	}
-
+	
 	/**
 	 * Test Test Insert multiple entities one by one with continueOnError hints
 	 * @throws SQLException
@@ -330,8 +291,8 @@ public class DalTableDaoSqlServerTest {
 		}
 		
 		DalHints hints = new DalHints(DalHintEnum.continueOnError);
-		dao.insert(hints, entities);
-		Assert.assertEquals(4+2, DalTestHelper.getCount(dao));
+		int[] res = dao.insert(hints, entities);
+		assertEquals(2, res);
 	}
 	
 	/**
@@ -348,12 +309,14 @@ public class DalTableDaoSqlServerTest {
 			model.setAddress("CTRIP");
 			entities.add(model);
 		}
-		KeyHolder holder = new KeyHolder();
-		dao.insert(new DalHints(),null, entities);
-//		Assert.assertEquals(3, res);
-//		Assert.assertEquals(3, holder.getKeyList().size());
-//		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEYS"));
-		Assert.assertEquals(4+3, DalTestHelper.getCount(dao));
+		KeyHolder holder = supportGetGeneratedKeys ? new KeyHolder() : null;
+		int[] res = dao.insert(new DalHints(),holder, entities);
+		assertEquals(3, res);
+		
+		if(supportGetGeneratedKeys) {
+			Assert.assertEquals(3, holder.size());
+			Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));
+		}
 	}
 	
 	@Test
@@ -372,6 +335,31 @@ public class DalTableDaoSqlServerTest {
 		Assert.assertEquals(0, res);
 	}
 
+	/**
+	 * Test Insert multiple entities with one SQL Statement
+	 * @throws SQLException
+	 */
+	@Test
+	public void testCombinedInsert() throws SQLException{
+		if(!supportInsertValues)
+			return;
+		
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
+		for (int i = 0; i < 3; i++) {
+			ClientTestModel model = new ClientTestModel();
+			model.setQuantity(10 + 1%3);
+			model.setType(((Number)(1%3)).shortValue());
+			model.setAddress("CTRIP");
+			entities.add(model);
+		}
+		KeyHolder holder = new KeyHolder();
+		DalHints hints = new DalHints();
+		int res = dao.combinedInsert(hints, holder, entities);
+		Assert.assertEquals(3, res);
+		Assert.assertEquals(3, holder.size());
+		Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));		
+	}
+	
 	@Test
 	public void testBatchInsertCheckForData() throws SQLException{
 		int[] res;
@@ -387,24 +375,28 @@ public class DalTableDaoSqlServerTest {
 		res = dao.batchInsert(new DalHints(), modelList);
 		Assert.assertArrayEquals(new int[0], res);
 	}
-		
+	
 	/**
 	 * Test Batch Insert multiple entities
 	 * @throws SQLException
 	 */
 	@Test
 	public void testBatchInsert() throws SQLException{
-		List<ClientTestModel> modelList = new ArrayList<>();
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setQuantity(10 + 1%3);
 			model.setType(((Number)(1%3)).shortValue());
 			model.setAddress("CTRIP");
-			modelList.add(model);
+			entities.add(model);
 		}
-		dao.batchInsert(new DalHints(), modelList);
-//		Assert.assertArrayEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(7, DalTestHelper.getCount(dao));
+		int[] res = dao.batchInsert(new DalHints(), entities);
+		Assert.assertTrue(res.length == 3);
+		Assert.assertEquals(3, dao.query("id>4", new StatementParameters(), new DalHints()).size());
+
+//		for (int i = 0; i < 3; i++){
+//			Assert.assertTrue(res[i] > 0);
+//		}
 	}
 	
 	/**
@@ -412,15 +404,12 @@ public class DalTableDaoSqlServerTest {
 	 * @throws SQLException
 	 */
 	@Test
-	public void testDeleteMultiple() throws SQLException{
-		List<ClientTestModel> modelList = new ArrayList<>();
-		for (int i = 0; i < 3; i++) {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(i+1);
-			modelList.add(model);
-		}
-		dao.delete(new DalHints(), modelList);
-		Assert.assertEquals(4-3, DalTestHelper.getCount(dao));
+	public void testDelete() throws SQLException{
+		ClientTestModel model = new ClientTestModel();
+		model.setId(1);
+
+		int res = dao.delete(new DalHints(), model);
+		Assert.assertEquals(1, res);
 	}
 	
 	@Test
@@ -445,28 +434,29 @@ public class DalTableDaoSqlServerTest {
 	 */
 	@Test
 	public void testBatchDelete() throws SQLException{
-		List<ClientTestModel> modelList = new ArrayList<>();
+		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setId(i+1);
-			modelList.add(model);
+			entities.add(model);
 		}
-		dao.batchDelete(new DalHints(), modelList);
-//		Assert.assertArrayEquals(new int[]{1,1,1}, res);
-		Assert.assertEquals(1, DalTestHelper.getCount(dao));
+		int[] res = dao.batchDelete(new DalHints(), entities);
+		Assert.assertEquals(3, res.length);
+		if(validateBatchUpdateCount)
+			Assert.assertArrayEquals(new int[]{1,1,1}, res);
 	}
 	
 	@Test
 	public void testUpdateCheckForData() throws SQLException{
 		int[] res;
-		
+
 		List<ClientTestModel> modelList = null;
 		try {
 			res = dao.update(new DalHints(), modelList);
 			Assert.fail();
 		} catch (Exception e) {
 		}
-
+		
 		modelList = new ArrayList<>();
 		res = dao.update(new DalHints(), modelList);
 		assertEquals(0, res);
@@ -479,15 +469,15 @@ public class DalTableDaoSqlServerTest {
 	@Test
 	public void testUpdateMultiple() throws SQLException{
 		DalHints hints = new DalHints();
-		List<ClientTestModel> modelList = new ArrayList<>();
+		List<ClientTestModel> models = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
 			model.setId(i+1);
 			model.setAddress("CTRIP");
-			modelList.add(model);
+			models.add(model);
 		}
-		dao.update(hints, modelList);
-		Assert.assertEquals(3, DalTestHelper.getCount(dao, "address='CTRIP'"));
+		int[] res = dao.update(hints, models);
+		assertEquals(3, res);
 		
 		ClientTestModel model = dao.queryByPk(1, hints);
 		Assert.assertTrue(null != model);
@@ -516,6 +506,12 @@ public class DalTableDaoSqlServerTest {
 		Assert.assertEquals("CTRIP", model.getAddress());
 	}
 	
+	private void assertEquals(int expected, int[] res) {
+		int total = 0;
+		for(int t: res)total+=t;
+		Assert.assertEquals(expected, total);
+	}
+	
 	/**
 	 * Test delete entities with where clause and parameters
 	 * @throws SQLException
@@ -527,7 +523,7 @@ public class DalTableDaoSqlServerTest {
 		parameters.set(1, Types.SMALLINT, 1);
 		DalHints hints = new DalHints();
 		int res = dao.delete(whereClause, parameters, hints);
-//		Assert.assertEquals(3, res);
+		Assert.assertEquals(3, res);
 		
 		List<ClientTestModel> models = dao.query(whereClause, parameters, hints);
 		Assert.assertEquals(0, models.size());
@@ -544,7 +540,7 @@ public class DalTableDaoSqlServerTest {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		int res = dao.update(sql, parameters, hints);
-//		Assert.assertEquals(1, res);
+		Assert.assertEquals(1, res);
 		
 		ClientTestModel model = dao.queryByPk(1, hints);
 		Assert.assertTrue(null != model);

@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -21,16 +23,11 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalQueryDaoMySqlTest {
+	private static MySqlDatabaseInitializer initializer = new MySqlDatabaseInitializer();
+	private final static String DATABASE_NAME = initializer.DATABASE_NAME;
+	
 	private final static int ROW_COUNT = 1000;
-	private final static String DATABASE_NAME = "dao_test";
 	private final static String TABLE_NAME = "dal_client_test";
-	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE dal_client_test("
-			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-			+ "quantity int,"
-			+ "type smallint, "
-			+ "address VARCHAR(64) not null, "
-			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
 	private static DalClient baseClient = null;
 	private static DalQueryDao client = null;
@@ -46,9 +43,8 @@ public class DalQueryDaoMySqlTest {
 	}
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		initializer.setUpBeforeClass();
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL};
-		baseClient.batchUpdate(sqls, hints);
 		
 		String insertSql = "INSERT INTO " + TABLE_NAME + " VALUES(?, ?, ?, ?, ?)";
 		StatementParameters[] parameterList = new StatementParameters[ROW_COUNT];
@@ -72,9 +68,7 @@ public class DalQueryDaoMySqlTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL };
-		baseClient.batchUpdate(sqls, hints);
+		initializer.tearDownAfterClass();
 	}
 
 	/**

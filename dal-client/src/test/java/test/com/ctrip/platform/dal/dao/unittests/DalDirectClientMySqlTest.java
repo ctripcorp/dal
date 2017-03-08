@@ -1,6 +1,5 @@
 package test.com.ctrip.platform.dal.dao.unittests;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -16,13 +15,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.unitbase.ClientTestDalRowMapper;
+import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
+import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
+
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
@@ -35,7 +37,9 @@ import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
  * @version 2014-05-04
  */
 public class DalDirectClientMySqlTest {
-	private final static String DATABASE_NAME = "dao_test_mysql";
+	private static MySqlDatabaseInitializer initializer = new MySqlDatabaseInitializer();
+
+	private final static String DATABASE_NAME = initializer.DATABASE_NAME;
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static String SP_I_NAME = "dal_client_test_i";
@@ -44,68 +48,6 @@ public class DalDirectClientMySqlTest {
 	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
 	
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
-	
-	//Create the the table
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE dal_client_test("
-			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-			+ "quantity int,"
-			+ "type smallint, "
-			+ "address VARCHAR(64) not null, "
-			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
-	
-	//Only has normal parameters
-	private static final String CREATE_I_SP_SQL = "CREATE PROCEDURE dal_client_test_i("
-			+ "dal_id int,"
-			+ "quantity int,"
-			+ "type smallint,"
-			+ "address VARCHAR(64)) "
-			+ "BEGIN INSERT INTO dal_client_test"
-			+ "(id, quantity, type, address) "
-			+ "VALUES(dal_id, quantity, type, address);"
-			+ "SELECT ROW_COUNT() AS result;"
-			+ "END";
-	//Has out parameters store procedure
-	private static final String CREATE_D_SP_SQL = "CREATE PROCEDURE dal_client_test_d("
-			+ "dal_id int,"
-			+ "out count int)"
-			+ "BEGIN DELETE FROM dal_client_test WHERE id=dal_id;"
-			+ "SELECT ROW_COUNT() AS result;"
-			+ "SELECT COUNT(*) INTO count from dal_client_test;"
-			+ "END";
-	//Has in-out parameters store procedure
-	private static final String CREATE_U_SP_SQL = "CREATE PROCEDURE dal_client_test_u("
-			+ "dal_id int,"
-			+ "quantity int,"
-			+ "type smallint,"
-			+ "INOUT address VARCHAR(64))"
-			+ "BEGIN UPDATE dal_client_test "
-			+ "SET quantity = quantity, type=type, address=address "
-			+ "WHERE id=dal_id;"
-			+ "SELECT ROW_COUNT() AS result;"
-			+ "END";
-	
-	//auto get all result parameters store procedure
-	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE PROCEDURE MULTIPLE_RESULT_SP_SQL("
-			+ "dal_id int,"
-			+ "quantity int,"
-			+ "type smallint,"
-			+ "INOUT address VARCHAR(64))"
-			+ "BEGIN UPDATE dal_client_test "
-			+ "SET quantity = quantity, type=type, address=address "
-			+ "WHERE id=dal_id;"
-			+ "SELECT ROW_COUNT() AS result;"
-			+ "SELECT 1 AS result2;"
-			+ "UPDATE dal_client_test "
-			+ "SET `quantity` = quantity + 1, `type`=type + 1, `address`='aaa';"
-			+ "SELECT 'abc' AS result3, 456 AS count2;"
-			+ "SELECT * from dal_client_test;"
-			+ "SELECT 'output' INTO address;"
-			+ "END";
-	
-	private static final String DROP_I_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_i";
-	private static final String DROP_D_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_d";
-	private static final String DROP_U_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_u";
-	private static final String DROP__MULTIPLE_RESULT_SP_SQL = "DROP PROCEDURE  IF  EXISTS MULTIPLE_RESULT_SP_SQL";
 	
 	private static DalClient client = null;
 	private static ClientTestDalRowMapper mapper = null;
@@ -122,47 +64,22 @@ public class DalDirectClientMySqlTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL, 
-				DROP_I_SP_SQL, CREATE_I_SP_SQL, 
-				DROP_D_SP_SQL, CREATE_D_SP_SQL,
-				DROP_U_SP_SQL, CREATE_U_SP_SQL,
-				CREATE_MULTIPLE_RESULT_SP_SQL};
-		client.batchUpdate(sqls, hints);
+		initializer.setUpBeforeClass();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL,
-				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP__MULTIPLE_RESULT_SP_SQL};
-		client.batchUpdate(sqls, hints);
+		initializer.tearDownAfterClass();
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		DalHints hints = new DalHints();
-		String[] insertSqls = new String[] {
-				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(1, 10, 1, 'SH INFO', NULL)",
-				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
-				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)" };
-		int[] counts = client.batchUpdate(insertSqls, hints);
-		Assert.assertArrayEquals(new int[] { 1, 1, 1 }, counts);
+		initializer.setUp();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		String sql = "DELETE FROM " + TABLE_NAME;
-		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
-		try {
-			client.update(sql, parameters, hints);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		initializer.tearDown();
 	}
 
 	/**
@@ -782,69 +699,5 @@ public class DalDirectClientMySqlTest {
 		}
 
 		return models;
-	}
-
-	private static class ClientTestModel {
-		private int id;
-		private int quantity;
-		private short type;
-		private String address;
-		private Timestamp lastChanged;
-
-		public int getId() {
-			return id;
-		}
-
-		public void setId(int id) {
-			this.id = id;
-		}
-
-		public int getQuantity() {
-			return quantity;
-		}
-
-		public void setQuantity(int quantity) {
-			this.quantity = quantity;
-		}
-
-		public short getType() {
-			return type;
-		}
-
-		public void setType(short type) {
-			this.type = type;
-		}
-
-		public String getAddress() {
-			return address;
-		}
-
-		public void setAddress(String address) {
-			this.address = address;
-		}
-
-		public Timestamp getLastChanged() {
-			return lastChanged;
-		}
-
-		public void setLastChanged(Timestamp lastChanged) {
-			this.lastChanged = lastChanged;
-		}
-	}
-
-	private static class ClientTestDalRowMapper implements
-			DalRowMapper<ClientTestModel> {
-
-		@Override
-		public ClientTestModel map(ResultSet rs, int rowNum)
-				throws SQLException {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(rs.getInt(1));
-			model.setQuantity(rs.getInt(2));
-			model.setType(rs.getShort(3));
-			model.setAddress(rs.getString(4));
-			model.setLastChanged(rs.getTimestamp(5));
-			return model;
-		}
 	}
 }

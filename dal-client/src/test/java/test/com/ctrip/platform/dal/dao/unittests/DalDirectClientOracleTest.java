@@ -1,6 +1,5 @@
 package test.com.ctrip.platform.dal.dao.unittests;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -16,13 +15,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.unitbase.ClientTestDalRowMapper;
+import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
+import test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer;
+
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
@@ -35,7 +37,8 @@ import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
  * @version 2014-05-04
  */
 public class DalDirectClientOracleTest {
-	private final static String DATABASE_NAME = "dao_test_oracle";
+	private static OracleDatabaseInitializer initializer = new OracleDatabaseInitializer();
+	private final static String DATABASE_NAME = initializer.DATABASE_NAME;
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static String SP_I_NAME = "dal_client_test_i";
@@ -43,133 +46,6 @@ public class DalDirectClientOracleTest {
 	private final static String SP_U_NAME = "dal_client_test_u";
 	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
 	private final static String MULTIPLE_SP_SQL = "MULTIPLE_SP_SQL";
-	
-	private final static String DROP_TABLE_SEQ = 
-			"declare num number;"
-			+ "begin "
-			+ "		num := 0;"
-			+ "		select count(1) into num from user_sequences where sequence_name = 'ID_SEQ';"
-			+ "		if num > 0 then "
-			+ "			execute immediate 'drop SEQUENCE ID_SEQ' ;"
-			+ "		end if;"
-			+ "end;";
-	
-	private final static String DROP_TABLE_SQL = String.format(
-			"declare num number;"
-			+ "begin "
-			+ "		num := 0;"
-			+ "		select count(1) into num from user_tables where table_name = upper('%s');"
-			+ "		if num > 0 then "
-			+ "			execute immediate 'drop table %s' ;"
-			+ "		end if;"
-			+ "end;", TABLE_NAME, TABLE_NAME); 
-	
-	private final static String CREATE_TABLE_SEQ = "CREATE SEQUENCE ID_SEQ  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 4 CACHE 20 NOORDER  NOCYCLE";
-	
-	//Create the the table
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE DAL_CLIENT_TEST"
-			   			+ "(ID NUMBER(*,0) NOT NULL ENABLE, " 
-						+ "QUANTITY NUMBER(*,0)," 
-						+ "TYPE NUMBER(*,0),"
-						+ "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
-						+ "LAST_CHANGED TIMESTAMP (6) DEFAULT SYSDATE, "
-						+ "CONSTRAINT DAL_CLIENT_TEST_PK PRIMARY KEY (ID))";
-	
-	private final static String CREATE_TABLE_TRIG = "CREATE OR REPLACE TRIGGER DAL_CLIENT_TEST_ID_TRIG" 
-						+" before insert on DAL_CLIENT_TEST" 
-						+" for each row " 
-						+" begin"  
-						+"	if inserting then" 
-						+"		if :NEW.ID is null then "
-						+"			select ID_SEQ.nextval into :NEW.ID from dual;" 
-						+"		end if; "
-						+"	end if; "
-						+" end;";
-	
-	private final static String DROP_TABLE_TRIG = 
-			"declare num number;"
-			+ "begin "
-			+ "		num := 0;"
-			+ "		select count(1) into num from user_triggers where trigger_name = 'DAL_CLIENT_TEST_ID_TRIG';"
-			+ "		if num > 0 then "
-			+ "			execute immediate 'drop TRIGGER DAL_CLIENT_TEST_ID_TRIG' ;"
-			+ "		end if;"
-			+ "end;";
-	
-	//Only has normal parameters
-	private static final String CREATE_I_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_i("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address VARCHAR) AS "
-			+ "BEGIN INSERT INTO dal_client_test"
-			+ "(id, quantity, type, address) "
-			+ "VALUES(v_id, v_quantity, v_type, v_address);"
-			//+ "SELECT sql%rowcount AS result;"
-			+ "END;";
-	//Has out parameters store procedure
-	private static final String CREATE_D_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_d("
-			+ "v_id int,"
-			+ "count out int) AS "
-			+ "BEGIN DELETE FROM dal_client_test WHERE id=v_id;"
-//			+ "SELECT sql%rowcount AS result;"
-			+ "SELECT COUNT(*) INTO count from dal_client_test;"
-			+ "END;";
-	//Has in-out parameters store procedure
-	private static final String CREATE_U_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_u("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address IN OUT VARCHAR) AS "
-			+ "BEGIN UPDATE dal_client_test "
-			+ "SET quantity = v_quantity, type=v_type, address=v_address "
-			+ "WHERE id=v_id;"
-//			+ "SELECT sql%rowcount AS result;"
-			+ "END;";
-	
-	//auto get all result parameters store procedure
-	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE OR REPLACE PROCEDURE MULTIPLE_RESULT_SP_SQL("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address IN OUT VARCHAR) AS " 
-			+ "BEGIN " 
-			+ "UPDATE dal_client_test " 
-			+ "SET quantity = v_quantity, type=v_type, address=v_address " 
-			+ "WHERE id=v_id;"
-			+ "SELECT 'output' AS result2 INTO v_address FROM DUAL;"
-			+ "UPDATE dal_client_test " 
-			+ "SET quantity = quantity + 1, type=type + 1, address='aaa';"
-			+ "END;";
-	
-	private static final String CREATE_MULTIPLE_SP_SQL = "CREATE OR REPLACE PROCEDURE MULTIPLE_SP_SQL("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address IN VARCHAR) AS " 
-			+ "BEGIN " 
-			+ "UPDATE dal_client_test " 
-			+ "SET quantity = v_quantity, type=v_type, address=v_address " 
-			+ "WHERE id=v_id;"
-			+ "UPDATE dal_client_test " 
-			+ "SET quantity = quantity + 1, type=type + 1, address='aaa';"
-			+ "END;";
-	
-	private static final String DROP_SP_TPL = 
-			"declare num number;"
-			+ "begin "
-			+ "		num := 0;"
-			+ "		select count(1) into num from USER_SOURCE where TYPE = 'PROCEDURE' and name = '%s';"
-			+ "		if num > 0 then "
-			+ "			execute immediate 'drop PROCEDURE %s' ;"
-			+ "		end if;"
-			+ "end;";
-
-	private static final String DROP_I_SP_SQL = String.format(DROP_SP_TPL, SP_I_NAME, SP_I_NAME);;
-	private static final String DROP_D_SP_SQL = String.format(DROP_SP_TPL, SP_D_NAME, SP_D_NAME);;
-	private static final String DROP_U_SP_SQL = String.format(DROP_SP_TPL, SP_U_NAME, SP_U_NAME);;
-	private static final String DROP_MULTIPLE_RESULT_SP_SQL = String.format(DROP_SP_TPL, MULTIPLE_RESULT_SP_SQL, MULTIPLE_RESULT_SP_SQL);;
-	private static final String DROP_MULTIPLE_SP_SQL = String.format(DROP_SP_TPL, MULTIPLE_SP_SQL, MULTIPLE_SP_SQL);;
 	
 	private static DalClient client = null;
 	private static ClientTestDalRowMapper mapper = null;
@@ -186,54 +62,22 @@ public class DalDirectClientOracleTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = new String[] { 
-				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,
-				CREATE_I_SP_SQL, 
-				CREATE_D_SP_SQL,
-				CREATE_U_SP_SQL,
-				CREATE_MULTIPLE_RESULT_SP_SQL,
-				CREATE_MULTIPLE_SP_SQL
-				};
-		try {
-			client.batchUpdate(sqls, hints);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		initializer.setUpBeforeClass();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SEQ, DROP_TABLE_TRIG, DROP_TABLE_SQL, DROP_I_SP_SQL,
-				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP_MULTIPLE_RESULT_SP_SQL, DROP_MULTIPLE_SP_SQL};
-		client.batchUpdate(sqls, hints);
+		initializer.tearDownAfterClass();
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		DalHints hints = new DalHints();
-		String[] insertSqls = new String[] {
-				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(1, 10, 1, 'SH INFO', NULL)",
-				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
-				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)" };
-		int[] counts = client.batchUpdate(insertSqls, hints);
-		Assert.assertArrayEquals(new int[] { 1, 1, 1 }, counts);
+		initializer.setUp();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		String sql = "DELETE FROM " + TABLE_NAME;
-		StatementParameters parameters = new StatementParameters();
-		DalHints hints = new DalHints();
-		try {
-			client.update(sql, parameters, hints);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		initializer.tearDown();
 	}
 
 	/**
@@ -858,69 +702,5 @@ public class DalDirectClientOracleTest {
 		}
 
 		return models;
-	}
-
-	private static class ClientTestModel {
-		private int id;
-		private int quantity;
-		private short type;
-		private String address;
-		private Timestamp lastChanged;
-
-		public int getId() {
-			return id;
-		}
-
-		public void setId(int id) {
-			this.id = id;
-		}
-
-		public int getQuantity() {
-			return quantity;
-		}
-
-		public void setQuantity(int quantity) {
-			this.quantity = quantity;
-		}
-
-		public short getType() {
-			return type;
-		}
-
-		public void setType(short type) {
-			this.type = type;
-		}
-
-		public String getAddress() {
-			return address;
-		}
-
-		public void setAddress(String address) {
-			this.address = address;
-		}
-
-		public Timestamp getLastChanged() {
-			return lastChanged;
-		}
-
-		public void setLastChanged(Timestamp lastChanged) {
-			this.lastChanged = lastChanged;
-		}
-	}
-
-	private static class ClientTestDalRowMapper implements
-			DalRowMapper<ClientTestModel> {
-
-		@Override
-		public ClientTestModel map(ResultSet rs, int rowNum)
-				throws SQLException {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(rs.getInt(1));
-			model.setQuantity(rs.getInt(2));
-			model.setType(rs.getShort(3));
-			model.setAddress(rs.getString(4));
-			model.setLastChanged(rs.getTimestamp(5));
-			return model;
-		}
 	}
 }

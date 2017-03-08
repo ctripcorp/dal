@@ -26,10 +26,10 @@ import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
-public abstract class BaseDalTabelDaoTableShardTest {
+public abstract class BaseDalTabelDaoShardByTableTest {
 	private boolean ASSERT_ALLOWED = true;
 
-	public BaseDalTabelDaoTableShardTest(String databaseName) {
+	public BaseDalTabelDaoShardByTableTest(String databaseName) {
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);

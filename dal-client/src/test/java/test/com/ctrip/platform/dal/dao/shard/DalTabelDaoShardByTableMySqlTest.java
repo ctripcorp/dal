@@ -20,8 +20,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
  * @author jhhe
  *
  */
-public class DalTabelDaoTableShardMySqlTest extends BaseDalTabelDaoTableShardTest {
-	public DalTabelDaoTableShardMySqlTest() {
+public class DalTabelDaoShardByTableMySqlTest extends BaseDalTabelDaoShardByTableTest {
+	public DalTabelDaoShardByTableMySqlTest() {
 		super(DATABASE_NAME_MYSQL);
 	}
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_tableShard";

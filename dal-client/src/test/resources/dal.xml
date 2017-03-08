@@ -99,8 +99,8 @@
         <add name="dao_test_oracle_1" databaseType="Master" sharding="1" connectionString="OracleShard_1"/>   
     </databaseSet>
     <databaseSet name="dao_test_oracle_dbTableShard" provider="oracleProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=index,dbIndex;mod=2;tableColumns=table,tableIndex;tableMod=4;separator=_;shardedTables=dal_client_test">
-        <add name="dao_test_oracle" databaseType="Master" sharding="0" connectionString="OracleShard_0"/>   
-        <add name="dao_test_oracle" databaseType="Master" sharding="1" connectionString="OracleShard_1"/>   
+        <add name="dao_test_oracle_0" databaseType="Master" sharding="0" connectionString="OracleShard_0"/>   
+        <add name="dao_test_oracle_1" databaseType="Master" sharding="1" connectionString="OracleShard_1"/>   
     </databaseSet>
   </databaseSets>
   <LogListener enabled="true">

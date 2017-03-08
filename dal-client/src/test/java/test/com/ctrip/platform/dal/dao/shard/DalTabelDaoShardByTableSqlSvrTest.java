@@ -18,8 +18,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
  * @author jhhe
  *
  */
-public class DalTabelDaoTableShardTest extends BaseDalTabelDaoTableShardTest {
-	public DalTabelDaoTableShardTest() {
+public class DalTabelDaoShardByTableSqlSvrTest extends BaseDalTabelDaoShardByTableTest {
+	public DalTabelDaoShardByTableSqlSvrTest() {
 		super(DATABASE_NAME_SQLSVR);
 	}
 	

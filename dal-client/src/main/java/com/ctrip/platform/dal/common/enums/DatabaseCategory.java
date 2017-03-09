@@ -77,7 +77,7 @@ public enum DatabaseCategory {
 			new int[]{-1}
 			){
 		public String quote(String fieldName){
-			return "\"" + fieldName + "\"";
+			return fieldName;//"\"" + fieldName + "\"";
 		}
 		
 		public boolean isTimeOutException(ErrorContext ctx){

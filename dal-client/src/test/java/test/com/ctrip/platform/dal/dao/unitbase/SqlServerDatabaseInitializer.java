@@ -10,8 +10,13 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class SqlServerDatabaseInitializer {
 	public final static String DATABASE_NAME = "dao_test_sqlsvr";
 	public final static String TABLE_NAME = "dal_client_test";
-	public final static boolean VALIDATE_BATCH_UPDATE_COUNT = true;
-	public final static boolean SUPPORT_GET_GENERATED_KEYS = true;
+
+	// This settings are based on SET NO COUNT, which sqlserver will not return affected rows
+	public final static boolean VALIDATE_BATCH_UPDATE_COUNT = false;
+	public final static boolean VALIDATE_BATCH_INSERT_COUNT = false;
+	public final static boolean VALIDATE_RETURN_COUNT = false;
+	public final static boolean SUPPORT_GET_GENERATED_KEYS = false;
+	public final static boolean SUPPORT_INSERT_VALUES = true;
 
 	private final static String SP_I_NAME = "dal_client_test_i";
 	private final static String SP_D_NAME="dal_client_test_d";

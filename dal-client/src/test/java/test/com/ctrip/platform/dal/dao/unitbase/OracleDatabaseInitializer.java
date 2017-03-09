@@ -12,7 +12,10 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class OracleDatabaseInitializer {
 	public final static String DATABASE_NAME = "dao_test_oracle";
 	public final static String TABLE_NAME = "dal_client_test";
+	
 	public final static boolean VALIDATE_BATCH_UPDATE_COUNT = false;
+	public final static boolean VALIDATE_BATCH_INSERT_COUNT = false;
+	public final static boolean VALIDATE_RETURN_COUNT = true;
 	public final static boolean SUPPORT_GET_GENERATED_KEYS = false;
 	public final static boolean SUPPORT_INSERT_VALUES = false;
 	

@@ -12,7 +12,10 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class MySqlDatabaseInitializer {
 	public final static String DATABASE_NAME = "dao_test_mysql";
 	public final static String TABLE_NAME = "dal_client_test";
+	
 	public final static boolean VALIDATE_BATCH_UPDATE_COUNT = true;
+	public final static boolean VALIDATE_BATCH_INSERT_COUNT = false;//When connectionProperties="rewriteBatchedStatements=true"
+	public final static boolean VALIDATE_RETURN_COUNT = true;
 	public final static boolean SUPPORT_GET_GENERATED_KEYS = true;
 	public final static boolean SUPPORT_INSERT_VALUES = true;
 	

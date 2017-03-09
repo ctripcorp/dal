@@ -7,10 +7,15 @@ import org.junit.BeforeClass;
 
 import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
 
-public class DalTabelDaoMySqlTest extends DalTabelDaoTestStub {
+public class DalTableDaoMySqlTest extends DalTableDaoTestStub {
 	private static MySqlDatabaseInitializer initializer = new MySqlDatabaseInitializer();
-	public DalTabelDaoMySqlTest() {
-		super(initializer.DATABASE_NAME, initializer.VALIDATE_BATCH_UPDATE_COUNT, initializer.SUPPORT_GET_GENERATED_KEYS, initializer.SUPPORT_INSERT_VALUES);
+	public DalTableDaoMySqlTest() {
+		super(initializer.DATABASE_NAME, 
+				initializer.VALIDATE_BATCH_UPDATE_COUNT, 
+				initializer.VALIDATE_BATCH_INSERT_COUNT,
+				initializer.VALIDATE_RETURN_COUNT, 
+				initializer.SUPPORT_GET_GENERATED_KEYS, 
+				initializer.SUPPORT_INSERT_VALUES);
 	}
 	
 	@BeforeClass

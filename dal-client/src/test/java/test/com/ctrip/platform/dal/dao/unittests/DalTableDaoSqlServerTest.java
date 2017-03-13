@@ -10,12 +10,7 @@ import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
 public class DalTableDaoSqlServerTest extends DalTableDaoTestStub {
 	private static SqlServerDatabaseInitializer initializer = new SqlServerDatabaseInitializer();
 	public DalTableDaoSqlServerTest() {
-		super(initializer.DATABASE_NAME, 
-				initializer.VALIDATE_BATCH_UPDATE_COUNT, 
-				initializer.VALIDATE_BATCH_INSERT_COUNT,
-				initializer.VALIDATE_RETURN_COUNT, 
-				initializer.SUPPORT_GET_GENERATED_KEYS, 
-				initializer.SUPPORT_INSERT_VALUES);
+		super(initializer.DATABASE_NAME, initializer.diff);
 	}
 	
 	@BeforeClass

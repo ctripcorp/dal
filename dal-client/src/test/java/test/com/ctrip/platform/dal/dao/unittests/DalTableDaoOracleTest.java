@@ -12,11 +12,7 @@ public class DalTableDaoOracleTest extends DalTableDaoTestStub {
 
 	public DalTableDaoOracleTest() {
 		super(initializer.DATABASE_NAME, 
-				initializer.VALIDATE_BATCH_UPDATE_COUNT, 
-				initializer.VALIDATE_BATCH_INSERT_COUNT,
-				initializer.VALIDATE_RETURN_COUNT, 
-				initializer.SUPPORT_GET_GENERATED_KEYS, 
-				initializer.SUPPORT_INSERT_VALUES);
+				initializer.diff);
 	}
 
 	@BeforeClass

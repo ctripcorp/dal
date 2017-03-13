@@ -8,38 +8,19 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import test.com.ctrip.platform.dal.dao.unitbase.ClientTestDalParser;
+import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub;
 import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class DalTableDaoTestStub {
-	private boolean validateBatchUpdateCount;
-	private boolean validateBatchInsertCount;
-	private boolean validateReturnCount;
-	private boolean supportGetGeneratedKeys;
-	private boolean supportInsertValues;
-	
-	public DalTableDaoTestStub(String dbName, boolean validateBatchUpdateCount, boolean validateBatchInsertCount, boolean validateReturnCount, boolean supportGetGeneratedKeys, boolean supportInsertValues) {
-		this.validateBatchUpdateCount = validateBatchUpdateCount;
-		this.validateBatchInsertCount = validateBatchInsertCount;
-		this.validateReturnCount = validateReturnCount;
-		this.supportGetGeneratedKeys = supportGetGeneratedKeys;
-		this.supportInsertValues = supportInsertValues;
-		try {
-			dao = new DalTableDao<ClientTestModel>(new ClientTestDalParser(dbName));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+public class DalTableDaoTestStub extends BaseTestStub {
+	public DalTableDaoTestStub(String dbName, DatabaseDifference diff) {
+		super(dbName, diff);
 	}
 	
-	private final static String TABLE_NAME = "dal_client_test";
-	private DalTableDao<ClientTestModel> dao = null;
-
 	/**
 	 * Test Query by Primary key
 	 * @throws SQLException
@@ -312,11 +293,11 @@ public class DalTableDaoTestStub {
 			model.setAddress("CTRIP");
 			entities.add(model);
 		}
-		KeyHolder holder = supportGetGeneratedKeys ? new KeyHolder() : null;
+		KeyHolder holder = diff.supportGetGeneratedKeys ? new KeyHolder() : null;
 		int[] res = dao.insert(new DalHints(),holder, entities);
 		assertEquals(new int[]{1, 1, 1}, res, 4+3);
 		
-		if(supportGetGeneratedKeys) {
+		if(diff.supportGetGeneratedKeys) {
 			Assert.assertEquals(3, holder.size());
 			Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));
 		}
@@ -344,7 +325,7 @@ public class DalTableDaoTestStub {
 	 */
 	@Test
 	public void testCombinedInsert() throws SQLException{
-		if(!supportInsertValues)
+		if(!diff.supportInsertValues)
 			return;
 		
 		List<ClientTestModel> entities = new ArrayList<ClientTestModel>();
@@ -355,11 +336,11 @@ public class DalTableDaoTestStub {
 			model.setAddress("CTRIP");
 			entities.add(model);
 		}
-		KeyHolder holder = supportGetGeneratedKeys ? new KeyHolder() : null;
+		KeyHolder holder = diff.supportGetGeneratedKeys ? new KeyHolder() : null;
 		DalHints hints = new DalHints();
 		int res = dao.combinedInsert(hints, holder, entities);
 		assertEquals(3, res, 4+3);
-		if(supportGetGeneratedKeys ){
+		if(diff.supportGetGeneratedKeys ){
 			Assert.assertEquals(3, holder.size());
 			Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));
 		}
@@ -553,55 +534,5 @@ public class DalTableDaoTestStub {
 		ClientTestModel model = dao.queryByPk(1, hints);
 		Assert.assertTrue(null != model);
 		Assert.assertEquals("CTRIP", model.getAddress());
-	}
-
-	private void assertEquals(int expected, int res, int expAll) throws SQLException {
-		if(validateReturnCount) {
-			Assert.assertEquals(expected, res);
-		}else{
-			Assert.assertEquals(expAll, DalTestHelper.getCount(dao));
-		}
-	}
-	
-	private void assertEquals(int expected, int res, int expAll, String countWhere) throws SQLException {
-		if(validateReturnCount) {
-			Assert.assertEquals(expected, res);
-		}else
-			Assert.assertEquals(expAll, DalTestHelper.getCount(dao, countWhere));
-	}
-
-	private void assertEquals(int[] expected, int[] res, int expAll) throws SQLException {
-		if(validateReturnCount) {
-			Assert.assertArrayEquals(expected, res);
-		}else
-			Assert.assertEquals(expAll, DalTestHelper.getCount(dao));
-	}
-	
-	private void assertEquals(int[] expected, int[] res, int exp, String countWhere) throws SQLException {
-		if(validateReturnCount)
-			Assert.assertArrayEquals(expected, res);
-		else
-			Assert.assertEquals(exp, DalTestHelper.getCount(dao, countWhere));
-	}
-
-	private void assertEqualsBatch(int[] expected, int[] res, int expAll) throws SQLException {
-		if(validateBatchUpdateCount) {
-			Assert.assertArrayEquals(expected, res);
-		}else
-			Assert.assertEquals(expAll, DalTestHelper.getCount(dao));
-	}
-	
-	private void assertEqualsBatch(int[] expected, int[] res, int expAll, String countWhere) throws SQLException {
-		if(validateBatchUpdateCount) {
-			Assert.assertArrayEquals(expected, res);
-		}else
-			Assert.assertEquals(expAll, DalTestHelper.getCount(dao, countWhere));
-	}
-	
-	private void assertEqualsBatchInsert(int[] expected, int[] res, int expAll) throws SQLException {
-		if(validateBatchInsertCount) {
-			Assert.assertArrayEquals(expected, res);
-		}else
-			Assert.assertEquals(expAll, DalTestHelper.getCount(dao));
 	}
 }

@@ -4,6 +4,8 @@ import java.sql.SQLException;
 
 import org.junit.Assert;
 
+import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -13,17 +15,23 @@ public class OracleDatabaseInitializer {
 	public final static String DATABASE_NAME = "dao_test_oracle";
 	public final static String TABLE_NAME = "dal_client_test";
 	
-	public final static boolean VALIDATE_BATCH_UPDATE_COUNT = false;
-	public final static boolean VALIDATE_BATCH_INSERT_COUNT = false;
-	public final static boolean VALIDATE_RETURN_COUNT = true;
-	public final static boolean SUPPORT_GET_GENERATED_KEYS = false;
-	public final static boolean SUPPORT_INSERT_VALUES = false;
+	public static final DatabaseDifference diff = new DatabaseDifference();
+	static {
+		diff.validateBatchUpdateCount = false;
+		diff.validateBatchInsertCount = false;
+		diff.validateReturnCount = true;
+		diff.supportGetGeneratedKeys = false;
+		diff.supportInsertValues = false;
+		diff.supportSpIntermediateResult = false;
+		diff.supportBatchSpWithOutParameter = false;
+	}
 	
 	private final static String SP_I_NAME = "dal_client_test_i";
 	private final static String SP_D_NAME="dal_client_test_d";
 	private final static String SP_U_NAME = "dal_client_test_u";
 	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
 	private final static String MULTIPLE_SP_SQL = "MULTIPLE_SP_SQL";
+	public final static String SP_NO_OUT_NAME = "dal_client_test_no_out";
 	
 	private final static String DROP_TABLE_SEQ = 
 			"declare num number;"
@@ -80,6 +88,17 @@ public class OracleDatabaseInitializer {
 	
 	//Only has normal parameters
 	private static final String CREATE_I_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_i("
+			+ "v_id int,"
+			+ "v_quantity int,"
+			+ "v_type smallint,"
+			+ "v_address VARCHAR) AS "
+			+ "BEGIN INSERT INTO dal_client_test"
+			+ "(id, quantity, type, address) "
+			+ "VALUES(v_id, v_quantity, v_type, v_address);"
+			//+ "SELECT sql%rowcount AS result;"
+			+ "END;";
+	// Oracle does not support out parameter in batch call
+	private static final String CREATE_SP_NO_OUT_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_no_out("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -147,9 +166,10 @@ public class OracleDatabaseInitializer {
 			+ "		end if;"
 			+ "end;";
 
-	private static final String DROP_I_SP_SQL = String.format(DROP_SP_TPL, SP_I_NAME, SP_I_NAME);;
-	private static final String DROP_D_SP_SQL = String.format(DROP_SP_TPL, SP_D_NAME, SP_D_NAME);;
-	private static final String DROP_U_SP_SQL = String.format(DROP_SP_TPL, SP_U_NAME, SP_U_NAME);;
+	private static final String DROP_I_SP_SQL = String.format(DROP_SP_TPL, SP_I_NAME, SP_I_NAME);
+	private static final String DROP_D_SP_SQL = String.format(DROP_SP_TPL, SP_D_NAME, SP_D_NAME);
+	private static final String DROP_U_SP_SQL = String.format(DROP_SP_TPL, SP_U_NAME, SP_U_NAME);
+	private static final String DROP_SP_NO_OUT_SQL = String.format(DROP_SP_TPL, SP_NO_OUT_NAME, SP_NO_OUT_NAME);
 	private static final String DROP_MULTIPLE_RESULT_SP_SQL = String.format(DROP_SP_TPL, MULTIPLE_RESULT_SP_SQL, MULTIPLE_RESULT_SP_SQL);;
 	private static final String DROP_MULTIPLE_SP_SQL = String.format(DROP_SP_TPL, MULTIPLE_SP_SQL, MULTIPLE_SP_SQL);;
 	
@@ -172,7 +192,8 @@ public class OracleDatabaseInitializer {
 				CREATE_D_SP_SQL,
 				CREATE_U_SP_SQL,
 				CREATE_MULTIPLE_RESULT_SP_SQL,
-				CREATE_MULTIPLE_SP_SQL
+				CREATE_MULTIPLE_SP_SQL,
+				CREATE_SP_NO_OUT_SQL
 				};
 		try {
 			client.batchUpdate(sqls, hints);
@@ -201,7 +222,7 @@ public class OracleDatabaseInitializer {
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { DROP_TABLE_SEQ, DROP_TABLE_TRIG, DROP_TABLE_SQL, DROP_I_SP_SQL,
-				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP_MULTIPLE_RESULT_SP_SQL, DROP_MULTIPLE_SP_SQL};
+				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP_MULTIPLE_RESULT_SP_SQL, DROP_MULTIPLE_SP_SQL, DROP_SP_NO_OUT_SQL};
 		client.batchUpdate(sqls, hints);
 	}
 

@@ -6,12 +6,20 @@ import org.junit.Assert;
 
 import test.com.ctrip.platform.dal.dao.unittests.DalTestHelper;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalTableDao;
 
 public class BaseTestStub {
 	public static class DatabaseDifference {
+		/**
+		 * This for very strange issue about diffrence of sql server and oracle
+		 * 		String callSql = diff.category == DatabaseCategory.SqlServer ?
+				"{call " + SP_D_NAME + "(?,?)}":
+					"call " + SP_D_NAME + "(?,?)";
+		 */
+		public DatabaseCategory category;
 		public boolean validateBatchUpdateCount;
 		public boolean validateBatchInsertCount;
 		public boolean validateReturnCount;
@@ -23,11 +31,10 @@ public class BaseTestStub {
 	}
 	
 	public final static String TABLE_NAME = "dal_client_test";
-	public final static String SP_I_NAME = "dal_client_test_i";
-	public final static String SP_D_NAME="dal_client_test_d";
-	public final static String SP_U_NAME = "dal_client_test_u";
-	public final static String SP_NO_OUT_NAME = "dal_client_test_no_out";
-	public final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
+	public final static String SP_WITHOUT_OUT_PARAM = "SP_WITHOUT_OUT_PARAM";
+	public final static String SP_WITH_OUT_PARAM = "SP_WITH_OUT_PARAM";
+	public final static String SP_WITH_IN_OUT_PARAM = "SP_WITH_IN_OUT_PARAM";
+	public final static String SP_WITH_INTERMEDIATE_RESULT = "SP_WITH_INTERMEDIATE_RESULT";
 
 	public DatabaseDifference diff;
 

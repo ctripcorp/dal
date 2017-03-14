@@ -6,6 +6,7 @@ import org.junit.Assert;
 
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -17,6 +18,7 @@ public class MySqlDatabaseInitializer {
 	
 	public static final DatabaseDifference diff = new DatabaseDifference();
 	static {
+		diff.category = DatabaseCategory.MySql;
 		diff.validateBatchUpdateCount = true;
 		diff.validateBatchInsertCount = false;//When connectionProperties="rewriteBatchedStatements=true"
 		diff.validateReturnCount = true;
@@ -25,11 +27,6 @@ public class MySqlDatabaseInitializer {
 		diff.supportSpIntermediateResult = true;
 		diff.supportBatchSpWithOutParameter = true;
 	}
-	
-	private final static String SP_I_NAME = "dal_client_test_i";
-	private final static String SP_D_NAME="dal_client_test_d";
-	private final static String SP_U_NAME = "dal_client_test_u";
-	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
 	
 	private final static String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	
@@ -42,18 +39,8 @@ public class MySqlDatabaseInitializer {
 			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
 	
 	//Only has normal parameters
-	private static final String CREATE_I_SP_SQL = "CREATE PROCEDURE dal_client_test_i("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address VARCHAR(64)) "
-			+ "BEGIN INSERT INTO dal_client_test"
-			+ "(id, quantity, type, address) "
-			+ "VALUES(v_id, v_quantity, v_type, v_address);"
-			+ "SELECT ROW_COUNT() AS result;"
-			+ "END";
 	//When rewriteBatchedStatements=true, batch sp call will not allowed if there is intermediated result
-	private static final String CREATE_SP_NO_OUT_SQL = "CREATE PROCEDURE dal_client_test_no_out("
+	private static final String CREATE_SP_WITHOUT_OUT_PARAM = "CREATE PROCEDURE " + BaseTestStub.SP_WITHOUT_OUT_PARAM + "("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -62,16 +49,17 @@ public class MySqlDatabaseInitializer {
 			+ "(id, quantity, type, address) "
 			+ "VALUES(v_id, v_quantity, v_type, v_address);"
 			+ "END";
+	
 	//Has out parameters store procedure
-	private static final String CREATE_D_SP_SQL = "CREATE PROCEDURE dal_client_test_d("
+	private static final String CREATE_SP_WITH_OUT_PARAM = "CREATE PROCEDURE " + BaseTestStub.SP_WITH_OUT_PARAM + "("
 			+ "v_id int,"
 			+ "out count int)"
 			+ "BEGIN DELETE FROM dal_client_test WHERE id=v_id;"
-			+ "SELECT ROW_COUNT() AS result;"
 			+ "SELECT COUNT(*) INTO count from dal_client_test;"
 			+ "END";
+	
 	//Has in-out parameters store procedure
-	private static final String CREATE_U_SP_SQL = "CREATE PROCEDURE dal_client_test_u("
+	private static final String CREATE_SP_WITH_IN_OUT_PARAM = "CREATE PROCEDURE " + BaseTestStub.SP_WITH_IN_OUT_PARAM + "("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -79,11 +67,11 @@ public class MySqlDatabaseInitializer {
 			+ "BEGIN UPDATE dal_client_test "
 			+ "SET quantity = v_quantity, type=v_type, address=v_address "
 			+ "WHERE id=v_id;"
-			+ "SELECT ROW_COUNT() AS result;"
+			+ "SELECT 'output' INTO v_address;"
 			+ "END";
 	
 	//auto get all result parameters store procedure
-	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE PROCEDURE MULTIPLE_RESULT_SP_SQL("
+	private static final String CREATE_SP_WITH_INTERMEDIATE_RESULT = "CREATE PROCEDURE " + BaseTestStub.SP_WITH_INTERMEDIATE_RESULT + "("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -100,20 +88,17 @@ public class MySqlDatabaseInitializer {
 			+ "SELECT 'output' INTO v_address;"
 			+ "END";
 	
-	private static final String DROP_I_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_i";
-	private static final String DROP_D_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_d";
-	private static final String DROP_U_SP_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_u";
-	private static final String DROP_SP_NO_OUT_SQL = "DROP PROCEDURE  IF  EXISTS dal_client_test_no_out";
-	private static final String DROP_MULTIPLE_RESULT_SP_SQL = "DROP PROCEDURE  IF  EXISTS MULTIPLE_RESULT_SP_SQL";
-	
+	private static final String DROP_SP_WITHOUT_OUT_PARAM = "DROP PROCEDURE IF EXISTS " + BaseTestStub.SP_WITHOUT_OUT_PARAM;
+	private static final String DROP_SP_WITH_OUT_PARAM = "DROP PROCEDURE IF EXISTS " + BaseTestStub.SP_WITH_OUT_PARAM;
+	private static final String DROP_SP_WITH_IN_OUT_PARAM = "DROP PROCEDURE IF EXISTS " + BaseTestStub.SP_WITH_IN_OUT_PARAM;
+	private static final String DROP_SP_WITH_INTERMEDIATE_RESULT = "DROP PROCEDURE IF EXISTS " + BaseTestStub.SP_WITH_INTERMEDIATE_RESULT;
+
 	private static DalClient client = null;
-	private static ClientTestDalRowMapper mapper = null;
 
 	static {
 		try {
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
-			mapper = new ClientTestDalRowMapper();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -121,19 +106,23 @@ public class MySqlDatabaseInitializer {
 
 	public static void setUpBeforeClass() throws Exception {
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL, 
-				DROP_I_SP_SQL, CREATE_I_SP_SQL, 
-				DROP_D_SP_SQL, CREATE_D_SP_SQL,
-				DROP_U_SP_SQL, CREATE_U_SP_SQL,
-				DROP_MULTIPLE_RESULT_SP_SQL, CREATE_MULTIPLE_RESULT_SP_SQL,
-				DROP_SP_NO_OUT_SQL, CREATE_SP_NO_OUT_SQL};
+		String[] sqls = new String[] { 
+				DROP_TABLE_SQL, CREATE_TABLE_SQL, 
+				DROP_SP_WITHOUT_OUT_PARAM, CREATE_SP_WITHOUT_OUT_PARAM, 
+				DROP_SP_WITH_OUT_PARAM, CREATE_SP_WITH_OUT_PARAM,
+				DROP_SP_WITH_IN_OUT_PARAM, CREATE_SP_WITH_IN_OUT_PARAM,
+				DROP_SP_WITH_INTERMEDIATE_RESULT, CREATE_SP_WITH_INTERMEDIATE_RESULT};
 		client.batchUpdate(sqls, hints);
 	}
 
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL,
-				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP_MULTIPLE_RESULT_SP_SQL, DROP_SP_NO_OUT_SQL};
+		String[] sqls = new String[] { 
+				DROP_TABLE_SQL, 
+				DROP_SP_WITHOUT_OUT_PARAM,
+				DROP_SP_WITH_OUT_PARAM, 
+				DROP_SP_WITH_IN_OUT_PARAM, 
+				DROP_SP_WITH_INTERMEDIATE_RESULT};
 		client.batchUpdate(sqls, hints);
 	}
 

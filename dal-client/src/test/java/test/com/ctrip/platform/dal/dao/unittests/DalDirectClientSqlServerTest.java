@@ -57,63 +57,12 @@ public class DalDirectClientSqlServerTest extends DalDirectClientTestStub {
 	}
 
 	/**
-	 * Test the call function with out parameters
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithoutParametersAndOutParameter() throws SQLException{
-		String callSql = "{call " + SP_D_NAME + "(?,?)}";
-		StatementParameters parameters = new StatementParameters();
-		parameters.set("v_id", Types.INTEGER, 1);
-		parameters.registerOut("count", Types.INTEGER);
-		DalHints hints = new DalHints();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		Assert.assertTrue(null != res);
-		Assert.assertEquals(1, res.size());
-		Assert.assertEquals(2, ((Number)res.get("count")).intValue());
-		
-		List<ClientTestModel> models = this.queryModelsByIds(1);
-		Assert.assertEquals(0, models.size());
-		
-		List<ClientTestModel> models_d = this.queryModelsByIds();
-		Assert.assertEquals(2, models_d.size());
-	}
-	
-	/**
-	 * Test the call function with retrieveAllResultsFromSp parameters
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithAutoParameters() throws SQLException{
-		String callSql = "{call " + MULTIPLE_RESULT_SP_SQL + "(?,?,?,?)}";
-		StatementParameters parameters = new StatementParameters();
-		parameters.set("dal_id", Types.INTEGER, 1);
-		parameters.set("quantity", Types.INTEGER, 10);
-		parameters.set("type", Types.SMALLINT, 3);
-		parameters.registerInOut("address", Types.VARCHAR, "SZ INFO");
-		
-		DalHints hints = new DalHints().retrieveAllResultsFromSp();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		System.out.println(res);
-		Assert.assertTrue(null != res);
-		Assert.assertEquals(5, res.size());
-		Assert.assertTrue(res.containsKey("address"));
-		Assert.assertEquals("output", res.get("address"));
-		Assert.assertEquals("output", parameters.get("address", ParameterDirection.InputOutput).getValue());
-		
-		List<ClientTestModel> models = this.queryModelsByIds(1);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("aaa", models.get(0).getAddress());
-	}
-	
-
-	/**
 	 * Test batch call with parameters and has ResultParameters
 	 * @throws SQLException 
 	 */
 	@Test
 	public void testBatchCallWithParametersAndResultParameters() throws SQLException{
-		String callSql = "{call " + SP_D_NAME + "(?,NULL)}";
+		String callSql = "{call " + SP_WITH_OUT_PARAM + "(?,NULL)}";
 		StatementParameters[] parametersList = new StatementParameters[3];
 		for(int i = 0; i < 3; i++){
 			StatementParameters parameters = new StatementParameters();

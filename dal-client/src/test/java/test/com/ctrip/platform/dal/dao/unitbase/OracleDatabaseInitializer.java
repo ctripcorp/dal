@@ -6,6 +6,7 @@ import org.junit.Assert;
 
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -17,6 +18,7 @@ public class OracleDatabaseInitializer {
 	
 	public static final DatabaseDifference diff = new DatabaseDifference();
 	static {
+		diff.category = DatabaseCategory.Oracle;
 		diff.validateBatchUpdateCount = false;
 		diff.validateBatchInsertCount = false;
 		diff.validateReturnCount = true;
@@ -25,13 +27,6 @@ public class OracleDatabaseInitializer {
 		diff.supportSpIntermediateResult = false;
 		diff.supportBatchSpWithOutParameter = false;
 	}
-	
-	private final static String SP_I_NAME = "dal_client_test_i";
-	private final static String SP_D_NAME="dal_client_test_d";
-	private final static String SP_U_NAME = "dal_client_test_u";
-	private final static String MULTIPLE_RESULT_SP_SQL = "MULTIPLE_RESULT_SP_SQL";
-	private final static String MULTIPLE_SP_SQL = "MULTIPLE_SP_SQL";
-	public final static String SP_NO_OUT_NAME = "dal_client_test_no_out";
 	
 	private final static String DROP_TABLE_SEQ = 
 			"declare num number;"
@@ -87,18 +82,8 @@ public class OracleDatabaseInitializer {
 			+ "end;";
 	
 	//Only has normal parameters
-	private static final String CREATE_I_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_i("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address VARCHAR) AS "
-			+ "BEGIN INSERT INTO dal_client_test"
-			+ "(id, quantity, type, address) "
-			+ "VALUES(v_id, v_quantity, v_type, v_address);"
-			//+ "SELECT sql%rowcount AS result;"
-			+ "END;";
 	// Oracle does not support out parameter in batch call
-	private static final String CREATE_SP_NO_OUT_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_no_out("
+	private static final String CREATE_SP_WITHOUT_OUT_PARAM = "CREATE OR REPLACE PROCEDURE " + BaseTestStub.SP_WITHOUT_OUT_PARAM + "("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -106,18 +91,16 @@ public class OracleDatabaseInitializer {
 			+ "BEGIN INSERT INTO dal_client_test"
 			+ "(id, quantity, type, address) "
 			+ "VALUES(v_id, v_quantity, v_type, v_address);"
-			//+ "SELECT sql%rowcount AS result;"
 			+ "END;";
 	//Has out parameters store procedure
-	private static final String CREATE_D_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_d("
+	private static final String CREATE_SP_WITH_OUT_PARAM = "CREATE OR REPLACE PROCEDURE " + BaseTestStub.SP_WITH_OUT_PARAM + "("
 			+ "v_id int,"
-			+ "count out int) AS "
+			+ "count OUT int) AS "
 			+ "BEGIN DELETE FROM dal_client_test WHERE id=v_id;"
-//			+ "SELECT sql%rowcount AS result;"
 			+ "SELECT COUNT(*) INTO count from dal_client_test;"
 			+ "END;";
 	//Has in-out parameters store procedure
-	private static final String CREATE_U_SP_SQL = "CREATE OR REPLACE PROCEDURE dal_client_test_u("
+	private static final String CREATE_SP_WITH_IN_OUT_PARAM = "CREATE OR REPLACE PROCEDURE " + BaseTestStub.SP_WITH_IN_OUT_PARAM + "("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -125,11 +108,11 @@ public class OracleDatabaseInitializer {
 			+ "BEGIN UPDATE dal_client_test "
 			+ "SET quantity = v_quantity, type=v_type, address=v_address "
 			+ "WHERE id=v_id;"
-//			+ "SELECT sql%rowcount AS result;"
+			+ "SELECT 'output' INTO v_address FROM DUAL;"
 			+ "END;";
 	
 	//auto get all result parameters store procedure
-	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE OR REPLACE PROCEDURE MULTIPLE_RESULT_SP_SQL("
+	private static final String CREATE_SP_WITH_INTERMEDIATE_RESULT = "CREATE OR REPLACE PROCEDURE " + BaseTestStub.SP_WITH_INTERMEDIATE_RESULT + "("
 			+ "v_id int,"
 			+ "v_quantity int,"
 			+ "v_type smallint,"
@@ -139,19 +122,6 @@ public class OracleDatabaseInitializer {
 			+ "SET quantity = v_quantity, type=v_type, address=v_address " 
 			+ "WHERE id=v_id;"
 			+ "SELECT 'output' AS result2 INTO v_address FROM DUAL;"
-			+ "UPDATE dal_client_test " 
-			+ "SET quantity = quantity + 1, type=type + 1, address='aaa';"
-			+ "END;";
-	
-	private static final String CREATE_MULTIPLE_SP_SQL = "CREATE OR REPLACE PROCEDURE MULTIPLE_SP_SQL("
-			+ "v_id int,"
-			+ "v_quantity int,"
-			+ "v_type smallint,"
-			+ "v_address IN VARCHAR) AS " 
-			+ "BEGIN " 
-			+ "UPDATE dal_client_test " 
-			+ "SET quantity = v_quantity, type=v_type, address=v_address " 
-			+ "WHERE id=v_id;"
 			+ "UPDATE dal_client_test " 
 			+ "SET quantity = quantity + 1, type=type + 1, address='aaa';"
 			+ "END;";
@@ -166,12 +136,10 @@ public class OracleDatabaseInitializer {
 			+ "		end if;"
 			+ "end;";
 
-	private static final String DROP_I_SP_SQL = String.format(DROP_SP_TPL, SP_I_NAME, SP_I_NAME);
-	private static final String DROP_D_SP_SQL = String.format(DROP_SP_TPL, SP_D_NAME, SP_D_NAME);
-	private static final String DROP_U_SP_SQL = String.format(DROP_SP_TPL, SP_U_NAME, SP_U_NAME);
-	private static final String DROP_SP_NO_OUT_SQL = String.format(DROP_SP_TPL, SP_NO_OUT_NAME, SP_NO_OUT_NAME);
-	private static final String DROP_MULTIPLE_RESULT_SP_SQL = String.format(DROP_SP_TPL, MULTIPLE_RESULT_SP_SQL, MULTIPLE_RESULT_SP_SQL);;
-	private static final String DROP_MULTIPLE_SP_SQL = String.format(DROP_SP_TPL, MULTIPLE_SP_SQL, MULTIPLE_SP_SQL);;
+	private static final String DROP_SP_WITHOUT_OUT_PARAM = String.format(DROP_SP_TPL, BaseTestStub.SP_WITHOUT_OUT_PARAM, BaseTestStub.SP_WITHOUT_OUT_PARAM);
+	private static final String DROP_SP_WITH_OUT_PARAM = String.format(DROP_SP_TPL, BaseTestStub.SP_WITH_OUT_PARAM, BaseTestStub.SP_WITH_OUT_PARAM);
+	private static final String DROP_SP_WITH_IN_OUT_PARAM = String.format(DROP_SP_TPL, BaseTestStub.SP_WITH_IN_OUT_PARAM, BaseTestStub.SP_WITH_IN_OUT_PARAM);
+	private static final String DROP_SP_WITH_INTERMEDIATE_RESULT = String.format(DROP_SP_TPL, BaseTestStub.SP_WITH_INTERMEDIATE_RESULT, BaseTestStub.SP_WITH_INTERMEDIATE_RESULT);;
 	
 	private static DalClient client = null;
 
@@ -188,12 +156,10 @@ public class OracleDatabaseInitializer {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
 				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,
-				CREATE_I_SP_SQL, 
-				CREATE_D_SP_SQL,
-				CREATE_U_SP_SQL,
-				CREATE_MULTIPLE_RESULT_SP_SQL,
-				CREATE_MULTIPLE_SP_SQL,
-				CREATE_SP_NO_OUT_SQL
+				CREATE_SP_WITHOUT_OUT_PARAM, 
+				CREATE_SP_WITH_OUT_PARAM,
+				CREATE_SP_WITH_IN_OUT_PARAM,
+				CREATE_SP_WITH_INTERMEDIATE_RESULT,
 				};
 		try {
 			client.batchUpdate(sqls, hints);
@@ -206,11 +172,10 @@ public class OracleDatabaseInitializer {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
 				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ2, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,
-				CREATE_I_SP_SQL, 
-				CREATE_D_SP_SQL,
-				CREATE_U_SP_SQL,
-				CREATE_MULTIPLE_RESULT_SP_SQL,
-				CREATE_MULTIPLE_SP_SQL
+				CREATE_SP_WITHOUT_OUT_PARAM, 
+				CREATE_SP_WITH_OUT_PARAM,
+				CREATE_SP_WITH_IN_OUT_PARAM,
+				CREATE_SP_WITH_INTERMEDIATE_RESULT,
 				};
 		try {
 			client.batchUpdate(sqls, hints);
@@ -221,8 +186,8 @@ public class OracleDatabaseInitializer {
 
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { DROP_TABLE_SEQ, DROP_TABLE_TRIG, DROP_TABLE_SQL, DROP_I_SP_SQL,
-				DROP_D_SP_SQL, DROP_U_SP_SQL, DROP_MULTIPLE_RESULT_SP_SQL, DROP_MULTIPLE_SP_SQL, DROP_SP_NO_OUT_SQL};
+		String[] sqls = new String[] { DROP_TABLE_SEQ, DROP_TABLE_TRIG, DROP_TABLE_SQL, DROP_SP_WITHOUT_OUT_PARAM,
+				DROP_SP_WITH_OUT_PARAM, DROP_SP_WITH_IN_OUT_PARAM, DROP_SP_WITH_INTERMEDIATE_RESULT};
 		client.batchUpdate(sqls, hints);
 	}
 

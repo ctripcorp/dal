@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -16,13 +17,14 @@ public class SqlServerDatabaseInitializer {
 	public static final DatabaseDifference diff = new DatabaseDifference();
 	static {
 		// This settings are based on SET NO COUNT, which sqlserver will not return affected rows
+		diff.category = DatabaseCategory.SqlServer;
 		diff.validateBatchUpdateCount = false;
 		diff.validateBatchInsertCount = false;
 		diff.validateReturnCount = false;
 		diff.supportGetGeneratedKeys = false;
 		diff.supportInsertValues = true;
-		diff.supportSpIntermediateResult = false;
-		diff.supportBatchSpWithOutParameter = true;
+		diff.supportSpIntermediateResult = true;
+		diff.supportBatchSpWithOutParameter = false;
 	}
 
 	private final static String SP_I_NAME = "dal_client_test_i";
@@ -43,7 +45,7 @@ public class SqlServerDatabaseInitializer {
 			+ "last_changed datetime default getdate())";
 	
 	//Only has normal parameters
-	private static final String CREATE_I_SP_SQL = "CREATE PROCEDURE " + SP_I_NAME + "("
+	private static final String CREATE_SP_WITHOUT_OUT_PARAM = "CREATE PROCEDURE " + BaseTestStub.SP_WITHOUT_OUT_PARAM + "("
 			+ "@v_id int,"
 			+ "@v_quantity int,"
 			+ "@v_type smallint,"
@@ -51,29 +53,17 @@ public class SqlServerDatabaseInitializer {
 			+ "AS BEGIN INSERT INTO " + TABLE_NAME
 			+ "([quantity], [type], [address]) "
 			+ "VALUES(@v_quantity, @v_type, @v_address);"
-			+ "RETURN @@ROWCOUNT;"
-			+ "END";
-	private static final String CREATE_SP_NO_OUT_SQL = "CREATE PROCEDURE " + BaseTestStub.SP_NO_OUT_NAME + "("
-			+ "@v_id int,"
-			+ "@v_quantity int,"
-			+ "@v_type smallint,"
-			+ "@v_address VARCHAR(64)) "
-			+ "AS BEGIN INSERT INTO " + TABLE_NAME
-			+ "([quantity], [type], [address]) "
-			+ "VALUES(@v_quantity, @v_type, @v_address);"
-			+ "RETURN @@ROWCOUNT;"
 			+ "END";
 	//Has out parameters store procedure
-	private static final String CREATE_D_SP_SQL = "CREATE PROCEDURE " + SP_D_NAME + "("
+	private static final String CREATE_SP_WITH_OUT_PARAM = "CREATE PROCEDURE " + BaseTestStub.SP_WITH_OUT_PARAM + "("
 			+ "@v_id int,"
 			+ "@count int OUTPUT)"
 			+ "AS BEGIN DELETE FROM " + TABLE_NAME
 			+ " WHERE [id]=@v_id;"
 			+ "SELECT @count = COUNT(*) from " + TABLE_NAME + ";"
-			+ "RETURN @@ROWCOUNT;"
 			+ "END";
 	//Has in-out parameters store procedure
-	private static final String CREATE_U_SP_SQL = "CREATE PROCEDURE " + SP_U_NAME + "("
+	private static final String CREATE_SP_WITH_IN_OUT_PARAM = "CREATE PROCEDURE " + BaseTestStub.SP_WITH_IN_OUT_PARAM + "("
 			+ "@v_id int,"
 			+ "@v_quantity int,"
 			+ "@v_type smallint,"
@@ -81,47 +71,42 @@ public class SqlServerDatabaseInitializer {
 			+ "AS BEGIN UPDATE " + TABLE_NAME +" "
 			+ "SET [quantity] = @v_quantity, [type]=@v_type, [address]=@v_address "
 			+ "WHERE [id]=@v_id;"
-			+ "RETURN @@ROWCOUNT;"
+			+ "SELECT @v_address='output';"
 			+ "END";
 
 	//auto get all result parameters store procedure
-	private static final String CREATE_MULTIPLE_RESULT_SP_SQL = "CREATE PROCEDURE MULTIPLE_RESULT_SP_SQL("
-			+ "@dal_id int,"
-			+ "@quantity int,"
-			+ "@type smallint,"
-			+ "@address VARCHAR(64) OUTPUT)"
+	private static final String CREATE_SP_WITH_INTERMEDIATE_RESULT = "CREATE PROCEDURE " + BaseTestStub.SP_WITH_INTERMEDIATE_RESULT + "("
+			+ "@v_id int,"
+			+ "@v_quantity int,"
+			+ "@v_type smallint,"
+			+ "@v_address VARCHAR(64) OUTPUT)"
 			+ "AS BEGIN UPDATE dal_client_test "
-			+ "SET [quantity] = @quantity, [type]=@type, [address]=@address "
-			+ "WHERE [id]=@dal_id;"
+			+ "SET [quantity] = @v_quantity, [type]=@v_type, [address]=@v_address "
+			+ "WHERE [id]=@v_id;"
 			+ "SELECT @@ROWCOUNT AS result;"
 			+ "SELECT 1 AS result2;"
 			+ "UPDATE dal_client_test "
-			+ "SET [quantity] = @quantity + 1, [type]=@type + 1, [address]='aaa';"
+			+ "SET [quantity] = @v_quantity + 1, [type]=@v_type + 1, [address]='aaa';"
 			+ "SELECT 'abc' AS result3, 456 AS count2;"
 			+ "SELECT * from dal_client_test;"
-			+ "SELECT @address='output';"
-			+ "RETURN @@ROWCOUNT;"
+			+ "SELECT @v_address='output';"
 			+ "END";
 
-	private static final String DROP_I_SP_SQL = "IF OBJECT_ID('dbo." + SP_I_NAME + "') IS NOT NULL "
-			+ "DROP PROCEDURE dbo." + SP_I_NAME;
-	private static final String DROP_D_SP_SQL = "IF OBJECT_ID('dbo." + SP_D_NAME + "') IS NOT NULL "
-			+ "DROP PROCEDURE dbo." + SP_D_NAME;
-	private static final String DROP_U_SP_SQL = "IF OBJECT_ID('dbo." + SP_U_NAME + "') IS NOT NULL "
-			+ "DROP PROCEDURE dbo." + SP_U_NAME;
-	private static final String DROP_MULTIPLE_RESULT_SP_SQL = "IF OBJECT_ID('dbo." + MULTIPLE_RESULT_SP_SQL + "') IS NOT NULL "
-			+ "DROP PROCEDURE dbo." + MULTIPLE_RESULT_SP_SQL;
-	private static final String DROP_SP_NO_OUT_SQL = "IF OBJECT_ID('dbo." + BaseTestStub.SP_NO_OUT_NAME + "') IS NOT NULL "
-			+ "DROP PROCEDURE dbo." + BaseTestStub.SP_NO_OUT_NAME;
+	private static final String DROP_SP_WITHOUT_OUT_PARAM = "IF OBJECT_ID('dbo." + BaseTestStub.SP_WITHOUT_OUT_PARAM + "') IS NOT NULL "
+			+ "DROP PROCEDURE dbo." + BaseTestStub.SP_WITHOUT_OUT_PARAM;
+	private static final String DROP_SP_WITH_OUT_PARAM = "IF OBJECT_ID('dbo." + BaseTestStub.SP_WITH_OUT_PARAM + "') IS NOT NULL "
+			+ "DROP PROCEDURE dbo." + BaseTestStub.SP_WITH_OUT_PARAM;
+	private static final String DROP_SP_WITH_IN_OUT_PARAM = "IF OBJECT_ID('dbo." + BaseTestStub.SP_WITH_IN_OUT_PARAM + "') IS NOT NULL "
+			+ "DROP PROCEDURE dbo." + BaseTestStub.SP_WITH_IN_OUT_PARAM;
+	private static final String DROP_SP_WITH_INTERMEDIATE_RESULT = "IF OBJECT_ID('dbo." + BaseTestStub.SP_WITH_INTERMEDIATE_RESULT + "') IS NOT NULL "
+			+ "DROP PROCEDURE dbo." + BaseTestStub.SP_WITH_INTERMEDIATE_RESULT;
 	
 	private static DalClient client = null;
-	private static ClientTestDalRowMapper mapper = null;
 
 	static {
 		try {
 			DalClientFactory.initClientFactory();
 			client = DalClientFactory.getClient(DATABASE_NAME);
-			mapper = new ClientTestDalRowMapper();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,11 +116,10 @@ public class SqlServerDatabaseInitializer {
 		DalHints hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
 		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL, 
-				DROP_I_SP_SQL, CREATE_I_SP_SQL,
-				DROP_D_SP_SQL, CREATE_D_SP_SQL,
-				DROP_U_SP_SQL, CREATE_U_SP_SQL,
-				DROP_SP_NO_OUT_SQL, CREATE_SP_NO_OUT_SQL,
-				DROP_MULTIPLE_RESULT_SP_SQL, CREATE_MULTIPLE_RESULT_SP_SQL};
+				DROP_SP_WITHOUT_OUT_PARAM, CREATE_SP_WITHOUT_OUT_PARAM,
+				DROP_SP_WITH_OUT_PARAM, CREATE_SP_WITH_OUT_PARAM,
+				DROP_SP_WITH_IN_OUT_PARAM, CREATE_SP_WITH_IN_OUT_PARAM,
+				DROP_SP_WITH_INTERMEDIATE_RESULT, CREATE_SP_WITH_INTERMEDIATE_RESULT};
 		for (int i = 0; i < sqls.length; i++) {
 			client.update(sqls[i], parameters, hints);
 		}
@@ -144,7 +128,7 @@ public class SqlServerDatabaseInitializer {
 	public static void tearDownAfterClass() throws Exception {
 		DalHints hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
-		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_I_SP_SQL, DROP_D_SP_SQL, DROP_U_SP_SQL, DROP_SP_NO_OUT_SQL, DROP_MULTIPLE_RESULT_SP_SQL};
+		String[] sqls = new String[] { DROP_TABLE_SQL, DROP_SP_WITHOUT_OUT_PARAM, DROP_SP_WITH_OUT_PARAM, DROP_SP_WITH_IN_OUT_PARAM, DROP_SP_WITH_INTERMEDIATE_RESULT};
 		for (int i = 0; i < sqls.length; i++) {
 			client.update(sqls[i], parameters, hints);
 		}

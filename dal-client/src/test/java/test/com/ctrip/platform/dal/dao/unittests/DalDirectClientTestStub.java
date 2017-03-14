@@ -15,6 +15,7 @@ import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub;
 import test.com.ctrip.platform.dal.dao.unitbase.ClientTestDalRowMapper;
 import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -434,8 +435,8 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	 * @throws SQLException
 	 */
 	@Test
-	public void callTestWithoutParametersNoResultsParameter() throws SQLException{
-		String callSql = "{call " + SP_I_NAME + "(4, 12,1,'SZ INFO')}";
+	public void callTestWithoutParametersForSpWithoutOutParameter() throws SQLException{
+		String callSql = "{call " + SP_WITHOUT_OUT_PARAM + "(4, 12,1,'SZ INFO')}";
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		Map<String, ?> res = client.call(callSql, parameters, hints);
@@ -445,62 +446,14 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		List<ClientTestModel> models = this.queryModelsByIds();
 		Assert.assertEquals(4, models.size());
 	}
-	
-	/**
-	 * Test the call function with out parameters
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithoutParametersAndOutParameter() throws SQLException{
-		String callSql = "call " + SP_D_NAME + "(1,?)";
-		StatementParameters parameters = new StatementParameters();
-		parameters.registerOut("count", Types.INTEGER);
-		DalHints hints = new DalHints();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		Assert.assertTrue(null != res);
-		Assert.assertEquals(1, res.size());
-		Assert.assertEquals(2, ((Number)res.get("count")).intValue());
-		
-		List<ClientTestModel> models = this.queryModelsByIds(1);
-		Assert.assertEquals(0, models.size());
-		
-		List<ClientTestModel> models_d = this.queryModelsByIds();
-		Assert.assertEquals(2, models_d.size());
-	}
-	
-	/**
-	 * Test call without parameters but has resultsParameter
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithoutParametersAndResultsParameter() throws SQLException{
-		String callSql = "{call " + SP_I_NAME + "(4,12,1,'SZ INFO')}";
-		StatementParameters parameters = new StatementParameters();
-		DalScalarExtractor extractor = new DalScalarExtractor();
-		if(diff.supportSpIntermediateResult) {
-			parameters.setResultsParameter("result", extractor);
-			parameters.setResultsParameter("update_count");
-		}
-		DalHints hints = new DalHints();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		if(diff.supportSpIntermediateResult) {
 
-			Assert.assertEquals(2, res.size());
-			Assert.assertTrue(res.containsKey("result"));
-			Assert.assertTrue(res.containsKey("update_count"));
-			Assert.assertEquals((long)1, res.get("result"));
-		}		
-		List<ClientTestModel> models = this.queryModelsByIds();
-		Assert.assertEquals(4, models.size());
-	}
-	
 	/**
 	 * Test call with parameters but has no resultsParameter
 	 * @throws SQLException
 	 */
 	@Test
-	public void callTestWithParametersNoResultsParameter() throws SQLException {
-		String callSql = "{call " + SP_I_NAME + "(?,?,?,?)}";
+	public void callTestWithParametersForSpWithoutOutParameter() throws SQLException {
+		String callSql = "{call " + SP_WITHOUT_OUT_PARAM + "(?,?,?,?)}";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set("v_id", Types.INTEGER, 4);
 		parameters.set("v_quantity", Types.INTEGER, 10);
@@ -514,99 +467,6 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		
 		List<ClientTestModel> models = this.queryModelsByIds();
 		Assert.assertEquals(4, models.size());
-	}
-	
-	/**
-	 * Test the call function with in-out parameters
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithParametersAndInOutParameters() throws SQLException{
-		String callSql = "{call " + SP_U_NAME + "(?,?,?,?)}";
-		StatementParameters parameters = new StatementParameters();
-		parameters.set("v_id", Types.INTEGER, 1);
-		parameters.set("v_quantity", Types.INTEGER, 10);
-		parameters.set("v_type", Types.SMALLINT, 3);
-		//parameters.set("v_address", Types.VARCHAR, "SZ INFO");
-		parameters.registerInOut("v_address", Types.VARCHAR, "SZ INFO");
-		
-		DalHints hints = new DalHints();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		Assert.assertTrue(null != res);
-		Assert.assertEquals(1, res.size());
-		Assert.assertTrue(res.containsKey("v_address"));
-		Assert.assertEquals("SZ INFO", parameters.get("v_address", ParameterDirection.InputOutput).getValue());
-		
-		List<ClientTestModel> models = this.queryModelsByIds(1);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
-	}
-	
-	/**
-	 * Test call with parameters and has resultsParameter
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithParametersAndResultsParameter() throws SQLException {
-		String callSql = "{call " + SP_I_NAME + "(?,?,?,?)}";
-		StatementParameters parameters = new StatementParameters();
-		parameters.set("v_id", Types.INTEGER, 4);
-		parameters.set("v_quantity", Types.INTEGER, 10);
-		parameters.set("v_type", Types.SMALLINT, 3);
-		parameters.set("v_address", Types.VARCHAR, "SZ INFO");
-		
-		DalScalarExtractor extractor = new DalScalarExtractor();
-		
-		if(diff.supportSpIntermediateResult) {
-			parameters.setResultsParameter("result", extractor);
-			parameters.setResultsParameter("update_count");
-		}
-		
-		DalHints hints = new DalHints();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		
-		if(diff.supportSpIntermediateResult) {
-			Assert.assertEquals(2, res.size());
-			Assert.assertTrue(res.containsKey("result"));
-			Assert.assertTrue(res.containsKey("update_count"));
-			Assert.assertEquals((long)1, res.get("result"));
-		}
-		
-		List<ClientTestModel> models = this.queryModelsByIds();
-		Assert.assertEquals(4, models.size());
-	}
-	
-	/**
-	 * Test the call function with retrieveAllResultsFromSp parameters
-	 * @throws SQLException
-	 */
-	@Test
-	public void callTestWithAutoParameters() throws SQLException{
-		String callSql = "call " + MULTIPLE_RESULT_SP_SQL + "(?,?,?,?)";
-		StatementParameters parameters = new StatementParameters();
-		parameters.set("v_id", Types.INTEGER, 1);
-		parameters.set("v_quantity", Types.INTEGER, 10);
-		parameters.set("v_type", Types.SMALLINT, 3);
-		//parameters.set("v_address", Types.VARCHAR, "SZ INFO");
-		parameters.registerInOut("v_address", Types.VARCHAR, "SZ INFO");
-		
-		DalHints hints = new DalHints().retrieveAllResultsFromSp();
-		Map<String, ?> res = client.call(callSql, parameters, hints);
-		System.out.println(res);
-		Assert.assertTrue(null != res);
-		
-		if(diff.supportSpIntermediateResult)
-			Assert.assertEquals(6, res.size());
-		else
-			Assert.assertEquals(1, res.size());
-		
-		Assert.assertTrue(res.containsKey("v_address"));
-		Assert.assertEquals("output", res.get("v_address"));
-		Assert.assertEquals("output", parameters.get("v_address", ParameterDirection.InputOutput).getValue());
-		
-		List<ClientTestModel> models = this.queryModelsByIds(1);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("aaa", models.get(0).getAddress());
 	}
 	
 	/**
@@ -614,8 +474,8 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	 * @throws SQLException 
 	 */
 	@Test
-	public void testBatchCallWithNoOutParameters() throws SQLException{
-		String callSql = "{call " + SP_NO_OUT_NAME + "(?,?,?,?)}";
+	public void batchCallTestWithParametersForSpWithoutOutParameter() throws SQLException{
+		String callSql = "{call " + SP_WITHOUT_OUT_PARAM + "(?,?,?,?)}";
 		StatementParameters[] parametersList = new StatementParameters[7];
 		DalHints hints = new DalHints();
 		for(int i = 0; i < 7; i++){
@@ -634,16 +494,41 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	}
 	
 	/**
+	 * Test the call function with out parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestForSpWithOutParameter() throws SQLException{
+		String callSql = diff.category == DatabaseCategory.SqlServer ?
+				"{call " + SP_WITH_OUT_PARAM + "(?,?)}":
+					"call " + SP_WITH_OUT_PARAM + "(?,?)";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set("v_id", Types.INTEGER, 1);
+		parameters.registerOut("count", Types.INTEGER);
+		DalHints hints = new DalHints();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		Assert.assertTrue(null != res);
+		Assert.assertEquals(1, res.size());
+		Assert.assertEquals(2, ((Number)res.get("count")).intValue());
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(0, models.size());
+		
+		List<ClientTestModel> models_d = this.queryModelsByIds();
+		Assert.assertEquals(2, models_d.size());
+	}
+
+	/**
 	 * Test batch call with parameters and has ResultParameters
 	 * @throws SQLException 
 	 */
 	@Test
-	public void testBatchCallWithOutParameters() throws SQLException{
+	public void batchCallTestForSpWithOutParameter() throws SQLException{
 		// Oracle do not support out parameter for batch store procedure update
 		if(!diff.supportBatchSpWithOutParameter) 
 			return;
 		
-		String callSql = "{call " + SP_D_NAME + "(?,?)}";
+		String callSql = "{call " + SP_WITH_OUT_PARAM + "(?,?)}";
 		StatementParameters[] parametersList = new StatementParameters[3];
 		for(int i = 0; i < 3; i++){
 			StatementParameters parameters = new StatementParameters();
@@ -657,6 +542,63 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		
 		List<ClientTestModel> models = this.queryModelsByIds(1,2,3);
 		Assert.assertEquals(0, models.size());
+	}
+
+	/**
+	 * Test the call function with in-out parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestForSpWithInOutParameters() throws SQLException{
+		String callSql = "{call " + SP_WITH_IN_OUT_PARAM + "(?,?,?,?)}";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set("v_id", Types.INTEGER, 1);
+		parameters.set("v_quantity", Types.INTEGER, 10);
+		parameters.set("v_type", Types.SMALLINT, 3);
+		parameters.registerInOut("v_address", Types.VARCHAR, "SZ INFO");
+		
+		DalHints hints = new DalHints();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		Assert.assertTrue(null != res);
+		Assert.assertEquals(1, res.size());
+		Assert.assertTrue(res.containsKey("v_address"));
+		Assert.assertEquals("output", parameters.get("v_address", ParameterDirection.InputOutput).getValue());
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(1, models.size());
+		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+	}
+
+	/**
+	 * Test the call function with retrieveAllResultsFromSp parameters
+	 * @throws SQLException
+	 */
+	@Test
+	public void callTestForSpWithIntermediateParameters() throws SQLException{
+		String callSql = "{call " + SP_WITH_INTERMEDIATE_RESULT + "(?,?,?,?)}";
+		StatementParameters parameters = new StatementParameters();
+		parameters.set("v_id", Types.INTEGER, 1);
+		parameters.set("v_quantity", Types.INTEGER, 10);
+		parameters.set("v_type", Types.SMALLINT, 3);
+		parameters.registerInOut("v_address", Types.VARCHAR, "SZ INFO");
+		
+		DalHints hints = new DalHints().retrieveAllResultsFromSp();
+		Map<String, ?> res = client.call(callSql, parameters, hints);
+		System.out.println(res);
+		Assert.assertTrue(null != res);
+		
+		if(diff.supportSpIntermediateResult)
+			Assert.assertTrue(res.size()>=5);//mysql will return update count as well, while sqlserver will not return update count
+		else
+			Assert.assertEquals(1, res.size());
+		
+		Assert.assertTrue(res.containsKey("v_address"));
+		Assert.assertEquals("output", res.get("v_address"));
+		Assert.assertEquals("output", parameters.get("v_address", ParameterDirection.InputOutput).getValue());
+		
+		List<ClientTestModel> models = this.queryModelsByIds(1);
+		Assert.assertEquals(1, models.size());
+		Assert.assertEquals("aaa", models.get(0).getAddress());
 	}
 	
 	/**

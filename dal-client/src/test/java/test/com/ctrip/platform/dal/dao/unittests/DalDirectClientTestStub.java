@@ -442,9 +442,8 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		Assert.assertTrue(null != res);
 		Assert.assertEquals(0, res.size());
 		
-		List<ClientTestModel> models = this.queryModelsByIds(4);
-		assertEquals(1, models.size(), 4);
-		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(4, models.size());
 	}
 	
 	/**
@@ -491,9 +490,8 @@ public class DalDirectClientTestStub extends BaseTestStub {
 			Assert.assertTrue(res.containsKey("update_count"));
 			Assert.assertEquals((long)1, res.get("result"));
 		}		
-		List<ClientTestModel> models = this.queryModelsByIds(4);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(4, models.size());
 	}
 	
 	/**
@@ -514,9 +512,8 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		Assert.assertTrue(null != res);
 		Assert.assertEquals(0, res.size());
 		
-		List<ClientTestModel> models = this.queryModelsByIds(4);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(4, models.size());
 	}
 	
 	/**
@@ -575,9 +572,8 @@ public class DalDirectClientTestStub extends BaseTestStub {
 			Assert.assertEquals((long)1, res.get("result"));
 		}
 		
-		List<ClientTestModel> models = this.queryModelsByIds(4);
-		Assert.assertEquals(1, models.size());
-		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
+		List<ClientTestModel> models = this.queryModelsByIds();
+		Assert.assertEquals(4, models.size());
 	}
 	
 	/**

@@ -185,7 +185,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		StatementParameters parameters = new StatementParameters();
 		DalHints hints = new DalHints();
 		int count = client.update(insertSql, parameters, hints);
-		Assert.assertEquals(1, count);
+		assertEquals(1, count, 4);
 		Assert.assertEquals(4, queryModelsByIds().size());
 	}
 
@@ -443,7 +443,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		Assert.assertEquals(0, res.size());
 		
 		List<ClientTestModel> models = this.queryModelsByIds(4);
-		Assert.assertEquals(1, models.size());
+		assertEquals(1, models.size(), 4);
 		Assert.assertEquals("SZ INFO", models.get(0).getAddress());
 	}
 	

@@ -3,11 +3,11 @@ package test.com.ctrip.platform.dal.dao.unittests;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
+import test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer;
 
-public class DalQueryDaoSqlServerTest extends DalQueryDaoTestStub {
-	private static SqlServerDatabaseInitializer initializer = new SqlServerDatabaseInitializer();
-	public DalQueryDaoSqlServerTest() {
+public class DalQueryDaoOracleTest extends DalQueryDaoTestStub {
+	private static OracleDatabaseInitializer initializer = new OracleDatabaseInitializer();
+	public DalQueryDaoOracleTest() {
 		super(initializer.DATABASE_NAME, initializer.diff);
 	}
 	

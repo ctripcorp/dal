@@ -48,8 +48,7 @@ public class OracleDatabaseInitializer {
 			+ "		end if;"
 			+ "end;", TABLE_NAME, TABLE_NAME); 
 	
-	private final static String CREATE_TABLE_SEQ = "CREATE SEQUENCE ID_SEQ  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 4 CACHE 20 NOORDER  NOCYCLE";
-	private final static String CREATE_TABLE_SEQ2 = "CREATE SEQUENCE ID_SEQ  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 5 CACHE 20 NOORDER  NOCYCLE";
+	private final static String CREATE_TABLE_SEQ = "CREATE SEQUENCE ID_SEQ  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
 	
 	//Create the the table
 	private final static String CREATE_TABLE_SQL = "CREATE TABLE DAL_CLIENT_TEST"
@@ -171,7 +170,7 @@ public class OracleDatabaseInitializer {
 	public static void setUpBeforeClass2() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
-				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ2, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,
+				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,
 				CREATE_SP_WITHOUT_OUT_PARAM, 
 				CREATE_SP_WITH_OUT_PARAM,
 				CREATE_SP_WITH_IN_OUT_PARAM,
@@ -194,27 +193,28 @@ public class OracleDatabaseInitializer {
 	public static void setUp() throws Exception {
 		DalHints hints = new DalHints();
 		String[] insertSqls = new String[] {
+				DROP_TABLE_SEQ,CREATE_TABLE_SEQ,
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(1, 10, 1, 'SH INFO', NULL)",
+						+ " (quantity,type,address) VALUES(10, 1, 'SH INFO')",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
+						+ " (quantity,type,address) VALUES(11, 1, 'BJ INFO')",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)" };
-		int[] counts = client.batchUpdate(insertSqls, hints);
-		Assert.assertArrayEquals(new int[] { 1, 1, 1 }, counts);
+						+ " (quantity,type,address) VALUES(12, 2, 'SZ INFO')",};
+		client.batchUpdate(insertSqls, hints);
 	}
 
 	public static void setUp2() throws Exception {
 		DalHints hints = new DalHints();
 		String[] insertSqls = new String[] {
+				DROP_TABLE_SEQ,CREATE_TABLE_SEQ,
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(1, 10, 1, 'SH INFO', NULL)",
+						+ " (quantity,type,address) VALUES(10, 1, 'SH INFO')",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(2, 11, 1, 'BJ INFO', NULL)",
+						+ " (quantity,type,address) VALUES(11, 1, 'BJ INFO')",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(3, 12, 2, 'SZ INFO', NULL)",
+						+ " (quantity,type,address) VALUES(12, 2, 'SZ INFO')",
 				"INSERT INTO " + TABLE_NAME
-						+ " VALUES(4, 12, 1, 'HK INFO', NULL)"};
+						+ " (quantity,type,address) VALUES(12, 1, 'HK INFO')"};
 		client.batchUpdate(insertSqls, hints);
 	}
 

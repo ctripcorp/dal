@@ -23,19 +23,59 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static int mod = 4;
 	
-	private final static String DROP_TABLE_SQL_MYSQL = "DROP TABLE IF EXISTS " + TABLE_NAME;
-	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
+	private final static String DROP_TABLE_SEQ_TPL = 
+			"declare num number;"
+			+ "begin "
+			+ "		num := 0;"
+			+ "		select count(1) into num from user_sequences where sequence_name = 'ID_SEQ%d';"
+			+ "		if num > 0 then "
+			+ "			execute immediate 'drop SEQUENCE ID_SEQ%d' ;"
+			+ "		end if;"
+			+ "end;";
+	
+	private final static String DROP_TABLE_SQL_TPL = 
+			"declare num number;"
+			+ "begin "
+			+ "		num := 0;"
+			+ "		select count(1) into num from user_tables where table_name = upper('DAL_CLIENT_TEST_%d');"
+			+ "		if num > 0 then "
+			+ "			execute immediate 'drop table DAL_CLIENT_TEST_%d' ;"
+			+ "		end if;"
+			+ "end;"; 
+		
+	private final static String CREATE_TABLE_SEQ_TPL = "CREATE SEQUENCE ID_SEQ%d  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
 	
 	//Create the the table
-	// Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
-	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
-			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-			+ "quantity int,"
-			+ "tableIndex int,"
-			+ "type smallint, "
-			+ "address VARCHAR(64) not null, "
-			+ "last_changed timestamp default CURRENT_TIMESTAMP)";
+	private final static String CREATE_TABLE_SQL_TPL = "CREATE TABLE DAL_CLIENT_TEST_%d"
+			   			+ "(ID NUMBER(10) NOT NULL ENABLE, " 
+						+ "QUANTITY NUMBER(10)," 
+						+ "tableIndex NUMBER(10),"
+						+ "TYPE NUMBER(2),"
+						+ "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
+						+ "LAST_CHANGED TIMESTAMP (6) DEFAULT SYSDATE, "
+						+ "CONSTRAINT DAL_CLIENT_TEST_%d_PK PRIMARY KEY (ID))";
 	
+	private final static String CREATE_TABLE_TRIG_TPL = "CREATE OR REPLACE TRIGGER DAL_CLIENT_TEST_ID_TRIG%d" 
+						+" before insert on DAL_CLIENT_TEST_%d" 
+						+" for each row " 
+						+" begin"  
+						+"	if inserting then" 
+						+"		if :NEW.ID is null then "
+						+"			select ID_SEQ%d.nextval into :NEW.ID from dual;" 
+						+"		end if; "
+						+"	end if; "
+						+" end;";
+	
+	private final static String DROP_TABLE_TRIG_TPL = 
+			"declare num number;"
+			+ "begin "
+			+ "		num := 0;"
+			+ "		select count(1) into num from user_triggers where trigger_name = 'DAL_CLIENT_TEST_ID_TRIG%d';"
+			+ "		if num > 0 then "
+			+ "			execute immediate 'drop TRIGGER DAL_CLIENT_TEST_ID_TRIG%d' ;"
+			+ "		end if;"
+			+ "end;";	
+
 	private static DalClient clientMySql;
 	
 	@BeforeClass
@@ -45,10 +85,14 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 		DalHints hints = new DalHints();
 		String[] sqls = null;
 		for(int i = 0; i < mod; i++) {
-			sqls = new String[] { 
-					DROP_TABLE_SQL_MYSQL,
-					String.format(DROP_TABLE_SQL_MYSQL_TPL,i), 
-					String.format(CREATE_TABLE_SQL_MYSQL_TPL, i)};
+			sqls = new String[] {
+					String.format(DROP_TABLE_TRIG_TPL, i, i),
+					String.format(DROP_TABLE_SEQ_TPL, i, i), 
+					String.format(DROP_TABLE_SQL_TPL, i, i), 
+					String.format(CREATE_TABLE_SEQ_TPL, i, i), 
+					String.format(CREATE_TABLE_SQL_TPL, i, i), 
+					String.format(CREATE_TABLE_TRIG_TPL, i, i, i),
+					};
 			clientMySql.batchUpdate(sqls, hints);
 		}
 	}
@@ -58,7 +102,10 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 		DalHints hints = new DalHints();
 		String[] sqls = null;
 		for(int i = 0; i < mod; i++) {
-			sqls = new String[] { String.format(DROP_TABLE_SQL_MYSQL_TPL, i)};
+			sqls = new String[] { 
+					String.format(DROP_TABLE_SEQ_TPL, i, i),
+					String.format(DROP_TABLE_TRIG_TPL, i, i),
+					String.format(DROP_TABLE_SQL_TPL, i, i),};
 			clientMySql.batchUpdate(sqls, hints);
 		}
 	}
@@ -68,12 +115,15 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		for(int i = 0; i < mod; i++) {
-			insertSqls = new String[i + 1];
+			insertSqls = new String[i + 1 + 1 + 1];
+			insertSqls[0] = String.format(DROP_TABLE_SEQ_TPL, i, i);
+			insertSqls[1] = String.format(CREATE_TABLE_SEQ_TPL, i, i); 
+
 			for(int j = 0; j < i + 1; j ++) {
 				int id = j + 1;
 				int quantity = 10 + j;
-				insertSqls[j] = "INSERT INTO " + TABLE_NAME + "_"+ i
-						+ " VALUES(" + id + ", " + quantity + ", " + i + ",1, 'SH INFO', NULL)";
+				insertSqls[j+2] = "INSERT INTO " + TABLE_NAME + "_"+ i  + "(quantity,tableIndex,type,address)"
+						+ " VALUES(" + quantity + ", " + i + ",1, 'SH INFO')";
 			}
 			clientMySql.batchUpdate(insertSqls, hints);
 		}

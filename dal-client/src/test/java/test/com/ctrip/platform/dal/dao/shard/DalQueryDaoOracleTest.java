@@ -95,7 +95,7 @@ public class DalQueryDaoOracleTest extends DalQueryDaoTest {
 		DalHints hints = new DalHints();
 		String[] sqls = null;
 		for(int i = 0; i < mod; i++) {
-			sqls = new String[] { DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,};
+			sqls = new String[] { DROP_TABLE_TRIG, DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,};
 			client.batchUpdate(sqls, hints.inShard(i));
 		}
 	}

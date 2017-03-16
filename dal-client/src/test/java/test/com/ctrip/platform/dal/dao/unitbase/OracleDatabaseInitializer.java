@@ -2,8 +2,6 @@ package test.com.ctrip.platform.dal.dao.unitbase;
 
 import java.sql.SQLException;
 
-import org.junit.Assert;
-
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;

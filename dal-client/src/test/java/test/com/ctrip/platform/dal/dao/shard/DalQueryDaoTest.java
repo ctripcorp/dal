@@ -36,6 +36,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.ShortRowMapper;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
@@ -523,21 +524,21 @@ public abstract class DalQueryDaoTest {
 		MultipleSqlBuilder builder = new MultipleSqlBuilder();
 		// TODO add all add method
 		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper());//mapper
-//		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
-//		builder.addQuery(sqlList, new StatementParameters(), ClientTestModel.class, new ClientTestModelComparator());//sorter
-//		builder.addQuery(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
-//		builder.addQuery(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
-//		builder.addQuery(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
-//		
-//		parameters = new StatementParameters();
-//		List<Integer> inParam = new ArrayList<>();
-//		inParam.add(0);
-//		inParam.add(1);
-//		inParam.add(2);
-//		inParam.add(3);
-//		inParam.add(4);
-//		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
-//		builder.addQuery(sqlIdInParam, parameters, ClientTestModel.class);
+		builder.addQuery(sqlList, new StatementParameters(), new ClientTestDalRowMapper(), new DalListMerger<ClientTestModel>());//merger
+		builder.addQuery(sqlList, new StatementParameters(), ClientTestModel.class, new ClientTestModelComparator());//sorter
+		builder.addQuery(sqlListQuantity, new StatementParameters(), Integer.class, new DalListMerger<Integer>());//merger
+		builder.addQuery(sqlObject, parameters, Integer.class, new InteregrComparator());//soter
+		builder.addQuery(sqlNoResult, new StatementParameters(), new TestDalRowCallback3());//callback
+		
+		parameters = new StatementParameters();
+		List<Integer> inParam = new ArrayList<>();
+		inParam.add(0);
+		inParam.add(1);
+		inParam.add(2);
+		inParam.add(3);
+		inParam.add(4);
+		parameters.setInParameter(1, "type", Types.INTEGER, inParam);
+		builder.addQuery(sqlIdInParam, parameters, ClientTestModel.class);
 
 		return dao.query(builder, hints.inAllShards());
 	}

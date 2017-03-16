@@ -9,7 +9,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -22,7 +23,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
  */
 public class DalTabelDaoShardByTableMySqlTest extends BaseDalTabelDaoShardByTableTest {
 	public DalTabelDaoShardByTableMySqlTest() {
-		super(DATABASE_NAME_MYSQL);
+		super(DATABASE_NAME_MYSQL, MySqlDatabaseInitializer.diff);
 	}
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_tableShard";
 	

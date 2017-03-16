@@ -10,12 +10,15 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	DalTabelDaoShardByTableSqlSvrTest.class,
 	DalTabelDaoShardByTableMySqlTest.class,
+	DalTabelDaoShardByTableOracleTest.class,
 	
 	DalTableDaoShardByDbSqlSvrTest.class,
 	DalTableDaoShardByDbMySqlTest.class,
+	DalTableDaoShardByDbOracleTest.class,
 	
 	DalTableDaoShardByDbTableSqlSvrTest.class,
 	DalTableDaoShardByDbTableMySqlTest.class,
+	DalTableDaoShardByDbTableOracleTest.class,
 	
 	DalQueryDaoMySqlTest.class,
 	DalQueryDaoSqlSvrTest.class,

@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
+
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
@@ -35,8 +37,9 @@ import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
 public abstract class BaseDalTableDaoShardByDbTest {
 	private boolean ASSERT_ALLOWED = false;
-
-	public BaseDalTableDaoShardByDbTest(String databaseName, String generatedKey) {
+	private DatabaseDifference diff;
+	public BaseDalTableDaoShardByDbTest(String databaseName, String generatedKey, DatabaseDifference diff) {
+		this.diff = diff;
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
@@ -1387,6 +1390,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 	 */
 	@Test
 	public void testCombinedInsert() throws SQLException{
+		if(!diff.supportInsertValues)return;
+
 		List<ClientTestModel> entities = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
@@ -1442,6 +1447,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 	
 	@Test
 	public void testCombinedInsertAsyncCallback() throws SQLException{
+		if(!diff.supportInsertValues)return;
+
 		DalHints hints;
 		IntCallback callback;
 
@@ -2521,6 +2528,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 	@Test
 	public void testCrossShardInsert() {
+		if(!diff.supportInsertValues)return;
+		
 		try {
 			int res = 0;
 			deleteAllShardsByDb(dao, mod);
@@ -2582,6 +2591,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 	@Test
 	public void testCrossShardInsertAsync() {
+		if(!diff.supportInsertValues)return;
+
 		try {
 			int res = 0;
 			deleteAllShardsByDb(dao, mod);
@@ -2645,6 +2656,8 @@ public abstract class BaseDalTableDaoShardByDbTest {
 
 	@Test
 	public void testCrossShardInsertCallback() {
+		if(!diff.supportInsertValues)return;
+
 		try {
 			int res = 0;
 			deleteAllShardsByDb(dao, mod);

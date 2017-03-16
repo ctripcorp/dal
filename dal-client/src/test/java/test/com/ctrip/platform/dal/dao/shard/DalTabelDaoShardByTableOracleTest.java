@@ -9,6 +9,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -16,14 +18,14 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTableTest {
 	public DalTabelDaoShardByTableOracleTest() {
-		super(DATABASE_NAME);
+		super(DATABASE_NAME, OracleDatabaseInitializer.diff);
 	}
 	private final static String DATABASE_NAME = "dao_test_oracle_tableShard";
 	
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static int mod = 4;
 	
-	private final static String DROP_TABLE_SEQ_TPL = 
+	public final static String DROP_TABLE_SEQ_TPL = 
 			"declare num number;"
 			+ "begin "
 			+ "		num := 0;"
@@ -33,7 +35,7 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 			+ "		end if;"
 			+ "end;";
 	
-	private final static String DROP_TABLE_SQL_TPL = 
+	public final static String DROP_TABLE_SQL_TPL = 
 			"declare num number;"
 			+ "begin "
 			+ "		num := 0;"
@@ -43,19 +45,29 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 			+ "		end if;"
 			+ "end;"; 
 		
-	private final static String CREATE_TABLE_SEQ_TPL = "CREATE SEQUENCE ID_SEQ%d  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
+	public final static String DROP_TABLE_TRIG_TPL = 
+			"declare num number;"
+			+ "begin "
+			+ "		num := 0;"
+			+ "		select count(1) into num from user_triggers where trigger_name = 'DAL_CLIENT_TEST_ID_TRIG%d';"
+			+ "		if num > 0 then "
+			+ "			execute immediate 'drop TRIGGER DAL_CLIENT_TEST_ID_TRIG%d' ;"
+			+ "		end if;"
+			+ "end;";	
+
+	public final static String CREATE_TABLE_SEQ_TPL = "CREATE SEQUENCE ID_SEQ%d  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
 	
 	//Create the the table
-	private final static String CREATE_TABLE_SQL_TPL = "CREATE TABLE DAL_CLIENT_TEST_%d"
-			   			+ "(ID NUMBER(10) NOT NULL ENABLE, " 
-						+ "QUANTITY NUMBER(10)," 
+	public final static String CREATE_TABLE_SQL_TPL = "CREATE TABLE DAL_CLIENT_TEST_%d"
+			   			+ "(ID NUMBER(5) NOT NULL ENABLE, " 
+						+ "QUANTITY NUMBER(5)," 
 						+ "tableIndex NUMBER(10),"
 						+ "TYPE NUMBER(2),"
 						+ "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
 						+ "LAST_CHANGED TIMESTAMP (6) DEFAULT SYSDATE, "
 						+ "CONSTRAINT DAL_CLIENT_TEST_%d_PK PRIMARY KEY (ID))";
 	
-	private final static String CREATE_TABLE_TRIG_TPL = "CREATE OR REPLACE TRIGGER DAL_CLIENT_TEST_ID_TRIG%d" 
+	public final static String CREATE_TABLE_TRIG_TPL = "CREATE OR REPLACE TRIGGER DAL_CLIENT_TEST_ID_TRIG%d" 
 						+" before insert on DAL_CLIENT_TEST_%d" 
 						+" for each row " 
 						+" begin"  
@@ -66,16 +78,6 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 						+"	end if; "
 						+" end;";
 	
-	private final static String DROP_TABLE_TRIG_TPL = 
-			"declare num number;"
-			+ "begin "
-			+ "		num := 0;"
-			+ "		select count(1) into num from user_triggers where trigger_name = 'DAL_CLIENT_TEST_ID_TRIG%d';"
-			+ "		if num > 0 then "
-			+ "			execute immediate 'drop TRIGGER DAL_CLIENT_TEST_ID_TRIG%d' ;"
-			+ "		end if;"
-			+ "end;";	
-
 	private static DalClient clientMySql;
 	
 	@BeforeClass

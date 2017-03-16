@@ -7,6 +7,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -14,7 +16,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalTableDaoShardByDbTableSqlSvrTest extends BaseDalTableDaoShardByDbTableTest {
 	public DalTableDaoShardByDbTableSqlSvrTest() {
-		super(DATABASE_NAME_SQLSVR);
+		super(DATABASE_NAME_SQLSVR, SqlServerDatabaseInitializer.diff);
 	}
 
 	private final static String DATABASE_NAME_SQLSVR = "dao_test_sqlsvr_dbTableShard";
@@ -37,27 +39,6 @@ public class DalTableDaoShardByDbTableSqlSvrTest extends BaseDalTableDaoShardByD
 			+ "last_changed datetime default getdate())";
 	
 	private static DalClient clientSqlSvr;
-	
-	public static void clear() {
-		DalHints hints = new DalHints();
-		String[] sqls = null;
-		// For SQL server
-		hints = new DalHints();
-		int k = 0;
-		for(int j = 0; j < 10; j++) {
-			sqls = new String[1000];
-			for(int i = 0; i < 1000; i++) {
-				sqls[i]= String.format(DROP_TABLE_SQL_SQLSVR_TPL, k, k);
-				k++;
-			}
-			try {
-				clientSqlSvr.batchUpdate(sqls, hints.inShard(0).continueOnError());
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

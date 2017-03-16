@@ -1,6 +1,10 @@
 package test.com.ctrip.platform.dal.dao.shard;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
+import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -28,8 +34,10 @@ import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
 public abstract class BaseDalTabelDaoShardByTableTest {
 	private boolean ASSERT_ALLOWED = true;
-
-	public BaseDalTabelDaoShardByTableTest(String databaseName) {
+	private DatabaseDifference diff;
+	
+	public BaseDalTabelDaoShardByTableTest(String databaseName, DatabaseDifference diff) {
+		this.diff = diff;
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
@@ -1656,6 +1664,8 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 	 */
 	@Test
 	public void testCombinedInsert() throws SQLException{
+		if(!diff.supportInsertValues)return;
+		
 		ClientTestModel[] entities = new ClientTestModel[3];
 		for (int i = 0; i < 3; i++) {
 			ClientTestModel model = new ClientTestModel();
@@ -1702,6 +1712,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 	
 	@Test
 	public void testCombinedInsertAsyncCallback() throws SQLException{
+		if(!diff.supportInsertValues)return;
 		DalHints hints;
 
 		ClientTestModel[] entities = new ClientTestModel[3];
@@ -2517,6 +2528,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 	
 	@Test
 	public void testCrossShardInsert() {
+		if(!diff.supportInsertValues)return;
 		try {
 			deleteAllShards();
 			
@@ -2573,6 +2585,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 
 	@Test
 	public void testCrossShardInsertAsync() {
+		if(!diff.supportInsertValues)return;
 		try {
 			deleteAllShards();
 			
@@ -2630,6 +2643,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 
 	@Test
 	public void testCrossShardInsertCallback() {
+		if(!diff.supportInsertValues)return;
 		try {
 			deleteAllShards();
 			

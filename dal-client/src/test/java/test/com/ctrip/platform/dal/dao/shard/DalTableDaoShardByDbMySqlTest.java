@@ -10,6 +10,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -17,7 +19,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalTableDaoShardByDbMySqlTest extends BaseDalTableDaoShardByDbTest {
 	public DalTableDaoShardByDbMySqlTest() {
-		super(DATABASE_NAME_MYSQL, GENERATED_KEY);
+		super(DATABASE_NAME_MYSQL, GENERATED_KEY, MySqlDatabaseInitializer.diff);
 	}
 
 	private final static String DATABASE_NAME_MYSQL = "dao_test_mysql_dbShard";

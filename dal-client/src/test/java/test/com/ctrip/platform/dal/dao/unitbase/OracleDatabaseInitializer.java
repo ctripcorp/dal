@@ -26,7 +26,7 @@ public class OracleDatabaseInitializer {
 		diff.supportBatchSpWithOutParameter = false;
 	}
 	
-	private final static String DROP_TABLE_SEQ = 
+	public final static String DROP_TABLE_SEQ = 
 			"declare num number;"
 			+ "begin "
 			+ "		num := 0;"
@@ -36,7 +36,7 @@ public class OracleDatabaseInitializer {
 			+ "		end if;"
 			+ "end;";
 	
-	private final static String DROP_TABLE_SQL = String.format(
+	public final static String DROP_TABLE_SQL = String.format(
 			"declare num number;"
 			+ "begin "
 			+ "		num := 0;"
@@ -46,18 +46,28 @@ public class OracleDatabaseInitializer {
 			+ "		end if;"
 			+ "end;", TABLE_NAME, TABLE_NAME); 
 	
-	private final static String CREATE_TABLE_SEQ = "CREATE SEQUENCE ID_SEQ  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
+	public final static String CREATE_TABLE_SEQ = "CREATE SEQUENCE ID_SEQ  MINVALUE 1 MAXVALUE 9999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
 	
 	//Create the the table
-	private final static String CREATE_TABLE_SQL = "CREATE TABLE DAL_CLIENT_TEST"
-			   			+ "(ID NUMBER(*,0) NOT NULL ENABLE, " 
-						+ "QUANTITY NUMBER(*,0)," 
-						+ "TYPE NUMBER(*,0),"
+	public final static String CREATE_TABLE_SQL = "CREATE TABLE DAL_CLIENT_TEST"
+			   			+ "(ID NUMBER(5) NOT NULL ENABLE, " 
+						+ "QUANTITY NUMBER(5)," 
+						+ "TYPE NUMBER(2),"
 						+ "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
 						+ "LAST_CHANGED TIMESTAMP (6) DEFAULT SYSDATE, "
 						+ "CONSTRAINT DAL_CLIENT_TEST_PK PRIMARY KEY (ID))";
 	
-	private final static String CREATE_TABLE_TRIG = "CREATE OR REPLACE TRIGGER DAL_CLIENT_TEST_ID_TRIG" 
+	//Create the the table
+	public final static String CREATE_TABLE_SQL2 = "CREATE TABLE DAL_CLIENT_TEST"
+			   			+ "(ID NUMBER(5) NOT NULL ENABLE, " 
+						+ "QUANTITY NUMBER(5)," 
+						+ "tableIndex NUMBER(10),"
+						+ "TYPE NUMBER(2),"
+						+ "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
+						+ "LAST_CHANGED TIMESTAMP (6) DEFAULT SYSDATE, "
+						+ "CONSTRAINT DAL_CLIENT_TEST_PK PRIMARY KEY (ID))";
+	
+	public final static String CREATE_TABLE_TRIG = "CREATE OR REPLACE TRIGGER DAL_CLIENT_TEST_ID_TRIG" 
 						+" before insert on DAL_CLIENT_TEST" 
 						+" for each row " 
 						+" begin"  
@@ -68,7 +78,7 @@ public class OracleDatabaseInitializer {
 						+"	end if; "
 						+" end;";
 	
-	private final static String DROP_TABLE_TRIG = 
+	public final static String DROP_TABLE_TRIG = 
 			"declare num number;"
 			+ "begin "
 			+ "		num := 0;"
@@ -150,22 +160,6 @@ public class OracleDatabaseInitializer {
 	}
 
 	public static void setUpBeforeClass() throws Exception {
-		DalHints hints = new DalHints();
-		String[] sqls = new String[] { 
-				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,
-				CREATE_SP_WITHOUT_OUT_PARAM, 
-				CREATE_SP_WITH_OUT_PARAM,
-				CREATE_SP_WITH_IN_OUT_PARAM,
-				CREATE_SP_WITH_INTERMEDIATE_RESULT,
-				};
-		try {
-			client.batchUpdate(sqls, hints);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void setUpBeforeClass2() throws Exception {
 		DalHints hints = new DalHints();
 		String[] sqls = new String[] { 
 				DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL, CREATE_TABLE_TRIG,

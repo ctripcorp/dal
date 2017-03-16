@@ -17,7 +17,7 @@ public class DalTableDaoOracleTest extends DalTableDaoTestStub {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		initializer.setUpBeforeClass2();
+		initializer.setUpBeforeClass();
 	}
 
 	@AfterClass

@@ -17,6 +17,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
+
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -34,9 +36,11 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	public final static int mod = 2;
 	public final static int tableMod = 4;
 	
+	private DatabaseDifference diff;
 	private static DalTableDao<ClientTestModel> dao;
 	
-	public BaseDalTableDaoShardByDbTableTest(String databaseName) {
+	public BaseDalTableDaoShardByDbTableTest(String databaseName, DatabaseDifference diff) {
+		this.diff = diff;
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
@@ -1891,6 +1895,8 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	 */
 	@Test
 	public void testCombinedInsertFail() throws SQLException{
+		if(!diff.supportInsertValues)return;
+
 		testCombinedInsertFail(new DalHints());
 		testCombinedInsertFail(asyncHints());
 		testCombinedInsertFail(intHints());
@@ -1914,6 +1920,8 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 
 	@Test
 	public void testCombinedInsertByShard() throws SQLException{
+		if(!diff.supportInsertValues)return;
+
 		testCombinedInsert(new DalHints());
 		testCombinedInsert(asyncHints());
 		testCombinedInsert(intHints());
@@ -3111,6 +3119,8 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 	
 	@Test
 	public void testCrossShardCombinedInsert() throws SQLException{
+		if(!diff.supportInsertValues)return;
+
 		testCrossShardCombinedInsert(new DalHints());
 		testCrossShardCombinedInsert(asyncHints());
 		testCrossShardCombinedInsert(intHints());

@@ -15,7 +15,7 @@ public class TitanServiceReaderTest {
 	
 	@Test
 	public void testGetFromTitanServiceSuccess() {
-		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
+		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query/";
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("AbacusDB_INSERT_1");

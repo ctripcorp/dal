@@ -106,8 +106,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private String discoverTitanServiceUrl(Map<String, String> settings) {
 		String svcUrl = settings.get(SERVICE_ADDRESS);
 		
-		if(svcUrl != null)
-			return svcUrl.trim();
+		if(svcUrl != null) {
+			svcUrl = svcUrl.trim();
+			if(svcUrl.endsWith("/"))
+				svcUrl = svcUrl.substring(0, svcUrl.length()-1);
+			return svcUrl;
+		}
 		
 		if(Foundation.server().getEnvType() == null)
 			return null;

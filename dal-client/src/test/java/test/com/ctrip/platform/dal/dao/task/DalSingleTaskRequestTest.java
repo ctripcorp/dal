@@ -80,7 +80,7 @@ public class DalSingleTaskRequestTest {
 
 		try {
 			List<Integer> pojos = new ArrayList<>();
-			test = new DalSingleTaskRequest<>("", new DalHints(), pojos, null);
+			test = new DalSingleTaskRequest<>("", new DalHints(), pojos, (TestSingleTask)null);
 			test.validate();
 			fail();
 		} catch (SQLException e) {

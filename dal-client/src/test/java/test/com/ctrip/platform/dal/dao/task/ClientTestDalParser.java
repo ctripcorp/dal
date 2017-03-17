@@ -27,13 +27,20 @@ public class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 			throws SQLException {
 		ClientTestModel model = new ClientTestModel();
 		model.setId(rs.getInt(1));
-		model.setQuantity((Integer)rs.getObject(2));
-		model.setDbIndex((Integer)rs.getObject(3));
-		model.setTableIndex((Integer)rs.getObject(4));
+		model.setQuantity(getInteger(rs.getObject(2)));
+		model.setDbIndex(getInteger(rs.getObject(3)));
+		model.setTableIndex(getInteger(rs.getObject(4)));
 		model.setType(rs.getShort(5));
 		model.setAddress(rs.getString(6));
 		model.setLastChanged(rs.getTimestamp(7));
 		return model;
+	}
+	
+	private Integer getInteger(Object value) {
+		if(value == null)
+			return null;
+		
+		return ((Number)value).intValue();
 	}
 
 	@Override

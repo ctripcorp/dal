@@ -24,7 +24,7 @@
       <add  name="dao_test_sqlsvr_M" databaseType="Master" sharding="" connectionString="SqlSvrShard_0"/>
     </databaseSet>
     <databaseSet name="dao_test_mysql" provider="mySqlProvider" shardingStrategy="" >
-      <add  name="dao_test_mysql_M" databaseType="Master" sharding="" connectionString="dao_test_mysql"/>
+      <add  name="dao_test_mysql_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
     </databaseSet>
     <databaseSet name="dao_test_mysql1" provider="mySqlProvider" shardingStrategy="" >
       <add  name="dao_test_mysql_M" databaseType="Master" sharding="" connectionString="dal_test_new"/>

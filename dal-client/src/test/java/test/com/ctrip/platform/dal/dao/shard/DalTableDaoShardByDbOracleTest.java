@@ -1,7 +1,12 @@
 package test.com.ctrip.platform.dal.dao.shard;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
+import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.CREATE_TABLE_SEQ;
+import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.CREATE_TABLE_SQL2;
+import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.CREATE_TABLE_TRIG;
+import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.DROP_TABLE_SEQ;
+import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.DROP_TABLE_SQL;
+import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.DROP_TABLE_TRIG;
 
 import java.sql.SQLException;
 
@@ -11,7 +16,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer;
-import static test.com.ctrip.platform.dal.dao.unitbase.OracleDatabaseInitializer.*;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;

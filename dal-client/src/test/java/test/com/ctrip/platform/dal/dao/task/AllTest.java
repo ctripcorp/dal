@@ -28,12 +28,22 @@ import org.junit.runners.Suite.SuiteClasses;
 	DeleteSqlTaskMySqlTest.class,
 	UpdateSqlTaskMySqlTest.class,
 	
+	BatchDeleteTaskOracleTest.class,
+	BatchInsertTaskOracleTest.class,
+	BatchUpdateTaskOracleTest.class,
+	CombinedInsertTaskOracleTest.class,
+	SingleDeleteTaskOracleTest.class,
+	SingleInsertTaskOracleTest.class,
+	SingleUpdateTaskOracleTest.class,
+	QuerySqlTaskOracleTest.class,
+	DeleteSqlTaskOracleTest.class,
+	UpdateSqlTaskOracleTest.class,
+	
 	ShardedIntArrayResultMergerTest.class,
 	DalSingleTaskRequestTest.class,
 	DalBulkTaskRequestTest.class,
 	DalSingleTaskRequestTest.class,
 	DalSqlTaskRequestTest.class,
-	
 })
 public class AllTest {
 

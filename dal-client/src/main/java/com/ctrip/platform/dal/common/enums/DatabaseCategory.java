@@ -72,7 +72,7 @@ public enum DatabaseCategory {
 	
 	Oracle(
 			"%s=NVL(?,%s) ",
-			"SYSTIMEATAMP",
+			"SYSTIMESTAMP",
 			new int[]{-1}, 
 			new int[]{-1}
 			){

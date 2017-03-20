@@ -1,7 +1,11 @@
 package com.ctrip.platform.dal.dao.task;
 
+import static com.ctrip.platform.dal.dao.task.DefaultTaskFactory.getDbCategory;
+
 import java.util.Map;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalParser;
 
 public class DefaultTaskFactory implements DalTaskFactory {
@@ -15,6 +19,10 @@ public class DefaultTaskFactory implements DalTaskFactory {
 	@Override
 	public String getProperty(String key) {
 		return settings.get(key);
+	}
+	
+	public static <T> DatabaseCategory getDbCategory(DalParser<T> parser) {
+		return DalClientFactory.getDalConfigure().getDatabaseSet(parser.getDatabaseName()).getDatabaseCategory();
 	}
 	
 	@Override
@@ -40,6 +48,12 @@ public class DefaultTaskFactory implements DalTaskFactory {
 
 	@Override
 	public <T> BulkTask<Integer, T> createCombinedInsertTask(DalParser<T> parser) {
+		/**
+		 * Oracle has different way of INSERT VALUES, We do not support it yet.
+		 */
+		if(DatabaseCategory.Oracle== getDbCategory(parser))
+			return null;
+			
 		CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();
 		combinedInsertTask.initialize(parser);
 		return combinedInsertTask;

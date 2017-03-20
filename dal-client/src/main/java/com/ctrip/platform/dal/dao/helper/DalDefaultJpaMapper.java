@@ -3,7 +3,10 @@ package com.ctrip.platform.dal.dao.helper;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Map;
+
+import oracle.sql.TIMESTAMP;
 
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -34,7 +37,7 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 						continue;
 					else
 						throw new DalException(ErrorCode.FieldNotExists, clazz.getName(), columnNames[i]);
-				setValue(field, instance, rs.getObject(columnNames[i]));
+				setValue(field, instance, rs, i);
 			}
 			return instance;
 		} catch (Throwable e) {
@@ -42,8 +45,10 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 		}
 	}
 
-	private void setValue(Field field, Object entity, Object val)
-			throws ReflectiveOperationException {
+	private void setValue(Field field, Object entity, ResultSet rs, int index)
+			throws ReflectiveOperationException, SQLException {
+		Object val = rs.getObject(columnNames[index]);
+		
 		if (val == null) {
 			field.set(entity, val);
 			return;
@@ -71,6 +76,13 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 		}
 		if (field.getType().equals(Short.class) || field.getType().equals(short.class)) {
 			field.set(entity, ((Number) val).shortValue());
+			return;
+		}
+		/**
+		 * This is because oracle returns its own Timestamp type instead of standard java.sql.Timestamp
+		 */
+		if (field.getType().equals(Timestamp.class)  && !(val instanceof Timestamp)) {
+			field.set(entity, rs.getTimestamp(columnNames[index]));
 			return;
 		}
 		field.set(entity, val);

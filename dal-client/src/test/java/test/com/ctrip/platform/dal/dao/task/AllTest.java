@@ -31,7 +31,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	BatchDeleteTaskOracleTest.class,
 	BatchInsertTaskOracleTest.class,
 	BatchUpdateTaskOracleTest.class,
-	CombinedInsertTaskOracleTest.class,
+//	CombinedInsertTaskOracleTest.class,
 	SingleDeleteTaskOracleTest.class,
 	SingleInsertTaskOracleTest.class,
 	SingleUpdateTaskOracleTest.class,

@@ -17,7 +17,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(updateSPA, parameters, fields);
 
-		Map<String, ?> results = client.call(callSql, parameters, hints);
+		Map<String, ?> results = client.call(callSql, parameters, hints.setFields(fields));
 
 		return (Integer) results.get(RET_CODE);
 	}

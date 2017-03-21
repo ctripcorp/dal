@@ -10,9 +10,8 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 	public static final String RET_CODE = "retcode";
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	
-	public String prepareSpCall(String SpName, StatementParameters parameters,
-			Map<String, ?> fields) {
-		addParametersByName(parameters, fields);
+	public String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {
+		addParametersByIndex(parameters, fields);
 		String callSql = buildCallSql(SpName, fields.size());
 		parameters.setResultsParameter(RET_CODE, extractor);
 		return callSql;

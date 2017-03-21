@@ -18,7 +18,7 @@ public class BatchUpdateSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 		int i = 0;
 		for (Integer index :daoPojos.keySet()) {
 			StatementParameters parameters = new StatementParameters();
-			addParametersByName(parameters, daoPojos.get(index));
+			addParametersByIndex(parameters, daoPojos.get(index));
 			parametersList[i++] = parameters;
 		}
 		

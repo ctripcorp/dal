@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import static com.ctrip.platform.dal.common.enums.ParameterDirection.*;
 
 public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	private static final String INSERT_SPA_TPL = "spA_%s_i";
@@ -31,15 +31,18 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 		String callSql = prepareSpCall(insertSPA, parameters, fields);
 		
 		register(parameters, fields);
-		Map<String, ?> results = client.call(callSql, parameters, hints);
+		Map<String, ?> results = client.call(callSql, parameters, hints.setFields(fields));
 		extract(parameters, hints.getKeyHolder());
 
 		return (Integer)results.get(RET_CODE);
 	}
 	
 	private void register(StatementParameters parameters, Map<String, ?> fields) {
+		/**
+		 * Must be the first one
+		 */
 		if(outputIdName != null) {
-			parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
+			parameters.get(0).setDirection(InputOutput);
 		}
 	}
 	
@@ -48,7 +51,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 		
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		if(outputIdName != null) {
-			map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
+			map.put(outputIdName, parameters.get(0).getValue());
 		}
 		
 		holder.addKey(map);

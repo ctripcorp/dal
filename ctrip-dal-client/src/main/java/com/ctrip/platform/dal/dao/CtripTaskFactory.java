@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import static com.ctrip.platform.dal.dao.task.DefaultTaskFactory.getDbCategory;
 import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
@@ -43,14 +44,6 @@ public class CtripTaskFactory implements DalTaskFactory {
 		return defaultFactory.getProperty(key);
 	}
 
-	private <T> DatabaseCategory getDbCategory(DalParser<T> parser) {
-		DatabaseCategory dbCategory = DalClientFactory.getDalConfigure().getDatabaseSet(parser.getDatabaseName()).getDatabaseCategory();
-		if(DatabaseCategory.MySql == dbCategory || DatabaseCategory.SqlServer == dbCategory )
-			return dbCategory;
-					
-		throw new RuntimeException("Such Db category not suported yet");
-	}
-		
 	@Override
 	public <T> SingleTask<T> createSingleInsertTask(DalParser<T> parser) {
 		if(DatabaseCategory.MySql == getDbCategory(parser))

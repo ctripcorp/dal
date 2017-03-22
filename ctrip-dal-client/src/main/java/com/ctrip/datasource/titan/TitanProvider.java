@@ -38,10 +38,10 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
-import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.sql.logging.DalCatLogger;
 import com.ctrip.platform.dal.sql.logging.Metrics;
@@ -65,6 +65,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private int timeout;
 	private boolean useLocal;
 	private ConnectionStringParser parser = new ConnectionStringParser();
+	private boolean isDebug;
 	
 	/**
 	 * Used to access local Database.config file fo dev environment
@@ -90,6 +91,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		String timeoutStr = settings.get(TIMEOUT);
 		timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
 		logger.info("Titan connection timeout: " + timeout);
+		
+		isDebug = Boolean.parseBoolean(settings.get("isDebug"));
 	}
 
 	private static final Map<String, String> titanMapping = new HashMap<>();
@@ -144,25 +147,31 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
 	@Override
 	public void setup(Set<String> dbNames) {
-		// Assume it is local
+		// Try best to match pool configure for the given names.
+		checkMissingPoolConfig(dbNames);
+		
+		// If it uses local Database.Config
 		if(svcUrl == null || svcUrl.isEmpty() || useLocal) {
 			dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
 		} else {
-			// If it is not local dev environment or the AllInOne file does not exist
+			// If it uses Titan service
 			boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
-			boolean sameName = !isProdEnv || isProdEnv && isProdQualifiedName(dbNames);
-			
-			Set<String> queryNames = sameName ? dbNames : getProdDbNames(dbNames);
+
+			Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
 
 			try {
 				Map<String, TitanData> rawConnStrings = new HashMap<>();
 				Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
 				
-				if(sameName) {
-					rawConnStrings = tmpRawConnStrings;
+				if(isProdEnv) {
+					for(String name: dbNames) {
+						if(name.endsWith(PROD_SUFFIX))
+							rawConnStrings.put(name, tmpRawConnStrings.get(name));
+						else
+							rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
+					}
 				}else{
-					for(String name: dbNames)
-						rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
+					rawConnStrings = tmpRawConnStrings;
 				}
 				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
 			} catch (Exception e) {
@@ -171,25 +180,42 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		}
 	}
 	
+	private void checkMissingPoolConfig(Set<String> dbNames) {
+		for(String name: dbNames) {
+			if(DatabasePoolConfigParser.getInstance().contains(name))
+				continue;
+			
+			String possibleName = name.endsWith(PROD_SUFFIX) ? 
+				name.substring(0, name.length()-PROD_SUFFIX.length()) :
+				name + PROD_SUFFIX;
+
+			if(DatabasePoolConfigParser.getInstance().contains(possibleName)) {
+				DatabasePoolConfigParser.getInstance().copyDatabasePoolConifg(possibleName, name);
+			}else
+				// It is strongly recommended to add datasource config in datasource.xml for each of the connectionString in dal.config
+				logger.error("Cannot found datasource configure for connectionString " + name);
+		}
+	}
+	
 	@Override
 	public DataSourceConfigure getDataSourceConfigure(String dbName) {
 		return dataSourceConfigures.get(dbName);
 	}
 	
-	private boolean isProdQualifiedName(Set<String> dbNames) {
-		return dbNames.iterator().next().endsWith(PROD_SUFFIX);
-	}
-	
-	private Set<String> getProdDbNames(Set<String> dbNames) {
-		/*
-		 * Ctrip all in one key is not consist in between PROD and non PROD environment.
-		 * In PROD, the all in one name will be added with '_SH' suffix. To simplify suer
-		 * end configuration, we auto add the '_SH' to name to get config.
-		 */
+	/*
+	 * Ctrip all in one key is not consistent between PROD and non PROD environment.
+	 * In PROD, the all in one name will be added with '_SH' suffix. To simplify suer
+	 * end configuration, we auto add the '_SH' to name to get config.
+	 */
+	private Set<String> normalizedForProd(Set<String> dbNames) {
 		logger.info("It is production environment and titan key will be appended with _SH suffix");
 		Set<String> prodDbNames = new HashSet<>();
-		for(String name: dbNames)
-			prodDbNames.add(name + PROD_SUFFIX);
+		for(String name: dbNames) {
+			if(name.endsWith(PROD_SUFFIX))
+				prodDbNames.add(name);
+			else
+				prodDbNames.add(name + PROD_SUFFIX);
+		}
 		return prodDbNames;
 	}
 	
@@ -214,6 +240,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
 		String ids = sb.substring(0, sb.length()-1);
         Map<String, TitanData> result = new HashMap<>();
+        
+		if(isDebug) {
+			for(String name: dbNames)
+				result.put(name, new TitanData());
+			return result;
+		}
 
 		logger.info("Titan service URL: " + svcUrl);
 

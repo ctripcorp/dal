@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 
 public class TitanServiceReaderTest {
 	
@@ -308,6 +309,63 @@ public class TitanServiceReaderTest {
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
 		settings.put(TitanProvider.TIMEOUT, "1000");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			
+			DataSourceConfigure result = null;
+
+			for(String name: dbNames) {
+				result = provider.getDataSourceConfigure(name);
+				Assert.assertNotNull(result);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(Foundation.server().getEnvType());
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testCheckDatasource() {
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("SimpleShard_0");// has config
+		dbNames.add("SimpleShard_0_SH");// has no config, but name may be match
+		dbNames.add("PayBaseDB_INSERT_2");// has no config
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
+		settings.put(TitanProvider.TIMEOUT, "1000");
+		try {
+			provider.initialize(settings);
+			provider.setup(dbNames);
+			Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("SimpleShard_0"));
+			Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("SimpleShard_0_SH"));
+			Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("GSCommunityDB_SELECT_1"));
+			Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("PayBaseDB_INSERT_2"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(Foundation.server().getEnvType());
+			Assert.fail();
+		}
+	}
+	
+	@Test
+	public void testGetDatasourceWithMixedNames() {
+		String fws = "https://ws.titan.ctripcorp.com/titanservice/query";
+
+		TitanProvider provider = new TitanProvider();
+		Set<String> dbNames = new HashSet<>();
+		dbNames.add("mysqldbatestshard01db_W_SH");
+		dbNames.add("mysqldbatestshard01db_R");
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put(TitanProvider.TIMEOUT, "1000");
+		settings.put(TitanProvider.SERVICE_ADDRESS, fws);
+		settings.put("isDebug", "true");
+		
+		
 		try {
 			provider.initialize(settings);
 			provider.setup(dbNames);

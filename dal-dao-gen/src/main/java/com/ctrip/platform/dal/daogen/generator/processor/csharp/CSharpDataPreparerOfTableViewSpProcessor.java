@@ -232,7 +232,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 
         for (GenTaskBySqlBuilder task : sqlBuilders) {
             if (!existsTable.contains(task.getTable_name())) {
-                _tableDaos.add(getPojoClassName("", "Gen", task.getTable_name()));
+                _tableDaos.add(getPojoClassName("", "", task.getTable_name()));
             }
 
             addDatabaseSet(ctx, task.getDatabaseSetName());

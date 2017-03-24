@@ -1465,7 +1465,7 @@
 
             $("#prefix").val("");
             // 默认后缀
-            $("#suffix").val("Gen");
+            $("#suffix").val("");
 
             $("#sql_class_name").val("");
             $("#sql_pojo_name").val("");

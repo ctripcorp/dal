@@ -4,7 +4,7 @@ package test.${host.getPackageName()};
 import ${field};
 #end
 import ${host.getPackageName()}.dao.${host.getClassName()}Dao;
-import ${host.getPackageName()}.entity.${host.getClassName()};
+import ${host.getPackageName()}.entity.*;
 
 import java.sql.SQLException;
 

@@ -3,7 +3,7 @@ package ${host.getPackageName()}.dao;
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
-import ${host.getPackageName()}.entity.${host.getClassName()};
+import ${host.getPackageName()}.entity.*;
 
 import com.ctrip.platform.dal.dao.helper.*;
 

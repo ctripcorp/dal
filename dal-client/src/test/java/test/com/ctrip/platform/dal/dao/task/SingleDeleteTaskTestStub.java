@@ -23,7 +23,7 @@ public class SingleDeleteTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int result = test.execute(hints, getAllMap().get(0));
+			int result = test.execute(hints, getAllMap().get(0), null);
 //			assertEquals(1, result);
 			assertEquals(2, getCount());
 		} catch (SQLException e) {

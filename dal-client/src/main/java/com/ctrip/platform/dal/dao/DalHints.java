@@ -367,6 +367,15 @@ public class DalHints {
 		return is(DalHintEnum.updateNullField);
 	}
 	
+	public DalHints insertNullField() {
+		set(DalHintEnum.insertNullField);
+		return this;
+	}
+	
+	public boolean isInsertNullField() {
+		return is(DalHintEnum.insertNullField);
+	}
+	
 	public DalHints retrieveAllResultsFromSp() {
 		return set(DalHintEnum.retrieveAllSpResults);
 	}

@@ -80,8 +80,20 @@ public class StatementParameter implements Comparable<StatementParameter> {
 		return parameter;
 	}
 	
+	public static StatementParameter registerInOut(int index, int sqlType, Object value) {
+		StatementParameter parameter = new StatementParameter(index, sqlType, value);
+		parameter.setDirection(ParameterDirection.InputOutput);
+		return parameter;
+	}
+	
 	public static StatementParameter registerOut(String name, int sqlType) {
 		StatementParameter parameter = new StatementParameter(name, sqlType, null);
+		parameter.setDirection(ParameterDirection.Output);
+		return parameter;
+	}
+	
+	public static StatementParameter registerOut(int index, int sqlType) {
+		StatementParameter parameter = new StatementParameter(index, sqlType, null);
 		parameter.setDirection(ParameterDirection.Output);
 		return parameter;
 	}

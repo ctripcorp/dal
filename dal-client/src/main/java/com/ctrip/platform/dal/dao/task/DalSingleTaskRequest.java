@@ -71,7 +71,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 
 	@Override
 	public Callable<int[]> createTask() {
-		return new SingleTaskCallable<>(hints, daoPojos, task);
+		return new SingleTaskCallable<>(hints, daoPojos, rawPojos, task);
 	}
 
 	@Override
@@ -88,11 +88,13 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 	private static class SingleTaskCallable<T> implements Callable<int[]> {
 		private DalHints hints;
 		private List<Map<String, ?>> daoPojos;
+		private List<T> rawPojos;
 		private SingleTask<T> task;
 
-		public SingleTaskCallable(DalHints hints, List<Map<String, ?>> daoPojos, SingleTask<T> task){
+		public SingleTaskCallable(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos, SingleTask<T> task){
 			this.hints = hints;
 			this.daoPojos = daoPojos;
+			this.rawPojos = rawPojos;
 			this.task = task;
 		}
 
@@ -103,7 +105,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 			for (int i = 0; i < daoPojos.size(); i++) {
 				DalWatcher.begin();// TODO check if we needed
 				try {
-					counts[i] = task.execute(localHints, daoPojos.get(i));
+					counts[i] = task.execute(localHints, daoPojos.get(i), rawPojos.get(i));
 				} catch (SQLException e) {
 					hints.handleError("Error when execute single pojo operation", e);
 				}

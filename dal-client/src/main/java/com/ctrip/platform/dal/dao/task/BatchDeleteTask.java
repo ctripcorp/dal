@@ -12,7 +12,7 @@ public class BatchDeleteTask<T> extends AbstractIntArrayBulkTask<T> {
 	private static final String TMPL_SQL_DELETE = "DELETE FROM %s WHERE %s";
 
 	@Override
-	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		List<String> pkNames = Arrays.asList(parser.getPrimaryKeyNames());
 

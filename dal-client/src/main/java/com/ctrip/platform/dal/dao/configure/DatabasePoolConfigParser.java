@@ -103,6 +103,20 @@ public class DatabasePoolConfigParser {
 	public DatabasePoolConifg getDatabasePoolConifg(String name) {
 		return poolConfigs.get(name);
 	}
+
+	public boolean contains(String name) {
+		return poolConfigs.containsKey(name);
+	}
+
+	public void copyDatabasePoolConifg(String sampleName, String newName) {
+		DatabasePoolConifg oldConfig = poolConfigs.get(sampleName);
+		
+		DatabasePoolConifg newConfig = new DatabasePoolConifg();
+		newConfig.setName(newName);
+		newConfig.setPoolProperties(oldConfig.getPoolProperties());
+		newConfig.setOption(oldConfig.getOption());
+		poolConfigs.put(newName, newConfig);
+	}
 		
 	public String getDatabaseConfigLocation() {
 		return databaseConfigLocation;

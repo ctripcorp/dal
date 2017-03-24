@@ -17,7 +17,7 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 	}	
 
 	@Override
-	public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
+	public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 

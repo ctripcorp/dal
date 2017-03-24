@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.task;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;

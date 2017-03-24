@@ -50,7 +50,7 @@ public class DalBulkTaskRequestTest {
 		}
 
 		@Override
-		public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled) throws SQLException {
+		public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, List<TestPojo> raw) throws SQLException {
 			return shaffled.size();
 		}
 

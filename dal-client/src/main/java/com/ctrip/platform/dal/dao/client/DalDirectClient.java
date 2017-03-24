@@ -327,7 +327,10 @@ public class DalDirectClient implements DalClient {
 
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		for (StatementParameter parameter : callParameters) {
-			Object value = statement.getObject(parameter.getName());
+			Object value = parameter.getName() == null ?
+					statement.getObject(parameter.getIndex()):
+					statement.getObject(parameter.getName());
+
 			parameter.setValue(value);
 			if (value instanceof ResultSet) {
 				value = parameter.getResultSetExtractor().extract(statement.getResultSet());

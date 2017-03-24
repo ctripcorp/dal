@@ -46,7 +46,7 @@ public class DalSingleTaskRequestTest {
 		}
 
 		@Override
-		public int execute(DalHints hints, Map<String, ?> daoPojo)
+		public int execute(DalHints hints, Map<String, ?> daoPojo, Integer a)
 				throws SQLException {
 			return (Integer)daoPojo.values().iterator().next();
 		}

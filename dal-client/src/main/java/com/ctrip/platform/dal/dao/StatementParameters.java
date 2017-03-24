@@ -48,6 +48,14 @@ public class StatementParameters {
 		return add(StatementParameter.registerOut(name, sqlType));
 	}
 	
+	public StatementParameters registerInOut(int index, int sqlType, Object value) {
+		return add(StatementParameter.registerInOut(index, sqlType, value));
+	}
+	
+	public StatementParameters registerOut(int index, int sqlType) {
+		return add(StatementParameter.registerOut(index, sqlType));
+	}
+	
 	public StatementParameters setSensitive(int index, int sqlType, Object value) {
 		return add(new StatementParameter(index, sqlType, value).setSensitive(true));
 	}

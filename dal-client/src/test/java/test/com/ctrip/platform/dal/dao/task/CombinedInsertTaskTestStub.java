@@ -42,7 +42,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
 		try {
-			test.execute(hints, getAllMap());
+			test.execute(hints, getAllMap(), null);
 			if(enableKeyHolder){
 				// You have to merge before get size
 				assertEquals(3, hints.getKeyHolder().size());
@@ -71,7 +71,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 				((Map)pojo).put("id", new Integer(i++));
 			}
 			
-			test.execute(hints, pojos);
+			test.execute(hints, pojos, null);
 			assertEquals(6, getCount());
 			
 			pojos = getAllMap();
@@ -109,7 +109,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
 		try {
-			test.execute(hints, getAllMap());
+			test.execute(hints, getAllMap(), null);
 			if(enableKeyHolder){
 				// You have to merge before get size
 				assertEquals(3, hints.getKeyHolder().size());

@@ -166,6 +166,11 @@ public enum DalHintEnum {
 	isolationLevel,
 	
 	/*
+	 * used in DalTableDao, when set the insert field can be null value.
+	 */
+	insertNullField,
+	
+	/*
 	 * used in DalTableDao, when set the update field can be null value.
 	 */
 	updateNullField,

@@ -51,7 +51,7 @@ public class DefaultTaskFactory implements DalTaskFactory {
 		/**
 		 * Oracle has different way of INSERT VALUES, We do not support it yet.
 		 */
-		if(DatabaseCategory.Oracle== getDbCategory(parser))
+		if(DatabaseCategory.Oracle == getDbCategory(parser))
 			return null;
 			
 		CombinedInsertTask<T> combinedInsertTask = new CombinedInsertTask<T>();

@@ -110,22 +110,32 @@ public class DalStatementCreator {
 				statement.setObject(parameter.getIndex(), null);
 			}
 			else{
-				statement.setNull(parameter.getName(), parameter.getSqlType());
+				if(parameter.getName() == null)
+					statement.setNull(parameter.getIndex(), parameter.getSqlType());
+				else
+					statement.setNull(parameter.getName(), parameter.getSqlType());
 			}
 		} else {
 			if(parameter.isDefaultType()){
 				statement.setObject(parameter.getIndex(), parameter.getValue());
 			}
 			else{
-				statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+				if(parameter.getName() == null)
+					statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+				else
+					statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
 			}
 		}
 	}
 	
 	private void registerOutParameters(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
-			if(parameter.isOutParameter())
-				statement.registerOutParameter(parameter.getName(), parameter.getSqlType());
+			if(parameter.isOutParameter()) {
+				if(parameter.getName() == null)
+					statement.registerOutParameter(parameter.getIndex(), parameter.getSqlType());
+				else
+					statement.registerOutParameter(parameter.getName(), parameter.getSqlType());
+			}
 		}
 	}
 	

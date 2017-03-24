@@ -19,7 +19,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
 	@Override
-	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 

@@ -31,7 +31,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int result = test.execute(hints, getAllMap().get(0));
+			int result = test.execute(hints, getAllMap().get(0), null);
 //			assertEquals(1, result);
 			assertEquals(3+1, getCount());
 		} catch (SQLException e) {
@@ -52,7 +52,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 
 			Map<String, ?> pojo = getAllMap().get(0);
 			((Map)pojo).put("id", new Integer(210));
-			int result = test.execute(hints, pojo);
+			int result = test.execute(hints, pojo, null);
 
 			assertEquals(3+1, getCount());
 
@@ -79,7 +79,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 		test.initialize(parser);
 		
 		DalHints hints = new DalHints();
-		int result = test.execute(hints, getAllMap().get(0));
+		int result = test.execute(hints, getAllMap().get(0), null);
 
 		assertEquals(3+1, getCount());
 		

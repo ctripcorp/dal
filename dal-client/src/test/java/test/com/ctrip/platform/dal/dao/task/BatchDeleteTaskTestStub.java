@@ -32,7 +32,7 @@ public class BatchDeleteTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int[] result = test.execute(hints, getAllMap());
+			int[] result = test.execute(hints, getAllMap(), null);
 			assertEquals(3, result.length);
 			assertEquals(0, getCount());
 		} catch (SQLException e) {

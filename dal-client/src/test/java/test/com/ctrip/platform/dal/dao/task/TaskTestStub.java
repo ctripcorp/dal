@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class TaskTestStub {
 	private String dbName;
@@ -30,10 +31,19 @@ public class TaskTestStub {
 		return new ClientTestDalParser(dbName);
 	}
 	
+	Map<String, ?> getFields(Object o) throws SQLException {
+		return new DalDefaultJpaParser(o.getClass()).getFields(o);
+	}
+	
 	public DalTableDao<ClientTestModel> getDao() {
 		return dao;
 	}
 	
+	public <T> DalTableDao<T> getDao(Class<T> clazz) throws SQLException {
+		return new DalTableDao<T>(clazz);
+	}
+
+		
 	public DalClient getClient() {
 		return client;
 	}
@@ -44,6 +54,10 @@ public class TaskTestStub {
 	
 	public List<ClientTestModel> getAll() throws SQLException {
 		return dao.query("1=1", new StatementParameters(), new DalHints());
+	}
+	
+	public <T> List<T> getAll(Class<T> clazz) throws SQLException {
+		return new DalTableDao<T>(clazz).query("1=1", new StatementParameters(), new DalHints());
 	}
 	
 	public Map<Integer, Map<String, ?>> getAllMap() throws SQLException {

@@ -13,7 +13,7 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 	
 	@Override
-	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
+	public int execute(DalHints hints, Map<String, ?> fields, T rawPojo) throws SQLException {
 		if (fields.size() == 0)
 			throw new DalException(ErrorCode.ValidateFieldCount);
 		Map<String, ?> pks = getPrimaryKeys(fields);

@@ -146,7 +146,7 @@ public class PartialQueryQueryDaoTest {
 				cityIds);
 		builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
 
-		return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.partialQuery("PeopleID", "Name", "", "CityID", "ProvinceID"));
+		return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.partialQuery("PeopleID", "Name", "CityID", "ProvinceID"));
 	}
 
 	@Test

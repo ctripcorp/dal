@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleTask<T> {
 	
 	@Override
-	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
+	public int execute(DalHints hints, Map<String, ?> fields, T rawPojo) throws SQLException {
 		if(hints.isIdentityInsertDisabled())
 			removeAutoIncrementPrimaryFields(fields);
 		

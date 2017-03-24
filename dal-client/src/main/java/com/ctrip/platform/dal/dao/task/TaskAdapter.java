@@ -229,6 +229,37 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		}
 	}
 
+	/**
+	 * According to DBA, call SP by parameter name will invoke sp_sproc_columns to get SP metadata,  this is a 
+	 * very costly operation. To avoid the cost, it is required to call sp by parameter index instead of name
+	 */
+	public void addParametersByIndex(StatementParameters parameters,
+			Map<String, ?> entries) {
+		int index = parameters.size() + 1;
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			addParameterByIndex(parameters, index++, entry.getKey(), entry.getValue());
+		}
+	}
+
+	/**
+	 * According to DBA, call SP by parameter name will invoke sp_sproc_columns to get SP metadata,  this is a 
+	 * very costly operation. To avoid the cost, it is required to call sp by parameter index instead of name
+	 */
+	public void addParametersByIndex(StatementParameters parameters,
+			Map<String, ?> entries, String[] validColumns) {
+		int index = parameters.size() + 1;
+		for(String column : validColumns){
+			addParameterByIndex(parameters, index++, column, entries.get(column));
+		}
+	}
+
+	public void addParameterByIndex(StatementParameters parameters, int index, String columnName, Object value) {
+		if(isSensitive(columnName))
+			parameters.setSensitive(index, getColumnType(columnName), value);
+		else
+			parameters.set(index, getColumnType(columnName), value);
+	}
+
 	public void addParameter(StatementParameters parameters, int index, String columnName, Object value) {
 		if(isSensitive(columnName))
 			parameters.setSensitive(index, columnName, getColumnType(columnName), value);
@@ -352,7 +383,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	}
 	
 	public Map<String, ?> getPrimaryKeys(Map<String, ?> fields) {
-		Map<String, Object> pks = new HashMap<>();
+		Map<String, Object> pks = new LinkedHashMap<>();
 		for(String pkName: parser.getPrimaryKeyNames())
 			pks.put(pkName, fields.get(pkName));
 		return pks;

@@ -57,7 +57,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			for(ClientTestModel model: pojos)
 				model.setAddress("1122334455");
 			
-			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 			assertEquals(3, result.length);
 			assertArrayEquals(new int[]{1, 1 , 1}, result);
 			assertEquals(3, getCount());
@@ -90,7 +90,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 				model.setTableIndex(null);
 			}
 			
-			test.execute(hints, test.getPojosFieldsMap(pojos));
+			test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 			fail();
 		} catch (SQLException e) {
 			assertEquals(e.getMessage(), ErrorCode.ValidateFieldCount.getMessage());
@@ -114,7 +114,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 				model.setTableIndex(null);
 			}
 			
-			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 			assertEquals(3, result.length);
 			assertEquals(3, getCount());
 			
@@ -151,7 +151,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 				model.setTableIndex(null);
 			}
 			
-			int[] result = test.execute(hints.updateNullField(), test.getPojosFieldsMap(pojos));
+			int[] result = test.execute(hints.updateNullField(), test.getPojosFieldsMap(pojos), pojos);
 			assertEquals(3, result.length);
 			assertEquals(3, getCount());
 			
@@ -199,7 +199,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 				i++;
 			}
 			
-			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 			assertArrayEquals(new int[]{1, 1 , 1}, result);
 
 			i = 0;
@@ -247,7 +247,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 		}
 		
 		try {
-			test.execute(hints, test.getPojosFieldsMap(pojos));
+			test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 			fail();
 		} catch (SQLException e) {
 			assertEquals(ErrorCode.ValidateVersion.getMessage(), e.getMessage());
@@ -271,7 +271,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			model.setLastChanged(t);
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{0, 0 , 0}, result);
 		
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
@@ -296,7 +296,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			oldVer[i++] = model.getLastChanged().getTime();
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
@@ -366,7 +366,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			oldValue[i++] = model.getTableIndex();
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
@@ -432,7 +432,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			model.setAddress("1122334455");
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
@@ -456,7 +456,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			model.setAddress("1122334455");
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
@@ -508,7 +508,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			model.setAddress("1122334455");
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());
@@ -560,7 +560,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			model.setAddress("1122334455");
 		}
 		
-		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos));
+		int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
 		assertArrayEquals(new int[]{1, 1, 1}, result);
 
 		pojos = dao.query("1=1", new StatementParameters(), new DalHints());

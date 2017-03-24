@@ -70,10 +70,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		// If only one shard is shuffled
 		if(shuffled != null) {
 			if(shuffled.size() == 0)
-				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), task);
+				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), rawPojos, task);
 
 			String shard = shuffled.keySet().iterator().next();
-			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), task);
+			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), rawPojos, task);
 		}
 	
 		// Convert to index map
@@ -81,7 +81,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		for(int i = 0; i < daoPojos.size(); i++)
 			daoPojosMap.put(i, daoPojos.get(i));
 
-		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, task);
+		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, rawPojos, task);
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			dbShardMerger.recordPartial(shard, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 			
 			tasks.put(shard, new BulkTaskCallable<>(
-					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task));
+					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), rawPojos, task));
 		}
 
 		return tasks; 
@@ -120,13 +120,15 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		private String rawTableName;
 		private DalHints hints;
 		private Map<Integer, Map<String, ?>> shaffled;
+		private List<T> rawPojos;
 		private BulkTask<K, T> task;
 
-		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTask<K, T> task){
+		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, List<T> rawPojos, BulkTask<K, T> task){
 			this.logicDbName = logicDbName;
 			this.rawTableName = rawTableName;
 			this.hints = hints;
 			this.shaffled = shaffled;
+			this.rawPojos = rawPojos;
 			this.task = task;
 		}
 
@@ -137,7 +139,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			if(isTableShardingEnabled(logicDbName, rawTableName)) {
 				return executeByTableShards();
 			}else{
-				return task.execute(hints, shaffled);
+				return task.execute(hints, shaffled, rawPojos);
 			}
 		}
 
@@ -158,7 +160,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 				tmpHints.inTableShard(curTableShardId);
 				merger.recordPartial(curTableShardId, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 				
-				K partial = task.execute(tmpHints, pojosInShard);
+				K partial = task.execute(tmpHints, pojosInShard, rawPojos);
 				merger.addPartial(curTableShardId, partial);
 				
 			}

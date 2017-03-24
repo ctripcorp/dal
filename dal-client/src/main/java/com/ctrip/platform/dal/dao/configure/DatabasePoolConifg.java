@@ -39,6 +39,9 @@ public class DatabasePoolConifg {
 	public PoolProperties getPoolProperties() {
 		return poolProperties;
 	}
+	public void setPoolProperties(PoolProperties poolProperties) {
+		this.poolProperties = poolProperties;
+	}
 	public String getOption() {
 		return option;
 	}

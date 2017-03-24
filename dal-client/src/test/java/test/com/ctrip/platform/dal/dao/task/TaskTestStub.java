@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import test.com.ctrip.platform.dal.dao.task.SingleUpdateTaskTestStub.UpdatableVersionModel;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -32,7 +34,7 @@ public class TaskTestStub {
 	}
 	
 	Map<String, ?> getFields(Object o) throws SQLException {
-		return new DalDefaultJpaParser(o.getClass()).getFields(o);
+		return new DalDefaultJpaParser(o.getClass(), getDbName()).getFields(o);
 	}
 	
 	public DalTableDao<ClientTestModel> getDao() {
@@ -40,7 +42,7 @@ public class TaskTestStub {
 	}
 	
 	public <T> DalTableDao<T> getDao(Class<T> clazz) throws SQLException {
-		return new DalTableDao<T>(clazz);
+		return new DalTableDao<T>(new DalDefaultJpaParser<>(clazz, getDbName()));
 	}
 
 		
@@ -57,7 +59,7 @@ public class TaskTestStub {
 	}
 	
 	public <T> List<T> getAll(Class<T> clazz) throws SQLException {
-		return new DalTableDao<T>(clazz).query("1=1", new StatementParameters(), new DalHints());
+		return new DalTableDao<T>(new DalDefaultJpaParser<>(clazz, getDbName())).query("1=1", new StatementParameters(), new DalHints());
 	}
 	
 	public Map<Integer, Map<String, ?>> getAllMap() throws SQLException {

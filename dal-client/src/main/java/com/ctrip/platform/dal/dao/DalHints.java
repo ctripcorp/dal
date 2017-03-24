@@ -367,6 +367,15 @@ public class DalHints {
 		return is(DalHintEnum.updateNullField);
 	}
 	
+	public DalHints updateUnchangedField() {
+		set(DalHintEnum.updateUnchangedField);
+		return this;
+	}
+
+	public boolean isUpdateUnchangedField() {
+		return is(DalHintEnum.updateUnchangedField);
+	}
+		
 	public DalHints insertNullField() {
 		set(DalHintEnum.insertNullField);
 		return this;

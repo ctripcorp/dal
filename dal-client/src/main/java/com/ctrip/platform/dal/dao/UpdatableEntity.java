@@ -4,20 +4,28 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class UpdatableEntity implements DalPojo {
-	private Set<String> dirtyFlags = new HashSet<>();
+	private Set<String> updatedColumns = new HashSet<>();
 	public UpdatableEntity() {
 		
 	}
 	
 	public void update(String column) {
-		dirtyFlags.add(column);
+		updatedColumns.add(column);
+	}
+	
+	public void clear(String column) {
+		updatedColumns.remove(column);
+	}
+	
+	public boolean isUpdated(String column) {
+		return updatedColumns.contains(column);
 	}
 	
 	public void reset() {
-		dirtyFlags.clear();
+		updatedColumns.clear();
 	}
 	
 	public Set<String> getUpdatedColumns() {
-		return dirtyFlags;
+		return updatedColumns;
 	}
 }

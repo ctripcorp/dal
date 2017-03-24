@@ -27,6 +27,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.UpdatableEntity;
 
 public class TaskAdapter<T> implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
@@ -296,6 +297,12 @@ public class TaskAdapter<T> implements DaoTask<T> {
 				fields.remove(columnName);
 		}
 		return fields;
+	}
+	
+	public Set<String> getUpdatedColumns(T rawPojo) {
+		return rawPojo instanceof UpdatableEntity ?
+				((UpdatableEntity)rawPojo).getUpdatedColumns() :
+					(Set<String>)Collections.EMPTY_SET;
 	}
 
 	public Set<String> filterColumns(DalHints hints) {

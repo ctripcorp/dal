@@ -175,6 +175,11 @@ public enum DalHintEnum {
 	 */
 	updateNullField,
 	
+	/*
+	 * used in DalTableDao, when set the update field can be unchanged value after select from DB.
+	 */
+	updateUnchangedField,
+	
 	/**
 	 * Indicate the cud operation will async execute
 	 */

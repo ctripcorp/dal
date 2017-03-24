@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -23,7 +24,10 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 
-		Map<String, Boolean> pojoFieldStatus = filterUpdateColumnNames(hints, daoPojos);
+		Map<String, Boolean> pojoFieldStatus = rawPojos.size() > 0 && rawPojos.get(0) instanceof UpdatableEntity ?
+				pojoFieldStatus = filterUpdateColumnNames(hints, daoPojos) :
+					filterColumnsForUpdateableEntity(hints, daoPojos, rawPojos);
+		
 		if(pojoFieldStatus.size() == 0)
 			throw new DalException(ErrorCode.ValidateFieldCount);
 		
@@ -44,6 +48,54 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		
 		int[] result = client.batchUpdate(batchUpdateSql, parametersList, hints);
 		return result;
+	}
+
+	private Map<String, Boolean> filterColumnsForUpdateableEntity(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
+		Set<String> qualifiedColumns = filterColumns(hints);
+		Map<String, Boolean> columnStatus = new HashMap<String, Boolean>();
+		for(String column: qualifiedColumns)
+			columnStatus.put(column, false);
+		
+		if(hints.isUpdateNullField() && hints.isUpdateUnchangedField()) {
+			return columnStatus;
+		}
+		
+		String[] columnsToCheck = qualifiedColumns.toArray(new String[qualifiedColumns.size()]);
+		Set<String> nullFields = new HashSet<>(qualifiedColumns);
+		Set<String> notNullFields = new HashSet<>(nullFields);
+		Set<String> notUpdatedFields = new HashSet<>(qualifiedColumns);
+		
+		for (Integer index :daoPojos.keySet()) {
+			if(notNullFields.isEmpty() && nullFields.isEmpty() && notUpdatedFields.isEmpty())
+				break;
+			
+			notUpdatedFields.removeAll(getUpdatedColumns(rawPojos.get(index)));
+			
+			Map<String, ?> pojo = daoPojos.get(index);
+			for (int i = 0; i < columnsToCheck.length; i++) {
+				String colName = columnsToCheck[i];
+				boolean isNull = pojo.get(colName) == null;
+				
+				Set<String> check = isNull ? notNullFields : nullFields;
+				
+				if(!check.isEmpty() && check.contains(colName))
+					check.remove(colName);
+			}
+		}
+		
+		// Combine both null fields and un-updated fields
+		nullFields.addAll(notUpdatedFields);
+		
+		for(String nullField: nullFields)
+			columnStatus.remove(nullField);
+		
+		Set<String> remain = new HashSet<>(columnStatus.keySet());
+		remain.removeAll(notNullFields);
+		
+		for(String maybeNullField: remain)
+			columnStatus.put(maybeNullField, true);
+
+		return columnStatus;
 	}
 
 	private Map<String, Boolean> filterUpdateColumnNames(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws DalException {

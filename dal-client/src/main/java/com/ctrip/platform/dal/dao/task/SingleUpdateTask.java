@@ -20,7 +20,7 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		
 		Object version = getVersion(fields);
 		
-		filterUpdatableFields(hints, fields);
+		filterUpdatableFields(hints, fields, getUpdatedColumns(rawPojo));
 		
 		String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
@@ -43,18 +43,22 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		return version;
 	}
 	
-	private void filterUpdatableFields(DalHints hints, Map<String, ?> fields) throws DalException {
+	private void filterUpdatableFields(DalHints hints, Map<String, ?> fields, Set<String> updatedColumns) throws DalException {
 		Set<String> updatableColumns = filterColumns(hints);
 			
 		// Remove null value when hints is not DalHintEnum.updateNullField or
+		// Or dirty flag is not set but need to update
 		// primary key or not updatable
 		for (String column : parser.getColumnNames()) {
-			if ((fields.get(column) == null && !hints.isUpdateNullField())
-					|| isPrimaryKey(column) || !updatableColumns.contains(column))
+			if (
+					(fields.get(column) == null && !hints.isUpdateNullField() || 
+					(!updatedColumns.contains(column) && hints.isUpdateUnchangedField())) || 
+					isPrimaryKey(column) || !updatableColumns.contains(column))
+				
 				fields.remove(column);
 		}
 	}
-
+	
 	private String buildUpdateSql(String tableName, Map<String, ?> fields, DalHints hints) {
 		String columns = String.format(
 				combine(TMPL_SET_VALUE, fields.size(), COLUMN_SEPARATOR),

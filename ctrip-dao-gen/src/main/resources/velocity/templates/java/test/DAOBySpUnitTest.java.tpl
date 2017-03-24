@@ -1,4 +1,4 @@
-package ${host.getPackageName()};
+package test.${host.getPackageName()};
 
 #foreach( $field in ${host.getTestImports()} )
 import ${field};

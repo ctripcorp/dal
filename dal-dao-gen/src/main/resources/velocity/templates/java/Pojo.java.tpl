@@ -1,4 +1,4 @@
-package ${host.getPackageName()};
+package ${host.getPackageName()}.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

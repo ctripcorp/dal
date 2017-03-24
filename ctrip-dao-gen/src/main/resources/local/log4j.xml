@@ -6,7 +6,7 @@
             <param name="ConversionPattern" value="%d{yyyy-MM-dd hh:mm:ss}:%p %c:%L - %m%n"/>
         </layout>
         <filter class="org.apache.log4j.varia.LevelRangeFilter">
-            <param name="LevelMax" value="INFO"/>
+            <param name="LevelMax" value="ERROR"/>
             <param name="LevelMin" value="INFO"/>
         </filter>
     </appender>

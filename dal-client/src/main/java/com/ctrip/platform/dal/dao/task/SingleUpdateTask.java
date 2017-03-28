@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -20,7 +21,10 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		
 		Object version = getVersion(fields);
 		
-		filterUpdatableFields(hints, fields, getUpdatedColumns(rawPojo));
+		if(rawPojo instanceof UpdatableEntity)
+			filterNullColumns(hints, fields);
+		else
+			filterUpdatableEntity(hints, fields, getUpdatedColumns(rawPojo));
 		
 		String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
@@ -43,18 +47,26 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		return version;
 	}
 	
-	private void filterUpdatableFields(DalHints hints, Map<String, ?> fields, Set<String> updatedColumns) throws DalException {
+	private void filterNullColumns(DalHints hints, Map<String, ?> fields) throws DalException {
 		Set<String> updatableColumns = filterColumns(hints);
 			
 		// Remove null value when hints is not DalHintEnum.updateNullField or
-		// Or dirty flag is not set but need to update
 		// primary key or not updatable
 		for (String column : parser.getColumnNames()) {
-			if (
-					(fields.get(column) == null && !hints.isUpdateNullField() || 
-					(!updatedColumns.contains(column) && hints.isUpdateUnchangedField())) || 
+			if ((fields.get(column) == null && !hints.isUpdateNullField())
+					|| isPrimaryKey(column) || !updatableColumns.contains(column))
+				fields.remove(column);
+		}
+	}
+	
+	private void filterUpdatableEntity(DalHints hints, Map<String, ?> fields, Set<String> updatedColumns) throws DalException {
+		Set<String> updatableColumns = filterColumns(hints);
+			
+		// Dirty flag is not set but need to update
+		// primary key or not updatable
+		for (String column : parser.getColumnNames()) {
+			if (!updatedColumns.contains(column) && !hints.isUpdateUnchangedField() || 
 					isPrimaryKey(column) || !updatableColumns.contains(column))
-				
 				fields.remove(column);
 		}
 	}

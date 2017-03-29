@@ -174,7 +174,7 @@ public class GenTaskByFreeSqlResource {
     }
 
     private int[] getSqlTypes(String params) {
-        if (params == null || "".equalsIgnoreCase(params)) {
+        if (params == null || params.isEmpty()) {
             return new int[0];
         }
         String[] parameters = params.split(";");
@@ -189,12 +189,11 @@ public class GenTaskByFreeSqlResource {
     }
 
     private int[] getTypes(List<Parameter> list) {
-        int length = list.size();
-        if (list == null || length == 0) {
-            return null;
+        if (list == null || list.size() == 0) {
+            return new int[0];
         }
 
-        int[] array = new int[length];
+        int[] array = new int[list.size()];
         int index = 0;
         for (Parameter p : list) {
             array[index] = p.getType();
@@ -205,12 +204,11 @@ public class GenTaskByFreeSqlResource {
     }
 
     private String[] getValues(List<Parameter> list) {
-        int length = list.size();
-        if (list == null || length == 0) {
-            return null;
+        if (list == null || list.size() == 0) {
+            return new String[0];
         }
 
-        String[] array = new String[length];
+        String[] array = new String[list.size()];
         int index = 0;
         for (Parameter p : list) {
             array[index] = p.getValue();
@@ -244,6 +242,9 @@ public class GenTaskByFreeSqlResource {
             String[] parameters = params.split(";");
             if (parameters != null && parameters.length > 0) {
                 for (int i = 0; i < parameters.length; i++) {
+                    if (parameters[i].isEmpty()) {
+                        continue;
+                    }
                     String[] array = parameters[i].split(",");
                     if (array != null && array.length > 0) {
                         String name = array[0];

@@ -22,9 +22,9 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		Object version = getVersion(fields);
 		
 		if(rawPojo instanceof UpdatableEntity)
-			filterNullColumns(hints, fields);
-		else
 			filterUpdatableEntity(hints, fields, getUpdatedColumns(rawPojo));
+		else
+			filterNullColumns(hints, fields);
 		
 		String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 

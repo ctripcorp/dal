@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,11 +12,14 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 	
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields, T rawPojo) throws SQLException {
-		if(hints.isIdentityInsertDisabled())
-			removeAutoIncrementPrimaryFields(fields);
+		Map<Integer, Map<String, ?>> pojoList = new HashMap<Integer, Map<String,?>>();
+		pojoList.put(1, fields);
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, pojoList);
 		
-		String insertSql = buildInsertSql(hints, fields);
+		removeUnqualifiedColumns(fields, unqualifiedColumns);
 
+		String insertSql = buildInsertSql(hints, fields);
+		
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, fields);
 		
@@ -23,23 +27,10 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 	}
 	
 	private String buildInsertSql(DalHints hints, Map<String, ?> fields) throws SQLException {
-		filterFileds(fields);
 		Set<String> remainedColumns = fields.keySet();
 		String cloumns = combineColumns(remainedColumns, COLUMN_SEPARATOR);
-		String values = combine(PLACE_HOLDER, remainedColumns.size(),
-				COLUMN_SEPARATOR);
+		String values = combine(PLACE_HOLDER, remainedColumns.size(), COLUMN_SEPARATOR);
 
-		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns,
-				values);
+		return String.format(TMPL_SQL_INSERT, getTableName(hints, fields), cloumns, values);
 	}
-	
-	private Map<String, ?> filterFileds(Map<String, ?> fields) {
-		for (String columnName : parser.getColumnNames()) {
-			if (fields.get(columnName) == null || notInsertableColumns.contains(columnName))
-				fields.remove(columnName);
-		}
-		
-		return fields;
-	}
-
 }

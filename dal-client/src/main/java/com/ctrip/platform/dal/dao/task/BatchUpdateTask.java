@@ -82,7 +82,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		Set<String> qualifiedColumns = filterColumns(hints);
 		Map<String, Boolean> columnStatus = new HashMap<String, Boolean>();
 		for(String column: qualifiedColumns)
-			columnStatus.put(column, true);
+			columnStatus.put(column, false);
 		
 		if(hints.isUpdateUnchangedField()) {
 			return columnStatus;
@@ -106,8 +106,11 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		for(String unChangedField: unChangedFields)
 			columnStatus.remove(unChangedField);
 		
-		for(String changedField: changedFields)
-			columnStatus.put(changedField, false);
+		Set<String> remain = new HashSet<>(columnStatus.keySet());
+		remain.removeAll(changedFields);
+		
+		for(String maybeChangedField: remain)
+			columnStatus.put(maybeChangedField, true);
 
 		return columnStatus;
 	}
@@ -116,7 +119,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		Set<String> qualifiedColumns = filterColumns(hints);
 		Map<String, Boolean> columnStatus = new HashMap<String, Boolean>();
 		for(String column: qualifiedColumns)
-			columnStatus.put(column, true);
+			columnStatus.put(column, false);
 		
 		if(hints.isUpdateNullField()) {
 			return columnStatus;
@@ -145,8 +148,11 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		for(String nullField: nullFields)
 			columnStatus.remove(nullField);
 		
-		for(String notNullField: notNullFields)
-			columnStatus.put(notNullField, false);
+		Set<String> remain = new HashSet<>(columnStatus.keySet());
+		remain.removeAll(notNullFields);
+		
+		for(String maybeNullField: remain)
+			columnStatus.put(maybeNullField, true);
 
 		return columnStatus;
 	}

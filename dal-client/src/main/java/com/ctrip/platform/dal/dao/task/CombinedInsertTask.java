@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
@@ -21,23 +23,25 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
-		List<String> usedValidColumnsForInsert = hints.isIdentityInsertDisabled() ? validColumnsForInsert: validColumnsForInsertWithId;
-		String usedColumnsForInsert = hints.isIdentityInsertDisabled() ? columnsForInsert: columnsForInsertWithId;
-
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos);
+		
+		List<String> finalInsertableColumns = buildValidColumnsForInsert(unqualifiedColumns);
+		
+		String insertColumns = combineColumns(finalInsertableColumns, COLUMN_SEPARATOR);
+		
 		int startIndex = 1;
 		for (Integer index :daoPojos.keySet()) {
-			Map<String, ?> vfields = daoPojos.get(index);
+			Map<String, ?> pojo = daoPojos.get(index);
 			
-			if(hints.isIdentityInsertDisabled())
-				removeAutoIncrementPrimaryFields(vfields);
+			removeUnqualifiedColumns(pojo, unqualifiedColumns);
 			
-			int paramCount = addParameters(startIndex, parameters, vfields, usedValidColumnsForInsert);
+			int paramCount = addParameters(startIndex, parameters, pojo, finalInsertableColumns);
 			startIndex += paramCount;
 			values.append(String.format("(%s),", combine("?", paramCount, ",")));
 		}
 
 		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
-				getTableName(hints), usedColumnsForInsert,
+				getTableName(hints), insertColumns,
 				values.substring(0, values.length() - 2) + ")");
 
 		KeyHolder keyHolder = hints.getKeyHolder();

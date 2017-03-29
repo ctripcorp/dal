@@ -191,7 +191,7 @@ public class GenTaskByFreeSqlResource {
     private int[] getTypes(List<Parameter> list) {
         int length = list.size();
         if (list == null || length == 0) {
-            return null;
+            return new int[0];
         }
 
         int[] array = new int[length];
@@ -207,7 +207,7 @@ public class GenTaskByFreeSqlResource {
     private String[] getValues(List<Parameter> list) {
         int length = list.size();
         if (list == null || length == 0) {
-            return null;
+            return new String[0];
         }
 
         String[] array = new String[length];
@@ -244,6 +244,9 @@ public class GenTaskByFreeSqlResource {
             String[] parameters = params.split(";");
             if (parameters != null && parameters.length > 0) {
                 for (int i = 0; i < parameters.length; i++) {
+                    if (parameters[i].isEmpty()) {
+                        continue;
+                    }
                     String[] array = parameters[i].split(",");
                     if (array != null && array.length > 0) {
                         String name = array[0];

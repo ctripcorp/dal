@@ -28,8 +28,6 @@ public class ShardedIntArrayResultMerger implements BulkTaskResultMerger<int[]>{
 
 	@Override
 	public int[] merge() throws SQLException {
-		int count = 0;
-		
 		int[] affectedRowsList = new int[affectedRowsMap.size()];
 		
 		int i = 0;

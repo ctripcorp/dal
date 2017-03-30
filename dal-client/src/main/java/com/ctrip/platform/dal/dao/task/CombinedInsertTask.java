@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +22,7 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
-		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos);
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
 		
 		List<String> finalInsertableColumns = buildValidColumnsForInsert(unqualifiedColumns);
 		

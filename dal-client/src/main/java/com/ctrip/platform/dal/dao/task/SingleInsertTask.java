@@ -1,7 +1,9 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,8 +15,12 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields, T rawPojo) throws SQLException {
 		Map<Integer, Map<String, ?>> pojoList = new HashMap<Integer, Map<String,?>>();
+		List<T> rawPojos = new ArrayList<>();
+		
 		pojoList.put(1, fields);
-		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, pojoList);
+		rawPojos.add(rawPojo);
+		
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, pojoList, rawPojos);
 		
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
 

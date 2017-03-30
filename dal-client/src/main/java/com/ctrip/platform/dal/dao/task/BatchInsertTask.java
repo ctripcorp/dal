@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,7 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		
-		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos);
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
 		
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> pojo = daoPojos.get(index);

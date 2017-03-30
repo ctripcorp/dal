@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 public class InsertTaskAdapter<T> extends TaskAdapter<T> {
@@ -60,16 +61,52 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		return finalalidColumnsForInsert;
 	}
 	
-	public Set<String> filterUnqualifiedColumns(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws DalException {
+	public Set<String> filterUnqualifiedColumns(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
 		Set<String> unqualifiedColumns = new HashSet<>(notInsertableColumns);
-				
+		
 		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled())
 			unqualifiedColumns.add(parser.getPrimaryKeyNames()[0]);
 
-		if(hints.isInsertNullField()) {
-			return new HashSet<>();
+		if(hints.isInsertUnchangedField() ||hints.isInsertNullField()) {
+			return unqualifiedColumns;
 		}
+
+		if(rawPojos.get(0) instanceof UpdatableEntity)
+			return filterUpdatableEntity(unqualifiedColumns, daoPojos, rawPojos);
+		else
+			return filterNullColumns(unqualifiedColumns, daoPojos);
+	}
+	
+	private Set<String> filterUpdatableEntity(Set<String> unqualifiedColumns, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
+		Set<String> unchangedColumns = new HashSet<>(insertableColumns);
+		String[] columnsToCheck = unchangedColumns.toArray(new String[unchangedColumns.size()]);
+		boolean changed = false;		
+		for (Integer index :daoPojos.keySet()) {
+			if(unchangedColumns.isEmpty())
+				break;
+
+			// You may ask why I am doing the following, it is because of performance
+			if(changed) {
+				columnsToCheck = unchangedColumns.toArray(new String[unchangedColumns.size()]);
+				changed = false;
+			}
+			
+			UpdatableEntity rawPojo = (UpdatableEntity)rawPojos.get(index);
+			Set<String> updatedColumns = rawPojo.getUpdatedColumns();
+			for (String columnToCheck: columnsToCheck) {
+				if(updatedColumns.contains(columnToCheck)) {
+					unchangedColumns.remove(columnToCheck);
+					changed = true;
+				}
+			}
+		}
+
+		unqualifiedColumns.addAll(unchangedColumns);
 		
+		return unqualifiedColumns;
+	}
+	
+	private Set<String> filterNullColumns(Set<String> unqualifiedColumns, Map<Integer, Map<String, ?>> daoPojos) throws DalException {
 		Set<String> nullColumns = new HashSet<>(insertableColumns);
 		String[] columnsToCheck = nullColumns.toArray(new String[nullColumns.size()]);
 		boolean changed = false;

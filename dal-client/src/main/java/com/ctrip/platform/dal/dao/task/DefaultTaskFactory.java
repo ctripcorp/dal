@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.task;
 
-import static com.ctrip.platform.dal.dao.task.DefaultTaskFactory.getDbCategory;
-
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;

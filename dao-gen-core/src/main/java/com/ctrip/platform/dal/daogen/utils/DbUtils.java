@@ -382,6 +382,9 @@ public class DbUtils {
                 String[] parameters = params.split(";");
                 if (parameters != null && parameters.length > 0) {
                     for (String p : parameters) {
+                        if (p.isEmpty()) {
+                            continue;
+                        }
                         String[] tuple = p.split(",");
                         if (tuple != null && tuple.length > 0) {
                             Parameter parameter = new Parameter();

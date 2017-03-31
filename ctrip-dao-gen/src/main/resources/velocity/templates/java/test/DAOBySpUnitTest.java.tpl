@@ -1,8 +1,10 @@
-package ${host.getPackageName()};
+package test.${host.getPackageName()};
 
 #foreach( $field in ${host.getTestImports()} )
 import ${field};
 #end
+import ${host.getPackageName()}.dao.${host.getPojoClassName()}Dao;
+import ${host.getPackageName()}.entity.${host.getPojoClassName()};
 
 import java.sql.SQLException;
 

@@ -1,8 +1,9 @@
-package ${host.getPackageName()};
+package ${host.getPackageName()}.dao;
 
 #foreach( $field in ${host.getDaoImports()} )
 import ${field};
 #end
+import ${host.getPackageName()}.entity.${host.getPojoClassName()};
 
 public class ${host.getDbSetName()}SpDao {
 	private static final String DATA_BASE = "${host.getDbSetName()}";

@@ -3,30 +3,44 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.ctrip.platform</groupId>
+    <parent>
+        <groupId>com.ctrip.framework</groupId>
+        <artifactId>framework-parent</artifactId>
+        <version>1.5.1</version>
+    </parent>
+    <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.6</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
         <file_encoding>UTF-8</file_encoding>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.1.2</version>
+            <version>1.1.6</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.1.2</version>
+            <version>1.1.6</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.1.2</version>
+            <version>1.1.6</version>
             <type>warpath</type>
         </dependency>
         <dependency>
@@ -159,11 +173,11 @@
     </build>
     <distributionManagement>
         <repository>
-            <id>nexus-releases</id>
+            <id>releases</id>
             <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
         </repository>
         <snapshotRepository>
-            <id>nexus-snapshots</id>
+            <id>snapshots</id>
             <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot</url>
         </snapshotRepository>
     </distributionManagement>

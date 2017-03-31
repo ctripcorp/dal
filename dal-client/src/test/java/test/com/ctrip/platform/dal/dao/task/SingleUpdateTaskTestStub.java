@@ -63,6 +63,114 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 	}
 	
 	@Test
+	public void testExecuteUpdatableEntity() throws SQLException {
+		SingleUpdateTask<UpdatableClientTestModel> test = new SingleUpdateTask<>();
+		DalParser<UpdatableClientTestModel> parser = getParser(UpdatableClientTestModel.class);
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		try {
+			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
+			model.setAddress("1122334455");
+			
+			ClientTestModel oldModel = getAll().get(0);
+			oldModel.setQuantity(1000);
+			oldModel.setTableIndex(1000);
+			oldModel.setDbIndex(1000);
+			oldModel.setType(null);// This is ignored by default
+			getDao().update(hints, oldModel);
+			
+			int result = test.execute(hints, parser.getFields(model), model);
+			assertIntEquals(1, result);
+			model = getDao(UpdatableClientTestModel.class).queryByPk(model, new DalHints());
+			assertEquals("1122334455", model.getAddress());
+			assertEquals(1000, model.getQuantity().intValue());
+			assertEquals(1000, model.getDbIndex().intValue());
+			assertEquals(1000, model.getTableIndex().intValue());
+			Assert.assertNotNull(model.getType());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testDaoExecuteUpdatableEntity() throws SQLException {
+		DalTableDao<UpdatableClientTestModel> dao = getDao(UpdatableClientTestModel.class);
+		DalHints hints = new DalHints();
+		
+		try {
+			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
+			model.setAddress("1122334455");
+			
+			ClientTestModel oldModel = getAll().get(0);
+			oldModel.setQuantity(1000);
+			oldModel.setTableIndex(1000);
+			oldModel.setDbIndex(1000);
+			oldModel.setType(null);// This is ignored by default
+			getDao().update(hints, oldModel);
+
+			
+			int result = dao.update(hints, model);
+			assertIntEquals(1, result);
+			model = getDao(UpdatableClientTestModel.class).queryByPk(model, new DalHints());
+			assertEquals("1122334455", model.getAddress());
+			assertEquals("1122334455", model.getAddress());
+			assertEquals(1000, model.getQuantity().intValue());
+			assertEquals(1000, model.getDbIndex().intValue());
+			assertEquals(1000, model.getTableIndex().intValue());
+			Assert.assertNotNull(model.getType());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteUpdatableEntityNoChange() throws SQLException {
+		SingleUpdateTask<UpdatableClientTestModel> test = new SingleUpdateTask<>();
+		DalParser<UpdatableClientTestModel> parser = getParser(UpdatableClientTestModel.class);
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		try {
+			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
+			
+			int result = test.execute(hints, parser.getFields(model), model);
+			assertEquals(0, result);
+			
+			result = getDao(UpdatableClientTestModel.class).update(hints, model);
+			assertEquals(0, result);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testExecuteUpdatableEntityNoChangeWithUpdateNoChangeHints() throws SQLException, InterruptedException {
+		SingleUpdateTask<UpdatableClientTestModel> test = new SingleUpdateTask<>();
+		DalParser<UpdatableClientTestModel> parser = getParser(UpdatableClientTestModel.class);
+		test.initialize(parser);
+		DalHints hints = new DalHints();
+		
+		try {
+			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
+			Timestamp version = model.getLastChanged();
+			System.out.println(version);
+			Thread.sleep(1000);
+			int result = test.execute(hints.updateUnchangedField(), parser.getFields(model), model);
+			assertIntEquals(1, result);
+			model = getDao(UpdatableClientTestModel.class).queryByPk(model, new DalHints());
+			System.out.println(model.getLastChanged());
+			Assert.assertTrue(model.getLastChanged().getTime() > version.getTime());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
 	public void testVersionNotSet() throws SQLException {
 		SingleUpdateTask<UpdatableVersionModel> test = new SingleUpdateTask<>();
 		DalParser<UpdatableVersionModel> parser = new DalDefaultJpaParser<>(UpdatableVersionModel.class, getDbName());

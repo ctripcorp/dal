@@ -73,6 +73,58 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 	}
 	
 	@Test
+	public void testExecuteUpdatableEntity() throws SQLException {
+		BatchUpdateTask<UpdatableClientTestModel> test = new BatchUpdateTask<>();
+		test.initialize(getParser(UpdatableClientTestModel.class));
+		DalHints hints = new DalHints();
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos)
+				model.setAddress("1122334455");
+			
+			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
+			assertEquals(3, result.length);
+			assertArrayEquals(new int[]{1, 1 , 1}, result);
+			assertEquals(3, getCount());
+			
+			pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos)
+				assertEquals("1122334455", model.getAddress());
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testDaoExecuteUpdatableEntity() throws SQLException {
+		DalTableDao<UpdatableClientTestModel> dao = new DalTableDao<>(UpdatableClientTestModel.class, getDbName());
+		DalHints hints = new DalHints();
+
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos)
+				model.setAddress("1122334455");
+			
+			int[] result = dao.batchUpdate(hints,pojos);
+			
+			assertEquals(3, result.length);
+			assertArrayEquals(new int[]{1, 1 , 1}, result);
+			assertEquals(3, getCount());
+			
+			pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos)
+				assertEquals("1122334455", model.getAddress());
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
 	public void testValidteNullField() {
 		BatchUpdateTask<ClientTestModel> test = new BatchUpdateTask<>();
 		test.initialize(getParser());
@@ -80,10 +132,9 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 		
 		try {
 			List<ClientTestModel> pojos = getAll();
-			Short s = null;
 			for(ClientTestModel model: pojos) {
 				model.setAddress(null);
-				model.setType((Short)s);
+				model.setType(null);
 				model.setQuantity(null);
 				model.setDbIndex(null);
 				model.setLastChanged(null);
@@ -94,6 +145,28 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			fail();
 		} catch (SQLException e) {
 			assertEquals(e.getMessage(), ErrorCode.ValidateFieldCount.getMessage());
+		}
+	}
+	
+	@Test
+	public void testValidteUnchangedField() throws SQLException {
+		BatchUpdateTask<UpdatableClientTestModel> test = new BatchUpdateTask<>();
+		test.initialize(getParser(UpdatableClientTestModel.class));
+		DalHints hints = new DalHints();
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
+			fail();
+		} catch (SQLException e) {
+			assertEquals(e.getMessage(), ErrorCode.ValidateFieldCount.getMessage());
+		}
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			test.execute(hints.updateUnchangedField(), test.getPojosFieldsMap(pojos), pojos);
+		} catch (SQLException e) {
+			fail();
 		}
 	}
 	
@@ -126,6 +199,47 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 				assertNotNull(model.getDbIndex());
 				assertNotNull(model.getLastChanged());
 				assertNotNull(model.getTableIndex());
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testIgnorUnchangedField() throws SQLException {
+		BatchUpdateTask<UpdatableClientTestModel> test = new BatchUpdateTask<>();
+		test.initialize(getParser(UpdatableClientTestModel.class));
+		DalHints hints = new DalHints();
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos)
+				model.setAddress("1122334455");
+			
+			List<ClientTestModel> pojos2 = getAll();
+			for(ClientTestModel model: pojos2) {
+				model.setTableIndex(-1);
+				model.setDbIndex(-2);
+				model.setType((short)-1);
+				model.setQuantity(-100);
+			}
+			
+			// Change existing data to other value, so that we can compare after the first pojos get updated
+			int[] result = getDao().batchUpdate(new DalHints(), pojos2);
+
+			// Update with UpdatableEntity with only changed values
+			result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
+			
+			pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos) {
+				assertEquals("1122334455", model.getAddress());
+				assertEquals(-100, model.getQuantity().intValue());
+				assertEquals(-1, model.getType().shortValue());
+				assertEquals(-2, model.getDbIndex().intValue());
+				assertEquals(-1, model.getTableIndex().intValue());
+				assertNotNull(model.getLastChanged());
 			}
 			
 		} catch (SQLException e) {
@@ -172,6 +286,47 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 	}
 	
 	@Test
+	public void testUpdateUnchangedField() throws SQLException {
+		BatchUpdateTask<UpdatableClientTestModel> test = new BatchUpdateTask<>();
+		test.initialize(getParser(UpdatableClientTestModel.class));
+		DalHints hints = new DalHints();
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos) {
+				model.setType((Short)null);
+				model.setQuantity(-100);
+			}
+			
+			List<ClientTestModel> pojos2 = getAll();
+			for(ClientTestModel model: pojos2) {
+				model.setTableIndex(-1);
+				model.setDbIndex(-2);
+			}
+			
+			// Update data
+			int[] result = getDao().batchUpdate(new DalHints(), pojos2);
+			
+			result = test.execute(hints.updateUnchangedField(), test.getPojosFieldsMap(pojos), pojos);
+			
+			pojos = getAll(UpdatableClientTestModel.class);
+			
+			// Check if still old value in UpdatabvleEntity
+			int i = 0;
+			for(UpdatableClientTestModel model: pojos) {
+				assertNull(model.getType());
+				assertEquals(-100, model.getQuantity().intValue());
+				assertEquals(i++, model.getTableIndex().intValue());
+				assertEquals(0, model.getDbIndex().intValue());
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
 	public void testUpdateIfNullField() {
 		BatchUpdateTask<ClientTestModel> test = new BatchUpdateTask<>();
 		test.initialize(getParser());
@@ -206,6 +361,113 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 			pojos = getAll();
 			for(ClientTestModel model: pojos) {
 				assertEquals(1, model.getType().intValue());
+				assertNotNull(model.getLastChanged());
+				
+				if(i%2 == 0)
+					assertEquals(model.getQuantity().intValue(), -100);
+				else
+					assertEquals(model.getQuantity().intValue(), 10 + i);
+				
+				if(i%2 == 1)
+					assertEquals(model.getDbIndex().intValue(), -200);
+				else
+					assertEquals(model.getDbIndex().intValue(), 0);
+				
+				if(i%2 == 1)
+					assertEquals(model.getTableIndex().intValue(), -300);
+				else
+					assertEquals(model.getTableIndex().intValue(), i);
+				i++;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testUpdateIfChangedField() throws SQLException {
+		BatchUpdateTask<UpdatableClientTestModel> test = new BatchUpdateTask<>();
+		test.initialize(getParser(UpdatableClientTestModel.class));
+		DalHints hints = new DalHints();
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			int i = 0;
+			for(UpdatableClientTestModel model: pojos) {
+				model.setType((Short)null);
+				if(i%2 == 0)
+					model.setQuantity(-100);
+				
+				if(i%2 == 1)
+					model.setDbIndex(-200);
+				
+				if(i%2 == 1)
+					model.setTableIndex(-300);
+				i++;
+			}
+			
+			int[] result = test.execute(hints, test.getPojosFieldsMap(pojos), pojos);
+			assertArrayEquals(new int[]{1, 1 , 1}, result);
+
+			i = 0;
+			pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos) {
+				assertNull(model.getType());
+				assertNotNull(model.getLastChanged());
+				
+				if(i%2 == 0)
+					assertEquals(model.getQuantity().intValue(), -100);
+				else
+					assertEquals(model.getQuantity().intValue(), 10 + i);
+				
+				if(i%2 == 1)
+					assertEquals(model.getDbIndex().intValue(), -200);
+				else
+					assertEquals(model.getDbIndex().intValue(), 0);
+				
+				if(i%2 == 1)
+					assertEquals(model.getTableIndex().intValue(), -300);
+				else
+					assertEquals(model.getTableIndex().intValue(), i);
+				i++;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testDaoUpdateIfChangedField() throws SQLException {
+		DalTableDao<UpdatableClientTestModel> dao = new DalTableDao<>(UpdatableClientTestModel.class, getDbName());
+		DalHints hints = new DalHints();
+		
+		try {
+			List<UpdatableClientTestModel> pojos = getAll(UpdatableClientTestModel.class);
+			int i = 0;
+			for(UpdatableClientTestModel model: pojos) {
+				model.setType((Short)null);
+				if(i%2 == 0)
+					model.setQuantity(-100);
+				
+				if(i%2 == 1)
+					model.setDbIndex(-200);
+				
+				if(i%2 == 1)
+					model.setTableIndex(-300);
+				i++;
+			}
+			
+			int[] result = dao.batchUpdate(hints, pojos);
+			assertArrayEquals(new int[]{1, 1 , 1}, result);
+
+			i = 0;
+			pojos = getAll(UpdatableClientTestModel.class);
+			for(UpdatableClientTestModel model: pojos) {
+				assertNull(model.getType());
 				assertNotNull(model.getLastChanged());
 				
 				if(i%2 == 0)
@@ -521,8 +783,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 
 	@Test
 	public void testDaoExcludeColumns() throws SQLException {
-		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
-		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(UpdatableIntVersionModel.class, getDbName());
 		
 		DalHints hints = new DalHints().exclude("dbIndex");
 		
@@ -573,8 +834,7 @@ public class BatchUpdateTaskTestStub extends TaskTestStub {
 
 	@Test
 	public void testDaoIncludeExcludeColumns() throws SQLException {
-		DalParser<UpdatableIntVersionModel> parser = new DalDefaultJpaParser<>(UpdatableIntVersionModel.class, getDbName());
-		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(parser);
+		DalTableDao<UpdatableIntVersionModel> dao = new DalTableDao<>(UpdatableIntVersionModel.class, getDbName());
 		
 		DalHints hints = new DalHints().exclude("dbIndex").include("quantity", "dbIndex", "address");
 		

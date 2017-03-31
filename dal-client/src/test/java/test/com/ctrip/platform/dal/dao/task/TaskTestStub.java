@@ -4,8 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import test.com.ctrip.platform.dal.dao.task.SingleUpdateTaskTestStub.UpdatableVersionModel;
-
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -27,6 +25,10 @@ public class TaskTestStub {
 
 	public String getDbName() {
 		return dbName;
+	}
+
+	public <T> DalParser<T> getParser(Class<T> modelClazz) throws SQLException {
+		return new DalDefaultJpaParser<T>(modelClazz, dbName);
 	}
 
 	public DalParser<ClientTestModel> getParser() {

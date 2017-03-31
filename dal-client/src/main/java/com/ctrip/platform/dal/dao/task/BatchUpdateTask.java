@@ -37,7 +37,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 			Map<String, ?> pojo = daoPojos.get(index);
 			StatementParameters parameters = new StatementParameters();
 
-			if(isUpdatableEntity)
+			if(isUpdatableEntity && !hints.isUpdateUnchangedField())
 				addParameters(parameters, pojo, updateColumnNames, ((UpdatableEntity)rawPojos.get(index)).getUpdatedColumns());
 			else
 				addParameters(parameters, pojo, updateColumnNames);

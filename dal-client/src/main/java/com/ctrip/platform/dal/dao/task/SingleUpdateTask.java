@@ -26,6 +26,10 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		else
 			filterNullColumns(hints, fields);
 		
+		// If there is no columns changed, we will not perform update?
+		if(fields.size() == 0)
+			return 0;
+		
 		String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
 
 		StatementParameters parameters = new StatementParameters();

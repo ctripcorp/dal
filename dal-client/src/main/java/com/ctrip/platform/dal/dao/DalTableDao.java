@@ -63,6 +63,14 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 		this(new DalDefaultJpaParser<>(entityType));
 	}
 	
+	public DalTableDao(Class<T> entityType, String dataBaseName) throws SQLException {
+		this(new DalDefaultJpaParser<>(entityType, dataBaseName));
+	}
+	
+	public DalTableDao(Class<T> entityType, String dataBaseName, String tableName) throws SQLException {
+		this(new DalDefaultJpaParser<>(entityType, dataBaseName, tableName));
+	}
+	
 	public DalTableDao(DalParser<T> parser, DalTaskFactory factory) {
 		this(parser, factory, new DalRequestExecutor());
 	}

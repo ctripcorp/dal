@@ -9,6 +9,7 @@ import java.util.Map;
 import oracle.sql.TIMESTAMP;
 
 import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -39,6 +40,10 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 						throw new DalException(ErrorCode.FieldNotExists, clazz.getName(), columnNames[i]);
 				setValue(field, instance, rs, i);
 			}
+			
+			if(instance instanceof UpdatableEntity)
+				((UpdatableEntity)instance).reset();
+			
 			return instance;
 		} catch (Throwable e) {
 			throw DalException.wrap(e);

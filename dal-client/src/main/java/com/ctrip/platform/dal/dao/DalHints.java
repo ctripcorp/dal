@@ -381,17 +381,8 @@ public class DalHints {
 		return this;
 	}
 	
-	public DalHints insertUnchangedField() {
-		set(DalHintEnum.insertUnchangedField);
-		return this;
-	}
-	
 	public boolean isInsertNullField() {
 		return is(DalHintEnum.insertNullField);
-	}
-	
-	public boolean isInsertUnchangedField() {
-		return is(DalHintEnum.insertUnchangedField);
 	}
 	
 	public DalHints retrieveAllResultsFromSp() {

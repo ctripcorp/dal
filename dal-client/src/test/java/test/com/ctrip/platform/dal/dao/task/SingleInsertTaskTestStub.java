@@ -15,7 +15,6 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import com.ctrip.platform.dal.dao.task.BatchInsertTask;
 import com.ctrip.platform.dal.dao.task.SingleInsertTask;
 
 public class SingleInsertTaskTestStub extends TaskTestStub {
@@ -34,6 +33,32 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 			int result = test.execute(hints, getAllMap().get(0), null);
 //			assertEquals(1, result);
 			assertEquals(3+1, getCount());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testExecuteWithUpdatableEntity() throws SQLException {
+		SingleInsertTask<UpdatableClientTestModel> test = new SingleInsertTask<>();
+		test.initialize(getParser(UpdatableClientTestModel.class));
+		DalHints hints = new DalHints();
+		
+		try {
+			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
+			model.setAddress("abc");
+			int result = test.execute(hints, getFields(model), model);
+//			assertEquals(0, result);
+			assertEquals(4, getCount());
+
+			UpdatableClientTestModel model2 = getAll(UpdatableClientTestModel.class).get(3);
+			assertEquals("abc", model2.getAddress());
+			assertEquals(model.getTableIndex(), model2.getTableIndex());
+			assertEquals(model.getDbIndex(), model2.getDbIndex());
+			assertEquals(model.getQuantity(), model2.getQuantity());
+			assertEquals(model.getType(), model2.getType());
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();

@@ -5,6 +5,8 @@ import java.sql.Types;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -19,6 +21,7 @@ import com.ctrip.platform.dal.dao.annotation.Type;
 public class UpdatableClientTestModel extends UpdatableEntity {
 	@Id
 	@Column(name="id")
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Type(value=Types.INTEGER)
 	private Integer id;
 	

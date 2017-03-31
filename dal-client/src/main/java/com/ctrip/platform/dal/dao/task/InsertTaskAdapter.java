@@ -67,46 +67,10 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled())
 			unqualifiedColumns.add(parser.getPrimaryKeyNames()[0]);
 
-		if(hints.isInsertUnchangedField() ||hints.isInsertNullField()) {
+		if(hints.isInsertNullField()) {
 			return unqualifiedColumns;
 		}
 
-		if(rawPojos.get(0) instanceof UpdatableEntity)
-			return filterUpdatableEntity(unqualifiedColumns, daoPojos, rawPojos);
-		else
-			return filterNullColumns(unqualifiedColumns, daoPojos);
-	}
-	
-	private Set<String> filterUpdatableEntity(Set<String> unqualifiedColumns, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
-		Set<String> unchangedColumns = new HashSet<>(insertableColumns);
-		String[] columnsToCheck = unchangedColumns.toArray(new String[unchangedColumns.size()]);
-		boolean changed = false;		
-		for (Integer index :daoPojos.keySet()) {
-			if(unchangedColumns.isEmpty())
-				break;
-
-			// You may ask why I am doing the following, it is because of performance
-			if(changed) {
-				columnsToCheck = unchangedColumns.toArray(new String[unchangedColumns.size()]);
-				changed = false;
-			}
-			
-			UpdatableEntity rawPojo = (UpdatableEntity)rawPojos.get(index);
-			Set<String> updatedColumns = rawPojo.getUpdatedColumns();
-			for (String columnToCheck: columnsToCheck) {
-				if(updatedColumns.contains(columnToCheck)) {
-					unchangedColumns.remove(columnToCheck);
-					changed = true;
-				}
-			}
-		}
-
-		unqualifiedColumns.addAll(unchangedColumns);
-		
-		return unqualifiedColumns;
-	}
-	
-	private Set<String> filterNullColumns(Set<String> unqualifiedColumns, Map<Integer, Map<String, ?>> daoPojos) throws DalException {
 		Set<String> nullColumns = new HashSet<>(insertableColumns);
 		String[] columnsToCheck = nullColumns.toArray(new String[nullColumns.size()]);
 		boolean changed = false;

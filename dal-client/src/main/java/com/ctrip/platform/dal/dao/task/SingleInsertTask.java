@@ -17,12 +17,15 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		Map<Integer, Map<String, ?>> pojoList = new HashMap<Integer, Map<String,?>>();
 		List<T> rawPojos = new ArrayList<>();
 		
-		pojoList.put(1, fields);
+		pojoList.put(0, fields);
 		rawPojos.add(rawPojo);
 		
 		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, pojoList, rawPojos);
 		
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
+
+		if(fields.size() == 0)
+			return 0;
 
 		String insertSql = buildInsertSql(hints, fields);
 		

@@ -171,11 +171,6 @@ public enum DalHintEnum {
 	insertNullField,
 	
 	/*
-	 * used in DalTableDao, when set the insert field can be unchanged value.
-	 */
-	insertUnchangedField,
-	
-	/*
 	 * used in DalTableDao, when set the update field can be null value.
 	 */
 	updateNullField,

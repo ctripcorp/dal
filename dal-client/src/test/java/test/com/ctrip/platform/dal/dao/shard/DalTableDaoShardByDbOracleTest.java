@@ -59,6 +59,7 @@ public class DalTableDaoShardByDbOracleTest extends BaseDalTableDaoShardByDbTest
 
 	@Before
 	public void setUp() throws Exception {
+		setUpBeforeClass();
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		for(int i = 0; i < mod; i++) {

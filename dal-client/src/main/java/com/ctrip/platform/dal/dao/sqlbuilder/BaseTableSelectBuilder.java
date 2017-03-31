@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
@@ -32,6 +34,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private static final String ORDER_BY = "ORDER BY ";
 	private static final String ASC = " ASC";
 	private static final String DESC = " DESC";
+	private static final String ORDER_BY_SEPARATOR = ", ";
 	private static final String QUERY_ALL_CRITERIA = "1=1";
 	
 	/**
@@ -45,8 +48,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private String customized;
 	
 	private String whereClause;
-	private String orderBy;
-	private boolean ascending;
+	private Map<String, Boolean> orderBys = new LinkedHashMap<>();
 
 	private StatementParameters parameters;
 	private DalRowMapper mapper;
@@ -110,8 +112,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 
 	public BaseTableSelectBuilder orderBy(String orderBy, boolean ascending) {
-		this.orderBy = orderBy;
-		this.ascending = ascending;
+		orderBys.put(orderBy, ascending);
 		return this;
 	}
 	
@@ -158,16 +159,23 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 
 	private String getCompleteWhereExp() {
-		return orderBy == null ? whereClause : whereClause + SPACE + buildOrderbyExp();
+		return orderBys.size() == 0 ? whereClause : whereClause + SPACE + buildOrderbyExp();
 	}
 	
 	private String buildOrderbyExp(){
 		StringBuilder orderbyExp = new StringBuilder();
 
 		orderbyExp.append(ORDER_BY);
-		String wrap = wrapField(orderBy);
-		wrap += ascending? ASC: DESC;
-		orderbyExp.append(wrap);
+		boolean first = true;
+		for(String orderBy: orderBys.keySet()) {
+			if(first)
+				first = false;
+			else
+				orderbyExp.append(ORDER_BY_SEPARATOR);
+
+			orderbyExp.append(wrapField(orderBy));
+			orderbyExp.append(orderBys.get(orderBy) ? ASC: DESC);
+		}
 
 		return orderbyExp.toString();
 	}

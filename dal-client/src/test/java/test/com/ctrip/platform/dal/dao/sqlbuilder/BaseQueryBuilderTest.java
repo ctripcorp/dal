@@ -27,6 +27,21 @@ public class BaseQueryBuilderTest {
 	}
 
 	@Test
+	public void testOrderBy() throws SQLException {
+		BaseTableSelectBuilder qb;
+
+		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.MySql);
+		qb.select("columns").where("conditions").orderBy("ob", true).orderBy("ob2", false).orderBy("ob3", true);
+		assertEquals("SELECT `columns` FROM `Test` WHERE conditions ORDER BY `ob` ASC, `ob2` DESC, `ob3` ASC", qb.build());
+		assertEquals("SELECT `columns` FROM `Test_0` WHERE conditions ORDER BY `ob` ASC, `ob2` DESC, `ob3` ASC", qb.build("_0"));
+
+		qb = new BaseTableSelectBuilder("Test", DatabaseCategory.SqlServer);
+		qb.select("columns").where("conditions").orderBy("ob", true).orderBy("ob2", false).orderBy("ob3", true);
+		assertEquals("SELECT [columns] FROM [Test] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC, [ob2] DESC, [ob3] ASC", qb.build());
+		assertEquals("SELECT [columns] FROM [Test_0] WITH (NOLOCK) WHERE conditions ORDER BY [ob] ASC, [ob2] DESC, [ob3] ASC", qb.build("_0"));
+	}
+
+	@Test
 	public void testBuildFirst() throws SQLException {
 		BaseTableSelectBuilder qb;
 		

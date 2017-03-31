@@ -115,7 +115,7 @@ public class BatchDeleteSp3TaskTest {
 		
 		try {
 			DalHints hints = new DalHints();
-			test.execute(hints.inShard(0), getPojosFields(p, parser));
+			test.execute(hints.inShard(0), getPojosFields(p, parser), p);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -135,7 +135,7 @@ public class BatchDeleteSp3TaskTest {
 					DalHints hints = new DalHints().inShard(i).inTableShard(j);
 					List<People> p = dao.query("1=1", new StatementParameters(), hints);
 					Assert.assertTrue(p.size() == 3);
-					test.execute(hints, getPojosFields(p, parser));
+					test.execute(hints, getPojosFields(p, parser), p);
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();

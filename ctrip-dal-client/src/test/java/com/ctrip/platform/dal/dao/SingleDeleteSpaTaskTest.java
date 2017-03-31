@@ -100,7 +100,7 @@ public class SingleDeleteSpaTaskTest {
 	 	p1.setCountryID(-1);
 
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1));
+			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -122,7 +122,7 @@ public class SingleDeleteSpaTaskTest {
 					Assert.assertTrue(p.size() == 3);
 					
 					for(People p1: p)
-						test.execute(hints, parser.getFields(p1));
+						test.execute(hints, parser.getFields(p1), p1);
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();

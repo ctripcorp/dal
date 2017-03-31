@@ -11,7 +11,11 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 	private DalScalarExtractor extractor = new DalScalarExtractor();
 	
 	public String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {
-		addParametersByIndex(parameters, fields);
+		if(CtripTaskFactory.callSpbyName)
+			addParametersByName(parameters, fields);
+		else
+			addParametersByIndex(parameters, fields);
+		
 		String callSql = buildCallSql(SpName, fields.size());
 		parameters.setResultsParameter(RET_CODE, extractor);
 		return callSql;

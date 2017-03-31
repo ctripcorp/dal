@@ -114,7 +114,7 @@ public class BatchUpdateSp3TaskTest {
 		
 		try {
 			DalHints hints = new DalHints();
-			test.execute(hints.inShard(0), getPojosFields(p, parser));
+			test.execute(hints.inShard(0), getPojosFields(p, parser), p);
 			
 			DalTableDao<People> dao = new DalTableDao<>(parser);
 			p = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
@@ -151,7 +151,7 @@ public class BatchUpdateSp3TaskTest {
 		
 		try {
 			DalHints hints = new DalHints();
-			test.execute(hints.inShard(0), getPojosFields(p, parser));
+			test.execute(hints.inShard(0), getPojosFields(p, parser), p);
 			
 			DalTableDao<People> dao = new DalTableDao<>(parser);
 			p = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
@@ -186,7 +186,7 @@ public class BatchUpdateSp3TaskTest {
 					}
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
-					test.execute(hints, getPojosFields(p, parser));
+					test.execute(hints, getPojosFields(p, parser), p);
 					
 					p = dao.query("1=1", new StatementParameters(), hints);
 					for(People p1: p) {

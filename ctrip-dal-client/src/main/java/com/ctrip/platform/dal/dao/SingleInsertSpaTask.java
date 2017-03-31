@@ -22,7 +22,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	}
 	
 	@Override
-	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
+	public int execute(DalHints hints, Map<String, ?> fields, T rawPojos) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String insertSPA = String.format(INSERT_SPA_TPL, getRawTableName(hints, fields));

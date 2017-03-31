@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.sql.logging;
 
-import java.util.HashMap;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.Cat;

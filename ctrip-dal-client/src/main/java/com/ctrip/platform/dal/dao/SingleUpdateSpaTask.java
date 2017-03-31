@@ -7,7 +7,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 	private static final String UPDATE_SPA_TPL = "spA_%s_u";
 	
 	@Override
-	public int execute(DalHints hints, Map<String, ?> fields) throws SQLException {
+	public int execute(DalHints hints, Map<String, ?> fields, T rawPojos) throws SQLException {
 		if (null == fields) return 0;
 		
 		hints = DalHints.createIfAbsent(hints);

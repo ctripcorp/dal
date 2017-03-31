@@ -75,7 +75,7 @@ public class SingleInsertSpaTaskTest {
 			DalHints hints = new DalHints();
 			hints.setKeyHolder(keyHolder);
 			
-			test.execute(hints.inShard(0), parser.getFields(p1));
+			test.execute(hints.inShard(0), parser.getFields(p1), p1);
 			Number id1 = keyHolder.getKey();
 			assertTrue(id1.intValue() > 0);
 			//----------
@@ -83,7 +83,7 @@ public class SingleInsertSpaTaskTest {
 			hints = new DalHints();
 			hints.setKeyHolder(keyHolder);
 			
-			test.execute(hints.inShard(0), parser.getFields(p1));
+			test.execute(hints.inShard(0), parser.getFields(p1), p1);
 			Number id2 = keyHolder.getKey();
 			assertTrue(id2.intValue() > 0);
 			assertTrue(id2.intValue() - id1.intValue() == 1);
@@ -118,7 +118,7 @@ public class SingleInsertSpaTaskTest {
 					hints = new DalHints();
 					hints.setKeyHolder(keyHolder);
 					
-					test.execute(hints, parser.getFields(p1));
+					test.execute(hints, parser.getFields(p1), p1);
 					Number id1 = keyHolder.getKey();
 					assertTrue(id1.intValue() > 0);
 					//----------
@@ -126,7 +126,7 @@ public class SingleInsertSpaTaskTest {
 					hints = new DalHints();
 					hints.setKeyHolder(keyHolder);
 					
-					test.execute(hints, parser.getFields(p1));
+					test.execute(hints, parser.getFields(p1), p1);
 					Number id2 = keyHolder.getKey();
 					assertTrue(id2.intValue() > 0);
 					assertTrue(id2.intValue() - id1.intValue() == 1);

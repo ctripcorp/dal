@@ -102,7 +102,7 @@ public class SingleUpdateSpaTaskTest {
 	 	p1.setCountryID(-1);
 
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1));
+			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -124,7 +124,7 @@ public class SingleUpdateSpaTaskTest {
 					for(People p1: p) {
 					 	p1.setName("test123");
 					 	p1.setProvinceID(-100);
-						test.execute(new DalHints(), parser.getFields(p1));
+						test.execute(new DalHints(), parser.getFields(p1), p1);
 					}
 					
 					p = dao.query("1=1", new StatementParameters(), hints);

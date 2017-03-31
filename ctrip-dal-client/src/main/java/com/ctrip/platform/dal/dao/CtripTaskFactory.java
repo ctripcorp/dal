@@ -30,6 +30,10 @@ import com.ctrip.platform.dal.dao.vi.ConfigBeanFactory;
  */
 public class CtripTaskFactory implements DalTaskFactory {
 	private DefaultTaskFactory defaultFactory;
+	private static final String CALL_SP_BY_NAME = "callSpbyName";
+	
+	// Default disable, can be open by settings
+	static boolean callSpbyName = false;
 	
 	@Override
 	public void initialize(Map<String, String> settings) {
@@ -37,6 +41,7 @@ public class CtripTaskFactory implements DalTaskFactory {
 		defaultFactory.initialize(settings);
 		// TO integrate VI here, it is not a good solution
 		ConfigBeanFactory.init();
+		callSpbyName = Boolean.parseBoolean(defaultFactory.getProperty(CALL_SP_BY_NAME));
 	}
 
 	@Override

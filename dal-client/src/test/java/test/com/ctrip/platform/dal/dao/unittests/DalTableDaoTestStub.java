@@ -11,6 +11,7 @@ import org.junit.Test;
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub;
 import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
@@ -311,10 +312,13 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		try {
 			res = dao.combinedInsert(new DalHints(), null, modelList);
 			Assert.fail();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 		}
 		
 		modelList = new ArrayList<>();
+		if(diff.category == DatabaseCategory.Oracle)
+			return;
+		
 		res = dao.combinedInsert(new DalHints(), null, modelList);
 		Assert.assertEquals(0, res);
 	}

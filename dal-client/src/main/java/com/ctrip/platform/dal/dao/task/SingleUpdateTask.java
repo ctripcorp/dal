@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,19 +22,21 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		
 		Object version = getVersion(fields);
 		
+		Map<String, ?> filted = null;
+		
 		if(rawPojo instanceof UpdatableEntity)
-			filterUpdatableEntity(hints, fields, getUpdatedColumns(rawPojo));
+			filted = filterUpdatableEntity(hints, fields, getUpdatedColumns(rawPojo));
 		else
-			filterNullColumns(hints, fields);
+			filted = filterNullColumns(hints, fields);
 		
 		// If there is no columns changed, we will not perform update
-		if(fields.size() == 0)
+		if(filted.size() == 0)
 			return 0;
 		
-		String updateSql = buildUpdateSql(getTableName(hints, fields), fields, hints);
+		String updateSql = buildUpdateSql(getTableName(hints, fields), filted, hints);
 
 		StatementParameters parameters = new StatementParameters();
-		addParameters(parameters, fields);
+		addParameters(parameters, filted);
 		addParameters(parameters, pks);
 		addVersion(parameters, version);
 		
@@ -51,7 +54,9 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		return version;
 	}
 	
-	private void filterNullColumns(DalHints hints, Map<String, ?> fields) throws DalException {
+	private Map<String, ?> filterNullColumns(DalHints hints, Map<String, ?> fields) throws DalException {
+		Map<String, Object> filted = new LinkedHashMap<>();
+		
 		Set<String> updatableColumns = filterColumns(hints);
 			
 		// Remove null value when hints is not DalHintEnum.updateNullField or
@@ -59,11 +64,16 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		for (String column : parser.getColumnNames()) {
 			if ((fields.get(column) == null && !hints.isUpdateNullField())
 					|| isPrimaryKey(column) || !updatableColumns.contains(column))
-				fields.remove(column);
+				continue;
+			
+			filted.put(column, fields.get(column));
 		}
+		
+		return filted;
 	}
 	
-	private void filterUpdatableEntity(DalHints hints, Map<String, ?> fields, Set<String> updatedColumns) throws DalException {
+	private Map<String, ?> filterUpdatableEntity(DalHints hints, Map<String, ?> fields, Set<String> updatedColumns) throws DalException {
+		Map<String, Object> filted = new LinkedHashMap<>();
 		Set<String> updatableColumns = filterColumns(hints);
 			
 		// Dirty flag is not set but need to update
@@ -71,8 +81,12 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		for (String column : parser.getColumnNames()) {
 			if (!updatedColumns.contains(column) && !hints.isUpdateUnchangedField() || 
 					isPrimaryKey(column) || !updatableColumns.contains(column))
-				fields.remove(column);
+				continue;
+			
+			filted.put(column, fields.get(column));
 		}
+		
+		return filted;
 	}
 	
 	private String buildUpdateSql(String tableName, Map<String, ?> fields, DalHints hints) {

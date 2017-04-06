@@ -6,8 +6,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,6 +68,21 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private boolean useLocal;
 	private ConnectionStringParser parser = new ConnectionStringParser();
 	private boolean isDebug;
+
+	public static class LogEntry {
+		public static final int INFO = 0;
+		public static final int WARN = 1;
+		public static final int ERROR = 2;
+		public static final int ERROR2 = 3;
+				
+		public int type;
+		public String msg;
+		public Throwable e;
+	}
+	
+	// For dal ignite
+	public static List<LogEntry> startUpLog = new ArrayList<>();
+	public static Map<String, String> config = null;
 	
 	/**
 	 * Used to access local Database.config file fo dev environment
@@ -74,23 +91,26 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private Map<String, DataSourceConfigure> dataSourceConfigures;
 	
 	public void initialize(Map<String, String> settings) throws Exception {
-		logger.info("Initialize Titan provider");
+		startUpLog.clear();
+		config = new HashMap<>(settings);
+		
+		info("Initialize Titan provider");
 		
 		svcUrl = discoverTitanServiceUrl(settings);
 		appid = discoverAppId(settings);
 		subEnv = Foundation.server().getSubEnv();
 		subEnv = subEnv == null ? null : subEnv .trim();
 		
-		logger.info("Titan Service Url: " + svcUrl);
-		logger.info("Appid: " + appid);
-		logger.info("Sub-environment: " + (subEnv == null ? "N/A" : subEnv));
+		info("Titan Service Url: " + svcUrl);
+		info("Appid: " + appid);
+		info("Sub-environment: " + (subEnv == null ? "N/A" : subEnv));
 		
 		useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
-		logger.info("Use local: " +useLocal);
+		info("Use local: " +useLocal);
 		
 		String timeoutStr = settings.get(TIMEOUT);
 		timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
-		logger.info("Titan connection timeout: " + timeout);
+		info("Titan connection timeout: " + timeout);
 		
 		isDebug = Boolean.parseBoolean(settings.get("isDebug"));
 	}
@@ -142,7 +162,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		if(!(appid == null || appid.trim().isEmpty())) 
 			return appid.trim();
 		
-		throw new DalException("Can not locate APPID for this application");
+		DalException e = new DalException("Can not locate APPID for this application");
+		error(e.getMessage(), e);
+		throw e;
 	}
 
 	@Override
@@ -175,6 +197,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 				}
 				dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
 			} catch (Exception e) {
+				error("Fail to setup Titan Provider", e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -193,7 +216,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 				DatabasePoolConfigParser.getInstance().copyDatabasePoolConifg(possibleName, name);
 			}else
 				// It is strongly recommended to add datasource config in datasource.xml for each of the connectionString in dal.config
-				logger.error("Cannot found datasource configure for connectionString " + name);
+				error("Cannot found datasource configure for connectionString " + name);
 		}
 	}
 	
@@ -208,7 +231,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	 * end configuration, we auto add the '_SH' to name to get config.
 	 */
 	private Set<String> normalizedForProd(Set<String> dbNames) {
-		logger.info("It is production environment and titan key will be appended with _SH suffix");
+		info("It is production environment and titan key will be appended with _SH suffix");
 		Set<String> prodDbNames = new HashSet<>();
 		for(String name: dbNames) {
 			if(name.endsWith(PROD_SUFFIX))
@@ -229,8 +252,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	}
 	
 	private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception{
-		logger.info("Start getting all in one connection string from titan service.");
-		logger.info("Database key names are " + dbNames);
+		info("Start getting all in one connection string from titan service.");
+		info("Database key names are " + dbNames);
 		
 		long start = System.currentTimeMillis();
 		
@@ -247,16 +270,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			return result;
 		}
 
-		logger.info("Titan service URL: " + svcUrl);
+		info("Titan service URL: " + svcUrl);
 
 		URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
 		if(!(subEnv == null || subEnv.isEmpty())) {
 			builder.addParameter("envt", subEnv);
-			logger.info("Sub environment: " + subEnv);
+			info("Sub environment: " + subEnv);
 		}
 		
         URI uri = builder.build();
-        logger.info(uri.toURL().toString());
+        info(uri.toURL().toString());
 
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
@@ -272,23 +295,23 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
             
             if(!"200".equals(resp.getStatus())) {
-            	logger.warn("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage());
+            	logger.warn(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
             	throw new RuntimeException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
             }
             
             for(TitanData data: resp.getData()) {
-            	logger.info("Parsing " + data.getName());
+            	info("Parsing " + data.getName());
             	//Fail fast
 	            if(data.getErrorCode() != null) {
-	            	logger.warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
+	            	warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 	            	throw new RuntimeException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
 	            }
 
             	//Decrypt raw connection string
             	result.put(data.getName(), data);
-            	logger.info(data.getName()+ " loaded");
+            	info(data.getName()+ " loaded");
             	if(data.getEnv() != null) {
-            		logger.info(String.format("Sub environment %s detected.", data.getEnv()));
+            		info(String.format("Sub environment %s detected.", data.getEnv()));
             		DalCatLogger.reportTitanAccessSunEnv(subEnv, data.getName());
             		Metrics.reportTitanAccessSunEnv(subEnv, data.getName());
             	}
@@ -296,7 +319,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         }
 	    
 	    long cost = System.currentTimeMillis() - start;
-		logger.info("Time costed by getting all in one connection string from titan service(ms): " + cost);
+		info("Time costed by getting all in one connection string from titan service(ms): " + cost);
 		DalCatLogger.reportTitanAccessCost(cost);
 
 	    return result;
@@ -380,5 +403,38 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	        datas[o] = (byte) (sources[o + 1] ^ sources[offset - ((sources[offset - i] + sources[offset - j]) % keyLen)]);
 	    }
 	    return new String(datas);
+	}
+	
+	private void info(String msg) {
+		logger.info(msg);
+
+		LogEntry ent = new LogEntry();
+		ent.type = LogEntry.INFO;
+		ent.msg = msg;
+		startUpLog.add(ent);
+	}
+	private void warn(String msg) {
+		logger.warn(msg);
+
+		LogEntry ent = new LogEntry();
+		ent.type = LogEntry.WARN;
+		ent.msg = msg;
+		startUpLog.add(ent);
+	}
+	private void error(String msg) {
+		logger.error(msg);
+		
+		LogEntry ent = new LogEntry();
+		ent.type = LogEntry.ERROR;
+		ent.msg = msg;
+		startUpLog.add(ent);
+	}
+	private void error(String msg, Throwable e) {
+		logger.error(msg, e);
+		
+		LogEntry ent = new LogEntry();
+		ent.type = LogEntry.ERROR2;
+		ent.msg = msg;
+		startUpLog.add(ent);
 	}
 }

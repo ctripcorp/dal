@@ -29,15 +29,21 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 	@Override
 	public boolean warmUP(SimpleLogger logger) {
 		try {
+			logger.info("Initialize Dal Factory");
 			DalClientFactory.initClientFactory();
 			
 			configs.putAll(TitanProvider.config);
 			log(logger);
+			logger.info("success initialized Dal Factory");
 			
+			logger.info("Start warm up datasources");
 			DalClientFactory.warmUpConnections();
+			logger.info("success warmed up datasources");
+			
 			return true;
 		} catch (Throwable e) {
 			logger.error("Fail", e);
+			logger.info("Please check http://conf.ctripcorp.com/pages/viewpage.action?pageId=60842135");
 			return false;
 		}
 	}

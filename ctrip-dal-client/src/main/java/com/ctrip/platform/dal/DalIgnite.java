@@ -42,6 +42,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 			
 			return true;
 		} catch (Throwable e) {
+			log(logger);
 			logger.error("Fail", e);
 			logger.info("Please check http://conf.ctripcorp.com/pages/viewpage.action?pageId=60842135");
 			return false;

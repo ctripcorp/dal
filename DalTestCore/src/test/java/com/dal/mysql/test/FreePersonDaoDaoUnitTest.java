@@ -21,6 +21,9 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.dal.mysql.test.FreeEntityPojo;
+import com.dal.mysql.test.FreePersonDaoDao;
+import com.dal.mysql.test.Person;
 
 /**
  * JUnit test of FreePersonDaoDao class.

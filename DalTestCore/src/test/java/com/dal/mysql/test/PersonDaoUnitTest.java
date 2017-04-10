@@ -19,6 +19,8 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
+import com.dal.mysql.test.Person;
+import com.dal.mysql.test.PersonDao;
 
 /**
  * JUnit test of PersonDao class.

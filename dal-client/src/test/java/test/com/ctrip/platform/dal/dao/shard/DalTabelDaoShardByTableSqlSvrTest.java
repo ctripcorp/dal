@@ -30,11 +30,16 @@ public class DalTabelDaoShardByTableSqlSvrTest extends BaseDalTabelDaoShardByTab
 	private final static String TABLE_NAME = "dal_client_test";
 	private final static int mod = 4;
 	
-	//Create the the table
 	private final static String DROP_TABLE_SQL_SQLSVR_TPL = "IF EXISTS ("
 			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
 			+ "WHERE TABLE_NAME = '"+ TABLE_NAME + "_%d') "
 			+ "DROP TABLE  "+ TABLE_NAME + "_%d";
+
+	//Create the the table
+	private final static String DROP_TABLE_SQL_SQLSVR_TPL_1 = "IF EXISTS ("
+			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+			+ "WHERE TABLE_NAME = '"+ TABLE_NAME + "') "
+			+ "DROP TABLE  "+ TABLE_NAME;
 	
 	//Create the the table
 	private final static String CREATE_TABLE_SQL_SQLSVR_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
@@ -62,6 +67,7 @@ public class DalTabelDaoShardByTableSqlSvrTest extends BaseDalTabelDaoShardByTab
 				clientSqlSvr.update(sqls[j], parameters, hints);
 			}
 		}
+		clientSqlSvr.update(DROP_TABLE_SQL_SQLSVR_TPL_1, parameters, hints);
 	}
 
 	@AfterClass

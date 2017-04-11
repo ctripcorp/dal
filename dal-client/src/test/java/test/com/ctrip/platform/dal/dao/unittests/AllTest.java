@@ -23,5 +23,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalClientFactoryLazeLoadTest.class,
 	DalStatusManagerTest.class,
 	StatementParametersTest.class,
+	
+	KeyHolderTest.class,
 })
 public class AllTest {}

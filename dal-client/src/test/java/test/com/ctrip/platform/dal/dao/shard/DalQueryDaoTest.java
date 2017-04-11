@@ -545,6 +545,9 @@ public abstract class DalQueryDaoTest {
 	
 	@Test
 	public void testQueryMultipleAllShards() {
+		if(dbCategory == DatabaseCategory.Oracle)
+			return;
+		
 		try {
 			List list = queryMultipleAllShards(new DalHints());
 			
@@ -557,6 +560,9 @@ public abstract class DalQueryDaoTest {
 	
 	@Test
 	public void testQueryMultipleAllShardsAsync() {
+		if(dbCategory == DatabaseCategory.Oracle)
+			return;
+		
 		try {
 			DalHints hints = new DalHints();
 			List list = queryMultipleAllShards(hints.asyncExecution());

@@ -33,6 +33,7 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.sql.logging.DalCatLogger;
 import com.ctrip.platform.dal.sql.logging.Metrics;
@@ -201,9 +203,15 @@ public class TitanProvider implements DataSourceConfigureProvider {
 				throw new RuntimeException(e);
 			}
 		}
+		
+		for(String name: dbNames) 
+			logPoolSettings(name);
+		
+		info("--- End datasource config  ---");
 	}
 	
 	private void checkMissingPoolConfig(Set<String> dbNames) {
+		DatabasePoolConfigParser parser = DatabasePoolConfigParser.getInstance();
 		for(String name: dbNames) {
 			if(DatabasePoolConfigParser.getInstance().contains(name))
 				continue;
@@ -212,11 +220,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
 				name.substring(0, name.length()-PROD_SUFFIX.length()) :
 				name + PROD_SUFFIX;
 
-			if(DatabasePoolConfigParser.getInstance().contains(possibleName)) {
-				DatabasePoolConfigParser.getInstance().copyDatabasePoolConifg(possibleName, name);
-			}else
+			if(parser.contains(possibleName)) {
+				parser.copyDatabasePoolConifg(possibleName, name);
+			}else{
 				// It is strongly recommended to add datasource config in datasource.xml for each of the connectionString in dal.config
-				error("Cannot found datasource configure for connectionString " + name);
+				warn("Cannot found datasource configure for connectionString " + name + ", creating default");
+				// Add missing one
+				parser.addDatabasePoolConifg(name, new DatabasePoolConifg());
+			}
 		}
 	}
 	
@@ -245,10 +256,28 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData) throws Exception{
 		Map<String, DataSourceConfigure> configures = new HashMap<>();
 		for(Map.Entry<String, TitanData> entry: rawConnData.entrySet()) {
-			configures.put(entry.getKey(), parseConfig(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
+			configures.put(entry.getKey(), parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
 		}
 		
 		return configures;
+	}
+	
+	private void logPoolSettings(String name) {
+		info("--- Key datasource config for " + name + " ---");
+		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+		if(config.getOption() != null)
+			info("option: " + config.getOption());
+		
+		PoolProperties pc = config.getPoolProperties();
+		info("connectionProperties: " + pc.getConnectionProperties());
+		info("initialSize: " + pc.getInitialSize());
+		info("minIdle: " + pc.getMaxIdle());
+		info("maxActive: " + pc.getMaxActive());
+		info("maxAge: " + pc.getMaxAge());
+		info("testWhileIdle: " + pc.isTestWhileIdle());
+		info("testOnBorrow: " + pc.isTestOnBorrow());
+		info("testOnReturn: " + pc.isTestOnReturn());
+		info("removeAbandonedTimeout: " + pc.getRemoveAbandonedTimeout());
 	}
 	
 	private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception{
@@ -323,11 +352,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		DalCatLogger.reportTitanAccessCost(cost);
 
 	    return result;
-	}
-	
-	private DataSourceConfigure parseConfig(String name, String connectionString) {
-		DataSourceConfigure config = parser.parse(name, connectionString);
-		return config;
 	}
 	
 	private HttpClient initWeakSSLClient() {

@@ -28,6 +28,9 @@ public class ConnectionStringParser {
 	private static final String DRIVER_MYSQL ="com.mysql.jdbc.Driver";
 	private static final String DRIVER_SQLSERVRE ="com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	
+	private static final String MYSQL_CONNECTION_PROPERTIES = "rewriteBatchedStatements=true;allowMultiQueries=true";
+	private static final String MSSQL_CONNECTION_PROPERTIES = "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false";
+	
 	/**
 	 * parse "Data Source=devdb.dev.sh.ctriptravel.com,28747;UID=uws_AllInOneKey_dev;password=!QAZ@WSX1qaz2wsx; database=AbacusDB;"
 	 * 
@@ -48,14 +51,15 @@ public class ConnectionStringParser {
 		}
 
 		matcher = dburlPattern.matcher(connStr);
-
+		boolean isSqlServer;
 		if (matcher.find()) {
 			String[] dburls = matcher.group(2).split(PORT_SPLIT);
 			dbhost = dburls[0];
 			if (dburls.length == 2) {// is sqlserver
+				isSqlServer = true;
 				url = String.format(DBURL_SQLSERVER, dbhost, dburls[1], dbname);
-				driverClass = DRIVER_SQLSERVRE;
 			} else {// should be mysql
+				isSqlServer = false;
 				matcher = dbcharsetPattern.matcher(connStr);
 				if (matcher.find()) {
 					charset = matcher.group(2);
@@ -68,9 +72,11 @@ public class ConnectionStringParser {
 				} else {
 					url = String.format(DBURL_MYSQL, dbhost, DEFAULT_PORT, dbname, charset);
 				}
-				driverClass = DRIVER_MYSQL;
 			}
-		}
+			
+			driverClass = isSqlServer?DRIVER_SQLSERVRE : DRIVER_MYSQL;
+		}else
+			throw new RuntimeException("The format of connection string is incorrect for " + name);
 
 		matcher = dbuserPattern.matcher(connStr);
 		if (matcher.find()) {
@@ -86,20 +92,26 @@ public class ConnectionStringParser {
 		config.setUserName(userName);
 		config.setPassword(password);
 		config.setDriverClass(driverClass);
-		config = applyOptions(name, config);
+		config = applyOptions(name, config, isSqlServer);
 		
 		return config;
 	}
 
-	private DataSourceConfigure applyOptions(String name, DataSourceConfigure config) {
+	private DataSourceConfigure applyOptions(String name, DataSourceConfigure config, boolean isSqlServer) {
 		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
-		if(poolConfig == null)
-			return config;
 		
 		String option = poolConfig.getOption();
 		
-		if(option == null || option.length() == 0)
+		if(option == null || option.length() == 0) {
+			// If user not set option or connection properties, we should provide default value
+			if (poolConfig.getPoolProperties().getConnectionProperties() == null) {
+				String defaultConnectionProperties = isSqlServer ? 
+						MSSQL_CONNECTION_PROPERTIES :
+							MYSQL_CONNECTION_PROPERTIES;
+				poolConfig.getPoolProperties().setConnectionProperties(defaultConnectionProperties);
+			}
 			return config;
+		}
 		
 		String url = config.getConnectionUrl();
 		if(config.getDriverClass().equals(DRIVER_SQLSERVRE)){

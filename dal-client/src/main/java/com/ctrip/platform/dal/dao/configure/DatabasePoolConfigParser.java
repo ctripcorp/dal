@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -73,7 +74,7 @@ public class DatabasePoolConfigParser {
 	public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"+
 	          "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
 	
-	private Map<String, DatabasePoolConifg> poolConfigs = new HashMap<String, DatabasePoolConifg>();
+	private Map<String, DatabasePoolConifg> poolConfigs = new ConcurrentHashMap<String, DatabasePoolConifg>();
 	
 	private String databaseConfigLocation = null;
 	
@@ -108,6 +109,10 @@ public class DatabasePoolConfigParser {
 		return poolConfigs.containsKey(name);
 	}
 
+	public void addDatabasePoolConifg(String name, DatabasePoolConifg config) {
+		poolConfigs.put(name, config);
+	}
+	
 	public void copyDatabasePoolConifg(String sampleName, String newName) {
 		DatabasePoolConifg oldConfig = poolConfigs.get(sampleName);
 		

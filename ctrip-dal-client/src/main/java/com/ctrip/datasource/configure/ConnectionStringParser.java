@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 
 public class ConnectionStringParser {
 	private static final Pattern dburlPattern = Pattern
@@ -98,7 +98,7 @@ public class ConnectionStringParser {
 	}
 
 	private DataSourceConfigure applyOptions(String name, DataSourceConfigure config, boolean isSqlServer) {
-		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+		DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		
 		String option = poolConfig.getOption();
 		

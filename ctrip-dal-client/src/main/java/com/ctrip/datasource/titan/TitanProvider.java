@@ -213,7 +213,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private void checkMissingPoolConfig(Set<String> dbNames) {
 		DatabasePoolConfigParser parser = DatabasePoolConfigParser.getInstance();
 		for(String name: dbNames) {
-			if(DatabasePoolConfigParser.getInstance().contains(name))
+			if(parser.contains(name))
 				continue;
 			
 			String possibleName = name.endsWith(PROD_SUFFIX) ? 
@@ -271,7 +271,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		PoolProperties pc = config.getPoolProperties();
 		info("connectionProperties: " + pc.getConnectionProperties());
 		info("initialSize: " + pc.getInitialSize());
-		info("minIdle: " + pc.getMaxIdle());
+		info("minIdle: " + pc.getMinIdle());
 		info("maxActive: " + pc.getMaxActive());
 		info("maxAge: " + pc.getMaxAge());
 		info("testWhileIdle: " + pc.isTestWhileIdle());

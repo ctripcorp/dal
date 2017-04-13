@@ -93,6 +93,11 @@ public enum DalHintEnum {
 	 */
 	resultSorter,
 	
+	/*
+	 * used in batch sp, when set the connection auto commit will be true.
+	 */
+	forceAutoCommit,
+	
 	/* 
 	 * Settings for initialize statement.
 	 * Sets the number of seconds the driver will wait for a Statement object to execute to the given number of seconds.

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
 
@@ -66,7 +66,7 @@ public class DataSourceLocator {
 	}
 	
 	private DataSource createDataSource(String name) throws SQLException {
-		DatabasePoolConifg poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+		DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		DataSourceConfigure config = provider.getDataSourceConfigure(name);
 		
 		if (config == null && poolConfig == null) {
@@ -75,7 +75,7 @@ public class DataSourceLocator {
 		
 		if (poolConfig == null) {
 			// Create default connection pool configure
-			poolConfig = new DatabasePoolConifg();
+			poolConfig = new DatabasePoolConfig();
 		}
 		
 		PoolProperties p = poolConfig.getPoolProperties();

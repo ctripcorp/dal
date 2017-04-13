@@ -344,6 +344,11 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints forceAutoCommit() {
+		set(DalHintEnum.forceAutoCommit);
+		return this;
+	}
+	
 	public DalHints timeout(int seconds) {
 		set(DalHintEnum.timeout, seconds);
 		return this;

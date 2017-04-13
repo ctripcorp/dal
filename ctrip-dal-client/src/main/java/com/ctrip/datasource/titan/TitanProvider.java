@@ -45,7 +45,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.sql.logging.DalCatLogger;
 import com.ctrip.platform.dal.sql.logging.Metrics;
@@ -226,7 +226,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 				// It is strongly recommended to add datasource config in datasource.xml for each of the connectionString in dal.config
 				warn("Cannot found datasource configure for connectionString " + name + ", creating default");
 				// Add missing one
-				parser.addDatabasePoolConifg(name, new DatabasePoolConifg());
+				parser.addDatabasePoolConifg(name, new DatabasePoolConfig());
 			}
 		}
 	}
@@ -264,7 +264,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	
 	private void logPoolSettings(String name) {
 		info("--- Key datasource config for " + name + " ---");
-		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		if(config.getOption() != null)
 			info("option: " + config.getOption());
 		

@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConifg;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 
 public class DatabasePoolConfigParserTest {
 
@@ -27,7 +27,7 @@ public class DatabasePoolConfigParserTest {
 
 	@Test
 	public void test1() {
-		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test");
+		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test");
 		Assert.assertEquals("dao_test", config.getName());
 		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8", config.getOption());
@@ -35,7 +35,7 @@ public class DatabasePoolConfigParserTest {
 	
 	@Test
 	public void test2() {
-		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_select");
+		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_select");
 		Assert.assertEquals("dao_test_select", config.getName());
 		Assert.assertEquals(true, config.getPoolProperties().isTestWhileIdle());
 		Assert.assertEquals(true, config.getPoolProperties().isTestOnBorrow());
@@ -55,7 +55,7 @@ public class DatabasePoolConfigParserTest {
 	
 	@Test
 	public void test3() {
-		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dal_test_new");
+		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dal_test_new");
 		Assert.assertEquals("dal_test_new", config.getName());
 		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("sendTimeAsDateTime=false", config.getOption());
@@ -66,7 +66,7 @@ public class DatabasePoolConfigParserTest {
 	
 	@Test
 	public void test4() {
-		DatabasePoolConifg config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_select");
+		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test_select");
 		Assert.assertEquals("dao_test_select", config.getName());
 		Assert.assertEquals(1000, config.getPoolProperties().getMaxWait());
 		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getPoolProperties().getConnectionProperties());

@@ -342,7 +342,11 @@ public class DalDirectClient implements DalClient {
 	
 	private <T> T executeBatch(ConnectionAction<T> action, DalHints hints) 
 			throws SQLException  {
-		return doInTransaction(action, hints);
+		if(hints.is(DalHintEnum.forceAutoCommit)){
+			return doInConnection(action, hints);
+		}else{
+			return doInTransaction(action, hints);
+		}
 	}
 	
 	private <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

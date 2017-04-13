@@ -2,13 +2,13 @@ package com.ctrip.platform.dal.dao.configure;
 
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
-public class DatabasePoolConifg {
+public class DatabasePoolConfig {
 	
 	private String name = null;
 	private PoolProperties poolProperties = null;
 	private String option = null;
 	
-	public DatabasePoolConifg() {
+	public DatabasePoolConfig() {
 		poolProperties = new PoolProperties();
 		poolProperties.setTestWhileIdle(DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
 		poolProperties.setTestOnBorrow(DatabasePoolConfigParser.DEFAULT_TESTONBORROW);

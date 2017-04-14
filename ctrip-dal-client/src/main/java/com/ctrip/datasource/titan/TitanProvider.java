@@ -270,13 +270,36 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		
 		PoolProperties pc = config.getPoolProperties();
 		info("connectionProperties: " + pc.getConnectionProperties());
-		info("initialSize: " + pc.getInitialSize());
-		info("minIdle: " + pc.getMinIdle());
-		info("maxActive: " + pc.getMaxActive());
-		info("maxAge: " + pc.getMaxAge());
-		info("testWhileIdle: " + pc.isTestWhileIdle());
+		
+		// Check minIdle
+		if(pc.getMinIdle() > 0) {
+			warn("minIdle: " + pc.getMinIdle());
+			warn("minIdle changed to 0");
+			pc.setMinIdle(0);
+		} else
+			info("minIdle: " + pc.getMinIdle());
+		
+		// Check maxAge
+		if(pc.getMaxAge() > DatabasePoolConfigParser.DEFAULT_MAXAGE) {
+			warn("maxAge: " + pc.getMinIdle());
+			warn("maxAge changed to " + DatabasePoolConfigParser.DEFAULT_MAXAGE);
+			pc.setMaxAge(DatabasePoolConfigParser.DEFAULT_MAXAGE);
+		} else
+			info("maxAge: " + pc.getMaxAge());
+		
+		// Check testWhileIdle
+		if(pc.isTestWhileIdle() != DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE) {
+			warn("testWhileIdle: " + pc.isTestWhileIdle());
+			warn("testWhileIdle changed to " + DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
+			pc.setTestWhileIdle(DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
+		} else
+			info("testWhileIdle: " + pc.isTestWhileIdle());
+		
 		info("testOnBorrow: " + pc.isTestOnBorrow());
 		info("testOnReturn: " + pc.isTestOnReturn());
+
+		info("maxActive: " + pc.getMaxActive());
+		info("initialSize: " + pc.getInitialSize());
 		info("removeAbandonedTimeout: " + pc.getRemoveAbandonedTimeout());
 	}
 	

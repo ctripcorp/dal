@@ -272,16 +272,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		info("connectionProperties: " + pc.getConnectionProperties());
 		
 		// Check minIdle
-		if(pc.getMinIdle() > 0) {
+		if(pc.getMinIdle() != DatabasePoolConfigParser.DEFAULT_MINIDLE) {
 			warn("minIdle: " + pc.getMinIdle());
-			warn("minIdle changed to 0");
-			pc.setMinIdle(0);
+			warn("minIdle changed to " + DatabasePoolConfigParser.DEFAULT_MINIDLE);
+			pc.setMinIdle(DatabasePoolConfigParser.DEFAULT_MINIDLE);
 		} else
 			info("minIdle: " + pc.getMinIdle());
 		
 		// Check maxAge
 		if(pc.getMaxAge() > DatabasePoolConfigParser.DEFAULT_MAXAGE) {
-			warn("maxAge: " + pc.getMinIdle());
+			warn("maxAge: " + pc.getMaxAge());
 			warn("maxAge changed to " + DatabasePoolConfigParser.DEFAULT_MAXAGE);
 			pc.setMaxAge(DatabasePoolConfigParser.DEFAULT_MAXAGE);
 		} else

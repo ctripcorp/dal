@@ -29,6 +29,9 @@ public class HATest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
+		/**
+		 * ha_test, ha_test_1, ha_test_2 are the same DB
+		 */
 		try {
 			DalClientFactory.initClientFactory();
 			database = new Database("HA_Test_0", "dal_client_test",

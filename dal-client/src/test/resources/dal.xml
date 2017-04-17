@@ -4,18 +4,18 @@
       <add  name="dao_test_M" databaseType="Master" sharding="" connectionString="dao_test"/>
     </databaseSet>
     <databaseSet name="HA_Test_0" provider="mySqlProvider">
-      <add  name="dao_test_M" databaseType="Master" sharding="" connectionString="ha_test_1"/>
+      <add  name="dao_test_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
     </databaseSet>
     <databaseSet name="HA_Test" provider="mySqlProvider" shardingStrategy="">
-    	<add  name="dao_test_M" databaseType="Master" sharding="" connectionString="ha_test"/>
-    	<add  name="dao_test_S1" databaseType="Slave" sharding="" connectionString="ha_test"/>
-      	<add  name="dao_test_S2" databaseType="Slave" sharding="" connectionString="ha_test_1"/>
-      	<add  name="dao_test_S3" databaseType="Slave" sharding="" connectionString="ha_test_2"/>
+    	<add  name="dao_test_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
+    	<add  name="dao_test_S1" databaseType="Slave" sharding="" connectionString="MySqlShard_0"/>
+      	<add  name="dao_test_S2" databaseType="Slave" sharding="" connectionString="MySqlShard_1"/>
+      	<add  name="dao_test_S3" databaseType="Slave" sharding="" connectionString="MySqlShard_1"/>
     </databaseSet>
       <databaseSet name="HA_Test_1" provider="mySqlProvider" shardingStrategy="">
-    	<add  name="dao_test_M" databaseType="Master" sharding="" connectionString="ha_test"/>
-    	<add  name="dao_test_S1" databaseType="Slave" sharding="" connectionString="ha_test"/>
-      	<add  name="dao_test_S2" databaseType="Slave" sharding="" connectionString="ha_test_1"/>
+    	<add  name="dao_test_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
+    	<add  name="dao_test_S1" databaseType="Slave" sharding="" connectionString="MySqlShard_0"/>
+      	<add  name="dao_test_S2" databaseType="Slave" sharding="" connectionString="MySqlShard_1"/>
     </databaseSet>
     <databaseSet name="dao_test_sqlsvr" provider="sqlProvider" shardingStrategy="" >
       <add  name="dao_test_sqlsvr_M" databaseType="Master" sharding="" connectionString="dao_test_sqlsvr"/>

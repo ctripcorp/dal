@@ -31,9 +31,9 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  */
 public class DatabaseSelectorTest {
 
-	private static final String M1 = "ha_test";
-	private static final String M2 = "ha_test_1";
-	private static final String S1 = "ha_test_2";
+	private static final String M1 = "MySqlShard_0";
+	private static final String M2 = "MySqlShard_1";
+	private static final String S1 = "OracleShard_0";
 	private static final String S2 = "dao_test_sqlsvr_0";
 	private static final String S3 = "dao_test_sqlsvr_1";
 

@@ -10,9 +10,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import test.com.ctrip.platform.dal.dao.shard.DalQueryDaoMySqlTest;
 import test.com.ctrip.platform.dal.dao.unitbase.Database;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
@@ -21,25 +23,27 @@ import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 
 public class HATest {
-	private static Database database = null;
-	private static Database database2 = null;
-	private static Database database3 = null;
+	private static DalClient database = null;
+	private static DalClient database2 = null;
+	private static DalClient database3 = null;
 	private static DalHints hints = new DalHints();
 	private static int markCount = 0;
+	private String sql = "SELECT Count(*) from dal_client_test";
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
+		/**
+		 * ha_test, ha_test_1, ha_test_2 are the same DB
+		 */
 		try {
 			DalClientFactory.initClientFactory();
-			database = new Database("HA_Test_0", "dal_client_test",
-					DatabaseCategory.MySql);
-			database2 = new Database("HA_Test", "dal_client_test",
-					DatabaseCategory.MySql);
-			database3 = new Database("HA_Test_1", "dal_client_test", 
-					DatabaseCategory.MySql);
+			database = DalClientFactory.getClient("HA_Test_0");
+			database2 = DalClientFactory.getClient("HA_Test");
+			database3 = DalClientFactory.getClient("HA_Test_1");
+			
 			DalStatusManager.getHaStatus().setEnabled(true);
 			DalStatusManager.getHaStatus().setRetryCount(3);
-			database.init();
+			DalQueryDaoMySqlTest.setUpBeforeClass();
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -48,31 +52,27 @@ public class HATest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		database.drop();
-		//database2.drop();
 		DalStatusManager.getHaStatus().setEnabled(false);
+		DalQueryDaoMySqlTest.tearDownAfterClass();
 	}
 	
 	@Before
 	public void setUp() throws Exception {
 		markCount = 0;
-		database.mock();
-		//database2.mock();
+		new DalQueryDaoMySqlTest().setUp();
 	}
 	
 	@After
 	public void tearDown() throws Exception {
-		database.clear();
-		//database2.clear();
+		new DalQueryDaoMySqlTest().tearDown();
 	}
 
 	@Test
 	public void testNotRetryNotFailOver(){
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = 0;
 		try{
-			count = database.getClient().query(sql, new StatementParameters(), hints,
+			count = database.query(sql, new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
@@ -87,10 +87,9 @@ public class HATest {
 	@Test
 	public void testAllRetryFailed() {
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = 0;
 		try {
-			count = database.getClient().query(sql, new StatementParameters(), hints,
+			count = database.query(sql, new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {
@@ -108,10 +107,9 @@ public class HATest {
 	@Test
 	public void testTheSecondRetrySuccess() {
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database.getTableName();
 		Integer count = 0;
 		try{
-			count = database.getClient().query(sql, new StatementParameters(),
+			count = database.query(sql, new StatementParameters(),
 				hints, new DalResultSetExtractor<Integer>() {
 					@Override
 					public Integer extract(ResultSet rs) throws SQLException {						
@@ -131,10 +129,9 @@ public class HATest {
 	@Test
 	public void testTheSecondFailOverSuccess() throws SQLException {
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
 		try{ 
-			count = database2.getClient().query(sql,
+			count = database2.query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
@@ -159,10 +156,9 @@ public class HATest {
 	@Test
 	public void testAllFailOverFailed(){
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
 		try{
-			count = database3.getClient().query(sql,
+			count = database3.query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
@@ -179,9 +175,8 @@ public class HATest {
 	@Test
 	public void testRetryFailOverDisabled(){
 		hints = new DalHints();
-		String sql = "SELECT * from " + database2.getTableName();
 		try {
-			database2.getClient().query(sql,
+			database2.query(sql,
 					new StatementParameters(), hints,
 					new DalResultSetExtractor<String>() {
 						@Override
@@ -198,10 +193,9 @@ public class HATest {
 	@Test
 	public void testFirstRetrySecondeFailOver() {
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
 		try{ 
-			count = database2.getClient().query(sql,
+			count = database2.query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
@@ -229,12 +223,11 @@ public class HATest {
 
 	@Test
 	public void testHAWithMarkdowns() throws Exception{
-		DalStatusManager.getDataSourceStatus("ha_test_1").setManualMarkdown(true);
+		DalStatusManager.getDataSourceStatus("MySqlShard_1").setManualMarkdown(true);
 		hints = new DalHints();
-		String sql = "SELECT Count(*) from " + database2.getTableName();
 		Integer count = 0;
 		try{ 
-			count = database2.getClient().query(sql,
+			count = database2.query(sql,
 				new StatementParameters(), hints,
 				new DalResultSetExtractor<Integer>() {
 					@Override
@@ -258,7 +251,7 @@ public class HATest {
 				});
 		}catch(SQLException e){ }
 		Assert.assertEquals(3, count ==null ? 0 : count.intValue());
-		DalStatusManager.getDataSourceStatus("ha_test_1").setManualMarkdown(false);
+		DalStatusManager.getDataSourceStatus("MySqlShard_1").setManualMarkdown(false);
 	}
 	
 	private SQLException createException(int errorCode) {

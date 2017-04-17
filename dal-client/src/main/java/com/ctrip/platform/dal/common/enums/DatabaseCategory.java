@@ -141,6 +141,7 @@ public enum DatabaseCategory {
 	public Set<Integer> getDefaultErrorCodes() {
 		Set<Integer> errorCodes = getDefaultRetriableErrorCodes();
 		errorCodes.addAll(retriableCodeSet);
+		errorCodes.addAll(failOverableCodeSet);
 		return errorCodes;
 	}
 	

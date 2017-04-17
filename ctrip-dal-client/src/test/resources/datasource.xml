@@ -17,7 +17,7 @@
               validationInterval="30000"
               timeBetweenEvictionRunsMillis="5000"
               maxActive="100"
-              minIdle="1"
+              minIdle="10"
               maxWait="500"
               initialSize="1"
               removeAbandonedTimeout="60"
@@ -26,7 +26,7 @@
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
 	<Datasource name="SimpleShard_0"
-              testWhileIdle="false"
+              testWhileIdle="true"
               testOnBorrow="false"
               testOnReturn="false"
               validationQuery="SELECT 1"

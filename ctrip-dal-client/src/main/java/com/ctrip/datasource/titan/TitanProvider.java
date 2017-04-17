@@ -61,6 +61,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	public static final String APPID = "appid";
 	public static final String TIMEOUT = "timeout";
 	public static final String USE_LOCAL_CONFIG = "useLocalConfig";
+	public static final String OVERWRITE_DATASOURCE_CONFIG = "overwriteDSConfig";
 	private static final String PROD_SUFFIX = "_SH";
 	
 	private String svcUrl;
@@ -68,6 +69,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 	private String subEnv;
 	private int timeout;
 	private boolean useLocal;
+	private boolean overwriteDSConfig;
 	private ConnectionStringParser parser = new ConnectionStringParser();
 	private boolean isDebug;
 
@@ -109,6 +111,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		
 		useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
 		info("Use local: " +useLocal);
+		
+		overwriteDSConfig = settings.containsKey(OVERWRITE_DATASOURCE_CONFIG) ? Boolean.parseBoolean(settings.get(OVERWRITE_DATASOURCE_CONFIG)) : true;
 		
 		String timeoutStr = settings.get(TIMEOUT);
 		timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
@@ -272,7 +276,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 		info("connectionProperties: " + pc.getConnectionProperties());
 		
 		// Check minIdle
-		if(pc.getMinIdle() != DatabasePoolConfigParser.DEFAULT_MINIDLE) {
+		if(overwriteDSConfig && pc.getMinIdle() != DatabasePoolConfigParser.DEFAULT_MINIDLE) {
 			warn("minIdle: " + pc.getMinIdle());
 			warn("minIdle changed to " + DatabasePoolConfigParser.DEFAULT_MINIDLE);
 			pc.setMinIdle(DatabasePoolConfigParser.DEFAULT_MINIDLE);
@@ -280,7 +284,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			info("minIdle: " + pc.getMinIdle());
 		
 		// Check maxAge
-		if(pc.getMaxAge() > DatabasePoolConfigParser.DEFAULT_MAXAGE) {
+		if(overwriteDSConfig && pc.getMaxAge() > DatabasePoolConfigParser.DEFAULT_MAXAGE) {
 			warn("maxAge: " + pc.getMaxAge());
 			warn("maxAge changed to " + DatabasePoolConfigParser.DEFAULT_MAXAGE);
 			pc.setMaxAge(DatabasePoolConfigParser.DEFAULT_MAXAGE);
@@ -288,7 +292,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 			info("maxAge: " + pc.getMaxAge());
 		
 		// Check testWhileIdle
-		if(pc.isTestWhileIdle() != DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE) {
+		if(overwriteDSConfig && pc.isTestWhileIdle() != DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE) {
 			warn("testWhileIdle: " + pc.isTestWhileIdle());
 			warn("testWhileIdle changed to " + DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
 			pc.setTestWhileIdle(DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);

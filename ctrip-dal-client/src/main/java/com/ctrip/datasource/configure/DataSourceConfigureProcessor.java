@@ -13,9 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceConfigureProcessor.class);
-    private static final String DAL_APPNAME = "FX.DAL";
-    private static final String DAL_DATASOURCE_CONFIG = "FX.DAL.Datasource";
-    private static final String SEPARATOR = ".";
+    private static final String DAL_APPNAME = "fx_dal";
+    private static final String DAL_DATASOURCE_CONFIG = "dal.datasource.properties";
+    private static final String SEPARATOR = "\\.";
     private static DatabasePoolConfig globalPoolConfig = null;
     private static DatabasePoolConfig appPoolConfig = null;
     private static Map<String, DatabasePoolConfig> datasourcePoolConfig = null;
@@ -31,8 +31,9 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
             MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_CONFIG, null);
             if (config != null) {
                 Map<String, String> datasource = config.asMap();
+                Map<String, String> map = new HashMap<>(datasource);    //avoid UnsupportedOperationException
                 globalPoolConfig = new DatabasePoolConfig();
-                setDataSourceConfig(globalPoolConfig, datasource);
+                setDataSourceConfig(globalPoolConfig, map);
             }
         } catch (Throwable e) {
             logger.warn("setGlobalDataSourceConfig error:" + e.getMessage());
@@ -45,8 +46,8 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
             if (config != null) {
                 Map<String, String> map = config.asMap();
                 Map<String, String> datasource = new HashMap<>();   //app level
-                Map<String, Map<String, String>> datasourceMap = new HashMap<>();   //dataSource level
-                processConfig(map, datasource, datasourceMap);
+                Map<String, Map<String, String>> datasourceMap = new HashMap<>();   //datasource level
+                processAppDatasourceConfig(map, datasource, datasourceMap);
                 appPoolConfig = new DatabasePoolConfig();
                 setDataSourceConfig(appPoolConfig, datasource);
                 datasourcePoolConfig = new ConcurrentHashMap<>();
@@ -58,8 +59,9 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
     }
 
     private static void setDataSourceConfig(DatabasePoolConfig poolConfig, Map<String, String> datasource) {
-        if (datasource.size() == 0)
+        if (poolConfig == null || datasource.size() == 0)
             return;
+
         poolConfig.setMap(datasource);
         //PoolProperties
         /*
@@ -73,7 +75,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
     }
 
     private static void setDataSourceConfigMap(Map<String, DatabasePoolConfig> poolConfigMap, Map<String, Map<String, String>> datasourceMap) {
-        if (datasourceMap.size() == 0)
+        if (poolConfigMap == null || datasourceMap.size() == 0)
             return;
         for (Map.Entry<String, Map<String, String>> entry : datasourceMap.entrySet()) {
             DatabasePoolConfig config = new DatabasePoolConfig();
@@ -82,7 +84,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
         }
     }
 
-    private static void processConfig(Map<String, String> map, Map<String, String> datasource, Map<String, Map<String, String>> datasourceMap) {
+    private static void processAppDatasourceConfig(Map<String, String> map, Map<String, String> datasource, Map<String, Map<String, String>> datasourceMap) {
         if (map == null || map.size() == 0)
             return;
         for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -96,6 +98,57 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
                 Map<String, String> temp = datasourceMap.get(datasourceName);
                 temp.put(array[1], entry.getValue());
             }
+        }
+    }
+
+    /*
+    * Input parameter 'DatabasePoolConfig config' currently indicates the datasource config which read from datasource.xml
+    * Override order: Config center global datasource <-- datasource.xml <-- Config center app datasource <-- Config center per datasource
+    */
+    public static DatabasePoolConfig getDatabasePoolConfig(DatabasePoolConfig config) {
+        DatabasePoolConfig c = cloneDatabasePoolConfig(globalPoolConfig);
+        if (config != null)
+            overrideDatabasePoolConfig(c, config);
+        if (appPoolConfig != null)
+            overrideDatabasePoolConfig(c, appPoolConfig);
+        String name = config.getName();
+        if (name != null && datasourcePoolConfig != null) {
+            DatabasePoolConfig poolConfig = datasourcePoolConfig.get(name);
+            if (poolConfig != null)
+                overrideDatabasePoolConfig(c, poolConfig);
+        }
+
+        Map<String, String> datasource = c.getMap();
+        PoolProperties prop = c.getPoolProperties();
+        setPoolProperties(datasource, prop);
+        return c;
+    }
+
+    private static DatabasePoolConfig cloneDatabasePoolConfig(DatabasePoolConfig config) {
+        DatabasePoolConfig c = new DatabasePoolConfig();
+        if (config == null)
+            return c;
+        c.setName(config.getName());
+        c.setMap(config.getMap());
+        c.setPoolProperties(config.getPoolProperties());
+        c.setOption(config.getOption());
+        return c;
+    }
+
+    private static void overrideDatabasePoolConfig(DatabasePoolConfig lowlevel, DatabasePoolConfig highlevel) {
+        if (lowlevel == null || highlevel == null)
+            return;
+        String option = highlevel.getOption();
+        if (option != null)
+            lowlevel.setOption(option);
+        Map<String, String> lowlevelMap = lowlevel.getMap();
+        Map<String, String> highlevelMap = highlevel.getMap();
+        if (lowlevelMap == null || highlevelMap == null)
+            return;
+        for (Map.Entry<String, String> entry : highlevelMap.entrySet()) {
+            String key = entry.getKey();
+            if (lowlevelMap.containsKey(key))
+                lowlevelMap.put(key, entry.getValue());     //override entry of map
         }
     }
 
@@ -174,53 +227,6 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
         String initSQL = datasource.get(INIT_SQL2);
         if (initSQL != null)
             prop.setInitSQL(initSQL);
-    }
-
-    private static void overrideDatabasePoolConfig(DatabasePoolConfig lowlevel, DatabasePoolConfig highlevel) {
-        if (lowlevel == null || highlevel == null)
-            return;
-        String option = highlevel.getOption();
-        if (option != null)
-            lowlevel.setOption(option);
-        Map<String, String> lowlevelMap = lowlevel.getMap();
-        Map<String, String> highlevelMap = highlevel.getMap();
-        if (lowlevelMap == null || highlevelMap == null)
-            return;
-        for (Map.Entry<String, String> entry : highlevelMap.entrySet()) {
-            String key = entry.getKey();
-            if (lowlevelMap.containsKey(key))
-                lowlevelMap.put(key, entry.getValue());     //override entry of map
-        }
-    }
-
-    /*
-    * Input parameter 'DatabasePoolConfig config' currently indicates the datasource config which read from datasource.xml
-    * Override order: Config center global datasource <-- datasource.xml <-- Config center app datasource <-- Config center per datasource
-    */
-    public static DatabasePoolConfig getDatabasePoolConfig(DatabasePoolConfig config) {
-        DatabasePoolConfig c = cloneDatabasePoolConfig(globalPoolConfig);
-        if (config != null)
-            overrideDatabasePoolConfig(c, config);
-        if (appPoolConfig != null)
-            overrideDatabasePoolConfig(c, appPoolConfig);
-        String name = config.getName();
-        if (name != null) {
-            DatabasePoolConfig poolConfig = datasourcePoolConfig.get(name);
-            if (poolConfig != null)
-                overrideDatabasePoolConfig(c, poolConfig);
-        }
-        return c;
-    }
-
-    private static DatabasePoolConfig cloneDatabasePoolConfig(DatabasePoolConfig config) {
-        DatabasePoolConfig c = new DatabasePoolConfig();
-        if (config == null)
-            return c;
-        c.setName(config.getName());
-        c.setMap(config.getMap());
-        c.setPoolProperties(config.getPoolProperties());
-        c.setOption(config.getOption());
-        return c;
     }
 
 }

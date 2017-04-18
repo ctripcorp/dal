@@ -122,6 +122,7 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			pojos.add(new TestPojo(0));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			assertFalse(test.isCrossShard());
 			
 			// Shuffled in two shards
@@ -129,14 +130,17 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			pojos.add(new TestPojo(1));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			assertTrue(test.isCrossShard());
 
 			// No shard
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr", "", new DalHints(), new ArrayList<TestPojo>(), new TestBulkTask());
+			test.validate();
 			assertFalse(test.isCrossShard());
 
 			// Shard at table level
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_tableShard", "", new DalHints(), new ArrayList<TestPojo>(), new TestBulkTask());
+			test.validate();
 			assertFalse(test.isCrossShard());
 			
 		} catch (SQLException e) {
@@ -154,6 +158,7 @@ public class DalBulkTaskRequestTest {
 			// Empty
 			pojos = new ArrayList<TestPojo>();
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			test.isCrossShard();
 			task = test.createTask();
 			assertEquals(0, task.call().intValue());
@@ -163,6 +168,7 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			pojos.add(new TestPojo(0));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			test.isCrossShard();
 			task = test.createTask();
 			assertNotNull(task);
@@ -174,6 +180,7 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints().inShard(1), pojos, new TestBulkTask());
 			// To create pojos
+			test.validate();
 			test.isCrossShard();
 			task = test.createTask();
 			assertNotNull(task);

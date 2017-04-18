@@ -44,12 +44,12 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			throw new DalException(ErrorCode.ValidateTask);
 
 		dbShardMerger = task.createMerger();
+		daoPojos = task.getPojosFields(rawPojos);
+		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
 	}
 	
 	@Override
 	public boolean isCrossShard() throws SQLException {		
-		daoPojos = task.getPojosFields(rawPojos);
-		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
 		if(isAlreadySharded(logicDbName, rawTableName, hints))
 			return false;
 		

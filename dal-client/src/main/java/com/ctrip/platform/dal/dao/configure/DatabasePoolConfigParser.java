@@ -55,7 +55,7 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
     public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
             "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
 
-    private Map<String, DatabasePoolConifg> poolConfigs = new ConcurrentHashMap<String, DatabasePoolConifg>();
+    private Map<String, DatabasePoolConfig> poolConfigs = new ConcurrentHashMap<String, DatabasePoolConfig>();
 
     private String databaseConfigLocation = null;
 
@@ -82,7 +82,7 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
         return poolConfigParser;
     }
 
-    public DatabasePoolConifg getDatabasePoolConifg(String name) {
+    public DatabasePoolConfig getDatabasePoolConifg(String name) {
         return poolConfigs.get(name);
     }
 
@@ -90,14 +90,14 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
         return poolConfigs.containsKey(name);
     }
 
-    public void addDatabasePoolConifg(String name, DatabasePoolConifg config) {
+    public void addDatabasePoolConifg(String name, DatabasePoolConfig config) {
         poolConfigs.put(name, config);
     }
 
     public void copyDatabasePoolConifg(String sampleName, String newName) {
-        DatabasePoolConifg oldConfig = poolConfigs.get(sampleName);
+        DatabasePoolConfig oldConfig = poolConfigs.get(sampleName);
 
-        DatabasePoolConifg newConfig = new DatabasePoolConifg();
+        DatabasePoolConfig newConfig = new DatabasePoolConfig();
         newConfig.setName(newName);
         newConfig.setPoolProperties(oldConfig.getPoolProperties());
         newConfig.setOption(oldConfig.getOption());
@@ -131,13 +131,13 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
         }
         List<Node> resourceList = getChildNodes(root, RESOURCE_NODE);
         for (Node resource : resourceList) {
-            DatabasePoolConifg poolConfig = parseResource(resource);
+            DatabasePoolConfig poolConfig = parseResource(resource);
             poolConfigs.put(poolConfig.getName(), poolConfig);
         }
     }
 
-    private DatabasePoolConifg parseResource(Node resource) {
-        DatabasePoolConifg poolConfig = new DatabasePoolConifg();
+    private DatabasePoolConfig parseResource(Node resource) {
+        DatabasePoolConfig poolConfig = new DatabasePoolConfig();
         poolConfig.setName(getAttribute(resource, NAME));
         PoolProperties prop = poolConfig.getPoolProperties();
         // The following are key connection parameters, developer do not need to provide them in case the configure provider is set

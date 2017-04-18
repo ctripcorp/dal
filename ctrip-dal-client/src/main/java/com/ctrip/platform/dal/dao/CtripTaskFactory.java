@@ -32,8 +32,8 @@ public class CtripTaskFactory implements DalTaskFactory {
 	private DefaultTaskFactory defaultFactory;
 	private static final String CALL_SP_BY_NAME = "callSpbyName";
 	
-	// Default disable, can be open by settings
-	static boolean callSpbyName = false;
+	// Default enabled, to compatible with current behavior
+	static boolean callSpbyName = true;
 	
 	@Override
 	public void initialize(Map<String, String> settings) {
@@ -41,7 +41,9 @@ public class CtripTaskFactory implements DalTaskFactory {
 		defaultFactory.initialize(settings);
 		// TO integrate VI here, it is not a good solution
 		ConfigBeanFactory.init();
-		callSpbyName = Boolean.parseBoolean(defaultFactory.getProperty(CALL_SP_BY_NAME));
+		String callSpbyNameOpt = defaultFactory.getProperty(CALL_SP_BY_NAME);
+		if(callSpbyNameOpt != null)
+			callSpbyName = Boolean.parseBoolean(callSpbyNameOpt);
 	}
 
 	@Override

@@ -1,16 +1,16 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
+import com.ctrip.platform.dal.dao.task.BulkTaskContext;
 
 public class BatchInsertSp3Task<T> extends AbstractIntArrayBulkTask<T> {
 	private static final String INSERT_SP3_TPL = "sp3_%s_i";
 
 	@Override
-	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> tastContext) throws SQLException {
 		String insertSP3 = String.format(INSERT_SP3_TPL, getRawTableName(hints));
 
 		String callSql = buildCallSql(insertSP3, parser.getColumnNames().length);

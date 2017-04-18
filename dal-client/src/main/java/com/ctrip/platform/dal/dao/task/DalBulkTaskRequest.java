@@ -23,6 +23,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	private List<T> rawPojos;
 	private List<Map<String, ?>> daoPojos;
 	private BulkTask<K, T> task;
+	private BulkTaskContext<T> taskContext;
 	private BulkTaskResultMerger<K> dbShardMerger;
 	Map<String, Map<Integer, Map<String, ?>>> shuffled;
 	
@@ -46,9 +47,9 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	}
 	
 	@Override
-	public boolean isCrossShard() throws SQLException {
+	public boolean isCrossShard() throws SQLException {		
 		daoPojos = task.getPojosFields(rawPojos);
-		
+		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
 		if(isAlreadySharded(logicDbName, rawTableName, hints))
 			return false;
 		
@@ -70,10 +71,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		// If only one shard is shuffled
 		if(shuffled != null) {
 			if(shuffled.size() == 0)
-				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), rawPojos, task);
+				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), task, taskContext);
 
 			String shard = shuffled.keySet().iterator().next();
-			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), rawPojos, task);
+			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), task, taskContext);
 		}
 	
 		// Convert to index map
@@ -81,7 +82,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		for(int i = 0; i < daoPojos.size(); i++)
 			daoPojosMap.put(i, daoPojos.get(i));
 
-		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, rawPojos, task);
+		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, task, taskContext);
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			dbShardMerger.recordPartial(shard, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 			
 			tasks.put(shard, new BulkTaskCallable<>(
-					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), rawPojos, task));
+					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task, taskContext));
 		}
 
 		return tasks; 
@@ -120,16 +121,16 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		private String rawTableName;
 		private DalHints hints;
 		private Map<Integer, Map<String, ?>> shaffled;
-		private List<T> rawPojos;
 		private BulkTask<K, T> task;
+		private BulkTaskContext<T> taskContext;
 
-		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, List<T> rawPojos, BulkTask<K, T> task){
+		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTask<K, T> task, BulkTaskContext<T> taskContext){
 			this.logicDbName = logicDbName;
 			this.rawTableName = rawTableName;
 			this.hints = hints;
 			this.shaffled = shaffled;
-			this.rawPojos = rawPojos;
 			this.task = task;
+			this.taskContext = taskContext;
 		}
 
 		@Override
@@ -139,7 +140,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			if(isTableShardingEnabled(logicDbName, rawTableName)) {
 				return executeByTableShards();
 			}else{
-				return task.execute(hints, shaffled, rawPojos);
+				return task.execute(hints, shaffled, taskContext);
 			}
 		}
 
@@ -160,7 +161,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 				tmpHints.inTableShard(curTableShardId);
 				merger.recordPartial(curTableShardId, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 				
-				K partial = task.execute(tmpHints, pojosInShard, rawPojos);
+				K partial = task.execute(tmpHints, pojosInShard, taskContext);
 				merger.addPartial(curTableShardId, partial);
 				
 			}

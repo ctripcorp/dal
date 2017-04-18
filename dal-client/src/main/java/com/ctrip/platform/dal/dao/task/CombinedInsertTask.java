@@ -18,11 +18,19 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 	}	
 
 	@Override
-	public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
+	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) {
+		BulkTaskContext<T> context = new BulkTaskContext<T>(rawPojos);
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
+		context.setUnqualifiedColumns(unqualifiedColumns);
+		return context;
+	}
+
+	@Override
+	public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		StringBuilder values = new StringBuilder();
 
-		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
+		Set<String> unqualifiedColumns = taskContext.getUnqualifiedColumns();
 		
 		List<String> finalInsertableColumns = buildValidColumnsForInsert(unqualifiedColumns);
 		

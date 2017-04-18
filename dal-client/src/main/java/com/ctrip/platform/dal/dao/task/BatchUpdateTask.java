@@ -20,15 +20,26 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 
 	@Override
-	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
-		boolean isUpdatableEntity = rawPojos.get(0) instanceof UpdatableEntity;
-		Map<String, Boolean> pojoFieldStatus =  isUpdatableEntity ?
-				filterUpdatableEntity(hints, daoPojos, rawPojos) :
+	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
+		BulkTaskContext<T> taskContext = new BulkTaskContext<T>(rawPojos);
+		
+		Map<String, Boolean> pojoFieldStatus = taskContext.isUpdatableEntity() ?
+				filterUpdatableEntity(hints, rawPojos) :
 					filterNullColumns(hints, daoPojos);
 
 		if(pojoFieldStatus.size() == 0)
 			throw new DalException(ErrorCode.ValidateFieldCount);
 		
+		taskContext.setPojoFieldStatus(pojoFieldStatus);
+		return taskContext;
+	}
+
+	@Override
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext) throws SQLException {
+		List<T> rawPojos = taskContext.getRawPojos();
+		boolean isUpdatableEntity = taskContext.isUpdatableEntity();
+		Map<String, Boolean> pojoFieldStatus = taskContext.getPojoFieldStatus();
+
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		String[] updateColumnNames = pojoFieldStatus.keySet().toArray(new String[pojoFieldStatus.size()]);
@@ -78,7 +89,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 	 * C3 and C4 will using set value
 	 * C2 and C5 will use set ifnull
 	 */
-	private Map<String, Boolean> filterUpdatableEntity(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
+	private Map<String, Boolean> filterUpdatableEntity(DalHints hints, List<T> rawPojos) {
 		Set<String> qualifiedColumns = filterColumns(hints);
 		Map<String, Boolean> columnStatus = new HashMap<String, Boolean>();
 		for(String column: qualifiedColumns)
@@ -91,11 +102,11 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		Set<String> unChangedFields = new HashSet<>(qualifiedColumns);
 		Set<String> changedFields = new HashSet<>(qualifiedColumns);
 		
-		for (Integer index :daoPojos.keySet()) {
+		for (T pojo: rawPojos) {
 			if(unChangedFields.isEmpty())
 				break;
 			
-			Set<String> updatedColumns = getUpdatedColumns(rawPojos.get(index));
+			Set<String> updatedColumns = getUpdatedColumns(pojo);
 			if(updatedColumns.size() == 0)
 				continue;
 			
@@ -115,7 +126,7 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		return columnStatus;
 	}
 
-	private Map<String, Boolean> filterNullColumns(DalHints hints, Map<Integer, Map<String, ?>> daoPojos) throws DalException {
+	private Map<String, Boolean> filterNullColumns(DalHints hints, List<Map<String, ?>> daoPojos) {
 		Set<String> qualifiedColumns = filterColumns(hints);
 		Map<String, Boolean> columnStatus = new HashMap<String, Boolean>();
 		for(String column: qualifiedColumns)
@@ -129,11 +140,10 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		Set<String> nullFields = new HashSet<>(qualifiedColumns);
 		Set<String> notNullFields = new HashSet<>(nullFields);
 		
-		for (Integer index :daoPojos.keySet()) {
+		for (Map<String, ?> pojo: daoPojos) {
 			if(notNullFields.isEmpty() && nullFields.isEmpty())
 				break;
 			
-			Map<String, ?> pojo = daoPojos.get(index);
 			for (int i = 0; i < columnsToCheck.length; i++) {
 				String colName = columnsToCheck[i];
 				boolean isNull = pojo.get(colName) == null;

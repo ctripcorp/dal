@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.task.BatchInsertTask;
+import com.ctrip.platform.dal.dao.task.BulkTaskContext;
 
 public class BatchInsertTaskTestStub extends TaskTestStub {
 	public BatchInsertTaskTestStub (String dbName) {
@@ -33,7 +34,8 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int[] result = test.execute(hints, getAllMap(), getAll());
+			BulkTaskContext<ClientTestModel> ctx = test.createTaskContext(hints, test.getPojosFields(getAll()), getAll());
+			int[] result = test.execute(hints, getAllMap(), ctx);
 			assertEquals(3, result.length);
 			assertEquals(6, getCount());
 		} catch (SQLException e) {
@@ -58,7 +60,8 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 				((Map)pojo).put("id", new Integer(i++));
 			}
 			
-			int[] result = test.execute(hints, pojos, getAll());
+			BulkTaskContext<ClientTestModel> ctx = test.createTaskContext(hints, test.getPojosFields(getAll()), getAll());
+			int[] result = test.execute(hints, pojos, ctx);
 			assertEquals(3, result.length);
 			assertEquals(6, getCount());
 			
@@ -92,7 +95,8 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 			List<ClientTestModel> old = getAll();
 			
 			Thread.sleep(1000);
-			test.execute(hints, getAllMap(), getAll(NonInsertableVersionModel.class));
+			BulkTaskContext<NonInsertableVersionModel> ctx = test.createTaskContext(hints, test.getPojosFields(getAll(NonInsertableVersionModel.class)), getAll(NonInsertableVersionModel.class));
+			test.execute(hints, getAllMap(), ctx);
 			
 			assertEquals(3+3, getCount());
 			
@@ -122,13 +126,15 @@ public class BatchInsertTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		try {
 			List<NonInsertableVersionModel> models = getAll(NonInsertableVersionModel.class);
+			BulkTaskContext<NonInsertableVersionModel> ctx = test.createTaskContext(hints, test.getPojosFields(models), models);
 			for(NonInsertableVersionModel model: models) {
 				model.setType(null);
 				model.setDbIndex(null);
 				model.setTableIndex(null);
 			}
 			// Type Address, tableIndex will not be included in insert
-			test.execute(hints, test.getPojosFieldsMap(models), models);
+			
+			test.execute(hints, test.getPojosFieldsMap(models), ctx);
 			assertEquals(3+3, getCount());
 			
 			models = getAll(NonInsertableVersionModel.class).subList(3, 6);

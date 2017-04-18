@@ -11,8 +11,6 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.UpdatableEntity;
-import com.ctrip.platform.dal.exceptions.DalException;
 
 public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
@@ -61,7 +59,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		return finalalidColumnsForInsert;
 	}
 	
-	public Set<String> filterUnqualifiedColumns(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
+	public Set<String> filterUnqualifiedColumns(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) {
 		Set<String> unqualifiedColumns = new HashSet<>(notInsertableColumns);
 		
 		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled())
@@ -74,7 +72,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		Set<String> nullColumns = new HashSet<>(insertableColumns);
 		String[] columnsToCheck = nullColumns.toArray(new String[nullColumns.size()]);
 		boolean changed = false;
-		for (Integer index :daoPojos.keySet()) {
+		for (Map<String, ?> pojo: daoPojos) {
 			if(nullColumns.isEmpty())
 				break;
 
@@ -83,7 +81,6 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 				changed = false;
 			}
 			
-			Map<String, ?> pojo = daoPojos.get(index);
 			for (int i = 0; i < columnsToCheck.length; i++) {
 				String colName = columnsToCheck[i];
 				if(pojo.get(colName) != null) {

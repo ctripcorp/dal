@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,9 +15,9 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.task.BulkTaskContext;
 import com.ctrip.platform.dal.dao.task.CombinedInsertTask;
 
 //TODO handle keyholder and set nocount on issue
@@ -34,6 +35,11 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		assertEquals(0, test.getEmptyValue().intValue());
 	}
 	
+	private <T> Integer execute(CombinedInsertTask<T> test, DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
+		BulkTaskContext<T> taskContext = test.createTaskContext(hints, test.getPojosFields(rawPojos), rawPojos);
+		return test.execute(hints, test.getPojosFieldsMap(rawPojos), taskContext);
+	}
+	
 	@Test
 	public void testExecute() {
 		CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
@@ -42,7 +48,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
 		try {
-			test.execute(hints, getAllMap(), getAll());
+			execute(test, hints, getAllMap(), getAll());
 			if(enableKeyHolder){
 				// You have to merge before get size
 				assertEquals(3, hints.getKeyHolder().size());
@@ -65,20 +71,20 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 			if(this instanceof CombinedInsertTaskSqlSvrTest)
 				SqlServerTestInitializer.turnOnIdentityInsert();
 
-			Map<Integer, Map<String, ?>> pojos = getAllMap();
+			List<ClientTestModel> pojos = getAll();
 			int i = 111;
-			for(Map<String, ?> pojo: pojos.values()) {
-				((Map)pojo).put("id", new Integer(i++));
+			for(ClientTestModel pojo: pojos) {
+				pojo.setId(new Integer(i++));
 			}
 			
-			test.execute(hints, pojos, getAll());
+			execute(test, hints, null, pojos);
 			assertEquals(6, getCount());
 			
-			pojos = getAllMap();
+			pojos = getAll();
 			Set<Integer> ids = new HashSet<>();
 			
-			for(Map<String, ?> pojo: pojos.values()) {
-				ids.add((Integer)pojo.get("id"));
+			for(ClientTestModel pojo: pojos) {
+				ids.add(pojo.getId());
 			}
 			
 			assertTrue(ids.contains(111));
@@ -109,7 +115,7 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());
 		try {
-			test.execute(hints, getAllMap(), getAll(NonInsertableVersionModel.class));
+			execute(test, hints, getAllMap(), getAll(NonInsertableVersionModel.class));
 			if(enableKeyHolder){
 				// You have to merge before get size
 				assertEquals(3, hints.getKeyHolder().size());

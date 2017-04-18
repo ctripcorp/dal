@@ -17,11 +17,19 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 	}	
 
 	@Override
-	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
+	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) {
+		BulkTaskContext<T> context = new BulkTaskContext<T>(rawPojos);
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
+		context.setUnqualifiedColumns(unqualifiedColumns);
+		return context;
+	}
+
+	@Override
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext) throws SQLException {
 		StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
 		int i = 0;
 		
-		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
+		Set<String> unqualifiedColumns = taskContext.getUnqualifiedColumns();
 		
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> pojo = daoPojos.get(index);

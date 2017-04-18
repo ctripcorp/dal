@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.task.BulkTask;
+import com.ctrip.platform.dal.dao.task.BulkTaskContext;
 import com.ctrip.platform.dal.dao.task.BulkTaskResultMerger;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
 import com.ctrip.platform.dal.dao.task.ShardedIntResultMerger;
@@ -50,13 +51,20 @@ public class DalBulkTaskRequestTest {
 		}
 
 		@Override
-		public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, List<TestPojo> raw) throws SQLException {
+		public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTaskContext<TestPojo> ctx) throws SQLException {
 			return shaffled.size();
 		}
 
 		@Override
 		public BulkTaskResultMerger<Integer> createMerger() {
 			return new ShardedIntResultMerger();
+		}
+
+		@Override
+		public BulkTaskContext<TestPojo> createTaskContext(DalHints hints,
+				List<Map<String, ?>> daoPojos, List<TestPojo> rawPojos)
+				throws SQLException {
+			return new BulkTaskContext(rawPojos);
 		}
 	}
 
@@ -114,6 +122,7 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			pojos.add(new TestPojo(0));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			assertFalse(test.isCrossShard());
 			
 			// Shuffled in two shards
@@ -121,14 +130,17 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			pojos.add(new TestPojo(1));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			assertTrue(test.isCrossShard());
 
 			// No shard
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr", "", new DalHints(), new ArrayList<TestPojo>(), new TestBulkTask());
+			test.validate();
 			assertFalse(test.isCrossShard());
 
 			// Shard at table level
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_tableShard", "", new DalHints(), new ArrayList<TestPojo>(), new TestBulkTask());
+			test.validate();
 			assertFalse(test.isCrossShard());
 			
 		} catch (SQLException e) {
@@ -146,6 +158,7 @@ public class DalBulkTaskRequestTest {
 			// Empty
 			pojos = new ArrayList<TestPojo>();
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			test.isCrossShard();
 			task = test.createTask();
 			assertEquals(0, task.call().intValue());
@@ -155,6 +168,7 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			pojos.add(new TestPojo(0));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
+			test.validate();
 			test.isCrossShard();
 			task = test.createTask();
 			assertNotNull(task);
@@ -166,6 +180,7 @@ public class DalBulkTaskRequestTest {
 			pojos.add(new TestPojo(0));
 			test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints().inShard(1), pojos, new TestBulkTask());
 			// To create pojos
+			test.validate();
 			test.isCrossShard();
 			task = test.createTask();
 			assertNotNull(task);

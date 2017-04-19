@@ -139,6 +139,8 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
     private DatabasePoolConfig parseResource(Node resource) {
         DatabasePoolConfig poolConfig = new DatabasePoolConfig();
         poolConfig.setName(getAttribute(resource, NAME));
+        Map<String, String> map = new HashMap<>();
+        poolConfig.setMap(map);
         PoolProperties prop = poolConfig.getPoolProperties();
         // The following are key connection parameters, developer do not need to provide them in case the configure provider is set
         if (hasAttribute(resource, USER_NAME)) {
@@ -155,76 +157,113 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
         }
         // The following are common options
         if (hasAttribute(resource, TESTWHILEIDLE)) {
-            boolean testWhileIdle = Boolean.parseBoolean(getAttribute(resource, TESTWHILEIDLE));
+            String value = getAttribute(resource, TESTWHILEIDLE);
+            boolean testWhileIdle = Boolean.parseBoolean(value);
             prop.setTestWhileIdle(testWhileIdle);
+            map.put(TESTWHILEIDLE, value);
         }
         if (hasAttribute(resource, TESTONBORROW)) {
-            boolean testOnBorrow = Boolean.parseBoolean(getAttribute(resource, TESTONBORROW));
+            String value = getAttribute(resource, TESTONBORROW);
+            boolean testOnBorrow = Boolean.parseBoolean(value);
             prop.setTestOnBorrow(testOnBorrow);
+            map.put(TESTONBORROW, value);
         }
         if (hasAttribute(resource, TESTONRETURN)) {
-            boolean testOnReturn = Boolean.parseBoolean(getAttribute(resource, TESTONRETURN));
+            String value = getAttribute(resource, TESTONRETURN);
+            boolean testOnReturn = Boolean.parseBoolean(value);
             prop.setTestOnReturn(testOnReturn);
+            map.put(TESTONRETURN, value);
         }
         if (hasAttribute(resource, VALIDATIONQUERY)) {
             String validationQuery = getAttribute(resource, VALIDATIONQUERY);
             prop.setValidationQuery(validationQuery);
+            map.put(VALIDATIONQUERY, validationQuery);
         }
         if (hasAttribute(resource, VALIDATIONINTERVAL)) {
-            long validationInterval = Long.parseLong(getAttribute(resource, VALIDATIONINTERVAL));
+            String value = getAttribute(resource, VALIDATIONINTERVAL);
+            long validationInterval = Long.parseLong(value);
             prop.setValidationInterval(validationInterval);
+            map.put(VALIDATIONINTERVAL, value);
         }
         if (hasAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS)) {
-            int timeBetweenEvictionRunsMillis = Integer.parseInt(getAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS));
+            String value = getAttribute(resource, TIMEBETWEENEVICTIONRUNSMILLIS);
+            int timeBetweenEvictionRunsMillis = Integer.parseInt(value);
             prop.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+            map.put(TIMEBETWEENEVICTIONRUNSMILLIS, value);
         }
         if (hasAttribute(resource, MAX_AGE)) {
-            int maxAge = Integer.parseInt(getAttribute(resource, MAX_AGE));
+            String value = getAttribute(resource, MAX_AGE);
+            int maxAge = Integer.parseInt(value);
             prop.setMaxAge(maxAge);
+            map.put(MAX_AGE, value);
         }
         if (hasAttribute(resource, MAXACTIVE)) {
-            int maxActive = Integer.parseInt(getAttribute(resource, MAXACTIVE));
+            String value = getAttribute(resource, MAXACTIVE);
+            int maxActive = Integer.parseInt(value);
             prop.setMaxActive(maxActive);
+            map.put(MAXACTIVE, value);
         }
         if (hasAttribute(resource, MINIDLE)) {
-            int minIdle = Integer.parseInt(getAttribute(resource, MINIDLE));
+            String value = getAttribute(resource, MINIDLE);
+            int minIdle = Integer.parseInt(value);
             prop.setMinIdle(minIdle);
+            map.put(MINIDLE, value);
         }
         if (hasAttribute(resource, MAXWAIT)) {
-            int maxWait = Integer.parseInt(getAttribute(resource, MAXWAIT));
+            String value = getAttribute(resource, MAXWAIT);
+            int maxWait = Integer.parseInt(value);
             prop.setMaxWait(maxWait);
+            map.put(MAXWAIT, value);
         }
         if (hasAttribute(resource, INITIALSIZE)) {
-            int initialSize = Integer.parseInt(getAttribute(resource, INITIALSIZE));
+            String value = getAttribute(resource, INITIALSIZE);
+            int initialSize = Integer.parseInt(value);
             prop.setInitialSize(initialSize);
+            map.put(INITIALSIZE, value);
         }
         if (hasAttribute(resource, REMOVEABANDONEDTIMEOUT)) {
-            int removeAbandonedTimeout = Integer.parseInt(getAttribute(resource, REMOVEABANDONEDTIMEOUT));
+            String value = getAttribute(resource, REMOVEABANDONEDTIMEOUT);
+            int removeAbandonedTimeout = Integer.parseInt(value);
             prop.setRemoveAbandonedTimeout(removeAbandonedTimeout);
+            map.put(REMOVEABANDONEDTIMEOUT, value);
         }
         if (hasAttribute(resource, REMOVEABANDONED)) {
-            boolean removeAbandoned = Boolean.parseBoolean(getAttribute(resource, REMOVEABANDONED));
+            String value = getAttribute(resource, REMOVEABANDONED);
+            boolean removeAbandoned = Boolean.parseBoolean(value);
             prop.setRemoveAbandoned(removeAbandoned);
+            map.put(REMOVEABANDONED, value);
         }
         if (hasAttribute(resource, LOGABANDONED)) {
-            boolean logAbandoned = Boolean.parseBoolean(getAttribute(resource, LOGABANDONED));
+            String value = getAttribute(resource, LOGABANDONED);
+            boolean logAbandoned = Boolean.parseBoolean(value);
             prop.setLogAbandoned(logAbandoned);
+            map.put(LOGABANDONED, value);
         }
         if (hasAttribute(resource, MINEVICTABLEIDLETIMEMILLIS)) {
-            int minEvictableIdleTimeMillis = Integer.parseInt(getAttribute(resource, MINEVICTABLEIDLETIMEMILLIS));
+            String value = getAttribute(resource, MINEVICTABLEIDLETIMEMILLIS);
+            int minEvictableIdleTimeMillis = Integer.parseInt(value);
             prop.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+            map.put(MINEVICTABLEIDLETIMEMILLIS, value);
         }
         if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
-            prop.setConnectionProperties(getAttribute(resource, CONNECTIONPROPERTIES));
+            String value = getAttribute(resource, CONNECTIONPROPERTIES);
+            prop.setConnectionProperties(value);
+            map.put(CONNECTIONPROPERTIES, value);
         }
         if (hasAttribute(resource, INIT_SQL)) {
-            prop.setInitSQL(getAttribute(resource, INIT_SQL));
+            String value = getAttribute(resource, INIT_SQL);
+            prop.setInitSQL(value);
+            map.put(INIT_SQL, value);
         }
         if (hasAttribute(resource, INIT_SQL2)) {
-            prop.setInitSQL(getAttribute(resource, INIT_SQL2));
+            String value = getAttribute(resource, INIT_SQL2);
+            prop.setInitSQL(value);
+            map.put(INIT_SQL2, value);
         }
         if (hasAttribute(resource, OPTION)) {
-            poolConfig.setOption(getAttribute(resource, OPTION));
+            String value = getAttribute(resource, OPTION);
+            poolConfig.setOption(value);
+            map.put(OPTION, value);
         }
         return poolConfig;
     }

@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceConfigureProcessor.class);
     private static final String DAL_APPNAME = "fx_dal";
-    private static final String DAL_DATASOURCE_CONFIG = "dal.datasource.properties";
+    private static final String DAL_DATASOURCE_PROPERTIES = "dal.datasource.properties";
     private static final String SEPARATOR = "\\.";
     private static DatabasePoolConfig globalPoolConfig = null;
     private static DatabasePoolConfig appPoolConfig = null;
@@ -28,7 +28,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
 
     private static void setGlobalDataSourceConfig() {
         try {
-            MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_CONFIG, null);
+            MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null);
             if (config != null) {
                 Map<String, String> datasource = config.asMap();
                 Map<String, String> map = new HashMap<>(datasource);    //avoid UnsupportedOperationException
@@ -36,13 +36,13 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
                 setDataSourceConfig(globalPoolConfig, map);
             }
         } catch (Throwable e) {
-            logger.warn("setGlobalDataSourceConfig error:" + e.getMessage());
+            logger.warn(e.getMessage(), e);
         }
     }
 
     private static void setAppDataSourceConfig() {
         try {
-            MapConfig config = MapConfig.get(DAL_DATASOURCE_CONFIG);
+            MapConfig config = MapConfig.get(DAL_DATASOURCE_PROPERTIES);
             if (config != null) {
                 Map<String, String> map = config.asMap();
                 Map<String, String> datasource = new HashMap<>();   //app level
@@ -54,7 +54,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
                 setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);
             }
         } catch (Throwable e) {
-            logger.warn("getAppDataSourceConfig error:" + e.getMessage());
+            logger.warn(e.getMessage(), e);
         }
     }
 

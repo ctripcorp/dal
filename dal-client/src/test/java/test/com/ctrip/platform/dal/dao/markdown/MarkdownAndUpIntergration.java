@@ -56,7 +56,7 @@ public class MarkdownAndUpIntergration {
 		}
 		
 		//Mark up
-		Thread.sleep(1000 * 2);
+		Thread.sleep(1000 * 3);
 		
 		try{
 			this.testQuery(logicName);		
@@ -72,15 +72,16 @@ public class MarkdownAndUpIntergration {
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
 		
 		//Mark Down. It has 3 slaves
-		autoMarkdown("ha_test_1");
-		autoMarkdown("ha_test_2");
+		// We need to make it like oringal ha_test, ha_test_0, ha_test_1
+		autoMarkdown("MySqlShard_0");
+//		autoMarkdown("ha_test_2");
 		try{
 			this.testQuery(logicName);		
 		}catch(Exception e){
 			Assert.fail();
 		}
 		
-		autoMarkdown("ha_test");
+		autoMarkdown("MySqlShard_1");
 
 		try{
 			this.testQuery(logicName);

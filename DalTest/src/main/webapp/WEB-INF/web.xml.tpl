@@ -28,4 +28,7 @@
 	<listener>
 		<listener-class>com.ctrip.platform.dal.dao.helper.DalClientFactoryListener</listener-class>
 	</listener>
+	<!-- <listener>
+		<listener-class>com.ctrip.framework.vi.VIServletContextListener</listener-class>
+	</listener> -->
 </web-app>

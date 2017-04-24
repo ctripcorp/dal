@@ -1,5 +1,6 @@
 package com.ctrip.datasource.configure;
 
+import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import org.junit.Test;
 
@@ -31,5 +32,6 @@ public class DataSourceConfigureProcessorTest {
         map.put("minEvictableIdleTimeMillis", "30000");
         map.put("connectionProperties", "rewriteBatchedStatements=true;allowMultiQueries=true");
         config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
+        MessageManager.getInstance().shutdown();
     }
 }

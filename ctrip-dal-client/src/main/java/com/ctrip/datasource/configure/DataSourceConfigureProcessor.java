@@ -1,5 +1,6 @@
 package com.ctrip.datasource.configure;
 
+import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigConstants;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -34,6 +35,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
                 Map<String, String> map = new HashMap<>(datasource);    //avoid UnsupportedOperationException
                 globalPoolConfig = new DatabasePoolConfig();
                 setDataSourceConfig(globalPoolConfig, map);
+                logger.info("global datasource settings:" + mapToString(datasource));
             }
         } catch (Throwable e) {
             logger.warn(e.getMessage(), e);
@@ -52,6 +54,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
                 setDataSourceConfig(appPoolConfig, datasource);
                 datasourcePoolConfig = new ConcurrentHashMap<>();
                 setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);
+                logger.info("app datasource settings:" + mapToString(map));
             }
         } catch (Throwable e) {
             logger.warn(e.getMessage(), e);
@@ -107,15 +110,21 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
     */
     public static DatabasePoolConfig getDatabasePoolConfig(DatabasePoolConfig config) {
         DatabasePoolConfig c = cloneDatabasePoolConfig(globalPoolConfig);
-        if (config != null)
+        if (config != null) {
             overrideDatabasePoolConfig(c, config);
-        if (appPoolConfig != null)
+            logger.info("datasource.xml override:" + mapToString(c.getMap()));
+        }
+        if (appPoolConfig != null) {
             overrideDatabasePoolConfig(c, appPoolConfig);
+            logger.info("app level override:" + mapToString(c.getMap()));
+        }
         String name = config.getName();
         if (name != null && datasourcePoolConfig != null) {
             DatabasePoolConfig poolConfig = datasourcePoolConfig.get(name);
-            if (poolConfig != null)
+            if (poolConfig != null) {
                 overrideDatabasePoolConfig(c, poolConfig);
+                logger.info("datasource level override:" + c.getMap());
+            }
         }
 
         Map<String, String> datasource = c.getMap();
@@ -146,9 +155,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
         if (lowlevelMap == null || highlevelMap == null)
             return;
         for (Map.Entry<String, String> entry : highlevelMap.entrySet()) {
-            String key = entry.getKey();
-            if (lowlevelMap.containsKey(key))
-                lowlevelMap.put(key, entry.getValue());     //override entry of map
+            lowlevelMap.put(entry.getKey(), entry.getValue());     //override entry of map
         }
     }
 
@@ -227,6 +234,21 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
         String initSQL = datasource.get(INIT_SQL2);
         if (initSQL != null)
             prop.setInitSQL(initSQL);
+    }
+
+    private static String mapToString(Map<String, String> map) {
+        String result = "";
+        try {
+            if (map != null) {
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    sb.append(entry.getKey() + "=" + entry.getValue() + ",");
+                }
+                result = sb.substring(0, sb.length() - 1);
+            }
+        } catch (Throwable e) {
+        }
+        return result;
     }
 
 }

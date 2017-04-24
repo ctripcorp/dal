@@ -23,7 +23,6 @@ public class CtripDalConfigSource extends DalConfigConstants implements DalConfi
     private static final Logger logger = LoggerFactory.getLogger(CtripDalConfigSource.class);
     private static final String DAL_CONFIG_PROPERTIES = "dal.config.properties";
     private static final Charset charset = StandardCharsets.UTF_8;
-    private static final String regex = "\\s+";
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
@@ -47,7 +46,6 @@ public class CtripDalConfigSource extends DalConfigConstants implements DalConfi
                 Node node = getChildNode(root, DATABASE_SETS);
                 map = DefaultDalConfigSourceParser.readDatabaseSets(node);
             }
-
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             //Fallback to local dal.config?

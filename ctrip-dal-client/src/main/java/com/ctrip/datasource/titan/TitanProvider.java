@@ -270,13 +270,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private void logPoolSettings(String name) {
         info("--- Key datasource config for " + name + " ---");
         DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
-        config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);    //Process DatabasePoolConfig
+        //Process DatabasePoolConfig
+        config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
+
         if (config.getOption() != null)
             info("option: " + config.getOption());
 
         PoolProperties pc = config.getPoolProperties();
         info("connectionProperties: " + pc.getConnectionProperties());
 
+        /*
         // Check minIdle
         if (overwriteDSConfig && pc.getMinIdle() != DatabasePoolConfigParser.DEFAULT_MINIDLE) {
             warn("minIdle: " + pc.getMinIdle());
@@ -300,6 +303,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
             pc.setTestWhileIdle(DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
         } else
             info("testWhileIdle: " + pc.isTestWhileIdle());
+        */
+
+        info("minIdle: " + pc.getMinIdle());
+        info("maxAge: " + pc.getMaxAge());
+        info("testWhileIdle: " + pc.isTestWhileIdle());
 
         info("testOnBorrow: " + pc.isTestOnBorrow());
         info("testOnReturn: " + pc.isTestOnReturn());

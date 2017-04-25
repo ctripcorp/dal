@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CtripDalConfigSource extends DalConfigConstants implements DalConfigSource {
-  private static final Logger logger = LoggerFactory.getLogger(CtripDalConfigSource.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfigSource.class);
   private static final String DAL_CONFIG_PROPERTIES = "dal.config.properties";
-  private static final Charset charset = StandardCharsets.UTF_8;
+  private static final Charset CHARSET = StandardCharsets.UTF_8;
 
   @Override
   public void initialize(Map<String, String> settings) throws Exception {}
@@ -40,7 +40,7 @@ public class CtripDalConfigSource extends DalConfigConstants implements DalConfi
 
       String content = config.current();
       if (content != null && content.length() > 0) {
-        InputStream stream = new ByteArrayInputStream(content.getBytes(charset));
+        InputStream stream = new ByteArrayInputStream(content.getBytes(CHARSET));
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
         Element root = doc.getDocumentElement();
         Node node = getChildNode(root, DATABASE_SETS);
@@ -48,7 +48,7 @@ public class CtripDalConfigSource extends DalConfigConstants implements DalConfi
       }
     } catch (Throwable e) {
       String msg = "从QConfig读取dal.config配置时发生异常:";
-      logger.error(msg + e.getMessage(), e);
+      LOGGER.error(msg + e.getMessage(), e);
       throw new DalException(msg + e.getMessage());
       // Fallback to local dal.config?
       // return DefaultDalConfigSourceParser.readDatabaseSets(databaseSetsNode);

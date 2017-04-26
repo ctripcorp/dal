@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal;
+package com.ctrip.platform.dal.dao.vi;
 
 import java.util.ArrayList;
 import java.util.HashMap;

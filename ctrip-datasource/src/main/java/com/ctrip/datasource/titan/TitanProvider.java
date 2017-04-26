@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.net.ssl.SSLContext;
 
 import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -42,14 +43,13 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.exceptions.DalException;
-import com.ctrip.platform.dal.sql.logging.DalCatLogger;
-import com.ctrip.platform.dal.sql.logging.Metrics;
 import com.dianping.cat.Cat;
 
 public class TitanProvider implements DataSourceConfigureProvider {
@@ -73,6 +73,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private boolean overwriteDSConfig;
     private ConnectionStringParser parser = new ConnectionStringParser();
     private boolean isDebug;
+
+    public static final String TITAN = "arch.dal.titan.subenv";
+    public static final String ENV = "environment";
+    public static final String SUB_ENV = "subEnvironment";
+    public static final String DB_NAME = "DBKeyName";
 
     public static class LogEntry {
         public static final int INFO = 0;
@@ -378,15 +383,15 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 info(data.getName() + " loaded");
                 if (data.getEnv() != null) {
                     info(String.format("Sub environment %s detected.", data.getEnv()));
-                    DalCatLogger.reportTitanAccessSunEnv(subEnv, data.getName());
-                    Metrics.reportTitanAccessSunEnv(subEnv, data.getName());
+                    reportTitanAccessSunEnv(subEnv, data.getName());
+                    reportTitanAccessSunEnvMetrics(subEnv, data.getName());
                 }
             }
         }
 
         long cost = System.currentTimeMillis() - start;
         info("Time costed by getting all in one connection string from titan service(ms): " + cost);
-        DalCatLogger.reportTitanAccessCost(cost);
+        reportTitanAccessCost(cost);
 
         return result;
     }
@@ -501,4 +506,30 @@ public class TitanProvider implements DataSourceConfigureProvider {
         ent.msg = msg;
         startUpLog.add(ent);
     }
+    
+    public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {
+        try {
+            Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv, "0", DB_NAME + "=" + allInOneKey);
+        } catch (Throwable e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    public static void reportTitanAccessCost(long cost) {
+        try {
+            Cat.logSizeEvent("Accessing Titan cost[Dal Java]", cost);
+        } catch (Throwable e1) {
+            e1.printStackTrace();
+        }
+    }
+    
+    public void reportTitanAccessSunEnvMetrics(String subEnv, String allInOneKey) {
+        if(subEnv == null)
+            return;
+        
+        Map<String, String> tag = new HashMap<String, String>();
+        tag.put(SUB_ENV, subEnv);
+        tag.put(DB_NAME, allInOneKey);
+        MetricManager.getMetricer().log(TITAN, 1, tag);
+    }    
 }

@@ -1,8 +1,10 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.dao.config;
 
+import com.ctrip.platform.dal.dao.configure.CtripDalConfigSource;
 import com.ctrip.platform.dal.dao.configure.DalConfigConstants;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+
 import org.junit.Test;
 
 import java.util.Map;

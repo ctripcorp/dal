@@ -54,20 +54,4 @@ public class DalCatLogger {
 			e1.printStackTrace();
 		}
 	}
-
-	public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {
-		try {
-			Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv, "0", SQLInfo.DB_NAME+ "="+allInOneKey );
-		} catch (Throwable e1) {
-			e1.printStackTrace();
-		}
-	}
-	
-	public static void reportTitanAccessCost(long cost) {
-		try {
-			Cat.logSizeEvent("Accessing Titan cost[Dal Java]", cost);
-		} catch (Throwable e1) {
-			e1.printStackTrace();
-		}
-	}
 }

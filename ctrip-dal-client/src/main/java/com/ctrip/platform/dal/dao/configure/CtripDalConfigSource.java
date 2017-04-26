@@ -1,19 +1,5 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.dao.configure.DalConfigConstants;
-import com.ctrip.platform.dal.dao.configure.DalConfigSource;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.configure.DefaultDalConfigSource;
-import com.ctrip.platform.dal.dao.configure.DefaultDalConfigSourceParser;
-import com.ctrip.platform.dal.exceptions.DalException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import qunar.tc.qconfig.client.TypedConfig;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -21,7 +7,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static oracle.net.aso.C01.e;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import qunar.tc.qconfig.client.TypedConfig;
+
+import com.ctrip.platform.dal.exceptions.DalException;
 
 public class CtripDalConfigSource extends DalConfigConstants implements DalConfigSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfigSource.class);

@@ -128,7 +128,7 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
       DatabasePoolConfig poolConfig = datasourcePoolConfig.get(name);
       if (poolConfig != null) {
         overrideDatabasePoolConfig(c, poolConfig);
-        LOGGER.info(name + " 覆盖结果:" + c.getMap());
+        LOGGER.info(name + " 覆盖结果:" + mapToString(c.getMap()));
       }
     }
 

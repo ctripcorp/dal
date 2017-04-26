@@ -10,6 +10,7 @@ import java.util.Map;
 public class CtripDalConfigSourceTest {
   @Test
   public void testGetDatabaseSets() throws Exception {
+
     CtripDalConfigSource configSource = new CtripDalConfigSource();
     try {
       Map<String, DatabaseSet> map = configSource.getDatabaseSets(null);

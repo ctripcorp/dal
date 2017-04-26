@@ -3,6 +3,7 @@ package com.ctrip.datasource.configure;
 import com.ctrip.platform.dal.dao.configure.DalConfigConstants;
 import com.ctrip.platform.dal.dao.configure.DalConfigSource;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.configure.DefaultDalConfigSource;
 import com.ctrip.platform.dal.dao.configure.DefaultDalConfigSourceParser;
 import com.ctrip.platform.dal.exceptions.DalException;
 import org.slf4j.Logger;
@@ -20,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static oracle.net.aso.C01.e;
+
 public class CtripDalConfigSource extends DalConfigConstants implements DalConfigSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfigSource.class);
   private static final String DAL_CONFIG_PROPERTIES = "dal.config.properties";
@@ -32,19 +35,23 @@ public class CtripDalConfigSource extends DalConfigConstants implements DalConfi
   public Map<String, DatabaseSet> getDatabaseSets(Node databaseSetsNode) throws Exception {
     Map<String, DatabaseSet> map = new HashMap<>();
     try {
-      TypedConfig<String> config = TypedConfig.get(DAL_CONFIG_PROPERTIES, new TypedConfig.Parser<String>() {
-        public String parse(String s) {
-          return s;
-        }
-      });
+      if (isUseLocalDalConfig()) {
+        map = DefaultDalConfigSourceParser.readDatabaseSets(databaseSetsNode);
+      } else {
+        TypedConfig<String> config = TypedConfig.get(DAL_CONFIG_PROPERTIES, new TypedConfig.Parser<String>() {
+          public String parse(String s) {
+            return s;
+          }
+        });
 
-      String content = config.current();
-      if (content != null && content.length() > 0) {
-        InputStream stream = new ByteArrayInputStream(content.getBytes(CHARSET));
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
-        Element root = doc.getDocumentElement();
-        Node node = getChildNode(root, DATABASE_SETS);
-        map = DefaultDalConfigSourceParser.readDatabaseSets(node);
+        String content = config.current();
+        if (content != null && content.length() > 0) {
+          InputStream stream = new ByteArrayInputStream(content.getBytes(CHARSET));
+          Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+          Element root = doc.getDocumentElement();
+          Node node = getChildNode(root, DATABASE_SETS);
+          map = DefaultDalConfigSourceParser.readDatabaseSets(node);
+        }
       }
     } catch (Throwable e) {
       String msg = "从QConfig读取dal.config配置时发生异常:";
@@ -55,6 +62,18 @@ public class CtripDalConfigSource extends DalConfigConstants implements DalConfi
     }
 
     return map;
+  }
+
+  private boolean isUseLocalDalConfig() {
+    boolean b = false;
+    String useLocal = System.getProperty(USE_LOCAL_DAL_CONFIG);
+    if (useLocal != null && useLocal.length() > 0) {
+      try {
+        b = Boolean.parseBoolean(useLocal);
+      } catch (Throwable e) {
+      }
+    }
+    return b;
   }
 
 }

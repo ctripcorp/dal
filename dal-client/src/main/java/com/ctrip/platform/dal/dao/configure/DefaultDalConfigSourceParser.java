@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultDalConfigSourceParser extends DalConfigConstants {
+public class DefaultDalConfigSourceParser implements DalConfigConstants {
     public static Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
         List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
         Map<String, DatabaseSet> databaseSets = new HashMap<>();
@@ -69,4 +69,20 @@ public class DefaultDalConfigSourceParser extends DalConfigConstants {
         return node.getAttributes().getNamedItem(attributeName) != null;
     }
 
+
+    private static String getAttribute(Node node, String attributeName) {
+        return node.getAttributes().getNamedItem(attributeName).getNodeValue();
+    }
+
+    private static Node getChildNode(Node node, String name) {
+        NodeList children = node.getChildNodes();
+        Node found = null;
+        for (int i = 0; i < children.getLength(); i++) {
+            if (!children.item(i).getNodeName().equalsIgnoreCase(name))
+                continue;
+            found = children.item(i);
+            break;
+        }
+        return found;
+    }
 }

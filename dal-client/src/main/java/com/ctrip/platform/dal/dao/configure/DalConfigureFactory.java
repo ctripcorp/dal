@@ -109,8 +109,6 @@ public class DalConfigureFactory extends DalConfigConstants {
     DalConnectionLocator locator = readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR);
 
     DalConfigSource source = readComponent(root, CONFIG_SOURCE, new DefaultDalConfigSource(), SOURCE);
-    if (isUseLocalDalConfig() && !(source instanceof DefaultDalConfigSource))
-      source = new DefaultDalConfigSource();
 
     Map<String, DatabaseSet> databaseSets = source.getDatabaseSets(getChildNode(root, DATABASE_SETS));
     // Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
@@ -118,18 +116,6 @@ public class DalConfigureFactory extends DalConfigConstants {
     locator.setup(getAllDbNames(databaseSets));
 
     return new DalConfigure(name, databaseSets, logger, locator, factory, source);
-  }
-
-  private boolean isUseLocalDalConfig() {
-    boolean b = false;
-    String useLocal = System.getProperty(USE_LOCAL_DAL_CONFIG);
-    if (useLocal != null && useLocal.length() > 0) {
-      try {
-        b = Boolean.parseBoolean(useLocal);
-      } catch (Throwable e) {
-      }
-    }
-    return b;
   }
 
   private Set<String> getAllDbNames(Map<String, DatabaseSet> databaseSets) {

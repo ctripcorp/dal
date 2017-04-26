@@ -24,25 +24,6 @@ import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
-/*
- * The following are sample dal.config <dal name="dal.prize.test"> <databaseSets> <databaseSet name="SimpleShard"
- * provider="sqlProvider" shardingStrategy=
- * "class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=index,tableIndex;mod=2;"> <add
- * name="dao_test_sqlsvr_dbShard_0" databaseType="Master" sharding="0" connectionString="SimpleShard_0"/> <add
- * name="dao_test_sqlsvr_dbShard_1" databaseType="Master" sharding="1" connectionString="SimpleShard_1"/> </databaseSet>
- * <databaseSet name="HotelPubDB" provider="sqlProvider"> <add name="HotelPubDB_M" databaseType="Master" sharding=""
- * connectionString="dao_test_sqlsvr"/> <add name="HotelPubDB_S1" databaseType="Slave" sharding=""
- * connectionString="dao_test_sqlsvr"/> <add name="HotelPubDB_S2" databaseType="Slave" sharding=""
- * connectionString="dao_test_sqlsvr"/> <add name="HotelPubDB_S3" databaseType="Slave" sharding=""
- * connectionString="dao_test_sqlsvr"/> </databaseSet> </databaseSets>   <logListener enabled="true/false">
- * <logger>com.xxx.xxx.xxx</logger>     <settings> <encrypt>true</encrypt> <sampling>false</sampling> <settings>
- *   </logListener> <ConnectionLocator> <locator>com.xxx.xxx.xxx</locator>     <settings>
- * <dataSourceConfigureProvider>com.xxx.xxx.xxx</dataSourceConfigureProvider> <serviceAddress>http:...</serviceAddress>
- * <appid>123456</appid> <forceLocalConfig>true/false</forceLocalConfig> <settings> </ConnectionLocator> <TaskFactory>
- * <factory>com.xxx.xxx.xxx</factory> </TaskFactory> </dal>
- */
-// For java we only process databaseSets. log and providers are covered elsewhere.
-
 public class DalConfigureFactory extends DalConfigConstants {
   private static DalConfigureFactory factory = new DalConfigureFactory();
 
@@ -111,7 +92,6 @@ public class DalConfigureFactory extends DalConfigConstants {
     DalConfigSource source = readComponent(root, CONFIG_SOURCE, new DefaultDalConfigSource(), SOURCE);
 
     Map<String, DatabaseSet> databaseSets = source.getDatabaseSets(getChildNode(root, DATABASE_SETS));
-    // Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
 
     locator.setup(getAllDbNames(databaseSets));
 

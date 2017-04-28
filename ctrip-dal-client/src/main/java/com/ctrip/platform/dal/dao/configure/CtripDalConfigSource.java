@@ -23,7 +23,7 @@ import com.ctrip.platform.dal.exceptions.DalException;
 public class CtripDalConfigSource implements DalConfigConstants, DalConfigSource {
     public static final String USE_LOCAL_DAL_CONFIG = "dal.config.uselocal";
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfigSource.class);
-    private static final String DAL_CONFIG_PROPERTIES = "dal.config.properties";
+    private static final String DAL_CONFIG_XML = "dal.config.xml";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     @Override
@@ -36,7 +36,7 @@ public class CtripDalConfigSource implements DalConfigConstants, DalConfigSource
             if (isUseLocalDalConfig()) {
                 map = DefaultDalConfigSourceParser.readDatabaseSets(databaseSetsNode);
             } else {
-                TypedConfig<String> config = TypedConfig.get(DAL_CONFIG_PROPERTIES, new TypedConfig.Parser<String>() {
+                TypedConfig<String> config = TypedConfig.get(DAL_CONFIG_XML, new TypedConfig.Parser<String>() {
                     public String parse(String s) {
                         return s;
                     }

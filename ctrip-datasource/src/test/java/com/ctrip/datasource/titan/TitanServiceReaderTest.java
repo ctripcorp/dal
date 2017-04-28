@@ -332,7 +332,6 @@ public class TitanServiceReaderTest {
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("SimpleShard_0");// has config
 		dbNames.add("SimpleShard_0_SH");// has no config, but name may be match
-		dbNames.add("PayBaseDB_INSERT_2");// has no config
 		
 		Map<String, String> settings = new HashMap<>();
 		settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
@@ -342,8 +341,6 @@ public class TitanServiceReaderTest {
 			provider.setup(dbNames);
 			Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("SimpleShard_0"));
 			Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("SimpleShard_0_SH"));
-			Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("GSCommunityDB_SELECT_1"));
-			Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("PayBaseDB_INSERT_2"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(Foundation.server().getEnvType());
@@ -351,6 +348,27 @@ public class TitanServiceReaderTest {
 		}
 	}
 	
+    @Test
+    public void testCheckDatasourceDefault() {
+        TitanProvider provider = new TitanProvider();
+        Set<String> dbNames = new HashSet<>();
+        dbNames.add("PayBaseDB_INSERT_2");// has no config
+        
+        Map<String, String> settings = new HashMap<>();
+        settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
+        settings.put(TitanProvider.TIMEOUT, "1000");
+        try {
+            provider.initialize(settings);
+            provider.setup(dbNames);
+          Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("Not_Exist"));
+            Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("PayBaseDB_INSERT_2"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(Foundation.server().getEnvType());
+            Assert.fail();
+        }
+    }
+    
 	@Test
 	public void testGetDatasourceWithMixedNames() {
 		String fws = "https://ws.titan.ctripcorp.com/titanservice/query";

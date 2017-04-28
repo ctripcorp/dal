@@ -70,8 +70,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private String subEnv;
     private int timeout;
     private boolean useLocal;
-    private boolean overwriteDSConfig;
     private ConnectionStringParser parser = new ConnectionStringParser();
+    // used for simulate prod environemnt
     private boolean isDebug;
 
     public static final String TITAN = "arch.dal.titan.subenv";
@@ -117,8 +117,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
         info("Use local: " + useLocal);
-
-        overwriteDSConfig = settings.containsKey(OVERWRITE_DATASOURCE_CONFIG) ? Boolean.parseBoolean(settings.get(OVERWRITE_DATASOURCE_CONFIG)) : true;
 
         String timeoutStr = settings.get(TIMEOUT);
         timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
@@ -266,7 +264,10 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData) throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
         for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
-            configures.put(entry.getKey(), parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
+            if(isDebug)
+                configures.put(entry.getKey(), new DataSourceConfigure());
+            else
+                configures.put(entry.getKey(), parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
         }
 
         return configures;
@@ -283,32 +284,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         PoolProperties pc = config.getPoolProperties();
         info("connectionProperties: " + pc.getConnectionProperties());
-
-        /*
-        // Check minIdle
-        if (overwriteDSConfig && pc.getMinIdle() != DatabasePoolConfigParser.DEFAULT_MINIDLE) {
-            warn("minIdle: " + pc.getMinIdle());
-            warn("minIdle changed to " + DatabasePoolConfigParser.DEFAULT_MINIDLE);
-            pc.setMinIdle(DatabasePoolConfigParser.DEFAULT_MINIDLE);
-        } else
-            info("minIdle: " + pc.getMinIdle());
-
-        // Check maxAge
-        if (overwriteDSConfig && pc.getMaxAge() > DatabasePoolConfigParser.DEFAULT_MAXAGE) {
-            warn("maxAge: " + pc.getMaxAge());
-            warn("maxAge changed to " + DatabasePoolConfigParser.DEFAULT_MAXAGE);
-            pc.setMaxAge(DatabasePoolConfigParser.DEFAULT_MAXAGE);
-        } else
-            info("maxAge: " + pc.getMaxAge());
-
-        // Check testWhileIdle
-        if (overwriteDSConfig && pc.isTestWhileIdle() != DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE) {
-            warn("testWhileIdle: " + pc.isTestWhileIdle());
-            warn("testWhileIdle changed to " + DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
-            pc.setTestWhileIdle(DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE);
-        } else
-            info("testWhileIdle: " + pc.isTestWhileIdle());
-        */
 
         info("minIdle: " + pc.getMinIdle());
         info("maxAge: " + pc.getMaxAge());

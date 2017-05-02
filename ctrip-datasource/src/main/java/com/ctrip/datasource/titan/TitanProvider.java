@@ -279,9 +279,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         //Process DatabasePoolConfig
         config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
 
-        if (config.getOption() != null)
-            info("option: " + config.getOption());
-
         PoolProperties pc = config.getPoolProperties();
         info("connectionProperties: " + pc.getConnectionProperties());
 

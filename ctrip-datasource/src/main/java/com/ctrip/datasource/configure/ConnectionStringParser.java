@@ -92,35 +92,22 @@ public class ConnectionStringParser {
 		config.setUserName(userName);
 		config.setPassword(password);
 		config.setDriverClass(driverClass);
-		config = applyOptions(name, config, isSqlServer);
+		applyDefaultCtripOptionsIfEmpty(name, isSqlServer);
 		
 		return config;
 	}
 
-	private DataSourceConfigure applyOptions(String name, DataSourceConfigure config, boolean isSqlServer) {
+	private void applyDefaultCtripOptionsIfEmpty(String name, boolean isSqlServer) {
 		DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		
-		String option = poolConfig.getOption();
-		
-		if(option == null || option.length() == 0) {
-			// If user not set option or connection properties, we should provide default value
-			if (poolConfig.getPoolProperties().getConnectionProperties() == null) {
-				String defaultConnectionProperties = isSqlServer ? 
-						MSSQL_CONNECTION_PROPERTIES :
-							MYSQL_CONNECTION_PROPERTIES;
-				poolConfig.getPoolProperties().setConnectionProperties(defaultConnectionProperties);
-			}
-			return config;
-		}
-		
-		String url = config.getConnectionUrl();
-		if(config.getDriverClass().equals(DRIVER_SQLSERVRE)){
-			url = url + ";" + option;
-		}else{
-			url = url + "&" + option.replaceAll(";", "&");
-		}
-		config.setConnectionUrl(url);
-		
-		return config;
+		// If connectionProperties is set, we will use what user specifies.
+		if (poolConfig.getPoolProperties().getConnectionProperties() != null)
+		    return;
+
+		// If connectionProperties is not set, we should provide default value per database type
+		String defaultConnectionProperties = isSqlServer ? 
+				MSSQL_CONNECTION_PROPERTIES :
+					MYSQL_CONNECTION_PROPERTIES;
+		poolConfig.getPoolProperties().setConnectionProperties(defaultConnectionProperties);
 	}
 }

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
+public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceConfigureProcessor.class);
     private static final String DAL_APPNAME = "fx_dal";
     private static final String DAL_DATASOURCE_PROPERTIES = "dal.datasource.properties";
@@ -74,10 +74,10 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
         /*
          * PoolProperties prop = poolConfig.getPoolProperties(); setPoolProperties(datasource, prop);
          */
-        // Option
-        String option = datasource.get(OPTION);
-        if (option != null)
-            poolConfig.setOption(option);
+//        // Option
+//        String option = datasource.get(OPTION);
+//        if (option != null)
+//            poolConfig.setOption(option);
     }
 
     private static void setDataSourceConfigMap(Map<String, DatabasePoolConfig> poolConfigMap,
@@ -154,16 +154,16 @@ public class DataSourceConfigureProcessor extends DatabasePoolConfigConstants {
         c.setName(config.getName());
         c.setMap(config.getMap());
         c.setPoolProperties(config.getPoolProperties());
-        c.setOption(config.getOption());
+//        c.setOption(config.getOption());
         return c;
     }
 
     private static void overrideDatabasePoolConfig(DatabasePoolConfig lowlevel, DatabasePoolConfig highlevel) {
         if (lowlevel == null || highlevel == null)
             return;
-        String option = highlevel.getOption();
-        if (option != null)
-            lowlevel.setOption(option);
+//        String option = highlevel.getOption();
+//        if (option != null)
+//            lowlevel.setOption(option);
         Map<String, String> lowlevelMap = lowlevel.getMap();
         Map<String, String> highlevelMap = highlevel.getMap();
         if (lowlevelMap == null || highlevelMap == null)

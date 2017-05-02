@@ -1,24 +1,27 @@
 package com.ctrip.platform.dal.dao.configure;
 
-public class DatabasePoolConfigConstants {
-    public static final String TESTWHILEIDLE = "testWhileIdle";
-    public static final String TESTONBORROW = "testOnBorrow";
-    public static final String TESTONRETURN = "testOnReturn";
-    public static final String VALIDATIONQUERY = "validationQuery";
-    public static final String VALIDATIONINTERVAL = "validationInterval";
-    public static final String TIMEBETWEENEVICTIONRUNSMILLIS = "timeBetweenEvictionRunsMillis";
-    public static final String MAX_AGE = "maxAge";
-    public static final String MAXACTIVE = "maxActive";
-    public static final String MINIDLE = "minIdle";
-    public static final String MAXWAIT = "maxWait";
-    public static final String INITIALSIZE = "initialSize";
-    public static final String REMOVEABANDONEDTIMEOUT = "removeAbandonedTimeout";
-    public static final String REMOVEABANDONED = "removeAbandoned";
-    public static final String LOGABANDONED = "logAbandoned";
-    public static final String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
-    public static final String CONNECTIONPROPERTIES = "connectionProperties";
-    public static final String INIT_SQL = "initSql";
-    public static final String INIT_SQL2 = "initSQL";
-    public static final String OPTION = "option";
-
+public interface DatabasePoolConfigConstants {
+    String TESTWHILEIDLE = "testWhileIdle";
+    String TESTONBORROW = "testOnBorrow";
+    String TESTONRETURN = "testOnReturn";
+    String VALIDATIONQUERY = "validationQuery";
+    String VALIDATIONINTERVAL = "validationInterval";
+    String TIMEBETWEENEVICTIONRUNSMILLIS = "timeBetweenEvictionRunsMillis";
+    String MAX_AGE = "maxAge";
+    String MAXACTIVE = "maxActive";
+    String MINIDLE = "minIdle";
+    String MAXWAIT = "maxWait";
+    String INITIALSIZE = "initialSize";
+    String REMOVEABANDONEDTIMEOUT = "removeAbandonedTimeout";
+    String REMOVEABANDONED = "removeAbandoned";
+    String LOGABANDONED = "logAbandoned";
+    String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
+    String CONNECTIONPROPERTIES = "connectionProperties";
+    String INIT_SQL = "initSql";
+    // This is for typo error
+    String INIT_SQL2 = "initSQL";
+    // This is for backward compatible, option serves the same purpose as connectionProperties
+    // If both option and connectionProperties present, the correspond connectionProperties value is used
+    // And if only option is set, it will be set into connectionProperties
+    String OPTION = "option";
 }

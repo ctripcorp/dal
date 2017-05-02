@@ -8,7 +8,6 @@ public class DatabasePoolConfig {
 
     private String name = null;
     private PoolProperties poolProperties = null;
-    private String option = null;
     private Map<String, String> map = null;
 
     public DatabasePoolConfig() {
@@ -47,14 +46,6 @@ public class DatabasePoolConfig {
 
     public void setPoolProperties(PoolProperties poolProperties) {
         this.poolProperties = poolProperties;
-    }
-
-    public String getOption() {
-        return option;
-    }
-
-    public void setOption(String option) {
-        this.option = option;
     }
 
     public Map<String, String> getMap() {

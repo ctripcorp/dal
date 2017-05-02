@@ -30,7 +30,7 @@ public class DatabasePoolConfigParserTest {
 		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test");
 		Assert.assertEquals("dao_test", config.getName());
 		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
-		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8", config.getOption());
+		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8", config.getPoolProperties().getConnectionProperties());
 	}
 	
 	@Test
@@ -50,7 +50,7 @@ public class DatabasePoolConfigParserTest {
 		Assert.assertEquals(true, config.getPoolProperties().isRemoveAbandoned());
 		Assert.assertEquals(true, config.getPoolProperties().isLogAbandoned());
 		Assert.assertEquals(30000, config.getPoolProperties().getMinEvictableIdleTimeMillis());
-		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getOption());
+		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true", config.getPoolProperties().getConnectionProperties());
 	}
 	
 	@Test
@@ -58,7 +58,7 @@ public class DatabasePoolConfigParserTest {
 		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dal_test_new");
 		Assert.assertEquals("dal_test_new", config.getName());
 		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
-		Assert.assertEquals("sendTimeAsDateTime=false", config.getOption());
+		Assert.assertEquals("sendTimeAsDateTime=false", config.getPoolProperties().getConnectionProperties());
 		
 		// Test default settings
 		Assert.assertEquals(30000, config.getPoolProperties().getMaxAge());

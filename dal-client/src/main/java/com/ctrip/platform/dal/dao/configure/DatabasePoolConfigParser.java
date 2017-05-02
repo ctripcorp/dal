@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 
-public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
+public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);
     private static DatabasePoolConfigParser poolConfigParser = new DatabasePoolConfigParser();
@@ -100,7 +100,6 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
         DatabasePoolConfig newConfig = new DatabasePoolConfig();
         newConfig.setName(newName);
         newConfig.setPoolProperties(oldConfig.getPoolProperties());
-        newConfig.setOption(oldConfig.getOption());
         poolConfigs.put(newName, newConfig);
     }
 
@@ -245,11 +244,6 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
             prop.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
             map.put(MINEVICTABLEIDLETIMEMILLIS, value);
         }
-        if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
-            String value = getAttribute(resource, CONNECTIONPROPERTIES);
-            prop.setConnectionProperties(value);
-            map.put(CONNECTIONPROPERTIES, value);
-        }
         if (hasAttribute(resource, INIT_SQL)) {
             String value = getAttribute(resource, INIT_SQL);
             prop.setInitSQL(value);
@@ -260,11 +254,24 @@ public class DatabasePoolConfigParser extends DatabasePoolConfigConstants {
             prop.setInitSQL(value);
             map.put(INIT_SQL2, value);
         }
-        if (hasAttribute(resource, OPTION)) {
-            String value = getAttribute(resource, OPTION);
-            poolConfig.setOption(value);
-            map.put(OPTION, value);
+        
+        /**
+         * Special handing for connectionProperties and option.
+         * If connectionProperties is not set, we will use option's value
+         * if connectionProperties is set, we will ignore option's value
+         */
+        if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
+            String value = getAttribute(resource, CONNECTIONPROPERTIES);
+            prop.setConnectionProperties(value);
+            map.put(CONNECTIONPROPERTIES, value);
+        }else{
+            if (hasAttribute(resource, OPTION)) {
+                String value = getAttribute(resource, OPTION);
+                prop.setConnectionProperties(value);
+                map.put(CONNECTIONPROPERTIES, value);
+            }
         }
+
         return poolConfig;
     }
 

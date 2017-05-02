@@ -203,18 +203,19 @@
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">provider:</label>
+                        <label class="control-label popup_label" style="width: 130px;">数据库类型:</label>
                         <select id="provider" class="span8">
-                            <option value="sqlProvider">sqlProvider</option>
-                            <option value="mySqlProvider">mySqlProvider</option>
+                            <option value="">请选择</option>
+                            <option value="sqlProvider">SQLServer</option>
+                            <option value="mySqlProvider">MySQL</option>
                         </select>
                     </div>
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
                         <label class="control-label popup_label" style="width: 130px;">shardingStrategy:</label>
-							<textarea id="shardingStrategy" class="span12 popup_text"
-                                      cols="4"></textarea>
+                        <textarea id="shardingStrategy" class="span12 popup_text"
+                                  cols="4"></textarea>
                     </div>
                 </div>
             </div>
@@ -250,18 +251,18 @@
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">provider:</label>
+                        <label class="control-label popup_label" style="width: 130px;">数据库类型:</label>
                         <select id="provider2" class="span8">
-                            <option value="sqlProvider">sqlProvider</option>
-                            <option value="mySqlProvider">mySqlProvider</option>
+                            <option value="sqlProvider">SQLServer</option>
+                            <option value="mySqlProvider">MySQL</option>
                         </select>
                     </div>
                 </div>
                 <div class="row-fluid">
                     <div class="control-group">
                         <label class="control-label popup_label" style="width: 130px;">shardingStrategy:</label>
-							<textarea id="shardingStrategy2" class="span12 popup_text"
-                                      cols="4"></textarea>
+                        <textarea id="shardingStrategy2" class="span12 popup_text"
+                                  cols="4"></textarea>
                     </div>
                 </div>
             </div>
@@ -329,8 +330,8 @@
                 <div class="row-fluid">
                     <div class="control-group">
                         <label class="control-label popup_label" style="width: 130px;">配置模板:</label>
-							<textarea id="txt_configtemplate" class="span12 popup_text"
-                                      cols="10"></textarea>
+                        <textarea id="txt_configtemplate" class="span12 popup_text"
+                                  cols="10"></textarea>
                         <input id="txt_id" type="text"/>
                     </div>
                 </div>

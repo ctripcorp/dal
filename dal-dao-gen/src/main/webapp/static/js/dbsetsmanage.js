@@ -167,21 +167,22 @@
     };
 
     var addDbSet = function () {
-        $("#adddbset_error_msg").html('');
-        var current_group = w2ui['grid'].current_group;
-        if (current_group == null || current_group == '') {
-            alert('请先选择一个 DAL Team');
+        $("#adddbset_error_msg").html("");
+        var current_group = w2ui["grid"].current_group;
+        if (current_group == null || current_group == "") {
+            alert("请先选择一个 DAL Team");
             return;
         }
-        $("#dbsetname").val('');
+        $("#dbsetname").val("");
+        $("#provider").val("");
         $("#addDbsetModal").modal({"backdrop": "static"});
     };
 
     var editDbSet = function () {
-        $("#updatedbset_error_msg").html('');
-        var current_group = w2ui['grid'].current_group;
-        if (current_group == null || current_group == '') {
-            alert('请先选择一个 DAL Team');
+        $("#updatedbset_error_msg").html("");
+        var current_group = w2ui["grid"].current_group;
+        if (current_group == null || current_group == "") {
+            alert("请先选择一个 DAL Team");
             return;
         }
 
@@ -635,8 +636,12 @@
         $(document.body).on("click", "#save_adddbset", function () {
             var dbsetname = $("#dbsetname").val();
             var provider = $("#provider").val();
+            if (provider == null || provider.length == 0) {
+                $("#adddbset_error_msg").html("请选择数据库类型!");
+                return;
+            }
             var shardingStrategy = $("#shardingStrategy").val();
-            if (dbsetname == null || dbsetname == "") {
+            if (dbsetname == null || dbsetname.length == 0) {
                 $("#adddbset_error_msg").html('databaseSet name 不能为空!');
                 return;
             }

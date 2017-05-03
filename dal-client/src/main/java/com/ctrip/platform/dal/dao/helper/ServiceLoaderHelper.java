@@ -11,11 +11,10 @@ public class ServiceLoaderHelper {
 
     public static <T> T getInstance(Class<T> clazz) {
         T instance = null;
-        Iterator<T> iterator = getIterator(clazz);
-        if (!iterator.hasNext())
-            return instance;
         try {
-            instance = iterator.next();
+            Iterator<T> iterator = getIterator(clazz);
+            if (iterator.hasNext())
+                return iterator.next();
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }

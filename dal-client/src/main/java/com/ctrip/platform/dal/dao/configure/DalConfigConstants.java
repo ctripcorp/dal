@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-
 public interface DalConfigConstants {
     String DAL_XML = "dal.xml";
     String DAL_CONFIG = "Dal.config";
@@ -23,6 +22,4 @@ public interface DalConfigConstants {
     String SETTINGS = "settings";
     String CONNECTION_LOCATOR = "ConnectionLocator";
     String LOCATOR = "locator";
-    String CONFIG_SOURCE = "ConfigSource";
-    String SOURCE = "source";
 }

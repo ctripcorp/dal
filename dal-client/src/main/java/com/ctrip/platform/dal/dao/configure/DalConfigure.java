@@ -16,15 +16,14 @@ public class DalConfigure {
     private DalLogger dalLogger;
     private DalConnectionLocator locator;
     private DalTaskFactory facory;
-    private DalConfigSource source;
 
-    public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger, DalConnectionLocator locator, DalTaskFactory facory, DalConfigSource source) {
+    public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger,
+            DalConnectionLocator locator, DalTaskFactory facory) {
         this.name = name;
         this.databaseSets.putAll(databaseSets);
         this.dalLogger = dalLogger;
         this.locator = locator;
         this.facory = facory;
-        this.source = source;
     }
 
     public String getName() {
@@ -33,10 +32,8 @@ public class DalConfigure {
 
     public DatabaseSet getDatabaseSet(String logicDbName) {
         if (!databaseSets.containsKey(logicDbName))
-            throw new IllegalArgumentException(
-                    "Can not find definition for Database Set "
-                            + logicDbName
-                            + ". Please check spelling or define it in Dal.config");
+            throw new IllegalArgumentException("Can not find definition for Database Set " + logicDbName
+                    + ". Please check spelling or define it in Dal.config");
 
         return databaseSets.get(logicDbName);
     }
@@ -86,10 +83,6 @@ public class DalConfigure {
 
     public DalTaskFactory getFacory() {
         return facory;
-    }
-
-    public DalConfigSource getConfigSource() {
-        return source;
     }
 
 }

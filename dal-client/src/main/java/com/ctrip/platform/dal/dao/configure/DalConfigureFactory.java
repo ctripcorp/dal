@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,8 +46,8 @@ public class DalConfigureFactory implements DalConfigConstants {
             dalconfigUrl = classLoader.getResource(DAL_CONFIG);
 
         if (dalconfigUrl == null)
-            throw new IllegalStateException("Can not find " + DAL_XML + " or " + DAL_CONFIG
-                    + " to initilize dal configure");
+            throw new IllegalStateException(
+                    "Can not find " + DAL_XML + " or " + DAL_CONFIG + " to initilize dal configure");
 
         return load(dalconfigUrl);
     }
@@ -90,13 +92,11 @@ public class DalConfigureFactory implements DalConfigConstants {
         DalConnectionLocator locator =
                 readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR);
 
-        DalConfigSource source = readComponent(root, CONFIG_SOURCE, new DefaultDalConfigSource(), SOURCE);
-
-        Map<String, DatabaseSet> databaseSets = source.getDatabaseSets(getChildNode(root, DATABASE_SETS));
+        Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
 
         locator.setup(getAllDbNames(databaseSets));
 
-        return new DalConfigure(name, databaseSets, logger, locator, factory, source);
+        return new DalConfigure(name, databaseSets, logger, locator, factory);
     }
 
     private Set<String> getAllDbNames(Map<String, DatabaseSet> databaseSets) {
@@ -109,8 +109,8 @@ public class DalConfigureFactory implements DalConfigConstants {
         return dbNames;
     }
 
-    private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl, String implNodeName)
-            throws Exception {
+    private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl,
+            String implNodeName) throws Exception {
         Node node = getChildNode(root, componentName);
         T component = defaultImpl;
 
@@ -157,4 +157,54 @@ public class DalConfigureFactory implements DalConfigConstants {
         }
         return found;
     }
+
+    private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
+        List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
+        Map<String, DatabaseSet> databaseSets = new HashMap<>();
+        for (int i = 0; i < databaseSetList.size(); i++) {
+            DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i));
+            databaseSets.put(databaseSet.getName(), databaseSet);
+        }
+        return databaseSets;
+    }
+
+    private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
+        List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
+        Map<String, DataBase> databases = new HashMap<>();
+        for (int i = 0; i < databaseList.size(); i++) {
+            DataBase database = readDataBase(databaseList.get(i));
+            databases.put(database.getName(), database);
+        }
+
+        if (hasAttribute(databaseSetNode, SHARD_STRATEGY))
+            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
+                    getAttribute(databaseSetNode, SHARD_STRATEGY), databases);
+        else if (hasAttribute(databaseSetNode, SHARDING_STRATEGY))
+            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
+                    getAttribute(databaseSetNode, SHARDING_STRATEGY), databases);
+        else
+            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
+                    databases);
+    }
+
+    private DataBase readDataBase(Node dataBaseNode) {
+        return new DataBase(getAttribute(dataBaseNode, NAME), getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
+                getAttribute(dataBaseNode, SHARDING), getAttribute(dataBaseNode, CONNECTION_STRING));
+    }
+
+    private List<Node> getChildNodes(Node node, String name) {
+        List<Node> nodes = new ArrayList<>();
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (!children.item(i).getNodeName().equalsIgnoreCase(name))
+                continue;
+            nodes.add(children.item(i));
+        }
+        return nodes;
+    }
+
+    private boolean hasAttribute(Node node, String attributeName) {
+        return node.getAttributes().getNamedItem(attributeName) != null;
+    }
+
 }

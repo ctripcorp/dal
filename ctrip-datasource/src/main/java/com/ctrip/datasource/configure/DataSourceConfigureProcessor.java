@@ -74,10 +74,6 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         /*
          * PoolProperties prop = poolConfig.getPoolProperties(); setPoolProperties(datasource, prop);
          */
-//        // Option
-//        String option = datasource.get(OPTION);
-//        if (option != null)
-//            poolConfig.setOption(option);
     }
 
     private static void setDataSourceConfigMap(Map<String, DatabasePoolConfig> poolConfigMap,
@@ -154,16 +150,12 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         c.setName(config.getName());
         c.setMap(config.getMap());
         c.setPoolProperties(config.getPoolProperties());
-//        c.setOption(config.getOption());
         return c;
     }
 
     private static void overrideDatabasePoolConfig(DatabasePoolConfig lowlevel, DatabasePoolConfig highlevel) {
         if (lowlevel == null || highlevel == null)
             return;
-//        String option = highlevel.getOption();
-//        if (option != null)
-//            lowlevel.setOption(option);
         Map<String, String> lowlevelMap = lowlevel.getMap();
         Map<String, String> highlevelMap = highlevel.getMap();
         if (lowlevelMap == null || highlevelMap == null)
@@ -248,6 +240,10 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         String initSQL = datasource.get(INIT_SQL2);
         if (initSQL != null)
             prop.setInitSQL(initSQL);
+
+        String validatorClassName = datasource.get(VALIDATORCLASSNAME);
+        if (validatorClassName != null)
+            prop.setValidatorClassName(validatorClassName);
     }
 
     private static String mapToString(Map<String, String> map) {

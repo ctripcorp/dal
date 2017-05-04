@@ -30,7 +30,7 @@ public class DatabasePoolConfigParserTest {
 		DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg("dao_test");
 		Assert.assertEquals("dao_test", config.getName());
 		Assert.assertEquals(10000, config.getPoolProperties().getMaxWait());
-		Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8", config.getPoolProperties().getConnectionProperties());
+		Assert.assertEquals("sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8", config.getPoolProperties().getConnectionProperties());
 	}
 	
 	@Test

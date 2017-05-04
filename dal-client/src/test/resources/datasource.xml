@@ -15,7 +15,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="ha_test_1"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -31,7 +31,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="ha_test_2"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -47,7 +47,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="dao_test"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -63,7 +63,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="dao_test_sqlsvr"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -79,7 +79,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="dao_test_sqlsvr_0"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -95,7 +95,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="dao_test_sqlsvr_1"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -111,7 +111,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="dao_test_mysql"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -128,7 +128,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               defaultTransactionIsolation="SERIALIZABLE"
-              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"
+              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"
               /><!--  rewriteBatchedStatements=true;allowMultiQueries=true -->
     <Datasource name="dao_test_mysql_0"
               testWhileIdle="true"
@@ -199,7 +199,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>
     <Datasource name="MySqlShard_1"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -215,7 +215,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>
     <Datasource name="SqlSvrShard_0"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -231,7 +231,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="SqlSvrShard_1"
               testWhileIdle="true"
               testOnBorrow="true"
@@ -247,7 +247,7 @@
               removeAbandoned="true"
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
-              option="rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
+              option="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8"/>              
     <Datasource name="OracleShard_0"
               testWhileIdle="true"
               testOnBorrow="true"

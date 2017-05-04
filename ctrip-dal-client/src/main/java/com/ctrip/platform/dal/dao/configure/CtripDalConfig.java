@@ -7,10 +7,11 @@ import qunar.tc.qconfig.client.TypedConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class CtripDalConfig implements DalConfig {
+public class CtripDalConfig implements DalConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfig.class);
     private static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
@@ -19,9 +20,11 @@ public class CtripDalConfig implements DalConfig {
     public DalConfigure load() throws Exception {
         DalConfigure configure = null;
         try {
-            configure = DalConfigureFactory.load();
-        } catch (IllegalStateException e) {
-            configure = getConfigure();
+            URL url = DalConfigureFactory.getDalConfigUrl();
+            if (url != null)
+                configure = DalConfigureFactory.load(url);
+            else
+                configure = getConfigure();
         } catch (Throwable e) {
             throw new DalException(e.getMessage());
         }

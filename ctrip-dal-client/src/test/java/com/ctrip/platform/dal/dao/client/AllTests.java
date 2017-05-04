@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
-import com.ctrip.platform.dal.dao.configure.CtripDalConfigTest;
+import com.ctrip.platform.dal.dao.configure.CtripDalConfigLoaderTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.sql.logging.CommonUtilTest;
 import com.ctrip.platform.dal.sql.logging.DalCatLoggerTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({com.ctrip.platform.dal.dao.AllTests.class, CtripDalConfigTest.class, SQLParserTests.class,
+@SuiteClasses({com.ctrip.platform.dal.dao.AllTests.class, CtripDalConfigLoaderTest.class, SQLParserTests.class,
         CommonUtilTest.class, DalCatLoggerTest.class,})
 public class AllTests {
 

@@ -24,4 +24,5 @@ public interface DatabasePoolConfigConstants {
     // If both option and connectionProperties present, the correspond connectionProperties value is used
     // And if only option is set, it will be set into connectionProperties
     String OPTION = "option";
+    String VALIDATORCLASSNAME = "validatorClassName";
 }

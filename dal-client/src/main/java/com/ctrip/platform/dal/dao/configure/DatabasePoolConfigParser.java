@@ -52,8 +52,9 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
     public static final int DEFAULT_MINEVICTABLEIDLETIMEMILLIS = 30000;
     public static final String DEFAULT_CONNECTIONPROPERTIES = null;
     public static final boolean DEFAULT_JMXENABLED = true;
-    public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;" +
-            "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
+    public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
+            + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
+    public static final String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
 
     private Map<String, DatabasePoolConfig> poolConfigs = new ConcurrentHashMap<String, DatabasePoolConfig>();
 
@@ -141,7 +142,8 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
         Map<String, String> map = new HashMap<>();
         poolConfig.setMap(map);
         PoolProperties prop = poolConfig.getPoolProperties();
-        // The following are key connection parameters, developer do not need to provide them in case the configure provider is set
+        // The following are key connection parameters, developer do not need to provide them in case the configure
+        // provider is set
         if (hasAttribute(resource, USER_NAME)) {
             prop.setUsername(getAttribute(resource, USER_NAME));
         }
@@ -254,22 +256,27 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
             prop.setInitSQL(value);
             map.put(INIT_SQL2, value);
         }
-        
+
         /**
-         * Special handing for connectionProperties and option.
-         * If connectionProperties is not set, we will use option's value
-         * if connectionProperties is set, we will ignore option's value
+         * Special handing for connectionProperties and option. If connectionProperties is not set, we will use option's
+         * value if connectionProperties is set, we will ignore option's value
          */
         if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
             String value = getAttribute(resource, CONNECTIONPROPERTIES);
             prop.setConnectionProperties(value);
             map.put(CONNECTIONPROPERTIES, value);
-        }else{
+        } else {
             if (hasAttribute(resource, OPTION)) {
                 String value = getAttribute(resource, OPTION);
                 prop.setConnectionProperties(value);
                 map.put(CONNECTIONPROPERTIES, value);
             }
+        }
+
+        if (hasAttribute(resource, VALIDATORCLASSNAME)) {
+            String value = getAttribute(resource, VALIDATORCLASSNAME);
+            prop.setValidatorClassName(value);
+            map.put(VALIDATORCLASSNAME, value);
         }
 
         return poolConfig;
@@ -293,6 +300,5 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
     private String getAttribute(Node node, String attributeName) {
         return node.getAttributes().getNamedItem(attributeName).getNodeValue();
     }
-
 
 }

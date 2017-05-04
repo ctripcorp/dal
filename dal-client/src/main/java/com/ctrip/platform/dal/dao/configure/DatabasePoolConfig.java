@@ -30,6 +30,7 @@ public class DatabasePoolConfig {
         poolProperties.setConnectionProperties(DatabasePoolConfigParser.DEFAULT_CONNECTIONPROPERTIES);
         poolProperties.setJmxEnabled(DatabasePoolConfigParser.DEFAULT_JMXENABLED);
         poolProperties.setJdbcInterceptors(DatabasePoolConfigParser.DEFAULT_JDBCINTERCEPTORS);
+        poolProperties.setValidatorClassName(DatabasePoolConfigParser.DEFAULT_VALIDATORCLASSNAME);
     }
 
     public String getName() {

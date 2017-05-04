@@ -68,12 +68,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     private static void setDataSourceConfig(DatabasePoolConfig poolConfig, Map<String, String> datasource) {
         if (poolConfig == null || datasource.size() == 0)
             return;
-
         poolConfig.setMap(datasource);
-        // PoolProperties
-        /*
-         * PoolProperties prop = poolConfig.getPoolProperties(); setPoolProperties(datasource, prop);
-         */
     }
 
     private static void setDataSourceConfigMap(Map<String, DatabasePoolConfig> poolConfigMap,
@@ -148,8 +143,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         if (config == null)
             return c;
         c.setName(config.getName());
-        c.setMap(config.getMap());
-        c.setPoolProperties(config.getPoolProperties());
+        c.setMap(new HashMap<>(config.getMap()));
         return c;
     }
 

@@ -1,5 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-public interface DalConfig {
+public interface DalConfigLoader {
     DalConfigure load() throws Exception;
 }

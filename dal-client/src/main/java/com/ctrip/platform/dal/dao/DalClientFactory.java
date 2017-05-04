@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.dao;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.ctrip.platform.dal.dao.configure.DalConfig;
+import com.ctrip.platform.dal.dao.configure.DalConfigLoader;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +64,11 @@ public class DalClientFactory {
 
             DalConfigure config = null;
             if (path == null) {
-                DalConfig c = ServiceLoaderHelper.getInstance(DalConfig.class);
-                if (c == null)
+                DalConfigLoader loader = ServiceLoaderHelper.getInstance(DalConfigLoader.class);
+                if (loader == null)
                     config = DalConfigureFactory.load();
                 else
-                    config = c.load();
+                    config = loader.load();
                 logger.info("Successfully initialized Dal Java Client Factory");
             } else {
                 config = DalConfigureFactory.load(path);

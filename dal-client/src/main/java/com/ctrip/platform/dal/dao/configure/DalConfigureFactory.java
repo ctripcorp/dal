@@ -36,15 +36,7 @@ public class DalConfigureFactory implements DalConfigConstants {
      * @throws Exception
      */
     public static DalConfigure load() throws Exception {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = DalClientFactory.class.getClassLoader();
-        }
-
-        URL dalconfigUrl = classLoader.getResource(DAL_XML);
-        if (dalconfigUrl == null)
-            dalconfigUrl = classLoader.getResource(DAL_CONFIG);
-
+        URL dalconfigUrl = getDalConfigUrl();
         if (dalconfigUrl == null)
             throw new IllegalStateException(
                     "Can not find " + DAL_XML + " or " + DAL_CONFIG + " to initilize dal configure");
@@ -205,6 +197,18 @@ public class DalConfigureFactory implements DalConfigConstants {
 
     private boolean hasAttribute(Node node, String attributeName) {
         return node.getAttributes().getNamedItem(attributeName) != null;
+    }
+
+    public static URL getDalConfigUrl() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null)
+            classLoader = DalClientFactory.class.getClassLoader();
+
+        URL dalconfigUrl = classLoader.getResource(DAL_XML);
+        if (dalconfigUrl == null)
+            dalconfigUrl = classLoader.getResource(DAL_CONFIG);
+
+        return dalconfigUrl;
     }
 
 }

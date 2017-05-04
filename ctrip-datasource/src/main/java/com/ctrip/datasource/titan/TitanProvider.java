@@ -224,17 +224,19 @@ public class TitanProvider implements DataSourceConfigureProvider {
             if (parser.contains(name))
                 continue;
 
-            String possibleName = name.endsWith(PROD_SUFFIX) ?
-                    name.substring(0, name.length() - PROD_SUFFIX.length()) :
-                    name + PROD_SUFFIX;
+            String possibleName = name.endsWith(PROD_SUFFIX) ? name.substring(0, name.length() - PROD_SUFFIX.length())
+                    : name + PROD_SUFFIX;
 
             if (parser.contains(possibleName)) {
                 parser.copyDatabasePoolConifg(possibleName, name);
             } else {
-                // It is strongly recommended to add datasource config in datasource.xml for each of the connectionString in dal.config
+                // It is strongly recommended to add datasource config in datasource.xml for each of the
+                // connectionString in dal.config
                 warn("Cannot found datasource configure for connectionString " + name + ", creating default");
                 // Add missing one
-                parser.addDatabasePoolConifg(name, new DatabasePoolConfig());
+                DatabasePoolConfig c = new DatabasePoolConfig();
+                c.setName(name);
+                parser.addDatabasePoolConifg(name, c);
             }
         }
     }
@@ -245,9 +247,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
     }
 
     /*
-     * Ctrip all in one key is not consistent between PROD and non PROD environment.
-     * In PROD, the all in one name will be added with '_SH' suffix. To simplify suer
-     * end configuration, we auto add the '_SH' to name to get config.
+     * Ctrip all in one key is not consistent between PROD and non PROD environment. In PROD, the all in one name will
+     * be added with '_SH' suffix. To simplify suer end configuration, we auto add the '_SH' to name to get config.
      */
     private Set<String> normalizedForProd(Set<String> dbNames) {
         info("It is production environment and titan key will be appended with _SH suffix");
@@ -261,13 +262,15 @@ public class TitanProvider implements DataSourceConfigureProvider {
         return prodDbNames;
     }
 
-    private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData) throws Exception {
+    private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData)
+            throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
         for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
-            if(isDebug)
+            if (isDebug)
                 configures.put(entry.getKey(), new DataSourceConfigure());
             else
-                configures.put(entry.getKey(), parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
+                configures.put(entry.getKey(),
+                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
         }
 
         return configures;
@@ -276,7 +279,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private void logPoolSettings(String name) {
         info("--- Key datasource config for " + name + " ---");
         DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
-        //Process DatabasePoolConfig
+        // Process DatabasePoolConfig
         config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
 
         PoolProperties pc = config.getPoolProperties();
@@ -338,19 +341,25 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
 
             if (!"200".equals(resp.getStatus())) {
-                logger.warn(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
-                throw new RuntimeException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s", resp.getStatus(), resp.getMessage()));
+                logger.warn(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                        resp.getStatus(), resp.getMessage()));
+                throw new RuntimeException(
+                        String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                                resp.getStatus(), resp.getMessage()));
             }
 
             for (TitanData data : resp.getData()) {
                 info("Parsing " + data.getName());
-                //Fail fast
+                // Fail fast
                 if (data.getErrorCode() != null) {
-                    warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
-                    throw new RuntimeException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s", data.getName(), data.getErrorCode(), data.getErrorMessage()));
+                    warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
+                            data.getName(), data.getErrorCode(), data.getErrorMessage()));
+                    throw new RuntimeException(
+                            String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
+                                    data.getName(), data.getErrorCode(), data.getErrorMessage()));
                 }
 
-                //Decrypt raw connection string
+                // Decrypt raw connection string
                 result.put(data.getName(), data);
                 info(data.getName() + " loaded");
                 if (data.getEnv() != null) {
@@ -386,21 +395,20 @@ public class TitanProvider implements DataSourceConfigureProvider {
         b.setSslcontext(sslContext);
 
         // don't check Hostnames, either.
-        //      -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
+        // -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
         X509HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
         // here's the special part:
-        //      -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
-        //      -- and create a Registry, to register it.
+        // -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
+        // -- and create a Registry, to register it.
         //
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", sslSocketFactory)
+                .register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", sslSocketFactory)
                 .build();
 
         // now, we create connection-manager using our Registry.
-        //      -- allows multi-threaded use
+        // -- allows multi-threaded use
         PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         b.setConnectionManager(connMgr);
 
@@ -413,7 +421,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         b.setDefaultRequestConfig(configBuilder.build());
 
         // finally, build the HttpClient;
-        //      -- done!
+        // -- done!
         HttpClient sslClient = b.build();
 
         return sslClient;
@@ -438,7 +446,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
             t = sources[offset - i];
             sources[offset - i] = sources[offset - j];
             sources[offset - j] = t;
-            datas[o] = (byte) (sources[o + 1] ^ sources[offset - ((sources[offset - i] + sources[offset - j]) % keyLen)]);
+            datas[o] =
+                    (byte) (sources[o + 1] ^ sources[offset - ((sources[offset - i] + sources[offset - j]) % keyLen)]);
         }
         return new String(datas);
     }
@@ -478,7 +487,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         ent.msg = msg;
         startUpLog.add(ent);
     }
-    
+
     public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {
         try {
             Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv, "0", DB_NAME + "=" + allInOneKey);
@@ -494,14 +503,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
             e1.printStackTrace();
         }
     }
-    
+
     public void reportTitanAccessSunEnvMetrics(String subEnv, String allInOneKey) {
-        if(subEnv == null)
+        if (subEnv == null)
             return;
-        
+
         Map<String, String> tag = new HashMap<String, String>();
         tag.put(SUB_ENV, subEnv);
         tag.put(DB_NAME, allInOneKey);
         MetricManager.getMetricer().log(TITAN, 1, tag);
-    }    
+    }
 }

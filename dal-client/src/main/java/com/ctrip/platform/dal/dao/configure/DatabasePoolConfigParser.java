@@ -101,6 +101,7 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
         DatabasePoolConfig newConfig = new DatabasePoolConfig();
         newConfig.setName(newName);
         newConfig.setPoolProperties(oldConfig.getPoolProperties());
+        newConfig.setMap(new HashMap<>(oldConfig.getMap()));
         poolConfigs.put(newName, newConfig);
     }
 

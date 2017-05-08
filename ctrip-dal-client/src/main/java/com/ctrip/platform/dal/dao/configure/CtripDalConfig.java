@@ -11,6 +11,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static oracle.net.aso.C01.e;
+
 public class CtripDalConfig implements DalConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfig.class);
     private static final String DAL_CONFIG = "dal.config";
@@ -21,10 +23,13 @@ public class CtripDalConfig implements DalConfigLoader {
         DalConfigure configure = null;
         try {
             URL url = DalConfigureFactory.getDalConfigUrl();
-            if (url != null)
+            if (url != null) {
                 configure = DalConfigureFactory.load(url);
-            else
+                LOGGER.info("从本地读取dal.config");
+            } else {
                 configure = getConfigure();
+                LOGGER.info("从QConfig读取dal.config");
+            }
         } catch (Throwable e) {
             throw new DalException(e.getMessage());
         }

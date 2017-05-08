@@ -56,7 +56,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         } catch (Throwable e) {
             transaction.setStatus(e);
             String msg = "从QConfig读取全局DataSource配置时发生异常:" + e.getMessage();
-            LOGGER.error(msg, e);
+            LOGGER.warn(msg, e);
         } finally {
             transaction.complete();
         }

@@ -29,7 +29,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     private static Map<String, DatabasePoolConfig> datasourcePoolConfig = null;
     private static final String DAL_DATASOURCE = "DAL.DataSource";
     private static final String DAL_GLOBAL_DATASOURCE = "getGlobalDataSourceConfig";
-    private static final String DAL_APP_DATSOURCE = "getAppDataSourceConfig";
+    private static final String DAL_APP_DATASOURCE = "getAppDataSourceConfig";
     private static final String DAL_MERGE_DATASOURCE = "mergeDataSourceConfig";
 
     static {
@@ -63,7 +63,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     }
 
     private static void setAppDataSourceConfig() {
-        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_APP_DATSOURCE);
+        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_APP_DATASOURCE);
         try {
             MapConfig config = MapConfig.get(DAL_DATASOURCE_PROPERTIES);
             if (config != null) {
@@ -76,15 +76,15 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
                 datasourcePoolConfig = new ConcurrentHashMap<>();
                 setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);
 
-                String log = mapToString(map);
-                Cat.logEvent(DAL_DATASOURCE, DAL_APP_DATSOURCE, Message.SUCCESS, log);
-                LOGGER.info("App DataSource配置:" + log);
+                String log = "App DataSource配置:" + mapToString(map);
+                Cat.logEvent(DAL_DATASOURCE, DAL_APP_DATASOURCE, Message.SUCCESS, log);
+                LOGGER.info(log);
             }
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             String msg = "从QConfig读取App DataSource配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
             transaction.setStatus(Transaction.SUCCESS);
-            transaction.addData(DAL_APP_DATSOURCE, msg);
+            transaction.addData(DAL_APP_DATASOURCE, msg);
             LOGGER.warn(msg, e);
         } finally {
             transaction.complete();
@@ -165,6 +165,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
                 }
             }
 
+            Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS, mapToString(c.getMap()));
             Map<String, String> datasource = c.getMap();
             PoolProperties prop = c.getPoolProperties();
             setPoolProperties(datasource, prop);

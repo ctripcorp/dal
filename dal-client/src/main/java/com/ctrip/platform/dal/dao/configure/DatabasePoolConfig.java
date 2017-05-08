@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class DatabasePoolConfig {
@@ -31,6 +32,7 @@ public class DatabasePoolConfig {
         poolProperties.setJmxEnabled(DatabasePoolConfigParser.DEFAULT_JMXENABLED);
         poolProperties.setJdbcInterceptors(DatabasePoolConfigParser.DEFAULT_JDBCINTERCEPTORS);
         poolProperties.setValidatorClassName(DatabasePoolConfigParser.DEFAULT_VALIDATORCLASSNAME);
+        map = new HashMap<>();
     }
 
     public String getName() {

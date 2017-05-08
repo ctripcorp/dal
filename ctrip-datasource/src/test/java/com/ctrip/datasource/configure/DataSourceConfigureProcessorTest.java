@@ -10,7 +10,7 @@ import java.util.Map;
 public class DataSourceConfigureProcessorTest {
     @Test
     public void testGetDatabasePoolConfig() {
-        //emulate datasource.xml
+        // emulate datasource.xml
         DatabasePoolConfig config = new DatabasePoolConfig();
         config.setName("test");
         Map<String, String> map = new HashMap<>();
@@ -24,7 +24,7 @@ public class DataSourceConfigureProcessorTest {
         map.put("maxActive", "100");
         map.put("minIdle", "0");
         map.put("maxWait", "10000");
-        //map.put("maxAge", "30000");
+        // map.put("maxAge", "30000");
         map.put("initialSize", "3");
         map.put("removeAbandonedTimeout", "60");
         map.put("removeAbandoned", "true");

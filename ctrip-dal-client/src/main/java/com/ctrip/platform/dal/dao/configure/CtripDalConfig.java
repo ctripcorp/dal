@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.TypedConfig;
@@ -17,23 +20,33 @@ public class CtripDalConfig implements DalConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfig.class);
     private static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
+    private static final String DAL_CONFIG_LOG = "DAL.Config";
+    private static final String DAL_CONFIG_LOAD = "load";
 
     @Override
     public DalConfigure load() throws Exception {
+        Transaction transaction = Cat.newTransaction(DAL_CONFIG_LOG, DAL_CONFIG_LOAD);
         DalConfigure configure = null;
         try {
             URL url = DalConfigureFactory.getDalConfigUrl();
+            String log = null;
             if (url != null) {
                 configure = DalConfigureFactory.load(url);
-                LOGGER.info("从本地读取dal.config");
+                log = "从本地读取dal.config";
             } else {
                 configure = getConfigure();
-                LOGGER.info("从QConfig读取dal.config");
+                log = "从QConfig读取dal.config";
             }
-        } catch (Throwable e) {
-            throw new DalException(e.getMessage());
-        }
 
+            Cat.logEvent(DAL_CONFIG_LOG, DAL_CONFIG_LOAD, Message.SUCCESS, log);
+            LOGGER.info(log);
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+            throw new DalException(e.getMessage());
+        } finally {
+            transaction.complete();
+        }
         return configure;
     }
 
@@ -55,6 +68,8 @@ public class CtripDalConfig implements DalConfigLoader {
             String msg = "从QConfig读取dal.config配置时发生异常:";
             LOGGER.error(msg + e.getMessage(), e);
             throw new DalException(msg + e.getMessage());
+        } finally {
+
         }
         return configure;
     }

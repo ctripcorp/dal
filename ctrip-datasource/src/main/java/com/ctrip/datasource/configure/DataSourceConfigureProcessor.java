@@ -1,5 +1,6 @@
 package com.ctrip.datasource.configure;
 
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigConstants;
 import com.dianping.cat.Cat;
@@ -39,6 +40,8 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     }
 
     private static void setGlobalDataSourceConfig() {
+        if (!Foundation.app().isAppIdSet())
+            return;
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GLOBAL_DATASOURCE);
         try {
             MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null);
@@ -63,6 +66,8 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     }
 
     private static void setAppDataSourceConfig() {
+        if (!Foundation.app().isAppIdSet())
+            return;
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_APP_DATASOURCE);
         try {
             MapConfig config = MapConfig.get(DAL_DATASOURCE_PROPERTIES);

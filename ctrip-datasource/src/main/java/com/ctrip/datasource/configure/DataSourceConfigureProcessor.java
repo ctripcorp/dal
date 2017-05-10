@@ -25,7 +25,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
     private static final String PROD_SUFFIX = "_SH";
-    private static DatabasePoolConfig poolConfig = null;
+    private static DatabasePoolConfig databasePoolConfig = null;
     private static Map<String, DatabasePoolConfig> datasourcePoolConfig = null;
     private static final String DAL_DATASOURCE = "DAL";
     private static final String DAL_GET_DATASOURCE = "DataSource::getDataSourceConfig";
@@ -47,8 +47,8 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
                 Map<String, String> datasource = new HashMap<>(); // app level
                 Map<String, Map<String, String>> datasourceMap = new HashMap<>(); // datasource level
                 processDataSourceConfig(map, datasource, datasourceMap);
-                poolConfig = new DatabasePoolConfig();
-                setDataSourceConfig(poolConfig, datasource);
+                databasePoolConfig = new DatabasePoolConfig();
+                setDataSourceConfig(databasePoolConfig, datasource);
                 datasourcePoolConfig = new ConcurrentHashMap<>();
                 setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);
 
@@ -112,8 +112,8 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_MERGE_DATASOURCE);
 
         try {
-            if (poolConfig != null) {
-                overrideDatabasePoolConfig(c, poolConfig);
+            if (databasePoolConfig != null) {
+                overrideDatabasePoolConfig(c, databasePoolConfig);
                 String log = "App 覆盖结果:" + mapToString(c.getMap());
                 LOGGER.info(log);
             }

@@ -17,6 +17,7 @@ import javax.net.ssl.SSLContext;
 
 import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
 
+import com.dianping.cat.status.ProductVersionManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -78,6 +79,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
     public static final String ENV = "environment";
     public static final String SUB_ENV = "subEnvironment";
     public static final String DB_NAME = "DBKeyName";
+
+    private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
 
     public static class LogEntry {
         public static final int INFO = 0;
@@ -220,6 +223,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     private void checkMissingPoolConfig(Set<String> dbNames) {
         DatabasePoolConfigParser parser = DatabasePoolConfigParser.getInstance();
+        if (parser.isDatasourceXmlExist())
+            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, appid);
+
         for (String name : dbNames) {
             if (parser.contains(name))
                 continue;

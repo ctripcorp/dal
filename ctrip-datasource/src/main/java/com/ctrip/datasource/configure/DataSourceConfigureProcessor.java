@@ -22,74 +22,45 @@ import static oracle.net.aso.C07.s;
 public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceConfigureProcessor.class);
     private static final String DAL_APPNAME = "fx_dal";
-    private static final String DAL_DATASOURCE_PROPERTIES = "dal.datasource.properties";
+    private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
     private static final String PROD_SUFFIX = "_SH";
-    private static DatabasePoolConfig globalPoolConfig = null;
-    private static DatabasePoolConfig appPoolConfig = null;
+    private static DatabasePoolConfig poolConfig = null;
     private static Map<String, DatabasePoolConfig> datasourcePoolConfig = null;
-    private static final String DAL_DATASOURCE = "DAL.DataSource";
-    private static final String DAL_GLOBAL_DATASOURCE = "getGlobalDataSourceConfig";
-    private static final String DAL_APP_DATASOURCE = "getAppDataSourceConfig";
-    private static final String DAL_MERGE_DATASOURCE = "mergeDataSourceConfig";
+    private static final String DAL_DATASOURCE = "DAL";
+    private static final String DAL_GET_DATASOURCE = "DataSource::getDataSourceConfig";
+    private static final String DAL_MERGE_DATASOURCE = "DataSource::mergeDataSourceConfig";
 
     static {
         // Thread safe
-        setGlobalDataSourceConfig();
-        setAppDataSourceConfig();
+        setDataSourceConfig();
     }
 
-    private static void setGlobalDataSourceConfig() {
+    private static void setDataSourceConfig() {
         if (!Foundation.app().isAppIdSet())
             return;
-        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GLOBAL_DATASOURCE);
+        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE);
         try {
             MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null);
-            if (config != null) {
-                Map<String, String> datasource = config.asMap();
-                Map<String, String> map = new HashMap<>(datasource); // avoid UnsupportedOperationException
-                globalPoolConfig = new DatabasePoolConfig();
-                setDataSourceConfig(globalPoolConfig, map);
-
-                String log = "全局DataSource配置:" + mapToString(datasource);
-                Cat.logEvent(DAL_DATASOURCE, DAL_GLOBAL_DATASOURCE, Message.SUCCESS, log);
-                LOGGER.info(log);
-            }
-            transaction.setStatus(Transaction.SUCCESS);
-        } catch (Throwable e) {
-            transaction.setStatus(e);
-            String msg = "从QConfig读取全局DataSource配置时发生异常:" + e.getMessage();
-            LOGGER.warn(msg, e);
-        } finally {
-            transaction.complete();
-        }
-    }
-
-    private static void setAppDataSourceConfig() {
-        if (!Foundation.app().isAppIdSet())
-            return;
-        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_APP_DATASOURCE);
-        try {
-            MapConfig config = MapConfig.get(DAL_DATASOURCE_PROPERTIES);
             if (config != null) {
                 Map<String, String> map = config.asMap();
                 Map<String, String> datasource = new HashMap<>(); // app level
                 Map<String, Map<String, String>> datasourceMap = new HashMap<>(); // datasource level
-                processAppDatasourceConfig(map, datasource, datasourceMap);
-                appPoolConfig = new DatabasePoolConfig();
-                setDataSourceConfig(appPoolConfig, datasource);
+                processDataSourceConfig(map, datasource, datasourceMap);
+                poolConfig = new DatabasePoolConfig();
+                setDataSourceConfig(poolConfig, datasource);
                 datasourcePoolConfig = new ConcurrentHashMap<>();
                 setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);
 
-                String log = "App DataSource配置:" + mapToString(map);
-                Cat.logEvent(DAL_DATASOURCE, DAL_APP_DATASOURCE, Message.SUCCESS, log);
+                String log = "DataSource配置:" + mapToString(map);
+                Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
                 LOGGER.info(log);
             }
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
-            String msg = "从QConfig读取App DataSource配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
+            String msg = "从QConfig读取DataSource配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
             transaction.setStatus(Transaction.SUCCESS);
-            transaction.addData(DAL_APP_DATASOURCE, msg);
+            transaction.addData(DAL_GET_DATASOURCE, msg);
             LOGGER.warn(msg, e);
         } finally {
             transaction.complete();
@@ -113,7 +84,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         }
     }
 
-    private static void processAppDatasourceConfig(Map<String, String> map, Map<String, String> datasource,
+    private static void processDataSourceConfig(Map<String, String> map, Map<String, String> datasource,
             Map<String, Map<String, String>> datasourceMap) {
         if (map == null || map.size() == 0)
             return;
@@ -137,17 +108,12 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
      * datasource <-- Config center per datasource
      */
     public static DatabasePoolConfig getDatabasePoolConfig(DatabasePoolConfig config) {
-        DatabasePoolConfig c = cloneDatabasePoolConfig(globalPoolConfig);
+        DatabasePoolConfig c = cloneDatabasePoolConfig(null);
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_MERGE_DATASOURCE);
 
         try {
-            if (config != null) {
-                overrideDatabasePoolConfig(c, config);
-                String log = "datasource.xml 覆盖结果:" + mapToString(c.getMap());
-                LOGGER.info(log);
-            }
-            if (appPoolConfig != null) {
-                overrideDatabasePoolConfig(c, appPoolConfig);
+            if (poolConfig != null) {
+                overrideDatabasePoolConfig(c, poolConfig);
                 String log = "App 覆盖结果:" + mapToString(c.getMap());
                 LOGGER.info(log);
             }
@@ -169,7 +135,11 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
                     }
                 }
             }
-
+            if (config != null) {
+                overrideDatabasePoolConfig(c, config);
+                String log = "datasource.xml 覆盖结果:" + mapToString(c.getMap());
+                LOGGER.info(log);
+            }
             Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS, mapToString(c.getMap()));
             Map<String, String> datasource = c.getMap();
             PoolProperties prop = c.getPoolProperties();

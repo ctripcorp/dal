@@ -60,6 +60,8 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
 
     private String databaseConfigLocation = null;
 
+    private boolean datasourceXmlExist = false;
+
     private DatabasePoolConfigParser() {
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -70,6 +72,7 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
             if (url == null) {
                 logger.warn(DBPOOL_CONFIG + " is not exist in the root directory of classpath.");
             } else {
+                datasourceXmlExist = true;
                 parse(url.openStream());
                 logger.info("datasource property will use file :" + url.getFile());
             }
@@ -302,4 +305,7 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
         return node.getAttributes().getNamedItem(attributeName).getNodeValue();
     }
 
+    public boolean isDatasourceXmlExist() {
+        return datasourceXmlExist;
+    }
 }

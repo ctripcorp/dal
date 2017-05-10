@@ -17,6 +17,7 @@ import javax.net.ssl.SSLContext;
 
 import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
 
+import com.ctrip.platform.dal.dao.Version;
 import com.dianping.cat.status.ProductVersionManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
@@ -81,6 +82,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     public static final String DB_NAME = "DBKeyName";
 
     private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
+    private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
 
     public static class LogEntry {
         public static final int INFO = 0;
@@ -104,6 +106,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private Map<String, DataSourceConfigure> dataSourceConfigures;
 
     public void initialize(Map<String, String> settings) throws Exception {
+        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, Version.getVersion());
         startUpLog.clear();
         config = new HashMap<>(settings);
 

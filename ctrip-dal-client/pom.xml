@@ -7,7 +7,7 @@
         <version>1.5.2</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.3.1-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>

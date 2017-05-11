@@ -18,11 +18,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-
 public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatabasePoolConfigParser.class);
     private static DatabasePoolConfigParser poolConfigParser = new DatabasePoolConfigParser();
     private static final String DBPOOL_CONFIG = "datasource.xml";
 
@@ -69,9 +67,7 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
                 classLoader = DatabasePoolConfigParser.class.getClassLoader();
             }
             URL url = classLoader.getResource(DBPOOL_CONFIG);
-            if (url == null) {
-                logger.warn(DBPOOL_CONFIG + " is not exist in the root directory of classpath.");
-            } else {
+            if (url != null) {
                 datasourceXmlExist = true;
                 parse(url.openStream());
                 logger.info("datasource property will use file :" + url.getFile());

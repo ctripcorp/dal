@@ -106,7 +106,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private Map<String, DataSourceConfigure> dataSourceConfigures;
 
     public void initialize(Map<String, String> settings) throws Exception {
-        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, Version.getVersion());
+        // ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, Version.getVersion());
         startUpLog.clear();
         config = new HashMap<>(settings);
 

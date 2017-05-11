@@ -50,9 +50,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        	<groupId>com.ctrip.framework</groupId>
-        	<artifactId>ctrip-datasource</artifactId>
-        	<version>1.0.0</version>
+            <groupId>com.ctrip.framework</groupId>
+            <artifactId>ctrip-datasource</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <distributionManagement>

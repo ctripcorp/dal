@@ -33,11 +33,6 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
         try {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
-            if (TitanProvider.config == null) {
-                logger.error("Can not find dal.config from neither local nor remote.");
-                return false;
-            }
-
             configs.putAll(TitanProvider.config);
             log(logger);
             logger.info("success initialized Dal Factory");
@@ -48,7 +43,12 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
             return true;
         } catch (Throwable e) {
-            configs.putAll(TitanProvider.config);
+            if (TitanProvider.config == null) {
+                logger.error("Can not find dal.config from neither local nor remote.");
+            } else {
+                configs.putAll(TitanProvider.config);
+            }
+
             log(logger);
             logger.error("Fail", e);
             logger.info("Please check http://conf.ctripcorp.com/pages/viewpage.action?pageId=60842135");

@@ -180,7 +180,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (!(appid == null || appid.trim().isEmpty()))
             return appid.trim();
 
-        DalException e = new DalException("Can not locate APPID for this application");
+        DalException e = new DalException("Can not locate app.id for this application");
         error(e.getMessage(), e);
         throw e;
     }

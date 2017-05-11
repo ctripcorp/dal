@@ -24,9 +24,9 @@ public class CtripDalConfig implements DalConfigLoader {
     private static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final String DAL_CONFIG_LOG = "DAL";
-    private static final String DAL_CONFIG_LOAD = "Config::";
-    private static final String DAL_CONFIG_LOCAL = "local";
-    private static final String DAL_CONFIG_REMOTE = "remote";
+    private static final String DAL_CONFIG_LOAD = "dal.config::";
+    private static final String DAL_CONFIG_LOCAL = "readLocal";
+    private static final String DAL_CONFIG_REMOTE = "readRemote";
     private static final String UNKNOWN = "unknown";
     private static final String DAL_REMOTE_CONFIG = "DAL.remote.config";
 
@@ -35,7 +35,6 @@ public class CtripDalConfig implements DalConfigLoader {
         URL url = DalConfigureFactory.getDalConfigUrl();
         String location = url == null ? DAL_CONFIG_REMOTE : DAL_CONFIG_LOCAL;
         location = DAL_CONFIG_LOAD + location;
-        Transaction transaction = Cat.newTransaction(DAL_CONFIG_LOG, location);
         DalConfigure configure = null;
         try {
             String log = null;
@@ -52,12 +51,10 @@ public class CtripDalConfig implements DalConfigLoader {
 
             Cat.logEvent(DAL_CONFIG_LOG, location, Message.SUCCESS, log);
             LOGGER.info(log);
-            transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
-            transaction.setStatus(e);
-            throw new DalException(e.getMessage());
-        } finally {
-            transaction.complete();
+            LOGGER.error(e.getMessage(), e);
+            Cat.logError(e.getMessage(), e);
+            throw new DalException(e.getMessage(), e);
         }
         return configure;
     }
@@ -65,25 +62,41 @@ public class CtripDalConfig implements DalConfigLoader {
     private DalConfigure getConfigure() throws Exception {
         DalConfigure configure = null;
         try {
+            String content = getRemoteConfig();
+            if (content != null && content.length() > 0) {
+                InputStream stream = new ByteArrayInputStream(content.getBytes(CHARSET));
+                configure = DalConfigureFactory.load(stream);
+            }
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage(), e);
+            Cat.logError(e.getMessage(), e);
+            throw new DalException(e.getMessage(), e);
+        }
+        return configure;
+    }
+
+    private String getRemoteConfig() throws Exception {
+        Transaction transaction = Cat.newTransaction(DAL_CONFIG_LOG, DAL_CONFIG_LOAD + DAL_CONFIG_REMOTE);
+        String content = null;
+        try {
             TypedConfig<String> config = TypedConfig.get(DAL_CONFIG, new TypedConfig.Parser<String>() {
                 public String parse(String s) {
                     return s;
                 }
             });
 
-            String content = config.current();
-            if (content != null && content.length() > 0) {
-                InputStream stream = new ByteArrayInputStream(content.getBytes(CHARSET));
-                configure = DalConfigureFactory.load(stream);
-            }
+            content = config.current();
+            transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
-            String msg = "从QConfig读取dal.config配置时发生异常:";
-            LOGGER.error(msg + e.getMessage(), e);
-            throw new DalException(msg + e.getMessage());
+            transaction.setStatus(e);
+            String msg = "从QConfig读取dal.config配置时发生异常:" + e.getMessage();
+            LOGGER.error(msg, e);
+            Cat.logError(msg, e);
+            throw new DalException(msg, e);
         } finally {
-
+            transaction.complete();
         }
-        return configure;
+        return content;
     }
 
 }

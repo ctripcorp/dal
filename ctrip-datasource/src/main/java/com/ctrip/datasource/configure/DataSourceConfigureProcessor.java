@@ -28,7 +28,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
     private static DatabasePoolConfig databasePoolConfig = null;
     private static Map<String, DatabasePoolConfig> datasourcePoolConfig = null;
     private static final String DAL_DATASOURCE = "DAL";
-    private static final String DAL_GET_DATASOURCE = "DataSource::getDataSourceConfig";
+    private static final String DAL_GET_DATASOURCE = "DataSource::getRemoteDataSourceConfig";
     private static final String DAL_MERGE_DATASOURCE = "DataSource::mergeDataSourceConfig";
 
     static {

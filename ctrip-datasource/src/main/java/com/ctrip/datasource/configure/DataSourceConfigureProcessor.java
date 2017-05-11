@@ -41,16 +41,16 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
             return;
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE);
         try {
-            MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null);
+            MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null);// Get config from QConfig
             if (config != null) {
                 Map<String, String> map = config.asMap();
                 Map<String, String> datasource = new HashMap<>(); // app level
                 Map<String, Map<String, String>> datasourceMap = new HashMap<>(); // datasource level
                 processDataSourceConfig(map, datasource, datasourceMap);
                 databasePoolConfig = new DatabasePoolConfig();
-                setDataSourceConfig(databasePoolConfig, datasource);
+                setDataSourceConfig(databasePoolConfig, datasource);// set app level map
                 datasourcePoolConfig = new ConcurrentHashMap<>();
-                setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);
+                setDataSourceConfigMap(datasourcePoolConfig, datasourceMap);// set datasource level map
 
                 String log = "DataSource配置:" + mapToString(map);
                 Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
@@ -112,11 +112,13 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_MERGE_DATASOURCE);
 
         try {
+            // override app-level config from QConfig
             if (databasePoolConfig != null) {
                 overrideDatabasePoolConfig(c, databasePoolConfig);
                 String log = "App 覆盖结果:" + mapToString(c.getMap());
                 LOGGER.info(log);
             }
+            // override datasource-level config from QConfig
             String name = config.getName();
             if (name != null && datasourcePoolConfig != null) {
                 DatabasePoolConfig poolConfig = datasourcePoolConfig.get(name);
@@ -135,6 +137,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
                     }
                 }
             }
+            // override config from datasource.xml
             if (config != null) {
                 overrideDatabasePoolConfig(c, config);
                 String log = "datasource.xml 覆盖结果:" + mapToString(c.getMap());
@@ -143,7 +146,7 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
             Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS, mapToString(c.getMap()));
             Map<String, String> datasource = c.getMap();
             PoolProperties prop = c.getPoolProperties();
-            setPoolProperties(datasource, prop);
+            setPoolProperties(datasource, prop); // set poolproperties from map
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);

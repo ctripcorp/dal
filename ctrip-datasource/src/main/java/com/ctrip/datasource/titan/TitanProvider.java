@@ -54,6 +54,8 @@ import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
+
 public class TitanProvider implements DataSourceConfigureProvider {
     // This is to make sure we can get APPID if user really set so
     private static final Logger logger = LoggerFactory.getLogger(TitanProvider.class);
@@ -219,7 +221,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         }
 
         for (String name : dbNames)
-            logPoolSettings(name);
+            processPoolSettings(name);
 
         info("--- End datasource config  ---");
     }
@@ -285,11 +287,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
         return configures;
     }
 
-    private void logPoolSettings(String name) {
+    private void processPoolSettings(String name) {
         info("--- Key datasource config for " + name + " ---");
         DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
         // Process DatabasePoolConfig
         config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
+        DatabasePoolConfigParser.getInstance().addDatabasePoolConifg(name, config);
 
         PoolProperties pc = config.getPoolProperties();
         info("connectionProperties: " + pc.getConnectionProperties());

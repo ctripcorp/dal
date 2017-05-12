@@ -53,7 +53,7 @@ public class CtripDalConfig implements DalConfigLoader {
             LOGGER.info(log);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
-            Cat.logError(e.getMessage(), e);
+            Cat.logError(e);
             throw new DalException(e.getMessage(), e);
         }
         return configure;
@@ -68,8 +68,6 @@ public class CtripDalConfig implements DalConfigLoader {
                 configure = DalConfigureFactory.load(stream);
             }
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-            Cat.logError(e.getMessage(), e);
             throw new DalException(e.getMessage(), e);
         }
         return configure;
@@ -90,8 +88,6 @@ public class CtripDalConfig implements DalConfigLoader {
         } catch (Throwable e) {
             transaction.setStatus(e);
             String msg = "从QConfig读取dal.config配置时发生异常:" + e.getMessage();
-            LOGGER.error(msg, e);
-            Cat.logError(msg, e);
             throw new DalException(msg, e);
         } finally {
             transaction.complete();

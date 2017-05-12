@@ -243,7 +243,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
             } else {
                 // It is strongly recommended to add datasource config in datasource.xml for each of the
                 // connectionString in dal.config
-                warn("Cannot found datasource configure for connectionString " + name + ", creating default");
                 // Add missing one
                 DatabasePoolConfig c = new DatabasePoolConfig();
                 c.setName(name);

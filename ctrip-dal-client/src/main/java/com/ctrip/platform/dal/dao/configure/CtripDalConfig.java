@@ -87,6 +87,7 @@ public class CtripDalConfig implements DalConfigLoader {
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);
+            Cat.logError(e);
             String msg = "从QConfig读取dal.config配置时发生异常:" + e.getMessage();
             throw new DalException(msg, e);
         } finally {

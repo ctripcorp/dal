@@ -21,7 +21,7 @@ import static oracle.net.aso.C07.s;
 
 public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceConfigureProcessor.class);
-    private static final String DAL_APPNAME = "fx_dal";
+    private static final String DAL_APPNAME = "dal";
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
     private static final String PROD_SUFFIX = "_SH";

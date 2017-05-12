@@ -6,7 +6,7 @@
         <artifactId>framework-parent</artifactId>
         <version>1.5.2</version>
     </parent>
-    <groupId>com.ctrip.framework</groupId>
+    <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <properties>

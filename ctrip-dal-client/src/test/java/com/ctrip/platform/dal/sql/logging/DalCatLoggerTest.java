@@ -22,7 +22,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalCatLoggerTest {
 	
-	private final static int SAMPLE = 10000;
+	private final static int SAMPLE = 10;
 
 	private final static String DATABASE_NAME = "HotelPubDB";
 	

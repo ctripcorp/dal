@@ -10,8 +10,12 @@ import com.ctrip.platform.dal.sql.logging.CommonUtilTest;
 import com.ctrip.platform.dal.sql.logging.DalCatLoggerTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({com.ctrip.platform.dal.dao.AllTests.class, CtripDalConfigLoaderTest.class, SQLParserTests.class,
-        CommonUtilTest.class, DalCatLoggerTest.class,})
+@SuiteClasses({
+    com.ctrip.platform.dal.dao.AllTests.class, 
+    CtripDalConfigLoaderTest.class, 
+    SQLParserTests.class,
+    CommonUtilTest.class,
+    DalCatLoggerTest.class,})
 public class AllTests {
 
 }

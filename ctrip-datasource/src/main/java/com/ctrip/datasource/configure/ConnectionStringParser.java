@@ -101,7 +101,7 @@ public class ConnectionStringParser {
 		DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
 		
 		// If connectionProperties is set, we will use what user specifies.
-		if (poolConfig.getPoolProperties().getConnectionProperties() != null)
+		if (poolConfig == null || poolConfig.getPoolProperties().getConnectionProperties() != null)
 		    return;
 
 		// If connectionProperties is not set, we should provide default value per database type

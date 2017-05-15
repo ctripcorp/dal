@@ -25,7 +25,7 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="rewriteBatchedStatements=true;allowMultiQueries=true"/>
-	<Datasource name="SimpleShard_0"
+	<Datasource name="SimpleShard_1"
               testWhileIdle="false"
               testOnBorrow="false"
               testOnReturn="false"

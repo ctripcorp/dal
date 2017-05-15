@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.ctrip.datasource.configure.AllInOneConfigureReaderTest;
 import com.ctrip.datasource.configure.ConnectionStringParserParserTest;
 import com.ctrip.datasource.configure.CtripDalDataSourceTest;
+import com.ctrip.datasource.configure.DataSourceConfigureProcessorTest;
 import com.ctrip.datasource.titan.TitanServiceReaderTest;
 
 @RunWith(Suite.class)
@@ -15,6 +16,7 @@ import com.ctrip.datasource.titan.TitanServiceReaderTest;
 	AllInOneConfigureReaderTest.class,
 	ConnectionStringParserParserTest.class,
 	CtripDalDataSourceTest.class,
+	DataSourceConfigureProcessorTest.class,
 	MetricTest.class
 	})
 public class AllTests {

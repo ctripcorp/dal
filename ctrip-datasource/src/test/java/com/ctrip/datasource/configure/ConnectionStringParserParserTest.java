@@ -22,7 +22,8 @@ public class ConnectionStringParserParserTest {
 		ConnectionStringParser parser = new ConnectionStringParser();
 		DataSourceConfigure  c = parser.parse("SimpleShard_0", "Data Source=DST56614,1433;UID=sa;password=!QAZ@WSX1qaz2wsx; database=SimpleShard_0;");
 		Assert.assertNotNull(c);
-		Assert.assertEquals("jdbc:sqlserver://DST56614:1433;DatabaseName=SimpleShard_0;rewriteBatchedStatements=true;allowMultiQueries=true", c.getConnectionUrl());
+//		Assert.assertEquals("jdbc:sqlserver://DST56614:1433;DatabaseName=SimpleShard_0;rewriteBatchedStatements=true;allowMultiQueries=true", c.getConnectionUrl());
+		Assert.assertEquals("jdbc:sqlserver://DST56614:1433;DatabaseName=SimpleShard_0", c.getConnectionUrl());
 		Assert.assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", c.getDriverClass());
 		Assert.assertEquals("sa", c.getUserName());
 		Assert.assertEquals("!QAZ@WSX1qaz2wsx", c.getPassword());

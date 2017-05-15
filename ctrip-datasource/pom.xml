@@ -90,7 +90,6 @@
         <dependency>
             <groupId>qunar.tc.qconfig</groupId>
             <artifactId>qconfig-client</artifactId>
-            <version>1.2.5</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

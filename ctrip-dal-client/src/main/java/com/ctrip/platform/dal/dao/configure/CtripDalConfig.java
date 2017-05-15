@@ -40,7 +40,7 @@ public class CtripDalConfig implements DalConfigLoader {
             String log = null;
             if (url != null) {
                 configure = DalConfigureFactory.load(url);
-                log = "从本地读取dal.config";
+                log = "从本地读取dal.config, path: " + url.getPath();
             } else {
                 String id = Foundation.app().getAppId();
                 String appId = (id == null || id.length() == 0) ? UNKNOWN : id;

@@ -17,14 +17,18 @@ public class CtripJavaCodeGeneratorOfOthersProcessor implements DalProcessor {
 
         VelocityContext vltCcontext = GenUtils.buildDefaultVelocityContext();
         vltCcontext.put("host", ctx.getDalConfigHost());
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.config", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
+        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Dal.config", dir.getAbsolutePath()),
+                "templates/java/Dal.config.java.tpl");
 
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Database.Config", dir.getAbsolutePath()), "templates/java/Database.config.java.tpl");
+        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/Database.Config", dir.getAbsolutePath()),
+                "templates/java/Database.config.java.tpl");
 
-        vltCcontext.put("host", ctx.getContextHost());
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/datasource.xml", dir.getAbsolutePath()), "templates/java/DataSource.java.tpl");
+        // vltCcontext.put("host", ctx.getContextHost());
+        // GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/datasource.xml", dir.getAbsolutePath()),
+        // "templates/java/DataSource.java.tpl");
 
-        vltCcontext.put("host", "");
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/ConfigProfile.xml", dir.getAbsolutePath()), "templates/java/ConfigProfile.java.tpl");
+        // vltCcontext.put("host", "");
+        // GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/ConfigProfile.xml", dir.getAbsolutePath()),
+        // "templates/java/ConfigProfile.java.tpl");
     }
 }

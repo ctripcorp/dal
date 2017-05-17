@@ -1,6 +1,13 @@
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "delete" )
 
+    /**
+	 * ${method.getComments()}
+	**/
+	public int ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
+		return ${method.getName()}(${method.getActualParameter()});
+	}
+
 	/**
 	 * ${method.getComments()}
 	**/

@@ -1,5 +1,13 @@
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "insert")
+
+    /**
+	 * ${method.getComments()}
+	**/
+	public int ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
+		return ${method.getName()}(${method.getActualParameter()});
+	}
+
 	/**
 	 * ${method.getComments()}
 	**/

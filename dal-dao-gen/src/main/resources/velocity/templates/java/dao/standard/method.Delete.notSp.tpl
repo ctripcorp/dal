@@ -2,6 +2,17 @@
 
 	/**
 	 * Delete the given pojo.
+	 *
+	 * @param daoPojo pojo to be deleted
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int delete(${host.getPojoClassName()} daoPojo) throws SQLException {
+		return delete(null, daoPojo);
+	}
+
+	/**
+	 * Delete the given pojo.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojo pojo to be deleted
@@ -19,6 +30,17 @@
 
 	/**
 	 * Delete the given pojos list one by one.
+	 *
+	 * @param daoPojos list of pojos to be deleted
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int[] delete(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+		return delete(null, daoPojos);
+	}
+
+	/**
+	 * Delete the given pojos list one by one.
 	 * 
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be deleted
@@ -33,6 +55,18 @@
 	}
 #end
 #if($host.generateAPI(88,89))
+
+	/**
+	 * Delete the given pojo list in batch.
+	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
+	 *
+	 * @param daoPojos list of pojos to be deleted
+	 * @return how many rows been affected for deleting each of the pojo
+	 * @throws SQLException
+	 */
+	public int[] batchDelete(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+		return batchDelete(null, daoPojos);
+	}
 
 	/**
 	 * Delete the given pojo list in batch. 

@@ -3,6 +3,13 @@
 ##简单类型并且返回值是List
 #if($method.isSampleType() && $method.isReturnList())
 
+    /**
+	 * ${method.getComments()}
+	**/
+	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
+		return ${method.getName()}(${method.getActualParameter()});
+	}
+
 	/**
 	 * ${method.getComments()}
 	**/

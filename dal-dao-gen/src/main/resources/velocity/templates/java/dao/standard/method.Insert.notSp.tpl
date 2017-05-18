@@ -9,7 +9,7 @@
 	 * @throws SQLException
 	 */
 	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
-		return insert(null, daoPojo);
+		return client.insert(new DalHints(), daoPojo);
 	}
 
 	/**
@@ -40,7 +40,7 @@
 	 * @return how many rows been affected
 	 */
 	public int[] insert(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		return insert(null, daoPojos);
+		return client.insert(new DalHints(), daoPojos);
 	}
 
 	/**
@@ -185,7 +185,7 @@
 	 * @throws SQLException
 	 */
 	public int combinedInsert(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		return combinedInsert(null, daoPojos);
+		return client.combinedInsert(new DalHints(), daoPojos);
 	}
 
 	/**

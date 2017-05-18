@@ -9,7 +9,7 @@
 	 * @throws SQLException
 	 */
 	public int insert(${host.getPojoClassName()} daoPojo) throws SQLException {
-		return client.insert(new DalHints(), daoPojo);
+		return insert(null, daoPojo);
 	}
 
 	/**
@@ -40,7 +40,7 @@
 	 * @return how many rows been affected
 	 */
 	public int[] insert(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		return client.insert(new DalHints(), daoPojos);
+		return insert(null, daoPojos);
 	}
 
 	/**
@@ -77,7 +77,7 @@
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int insert(KeyHolder keyHolder, ${host.getPojoClassName()} daoPojo) throws SQLException {
+	public int insertWithKeyHolder(KeyHolder keyHolder, ${host.getPojoClassName()} daoPojo) throws SQLException {
 		return insert(null, keyHolder, daoPojo);
 	}
 
@@ -116,7 +116,7 @@
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int[] insert(KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+	public int[] insertWithKeyHolder(KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
 		return insert(null, keyHolder, daoPojos);
 	}
 
@@ -185,7 +185,7 @@
 	 * @throws SQLException
 	 */
 	public int combinedInsert(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		return client.combinedInsert(new DalHints(), daoPojos);
+		return combinedInsert(null, daoPojos);
 	}
 
 	/**
@@ -217,7 +217,7 @@
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int combinedInsert(KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+	public int combinedInsertWithKeyHolder(KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
 		return combinedInsert(null, keyHolder, daoPojos);
 	}
 

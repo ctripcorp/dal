@@ -176,8 +176,8 @@ public class JavaTableHost {
 
     public boolean isIntegerPk() {
         Class<?> clazz = primaryKeys.get(0).getJavaClass();
-        return primaryKeys.size() == 1 &&
-                (clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(BigInteger.class));
+        return primaryKeys.size() == 1
+                && (clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(BigInteger.class));
     }
 
     public String pageBegain() {
@@ -199,10 +199,27 @@ public class JavaTableHost {
     public String getPkParameterDeclaration() {
         List<String> paramsDeclaration = new ArrayList<>();
         for (JavaParameterHost parameter : primaryKeys) {
-//            paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getUncapitalizedName()));
-            paramsDeclaration.add(String.format("%s %s", parameter.getClassDisplayName(), parameter.getCamelCaseUncapitalizedName()));
+            paramsDeclaration.add(
+                    String.format("%s %s", parameter.getClassDisplayName(), parameter.getCamelCaseUncapitalizedName()));
         }
         paramsDeclaration.add(String.format("%s %s", "DalHints", "hints"));
+        return StringUtils.join(paramsDeclaration, ", ");
+    }
+
+    public String getPkParameterDeclarationWithoutHints() {
+        List<String> paramsDeclaration = new ArrayList<>();
+        for (JavaParameterHost parameter : primaryKeys) {
+            paramsDeclaration.add(
+                    String.format("%s %s", parameter.getClassDisplayName(), parameter.getCamelCaseUncapitalizedName()));
+        }
+        return StringUtils.join(paramsDeclaration, ", ");
+    }
+
+    public String getPkParameters() {
+        List<String> paramsDeclaration = new ArrayList<>();
+        for (JavaParameterHost parameter : primaryKeys) {
+            paramsDeclaration.add(parameter.getCamelCaseUncapitalizedName());
+        }
         return StringUtils.join(paramsDeclaration, ", ");
     }
 
@@ -242,8 +259,9 @@ public class JavaTableHost {
             allTypes.addAll(SpUpdate.getParameters());
 
         for (JavaParameterHost field : allTypes) {
-//            if (null != field.getDirection() && (field.getDirection().name().equals("InputOutput") || field.getDirection().name().equals("InputOutput")))
-//                imports.add(com.ctrip.platform.dal.daogen.enums.ParameterDirection.class.getName());
+            // if (null != field.getDirection() && (field.getDirection().name().equals("InputOutput") ||
+            // field.getDirection().name().equals("InputOutput")))
+            // imports.add(com.ctrip.platform.dal.daogen.enums.ParameterDirection.class.getName());
             Class<?> clazz = field.getJavaClass();
             if (byte[].class.equals(clazz))
                 continue;

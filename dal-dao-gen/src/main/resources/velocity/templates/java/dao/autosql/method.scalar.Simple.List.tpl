@@ -7,6 +7,13 @@
 #set($isPagination = "true")	
 #end
 
+    /**
+	 * ${method.getComments()}
+	**/
+	public List<${method.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
+		return ${method.getName()}(${method.getActualParameter()});
+	}
+
 	/**
 	 * ${method.getComments()}
 	**/

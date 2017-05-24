@@ -1,6 +1,13 @@
 #foreach($method in $host.getMethods())
 #if($method.getCrud_type() == "update")
 
+    /**
+	 * ${method.getComments()}
+	**/
+	public int ${method.getName()}(${method.getUpdateParameterDeclarationWithoutHints()}) throws SQLException {
+		return ${method.getName()}(${method.getUpdateActualParameter()});
+	}
+
 	/**
 	 * ${method.getComments()}
 	**/

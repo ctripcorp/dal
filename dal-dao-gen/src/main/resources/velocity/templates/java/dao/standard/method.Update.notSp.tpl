@@ -4,6 +4,19 @@
 	 * Update the given pojo . By default, if a field of pojo is null value,
 	 * that field will be ignored, so that it will not be updated. You can
 	 * overwrite this by set updateNullField in hints.
+	 *
+	 * @param daoPojo pojo to be updated
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int update(${host.getPojoClassName()} daoPojo) throws SQLException {
+		return update(null, daoPojo);
+	}
+
+	/**
+	 * Update the given pojo . By default, if a field of pojo is null value,
+	 * that field will be ignored, so that it will not be updated. You can
+	 * overwrite this by set updateNullField in hints.
 	 * 
 	 * @param hints
 	 * 			Additional parameters that instruct how DAL Client perform database operation.
@@ -26,6 +39,19 @@
 	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
 	 * that field will be ignored, so that it will not be updated. You can
 	 * overwrite this by set updateNullField in hints.
+	 *
+	 * @param daoPojos list of pojos to be updated
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int[] update(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+		return update(null, daoPojos);
+	}
+
+	/**
+	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
+	 * that field will be ignored, so that it will not be updated. You can
+	 * overwrite this by set updateNullField in hints.
 	 * 
 	 * @param hints
 	 * 			Additional parameters that instruct how DAL Client perform database operation.
@@ -43,6 +69,16 @@
 	}
 #end
 #if($host.generateAPI(96,97))
+
+	/**
+	 * Update the given pojo list in batch.
+	 *
+	 * @return how many rows been affected
+	 * @throws SQLException
+	 */
+	public int[] batchUpdate(List<${host.getPojoClassName()}> daoPojos) throws SQLException {
+		return batchUpdate(null, daoPojos);
+	}
 
 	/**
 	 * Update the given pojo list in batch. 

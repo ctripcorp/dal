@@ -3,6 +3,13 @@
 ##简单类型并且返回值为Single
 #if($method.isSampleType() && $method.isReturnSingle())
 
+    /**
+	 * ${method.getComments()}
+	**/
+	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
+		return ${method.getName()}(${method.getActualParameter()});
+	}
+
 	/**
 	 * ${method.getComments()}
 	**/

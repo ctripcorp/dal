@@ -58,12 +58,12 @@ public class DatabaseSet {
 		String[] values = shardStrategy.split(ENTRY_SEPARATOR);
 		String[] strategyDef = values[0].split(KEY_VALUE_SEPARATOR);
 		
-		if(strategyDef[0].equals(CLASS))
-			strategy = (DalShardingStrategy)Class.forName(strategyDef[1]).newInstance();
+		if(strategyDef[0].trim().equals(CLASS))
+			strategy = (DalShardingStrategy)Class.forName(strategyDef[1].trim()).newInstance();
 		Map<String, String> settings = new HashMap<String, String>();
 		for(int i = 1; i < values.length; i++) {
 			String[] entry = values[i].split(KEY_VALUE_SEPARATOR);
-			settings.put(entry[0], entry[1]);
+			settings.put(entry[0].trim(), entry[1].trim());
 		}
 		strategy.initialize(settings);
 	}

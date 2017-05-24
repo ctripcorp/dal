@@ -29,7 +29,9 @@
     <databaseSet name="dao_test_mysql1" provider="mySqlProvider" shardingStrategy="" >
       <add  name="dao_test_mysql_M" databaseType="Master" sharding="" connectionString="dal_test_new"/>
     </databaseSet>
-    <databaseSet name="dao_test_mod" provider="sqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=id;mod=2" >
+    <databaseSet name="dao_test_mod" provider="sqlProvider" shardingStrategy=" class = com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy ;
+     columns = id ;
+     mod = 2" >
       <add  name="dao_test_sqlsvr_M" databaseType="Master" sharding="0" connectionString="dao_test_sqlsvr_0"/>
       <add  name="dao_test_sqlsvr_S" databaseType="Slave" sharding="0" connectionString="dao_test_sqlsvr_1"/>
       <add  name="dao_test_mysql_M" databaseType="Master" sharding="1" connectionString="SqlSvrShard_0"/>

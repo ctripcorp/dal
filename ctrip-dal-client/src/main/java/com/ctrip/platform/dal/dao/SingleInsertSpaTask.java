@@ -1,10 +1,12 @@
 package com.ctrip.platform.dal.dao;
 
+import static com.ctrip.platform.dal.common.enums.ParameterDirection.InputOutput;
+
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.ctrip.platform.dal.common.enums.ParameterDirection.*;
+import com.ctrip.platform.dal.common.enums.ParameterDirection;
 
 public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	private static final String INSERT_SPA_TPL = "spA_%s_i";
@@ -18,7 +20,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
-		this.outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
+		outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;		
 	}
 	
 	@Override
@@ -38,20 +40,36 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	}
 	
 	private void register(StatementParameters parameters, Map<String, ?> fields) {
-		/**
-		 * Must be the first one
-		 */
-		if(outputIdName != null) {
-			parameters.get(0).setDirection(InputOutput);
-		}
+	    if(CtripTaskFactory.callSpbyName) {
+    	    if(outputIdName != null) {
+                parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
+    	    }
+	    }else {
+	        /**
+	         * Must to be first one
+	         */
+    		if(outputIdName != null) {
+    			parameters.get(0).setDirection(InputOutput);
+    		}
+	    }
 	}
 	
 	private void extract(StatementParameters parameters, KeyHolder holder) {
 		if(holder == null) return;
 		
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		if(outputIdName != null) {
-			map.put(outputIdName, parameters.get(0).getValue());
+		
+		if(CtripTaskFactory.callSpbyName) {
+		    if(outputIdName != null) {
+		        map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
+		    }
+		}else{
+            /**
+             * Must to be first one
+             */
+	        if(outputIdName != null) {
+	            map.put(outputIdName, parameters.get(0).getValue());
+	        }
 		}
 		
 		holder.addKey(map);

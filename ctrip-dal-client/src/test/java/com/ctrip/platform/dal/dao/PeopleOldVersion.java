@@ -1,4 +1,6 @@
-package com.ctrip.platform.dal.codegen;
+package com.ctrip.platform.dal.dao;
+
+import java.sql.Types;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -6,23 +8,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import com.ctrip.platform.dal.dao.annotation.Database;
-import com.ctrip.platform.dal.dao.annotation.Sensitive;
-import com.ctrip.platform.dal.dao.annotation.Type;
-import java.sql.Types;
-import java.sql.Timestamp;
 
-import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
 @Entity
-@Database(name="MySqlSimpleShard")
-@Table(name="person")
-public class Person implements DalPojo {
+@Database(name="SimpleShard")
+@Table(name="People")
+public class PeopleOldVersion implements DalPojo {
 	
 	@Column(name="Name")
 	@Type(value=Types.VARCHAR)
 	private String name;
-	
+
+	//To simulate old style table that has a column before primary key
     @Id
     @Column(name="PeopleID")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -40,10 +39,6 @@ public class Person implements DalPojo {
 	@Column(name="CountryID")
 	@Type(value=Types.INTEGER)
 	private Integer countryID;
-	
-	@Column(name="DataChange_LastTime")
-	@Type(value=Types.TIMESTAMP)
-	private Timestamp dataChange_LastTime;
 
 	public Integer getPeopleID() {
 		return peopleID;
@@ -84,13 +79,4 @@ public class Person implements DalPojo {
 	public void setCountryID(Integer countryID) {
 		this.countryID = countryID;
 	}
-
-	public Timestamp getDataChange_LastTime() {
-		return dataChange_LastTime;
-	}
-
-	public void setDataChange_LastTime(Timestamp dataChange_LastTime) {
-		this.dataChange_LastTime = dataChange_LastTime;
-	}
-
 }

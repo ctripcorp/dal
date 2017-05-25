@@ -8,10 +8,10 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>0.6.30</framework-bom.version>
+        <framework-bom.version>0.8.15</framework-bom.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-client</artifactId>
-            <version>1.8.1</version>
+            <version>1.8.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

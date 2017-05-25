@@ -3,10 +3,9 @@ package com.ctrip.platform.dal.dao;
 import java.sql.SQLException;
 import java.util.Map;
 
-import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
 import com.ctrip.platform.dal.dao.task.BulkTaskContext;
 
-public class BatchUpdateSp3Task<T> extends AbstractIntArrayBulkTask<T> {
+public class BatchUpdateSp3Task<T> extends CtripSp3Task<T> {
 	private static final String UPDATE_SP3_TPL = "sp3_%s_u";
 	
 	@Override

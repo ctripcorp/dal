@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-dao-gen</artifactId>
-    <version>1.1.9</version>
+    <version>1.2.0</version>
     <packaging>war</packaging>
     <properties>
         <environment>open</environment>
@@ -14,7 +14,7 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.1.9</version>
+            <version>1.2.0</version>
         </dependency>
     </dependencies>
     <profiles>

@@ -36,15 +36,16 @@ public class SQLValidation {
      */
     public static String[] mockStringValues(int[] sqlTypes) {
         if (sqlTypes == null || sqlTypes.length == 0)
-            return new String[]{};
+            return new String[] {};
         String[] mockedVals = new String[sqlTypes.length];
         for (int i = 0; i < mockedVals.length; i++) {
             Object obj = mockSQLValue(sqlTypes[i]);
             if (null == obj)
                 mockedVals[i] = "null";
             else
-                mockedVals[i] = obj instanceof String && sqlTypes[i] != 10001 ? //10001 <---> uniqueidentifier
-                        "'" + obj.toString() + "'" : obj.toString();
+                mockedVals[i] = obj.toString();
+            // mockedVals[i] = obj instanceof String && sqlTypes[i] != 10001 ? //10001 <---> uniqueidentifier
+            // "'" + obj.toString() + "'" : obj.toString();
         }
         return mockedVals;
     }
@@ -57,7 +58,7 @@ public class SQLValidation {
      */
     public static Object[] mockObjectValues(int[] sqlTypes) {
         if (sqlTypes == null || sqlTypes.length == 0)
-            return new Object[]{};
+            return new Object[] {};
         Object[] mockedVals = new Object[sqlTypes.length];
         for (int i = 0; i < mockedVals.length; i++) {
             mockedVals[i] = mockSQLValue(sqlTypes[i]);
@@ -66,11 +67,10 @@ public class SQLValidation {
     }
 
     /**
-     * Validate the SQL Statement
-     * Parameters will be auto-mocked according to the specified SQL Types
+     * Validate the SQL Statement Parameters will be auto-mocked according to the specified SQL Types
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
      * @return Validate Result
      */
@@ -80,13 +80,12 @@ public class SQLValidation {
     }
 
     /**
-     * Validate the SQL Statement
-     * Parameters will be parsed form specified String values.
+     * Validate the SQL Statement Parameters will be parsed form specified String values.
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
-     * @param vals        Parameter String values
+     * @param vals Parameter String values
      * @return Validate Result
      */
     public static ValidateResult validate(String dbName, String sql, int[] paramsTypes, String[] vals) {
@@ -97,10 +96,10 @@ public class SQLValidation {
     /**
      * Validate the SQL Statement
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
-     * @param vals        Parameter values
+     * @param vals Parameter values
      * @return Validate Result
      */
     private static ValidateResult validate(String dbName, String sql, int[] paramsTypes, Object[] vals) {
@@ -114,10 +113,10 @@ public class SQLValidation {
     /**
      * Validate the Non-Query SQL Statement
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
-     * @param vals        Parameter String values
+     * @param vals Parameter String values
      * @return Validate Result
      */
     public static ValidateResult updateValidate(String dbName, String sql, int[] paramsTypes, String[] vals) {
@@ -126,11 +125,10 @@ public class SQLValidation {
     }
 
     /**
-     * Validate the Non-Query SQL Statement
-     * Parameters will be auto-mocked according to the specified SQL Types
+     * Validate the Non-Query SQL Statement Parameters will be auto-mocked according to the specified SQL Types
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
      * @return Validate Result
      */
@@ -143,14 +141,13 @@ public class SQLValidation {
     /**
      * Validate the Non-Query SQL Statement
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
-     * @param mockedVals  Parameter values
+     * @param mockedVals Parameter values
      * @return Validate Result
      */
-    private static ValidateResult updateValidate(String dbName, String sql,
-                                                 int[] paramsTypes, Object[] mockedVals) {
+    private static ValidateResult updateValidate(String dbName, String sql, int[] paramsTypes, Object[] mockedVals) {
         ValidateResult status = new ValidateResult(sql);
         Connection connection = null;
         try {
@@ -181,34 +178,30 @@ public class SQLValidation {
     }
 
     /**
-     * Validate the Query SQL Statement.
-     * Parameters will be auto-mocked according to the specified SQL Types
+     * Validate the Query SQL Statement. Parameters will be auto-mocked according to the specified SQL Types
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
      * @return Validate Result
      */
 
-    public static ValidateResult queryValidate(String dbName, String sql,
-                                               int[] paramsTypes) {
+    public static ValidateResult queryValidate(String dbName, String sql, int[] paramsTypes) {
         Object[] mockedVals = mockObjectValues(paramsTypes);
         return queryValidate(dbName, sql, paramsTypes, mockedVals);
     }
 
     /**
-     * Validate the Query SQL Statement.
-     * Parameters will be be parsed from specified String values
+     * Validate the Query SQL Statement. Parameters will be be parsed from specified String values
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
-     * @param vals        The parameter values
+     * @param vals The parameter values
      * @return Validate Result
      */
 
-    public static ValidateResult queryValidate(String dbName, String sql,
-                                               int[] paramsTypes, String[] vals) {
+    public static ValidateResult queryValidate(String dbName, String sql, int[] paramsTypes, String[] vals) {
         Object[] mockedVals = parseSQLValue(paramsTypes, vals);
         return queryValidate(dbName, sql, paramsTypes, mockedVals);
     }
@@ -216,15 +209,14 @@ public class SQLValidation {
     /**
      * Validate the Query SQL Statement.
      *
-     * @param dbName      The database name
-     * @param sql         SQL Statement
+     * @param dbName The database name
+     * @param sql SQL Statement
      * @param paramsTypes SQL Types of parameters
-     * @param vals        The parameter values
+     * @param mockedVals The parameter values
      * @return Validate Result
      */
 
-    private static ValidateResult queryValidate(String dbName, String sql,
-                                                int[] paramsTypes, Object[] mockedVals) {
+    private static ValidateResult queryValidate(String dbName, String sql, int[] paramsTypes, Object[] mockedVals) {
         ValidateResult status = new ValidateResult(sql);
         Connection connection = null;
         try {
@@ -248,14 +240,14 @@ public class SQLValidation {
     /**
      * Validate the SQL Server Query SQL Statement.
      *
-     * @param connection  SQL Connection
-     * @param sql         SQL Statement
-     * @param status      Result to be updated
+     * @param connection SQL Connection
+     * @param sql SQL Statement
+     * @param status Result to be updated
      * @param paramsTypes SQL Types of parameters
      */
 
-    private static void sqlserverQueryWithoutExplain(Connection connection, String sql,
-                                                     ValidateResult status, int[] paramsTypes, Object[] vals) {
+    private static void sqlserverQueryWithoutExplain(Connection connection, String sql, ValidateResult status,
+            int[] paramsTypes, Object[] vals) {
 
         sqlserverExplain(connection, sql, status, paramsTypes, vals);
         if (status.isPassed()) {
@@ -290,63 +282,40 @@ public class SQLValidation {
         }
     }
 
-    private static void sqlserverExplain(Connection connection, String sql,
-                                         ValidateResult status, int[] paramsTypes, Object[] vals) {
+    private static void sqlserverExplain(Connection connection, String sql, ValidateResult status, int[] paramsTypes,
+            Object[] vals) {
         status.append("The SQL Server explain is not supported!");
         status.setPassed(true);
     }
 
-	/*
-    private static void sqlserverQuery(Connection connection, String sql,
-			ValidateResult status, int[] paramsTypes) {
-		ResultSet rs = null;
-		Statement profile = null;
-		try{
-			connection.setAutoCommit(false);
-			profile = connection.createStatement();
-			profile.execute("SET SHOWPLAN_ALL ON");
-			for (int i = 0; i < paramsTypes.length; i++) {
-				Object mockValue = mockSQLValue(paramsTypes[i]);
-				String replacement = mockValue instanceof String ? "'" + mockValue.toString() + "'" : mockValue.toString();
-				sql = sql.replaceFirst("\\?", replacement);
-			}				
-			rs = profile.executeQuery(sql);
-			List<SqlServerExplain> explains = new ArrayList<SqlServerExplain>();
-			while(rs.next()){	
-				explains.add(ORMUtils.map(rs, SqlServerExplain.class));
-			}
-			status.append(objectMapper.writeValueAsString(explains));
-			status.setPassed(true);
-			profile.execute("SET SHOWPLAN_ALL OFF");
-			connection.setAutoCommit(true);
-		}catch(SQLException e){	
-			status.append(e.getMessage());
-			log.error("Validate sql server query sql execute failed", e);
-		}catch(JsonProcessingException e){
-			status.append(e.getMessage());
-			log.error("Validate sql server query JSON parse failed");
-		}catch(Exception e){
-			status.append(e.getMessage());
-			log.error("Validate sql server query failed", e);
-		}
-		finally{
-			ResourceUtils.close(rs);
-			ResourceUtils.close(profile);
-			ResourceUtils.rollback(connection);
-		}
-	}*/
+    /*
+     * private static void sqlserverQuery(Connection connection, String sql, ValidateResult status, int[] paramsTypes) {
+     * ResultSet rs = null; Statement profile = null; try{ connection.setAutoCommit(false); profile =
+     * connection.createStatement(); profile.execute("SET SHOWPLAN_ALL ON"); for (int i = 0; i < paramsTypes.length;
+     * i++) { Object mockValue = mockSQLValue(paramsTypes[i]); String replacement = mockValue instanceof String ? "'" +
+     * mockValue.toString() + "'" : mockValue.toString(); sql = sql.replaceFirst("\\?", replacement); } rs =
+     * profile.executeQuery(sql); List<SqlServerExplain> explains = new ArrayList<SqlServerExplain>(); while(rs.next()){
+     * explains.add(ORMUtils.map(rs, SqlServerExplain.class)); }
+     * status.append(objectMapper.writeValueAsString(explains)); status.setPassed(true);
+     * profile.execute("SET SHOWPLAN_ALL OFF"); connection.setAutoCommit(true); }catch(SQLException e){
+     * status.append(e.getMessage()); log.error("Validate sql server query sql execute failed", e);
+     * }catch(JsonProcessingException e){ status.append(e.getMessage());
+     * log.error("Validate sql server query JSON parse failed"); }catch(Exception e){ status.append(e.getMessage());
+     * log.error("Validate sql server query failed", e); } finally{ ResourceUtils.close(rs);
+     * ResourceUtils.close(profile); ResourceUtils.rollback(connection); } }
+     */
 
     /**
      * Validate the MySQL Query SQL Statement.
      *
-     * @param connection  SQL Connection
-     * @param sql         SQL Statement
-     * @param status      Result to be updated
+     * @param connection SQL Connection
+     * @param sql SQL Statement
+     * @param status Result to be updated
      * @param paramsTypes SQL Types of parameters
      */
 
-    private static void mysqlQuery(Connection connection, String sql,
-                                   ValidateResult status, int[] paramsTypes, Object[] vals) {
+    private static void mysqlQuery(Connection connection, String sql, ValidateResult status, int[] paramsTypes,
+            Object[] vals) {
 
         mysqlExplain(connection, sql, status, paramsTypes, vals);
 
@@ -383,8 +352,8 @@ public class SQLValidation {
     }
 
 
-    private static void mysqlExplain(Connection connection, String sql,
-                                     ValidateResult status, int[] paramsTypes, Object[] vals) {
+    private static void mysqlExplain(Connection connection, String sql, ValidateResult status, int[] paramsTypes,
+            Object[] vals) {
         ResultSet rs = null;
         PreparedStatement stat = null;
         try {
@@ -420,7 +389,7 @@ public class SQLValidation {
     /**
      * Get the database category, which is SQL Server or MySQL
      *
-     * @param conn   Connection
+     * @param conn Connection
      * @param dbName Database Name
      * @return The category name
      * @throws SQLException
@@ -474,14 +443,13 @@ public class SQLValidation {
             case java.sql.Types.TIMESTAMP:
                 return Timestamp.valueOf("2012-01-01 10:00:00");
             case microsoft.sql.Types.DATETIMEOFFSET:
-                return DateTimeOffset.valueOf(
-                        Timestamp.valueOf("2012-01-01 10:00:00"), 0);
+                return DateTimeOffset.valueOf(Timestamp.valueOf("2012-01-01 10:00:00"), 0);
             case java.sql.Types.VARCHAR:
             case java.sql.Types.NVARCHAR:
             case java.sql.Types.LONGNVARCHAR:
             case java.sql.Types.LONGVARCHAR:
                 return "TT";
-            case 10001: //uniqueidentifier
+            case 10001: // uniqueidentifier
                 return "C4AECF65-1D5C-47B6-BFFC-0C9550C4E158";
             default:
                 return null;
@@ -490,9 +458,8 @@ public class SQLValidation {
     }
 
     private static Object[] parseSQLValue(int[] sqlTypes, String[] vals) {
-        if (sqlTypes == null || vals == null ||
-                sqlTypes.length != vals.length || sqlTypes.length == 0)
-            return new Object[]{};
+        if (sqlTypes == null || vals == null || sqlTypes.length != vals.length || sqlTypes.length == 0)
+            return new Object[] {};
         else {
             Object[] objs = new Object[sqlTypes.length];
             for (int i = 0; i < objs.length; i++) {
@@ -506,7 +473,7 @@ public class SQLValidation {
      * Parse the String value to java Object according to different SQL Type
      *
      * @param javaSqlTypes The SQL Types @see java.sql.Types
-     * @param val          The string value
+     * @param val The string value
      * @return Java Object
      */
     private static Object parseSQLValue(int javaSqlTypes, String val) {
@@ -541,7 +508,7 @@ public class SQLValidation {
             case java.sql.Types.CHAR:
                 return val;
             case java.sql.Types.DATE:
-//				return Date.valueOf(val);
+                // return Date.valueOf(val);
                 return parseDate(val);
             case java.sql.Types.TIME:
                 return Time.valueOf(val);
@@ -554,7 +521,7 @@ public class SQLValidation {
             case java.sql.Types.LONGNVARCHAR:
             case java.sql.Types.LONGVARCHAR:
                 return val;
-            case 10001: //uniqueidentifier
+            case 10001: // uniqueidentifier
                 return val;
             default:
                 return null;

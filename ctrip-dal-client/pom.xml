@@ -7,7 +7,7 @@
         <version>1.5.2</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.4.2</version>
+    <version>1.8.2</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
@@ -69,6 +69,10 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.prop</include>
+                </includes>
             </resource>
         </resources>
         <plugins>

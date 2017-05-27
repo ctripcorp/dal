@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.sql.logging;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +27,25 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
     @Override
     public void initialize(Map<String, String> settings) {
         super.initialize(settings);
-        ProductVersionManager.getInstance().register(DAL_VERSION, "java-" + Version.getVersion());
+        ProductVersionManager.getInstance().register(DAL_VERSION, "java-" + initVersion());
         DalCLogger.setEncryptLogging(encryptLogging);
         DalCLogger.setSimplifyLogging(simplifyLogging);
+    }
+    
+    private String initVersion(){
+        String path = "/CtripClientVersion.prop";
+        InputStream stream = Version.class.getResourceAsStream(path);
+        if (stream == null) {
+            return "UNKNOWN";
+        }
+        Properties props = new Properties();
+        try {
+            props.load(stream);
+            stream.close();
+            return (String)props.get("version");
+        } catch (IOException e) {
+            return "UNKNOWN";
+        }
     }
 
     @Override

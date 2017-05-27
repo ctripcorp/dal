@@ -1,5 +1,7 @@
 package com.ctrip.datasource.titan;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -11,14 +13,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 
 import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
-
 import com.ctrip.platform.dal.dao.Version;
 import com.dianping.cat.status.ProductVersionManager;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -108,7 +111,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private Map<String, DataSourceConfigure> dataSourceConfigures;
 
     public void initialize(Map<String, String> settings) throws Exception {
-        // ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, Version.getVersion());
+        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
+        
         startUpLog.clear();
         config = new HashMap<>(settings);
 
@@ -524,4 +528,20 @@ public class TitanProvider implements DataSourceConfigureProvider {
         tag.put(DB_NAME, allInOneKey);
         MetricManager.getMetricer().log(TITAN, 1, tag);
     }
+    
+    private String initVersion(){
+        String path = "/CtripDatasourceVersion.prop";
+        InputStream stream = Version.class.getResourceAsStream(path);
+        if (stream == null) {
+            return "UNKNOWN";
+        }
+        Properties props = new Properties();
+        try {
+            props.load(stream);
+            stream.close();
+            return (String)props.get("version");
+        } catch (IOException e) {
+            return "UNKNOWN";
+        }
+    }    
 }

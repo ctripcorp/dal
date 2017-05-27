@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen;
 
+import microsoft.sql.Types;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,33 +104,10 @@ public class Consts {
         jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGVARBINARY, byte[].class);
         jdbcSqlTypeToJavaClass.put(java.sql.Types.NCHAR, String.class);
         jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGNVARCHAR, String.class);
+        jdbcSqlTypeToJavaClass.put(Types.DATETIMEOFFSET, microsoft.sql.DateTimeOffset.class);
 
         // uniqueidentifier
         jdbcSqlTypeToJavaClass.put(10001, String.class);
-
-        // Used as an argument to CallableStatement.registerOutParameter
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.OTHER, "Object");
-
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.JAVA_OBJECT, Object.class);
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.DISTINCT, Object.class);
-        //
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.STRUCT, Struct.class);
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.ARRAY, Array.class);
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.BLOB, Blob.class);
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.CLOB, Clob.class);
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.REF, Ref.class);
-        // // should it be URL?
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.DATALINK, Object.class);
-        //
-        // jdbcSqlTypeToJavaClass.put(java.sql.Types.BOOLEAN, Boolean.class);
-        /*
-         * jdbcSqlTypeToJavaClass.put(java.sql.Types.ROWID, "Integer");
-		 * jdbcSqlTypeToJavaClass.put(java.sql.Types.NCHAR, "Integer");
-		 * jdbcSqlTypeToJavaClass.put(java.sql.Types.NVARCHAR, "Integer");
-		 * jdbcSqlTypeToJavaClass.put(java.sql.Types.LONGNVARCHAR, "Integer");
-		 * jdbcSqlTypeToJavaClass.put(java.sql.Types.NCLOB, "Integer");
-		 * jdbcSqlTypeToJavaClass.put(java.sql.Types.SQLXML, "Integer");
-		 */
 
         jdbcSqlTypeDisplay = new HashMap<>();
         jdbcSqlTypeDisplay.put(java.sql.Types.BIT, "Types.BIT");

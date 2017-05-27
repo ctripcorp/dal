@@ -64,7 +64,8 @@ public class DatabaseResource {
 
         DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 
-        Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();
+        Map<String, DalGroupDB> allDbs =
+                new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();
         Set<String> keys = allDbs.keySet();
         for (String key : keys) {
             DalGroupDB db = allDbDao.getGroupDBByDbName(key);
@@ -72,7 +73,9 @@ public class DatabaseResource {
                 allDbDao.insertDalGroupDB(allDbs.get(key));
             } else {
                 DalGroupDB fileDB = allDbs.get(key);
-                allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(), fileDB.getDb_port(), fileDB.getDb_user(), fileDB.getDb_password(), fileDB.getDb_catalog(), fileDB.getDb_providerName());
+                allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(), fileDB.getDb_port(),
+                        fileDB.getDb_user(), fileDB.getDb_password(), fileDB.getDb_catalog(),
+                        fileDB.getDb_providerName());
             }
         }
 
@@ -82,12 +85,15 @@ public class DatabaseResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("connectionTest")
-    public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword) {
+    public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
+            @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+            @FormParam("dbpassword") String dbpassword) {
         Status status = Status.OK;
         Connection conn = null;
         ResultSet rs = null;
         try {
-            conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword, DatabaseType.valueOf(dbtype).getValue());
+            conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
+                    DatabaseType.valueOf(dbtype).getValue());
             // conn.setNetworkTimeout(Executors.newFixedThreadPool(1), 5000);
             rs = conn.getMetaData().getCatalogs();
             Set<String> allCatalog = new HashSet<String>();
@@ -114,13 +120,12 @@ public class DatabaseResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("addNewAllInOneDB")
-    public Status addNewAllInOneDB(@Context HttpServletRequest request,
-                                   @FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename,
-                                   @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
-                                   @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
-                                   @FormParam("dbcatalog") String dbcatalog,
-                                   @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId,
-                                   @FormParam("gen_default_dbset") boolean isGenDefault) {
+    public Status addNewAllInOneDB(@Context HttpServletRequest request, @FormParam("dbtype") String dbtype,
+            @FormParam("allinonename") String allinonename, @FormParam("dbaddress") String dbaddress,
+            @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+            @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
+            @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId,
+            @FormParam("gen_default_dbset") boolean isGenDefault) {
         Status status = Status.OK;
         DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
 
@@ -139,7 +144,7 @@ public class DatabaseResource {
             groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
             groupDb.setDal_group_id(-1);
 
-            //add to current user's group
+            // add to current user's group
             if (addToGroup) {
                 int gid = -1;
                 if (groupId != null && !groupId.isEmpty()) {
@@ -157,7 +162,7 @@ public class DatabaseResource {
                     }
                 }
 
-                //generate default databaseset
+                // generate default databaseset
                 if (isGenDefault) {
                     status = DalGroupDbResource.genDefaultDbset(gid, allinonename);
                 }
@@ -188,7 +193,8 @@ public class DatabaseResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("deleteAllInOneDB")
-    public Status deleteAllInOneDB(@Context HttpServletRequest request, @FormParam("allinonename") String allinonename) {
+    public Status deleteAllInOneDB(@Context HttpServletRequest request,
+            @FormParam("allinonename") String allinonename) {
         String userNo = RequestUtil.getUserNo(request);
         Status status = Status.OK;
 
@@ -243,7 +249,11 @@ public class DatabaseResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("updateDB")
-    public Status updateDB(@Context HttpServletRequest request, @FormParam("id") int id, @FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog) {
+    public Status updateDB(@Context HttpServletRequest request, @FormParam("id") int id,
+            @FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename,
+            @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+            @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+            @FormParam("dbcatalog") String dbcatalog) {
         Status status = Status.OK;
         DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
         DalGroupDB db = allDbDao.getGroupDBByDbName(allinonename);
@@ -264,7 +274,8 @@ public class DatabaseResource {
             return status;
         }
 
-        allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog, DatabaseType.valueOf(dbtype).getValue());
+        allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog,
+                DatabaseType.valueOf(dbtype).getValue());
         return Status.OK;
     }
 
@@ -301,7 +312,8 @@ public class DatabaseResource {
     @Path("tables")
     public String getTableNames(@QueryParam("db_name") String db_set) throws Exception {
         try {
-            DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set);
+            DatabaseSetEntry databaseSetEntry =
+                    SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set);
             String dbName = databaseSetEntry.getConnectionString();
             List<String> results = DbUtils.getAllTableNames(dbName);
             java.util.Collections.sort(results);
@@ -318,11 +330,13 @@ public class DatabaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fields")
-    public List<ColumnMetaData> getFieldNames(@QueryParam("db_name") String dbName, @QueryParam("table_name") String tableName) throws Exception {
+    public List<ColumnMetaData> getFieldNames(@QueryParam("db_name") String dbName,
+            @QueryParam("table_name") String tableName) throws Exception {
         List<ColumnMetaData> fields = new ArrayList<>();
         Connection connection = null;
         try {
-            DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
+            DatabaseSetEntry databaseSetEntry =
+                    SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
             String db_Name = databaseSetEntry.getConnectionString();
 
             connection = DataSourceUtil.getConnection(db_Name);
@@ -405,7 +419,8 @@ public class DatabaseResource {
         List<String> tables;
         List<StoredProcedure> sps;
         try {
-            DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(setName);
+            DatabaseSetEntry databaseSetEntry =
+                    SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(setName);
             String dbName = databaseSetEntry.getConnectionString();
             views = DbUtils.getAllViewNames(dbName);
             tables = DbUtils.getAllTableNames(dbName);
@@ -486,7 +501,7 @@ public class DatabaseResource {
             if (error != null && !error.isEmpty()) {
                 status.setInfo(error);
             } else {
-                status.setInfo(key + " 有效。");
+                status.setInfo("");
             }
         }
 

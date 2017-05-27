@@ -36,7 +36,8 @@ public class DbUtils {
         try {
             return objectExist(allInOneName, "u", tableName);
         } catch (Exception e) {
-            log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", allInOneName, tableName), e);
+            log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", allInOneName, tableName),
+                    e);
         }
         return false;
     }
@@ -50,9 +51,10 @@ public class DbUtils {
         }
     }
 
-    private static boolean mssqlObjectExist(String allInOneName, String objectType, String objectName) throws Exception {
+    private static boolean mssqlObjectExist(String allInOneName, String objectType, String objectName)
+            throws Exception {
         String sql = "select Name from sysobjects where xtype = ? and status>=0 and Name=?";
-        return query(allInOneName, sql, new Object[]{objectType, objectName}, new ResultSetExtractor<Boolean>() {
+        return query(allInOneName, sql, new Object[] {objectType, objectName}, new ResultSetExtractor<Boolean>() {
             @Override
             public Boolean extractData(ResultSet rs) throws SQLException {
                 return rs.next();
@@ -66,7 +68,7 @@ public class DbUtils {
                 @Override
                 public Boolean doInConnection(Connection connection) throws SQLException, DataAccessException {
                     String type = "u".equalsIgnoreCase(objectType) ? "TABLE" : "VIEW";
-                    ResultSet rs = connection.getMetaData().getTables(null, null, objectName, new String[]{type});
+                    ResultSet rs = connection.getMetaData().getTables(null, null, objectName, new String[] {type});
                     return rs.next();
                 }
             });
@@ -80,7 +82,8 @@ public class DbUtils {
         return new JdbcTemplate(DataSourceUtil.getDataSource(allInOneName));
     }
 
-    private static <T> T query(String allInOneName, String sql, Object[] params, ResultSetExtractor<T> extractor) throws Exception {
+    private static <T> T query(String allInOneName, String sql, Object[] params, ResultSetExtractor<T> extractor)
+            throws Exception {
         JdbcTemplate jdbcTemplate = createJdbcTemplate(allInOneName);
         return jdbcTemplate.query(sql, params, extractor);
     }
@@ -98,7 +101,7 @@ public class DbUtils {
             @Override
             public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
                 List<String> results = new ArrayList<>();
-                ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[]{"TABLE"});
+                ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"TABLE"});
                 while (rs.next()) {
                     String tableName = rs.getString("TABLE_NAME");
                     if ("sysdiagrams".equals(tableName.toLowerCase()))
@@ -127,7 +130,7 @@ public class DbUtils {
             @Override
             public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
                 List<String> results = new ArrayList<>();
-                ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[]{"VIEW"});
+                ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"VIEW"});
                 while (rs.next())
                     results.add(rs.getString("TABLE_NAME"));
                 return results;
@@ -139,8 +142,9 @@ public class DbUtils {
         try {
             // 如果是Sql Server，通过Sql语句获取所有表和视图的名称
             if (!isMySqlServer(allInOneName)) {
-                String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
-                return query(allInOneName, sql, new Object[]{sp.getSchema(), sp.getName()},
+                String sql =
+                        "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
+                return query(allInOneName, sql, new Object[] {sp.getSchema(), sp.getName()},
                         new ResultSetExtractor<Boolean>() {
                             @Override
                             public Boolean extractData(ResultSet rs) throws SQLException {
@@ -158,7 +162,8 @@ public class DbUtils {
         try {
             // 如果是Sql Server，通过Sql语句获取所有视图的名称
             if (!isMySqlServer(allInOneName)) {
-                String sql = "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'";
+                String sql =
+                        "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'";
                 return query(allInOneName, sql, null, new ResultSetExtractor<List<StoredProcedure>>() {
                     @Override
                     public List<StoredProcedure> extractData(ResultSet rs) throws SQLException {
@@ -182,17 +187,20 @@ public class DbUtils {
     /**
      * 获取存储过程的所有参数
      */
-    public static <T> T getSpParams(String allInOneName, final StoredProcedure sp, final ResultSetExtractor<T> extractor) {
+    public static <T> T getSpParams(String allInOneName, final StoredProcedure sp,
+            final ResultSetExtractor<T> extractor) {
         try {
             return execute(allInOneName, new ConnectionCallback<T>() {
                 @Override
                 public T doInConnection(Connection connection) throws SQLException, DataAccessException {
-                    ResultSet spParamRs = connection.getMetaData().getProcedureColumns(null, sp.getSchema(), sp.getName(), null);
+                    ResultSet spParamRs =
+                            connection.getMetaData().getProcedureColumns(null, sp.getSchema(), sp.getName(), null);
                     return extractor.extractData(spParamRs);
                 }
             });
         } catch (Exception e) {
-            log.error(String.format("get sp params error: [allInOneName=%s;spName=%s;]", allInOneName, sp.getName()), e);
+            log.error(String.format("get sp params error: [allInOneName=%s;spName=%s;]", allInOneName, sp.getName()),
+                    e);
         }
         return null;
     }
@@ -212,12 +220,14 @@ public class DbUtils {
 
             });
         } catch (Exception e) {
-            log.error(String.format("get primary key names error: [allInOneName=%s;tableName=%s]", allInOneName, tableName), e);
+            log.error(String.format("get primary key names error: [allInOneName=%s;tableName=%s]", allInOneName,
+                    tableName), e);
         }
         return new ArrayList<>();
     }
 
-    public static DbType getDotNetDbType(String typeName, int dataType, int length, boolean isUnsigned, DatabaseCategory dbCategory) {
+    public static DbType getDotNetDbType(String typeName, int dataType, int length, boolean isUnsigned,
+            DatabaseCategory dbCategory) {
         DbType dbType;
         if (typeName != null && typeName.equalsIgnoreCase("year")) {
             dbType = DbType.Int16;
@@ -266,7 +276,8 @@ public class DbUtils {
         return result;
     }
 
-    public static <T> T getAllColumnNames(String allInOneName, final String tableName, final ResultSetExtractor<T> extractor) {
+    public static <T> T getAllColumnNames(String allInOneName, final String tableName,
+            final ResultSetExtractor<T> extractor) {
         try {
             return execute(allInOneName, new ConnectionCallback<T>() {
                 @Override
@@ -276,7 +287,8 @@ public class DbUtils {
                 }
             });
         } catch (Exception e) {
-            log.error(String.format("get all column names error: [allInOneName=%s;tableName=%s;]", allInOneName, tableName), e);
+            log.error(String.format("get all column names error: [allInOneName=%s;tableName=%s;]", allInOneName,
+                    tableName), e);
         }
         return null;
     }
@@ -306,7 +318,8 @@ public class DbUtils {
                 }
             });
         } catch (Exception e) {
-            log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]", allInOneName, tableViewName), e);
+            log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
+                    allInOneName, tableViewName), e);
         }
         return new HashMap<>();
     }
@@ -341,7 +354,8 @@ public class DbUtils {
                 }
             });
         } catch (Exception e) {
-            log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]", allInOneName, tableViewName), e);
+            log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
+                    allInOneName, tableViewName), e);
         }
         return new HashMap<>();
     }
@@ -355,7 +369,8 @@ public class DbUtils {
         }
     }
 
-    public static List<AbstractParameterHost> getSelectFieldHosts(String allInOneName, String sql, ResultSetExtractor<List<AbstractParameterHost>> extractor) {
+    public static List<AbstractParameterHost> getSelectFieldHosts(String allInOneName, String sql,
+            ResultSetExtractor<List<AbstractParameterHost>> extractor) {
         String testSql = sql;
         int whereIndex = StringUtils.indexOfIgnoreCase(testSql, "where");
         if (whereIndex > 0)
@@ -373,11 +388,12 @@ public class DbUtils {
         return new ArrayList<>();
     }
 
-    public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql,
-                                                            final String params, final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
+    public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql, final String params,
+            final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
         return execute(allInOneName, new ConnectionCallback<List<AbstractParameterHost>>() {
             @Override
-            public List<AbstractParameterHost> doInConnection(Connection connection) throws SQLException, DataAccessException {
+            public List<AbstractParameterHost> doInConnection(Connection connection)
+                    throws SQLException, DataAccessException {
                 List<Parameter> list = new ArrayList<>();
                 String[] parameters = params.split(";");
                 if (parameters != null && parameters.length > 0) {
@@ -396,7 +412,7 @@ public class DbUtils {
                 }
 
                 Matcher matcher = pattern.matcher(sql);
-                //Match C# parameters
+                // Match C# parameters
                 if (matcher.find()) {
                     list = getActualParameters(sql, list);
                 }
@@ -477,7 +493,8 @@ public class DbUtils {
             case Types.DECIMAL:
                 return 1.0;
             case Types.CHAR:
-                return 't';
+                return "t";
+            // return 't';
             case Types.DATE:
                 return "2012-01-01";
             case Types.TIME:
@@ -485,7 +502,7 @@ public class DbUtils {
             case Types.TIMESTAMP:
                 return "2012-01-01 10:00:00";
             case 10001:// uniqueidentifier
-                return new byte[]{};
+                return new byte[] {};
             default:
                 return "test";
         }
@@ -515,7 +532,8 @@ public class DbUtils {
         return dbCategory;
     }
 
-    public static Map<String, String> getSqlserverColumnComment(String allInOneName, String tableName) throws Exception {
+    public static Map<String, String> getSqlserverColumnComment(String allInOneName, String tableName)
+            throws Exception {
         Map<String, String> map = new HashMap<>();
         if (isMySqlServer(allInOneName)) {
             return map;
@@ -526,7 +544,7 @@ public class DbUtils {
                 + "                                     AND sys.extended_properties.minor_id = sys.columns.column_id)) AS description "
                 + "FROM   sys.columns, " + "       sys.tables " + "WHERE  sys.columns.object_id = sys.tables.object_id "
                 + "       AND sys.tables.name = ? " + "ORDER  BY sys.columns.column_id ";
-        return query(allInOneName, sql, new Object[]{tableName}, new ResultSetExtractor<Map<String, String>>() {
+        return query(allInOneName, sql, new Object[] {tableName}, new ResultSetExtractor<Map<String, String>>() {
             @Override
             public Map<String, String> extractData(ResultSet rs) throws SQLException {
                 Map<String, String> map = new HashMap<>();

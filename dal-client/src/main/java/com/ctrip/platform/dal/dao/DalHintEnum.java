@@ -229,4 +229,11 @@ public enum DalHintEnum {
 	 * Columns that will be included for query
 	 */
 	partialQuery,
+	
+	/**
+     * Allow columns in result set do not match columns declared in entity.
+     * It will populate the common set of columns from result set and entity columns.
+     * It request extractor or mapper to be HintsAwareExtractor or HintsAareMapper to do the required work
+     */
+    allowPartial,
 }

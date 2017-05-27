@@ -1,6 +1,7 @@
 package test.com.ctrip.platform.dal.dao.task;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.LinkedHashMap;
@@ -22,9 +23,19 @@ public class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 		super(databaseName, tableName, columnNames, primaryKeyNames, columnTypes);
 	}
 	
+	private boolean _DEBUG = true;
+	
 	@Override
 	public ClientTestModel map(ResultSet rs, int rowNum)
 			throws SQLException {
+        if(_DEBUG) {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            String[] columns = new String[rsmd.getColumnCount()];
+            for(int i = 0; i < columns.length; i++) {
+                columns[i] = rsmd.getColumnName(i + 1);
+            }
+        }
+	    
 		ClientTestModel model = new ClientTestModel();
 		model.setId(rs.getInt(1));
 		model.setQuantity(getInteger(rs.getObject(2)));

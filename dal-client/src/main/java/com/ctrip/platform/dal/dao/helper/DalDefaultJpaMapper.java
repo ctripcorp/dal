@@ -2,18 +2,21 @@ package com.ctrip.platform.dal.dao.helper;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import oracle.sql.TIMESTAMP;
-
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
-public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialResultMapping<T> {
+public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, HintsAwareMapper<T> {
 	
 	private Class<T> clazz = null;
 	private String[] columnNames = null;
@@ -94,9 +97,9 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 	}
 	
 	@Override
-	public DalRowMapper<T> mapWith(String[] selectedColumns, boolean ignorMissingFields)
+	public DalRowMapper<T> mapWith(ResultSet rs, DalHints hints)
 			throws SQLException {
-		return new DalDefaultJpaMapper<T>(this, selectedColumns, ignorMissingFields);
+		return new DalDefaultJpaMapper<T>(this, rs, hints);
 	}
 	
 	/**
@@ -107,10 +110,37 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, SupportPartialRe
 	 * @param clazz
 	 * @throws SQLException
 	 */
-	private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, String[] columnNames, boolean ignorMissingFields) throws SQLException {
+	private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, ResultSet rs, DalHints hints) throws SQLException {
 		this.clazz = rawMapper.clazz;
-		this.columnNames = columnNames;
 		this.fieldsMap = rawMapper.fieldsMap;
-		this.ignorMissingFields = ignorMissingFields;
-	}	
+		this.ignorMissingFields = hints.is(DalHintEnum.ignoreMissingFields);
+		
+        // User user defined columns if it is partial query case
+        this.columnNames = hints.is(DalHintEnum.partialQuery) ? hints.getPartialQueryColumns() : rawMapper.columnNames;
+
+        if(hints.is(DalHintEnum.allowPartial) == false)
+            return;
+            
+        Set<String> preDefinedColumns = toSet(columnNames);
+        
+        Set<String> resetSetColumns = new HashSet<>();
+        ResultSetMetaData rsMeta = rs.getMetaData();
+        for(int i = 0; i < rsMeta.getColumnCount(); i++) {
+            resetSetColumns.add(rsMeta.getColumnLabel(i));
+        }
+        
+        // If what user specifies is a subset of actual result set columns set
+        if(resetSetColumns.containsAll(preDefinedColumns))
+            return;
+
+        // Get the common set of both
+        preDefinedColumns.retainAll(resetSetColumns);
+        columnNames = preDefinedColumns.toArray(new String[preDefinedColumns.size()]);
+	}
+	
+	private Set<String> toSet(String[] values) {
+	    Set<String> s = new HashSet<>();
+	    for(String v: values) s.add(v);
+	    return s;
+	}
 }

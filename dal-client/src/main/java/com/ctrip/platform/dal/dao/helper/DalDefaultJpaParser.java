@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 
 /**
@@ -14,7 +15,7 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
  * 	1.The entity must contain non-parameters constructor.
  *  2.Each field of the entity must declare the SqlType annotation.
  */
-public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements SupportPartialResultMapping<T> {
+public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements HintsAwareMapper<T> {
 	
 	private Map<String, Field> fieldsMap;
 	private Class<T> clazz;
@@ -112,8 +113,8 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements Supp
 	}
 
 	@Override
-	public DalRowMapper<T> mapWith(String[] selectedColumns, boolean ignorMissingFields)
+	public DalRowMapper<T> mapWith(ResultSet rs, DalHints hints)
 			throws SQLException {
-		return rowMapper.mapWith(selectedColumns, ignorMissingFields);
+		return rowMapper.mapWith(rs, hints);
 	}
 }

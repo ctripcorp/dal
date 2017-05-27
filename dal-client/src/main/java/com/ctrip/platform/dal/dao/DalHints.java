@@ -433,4 +433,9 @@ public class DalHints {
 	public String[] getPartialQueryColumns() {
 		return getStringSet(DalHintEnum.partialQuery).toArray(new String[getStringSet(DalHintEnum.partialQuery).size()]);
 	}
+	
+	public DalHints allowPartial() {
+	    return set(DalHintEnum.allowPartial);
+    }
+
 }

@@ -23,6 +23,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.HintsAwareExtractor;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
@@ -52,7 +53,10 @@ public class DalDirectClient implements DalClient {
 				rs = preparedStatement.executeQuery();
 				DalWatcher.endExectue();
 				
-				return extractor.extract(rs);
+				if(extractor instanceof HintsAwareExtractor)
+				    return ((DalResultSetExtractor<T>)((HintsAwareExtractor)extractor).extractWith(hints)).extract(rs);
+				else
+				    return extractor.extract(rs);
 			}
 		};
 		action.populate(DalEventEnum.QUERY, sql, parameters);

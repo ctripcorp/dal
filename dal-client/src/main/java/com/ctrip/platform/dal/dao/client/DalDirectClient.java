@@ -78,7 +78,12 @@ public class DalDirectClient implements DalClient {
 				preparedStatement.execute();
 				for(DalResultSetExtractor<?> extractor: extractors) {
 		            ResultSet resultSet = preparedStatement.getResultSet();
-	            	result.add((Object)extractor.extract(resultSet));
+		            Object partResult;
+	                if(extractor instanceof HintsAwareExtractor)
+	                    partResult = ((DalResultSetExtractor)((HintsAwareExtractor)extractor).extractWith(hints)).extract(resultSet);
+	                else
+	                    partResult = extractor.extract(resultSet);
+	            	result.add(partResult);
 	                preparedStatement.getMoreResults();
 				}
 

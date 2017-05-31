@@ -172,7 +172,7 @@ public class PartialQueryQueryDaoTest {
         return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.partialQuery("PeopleID", "Name", "CityID", "ProvinceID"));
     }
 
-    // Result set is smaller than entity 
+    // Result set is not same with entity 
     public FreeEntityMismatchPojo findFreeFirstMismatch(String name,
             List<Integer> cityIds, DalHints hints) throws SQLException {
         DalQueryDao queryDao = new DalQueryDao(DATA_BASE);
@@ -340,7 +340,6 @@ public class PartialQueryQueryDaoTest {
 		}
 
 	}
-	
 	
     @Entity
     @Database(name = "")

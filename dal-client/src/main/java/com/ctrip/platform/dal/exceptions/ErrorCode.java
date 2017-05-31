@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.exceptions;
 
+import com.ctrip.platform.dal.dao.DalHintEnum;
+
 public enum ErrorCode {
 	/**
 	 * It is expected to return only %s result. But the actually count is %s
@@ -64,7 +66,7 @@ public enum ErrorCode {
 	/**
 	 * The insertion is fail or not completed yet.
 	 */
-	FieldNotExists(ErrorClassify.Validate, 5106, "There is no field defined in pojo %s for column %s."),
+	FieldNotExists(ErrorClassify.Validate, 5106, "There is no field defined in pojo %s for column %s. Please check with DalHintEnum.ignoreMissingFields"),
 	
 	/**
 	 * Sql cannot be null
@@ -146,6 +148,11 @@ public enum ErrorCode {
 	 */
 	TransactionNoFound(ErrorClassify.Transaction, 5604, "There is no transaction found"),
 	
+    /**
+     * The result mapping is faild.
+     */
+    ResultMappingError(ErrorClassify.Extract, 5700, "Can not extract from result set. If the columns in result set does not match with columns in pojo, please check with DalHintEnum.partialQuery."),
+    
 	/**
 	 * Can not get connection from DB %s
 	 */

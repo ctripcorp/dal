@@ -49,7 +49,7 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, HintsAwareMapper
 			
 			return instance;
 		} catch (Throwable e) {
-			throw DalException.wrap(e);
+			throw DalException.wrap(ErrorCode.ResultMappingError, e);
 		}
 	}
 
@@ -124,9 +124,13 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, HintsAwareMapper
         Set<String> preDefinedColumns = toSet(columnNames);
         
         Set<String> resetSetColumns = new HashSet<>();
+        // Delay the retrieval of ResultSetMetaData as much as possible, 
+        // because different driver implements this at different cost. 
+        // Some may require an additional round-trip of network    
         ResultSetMetaData rsMeta = rs.getMetaData();
-        for(int i = 0; i < rsMeta.getColumnCount(); i++) {
-            resetSetColumns.add(rsMeta.getColumnLabel(i));
+        int colCount = rsMeta.getColumnCount();
+        for(int i = 0; i < colCount; i++) {
+            resetSetColumns.add(rsMeta.getColumnLabel(i+1));
         }
         
         // If what user specifies is a subset of actual result set columns set

@@ -106,7 +106,8 @@ public class PartialQueryQueryDaoTest {
 
 	}
 
-	public FreeEntityPojo findFreeFirstPartial(String name, List<Integer> cityIds,
+	//Result set is same than entity
+	public FreeEntityPojo findFreeFirstSame(String name, List<Integer> cityIds,
 			DalHints hints) throws SQLException {
 		DalQueryDao queryDao = new DalQueryDao(DATA_BASE);
 		DalDefaultJpaMapper<FreeEntityPojo> freeEntityPojoRowMapper = new DalDefaultJpaMapper<>(
@@ -116,7 +117,7 @@ public class PartialQueryQueryDaoTest {
 
 		FreeSelectSqlBuilder<FreeEntityPojo> builder = new FreeSelectSqlBuilder<>(
 				dbCategory);
-		builder.setTemplate("SELECT PeopleID, Name, CityID, ProvinceID, CountryID, DataChange_LastTime FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
+		builder.setTemplate("SELECT * FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 		parameters.setSensitive(i++, "name", Types.VARCHAR, name);
@@ -124,11 +125,11 @@ public class PartialQueryQueryDaoTest {
 				cityIds);
 		builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
 
-		return (FreeEntityPojo) queryDao.query(builder, parameters,
-				hints.partialQuery("PeopleID", "Name", "CityID"));
+		return (FreeEntityPojo) queryDao.query(builder, parameters, hints);
 	}
 
-	public FreeEntityPartialPojo findFreeFirstMissingFields(String name,
+	// Result set is bigger than entity
+	public FreeEntityPartialPojo findFreeFirstBigger(String name,
 			List<Integer> cityIds, DalHints hints) throws SQLException {
 		DalQueryDao queryDao = new DalQueryDao(DATA_BASE);
 		DalDefaultJpaMapper<FreeEntityPartialPojo> freeEntityPojoRowMapper = new DalDefaultJpaMapper<>(
@@ -146,8 +147,52 @@ public class PartialQueryQueryDaoTest {
 				cityIds);
 		builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
 
-		return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.partialQuery("PeopleID", "Name", "CityID", "ProvinceID"));
+		return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints);
 	}
+
+    // Result set is smaller than entity 
+    public FreeEntityPartialPojo findFreeFirstSmaller(String name,
+            List<Integer> cityIds, DalHints hints) throws SQLException {
+        DalQueryDao queryDao = new DalQueryDao(DATA_BASE);
+        DalDefaultJpaMapper<FreeEntityPartialPojo> freeEntityPojoRowMapper = new DalDefaultJpaMapper<>(
+                FreeEntityPartialPojo.class);
+
+        hints = DalHints.createIfAbsent(hints);
+
+        FreeSelectSqlBuilder<FreeEntityPartialPojo> builder = new FreeSelectSqlBuilder<>(
+                dbCategory);
+        builder.setTemplate("SELECT * FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.setSensitive(i++, "name", Types.VARCHAR, name);
+        i = parameters.setSensitiveInParameter(i, "cityIds", Types.INTEGER,
+                cityIds);
+        builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
+
+        return (FreeEntityPartialPojo) queryDao.query(builder, parameters, hints.partialQuery("PeopleID", "Name", "CityID", "ProvinceID"));
+    }
+
+    // Result set is smaller than entity 
+    public FreeEntityMismatchPojo findFreeFirstMismatch(String name,
+            List<Integer> cityIds, DalHints hints) throws SQLException {
+        DalQueryDao queryDao = new DalQueryDao(DATA_BASE);
+        DalDefaultJpaMapper<FreeEntityMismatchPojo> freeEntityPojoRowMapper = new DalDefaultJpaMapper<>(
+                FreeEntityMismatchPojo.class);
+
+        hints = DalHints.createIfAbsent(hints);
+
+        FreeSelectSqlBuilder<FreeEntityMismatchPojo> builder = new FreeSelectSqlBuilder<>(
+                dbCategory);
+        builder.setTemplate("SELECT * FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.setSensitive(i++, "name", Types.VARCHAR, name);
+        i = parameters.setSensitiveInParameter(i, "cityIds", Types.INTEGER,
+                cityIds);
+        builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
+
+        return (FreeEntityMismatchPojo) queryDao.query(builder, parameters, hints);
+    }
 
 	@Test
 	public void testSelectPartial() throws Exception {
@@ -161,40 +206,67 @@ public class PartialQueryQueryDaoTest {
 		FreeEntityPojo ret;
 
 		hints = new DalHints();
-		ret = findFreeFirstPartial(name, cityIds, hints.inShard(1));
+		ret = findFreeFirstSame(name, cityIds, hints.inShard(1).partialQuery("PeopleID", "Name", "CityID"));
 		assertNotNull(ret);
 
 		hints = new DalHints();
-		ret = findFreeFirstPartial(name, cityIds, hints.inAllShards());
+		ret = findFreeFirstSame(name, cityIds, hints.inAllShards().partialQuery("PeopleID", "Name", "CityID"));
 		assertNotNull(ret);
 	}
 
-	@Test
-	public void testIgnorMissingFields() throws Exception {
-		String name = "Test";// Test value here
-		List<Integer> cityIds = new ArrayList<>();
-		cityIds.add(1);
-		cityIds.add(2);
-		cityIds.add(3);
-		DalHints hints = new DalHints();
+    @Test
+    public void testIgnorMissingFields() throws Exception {
+        String name = "Test";// Test value here
+        List<Integer> cityIds = new ArrayList<>();
+        cityIds.add(1);
+        cityIds.add(2);
+        cityIds.add(3);
+        DalHints hints = new DalHints();
 
-		FreeEntityPartialPojo ret;
-		try {
-			hints = new DalHints();
-			ret = findFreeFirstMissingFields(name, cityIds, hints.inShard(1));
-			fail();
-		} catch (DalException e) {
-			Assert.assertEquals(ErrorCode.FieldNotExists.getCode(), e.getErrorCode());
-		}
+        FreeEntityPartialPojo ret;
+        try {
+            hints = new DalHints();
+            ret = findFreeFirstBigger(name, cityIds, hints.inShard(1).partialQuery("PeopleID", "Name", "CityID", "ProvinceID"));
+            fail();
+        } catch (DalException e) {
+            Assert.assertEquals(ErrorCode.FieldNotExists.getCode(), e.getErrorCode());
+        }
 
-		hints = new DalHints().ignoreMissingFields();
-		ret = findFreeFirstMissingFields(name, cityIds, hints.inShard(1));
-		assertNotNull(ret);
+        hints = new DalHints().ignoreMissingFields().partialQuery("PeopleID", "Name", "CityID", "ProvinceID");
+        ret = findFreeFirstBigger(name, cityIds, hints.inShard(1));
+        assertNotNull(ret);
 
-		hints = new DalHints().ignoreMissingFields();
-		ret = findFreeFirstMissingFields(name, cityIds, hints.inAllShards());
-		assertNotNull(ret);
-	}
+        hints = new DalHints().ignoreMissingFields().partialQuery("PeopleID", "Name", "CityID", "ProvinceID");
+        ret = findFreeFirstBigger(name, cityIds, hints.inAllShards());
+        assertNotNull(ret);
+    }
+
+    @Test
+    public void testAllowPartial() throws Exception {
+        String name = "Test";// Test value here
+        List<Integer> cityIds = new ArrayList<>();
+        cityIds.add(1);
+        cityIds.add(2);
+        cityIds.add(3);
+        DalHints hints = new DalHints();
+
+        FreeEntityMismatchPojo ret;
+        try {
+            hints = new DalHints();
+            ret = findFreeFirstMismatch(name, cityIds, hints.inShard(1));
+            fail();
+        } catch (DalException e) {
+            Assert.assertEquals(ErrorCode.ResultMappingError.getCode(), e.getErrorCode());
+        }
+
+        hints = new DalHints().allowPartial();
+        ret = findFreeFirstMismatch(name, cityIds, hints.inShard(1));
+        assertNotNull(ret);
+
+        hints = new DalHints().allowPartial();
+        ret = findFreeFirstMismatch(name, cityIds, hints.inAllShards());
+        assertNotNull(ret);
+    }
 
 	@Entity
 	@Database(name = "")
@@ -268,4 +340,84 @@ public class PartialQueryQueryDaoTest {
 		}
 
 	}
+	
+	
+    @Entity
+    @Database(name = "")
+    @Table(name = "")
+    public static class FreeEntityMismatchPojo implements DalPojo {
+
+        @Column(name = "PeopleID")
+        @Type(value = Types.INTEGER)
+        private Integer peopleID;
+
+        @Column(name = "Name")
+        @Type(value = Types.VARCHAR)
+        private String name;
+
+        @Column(name = "CityID")
+        @Type(value = Types.INTEGER)
+        private Integer cityID;
+
+        @Column(name = "Province")
+        @Type(value = Types.INTEGER)
+        private Integer provinceID;
+
+        @Column(name = "Country")
+        @Type(value = Types.INTEGER)
+        private Integer countryID;
+
+        @Column(name = "Time")
+        @Type(value = Types.INTEGER)
+        private Timestamp dataChange_LastTime;
+
+        public Integer getPeopleID() {
+            return peopleID;
+        }
+
+        public void setPeopleID(Integer peopleID) {
+            this.peopleID = peopleID;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getCityID() {
+            return cityID;
+        }
+
+        public void setCityID(Integer cityID) {
+            this.cityID = cityID;
+        }
+
+        public Integer getProvinceID() {
+            return provinceID;
+        }
+
+        public void setProvinceID(Integer provinceID) {
+            this.provinceID = provinceID;
+        }
+
+        public Integer getCountryID() {
+            return countryID;
+        }
+
+        public void setCountryID(Integer countryID) {
+            this.countryID = countryID;
+        }
+
+        public Timestamp getDataChange_LastTime() {
+            return dataChange_LastTime;
+        }
+
+        public void setDataChange_LastTime(Timestamp dataChange_LastTime) {
+            this.dataChange_LastTime = dataChange_LastTime;
+        }
+
+    }
 }

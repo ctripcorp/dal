@@ -18,10 +18,6 @@ import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 
-import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
-import com.ctrip.platform.dal.dao.Version;
-import com.dianping.cat.status.ProductVersionManager;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -47,17 +43,19 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
+import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
+import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
+import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
-
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
+import com.dianping.cat.status.ProductVersionManager;
 
 public class TitanProvider implements DataSourceConfigureProvider {
     // This is to make sure we can get APPID if user really set so
@@ -148,31 +146,44 @@ public class TitanProvider implements DataSourceConfigureProvider {
         titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
     }
 
+    /**
+     * Get titan service URL in order of 
+     * 1. environment varaible
+     * 2. serviceAddress
+     * 3. local
+     * 
+     * @param settings
+     * @return
+     */
     private String discoverTitanServiceUrl(Map<String, String> settings) {
+        // First we use environment to determine titan service address
+        Env env = Foundation.server().getEnv();
+        if(titanMapping.containsKey(env.toString()))
+            return titanMapping.get(env.toString());
+        
+        // Then we check serviceAddress 
         String svcUrl = settings.get(SERVICE_ADDRESS);
 
-        if (svcUrl != null) {
+        // A little clean up
+        if (svcUrl != null && svcUrl.trim().length() != 0) {
             svcUrl = svcUrl.trim();
             if (svcUrl.endsWith("/"))
                 svcUrl = svcUrl.substring(0, svcUrl.length() - 1);
             return svcUrl;
         }
 
-        if (Foundation.server().getEnvType() == null)
-            return null;
-
-        String envType = Foundation.server().getEnvType().trim().toUpperCase();
-        return titanMapping.get(envType);
+        // Indicate local database.config should be used
+        return null;
     }
 
     private String discoverAppId(Map<String, String> settings) throws DalException {
-        // First try pre-configred settings
-        String appid = settings.get(APPID);
+        // First try framework foundation
+        appid = Foundation.app().getAppId();
         if (!(appid == null || appid.trim().isEmpty()))
             return appid.trim();
 
-        // Try framework foundation
-        appid = Foundation.app().getAppId();
+        // Try pre-configred settings
+        String appid = settings.get(APPID);
         if (!(appid == null || appid.trim().isEmpty()))
             return appid.trim();
 

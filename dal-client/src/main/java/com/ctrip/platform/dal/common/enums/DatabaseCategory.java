@@ -113,21 +113,22 @@ public enum DatabaseCategory {
 	public static final String SQL_PROVIDER = "sqlProvider";
 	public static final String MYSQL_PROVIDER = "mySqlProvider";
 	public static final String ORACLE_PROVIDER = "oracleProvider";
-	
+
 	public static DatabaseCategory matchWith(String provider) {
-		if(provider == null)
-			throw new RuntimeException("The provider value can not be NULL");
+		if(provider == null || provider.trim().length() == 0)
+			throw new RuntimeException("The provider value can not be NULL or empty!");
 		
-		switch (provider) {
-		case SQL_PROVIDER:
-			return DatabaseCategory.SqlServer;
-		case MYSQL_PROVIDER:
-			return DatabaseCategory.MySql;
-		case ORACLE_PROVIDER:
-			return DatabaseCategory.Oracle;
-		default:
-			throw new RuntimeException("The provider: " + provider + " can not be recoganized");
-		}
+		provider = provider.trim();
+		if(provider.equalsIgnoreCase(SQL_PROVIDER))
+		    return DatabaseCategory.SqlServer;
+		
+		if(provider.equalsIgnoreCase(MYSQL_PROVIDER))
+            return DatabaseCategory.MySql;
+		
+		if(provider.equalsIgnoreCase(ORACLE_PROVIDER))
+            return DatabaseCategory.Oracle;
+            
+		throw new RuntimeException("The provider: " + provider + " can not be recoganized");
 	}
 	
 	public Set<Integer> getDefaultRetriableErrorCodes() {

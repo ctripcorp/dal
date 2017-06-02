@@ -29,6 +29,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	 * Key used to declared columns for locating DB shard.
 	 */
 	public static final String COLUMNS = "columns";
+	private static final String COLUMNS_CSHARP = "column";
 
 	/**
 	 * Key used to declared mod for locating DB shard.
@@ -44,6 +45,7 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	 * Key used to declared columns for locating table shard.
 	 */
 	public static final String TABLE_COLUMNS = "tableColumns";
+	private static final String TABLE_COLUMNS_CSHARP = "tableColumn";
 	
 	/**
 	 * Key used to declared mod for locating table shard.
@@ -67,6 +69,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 	public void initialize(Map<String, String> settings) {
 		if(settings.containsKey(COLUMNS)) {
 			columns = settings.get(COLUMNS).split(",");
+		}else {
+		    if(settings.containsKey(COLUMNS_CSHARP)) {
+	            columns = settings.get(COLUMNS_CSHARP).split(",");
+	        }
 		}
 		
 		if(settings.containsKey(MOD)) {
@@ -81,6 +87,10 @@ public class ShardColModShardStrategy extends AbstractRWSeparationStrategy imple
 		
 		if(settings.containsKey(TABLE_COLUMNS)) {
 			tableColumns = settings.get(TABLE_COLUMNS).split(",");
+		}else {
+		    if(settings.containsKey(TABLE_COLUMNS_CSHARP)) {
+	            tableColumns = settings.get(TABLE_COLUMNS_CSHARP).split(",");
+		    }
 		}
 		
 		if(settings.containsKey(TABLE_MOD)) {

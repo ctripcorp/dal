@@ -13,4 +13,16 @@ public class Types {
     public void setDalVersion(DALVersion dalVersion) {
         this.dalVersion = dalVersion;
     }
+
+    @JSONField(name = "DAL.local.datasource")
+    private DALLocalDatasource dalLocalDatasource;
+
+    public DALLocalDatasource getDalLocalDatasource() {
+        return dalLocalDatasource;
+    }
+
+    public void setDalLocalDatasource(DALLocalDatasource dalLocalDatasource) {
+        this.dalLocalDatasource = dalLocalDatasource;
+    }
+
 }

@@ -352,7 +352,7 @@ public class TitanServiceReaderTest {
     public void testCheckDatasourceDefault() {
         TitanProvider provider = new TitanProvider();
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("PayBaseDB_INSERT_2");// has no config
+        dbNames.add("ha_test");// has no config
         
         Map<String, String> settings = new HashMap<>();
         settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
@@ -360,8 +360,8 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-          Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("Not_Exist"));
-            Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("PayBaseDB_INSERT_2"));
+            Assert.assertFalse(DatabasePoolConfigParser.getInstance().contains("Not_Exist"));
+            Assert.assertTrue(DatabasePoolConfigParser.getInstance().contains("ha_test"));
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Foundation.server().getEnvType());

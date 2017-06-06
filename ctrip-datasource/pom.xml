@@ -37,17 +37,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.ctrip.security</groupId>
-            <artifactId>encryption</artifactId>
-            <version>1.0.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-client</artifactId>
         </dependency>

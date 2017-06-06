@@ -20,7 +20,6 @@ import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
-import com.ctrip.security.encryption.Crypto;
 
 public class AllInOneConfigureReader {
 
@@ -129,7 +128,7 @@ public class AllInOneConfigureReader {
 				String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
 
 				logger.info("Try to read config for " + name);
-				DataSourceConfigure config = parser.parse(name, decrypt(name, connectionString));
+				DataSourceConfigure config = parser.parse(name, connectionString);
 				dataSourceConfigures.put(name, config);
 			}
 			in.close();
@@ -147,19 +146,6 @@ public class AllInOneConfigureReader {
 					logger.warn(e1.toString());
 				}
 			}
-		}
-	}
-	
-	private String decrypt(String dbname, String connStr) {
-		if (connStr!=null && -1==connStr.indexOf(';')) { // connStr was encrypted
-			try {
-				return Crypto.getInstance().decrypt(connStr);
-			} catch(Exception e) {
-				logger.error("decode " + dbname + " connectionString exception, msg:" + e.getMessage(), e);
-				throw new RuntimeException("decode " + dbname + " connectionString exception, msg:" + e.getMessage(), e);
-			}
-		} else {
-			return connStr;
 		}
 	}
 

@@ -7,6 +7,6 @@ public class DalReportResourceTest {
     @Test
     public void test() throws Exception {
         DalReportResource resource = new DalReportResource();
-        resource.Test();
+       // resource.Test();
     }
 }

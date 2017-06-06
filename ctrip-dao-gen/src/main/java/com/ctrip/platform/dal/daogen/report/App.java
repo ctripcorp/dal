@@ -8,6 +8,9 @@ public class App {
     private String ownerEmail;
     private String ownerCode;
 
+    private String dept;
+    private String version;
+
     public String getName() {
         return name;
     }
@@ -56,4 +59,19 @@ public class App {
         this.id = id;
     }
 
+    public String getDept() {
+        return dept;
+    }
+
+    public void setDept(String dept) {
+        this.dept = dept;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 }

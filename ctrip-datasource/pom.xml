@@ -23,6 +23,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+	        <dependency>
+	            <groupId>com.ctrip.platform</groupId>
+	            <artifactId>dal-client</artifactId>
+	            <version>1.8.3</version>
+	        </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -45,7 +50,6 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-client</artifactId>
-            <version>1.8.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -94,7 +98,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

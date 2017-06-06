@@ -23,6 +23,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+	        <dependency>
+	            <groupId>com.ctrip.platform</groupId>
+	            <artifactId>ctrip-datasource</artifactId>
+	            <version>1.0.3</version>
+	        </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -46,13 +51,11 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>ctrip-datasource</artifactId>
-            <version>1.0.3</version>
         </dependency>
     </dependencies>
     <distributionManagement>

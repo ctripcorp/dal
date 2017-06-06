@@ -16,9 +16,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import static oracle.net.aso.C01.e;
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
-
 public class CtripDalConfig implements DalConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfig.class);
     private static final String DAL_CONFIG = "dal.config";

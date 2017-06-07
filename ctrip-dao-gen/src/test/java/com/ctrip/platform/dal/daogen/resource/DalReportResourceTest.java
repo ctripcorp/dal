@@ -6,7 +6,7 @@ import org.junit.Test;
 public class DalReportResourceTest {
     @Test
     public void test() throws Exception {
-        DalReportResource resource = new DalReportResource();
+        //DalReportResource resource = new DalReportResource();
        // resource.Test();
     }
 }

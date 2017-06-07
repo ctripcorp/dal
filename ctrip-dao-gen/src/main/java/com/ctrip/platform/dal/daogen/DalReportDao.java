@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.daogen.report.Filter;
 import com.ctrip.platform.dal.daogen.report.Machines;
 import com.ctrip.platform.dal.daogen.report.NameDomain;
 import com.ctrip.platform.dal.daogen.report.NameDomainCount;
-import com.ctrip.platform.dal.daogen.report.Organization;
 import com.ctrip.platform.dal.daogen.report.RawInfo;
 import com.ctrip.platform.dal.daogen.report.Report;
 import com.ctrip.platform.dal.daogen.report.Root;

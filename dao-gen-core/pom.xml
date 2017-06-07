@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <javax-servlet-version>3.1.0</javax-servlet-version>
@@ -42,6 +42,17 @@
                     <exclusion>
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-aop</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi-version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.xmlbeans</groupId>
+                        <artifactId>xmlbeans</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -179,7 +190,6 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>${poi-version}</version>
         </dependency>
     </dependencies>
     <build>

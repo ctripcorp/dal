@@ -23,8 +23,8 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
 
-		if(fields.size() == 0)
-			return 0;
+//		if(fields.size() == 0)
+//			return 0;
 
 		String insertSql = buildInsertSql(hints, fields);
 		

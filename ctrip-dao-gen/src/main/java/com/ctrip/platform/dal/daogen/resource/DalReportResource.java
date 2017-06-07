@@ -30,7 +30,8 @@ import java.util.Map;
 public class DalReportResource {
     public static DalReportDao reportDao = null;
     private static final String MIME_EXCEL = "application/vnd.ms-excel";
-    private static final String excelFileName = "dal_report";
+    private static final String excelFileName = "dal_version";
+    private static final String excelFileName2 = "dal_local_datasource";
 
     // thread safe
     static {
@@ -152,6 +153,39 @@ public class DalReportResource {
     @Path("getLocalDatasourceAppList")
     public List<App> getLocalDatasourceAppList() throws Exception {
         return reportDao.getLocalDatasourceAppList();
+    }
+
+    @GET
+    @Path("exportExcel2")
+    @Produces(MIME_EXCEL)
+    public String exportExcel2(@Context HttpServletResponse response) throws Exception {
+        Workbook workbook = null;
+        ByteArrayOutputStream byteArrayStream = null;
+        OutputStream stream = null;
+        try {
+            response.setContentType(MIME_EXCEL);
+            response.setHeader("Content-Disposition", String.format("attachment; filename=%s.xls", excelFileName2));
+            workbook = reportDao.getWorkbook2();
+            byteArrayStream = new ByteArrayOutputStream();
+            workbook.write(byteArrayStream);
+            byte[] outArray = byteArrayStream.toByteArray();
+            stream = response.getOutputStream();
+            stream.write(outArray);
+        } catch (Throwable e) {
+            throw e;
+        } finally {
+            if (workbook != null)
+                workbook.close();
+            if (byteArrayStream != null) {
+                byteArrayStream.flush();
+                byteArrayStream.close();
+            }
+            if (stream != null) {
+                stream.flush();
+                stream.close();
+            }
+        }
+        return "";
     }
 
 }

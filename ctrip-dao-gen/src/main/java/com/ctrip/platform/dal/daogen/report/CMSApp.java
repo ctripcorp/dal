@@ -8,6 +8,9 @@ public class CMSApp {
     private String ownerEmail;
     private String ownerCode;
 
+    private Organization organization;
+    private String orgName;
+
     public String getAppId() {
         return appId;
     }
@@ -55,4 +58,21 @@ public class CMSApp {
     public void setOwnerCode(String ownerCode) {
         this.ownerCode = ownerCode;
     }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+    }
+
+    public String getOrgName() {
+        return organization == null ? "" : organization.getName();
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
 }

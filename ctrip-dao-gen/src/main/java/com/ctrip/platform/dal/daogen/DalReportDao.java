@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.daogen.report.Filter;
 import com.ctrip.platform.dal.daogen.report.Machines;
 import com.ctrip.platform.dal.daogen.report.NameDomain;
 import com.ctrip.platform.dal.daogen.report.NameDomainCount;
+import com.ctrip.platform.dal.daogen.report.Organization;
 import com.ctrip.platform.dal.daogen.report.RawInfo;
 import com.ctrip.platform.dal.daogen.report.Report;
 import com.ctrip.platform.dal.daogen.report.Root;
@@ -54,9 +55,14 @@ public class DalReportDao {
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REQUEST_BODY = "request_body";
 
+    private static final String LOCAL_DATASOURCE = "DAL.local.datasource";
+
     private static Vector<DalReport> reportVector = null;
     private static ConcurrentHashMap<String, CMSApp> reportMap = null;
     private static Date lastUpdate = null;
+
+    private static final int columnCount = 6;
+    private static final int columnCount2 = 7;
 
     // minutes
     private static final long initDelay = 0;
@@ -80,11 +86,11 @@ public class DalReportDao {
             app.setId(appId);
             DalReport report = map.get(appId);
             if (report != null) {
-                app.setDept(report.getDept());
                 app.setVersion(report.getVersion());
             }
             CMSApp cmsApp = cmsMap.get(appId);
             if (cmsApp != null) {
+                app.setOrgName(cmsApp.getOrgName());
                 app.setName(cmsApp.getAppName());
                 app.setChineseName(cmsApp.getChineseName());
                 app.setOwner(cmsApp.getOwner());
@@ -298,7 +304,7 @@ public class DalReportDao {
                     createCells(row, list);
                     index++;
                 }
-                setAutoSizeColumn(sheet);
+                setAutoSizeColumn(sheet, columnCount);
             }
         }
 
@@ -317,16 +323,45 @@ public class DalReportDao {
                     createCells(row, list);
                     index++;
                 }
-                setAutoSizeColumn(sheet);
+                setAutoSizeColumn(sheet, columnCount);
             }
         }
 
         return workbook;
     }
 
-    private void setAutoSizeColumn(Sheet sheet) {
+    public Workbook getWorkbook2() throws Exception {
+        Workbook workbook = new HSSFWorkbook();
+        List<App> list = getLocalDatasourceAppList();
+        if (list == null || list.size() == 0)
+            return workbook;
+
+        int index = 0;
+        Sheet sheet = workbook.createSheet(LOCAL_DATASOURCE);
+        Row rowTitle = sheet.createRow(index);
+        List<String> title = getLocalDatasourceTitle();
+        createCells(rowTitle, title);
+        index++;
+
+        for (App app : list) {
+            List<String> temp = new ArrayList<>();
+            temp.add(app.getId());
+            temp.add(app.getOrgName());
+            temp.add(app.getName());
+            temp.add(app.getChineseName());
+            temp.add(app.getOwner());
+            temp.add(app.getOwnerEmail());
+            Row row = sheet.createRow(index);
+            createCells(row, temp);
+            index++;
+        }
+        setAutoSizeColumn(sheet, columnCount2);
+        return workbook;
+    }
+
+    private void setAutoSizeColumn(Sheet sheet, int length) {
         if (sheet != null) {
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < length; i++) {
                 sheet.autoSizeColumn(i);
             }
         }
@@ -345,6 +380,17 @@ public class DalReportDao {
         title.add("BU");
         List<String> temp = getCommonTitle();
         title.addAll(temp);
+        return title;
+    }
+
+    private List<String> getLocalDatasourceTitle() {
+        List<String> title = new ArrayList<>();
+        title.add("App Id");
+        title.add("BU");
+        title.add("App Name");
+        title.add("Chinese Name");
+        title.add("Owner");
+        title.add("Owner Email");
         return title;
     }
 
@@ -391,8 +437,9 @@ public class DalReportDao {
         Vector<DalReport> vector = new Vector<>();
         RawInfo raw = getRawInfo();
         Filter filter = new Filter();
-        filter.setDept("酒店");
+        // filter.setDept("酒店");
         List<Url> urls = getUrls(raw, filter);
+        int index = 0;
         if (urls != null && urls.size() > 0) {
             for (Url url : urls) {
                 Root root = HttpUtil.getJSONEntity(Root.class, url.getUrl(), null, HttpMethod.HttpGet);
@@ -404,6 +451,8 @@ public class DalReportDao {
                     report.setVersion(url.getVersion());
                     vector.add(report);
                 }
+                index++;
+                System.out.println(index);
             }
         }
         reportVector = vector;

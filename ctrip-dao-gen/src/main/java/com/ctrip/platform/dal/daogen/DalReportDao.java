@@ -56,6 +56,8 @@ public class DalReportDao {
 
     private static final String LOCAL_DATASOURCE = "DAL.local.datasource";
 
+    private static final String ALL = "All";
+
     private static Vector<DalReport> reportVector = null;
     private static ConcurrentHashMap<String, CMSApp> reportMap = null;
     private static Date lastUpdate = null;
@@ -65,11 +67,11 @@ public class DalReportDao {
 
     // minutes
     private static final long initDelay = 0;
-    private static final long delay = 5;
+    private static final long delay = 60;
 
     public void init() {
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleWithFixedDelay(new ReportTask(), initDelay, delay, TimeUnit.MINUTES);
+        service.scheduleAtFixedRate(new ReportTask(), initDelay, delay, TimeUnit.MINUTES);
     }
 
     public List<App> getLocalDatasourceAppList() throws Exception {
@@ -153,12 +155,18 @@ public class DalReportDao {
             return raw;
         Map<String, Version> map = version.getNames();
         if (map != null && map.size() > 0) {
-            List<String> depts = Arrays.asList(ips);
+            List<String> depts = new ArrayList<>();
+            depts.add(ALL);
+            List<String> temp = Arrays.asList(ips);
+            depts.addAll(temp);
             raw.setDepts(depts);
 
-            List<String> versions = new ArrayList<>(map.keySet());
-            versions = getFuzzyList(versions, DAL_JAVA);
-            Collections.sort(versions);
+            List<String> versions = new ArrayList<>();
+            versions.add(ALL);
+            List<String> list = new ArrayList<>(map.keySet());
+            list = getFuzzyList(list, DAL_JAVA);
+            Collections.sort(list);
+            versions.addAll(list);
             raw.setVersions(versions);
         }
 
@@ -167,7 +175,7 @@ public class DalReportDao {
 
     public Map<String, List<String>> getMapByDept(String dept) throws Exception {
         Map<String, List<String>> map = new LinkedHashMap<>();
-        List<DalReport> list = getDalReport(dept, null);
+        List<DalReport> list = getDalReport(dept, null); // filter by dept
         if (list == null || list.size() == 0)
             return map;
         for (DalReport report : list) {
@@ -184,7 +192,7 @@ public class DalReportDao {
 
     public Map<String, List<String>> getMapByVersion(String version) throws Exception {
         Map<String, List<String>> map = new LinkedHashMap<>();
-        List<DalReport> list = getDalReport(null, version);
+        List<DalReport> list = getDalReport(null, version); // filter by version
         if (list == null || list.size() == 0)
             return map;
         for (DalReport report : list) {
@@ -436,7 +444,7 @@ public class DalReportDao {
         Vector<DalReport> vector = new Vector<>();
         RawInfo raw = getRawInfo();
         Filter filter = new Filter();
-        // filter.setDept("酒店");
+        // filter.setDept("酒店"); // debug
         List<Url> urls = getUrls(raw, filter);
         int index = 0;
         if (urls != null && urls.size() > 0) {
@@ -466,9 +474,13 @@ public class DalReportDao {
                 if (dept != null && dept.length() > 0) {
                     if (report.getDept().equals(dept))
                         flag |= true;
+                    if (dept.equals(ALL))
+                        flag |= true;
                 }
                 if (version != null && version.length() > 0) {
                     if (report.getVersion().equals(version))
+                        flag |= true;
+                    if (version.equals(ALL))
                         flag |= true;
                 }
                 if (flag)

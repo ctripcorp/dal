@@ -54,7 +54,10 @@ public class HttpUtil {
             content = getHttpEntityContent(request);
         }
 
-        result = JSON.parseObject(content, clazz);
+        try {
+            result = JSON.parseObject(content, clazz);
+        } catch (Throwable e) {
+        }
         return result;
     }
 

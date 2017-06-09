@@ -108,11 +108,14 @@ public class DalGroupDbResource {
 
     @POST
     @Path("add")
-    public Status add(@Context HttpServletRequest request, @FormParam("groupId") String groupId, @FormParam("dbname") String dbname, @FormParam("comment") String comment, @FormParam("gen_default_dbset") boolean gen_default_dbset) {
+    public Status add(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+            @FormParam("dbname") String dbname, @FormParam("comment") String comment,
+            @FormParam("gen_default_dbset") boolean gen_default_dbset) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || groupId == null || dbname == null) {
-            log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbname=%s]", groupId, dbname));
+            log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbname=%s]",
+                    groupId, dbname));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;
@@ -159,7 +162,7 @@ public class DalGroupDbResource {
         }
 
         if (gen_default_dbset) {
-            Status status = genDefaultDbset(groupID, dbname);
+            Status status = genDefaultDbset(groupID, dbname, null);
             if (status == Status.ERROR) {
                 return status;
             }
@@ -170,11 +173,13 @@ public class DalGroupDbResource {
 
     @POST
     @Path("update")
-    public Status update(@Context HttpServletRequest request, @FormParam("groupId") String groupId, @FormParam("dbId") String dbId, @FormParam("comment") String comment) {
+    public Status update(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+            @FormParam("dbId") String dbId, @FormParam("comment") String comment) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || groupId == null || dbId == null) {
-            log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]", groupId, dbId));
+            log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+                    groupId, dbId));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;
@@ -211,11 +216,13 @@ public class DalGroupDbResource {
 
     @POST
     @Path("delete")
-    public Status delete(@Context HttpServletRequest request, @FormParam("groupId") String groupId, @FormParam("dbId") String dbId) {
+    public Status delete(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+            @FormParam("dbId") String dbId) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || groupId == null || dbId == null) {
-            log.error(String.format("Delete db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]", groupId, dbId));
+            log.error(String.format("Delete db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+                    groupId, dbId));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;
@@ -251,11 +258,13 @@ public class DalGroupDbResource {
 
     @POST
     @Path("transferdb")
-    public Status transferdb(@Context HttpServletRequest request, @FormParam("groupId") String groupId, @FormParam("dbId") String dbId) {
+    public Status transferdb(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
+            @FormParam("dbId") String dbId) {
         String userNo = RequestUtil.getUserNo(request);
 
         if (userNo == null || groupId == null || dbId == null) {
-            log.error(String.format("transfer db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]", groupId, dbId));
+            log.error(String.format("transfer db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+                    groupId, dbId));
             Status status = Status.ERROR;
             status.setInfo("Illegal parameters.");
             return status;
@@ -311,7 +320,8 @@ public class DalGroupDbResource {
         List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urGroups != null && urGroups.size() > 0) {
             for (UserGroup urGroup : urGroups) {
-                List<DalGroupDB> groupDbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(urGroup.getGroup_id());
+                List<DalGroupDB> groupDbs =
+                        SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(urGroup.getGroup_id());
                 if (groupDbs != null && groupDbs.size() > 0) {
                     for (DalGroupDB db : groupDbs) {
                         if (db.getId() == dbId) {
@@ -329,17 +339,26 @@ public class DalGroupDbResource {
      *
      * @param dbname
      */
-    public static Status genDefaultDbset(int groupId, String dbname) {
+    public static Status genDefaultDbset(int groupId, String dbname, String dbProvider) {
         Status status = Status.OK;
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
             status = Status.ERROR;
-            status.setInfo("数据库" + dbname + "已添加成功。由于已存在名为" + dbname + "的逻辑数据库，所以无法默认生成同名的逻辑库，请到逻辑数据库管理页面中手动添加不同名称的逻辑库。请点击关闭按钮以关闭窗口。");
+            status.setInfo("数据库" + dbname + "已添加成功。由于已存在名为" + dbname
+                    + "的逻辑数据库，所以无法默认生成同名的逻辑库，请到逻辑数据库管理页面中手动添加不同名称的逻辑库。请点击关闭按钮以关闭窗口。");
             return status;
         }
         DatabaseSet dbset = new DatabaseSet();
         dbset.setName(dbname);
         dbset.setProvider("sqlProvider");
+
+        if (dbProvider != null && dbProvider.length() > 0) {
+            if (dbProvider.equals("SQLServer"))
+                dbset.setProvider("sqlProvider");
+            if (dbProvider.equals("MySQL"))
+                dbset.setProvider("mySqlProvider");
+        }
+
         try {
             Connection connection = DataSourceUtil.getConnection(dbname);
             String dbType = connection.getMetaData().getDatabaseProductName();

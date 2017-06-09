@@ -459,7 +459,7 @@ public class DalReportDao {
                     vector.add(report);
                 }
                 index++;
-                System.out.println(index);
+                // System.out.println(index);
             }
         }
         reportVector = vector;

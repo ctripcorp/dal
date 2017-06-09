@@ -23,7 +23,7 @@ public class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
 		super(databaseName, tableName, columnNames, primaryKeyNames, columnTypes);
 	}
 	
-	private boolean _DEBUG = true;
+	private boolean _DEBUG = false;
 	
 	@Override
 	public ClientTestModel map(ResultSet rs, int rowNum)

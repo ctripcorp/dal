@@ -23,9 +23,12 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
 
-//		if(fields.size() == 0)
-//			return 0;
-
+		/*
+		 * In case fields is empty, the final sql will be like "insert into tableName () values()".
+		 * We do not report error or simply return 0, but just let DB decide what to do.
+		 * For MS Sql server, sql like this is illegal, but for mysql, this works however
+		 */
+		
 		String insertSql = buildInsertSql(hints, fields);
 		
 		StatementParameters parameters = new StatementParameters();

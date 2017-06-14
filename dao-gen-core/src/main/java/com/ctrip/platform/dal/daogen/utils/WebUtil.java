@@ -27,9 +27,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 
-/**
- * Created by yn.wang on 2017/1/9.
- */
 public class WebUtil {
     private static final String SERVICE_RUL = Configuration.get("allinone_service_url");
     private static final String APP_ID = Configuration.get("app_id");
@@ -45,22 +42,26 @@ public class WebUtil {
         if (APP_ID == null || APP_ID.isEmpty())
             return res;
 
-        URIBuilder builder = new URIBuilder(SERVICE_RUL).addParameter("ids", keyname).addParameter("appid", APP_ID);
-        if (environment != null && !environment.isEmpty())
-            builder.addParameter("envt", environment);
+        try {
+            URIBuilder builder = new URIBuilder(SERVICE_RUL).addParameter("ids", keyname).addParameter("appid", APP_ID);
+            if (environment != null && !environment.isEmpty())
+                builder.addParameter("envt", environment);
 
-        URI uri = builder.build();
-        HttpClient sslClient = initWeakSSLClient();
-        if (sslClient != null) {
-            HttpGet httpGet = new HttpGet();
-            httpGet.setURI(uri);
-            HttpResponse response = sslClient.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            String content = EntityUtils.toString(entity);
-            res = JSON.parseObject(content, Response.class);
+            URI uri = builder.build();
+            HttpClient sslClient = initWeakSSLClient();
+            if (sslClient != null) {
+                HttpGet httpGet = new HttpGet();
+                httpGet.setURI(uri);
+                HttpResponse response = sslClient.execute(httpGet);
+                HttpEntity entity = response.getEntity();
+                String content = EntityUtils.toString(entity);
+                res = JSON.parseObject(content, Response.class);
+            }
+
+            return res;
+        } catch (Throwable e) {
+            throw e;
         }
-
-        return res;
     }
 
     private static HttpClient initWeakSSLClient() {
@@ -80,21 +81,20 @@ public class WebUtil {
         b.setSslcontext(sslContext);
 
         // don't check Hostnames, either.
-        //      -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
+        // -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
         X509HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
         // here's the special part:
-        //      -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
-        //      -- and create a Registry, to register it.
+        // -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
+        // -- and create a Registry, to register it.
         //
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", sslSocketFactory)
+                .register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", sslSocketFactory)
                 .build();
 
         // now, we create connection-manager using our Registry.
-        //      -- allows multi-threaded use
+        // -- allows multi-threaded use
         PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         b.setConnectionManager(connMgr);
 
@@ -107,7 +107,7 @@ public class WebUtil {
         b.setDefaultRequestConfig(configBuilder.build());
 
         // finally, build the HttpClient;
-        //      -- done!
+        // -- done!
         HttpClient sslClient = b.build();
         return sslClient;
     }

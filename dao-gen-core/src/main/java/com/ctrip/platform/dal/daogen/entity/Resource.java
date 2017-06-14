@@ -40,7 +40,8 @@ public class Resource {
         this.name = name;
     }
 
-    public Resource(String name, String userName, String password, String dbAddress, String dbPort, String dbCatalog, String driverClassName) {
+    public Resource(String name, String userName, String password, String dbAddress, String dbPort, String dbCatalog,
+            String driverClassName) {
         this.name = name;
         this.userName = userName;
         this.password = password;
@@ -250,7 +251,7 @@ public class Resource {
         this.dbCatalog = dbCatalog;
     }
 
-    public String getConnectionUrl() throws SQLException {
+    public String getConnectionUrl() throws Exception {
         return DataSourceUtil.getConnectionUrl(getDbAddress(), getDbPort(), getDbCatalog(), this.driverClassName);
     }
 
@@ -258,7 +259,7 @@ public class Resource {
         this.connectionUrl = connectionUrl;
     }
 
-    public String getDriverClassName() throws SQLException {
+    public String getDriverClassName() throws Exception {
         return DataSourceUtil.getDriverClass(driverClassName);
     }
 

@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 
@@ -21,18 +20,17 @@ public class CommonUtils {
         int v = defaultValue;
         try {
             v = Integer.parseInt(val);
-        } catch (Exception e) {
+        } catch (Throwable e) {
         }
-
         return v;
     }
 
-    public static String toJson(Object o) {
+    public static String toJson(Object o) throws Exception {
         String res = "";
         try {
             res = objectMap.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            log.error(e);
+        } catch (Throwable e) {
+            throw e;
         }
         return res;
     }

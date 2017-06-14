@@ -8,7 +8,6 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -18,9 +17,11 @@ public final class GenUtils {
     static {
         log = Logger.getLogger(GenUtils.class);
         java.util.Properties property = new java.util.Properties();
-        property.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
+        property.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                "org.apache.velocity.runtime.log.NullLogChute");
         property.setProperty(VelocityEngine.RESOURCE_LOADER, "class");
-        property.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        property.setProperty("class.resource.loader.class",
+                "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
         Velocity.init(property);
     }
 
@@ -41,19 +42,19 @@ public final class GenUtils {
     /**
      * 根据Velocity模板，生成相应的文件
      *
-     * @param context        VelocityHost
+     * @param context VelocityHost
      * @param resultFilePath 生成的文件路径
-     * @param templateFile   Velocity模板文件
+     * @param templateFile Velocity模板文件
      * @return
      */
-    public static boolean mergeVelocityContext(VelocityContext context, String resultFilePath, String templateFile) {
+    public static boolean mergeVelocityContext(VelocityContext context, String resultFilePath, String templateFile)
+            throws Exception {
         FileWriter daoWriter = null;
         try {
             daoWriter = new FileWriter(resultFilePath);
             Velocity.mergeTemplate(templateFile, "UTF-8", context, daoWriter);
-        } catch (IOException e) {
-            log.error(String.format("merge velocity context error: [context=%s;resultFilePath=%s;templateFile=%s]", CommonUtils.toJson(context.get("host")), resultFilePath, templateFile), e);
-            return false;
+        } catch (Throwable e) {
+            throw e;
         } finally {
             JavaIOUtils.closeWriter(daoWriter);
         }
@@ -64,16 +65,17 @@ public final class GenUtils {
     /**
      * 根据Velocity模板，生成相应的文件
      *
-     * @param context        VelocityHost
-     * @param resultFilePath 生成的文件路径
-     * @param templateFile   Velocity模板文件
+     * @param context VelocityHost
+     * @param templateFile Velocity模板文件
      * @return
      */
-    public static String mergeVelocityContext(VelocityContext context, String templateFile) {
+    public static String mergeVelocityContext(VelocityContext context, String templateFile) throws Exception {
         Writer writer = null;
         try {
             writer = new StringWriter();
             Velocity.mergeTemplate(templateFile, "UTF-8", context, writer);
+        } catch (Throwable e) {
+            throw e;
         } finally {
             JavaIOUtils.closeWriter(writer);
         }

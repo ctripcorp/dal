@@ -31,11 +31,9 @@ public class ProgressResource {
     public static Map<String, Progress> progresses = new ConcurrentHashMap<>();
 
     private final static int MAX_PROGRESSES = 2000;
-
     private final static long MAX_ALIVE_TIME = 60 * 60 * 1000;// 单个Progress最大生命时间，单位毫秒
 
     public final static String FINISH = "finish";
-
     public final static String ISDOING = "isDoing";
 
     public final static String INIT_MESSAGE = "正在初始化...";
@@ -44,11 +42,13 @@ public class ProgressResource {
     @Path("/poll")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Progress poll(@Context HttpServletRequest request, @QueryParam("project_id") int project_id, @QueryParam("regenerate") boolean regen, @QueryParam("language") String language, @QueryParam("random") String random) {
+    public Progress poll(@Context HttpServletRequest request, @QueryParam("project_id") int project_id,
+            @QueryParam("regenerate") boolean regen, @QueryParam("language") String language,
+            @QueryParam("random") String random) throws Exception {
         try {
             TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            throw e;
         }
         String userNo = RequestUtil.getUserNo(request);
         Progress progress = getProgress(userNo, project_id, random);
@@ -79,16 +79,14 @@ public class ProgressResource {
     }
 
     public static void addTotalFiles(Progress progress, int newTotalFiles) {
-        if (progress == null) {
+        if (progress == null)
             return;
-        }
         progress.setTotalFiles(progress.getTotalFiles() + newTotalFiles);
     }
 
     public static void addDoneFiles(Progress progress, int newDoneFiles) {
-        if (progress == null) {
+        if (progress == null)
             return;
-        }
         progress.setDoneFiles(progress.getDoneFiles() + newDoneFiles);
         updatePercent(progress);
     }
@@ -98,16 +96,14 @@ public class ProgressResource {
     }
 
     private static void updatePercent(Progress progress) {
-        if (progress == null) {
+        if (progress == null)
             return;
-        }
         try {
             progress.setPercent((int) Math.floor(progress.getDoneFiles() * 100 / progress.getTotalFiles()));
-            if (!FINISH.equals(progress.getStatus()) && progress.getPercent() >= 100) {
+            if (!FINISH.equals(progress.getStatus()) && progress.getPercent() >= 100)
                 progress.setPercent(85);
-            }
-        } catch (Exception e) {
-            progress.setPercent(0);
+        } catch (Throwable e) {
+            throw e;
         }
     }
 
@@ -115,18 +111,16 @@ public class ProgressResource {
         String key = getKey(progress.getUserNo(), progress.getProject_id(), progress.getRandom());
         progress = null;
         progresses.remove(key);
-        if (progresses.size() > MAX_PROGRESSES) {
+        if (progresses.size() > MAX_PROGRESSES)
             cleanProgresses();
-        }
     }
 
     private static synchronized void cleanProgresses() {
         for (Map.Entry<String, Progress> entry : progresses.entrySet()) {
             String key = entry.getKey();
             Progress pro = entry.getValue();
-            if (System.currentTimeMillis() - pro.getTime() > MAX_ALIVE_TIME) {
+            if (System.currentTimeMillis() - pro.getTime() > MAX_ALIVE_TIME)
                 progresses.remove(key);
-            }
         }
     }
 

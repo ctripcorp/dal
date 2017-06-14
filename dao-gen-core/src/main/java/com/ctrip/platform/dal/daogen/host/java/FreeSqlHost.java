@@ -68,41 +68,10 @@ public class FreeSqlHost {
 
     public String pageBegain() {
         return "(pageNo - 1) * pageSize";
-        /*
-         * if (this.databaseCategory == DatabaseCategory.MySql) { return
-		 * "(pageNo - 1) * pageSize"; } else { return
-		 * "(pageNo - 1) * pageSize + 1"; }
-		 */
     }
 
     public String pageEnd() {
         return "pageSize";
-        /*
-         * if (this.databaseCategory == DatabaseCategory.MySql) { return
-		 * "pageSize"; } else { return "pageSize * pageNo"; }
-		 */
-    }
-
-    public boolean hasQuery() {
-        boolean hasQuery = false;
-        for (JavaMethodHost mtd : this.methods) {
-            if (mtd.isQuery()) {
-                hasQuery = true;
-                break;
-            }
-        }
-        return hasQuery;
-    }
-
-    public boolean hasUpdate() {
-        boolean hasUpdate = false;
-        for (JavaMethodHost mtd : this.methods) {
-            if (mtd.isUpdate()) {
-                hasUpdate = true;
-                break;
-            }
-        }
-        return hasUpdate;
     }
 
     public List<JavaParameterHost> getFields() {

@@ -3,13 +3,12 @@ package com.ctrip.platform.dal.daogen.generator.processor.csharp;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalProcessor;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 
 public class CSharpDirectoryPreparerProcessor implements DalProcessor {
-
     @Override
     public void process(CodeGenContext context) throws Exception {
         CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
@@ -43,7 +42,8 @@ public class CSharpDirectoryPreparerProcessor implements DalProcessor {
             if (!configDir.exists()) {
                 FileUtils.forceMkdir(configDir);
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

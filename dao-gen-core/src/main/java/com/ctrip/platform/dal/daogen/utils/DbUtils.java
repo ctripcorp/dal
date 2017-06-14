@@ -32,14 +32,12 @@ public class DbUtils {
         validMode.add(DatabaseMetaData.procedureColumnOut);
     }
 
-    public static boolean tableExists(String allInOneName, String tableName) {
+    public static boolean tableExists(String allInOneName, String tableName) throws Exception {
         try {
             return objectExist(allInOneName, "u", tableName);
-        } catch (Exception e) {
-            log.error(String.format("get table exists error: [allInOneName=%s;tableName=%s]", allInOneName, tableName),
-                    e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return false;
     }
 
     private static boolean objectExist(String allInOneName, String objectType, String objectName) throws Exception {
@@ -62,7 +60,8 @@ public class DbUtils {
         });
     }
 
-    private static boolean mysqlObjectExist(String allInOneName, final String objectType, final String objectName) {
+    private static boolean mysqlObjectExist(String allInOneName, final String objectType, final String objectName)
+            throws Exception {
         try {
             return execute(allInOneName, new ConnectionCallback<Boolean>() {
                 @Override
@@ -72,10 +71,9 @@ public class DbUtils {
                     return rs.next();
                 }
             });
-        } catch (Exception ex) {
-            log.warn(ex.getMessage(), ex);
+        } catch (Throwable e) {
+            throw e;
         }
-        return false;
     }
 
     private static JdbcTemplate createJdbcTemplate(String allInOneName) throws Exception {
@@ -113,13 +111,12 @@ public class DbUtils {
         });
     }
 
-    public static boolean viewExists(String allInOneName, String viewName) {
+    public static boolean viewExists(String allInOneName, String viewName) throws Exception {
         try {
             return objectExist(allInOneName, "v", viewName);
-        } catch (Exception e) {
-            log.error(String.format("get view exists error: [allInOneName=%s;viewName=%s]", allInOneName, viewName), e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return false;
     }
 
     /**
@@ -131,14 +128,15 @@ public class DbUtils {
             public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
                 List<String> results = new ArrayList<>();
                 ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"VIEW"});
-                while (rs.next())
+                while (rs.next()) {
                     results.add(rs.getString("TABLE_NAME"));
+                }
                 return results;
             }
         });
     }
 
-    public static boolean spExists(String allInOneName, final StoredProcedure sp) {
+    public static boolean spExists(String allInOneName, final StoredProcedure sp) throws Exception {
         try {
             // 如果是Sql Server，通过Sql语句获取所有表和视图的名称
             if (!isMySqlServer(allInOneName)) {
@@ -152,8 +150,8 @@ public class DbUtils {
                             }
                         });
             }
-        } catch (Exception e) {
-            log.error(String.format("get sp exists error: [allInOneName=%s;spName=%s]", allInOneName, sp.getName()), e);
+        } catch (Throwable e) {
+            throw e;
         }
         return false;
     }
@@ -178,8 +176,8 @@ public class DbUtils {
                     }
                 });
             }
-        } catch (SQLException e) {
-            handleException(String.format("get all sp names error: [allInOneName=%s]", allInOneName), e);
+        } catch (Throwable e) {
+            throw e;
         }
         return new ArrayList<>();
     }
@@ -188,7 +186,7 @@ public class DbUtils {
      * 获取存储过程的所有参数
      */
     public static <T> T getSpParams(String allInOneName, final StoredProcedure sp,
-            final ResultSetExtractor<T> extractor) {
+            final ResultSetExtractor<T> extractor) throws Exception {
         try {
             return execute(allInOneName, new ConnectionCallback<T>() {
                 @Override
@@ -198,14 +196,12 @@ public class DbUtils {
                     return extractor.extractData(spParamRs);
                 }
             });
-        } catch (Exception e) {
-            log.error(String.format("get sp params error: [allInOneName=%s;spName=%s;]", allInOneName, sp.getName()),
-                    e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return null;
     }
 
-    public static List<String> getPrimaryKeyNames(String allInOneName, final String tableName) {
+    public static List<String> getPrimaryKeyNames(String allInOneName, final String tableName) throws Exception {
         try {
             return execute(allInOneName, new ConnectionCallback<List<String>>() {
                 @Override
@@ -219,11 +215,9 @@ public class DbUtils {
                 }
 
             });
-        } catch (Exception e) {
-            log.error(String.format("get primary key names error: [allInOneName=%s;tableName=%s]", allInOneName,
-                    tableName), e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return new ArrayList<>();
     }
 
     public static DbType getDotNetDbType(String typeName, int dataType, int length, boolean isUnsigned,
@@ -267,17 +261,17 @@ public class DbUtils {
 
     public static boolean isColumnUnsigned(String columnType) {
         boolean result = false;
-        if (columnType == null || columnType.length() == 0) {
+        if (columnType == null || columnType.length() == 0)
             return result;
-        }
-        if (columnType.toLowerCase().indexOf("unsigned") > -1) {
+
+        if (columnType.toLowerCase().indexOf("unsigned") > -1)
             result = true;
-        }
+
         return result;
     }
 
     public static <T> T getAllColumnNames(String allInOneName, final String tableName,
-            final ResultSetExtractor<T> extractor) {
+            final ResultSetExtractor<T> extractor) throws Exception {
         try {
             return execute(allInOneName, new ConnectionCallback<T>() {
                 @Override
@@ -286,14 +280,13 @@ public class DbUtils {
                     return extractor.extractData(allColumnsRs);
                 }
             });
-        } catch (Exception e) {
-            log.error(String.format("get all column names error: [allInOneName=%s;tableName=%s;]", allInOneName,
-                    tableName), e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return null;
     }
 
-    public static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName) {
+    public static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName)
+            throws Exception {
         try {
             String sql = buildColumnSql(allInOneName, tableViewName);
             return query(allInOneName, sql, null, new ResultSetExtractor<Map<String, Class<?>>>() {
@@ -317,11 +310,9 @@ public class DbUtils {
                     return map;
                 }
             });
-        } catch (Exception e) {
-            log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
-                    allInOneName, tableViewName), e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return new HashMap<>();
     }
 
     private static String buildColumnSql(String allInOneName, String tableViewName) throws Exception {
@@ -332,7 +323,7 @@ public class DbUtils {
         }
     }
 
-    public static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) {
+    public static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) throws Exception {
         try {
             String sql = buildColumnSql(allInOneName, tableViewName);
             return query(allInOneName, sql, null, new ResultSetExtractor<Map<String, Integer>>() {
@@ -354,10 +345,8 @@ public class DbUtils {
                 }
             });
         } catch (Exception e) {
-            log.error(String.format("get sql-type to java-type maper error: [allInOneName=%s;tableViewName=%s]",
-                    allInOneName, tableViewName), e);
+            throw e;
         }
-        return new HashMap<>();
     }
 
     private static boolean isMySqlServer(String allInOneName) throws Exception {
@@ -370,7 +359,7 @@ public class DbUtils {
     }
 
     public static List<AbstractParameterHost> getSelectFieldHosts(String allInOneName, String sql,
-            ResultSetExtractor<List<AbstractParameterHost>> extractor) {
+            ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
         String testSql = sql;
         int whereIndex = StringUtils.indexOfIgnoreCase(testSql, "where");
         if (whereIndex > 0)
@@ -382,67 +371,70 @@ public class DbUtils {
                 testSql = testSql.replace("select", "select top(1)");
             }
             return query(allInOneName, testSql, null, extractor);
-        } catch (Exception e) {
-            log.error(String.format("get select field error: [allInOneName=%s;sql=%s;]", allInOneName, sql), e);
+        } catch (Throwable e) {
+            throw e;
         }
-        return new ArrayList<>();
     }
 
     public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql, final String params,
             final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
-        return execute(allInOneName, new ConnectionCallback<List<AbstractParameterHost>>() {
-            @Override
-            public List<AbstractParameterHost> doInConnection(Connection connection)
-                    throws SQLException, DataAccessException {
-                List<Parameter> list = new ArrayList<>();
-                String[] parameters = params.split(";");
-                if (parameters != null && parameters.length > 0) {
-                    for (String p : parameters) {
-                        if (p.isEmpty()) {
-                            continue;
+        try {
+            return execute(allInOneName, new ConnectionCallback<List<AbstractParameterHost>>() {
+                @Override
+                public List<AbstractParameterHost> doInConnection(Connection connection)
+                        throws SQLException, DataAccessException {
+                    List<Parameter> list = new ArrayList<>();
+                    String[] parameters = params.split(";");
+                    if (parameters != null && parameters.length > 0) {
+                        for (String p : parameters) {
+                            if (p.isEmpty()) {
+                                continue;
+                            }
+                            String[] tuple = p.split(",");
+                            if (tuple != null && tuple.length > 0) {
+                                Parameter parameter = new Parameter();
+                                parameter.setName(tuple[0]);
+                                parameter.setType(Integer.valueOf(tuple[1]));
+                                list.add(parameter);
+                            }
                         }
-                        String[] tuple = p.split(",");
-                        if (tuple != null && tuple.length > 0) {
-                            Parameter parameter = new Parameter();
-                            parameter.setName(tuple[0]);
-                            parameter.setType(Integer.valueOf(tuple[1]));
-                            list.add(parameter);
+                    }
+
+                    Matcher matcher = pattern.matcher(sql);
+                    // Match C# parameters
+                    if (matcher.find()) {
+                        list = getActualParameters(sql, list);
+                    }
+
+                    Matcher m = inRegxPattern.matcher(sql);
+                    String temp = sql;
+                    while (m.find()) {
+                        temp = temp.replace(m.group(1), String.format("(?) "));
+                    }
+                    String replacedSql = temp.replaceAll(expression, "?");
+                    PreparedStatement ps = connection.prepareStatement(replacedSql);
+                    int index = 0;
+                    for (Parameter parameter : list) {
+                        String name = parameter.getName();
+                        int type = parameter.getType();
+                        try {
+                            index = Integer.valueOf(name);
+                        } catch (NumberFormatException ex) {
+                            index++;
+                        }
+                        if (type == 10001) {
+                            ps.setObject(index, mockATest(type), Types.BINARY);
+                        } else {
+                            ps.setObject(index, mockATest(type), type);
                         }
                     }
+                    ResultSet rs = ps.executeQuery();
+                    return extractor.extractData(rs);
                 }
-
-                Matcher matcher = pattern.matcher(sql);
-                // Match C# parameters
-                if (matcher.find()) {
-                    list = getActualParameters(sql, list);
-                }
-
-                Matcher m = inRegxPattern.matcher(sql);
-                String temp = sql;
-                while (m.find()) {
-                    temp = temp.replace(m.group(1), String.format("(?) "));
-                }
-                String replacedSql = temp.replaceAll(expression, "?");
-                PreparedStatement ps = connection.prepareStatement(replacedSql);
-                int index = 0;
-                for (Parameter parameter : list) {
-                    String name = parameter.getName();
-                    int type = parameter.getType();
-                    try {
-                        index = Integer.valueOf(name);
-                    } catch (NumberFormatException ex) {
-                        index++;
-                    }
-                    if (type == 10001) {
-                        ps.setObject(index, mockATest(type), Types.BINARY);
-                    } else {
-                        ps.setObject(index, mockATest(type), type);
-                    }
-                }
-                ResultSet rs = ps.executeQuery();
-                return extractor.extractData(rs);
-            }
-        });
+            });
+        } catch (Throwable e) {
+            throw e;
+        }
     }
 
     private static final String expression = "[@:]\\w+";
@@ -526,18 +518,18 @@ public class DbUtils {
     public static DatabaseCategory getDatabaseCategory(String allInOneName) throws Exception {
         DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
         String dbType = getDbType(allInOneName);
-        if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server")) {
+        if (null != dbType && !dbType.equalsIgnoreCase("Microsoft SQL Server"))
             dbCategory = DatabaseCategory.MySql;
-        }
+
         return dbCategory;
     }
 
     public static Map<String, String> getSqlserverColumnComment(String allInOneName, String tableName)
             throws Exception {
         Map<String, String> map = new HashMap<>();
-        if (isMySqlServer(allInOneName)) {
+        if (isMySqlServer(allInOneName))
             return map;
-        }
+
         String sql = "" + "SELECT sys.columns.name as name, " + "       CONVERT(VARCHAR(1000), (SELECT VALUE "
                 + "                              FROM   sys.extended_properties "
                 + "                              WHERE  sys.extended_properties.major_id = sys.columns.object_id "
@@ -548,16 +540,12 @@ public class DbUtils {
             @Override
             public Map<String, String> extractData(ResultSet rs) throws SQLException {
                 Map<String, String> map = new HashMap<>();
-                while (rs.next())
+                while (rs.next()) {
                     map.put(rs.getString("name").toLowerCase(), rs.getString("description"));
+                }
                 return map;
             }
         });
-    }
-
-    private static void handleException(String msg, Exception e) throws Exception {
-        log.warn(msg == null ? e.getMessage() : msg, e);
-        throw e;
     }
 
 }

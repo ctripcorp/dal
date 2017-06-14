@@ -39,7 +39,8 @@ public class CSharpSpaOperationHost {
         this.methodName = methodName;
     }
 
-    public static CSharpSpaOperationHost getSpaOperation(String dbName, String tableName, List<StoredProcedure> spNames, String operation) {
+    public static CSharpSpaOperationHost getSpaOperation(String dbName, String tableName, List<StoredProcedure> spNames,
+            String operation) throws Exception {
         CSharpSpaOperationHost host = new CSharpSpaOperationHost();
 
         StoredProcedure expectSpa = new StoredProcedure();
@@ -62,7 +63,8 @@ public class CSharpSpaOperationHost {
         }
 
         if (host.exist) {
-            List<AbstractParameterHost> parameters = DbUtils.getSpParams(dbName, currentSp, new CsharpSpParamResultSetExtractor());
+            List<AbstractParameterHost> parameters =
+                    DbUtils.getSpParams(dbName, currentSp, new CsharpSpParamResultSetExtractor());
             List<CSharpParameterHost> realParams = new ArrayList<CSharpParameterHost>();
             for (AbstractParameterHost _host : parameters) {
                 realParams.add((CSharpParameterHost) _host);

@@ -24,29 +24,21 @@ public class CustomizedResource {
 
     private final String CONFIG_CLASS_NAME = "config_class";
 
-    private CustomizedResource() {
+    private CustomizedResource() throws Exception {
         try {
             classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
                 classLoader = Configuration.class.getClassLoader();
             }
             userInfo = getUserInfo();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoClassDefFoundError e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            throw e;
         }
     }
 
     private static CustomizedResource INSTANCE = null;
 
-    public static CustomizedResource getInstance() {
+    public static CustomizedResource getInstance() throws Exception {
         if (INSTANCE == null) {
             synchronized (LOCK) {
                 if (INSTANCE == null) {
@@ -70,46 +62,49 @@ public class CustomizedResource {
     }
 
     public boolean isDefaultInstanceByRequest(HttpServletRequest request) {
-        Boolean result = RequestUtil.isDefaultUser(request);
-        if (result != null) {
-            return result.booleanValue();
-        }
+        try {
+            Boolean result = RequestUtil.isDefaultUser(request);
+            if (result != null)
+                return result.booleanValue();
 
-        boolean value = isDefaultInstance();
-        HttpSession session = RequestUtil.getSession(request);
-        session.setAttribute(Consts.DEFAULT_USER, value);
-        return value;
+            boolean value = isDefaultInstance();
+            HttpSession session = RequestUtil.getSession(request);
+            session.setAttribute(Consts.DEFAULT_USER, value);
+            return value;
+        } catch (Throwable e) {
+            throw e;
+        }
     }
 
     public String getEmployee(String userNo) {
-        if (userNo == null || userNo.isEmpty()) {
+        if (userNo == null || userNo.isEmpty())
             return userInfo.getEmployee(userNo);
-        }
         return DefaultUserInfo.getInstance().getEmployee(userNo);
     }
 
     public String getName(String userNo) {
-        if (userNo == null || userNo.isEmpty()) {
+        if (userNo == null || userNo.isEmpty())
             return userInfo.getName(userNo);
-        }
         return DefaultUserInfo.getInstance().getName(userNo);
     }
 
     public String getMail(String userNo) {
-        if (userNo == null || userNo.isEmpty()) {
+        if (userNo == null || userNo.isEmpty())
             return userInfo.getMail(userNo);
-        }
         return DefaultUserInfo.getInstance().getMail(userNo);
     }
 
-    private UserInfo getUserInfo() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private UserInfo getUserInfo() throws Exception {
         String className = getUserInfoClassName();
-        if (className == null || className.isEmpty()) {
+        if (className == null || className.isEmpty())
             return DefaultUserInfo.getInstance(); // set to default
-        }
 
-        Class<?> clazz = Class.forName(className);
-        return (UserInfo) clazz.newInstance();
+        try {
+            Class<?> clazz = Class.forName(className);
+            return (UserInfo) clazz.newInstance();
+        } catch (Throwable e) {
+            throw e;
+        }
     }
 
     private String getUserInfoClassName() throws IOException {
@@ -121,13 +116,17 @@ public class CustomizedResource {
     }
 
     private String getClassNameFromConf(String className) throws IOException {
-        if (className == null || className.isEmpty()) {
+        if (className == null || className.isEmpty())
             return null;
+
+        try {
+            Properties properties = new Properties();
+            InputStream inStream = classLoader.getResourceAsStream(CONF_PROPERTIES);
+            properties.load(inStream);
+            return properties.getProperty(className);
+        } catch (Throwable e) {
+            throw e;
         }
-        Properties properties = new Properties();
-        InputStream inStream = classLoader.getResourceAsStream(CONF_PROPERTIES);
-        properties.load(inStream);
-        return properties.getProperty(className);
     }
 
     public void logOut(HttpServletRequest request, HttpServletResponse response) {

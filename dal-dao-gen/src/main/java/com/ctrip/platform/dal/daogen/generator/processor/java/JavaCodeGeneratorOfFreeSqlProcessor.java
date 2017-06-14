@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.log4j.Logger;
@@ -23,11 +24,16 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
     private static Logger log = Logger.getLogger(JavaCodeGeneratorOfFreeSqlProcessor.class);
 
     public void process(CodeGenContext context) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
-        int projectId = ctx.getProjectId();
-        File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
-        List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(ctx, dir);
-        TaskUtils.invokeBatch(log, freeCallables);
+        try {
+            JavaCodeGenContext ctx = (JavaCodeGenContext) context;
+            int projectId = ctx.getProjectId();
+            File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
+            List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(ctx, dir);
+            TaskUtils.invokeBatch(log, freeCallables);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     private List<Callable<ExecuteResult>> generateFreeSqlDao(CodeGenContext codeGenCtx, final File mavenLikeDir) {
@@ -46,7 +52,9 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
                     try {
                         VelocityContext context = GenUtils.buildDefaultVelocityContext();
                         context.put("host", host);
-                        GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
+                        GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
+                                mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+                                "templates/java/Pojo.java.tpl");
                         result.setSuccessal(true);
                     } catch (Exception e) {
                         log.error(result.getTaskName() + " exception", e);
@@ -63,13 +71,18 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
 
                 @Override
                 public ExecuteResult call() throws Exception {
-                    ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
+                    ExecuteResult result =
+                            new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
                     progress.setOtherMessage(result.getTaskName());
                     try {
                         VelocityContext context = GenUtils.buildDefaultVelocityContext();
                         context.put("host", host);
-                        GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/dao/freesql/FreeSqlDAO.java.tpl");
-                        GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getClassName()), "templates/java/test/FreeSqlDaoUnitTest.java.tpl");
+                        GenUtils.mergeVelocityContext(context,
+                                String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getClassName()),
+                                "templates/java/dao/freesql/FreeSqlDAO.java.tpl");
+                        GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoUnitTest.java",
+                                mavenLikeDir.getAbsolutePath(), host.getClassName()),
+                                "templates/java/test/FreeSqlDaoUnitTest.java.tpl");
 
                         result.setSuccessal(true);
                     } catch (Exception e) {

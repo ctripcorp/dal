@@ -17,10 +17,10 @@ public class DatabaseSetUtils {
             return databaseSetDBNameCache.get(databaseSetName);
         } else {
             try {
-                String dbName = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(databaseSetName).getConnectionString();
-                if (null != dbName) {
+                String dbName = SpringBeanGetter.getDaoOfDatabaseSet()
+                        .getMasterDatabaseSetEntryByDatabaseSetName(databaseSetName).getConnectionString();
+                if (null != dbName)
                     databaseSetDBNameCache.put(databaseSetName, dbName);
-                }
                 return dbName;
             } catch (Exception e) {
                 return databaseSetName;
@@ -29,7 +29,8 @@ public class DatabaseSetUtils {
     }
 
     public static String getAllInOneName(String db_set_name) {
-        DatabaseSetEntry databaseSetEntry = SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+        DatabaseSetEntry databaseSetEntry =
+                SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
         if (null != databaseSetEntry) {
             return databaseSetEntry.getConnectionString();
         } else {

@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 
@@ -26,13 +25,13 @@ public class SetupDBDao {
             String[] array = sqlScript.split(";"); // toUpperCase().
             jdbcTemplate.batchUpdate(array);
             result = true;
-        } catch (DataAccessException e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            throw e;
         }
         return result;
     }
 
-    public Set<String> getCatalogTableNames(String catalog) {
+    public Set<String> getCatalogTableNames(String catalog) throws Exception {
         Set<String> set = new HashSet<>();
         ResultSet resultSet = null;
 
@@ -50,8 +49,8 @@ public class SetupDBDao {
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            throw e;
         } finally {
             JdbcUtils.closeResultSet(resultSet);
         }

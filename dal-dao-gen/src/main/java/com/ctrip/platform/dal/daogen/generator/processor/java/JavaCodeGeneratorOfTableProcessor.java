@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.log4j.Logger;
@@ -22,11 +23,16 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
-        int projectId = ctx.getProjectId();
-        File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
-        List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
-        TaskUtils.invokeBatch(log, tableCallables);
+        try {
+            JavaCodeGenContext ctx = (JavaCodeGenContext) context;
+            int projectId = ctx.getProjectId();
+            File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
+            List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
+            TaskUtils.invokeBatch(log, tableCallables);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     private List<Callable<ExecuteResult>> generateTableDao(CodeGenContext codeGenCtx, final File mavenLikeDir) {
@@ -40,15 +46,22 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
 
                 @Override
                 public ExecuteResult call() throws Exception {
-                    ExecuteResult result = new ExecuteResult("Generate Table[" + host.getDbSetName() + "." + host.getTableName() + "] Dao, Pojo, Test");
+                    ExecuteResult result = new ExecuteResult(
+                            "Generate Table[" + host.getDbSetName() + "." + host.getTableName() + "] Dao, Pojo, Test");
                     progress.setOtherMessage(result.getTaskName());
                     try {
                         VelocityContext context = GenUtils.buildDefaultVelocityContext();
                         context.put("host", host);
 
-                        GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/dao/standard/DAO.java.tpl");
-                        GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/Pojo.java.tpl");
-                        GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoUnitTest.java", mavenLikeDir.getAbsolutePath(), host.getPojoClassName()), "templates/java/test/DaoUnitTests.java.tpl");
+                        GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
+                                mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+                                "templates/java/dao/standard/DAO.java.tpl");
+                        GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
+                                mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+                                "templates/java/Pojo.java.tpl");
+                        GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoUnitTest.java",
+                                mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
+                                "templates/java/test/DaoUnitTests.java.tpl");
 
                         result.setSuccessal(true);
                     } catch (Exception e) {

@@ -33,6 +33,7 @@ public class VelocityHelper {
             return "BigDecimal.ZERO";
         else if (host.getJavaClass().equals(Date.class))
             return "Date.valueOf(\"2014-6-19\")";
-        else return "null";
+        else
+            return "null";
     }
 }

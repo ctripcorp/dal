@@ -6,17 +6,16 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.processor.csharp.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CSharpDalGenerator implements DalGenerator {
-    private Logger log = Logger.getLogger(CSharpDalGenerator.class);
-
     @Override
-    public CodeGenContext createContext(int projectId, boolean regenerate, Progress progress, boolean newPojo, boolean ignoreApproveStatus) throws Exception {
+    public CodeGenContext createContext(int projectId, boolean regenerate, Progress progress, boolean newPojo,
+            boolean ignoreApproveStatus) throws Exception {
         CSharpCodeGenContext ctx = null;
         try {
             Map<String, Boolean> hints = new HashMap<>();
@@ -35,7 +34,7 @@ public class CSharpDalGenerator implements DalGenerator {
             ctx.setDalConfigHost(dalConfigHost);
             ctx.setNamespace(project.getNamespace());
         } catch (Exception e) {
-            log.warn("exception occur when createContext", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
         return ctx;
@@ -46,7 +45,7 @@ public class CSharpDalGenerator implements DalGenerator {
         try {
             new CSharpDirectoryPreparerProcessor().process(codeGenCtx);
         } catch (Exception e) {
-            log.warn("exception occur when prepareDirectory", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }
@@ -58,7 +57,7 @@ public class CSharpDalGenerator implements DalGenerator {
             new CSharpDataPreparerOfTableViewSpProcessor().process(codeGenCtx);
             new CSharpDataPreparerOfSqlBuilderProcessor().process(codeGenCtx);
         } catch (Exception e) {
-            log.warn("exception occur when prepareData", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }
@@ -71,7 +70,7 @@ public class CSharpDalGenerator implements DalGenerator {
             new CSharpCodeGeneratorOfFreeSqlProcessor().process(codeGenCtx);
             new CSharpCodeGeneratorOfOthersProcessor().process(codeGenCtx);
         } catch (Exception e) {
-            log.warn("exception occur when generateCode", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

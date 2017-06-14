@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.log4j.Logger;
@@ -22,8 +23,13 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-        List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
-        TaskUtils.invokeBatch(log, _sqlBuilderCallables);
+        try {
+            List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
+            TaskUtils.invokeBatch(log, _sqlBuilderCallables);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext codeGenCtx) {
@@ -40,9 +46,11 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 
                     @Override
                     public ExecuteResult call() throws Exception {
-                        /*progress.setOtherMessage("正在整理表 "
-                                + _table.getValue().getClass_name());*/
-                        ExecuteResult result = new ExecuteResult("Build Extral SQL[" + _table.getValue().getAllInOneName() + "." + _table.getKey() + "] Host");
+                        /*
+                         * progress.setOtherMessage("正在整理表 " + _table.getValue().getClass_name());
+                         */
+                        ExecuteResult result = new ExecuteResult("Build Extral SQL["
+                                + _table.getValue().getAllInOneName() + "." + _table.getKey() + "] Host");
                         progress.setOtherMessage(result.getTaskName());
                         CSharpTableHost extraTableHost;
                         try {
@@ -76,7 +84,8 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
         return groupBy;
     }
 
-    private CSharpTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder) throws Exception {
+    private CSharpTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)
+            throws Exception {
         GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
         tableViewSp.setCud_by_sp(false);
         tableViewSp.setPagination(false);

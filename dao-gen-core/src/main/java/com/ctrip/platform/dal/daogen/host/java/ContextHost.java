@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContextHost {
-    //<Resource name, Resource>
+    // <Resource name, Resource>
     private Map<String, Resource> resources = new HashMap<>();
 
     private String docBase = "";

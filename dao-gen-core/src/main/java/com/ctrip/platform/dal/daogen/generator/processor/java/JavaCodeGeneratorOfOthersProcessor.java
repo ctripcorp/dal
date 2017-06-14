@@ -17,9 +17,11 @@ public class JavaCodeGeneratorOfOthersProcessor implements DalProcessor {
 
         VelocityContext vltCcontext = GenUtils.buildDefaultVelocityContext();
         vltCcontext.put("host", ctx.getDalConfigHost());
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/dal.xml", dir.getAbsolutePath()), "templates/java/Dal.config.java.tpl");
+        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/dal.xml", dir.getAbsolutePath()),
+                "templates/java/Dal.config.java.tpl");
 
         vltCcontext.put("host", ctx.getContextHost());
-        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/datasource.xml", dir.getAbsolutePath()), "templates/java/DataSource.java.tpl");
+        GenUtils.mergeVelocityContext(vltCcontext, String.format("%s/datasource.xml", dir.getAbsolutePath()),
+                "templates/java/DataSource.java.tpl");
     }
 }

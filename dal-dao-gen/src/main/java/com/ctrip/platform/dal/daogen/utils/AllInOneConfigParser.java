@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -15,7 +16,8 @@ public class AllInOneConfigParser {
 
     private static final Logger log = Logger.getLogger(AllInOneConfigParser.class);
     private static final Pattern dbLinePattern = Pattern.compile(" name=\"([^\"]+)\" connectionString=\"([^\"]+)\"");
-    private static final Pattern dburlPattern = Pattern.compile("(data\\ssource|server|address|addr|network)=([^;]+)", 2);
+    private static final Pattern dburlPattern =
+            Pattern.compile("(data\\ssource|server|address|addr|network)=([^;]+)", 2);
     private static final Pattern dbuserPattern = Pattern.compile("(uid|user\\sid)=([^;]+)", 2);
     private static final Pattern dbpasswdPattern = Pattern.compile("(password|pwd)=([^;]+)", 2);
     private static final Pattern dbnamePattern = Pattern.compile("(database|initial\\scatalog)=([^;]+)", 2);
@@ -24,7 +26,7 @@ public class AllInOneConfigParser {
     private static final Pattern dbportPattern = Pattern.compile("(port)=([^;]+)", 2);
     private ConcurrentHashMap<String, DalGroupDB> allDbs = new ConcurrentHashMap<>();
 
-    public AllInOneConfigParser(String configFilePath) {
+    public AllInOneConfigParser(String configFilePath) throws Exception {
         BufferedReader br = null;
         try {
             if (null != configFilePath && new File(configFilePath).exists()) {
@@ -50,10 +52,9 @@ public class AllInOneConfigParser {
                 }
             }
             return;
-        } catch (IOException e) {
-            log.error("Read db config file error, msg:" + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Init db config props error, msg:" + e.getMessage(), e);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         } finally {
             if (br != null) {
                 try {
@@ -110,15 +111,6 @@ public class AllInOneConfigParser {
             log.error(e.getMessage(), e);
         }
         return db;
-    }
-
-    public static void main(String[] args) {
-        Configuration.addResource("conf.properties");
-        Map<String, DalGroupDB> allDbs = new AllInOneConfigParser(Configuration.get("all_in_one")).getDBAllInOneConfig();
-        Set<String> keys = allDbs.keySet();
-        for (String key : keys) {
-            System.out.println(allDbs.get(key));
-        }
     }
 
 }

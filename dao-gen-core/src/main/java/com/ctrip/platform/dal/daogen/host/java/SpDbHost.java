@@ -13,7 +13,7 @@ public class SpDbHost {
     private DatabaseCategory databaseCategory;
     private String packageName;
     private String dbSetName;
-    //<SpHost spName, SpHost>
+    // <SpHost spName, SpHost>
     private HashMap<String, SpHost> spHosts;
 
     public SpDbHost(String dbSetName, String packageName) throws Exception {

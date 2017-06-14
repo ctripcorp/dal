@@ -6,14 +6,13 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.processor.java.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import org.apache.log4j.Logger;
 
 public class JavaDalGenerator implements DalGenerator {
-    private Logger log = Logger.getLogger(JavaDalGenerator.class);
-
     @Override
-    public CodeGenContext createContext(int projectId, boolean regenerate, Progress progress, boolean newPojo, boolean ignoreApproveStatus) throws Exception {
+    public CodeGenContext createContext(int projectId, boolean regenerate, Progress progress, boolean newPojo,
+            boolean ignoreApproveStatus) throws Exception {
         JavaCodeGenContext ctx = null;
         try {
             ctx = new JavaCodeGenContext(projectId, regenerate, progress);
@@ -29,7 +28,7 @@ public class JavaDalGenerator implements DalGenerator {
             ctx.setDalConfigHost(dalConfigHost);
             ctx.setNamespace(project.getNamespace());
         } catch (Exception e) {
-            log.warn("exception occur when createContext", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
         return ctx;
@@ -40,7 +39,7 @@ public class JavaDalGenerator implements DalGenerator {
         try {
             new JavaDirectoryPreparerProcessor().process(codeGenCtx);
         } catch (Exception e) {
-            log.warn("exception occur when prepareDirectory", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }
@@ -52,7 +51,7 @@ public class JavaDalGenerator implements DalGenerator {
             new JavaDataPreparerOfTableViewSpProcessor().process(codeGenCtx);
             new JavaDataPreparerOfSqlBuilderProcessor().process(codeGenCtx);
         } catch (Exception e) {
-            log.warn("exception occur when prepareData", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }
@@ -66,7 +65,7 @@ public class JavaDalGenerator implements DalGenerator {
             new JavaCodeGeneratorOfFreeSqlProcessor().process(codeGenCtx);
             new JavaCodeGeneratorOfOthersProcessor().process(codeGenCtx);
         } catch (Exception e) {
-            log.warn("exception occur when generateCode", e);
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

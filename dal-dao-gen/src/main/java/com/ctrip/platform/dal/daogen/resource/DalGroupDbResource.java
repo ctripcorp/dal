@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.resource;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -32,17 +33,23 @@ public class DalGroupDbResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
-        List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
+    public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root)
+            throws Exception {
+        try {
+            List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
-        for (DalGroup group : groups) {
-            group.setText(group.getGroup_name());
-            group.setIcon("glyphicon glyphicon-folder-close");
-            group.setChildren(false);
+            for (DalGroup group : groups) {
+                group.setText(group.getGroup_name());
+                group.setIcon("glyphicon glyphicon-folder-close");
+                group.setChildren(false);
+            }
+
+            String userNo = RequestUtil.getUserNo(request);
+            return sortGroups(groups, userNo);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         }
-
-        String userNo = RequestUtil.getUserNo(request);
-        return sortGroups(groups, userNo);
     }
 
     private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
@@ -69,15 +76,16 @@ public class DalGroupDbResource {
     @Path("groupdb")
     @Produces(MediaType.APPLICATION_JSON)
     public List<DalGroupDB> getGroupUsers(@QueryParam("groupId") String id) {
-        int groupId = -1;
         try {
+            int groupId = -1;
             groupId = Integer.parseInt(id);
-        } catch (NumberFormatException ex) {
-            log.error("get Group Users failed", ex);
-            return null;
+
+            List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
+            return dbs;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         }
-        List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
-        return dbs;
     }
 
     @GET
@@ -110,192 +118,192 @@ public class DalGroupDbResource {
     @Path("add")
     public Status add(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
             @FormParam("dbname") String dbname, @FormParam("comment") String comment,
-            @FormParam("gen_default_dbset") boolean gen_default_dbset) {
-        String userNo = RequestUtil.getUserNo(request);
-
-        if (userNo == null || groupId == null || dbname == null) {
-            log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbname=%s]",
-                    groupId, dbname));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        int groupID = -1;
+            @FormParam("gen_default_dbset") boolean gen_default_dbset) throws Exception {
         try {
-            groupID = Integer.parseInt(groupId);
-        } catch (NumberFormatException ex) {
-            log.error("Add dal team database failed", ex);
-            Status status = Status.ERROR;
-            status.setInfo("Illegal group id");
-            return status;
-        }
+            String userNo = RequestUtil.getUserNo(request);
 
-        if (!this.validatePermision(userNo, groupID)) {
-            Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限。");
-            return status;
-        }
-
-        DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
-        if (null != groupdb && groupdb.getDal_group_id() > 0) {
-            DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
-            Status status = Status.ERROR;
-            status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
-            return status;
-        }
-
-        int ret = -1;
-        if (null != groupdb) {
-            ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);
-            SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
-        } else {
-            Status status = Status.ERROR;
-            status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB。");
-            return status;
-        }
-        if (ret <= 0) {
-            log.error("Add dal group db failed, caused by db operation failed, pls check the log.");
-            Status status = Status.ERROR;
-            status.setInfo("Add operation failed.");
-            return status;
-        }
-
-        if (gen_default_dbset) {
-            Status status = genDefaultDbset(groupID, dbname, null);
-            if (status == Status.ERROR) {
+            if (userNo == null || groupId == null || dbname == null) {
+                log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbname=%s]",
+                        groupId, dbname));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
                 return status;
             }
-        }
 
-        return Status.OK;
+            int groupID = -1;
+            groupID = Integer.parseInt(groupId);
+
+            if (!this.validatePermision(userNo, groupID)) {
+                Status status = Status.ERROR;
+                status.setInfo("你没有当前DAL Team的操作权限。");
+                return status;
+            }
+
+            DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
+            if (null != groupdb && groupdb.getDal_group_id() > 0) {
+                DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
+                Status status = Status.ERROR;
+                status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
+                return status;
+            }
+
+            int ret = -1;
+            if (null != groupdb) {
+                ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);
+                SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
+            } else {
+                Status status = Status.ERROR;
+                status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB。");
+                return status;
+            }
+            if (ret <= 0) {
+                log.error("Add dal group db failed, caused by db operation failed, pls check the log.");
+                Status status = Status.ERROR;
+                status.setInfo("Add operation failed.");
+                return status;
+            }
+
+            if (gen_default_dbset) {
+                Status status = genDefaultDbset(groupID, dbname, null);
+                if (status == Status.ERROR) {
+                    return status;
+                }
+            }
+
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR;
+            status.setInfo(e.getMessage());
+            return status;
+        }
     }
 
     @POST
     @Path("update")
     public Status update(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbId") String dbId, @FormParam("comment") String comment) {
-        String userNo = RequestUtil.getUserNo(request);
-
-        if (userNo == null || groupId == null || dbId == null) {
-            log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
-                    groupId, dbId));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        int groupID = -1;
-        int dbID = -1;
+            @FormParam("dbId") String dbId, @FormParam("comment") String comment) throws Exception {
         try {
+            String userNo = RequestUtil.getUserNo(request);
+
+            if (userNo == null || groupId == null || dbId == null) {
+                log.error(String.format("Add member failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+                        groupId, dbId));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            int groupID = -1;
+            int dbID = -1;
             dbID = Integer.parseInt(dbId);
             groupID = Integer.parseInt(groupId);
-        } catch (NumberFormatException ex) {
-            log.error("Update failed", ex);
+
+            if (!this.validatePermision(userNo, groupID)) {
+                Status status = Status.ERROR;
+                status.setInfo("你没有当前DAL Team的操作权限。");
+                return status;
+            }
+
+            int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, comment);
+            if (ret <= 0) {
+                log.error("Update dal group db failed, caused by db operation failed, pls check the spring log");
+                Status status = Status.ERROR;
+                status.setInfo("Update operation failed.");
+                return status;
+            }
+
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
-            status.setInfo("Illegal group id");
+            status.setInfo(e.getMessage());
             return status;
         }
-
-        if (!this.validatePermision(userNo, groupID)) {
-            Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限。");
-            return status;
-        }
-
-        int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, comment);
-        if (ret <= 0) {
-            log.error("Update dal group db failed, caused by db operation failed, pls check the spring log");
-            Status status = Status.ERROR;
-            status.setInfo("Update operation failed.");
-            return status;
-        }
-
-        return Status.OK;
     }
 
     @POST
     @Path("delete")
     public Status delete(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbId") String dbId) {
-        String userNo = RequestUtil.getUserNo(request);
-
-        if (userNo == null || groupId == null || dbId == null) {
-            log.error(String.format("Delete db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
-                    groupId, dbId));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        int groupID = -1;
-        int dbID = -1;
+            @FormParam("dbId") String dbId) throws Exception {
         try {
+            String userNo = RequestUtil.getUserNo(request);
+
+            if (userNo == null || groupId == null || dbId == null) {
+                log.error(String.format("Delete db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+                        groupId, dbId));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            int groupID = -1;
+            int dbID = -1;
             groupID = Integer.parseInt(groupId);
             dbID = Integer.parseInt(dbId);
-        } catch (NumberFormatException ex) {
-            log.error("Delete db failed", ex);
-            Status status = Status.ERROR;
-            status.setInfo("Illegal group id");
-            return status;
-        }
 
-        if (!this.validatePermision(userNo, groupID)) {
-            Status status = Status.ERROR;
-            status.setInfo("你没有当前DAL Team的操作权限。");
-            return status;
-        }
+            if (!this.validatePermision(userNo, groupID)) {
+                Status status = Status.ERROR;
+                status.setInfo("你没有当前DAL Team的操作权限。");
+                return status;
+            }
 
-        int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, -1);
-        if (ret <= 0) {
-            log.error("Delete db failed, caused by db operation failed, pls check the spring log");
+            int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, -1);
+            if (ret <= 0) {
+                log.error("Delete db failed, caused by db operation failed, pls check the spring log");
+                Status status = Status.ERROR;
+                status.setInfo("Delete operation failed.");
+                return status;
+            }
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
-            status.setInfo("Delete operation failed.");
+            status.setInfo(e.getMessage());
             return status;
         }
-        return Status.OK;
     }
 
     @POST
     @Path("transferdb")
     public Status transferdb(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbId") String dbId) {
-        String userNo = RequestUtil.getUserNo(request);
-
-        if (userNo == null || groupId == null || dbId == null) {
-            log.error(String.format("transfer db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
-                    groupId, dbId));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        int groupID = -1;
-        int dbID = -1;
+            @FormParam("dbId") String dbId) throws Exception {
         try {
+            String userNo = RequestUtil.getUserNo(request);
+
+            if (userNo == null || groupId == null || dbId == null) {
+                log.error(String.format("transfer db failed, caused by illegal parameters: " + "[groupId=%s, dbId=%s]",
+                        groupId, dbId));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            int groupID = -1;
+            int dbID = -1;
             groupID = Integer.parseInt(groupId);
             dbID = Integer.parseInt(dbId);
-        } catch (NumberFormatException ex) {
-            log.error("transfer db failed", ex);
-            Status status = Status.ERROR;
-            status.setInfo("Illegal group id or db id");
-            return status;
-        }
 
-        if (!this.validateTransferPermision(userNo, dbID)) {
-            Status status = Status.ERROR;
-            status.setInfo("你没有当前DataBase的操作权限。");
-            return status;
-        }
+            if (!this.validateTransferPermision(userNo, dbID)) {
+                Status status = Status.ERROR;
+                status.setInfo("你没有当前DataBase的操作权限。");
+                return status;
+            }
 
-        int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, groupID);
-        if (ret <= 0) {
-            log.error("transfer db failed, caused by db operation failed, pls check the spring log");
+            int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, groupID);
+            if (ret <= 0) {
+                log.error("transfer db failed, caused by db operation failed, pls check the spring log");
+                Status status = Status.ERROR;
+                status.setInfo("transfer operation failed.");
+                return status;
+            }
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
-            status.setInfo("transfer operation failed.");
+            status.setInfo(e.getMessage());
             return status;
         }
-        return Status.OK;
     }
 
     private boolean validatePermision(String userNo, int groupId) {
@@ -339,7 +347,7 @@ public class DalGroupDbResource {
      *
      * @param dbname
      */
-    public static Status genDefaultDbset(int groupId, String dbname, String dbProvider) {
+    public static Status genDefaultDbset(int groupId, String dbname, String dbProvider) throws Exception {
         Status status = Status.OK;
         List<DatabaseSet> exist = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
@@ -365,8 +373,9 @@ public class DalGroupDbResource {
             if (dbType != null && (!dbType.equals("Microsoft SQL Server"))) {
                 dbset.setProvider("mySqlProvider");
             }
-        } catch (Exception e) {
-            log.warn("", e);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         }
 
         dbset.setGroupId(groupId);

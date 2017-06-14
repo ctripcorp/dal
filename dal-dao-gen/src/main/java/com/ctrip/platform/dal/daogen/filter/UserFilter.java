@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.filter;
 
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.resource.CustomizedResource;
 import com.ctrip.platform.dal.daogen.resource.SetupDBResource;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
@@ -13,11 +14,11 @@ import java.io.IOException;
 
 public class UserFilter implements Filter {
     @Override
-    public void destroy() {
-    }
+    public void destroy() {}
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         try {
             HttpSession session = RequestUtil.getSession(request);
             Object userInfo = session.getAttribute(Consts.USER_INFO);
@@ -40,14 +41,13 @@ public class UserFilter implements Filter {
                 }
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            LoggerManager.getInstance().error(e);
         } finally {
             chain.doFilter(request, response);
         }
     }
 
     @Override
-    public void init(FilterConfig arg0) throws ServletException {
-    }
+    public void init(FilterConfig arg0) throws ServletException {}
 
 }

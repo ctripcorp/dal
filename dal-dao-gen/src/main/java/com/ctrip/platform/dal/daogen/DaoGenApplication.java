@@ -9,7 +9,7 @@ import javax.ws.rs.ApplicationPath;
 
 @ApplicationPath("/rest")
 public class DaoGenApplication extends ResourceConfig {
-    public DaoGenApplication() {
+    public DaoGenApplication() throws Exception {
         // 将与ProjectResource同Package的所有Class均注册为Jersey的Resource
         packages(ProjectResource.class.getPackage().getName());
         this.register(EntityFilteringFeature.class);
@@ -17,7 +17,5 @@ public class DaoGenApplication extends ResourceConfig {
         Configuration.addResource("conf.properties");
 
     }
-
-    public static void main(String[] args) {}
 
 }

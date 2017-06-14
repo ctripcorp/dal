@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
@@ -47,104 +48,125 @@ public class DalUserResource {
     @Path("get")
     @Produces(MediaType.APPLICATION_JSON)
     public List<LoginUser> getAllUsers() {
-        List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
-        return users;
+        try {
+            List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
+            return users;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @POST
     @Path("add")
-    public Status addUser(@FormParam("userNo") String userNo, @FormParam("userName") String userName, @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
-        if (userNo == null) {
-            log.error(String.format("Add user failed, caused by illegal parameters:userNo=%s", userNo));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        if (userName == null) {
-            log.error(String.format("Add user failed, caused by illegal parameters:userName=%s", userName));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        if (userEmail == null) {
-            log.error(String.format("Add user failed, caused by illegal parameters:userEmail=%s", userEmail));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        password = MD5Util.parseStrToMd5L32(password);
-        LoginUser user = new LoginUser();
-        user.setUserNo(userNo);
-        user.setUserName(userName);
-        user.setUserEmail(userEmail);
-        user.setPassword(password);
-
+    public Status addUser(@FormParam("userNo") String userNo, @FormParam("userName") String userName,
+            @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
         try {
-            int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
-            if (result < 1) {
-                log.error("Add user failed, caused by db operation failed, pls check the log.");
+            if (userNo == null) {
+                log.error(String.format("Add user failed, caused by illegal parameters:userNo=%s", userNo));
                 Status status = Status.ERROR;
-                status.setInfo("Add operation failed.");
+                status.setInfo("Illegal parameters.");
                 return status;
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
+
+            if (userName == null) {
+                log.error(String.format("Add user failed, caused by illegal parameters:userName=%s", userName));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            if (userEmail == null) {
+                log.error(String.format("Add user failed, caused by illegal parameters:userEmail=%s", userEmail));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            password = MD5Util.parseStrToMd5L32(password);
+            LoginUser user = new LoginUser();
+            user.setUserNo(userNo);
+            user.setUserName(userName);
+            user.setUserEmail(userEmail);
+            user.setPassword(password);
+
+            try {
+                int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                if (result < 1) {
+                    log.error("Add user failed, caused by db operation failed, pls check the log.");
+                    Status status = Status.ERROR;
+                    status.setInfo("Add operation failed.");
+                    return status;
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                Status status = Status.ERROR;
+                status.setInfo(e.getMessage());
+                return status;
+            }
+
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
             status.setInfo(e.getMessage());
             return status;
         }
-
-        return Status.OK;
     }
 
     @POST
     @Path("update")
-    public Status update(@FormParam("userId") int userId, @FormParam("userNo") String userNo, @FormParam("userName") String userName, @FormParam("userEmail") String userEmail) {
-        if (userNo == null) {
-            log.error(String.format("Update user failed, caused by illegal parameters:userNo=%s", userNo));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        if (userName == null) {
-            log.error(String.format("Update user failed, caused by illegal parameters:userName=%s", userName));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        if (userEmail == null) {
-            log.error(String.format("Update user failed, caused by illegal parameters:userEmail=%s", userEmail));
-            Status status = Status.ERROR;
-            status.setInfo("Illegal parameters.");
-            return status;
-        }
-
-        LoginUser user = new LoginUser();
-        user.setId(userId);
-        user.setUserNo(userNo);
-        user.setUserName(userName);
-        user.setUserEmail(userEmail);
+    public Status update(@FormParam("userId") int userId, @FormParam("userNo") String userNo,
+            @FormParam("userName") String userName, @FormParam("userEmail") String userEmail) {
         try {
-            int result = SpringBeanGetter.getDaoOfLoginUser().updateUser(user);
-            if (result < 1) {
-                log.error("Update user failed, caused by db operation failed, pls check the log.");
+            if (userNo == null) {
+                log.error(String.format("Update user failed, caused by illegal parameters:userNo=%s", userNo));
                 Status status = Status.ERROR;
-                status.setInfo("Update operation failed.");
+                status.setInfo("Illegal parameters.");
                 return status;
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
+
+            if (userName == null) {
+                log.error(String.format("Update user failed, caused by illegal parameters:userName=%s", userName));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            if (userEmail == null) {
+                log.error(String.format("Update user failed, caused by illegal parameters:userEmail=%s", userEmail));
+                Status status = Status.ERROR;
+                status.setInfo("Illegal parameters.");
+                return status;
+            }
+
+            LoginUser user = new LoginUser();
+            user.setId(userId);
+            user.setUserNo(userNo);
+            user.setUserName(userName);
+            user.setUserEmail(userEmail);
+            try {
+                int result = SpringBeanGetter.getDaoOfLoginUser().updateUser(user);
+                if (result < 1) {
+                    log.error("Update user failed, caused by db operation failed, pls check the log.");
+                    Status status = Status.ERROR;
+                    status.setInfo("Update operation failed.");
+                    return status;
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                Status status = Status.ERROR;
+                status.setInfo(e.getMessage());
+                return status;
+            }
+
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
             status.setInfo(e.getMessage());
             return status;
         }
-
-        return Status.OK;
     }
 
     @POST
@@ -158,8 +180,8 @@ public class DalUserResource {
                 status.setInfo("Delete operation failed.");
                 return status;
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
             status.setInfo(e.getMessage());
             return status;
@@ -170,35 +192,43 @@ public class DalUserResource {
 
     @POST
     @Path("signin")
-    public Status userSignIn(@Context HttpServletRequest request, @FormParam("userNo") String userNo, @FormParam("password") String password) {
-        Status status = Status.ERROR;
-        if (userNo == null || userNo.isEmpty()) {
-            status.setInfo(userNumberNullMessage);
-            return status;
-        }
-
-        if (password == null || password.isEmpty()) {
-            status.setInfo(passwordNullMessage);
-            return status;
-        }
-
+    public Status userSignIn(@Context HttpServletRequest request, @FormParam("userNo") String userNo,
+            @FormParam("password") String password) {
         try {
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-            if (user != null) {
-                String pw = user.getPassword();
-                if (pw != null && pw.equals(MD5Util.parseStrToMd5L32(password))) {
-                    status = Status.OK;
-                    setSession(request, user);
-                    return status;
-                }
+            Status status = Status.ERROR;
+            if (userNo == null || userNo.isEmpty()) {
+                status.setInfo(userNumberNullMessage);
+                return status;
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            status.setInfo(e.getMessage());
-        }
 
-        status.setInfo(loginFailMessage);
-        return status;
+            if (password == null || password.isEmpty()) {
+                status.setInfo(passwordNullMessage);
+                return status;
+            }
+
+            try {
+                LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                if (user != null) {
+                    String pw = user.getPassword();
+                    if (pw != null && pw.equals(MD5Util.parseStrToMd5L32(password))) {
+                        status = Status.OK;
+                        setSession(request, user);
+                        return status;
+                    }
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                status.setInfo(e.getMessage());
+            }
+
+            status.setInfo(loginFailMessage);
+            return status;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR;
+            status.setInfo(e.getMessage());
+            return status;
+        }
     }
 
     private void setSession(ServletRequest request, LoginUser user) {
@@ -210,157 +240,207 @@ public class DalUserResource {
     @POST
     @Path("exist")
     public Status isUserExists(@FormParam("userNo") String userNo) {
-        Status status = Status.ERROR;
-        if (userNo == null || userNo.isEmpty()) {
-            status.setInfo(userNumberNullMessage);
-            return status;
-        }
-
         try {
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-            if (user != null && user.getUserNo().equals(userNo)) {
-                status.setInfo(userNumberExistMessage);
+            Status status = Status.ERROR;
+            if (userNo == null || userNo.isEmpty()) {
+                status.setInfo(userNumberNullMessage);
                 return status;
             }
-        } catch (Exception e) {
-            String message = e.getMessage() == null ? e.toString() : e.getMessage();
-            log.error(message);
-            status.setInfo(message);
+
+            try {
+                LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                if (user != null && user.getUserNo().equals(userNo)) {
+                    status.setInfo(userNumberExistMessage);
+                    return status;
+                }
+            } catch (Exception e) {
+                String message = e.getMessage() == null ? e.toString() : e.getMessage();
+                log.error(message);
+                status.setInfo(message);
+                return status;
+            }
+
+            status = Status.OK;
+            return status;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR;
+            status.setInfo(e.getMessage());
             return status;
         }
-
-        status = Status.OK;
-        return status;
     }
 
     @POST
     @Path("signup")
-    public Status userSignUp(@Context HttpServletRequest request, @FormParam("userNo") String userNo, @FormParam("userName") String userName, @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
-        Status status = Status.ERROR;
-        if (userNo == null || userNo.isEmpty()) {
-            status.setInfo(userNumberNullMessage);
-            return status;
-        }
-        if (userName == null || userName.isEmpty()) {
-            status.setInfo(userNameNullMessage);
-            return status;
-        }
-        if (password == null || password.isEmpty()) {
-            status.setInfo(passwordNullMessage);
-            return status;
-        }
-        if (userEmail == null || userEmail.isEmpty()) {
-            status.setInfo(emailNullMessage);
-            return status;
-        }
-
-        password = MD5Util.parseStrToMd5L32(password);
-        LoginUser user = new LoginUser();
-        user.setUserNo(userNo);
-        user.setUserName(userName);
-        user.setUserEmail(userEmail);
-        user.setPassword(password);
-
+    public Status userSignUp(@Context HttpServletRequest request, @FormParam("userNo") String userNo,
+            @FormParam("userName") String userName, @FormParam("userEmail") String userEmail,
+            @FormParam("password") String password) {
         try {
-            int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
-            if (result < 1) {
-                log.error("用户创建失败");
-                status.setInfo("用户创建失败");
+            Status status = Status.ERROR;
+            if (userNo == null || userNo.isEmpty()) {
+                status.setInfo(userNumberNullMessage);
                 return status;
             }
-            setSession(request, user);
-            status = status.OK;
-        } catch (Exception e) {
-            String message = e.getMessage() == null ? e.toString() : e.getMessage();
-            log.error(message);
-            status.setInfo(message);
+            if (userName == null || userName.isEmpty()) {
+                status.setInfo(userNameNullMessage);
+                return status;
+            }
+            if (password == null || password.isEmpty()) {
+                status.setInfo(passwordNullMessage);
+                return status;
+            }
+            if (userEmail == null || userEmail.isEmpty()) {
+                status.setInfo(emailNullMessage);
+                return status;
+            }
+
+            password = MD5Util.parseStrToMd5L32(password);
+            LoginUser user = new LoginUser();
+            user.setUserNo(userNo);
+            user.setUserName(userName);
+            user.setUserEmail(userEmail);
+            user.setPassword(password);
+
+            try {
+                int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                if (result < 1) {
+                    log.error("用户创建失败");
+                    status.setInfo("用户创建失败");
+                    return status;
+                }
+                setSession(request, user);
+                status = status.OK;
+            } catch (Exception e) {
+                String message = e.getMessage() == null ? e.toString() : e.getMessage();
+                log.error(message);
+                status.setInfo(message);
+                return status;
+            }
+
+            return status;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR;
+            status.setInfo(e.getMessage());
             return status;
         }
-
-        return status;
     }
 
     @GET
     @Path("isSuperUser")
-    //@Produces(MediaType.APPLICATION_JSON)
-    public boolean isSuperUser(@Context HttpServletRequest request) {
-        Boolean result = RequestUtil.isSuperUser(request);
-        if (result != null) {
-            return result.booleanValue();
-        }
+    public boolean isSuperUser(@Context HttpServletRequest request) throws Exception {
+        try {
+            Boolean result = RequestUtil.isSuperUser(request);
+            if (result != null) {
+                return result.booleanValue();
+            }
 
-        HttpSession session = RequestUtil.getSession(request);
-        String userNo = RequestUtil.getUserNo(request);
-        boolean value = DalGroupResource.validate(userNo);
-        session.setAttribute(Consts.SUPER_USER, value);
-        return value;
+            HttpSession session = RequestUtil.getSession(request);
+            String userNo = RequestUtil.getUserNo(request);
+            boolean value = DalGroupResource.validate(userNo);
+            session.setAttribute(Consts.SUPER_USER, value);
+            return value;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @GET
     @Path("isDefaultUser")
-    public boolean isDefaultUser(@Context HttpServletRequest request) {
-        return CustomizedResource.getInstance().isDefaultInstanceByRequest(request);
+    public boolean isDefaultUser(@Context HttpServletRequest request) throws Exception {
+        try {
+            return CustomizedResource.getInstance().isDefaultInstanceByRequest(request);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @GET
     @Path("isDefaultSuperUser")
-    public boolean isDefaultSuperUser(@Context HttpServletRequest request) {
-        boolean result = true;
-        result &= isDefaultUser(request);
-        result &= isSuperUser(request);
-        return result;
+    public boolean isDefaultSuperUser(@Context HttpServletRequest request) throws Exception {
+        try {
+            boolean result = true;
+            result &= isDefaultUser(request);
+            result &= isSuperUser(request);
+            return result;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @POST
     @Path("checkPassword")
-    public boolean checkPassword(@Context HttpServletRequest request, @FormParam("password") String password) {
-        boolean result = false;
-        if (password == null || password.isEmpty()) {
-            return result;
-        }
+    public boolean checkPassword(@Context HttpServletRequest request, @FormParam("password") String password)
+            throws Exception {
+        try {
+            boolean result = false;
+            if (password == null || password.isEmpty())
+                return result;
 
-        String userNo = RequestUtil.getUserNo(request);
-        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-        if (user != null) {
-            String pass = MD5Util.parseStrToMd5L32(password);
-            String userPass = user.getPassword();
-            if (userPass != null && !userPass.isEmpty()) {
-                if (pass.equals(userPass)) {
-                    result = true;
+            String userNo = RequestUtil.getUserNo(request);
+            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            if (user != null) {
+                String pass = MD5Util.parseStrToMd5L32(password);
+                String userPass = user.getPassword();
+                if (userPass != null && !userPass.isEmpty()) {
+                    if (pass.equals(userPass)) {
+                        result = true;
+                    }
                 }
             }
+            return result;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         }
-        return result;
     }
 
     @POST
     @Path("changePassword")
-    public boolean changePassword(@Context HttpServletRequest request, @FormParam("password") String password) {
-        boolean result = false;
-        if (password == null || password.isEmpty()) {
-            return result;
-        }
-
+    public boolean changePassword(@Context HttpServletRequest request, @FormParam("password") String password)
+            throws Exception {
         try {
-            LoginUser user = RequestUtil.getUserInfo(request);
-            String pass = MD5Util.parseStrToMd5L32(password);
-            user.setPassword(pass);
-            result = SpringBeanGetter.getDaoOfLoginUser().updateUserPassword(user) > 0;
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+            boolean result = false;
+            if (password == null || password.isEmpty())
+                return result;
+
+            try {
+                LoginUser user = RequestUtil.getUserInfo(request);
+                String pass = MD5Util.parseStrToMd5L32(password);
+                user.setPassword(pass);
+                result = SpringBeanGetter.getDaoOfLoginUser().updateUserPassword(user) > 0;
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+            return result;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         }
-        return result;
     }
 
     @POST
     @Path("logOut")
-    public void logOut(@Context HttpServletRequest request, @Context HttpServletResponse response) {
-        CustomizedResource.getInstance().logOut(request, response);
+    public void logOut(@Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+        try {
+            CustomizedResource.getInstance().logOut(request, response);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @POST
     @Path("getDefaultDBInfo")
-    public DalGroupDB getDefaultDBInfo(@FormParam("dbType") String dbType) {
-        return CustomizedResource.getInstance().getDefaultDBInfo(dbType);
+    public DalGroupDB getDefaultDBInfo(@FormParam("dbType") String dbType) throws Exception {
+        try {
+            return CustomizedResource.getInstance().getDefaultDBInfo(dbType);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 }

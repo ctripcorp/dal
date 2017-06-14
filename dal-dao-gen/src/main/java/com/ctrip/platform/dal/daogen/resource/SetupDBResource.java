@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.AddUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.enums.RoleType;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
@@ -111,7 +112,8 @@ public class SetupDBResource {
                 status.setInfo("initialized");
                 initializeConfig();
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             status = Status.ERROR;
             status.setInfo(e.getMessage());
         }
@@ -122,8 +124,8 @@ public class SetupDBResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tableConsistentCheck")
     public Status tableConsistentCheck(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
-                                       @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
-                                       @FormParam("dbcatalog") String dbcatalog) {
+            @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+            @FormParam("dbcatalog") String dbcatalog) {
         Status status = Status.ERROR;
 
         try {
@@ -135,7 +137,8 @@ public class SetupDBResource {
                 }
                 boolean flag = clearJdbcProperties();
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             status = Status.ERROR;
             status.setInfo(e.getMessage());
         }
@@ -147,15 +150,16 @@ public class SetupDBResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("initializeJdbc")
     public Status initializeJdbc(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
-                                 @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
-                                 @FormParam("dbcatalog") String dbcatalog) {
+            @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+            @FormParam("dbcatalog") String dbcatalog) {
         Status status = Status.OK;
         try {
             boolean result = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
             if (!result) {
                 status = Status.ERROR;
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             status = Status.ERROR;
             status.setInfo(e.getMessage());
         }
@@ -165,10 +169,12 @@ public class SetupDBResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("initializeDb")
-    public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
-                               @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
-                               @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment, @FormParam("adminNo") String adminNo,
-                               @FormParam("adminName") String adminName, @FormParam("adminEmail") String adminEmail, @FormParam("adminPass") String adminPass) {
+    public Status initializeDb(@Context HttpServletRequest request, @FormParam("dbaddress") String dbaddress,
+            @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+            @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
+            @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment,
+            @FormParam("adminNo") String adminNo, @FormParam("adminName") String adminName,
+            @FormParam("adminEmail") String adminEmail, @FormParam("adminPass") String adminPass) {
         Status status = Status.OK;
         try {
             boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
@@ -178,7 +184,7 @@ public class SetupDBResource {
                 return status;
             }
 
-            initializeConfig(); //to be deleted
+            initializeConfig(); // to be deleted
             boolean isSetupTables = setupTables();
             if (!isSetupTables) {
                 status = Status.ERROR;
@@ -202,7 +208,8 @@ public class SetupDBResource {
                 status.setInfo("Error occured while setting up the admin.");
                 return status;
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             status = Status.ERROR;
             status.setInfo(e.getMessage());
         }
@@ -213,27 +220,24 @@ public class SetupDBResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("connectionTest")
     public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
-                                 @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-                                 @FormParam("dbpassword") String dbpassword) {
+            @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+            @FormParam("dbpassword") String dbpassword) throws Exception {
         Status status = Status.OK;
         Connection conn = null;
         ResultSet rs = null;
         try {
-            conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword, DatabaseType.valueOf(dbtype).getValue());
+            conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
+                    DatabaseType.valueOf(dbtype).getValue());
             rs = conn.getMetaData().getCatalogs();
             Set<String> allCatalog = new HashSet<>();
             while (rs.next()) {
                 allCatalog.add(rs.getString("TABLE_CAT"));
             }
             status.setInfo(mapper.writeValueAsString(allCatalog));
-        } catch (SQLException e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             status = Status.ERROR;
             status.setInfo(e.getMessage());
-            return status;
-        } catch (JsonProcessingException e) {
-            status = Status.ERROR;
-            status.setInfo(e.getMessage());
-            return status;
         } finally {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeConnection(conn);
@@ -316,7 +320,8 @@ public class SetupDBResource {
         return set;
     }
 
-    private boolean initializeJdbcProperties(String dbaddress, String dbport, String dbuser, String dbpassword, String dbcatalog) {
+    private boolean initializeJdbcProperties(String dbaddress, String dbport, String dbuser, String dbpassword,
+            String dbcatalog) {
         boolean result = false;
         try {
             Properties properties = new Properties();
@@ -422,7 +427,8 @@ public class SetupDBResource {
             return result;
         }
 
-        int userGroupResult = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(), DalGroupResource.SUPER_GROUP_ID, RoleType.Admin.getValue(), AddUser.Allow.getValue());
+        int userGroupResult = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(),
+                DalGroupResource.SUPER_GROUP_ID, RoleType.Admin.getValue(), AddUser.Allow.getValue());
         if (userGroupResult <= 0) {
             return result;
         }

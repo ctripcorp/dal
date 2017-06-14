@@ -10,19 +10,18 @@ import javax.servlet.http.HttpSession;
 
 public class RequestUtil {
     public static HttpSession getSession(ServletRequest request) {
-        if (request == null) {
+        if (request == null)
             return null;
-        }
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         return httpRequest.getSession();
     }
 
-    public static LoginUser getUserInfo(HttpServletRequest request) {
+    public static LoginUser getUserInfo(HttpServletRequest request) throws Exception {
         LoginUser user = null;
         HttpSession session = getSession(request);
-        if (session == null) {
+        if (session == null)
             return user;
-        }
+
         Object userInfo = session.getAttribute(Consts.USER_INFO);
         if (userInfo != null) {
             user = (LoginUser) userInfo;
@@ -36,38 +35,33 @@ public class RequestUtil {
         return user;
     }
 
-    public static String getUserNo(HttpServletRequest request) {
+    public static String getUserNo(HttpServletRequest request) throws Exception {
         String userNo = null;
         LoginUser user = getUserInfo(request);
-        if (user != null) {
+        if (user != null)
             userNo = user.getUserNo();
-        }
         return userNo;
     }
 
     public static Boolean isDefaultUser(HttpServletRequest request) {
         Boolean result = null;
         HttpSession session = getSession(request);
-        if (session == null) {
+        if (session == null)
             return result;
-        }
         Object defaultUser = session.getAttribute(Consts.DEFAULT_USER);
-        if (defaultUser != null) {
+        if (defaultUser != null)
             result = (Boolean) defaultUser;
-        }
         return result;
     }
 
     public static Boolean isSuperUser(HttpServletRequest request) {
         Boolean result = null;
         HttpSession session = getSession(request);
-        if (session == null) {
+        if (session == null)
             return result;
-        }
         Object superUser = session.getAttribute(Consts.SUPER_USER);
-        if (superUser != null) {
+        if (superUser != null)
             result = (Boolean) superUser;
-        }
         return result;
     }
 }

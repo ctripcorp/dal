@@ -3,9 +3,11 @@ package com.ctrip.platform.dal.daogen.host.java;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import microsoft.sql.DateTimeOffset;
 import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
@@ -37,57 +39,61 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
     }
 
     @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
+    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException, DataAccessException {
         List<AbstractParameterHost> allColumns = new ArrayList<>();
-        Map<String, Integer> columnSqlType = DbUtils.getColumnSqlType(allInOneName, tableName);
-        Map<String, Class<?>> typeMapper = DbUtils.getSqlType2JavaTypeMaper(allInOneName, tableName);
-        Map<String, String> columnComment;
         try {
+            Map<String, Integer> columnSqlType = DbUtils.getColumnSqlType(allInOneName, tableName);
+            Map<String, Class<?>> typeMapper = DbUtils.getSqlType2JavaTypeMaper(allInOneName, tableName);
+            Map<String, String> columnComment;
             columnComment = DbUtils.getSqlserverColumnComment(allInOneName, tableName);
-        } catch (Exception e) {
-            throw new SQLException(e.getMessage(), e);
-        }
 
-        if (columnSqlType != null && columnSqlType.size() > 0) {
-            while (rs.next()) {
-                JavaParameterHost host = new JavaParameterHost();
-                String typeName = rs.getString(TYPE_NAME);
-                String columnName = rs.getString(COLUMN_NAME);
-                host.setName(columnName);
-                host.setSqlType(columnSqlType.get(host.getName()));
-                Class<?> javaClass = null;
-                if (null != typeMapper && typeMapper.containsKey(host.getName())) {
-                    javaClass = typeMapper.get(host.getName());
-                } else {
-                    javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
-                }
-                if (null == javaClass) {
-                    if (null != typeName && typeName.equalsIgnoreCase("sql_variant")) {
-                        log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]", host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
-                        return null;
-                    } else if (null != typeName && typeName.equalsIgnoreCase("datetimeoffset")) {
-                        javaClass = DateTimeOffset.class;
+            if (columnSqlType != null && columnSqlType.size() > 0) {
+                while (rs.next()) {
+                    JavaParameterHost host = new JavaParameterHost();
+                    String typeName = rs.getString(TYPE_NAME);
+                    String columnName = rs.getString(COLUMN_NAME);
+                    host.setName(columnName);
+                    host.setSqlType(columnSqlType.get(host.getName()));
+                    Class<?> javaClass = null;
+                    if (null != typeMapper && typeMapper.containsKey(host.getName())) {
+                        javaClass = typeMapper.get(host.getName());
                     } else {
-                        log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
-                        return null;
+                        javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
                     }
-                }
-                host.setJavaClass(javaClass);
-                host.setIndex(rs.getInt(ORDINAL_POSITION));
-                host.setIdentity(rs.getString(IS_AUTOINCREMENT).equalsIgnoreCase("YES"));
-                String remarks = rs.getString(REMARKS);
-                if (remarks == null) {
-                    String description = columnComment.get(columnName.toLowerCase());
-                    remarks = description == null ? "" : description;
-                }
+                    if (null == javaClass) {
+                        if (null != typeName && typeName.equalsIgnoreCase("sql_variant")) {
+                            log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]",
+                                    host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
+                            return null;
+                        } else if (null != typeName && typeName.equalsIgnoreCase("datetimeoffset")) {
+                            javaClass = DateTimeOffset.class;
+                        } else {
+                            log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", host.getName(),
+                                    allInOneName, tableName, host.getSqlType(), javaClass));
+                            return null;
+                        }
+                    }
+                    host.setJavaClass(javaClass);
+                    host.setIndex(rs.getInt(ORDINAL_POSITION));
+                    host.setIdentity(rs.getString(IS_AUTOINCREMENT).equalsIgnoreCase("YES"));
+                    String remarks = rs.getString(REMARKS);
+                    if (remarks == null) {
+                        String description = columnComment.get(columnName.toLowerCase());
+                        remarks = description == null ? "" : description;
+                    }
 
-                host.setComment(remarks.replace("\n", " "));
-                host.setDefaultValue(rs.getString(COLUMN_DEF));
-                host.setDbCategory(dbCategory);
-                int dataType = rs.getInt(DATA_TYPE);
-                host.setDataType(dataType);
-                allColumns.add(host);
+                    host.setComment(remarks.replace("\n", " "));
+                    host.setDefaultValue(rs.getString(COLUMN_DEF));
+                    host.setDbCategory(dbCategory);
+                    int dataType = rs.getInt(DATA_TYPE);
+                    host.setDataType(dataType);
+                    allColumns.add(host);
+                }
             }
+
+        } catch (Exception e) {
+            LoggerManager.getInstance().error(e);
+            // throw e;
         }
         return allColumns;
     }

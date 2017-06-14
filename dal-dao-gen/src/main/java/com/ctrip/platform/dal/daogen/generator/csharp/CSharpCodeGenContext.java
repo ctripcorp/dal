@@ -30,16 +30,16 @@ public class CSharpCodeGenContext implements CodeGenContext {
     private Queue<GenTaskBySqlBuilder> sqlBuilders = new ConcurrentLinkedQueue<>();
     private DalConfigHost dalConfigHost;
 
-    //<DatabaseHost db_name, DatabaseHost>
+    // <DatabaseHost db_name, DatabaseHost>
     private Map<String, DatabaseHost> dbHosts = new ConcurrentHashMap<>();
     private Queue<CSharpFreeSqlHost> freeSqlHosts = new ConcurrentLinkedQueue<>();
-    //<CSharpFreeSqlPojoHost pojo_name, CSharpFreeSqlPojoHost>
+    // <CSharpFreeSqlPojoHost pojo_name, CSharpFreeSqlPojoHost>
     private Map<String, CSharpFreeSqlPojoHost> freeSqlPojoHosts = new ConcurrentHashMap<>();
-    //GenTaskByFreeSql class_name
+    // GenTaskByFreeSql class_name
     private Set<String> freeDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-    //PojoClassName of Table and View
+    // PojoClassName of Table and View
     private Set<String> tableDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-    //PojoClassName of SP
+    // PojoClassName of SP
     private Set<String> spDaos = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     private Queue<CSharpTableHost> tableViewHosts = new ConcurrentLinkedQueue<>();
     private Queue<CSharpTableHost> spHosts = new ConcurrentLinkedQueue<>();
@@ -55,8 +55,7 @@ public class CSharpCodeGenContext implements CodeGenContext {
         inRegxPattern = Pattern.compile(regEx);
     }
 
-    public CSharpCodeGenContext(int projectId, boolean regenerate,
-                                Progress progress, Map<String, ?> hints) {
+    public CSharpCodeGenContext(int projectId, boolean regenerate, Progress progress, Map<String, ?> hints) {
         this.projectId = projectId;
         this.regenerate = regenerate;
         this.progress = progress;

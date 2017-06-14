@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
@@ -47,13 +48,15 @@ public class ProjectResource {
     @GET
     @Path("userGroups")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DalGroup> getUserGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root) {
+    public List<DalGroup> getUserGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root)
+            throws Exception {
         String userNo = RequestUtil.getUserNo(request);
         LoginUser user = null;
         try {
             user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-        } catch (Exception e) {
-            log.warn("", e);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
         }
         if (user == null) {
             user = new LoginUser();
@@ -63,8 +66,9 @@ public class ProjectResource {
             try {
                 SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
                 user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-            } catch (Exception e) {
-                log.warn("", e);
+            } catch (Throwable e) {
+                LoggerManager.getInstance().error(e);
+                throw e;
             }
         }
 
@@ -90,7 +94,8 @@ public class ProjectResource {
     private List<DalGroup> getAllJoinedDalGroup(Set<Integer> groupIds) {
         Set<Integer> parentGroupIds = new HashSet<>();
         for (Integer childGroupId : groupIds) {
-            List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByChildGroupId(childGroupId);
+            List<GroupRelation> relations =
+                    SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByChildGroupId(childGroupId);
             if (relations == null || relations.size() < 1) {
                 continue;
             }
@@ -115,129 +120,157 @@ public class ProjectResource {
     @Path("groupprojects")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
-        int groupID = -1;
         try {
+            int groupID = -1;
             groupID = Integer.parseInt(groupId);
-        } catch (NumberFormatException ex) {
-            log.error("Add member failed", ex);
-            Status status = Status.ERROR;
-            status.setInfo("Illegal group id");
-            return null;
-        }
 
-        List<Project> list = SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
-        return list;
+            List<Project> list = SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
+            return list;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @GET
     @Path("project")
     @Produces(MediaType.APPLICATION_JSON)
     public Project getProject(@QueryParam("id") String id) {
-        return SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
+        try {
+            return SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            throw e;
+        }
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Status addProject(@Context HttpServletRequest request, @FormParam("id") int id, @FormParam("name") String name, @FormParam("namespace") String namespace, @FormParam("dalconfigname") String dalconfigname, @FormParam("action") String action, @FormParam("project_group_id") int project_group_id) {
-        Project proj = new Project();
-        String userNo = RequestUtil.getUserNo(request);
-        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+    public Status addProject(@Context HttpServletRequest request, @FormParam("id") int id,
+            @FormParam("name") String name, @FormParam("namespace") String namespace,
+            @FormParam("dalconfigname") String dalconfigname, @FormParam("action") String action,
+            @FormParam("project_group_id") int project_group_id) throws Exception {
+        try {
+            Project proj = new Project();
+            String userNo = RequestUtil.getUserNo(request);
+            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-        if (user == null) {
-            Status status = Status.ERROR;
-            status.setInfo("You have not login.");
-            return status;
-        }
-
-        List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
-
-        if (urGroups == null || urGroups.size() < 1) {
-            Status status = Status.ERROR;
-            status.setInfo("请先加入某个DAL Team.");
-            return status;
-        }
-
-        if (action.equals("insert")) {
-            List<Project> pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
-            if (null != pjs && pjs.size() > 0) {
+            if (user == null) {
                 Status status = Status.ERROR;
-                status.setInfo("Dal.config Name --> " + dalconfigname + " 已经存在，请重新命名!");
+                status.setInfo("You have not login.");
                 return status;
             }
-            proj.setName(name);
-            proj.setNamespace(namespace);
-            proj.setDal_config_name(dalconfigname);
-            proj.setDal_group_id(project_group_id);
-            proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-            proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
-            SpringBeanGetter.getDaoOfProject().insertProject(proj);
-            return Status.OK;
-        }
 
-        if (!validateProjectUpdatePermision(userNo, id, project_group_id)) {
-            Status status = Status.ERROR;
-            status.setInfo("你没有当前Project的操作权限.");
-            return status;
-        }
+            List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 
-        if (action.equals("update")) {
-            List<Project> pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
-            if (null != pjs && pjs.size() > 0) {
-                for (Project temp : pjs) {
-                    if (temp.getId() != id) {
-                        Status status = Status.ERROR;
-                        status.setInfo("Dal.config Name --> " + dalconfigname + " 已经存在，请重新命名!");
-                        return status;
+            if (urGroups == null || urGroups.size() < 1) {
+                Status status = Status.ERROR;
+                status.setInfo("请先加入某个DAL Team.");
+                return status;
+            }
+
+            if (action.equals("insert")) {
+                List<Project> pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
+                if (null != pjs && pjs.size() > 0) {
+                    Status status = Status.ERROR;
+                    status.setInfo("Dal.config Name --> " + dalconfigname + " 已经存在，请重新命名!");
+                    return status;
+                }
+                proj.setName(name);
+                proj.setNamespace(namespace);
+                proj.setDal_config_name(dalconfigname);
+                proj.setDal_group_id(project_group_id);
+                proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
+                proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                SpringBeanGetter.getDaoOfProject().insertProject(proj);
+                return Status.OK;
+            }
+
+            if (!validateProjectUpdatePermision(userNo, id, project_group_id)) {
+                Status status = Status.ERROR;
+                status.setInfo("你没有当前Project的操作权限.");
+                return status;
+            }
+
+            if (action.equals("update")) {
+                List<Project> pjs = SpringBeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
+                if (null != pjs && pjs.size() > 0) {
+                    for (Project temp : pjs) {
+                        if (temp.getId() != id) {
+                            Status status = Status.ERROR;
+                            status.setInfo("Dal.config Name --> " + dalconfigname + " 已经存在，请重新命名!");
+                            return status;
+                        }
                     }
                 }
+                proj.setId(id);
+                proj.setName(name);
+                proj.setNamespace(namespace);
+                proj.setDal_config_name(dalconfigname);
+                proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
+                proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                SpringBeanGetter.getDaoOfProject().updateProject(proj);
+            } else if (action.equals("delete")) {
+                proj.setId(Integer.valueOf(id));
+                if (SpringBeanGetter.getDaoOfProject().deleteProject(proj) > 0) {
+                    SpringBeanGetter.getDaoOfUserProject().deleteUserProject(id);
+                    SpringBeanGetter.getDaoByFreeSql().deleteByProjectId(id);
+                    SpringBeanGetter.getDaoBySqlBuilder().deleteByProjectId(id);
+                    SpringBeanGetter.getDaoByTableViewSp().deleteByProjectId(id);
+                }
             }
-            proj.setId(id);
-            proj.setName(name);
-            proj.setNamespace(namespace);
-            proj.setDal_config_name(dalconfigname);
-            proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-            proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
-            SpringBeanGetter.getDaoOfProject().updateProject(proj);
-        } else if (action.equals("delete")) {
-            proj.setId(Integer.valueOf(id));
-            if (SpringBeanGetter.getDaoOfProject().deleteProject(proj) > 0) {
-                SpringBeanGetter.getDaoOfUserProject().deleteUserProject(id);
-                SpringBeanGetter.getDaoByFreeSql().deleteByProjectId(id);
-                SpringBeanGetter.getDaoBySqlBuilder().deleteByProjectId(id);
-                SpringBeanGetter.getDaoByTableViewSp().deleteByProjectId(id);
-            }
-        }
 
-        return Status.OK;
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR;
+            status.setInfo(e.getMessage());
+            return status;
+        }
     }
 
     @POST
     @Path("projectPermisionCheck")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Status projectPermisionCheck(@Context HttpServletRequest request, @FormParam("prjId") int prjId) {
-        String userNo = RequestUtil.getUserNo(request);
+    public Status projectPermisionCheck(@Context HttpServletRequest request, @FormParam("prjId") int prjId)
+            throws Exception {
+        try {
+            String userNo = RequestUtil.getUserNo(request);
 
-        if (!validateProjectUpdatePermision(userNo, prjId, -1)) {
+            if (!validateProjectUpdatePermision(userNo, prjId, -1)) {
+                Status status = Status.ERROR;
+                status.setInfo("你没有当前DAO的操作权限.");
+                return status;
+            }
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
-            status.setInfo("你没有当前DAO的操作权限.");
+            status.setInfo(e.getMessage());
             return status;
         }
-        return Status.OK;
     }
 
     @POST
     @Path("eraseFiles")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Status eraseFiles(@FormParam("prjId") int prjId) {
-        String path = Configuration.get("gen_code_path");
-        File dir = new File(String.format("%s/%s", path, prjId));
-        if (dir.exists())
-            try {
-                FileUtils.forceDelete(dir);
-            } catch (IOException e) {
-                log.warn(e.getMessage(), e);
-            }
-        return Status.OK;
+        try {
+            String path = Configuration.get("gen_code_path");
+            File dir = new File(String.format("%s/%s", path, prjId));
+            if (dir.exists())
+                try {
+                    FileUtils.forceDelete(dir);
+                } catch (IOException e) {
+                    log.warn(e.getMessage(), e);
+                }
+            return Status.OK;
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR;
+            status.setInfo(e.getMessage());
+            return status;
+        }
     }
 
     private boolean validateProjectUpdatePermision(String userNo, int prjId, int project_group_id) {
@@ -253,7 +286,8 @@ public class ProjectResource {
 
     private boolean validateProjectUpdatePermisionInCurrentGroup(String userNo, int prjId, int project_group_id) {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-        List<UserGroup> userGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(project_group_id, user.getId());
+        List<UserGroup> userGroups =
+                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(project_group_id, user.getId());
         for (UserGroup userGroup : userGroups) {
             if (userGroup.getRole() == 1) {// the user is the original team user, at
                 // the same time is also the admin of
@@ -274,7 +308,8 @@ public class ProjectResource {
     }
 
     private boolean validateProjectUpdatePermisionInChildGroup(String userNo, int prjId, int project_group_id) {
-        List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(project_group_id);
+        List<GroupRelation> relations =
+                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(project_group_id);
         if (relations == null || relations.size() < 1) {
             return false;
         }
@@ -285,7 +320,8 @@ public class ProjectResource {
             if (relation.getChild_group_role() == 1) {// the child group, but
                 // have admin role
                 // permision
-                List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), user.getId());
+                List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao()
+                        .getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), user.getId());
                 if (exists != null && exists.size() > 0) { // the user is in the
                     // specific group
                     // whic have
@@ -301,7 +337,8 @@ public class ProjectResource {
                     // info
                     // check the user is or not in the current group
                     int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
-                    List<UserGroup> check = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(project_group_id, userId);
+                    List<UserGroup> check = SpringBeanGetter.getDalUserGroupDao()
+                            .getUserGroupByGroupIdAndUserId(project_group_id, userId);
                     if (check != null && check.size() > 0) {
                         return true;
                     }
@@ -324,7 +361,8 @@ public class ProjectResource {
                 }
                 // the group that the owner of the current prj have been joined
                 // in
-                List<UserGroup> userGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(currentPrjUser.getId());
+                List<UserGroup> userGroups =
+                        SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(currentPrjUser.getId());
                 if (userGroups == null || userGroups.size() < 1) {
                     return false;
                 }
@@ -337,7 +375,8 @@ public class ProjectResource {
                     if (!childGroupIds.contains(userGroup.getGroup_id())) {
                         continue;
                     }
-                    List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(userGroup.getGroup_id(), userId);
+                    List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao()
+                            .getUserGroupByGroupIdAndUserId(userGroup.getGroup_id(), userId);
                     if (exists != null && exists.size() > 0) {
                         return true;
                     }
@@ -350,7 +389,8 @@ public class ProjectResource {
 
     private Set<Integer> getChildGroupId(int currentGroupId) {
         Set<Integer> sets = new HashSet<>();
-        List<GroupRelation> relations = SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+        List<GroupRelation> relations =
+                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
         if (relations == null) {
             return sets;
         }
@@ -371,33 +411,42 @@ public class ProjectResource {
     @Path("addLackDbset")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Status addLackDbset(@FormParam("project_id") int project_id) {
-        int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
-        String info = addLackDb(project_id, groupId);
+        try {
+            int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
+            String info = addLackDb(project_id, groupId);
 
-        Set<String> notExistDbset = getLackDbset(groupId, project_id);
-        for (String dbsetName : notExistDbset) {
-            List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbsetName);
-            if (null != dbsets && dbsets.size() > 0) {
-                info += "<span style='color:red;'>databaseSet Name --> " + dbsetName + " 已经存在，请重新命名，再手动添加!" + "</span><br/>";
-            } else {
-                List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
-                Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);
-                if (allInOneDbnames.contains(dbsetName)) {
-                    info += genDefaultDbset(groupId, dbsetName);
+            Set<String> notExistDbset = getLackDbset(groupId, project_id);
+            for (String dbsetName : notExistDbset) {
+                List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbsetName);
+                if (null != dbsets && dbsets.size() > 0) {
+                    info += "<span style='color:red;'>databaseSet Name --> " + dbsetName + " 已经存在，请重新命名，再手动添加!"
+                            + "</span><br/>";
                 } else {
-                    info += "<span style='color:red;'>databaseSet Name --> " + dbsetName + "在数据库中不存在，请手动添加!" + "</span><br/>";
+                    List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
+                    Set<String> allInOneDbnames = new HashSet<String>(dbAllinOneNames);
+                    if (allInOneDbnames.contains(dbsetName)) {
+                        info += genDefaultDbset(groupId, dbsetName);
+                    } else {
+                        info += "<span style='color:red;'>databaseSet Name --> " + dbsetName + "在数据库中不存在，请手动添加!"
+                                + "</span><br/>";
+                    }
                 }
             }
-        }
-        if (!"".equals(info)) {
-            info += "点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a><br/>";
-            info += "点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a><br/>";
+            if (!"".equals(info)) {
+                info += "点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a><br/>";
+                info += "点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a><br/>";
+                Status status = Status.ERROR;
+                status.setInfo(info);
+                return status;
+            } else {
+                Status status = Status.OK;
+                status.setInfo("一键补全成功！");
+                return status;
+            }
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
-            status.setInfo(info);
-            return status;
-        } else {
-            Status status = Status.OK;
-            status.setInfo("一键补全成功！");
+            status.setInfo(e.getMessage());
             return status;
         }
     }
@@ -439,7 +488,8 @@ public class ProjectResource {
             DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
             if (null != groupdb && groupdb.getDal_group_id() > 0) {
                 DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
-                info += "<span style='color:red;'>数据库" + groupdb.getDbname() + " 已经加入 " + group.getGroup_comment() + "，一键补全失败</span><br/>";
+                info += "<span style='color:red;'>数据库" + groupdb.getDbname() + " 已经加入 " + group.getGroup_comment()
+                        + "，一键补全失败</span><br/>";
             } else if (allInOneDbnames.contains(dbname)) {
                 DalGroupDB groupDb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
                 int ret = SpringBeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupDb.getId(), groupId);
@@ -458,7 +508,9 @@ public class ProjectResource {
     @POST
     @Path("generate")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Status generateProject(@Context HttpServletRequest request, @FormParam("project_id") int id, @FormParam("regenerate") boolean regen, @FormParam("language") String language, @FormParam("newPojo") boolean newPojo, @FormParam("random") String random) {
+    public Status generateProject(@Context HttpServletRequest request, @FormParam("project_id") int id,
+            @FormParam("regenerate") boolean regen, @FormParam("language") String language,
+            @FormParam("newPojo") boolean newPojo, @FormParam("random") String random) {
         Status status = null;
         Progress progress = null;
         try {
@@ -492,11 +544,11 @@ public class ProjectResource {
             status = Status.OK;
             status.setInfo(code);
             log.info(String.format("generate project[%s] completed.", id));
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             status = Status.ERROR;
             status.setInfo(e.getMessage());
-            progress.setOtherMessage(e.getMessage());
-            log.error(String.format("generate project[%s] failed.", id), e);
+            return status;
         } finally {
             progress.setStatus(ProgressResource.FINISH);
         }
@@ -523,7 +575,8 @@ public class ProjectResource {
             }
         }
 
-        List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(projectId);
+        List<GenTaskByTableViewSp> tableViewSpTasks =
+                SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(projectId);
 
         if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
             for (GenTaskByTableViewSp genTaskByTableViewSp : tableViewSpTasks) {
@@ -613,7 +666,8 @@ public class ProjectResource {
             }
         }
 
-        List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+        List<GenTaskByTableViewSp> tableViewSpTasks =
+                SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
         for (GenTaskByTableViewSp task : tableViewSpTasks) {
             String databaseSet_name = task.getDatabaseSetName();
             if (!group_dbset_names.contains(databaseSet_name)) {
@@ -672,7 +726,8 @@ public class ProjectResource {
 
     private Set<String> getProjectAllRequireDbname(int project_id) {
         List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
-        List<GenTaskByTableViewSp> tableViewSpTasks = SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+        List<GenTaskByTableViewSp> tableViewSpTasks =
+                SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
         List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
         List<String> allRequireDbset = new ArrayList<>();
 
@@ -689,7 +744,8 @@ public class ProjectResource {
         for (String dbsetName : allRequireDbset) {
             List<DatabaseSet> dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbsetName);
             if (dbset != null && dbset.size() > 0) {
-                List<DatabaseSetEntry> dbentrys = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.get(0).getId());
+                List<DatabaseSetEntry> dbentrys =
+                        SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.get(0).getId());
                 for (DatabaseSetEntry entry : dbentrys) {
                     result.add(entry.getConnectionString());
                 }

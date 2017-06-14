@@ -25,12 +25,12 @@ public class JavaCodeGenContext implements CodeGenContext {
 
     protected Queue<JavaTableHost> tableHosts = new ConcurrentLinkedQueue<>();
     protected Queue<ViewHost> viewHosts = new ConcurrentLinkedQueue<>();
-    //<SpDbHost dbName, SpDbHost>
+    // <SpDbHost dbName, SpDbHost>
     protected Map<String, SpDbHost> spHostMaps = new ConcurrentHashMap<>();
     protected Queue<SpHost> spHosts = new ConcurrentLinkedQueue<>();
     protected ContextHost contextHost = new ContextHost();
     protected Queue<FreeSqlHost> freeSqlHosts = new ConcurrentLinkedQueue<>();
-    //<JavaMethodHost pojoClassName, JavaMethodHost>
+    // <JavaMethodHost pojoClassName, JavaMethodHost>
     protected Map<String, JavaMethodHost> freeSqlPojoHosts = new ConcurrentHashMap<>();
 
     public JavaCodeGenContext(int projectId, boolean regenerate, Progress progress) {

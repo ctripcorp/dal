@@ -46,7 +46,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     private boolean sensitive = false;// whether the param is sensitive
 
-    private boolean operator = false; //whether is opearator and,or,not
+    private boolean operator = false; // whether is opearator and,or,not
 
     private String comment;
 
@@ -56,8 +56,7 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     private int dataType;
 
-    public JavaParameterHost() {
-    }
+    public JavaParameterHost() {}
 
     public JavaParameterHost(JavaParameterHost host) {
         this.index = host.getIndex();
@@ -207,9 +206,9 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     public String getCapitalizedName() {
         String tempName = name.replace("@", "");
-//        if (tempName.contains("_")) {
-//            tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
-//        }
+        // if (tempName.contains("_")) {
+        // tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
+        // }
         return WordUtils.capitalize(tempName);
     }
 
@@ -223,9 +222,9 @@ public class JavaParameterHost extends AbstractParameterHost {
 
     public String getUncapitalizedName() {
         String tempName = name.replace("@", "");
-//        if (tempName.contains("_")) {
-//            tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
-//        }
+        // if (tempName.contains("_")) {
+        // tempName = WordUtils.capitalizeFully(tempName.replace('_', ' ')).replace(" ", "");
+        // }
         return WordUtils.uncapitalize(tempName);
     }
 

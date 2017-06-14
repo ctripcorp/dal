@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.generator.processor.java;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -29,7 +30,8 @@ public class JavaDirectoryPreparerProcessor {
             if (!testDir.exists()) {
                 FileUtils.forceMkdir(testDir);
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

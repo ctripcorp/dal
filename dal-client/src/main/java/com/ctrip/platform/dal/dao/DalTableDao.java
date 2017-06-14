@@ -303,6 +303,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	private <K> K commonQuery(TableSelectBuilder builder, DalHints hints) throws SQLException {
+		hints = hints.clone();
 		DalSqlTaskRequest<K> request = new DalSqlTaskRequest<K>(
 				logicDbName, populate(builder), hints, 
 				new QuerySqlTask<>((DalResultSetExtractor<K>)builder.getResultExtractor(hints)), (ResultMerger<K>)builder.getResultMerger(hints));

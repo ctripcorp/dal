@@ -19,6 +19,7 @@
         <dal-dao-gen-version>1.2.5</dal-dao-gen-version>
         <cat-client-version>2.9.0</cat-client-version>
         <clogging-version>4.1.7</clogging-version>
+        <framework-foundation-version>1.5.2</framework-foundation-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -26,6 +27,32 @@
                 <groupId>javax.activation</groupId>
                 <artifactId>activation</artifactId>
                 <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jasig.cas.client</groupId>
+                <artifactId>cas-client-core-infosec-credis</artifactId>
+                <version>3.1.12</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.ctrip.framework.clogging</groupId>
+                        <artifactId>clogging-agent</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.dianping.cat</groupId>
+                <artifactId>cat-client</artifactId>
+                <version>${cat-client-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.clogging</groupId>
+                <artifactId>clogging-agent</artifactId>
+                <version>${clogging-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework</groupId>
+                <artifactId>framework-foundation</artifactId>
+                <version>${framework-foundation-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -50,17 +77,14 @@
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-core-infosec-credis</artifactId>
-            <version>3.1.12</version>
         </dependency>
         <dependency>
             <groupId>com.dianping.cat</groupId>
             <artifactId>cat-client</artifactId>
-            <version>${cat-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework.clogging</groupId>
             <artifactId>clogging-agent</artifactId>
-            <version>${clogging-version}</version>
         </dependency>
     </dependencies>
     <profiles>

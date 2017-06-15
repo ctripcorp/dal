@@ -42,7 +42,7 @@
                 <directory>src/main/resources/velocity</directory>
             </resource>
             <resource>
-                <directory>src/main/resources/xunit</directory>
+                <directory>src/main/resources/log</directory>
             </resource>
         </resources>
         <finalName>ROOT</finalName>

@@ -34,8 +34,8 @@ public class DalSingleResultExtractor<T> implements DalResultSetExtractor<T>, Hi
 	}
 	
     private void checkHints(ResultSet rs) throws SQLException {
-        if(hints != null && mapper instanceof HintsAwareMapper) {
-            mapper = ((HintsAwareMapper)mapper).mapWith(rs, hints);
+        if(hints != null && mapper instanceof CustomizableMapper) {
+            mapper = ((CustomizableMapper)mapper).mapWith(rs, hints);
         }
     }
 

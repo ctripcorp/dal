@@ -151,7 +151,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	@Override
 	public <T> SelectBuilder mapWith(Class<T> type) {
 		queryBuilder.mapWith(type);
-		return null;
+		return this;
 	}
 	
 	public SelectSqlBuilder simpleType() {

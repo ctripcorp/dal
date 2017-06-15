@@ -7,7 +7,6 @@ import java.util.Map;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
 import com.ctrip.platform.dal.dao.sqlbuilder.BaseTableSelectBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
@@ -208,7 +207,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public <K> List<K> query(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<>(clazz)).nullable(), hints);
+		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(clazz).nullable(), hints);
 	}
 
 	/**
@@ -228,7 +227,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	/**
-	 * Query pojo for the given query builder. The requireSingle or requireFirst MUST be set on bulder.
+	 * Query pojo for the given query builder. The requireSingle or requireFirst MUST be set on builder.
 	 * @param selectBuilder select builder which represents the query criteria
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @return
@@ -240,7 +239,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 	
 	/**
-	 * Query object for the given type for the given query builder. The requireSingle or requireFirst MUST be set on bulder.
+	 * Query object for the given type for the given query builder. The requireSingle or requireFirst MUST be set on builder.
 	 * @param selectBuilder select builder which represents the query criteria
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param clazz the class which the returned result belongs to.
@@ -249,7 +248,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	 */
 	public <K> K queryObject(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
 		DalWatcher.begin();
-		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(new DalObjectRowMapper<>(clazz)), hints);
+		return commonQuery((TableSelectBuilder)selectBuilder.mapWith(clazz), hints);
 	}
 
 	public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
@@ -303,7 +302,6 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	private <K> K commonQuery(TableSelectBuilder builder, DalHints hints) throws SQLException {
-		hints = hints.clone();
 		DalSqlTaskRequest<K> request = new DalSqlTaskRequest<K>(
 				logicDbName, populate(builder), hints, 
 				new QuerySqlTask<>((DalResultSetExtractor<K>)builder.getResultExtractor(hints)), (ResultMerger<K>)builder.getResultMerger(hints));

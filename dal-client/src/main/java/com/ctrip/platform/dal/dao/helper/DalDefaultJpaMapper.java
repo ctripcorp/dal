@@ -16,7 +16,7 @@ import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
-public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, HintsAwareMapper<T> {
+public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, CustomizableMapper<T> {
 	
 	private Class<T> clazz = null;
 	private String[] columnNames = null;
@@ -96,12 +96,32 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, HintsAwareMapper
 		field.set(entity, val);
 	}
 	
+    @Override
+    public DalRowMapper<T> mapWith(String[] columns) throws SQLException {
+        return new DalDefaultJpaMapper<T>(this, columns);
+    }
+    
 	@Override
 	public DalRowMapper<T> mapWith(ResultSet rs, DalHints hints)
 			throws SQLException {
 		return new DalDefaultJpaMapper<T>(this, rs, hints);
 	}
 	
+    /**
+     * For map partial result set with given column names.
+     * Copy fields from rawMapper
+     * 
+     * @param rawMapper
+     * @param clazz
+     * @throws SQLException
+     */
+    private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, String[] columns) throws SQLException {
+        this.clazz = rawMapper.clazz;
+        this.fieldsMap = rawMapper.fieldsMap;
+        this.ignorMissingFields = rawMapper.ignorMissingFields;
+        this.columnNames = columns;
+    }
+    
 	/**
 	 * For map partial result set with given column names.
 	 * Copy fields from rawMapper

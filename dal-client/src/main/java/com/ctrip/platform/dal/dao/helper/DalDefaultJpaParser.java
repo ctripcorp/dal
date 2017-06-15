@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
  * 	1.The entity must contain non-parameters constructor.
  *  2.Each field of the entity must declare the SqlType annotation.
  */
-public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements HintsAwareMapper<T> {
+public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements CustomizableMapper<T> {
 	
 	private Map<String, Field> fieldsMap;
 	private Class<T> clazz;
@@ -117,4 +117,9 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements Hint
 			throws SQLException {
 		return rowMapper.mapWith(rs, hints);
 	}
+
+    @Override
+    public DalRowMapper<T> mapWith(String[] columns) throws SQLException {
+        return rowMapper.mapWith(columns);
+    }
 }

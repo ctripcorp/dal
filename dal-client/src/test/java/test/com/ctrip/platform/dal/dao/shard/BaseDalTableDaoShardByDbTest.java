@@ -21,25 +21,37 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub.DatabaseDifference;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 
 public abstract class BaseDalTableDaoShardByDbTest {
 	private boolean ASSERT_ALLOWED = false;
 	private DatabaseDifference diff;
+	private String databaseName;
 	public BaseDalTableDaoShardByDbTest(String databaseName, String generatedKey, DatabaseDifference diff) {
 		this.diff = diff;
+		this.databaseName = databaseName;
 		try {
 			DalClientFactory.initClientFactory();
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
@@ -678,6 +690,29 @@ public abstract class BaseDalTableDaoShardByDbTest {
 			assertEquals(0, models.size());
 		}
 	}
+	
+    @Test
+    public void testQueryListPartial() throws SQLException{
+        List<ClientTestModel> models = null;
+
+        DalTableDao<ClientTestModel> dao = new DalTableDao<>(ClientTestModel.class, databaseName, ClientTestDalParser.tableName); 
+        for(int i = 0; i < mod; i++) {
+            SelectSqlBuilder builder = new SelectSqlBuilder();
+            builder.equal("type", 1, Types.SMALLINT);
+            builder.select("id", "tableIndex");
+            DalHints hints = new DalHints();
+            models = dao.query(builder, hints.inShard(i));
+            Assert.assertTrue(null != models);
+            Assert.assertEquals(3, models.size());
+            ClientTestModel model = models.get(0);
+            
+            Assert.assertNull(model.address);
+            Assert.assertNull(model.lastChanged);
+            Assert.assertNull(model.quantity);
+            
+            Assert.assertNull(hints.get(DalHintEnum.partialQuery));
+        }        
+    }
 	
 	/**
 	 * Test Insert multiple entities one by one
@@ -3148,13 +3183,34 @@ public abstract class BaseDalTableDaoShardByDbTest {
 		
 	}
 	
-	private static class ClientTestModel {
-		private Integer id;
-		private Integer quantity;
-		private Integer tableIndex;
-		private Short type;
-		private String address;
-		private Timestamp lastChanged;
+	// Not used actually
+	@Database(name="SqlServerSimpleShard")
+	public static class ClientTestModel {
+        @Id
+        @Column(name="id")
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        @Type(value=Types.BIGINT)
+        private Integer id;
+
+        @Column(name="quantity")
+        @Type(value=Types.INTEGER)
+        private Integer quantity;
+
+        @Column(name="tableIndex")
+        @Type(value=Types.INTEGER)
+        private Integer tableIndex;
+        
+        @Column(name="type")
+        @Type(value=Types.SMALLINT)
+        private Short type;
+        
+        @Column(name="address")
+        @Type(value=Types.VARCHAR)
+        private String address;
+        
+        @Column(name="last_changed")
+        @Type(value=Types.TIMESTAMP)
+        private Timestamp lastChanged;
 
 		public Integer getId() {
 			return id;

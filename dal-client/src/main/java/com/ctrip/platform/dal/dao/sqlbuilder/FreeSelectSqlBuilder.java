@@ -17,7 +17,6 @@ import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
-import com.ctrip.platform.dal.dao.helper.HintsAwareMapper;
 
 public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 	private String selectSqlTemplate;
@@ -161,23 +160,9 @@ public class FreeSelectSqlBuilder<K> implements SqlBuilder, SelectBuilder {
 		if(extractor != null)
 			return extractor;
 
-		DalRowMapper<T> mapper  = checkAllowPartial(hints, this.mapper);
 		if(isRequireSingle() || isRequireFirst())
 			return new DalSingleResultExtractor<>(mapper, isRequireSingle());
 			
 		return count > 0 ? new DalRowMapperExtractor(mapper, count) : new DalRowMapperExtractor(mapper);
 	}
-	
-	public static <T> DalRowMapper<T> checkAllowPartial(DalHints hints, DalRowMapper<T> mapper) throws SQLException {
-		if(!(mapper instanceof HintsAwareMapper))
-			return mapper;
-		
-		if(!hints.is(DalHintEnum.partialQuery))
-			return mapper;
-		
-		//Otherwise we assume it is partial. The default implementation of generated code should support this
-//		return ((SupportPartialResultMapping)mapper).mapWith(hints.getPartialQueryColumns(), hints.is(DalHintEnum.ignoreMissingFields));
-		return mapper;
-	}
-
 }

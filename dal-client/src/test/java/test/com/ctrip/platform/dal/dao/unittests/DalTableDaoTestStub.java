@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 
 public class DalTableDaoTestStub extends BaseTestStub {
 	public DalTableDaoTestStub(String dbName, DatabaseDifference diff) {
@@ -196,6 +197,73 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		Assert.assertEquals(0, models.size());
 	}
 	
+    @Test
+    public void testQueryList() throws SQLException{
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        
+        builder.equal("type", 1, Types.SMALLINT);
+        
+        List<ClientTestModel> models = dao.query(builder, new DalHints());
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(3, models.size());
+        
+        
+        builder = new SelectSqlBuilder();
+        builder.equal("type", 1, Types.SMALLINT);
+        models = dao.query(builder.atPage(1, 1), new DalHints());
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(1, models.size());
+        
+        builder = new SelectSqlBuilder();
+        builder.equal("type", 10, Types.SMALLINT);
+        models = dao.query(builder.atPage(1, 10), new DalHints());
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(0, models.size());        
+    }
+    
+    @Test
+    public void testQueryObjectList() throws SQLException{
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.equal("type", 1, Types.SMALLINT);
+        List<Short> models = dao.query(builder, new DalHints(), Short.class);
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(3, models.size());
+        
+        builder = new SelectSqlBuilder();
+        builder.equal("type", 1, Types.SMALLINT);
+        models = dao.query(builder.atPage(1, 1), new DalHints(), Short.class);
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(1, models.size());
+        
+        builder = new SelectSqlBuilder();
+        builder.equal("type", 10, Types.SMALLINT);
+        models = dao.query(builder.atPage(1, 10), new DalHints(), Short.class);
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(0, models.size());
+        
+    }
+    
+    @Test
+    public void testQueryObject() throws SQLException{
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.equal("type", 1, Types.SMALLINT);
+        builder.requireFirst();
+        Short models = dao.queryObject(builder, new DalHints(), Short.class);
+        Assert.assertNotNull(models);
+        
+        builder = new SelectSqlBuilder();
+        builder.equal("type", 1, Types.SMALLINT);
+        builder.requireFirst();
+        models = dao.queryObject(builder.atPage(1, 1), new DalHints(), Short.class);
+        Assert.assertNotNull(models);
+        
+        builder = new SelectSqlBuilder();
+        builder.equal("type", 10, Types.SMALLINT);
+        builder.requireFirst();
+        models = dao.queryObject(builder.atPage(1, 10), new DalHints(), Short.class);
+        Assert.assertNull(models);
+    }
+    
 	/**
 	 * Test Insert with null or empty parameters
 	 * @throws SQLException

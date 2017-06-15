@@ -13,6 +13,7 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.CustomizableMapper;
 import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalListMerger;
 import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
@@ -20,7 +21,6 @@ import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
-import com.ctrip.platform.dal.dao.helper.HintsAwareMapper;
 
 /**
  * This builder is only for internal use of DalTableDao
@@ -226,7 +226,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 	
 	private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
-		if(!(mapper instanceof HintsAwareMapper))
+		if(!(mapper instanceof CustomizableMapper))
 			return mapper;
 		
 		// If it is COUNT case, we do nothing here
@@ -239,31 +239,10 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		if(hints.is(DalHintEnum.partialQuery))
 		    return mapper;
 		
-		// Use what user selected
-		hints.partialQuery(selectedColumns);
-
-		return mapper;
+		// Use what user selected and customize mapper
+		return ((CustomizableMapper)mapper).mapWith(selectedColumns);
 	}
 	
-    private <T> DalRowMapper<T> checkAllowPartial_old(DalHints hints) throws SQLException {
-        if(!(mapper instanceof HintsAwareMapper))
-            return mapper;
-        
-        // If it is COUNT case, we do nothing here
-        if(customized == COUNT)
-            return mapper;
-        
-        if(customized == ALL_COLUMNS && !hints.is(DalHintEnum.partialQuery))
-            return mapper;
-        
-        String[] queryColumns = hints.is(DalHintEnum.partialQuery) ? hints.getPartialQueryColumns() : selectedColumns;
-        select(queryColumns);
-                
-        //It is partial query, we need to create another mapper for this.
-//        return ((SupportPartialResultMapping)mapper).mapWith(queryColumns, hints.is(DalHintEnum.ignoreMissingFields));
-        return null;
-    }
-    
 	private String buildFirst(String effectiveTableName){
 		count = 1;
 		return buildTop(effectiveTableName);

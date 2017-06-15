@@ -375,7 +375,6 @@ public final class DalQueryDao {
 			throws SQLException {
 		FreeSelectSqlBuilder<List<T>> builder = new FreeSelectSqlBuilder<List<T>>(dbCategory).setTemplate(sql).mapWith(mapper);
 		
-		mapper = FreeSelectSqlBuilder.checkAllowPartial(hints, mapper);
 		if(hints.isAllShards() || hints.isInShards()) {
 			builder.mergerWith(new DalRangedResultMerger<>((Comparator<T>)hints.getSorter(), start, count));
 			builder.extractorWith(new DalRowMapperExtractor<T>(mapper));

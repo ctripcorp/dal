@@ -98,6 +98,9 @@ public class ProgressResource {
     private static void updatePercent(Progress progress) {
         if (progress == null)
             return;
+        if (progress.getTotalFiles() == 0)
+            return;
+
         try {
             progress.setPercent((int) Math.floor(progress.getDoneFiles() * 100 / progress.getTotalFiles()));
             if (!FINISH.equals(progress.getStatus()) && progress.getPercent() >= 100)

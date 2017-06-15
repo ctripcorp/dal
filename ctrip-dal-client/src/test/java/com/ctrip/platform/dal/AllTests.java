@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client;
+package com.ctrip.platform.dal;
 
 import com.ctrip.platform.dal.dao.configure.CtripDalConfigLoaderTest;
 import org.junit.runner.RunWith;

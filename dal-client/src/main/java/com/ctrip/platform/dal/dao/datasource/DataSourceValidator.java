@@ -17,8 +17,40 @@ public class DataSourceValidator implements Validator {
     public boolean validate(Connection connection, int validateAction) {
         boolean isValid = false;
         try {
-            checkInitSQL(connection, validateAction);
-            isValid = connection.isValid(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+            String query = null;
+            int validationQueryTimeout = -1;
+
+            if (validateAction == PooledConnection.VALIDATE_INIT) {
+                PoolProperties poolProperties = getInitSQL(connection);
+                if (poolProperties != null) {
+                    query = poolProperties.getInitSQL();
+                    validationQueryTimeout = poolProperties.getValidationQueryTimeout();
+                    if (validationQueryTimeout <= 0) {
+                        validationQueryTimeout = DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS;
+                    }
+                }
+            }
+
+            if (query == null) {
+                isValid = connection.isValid(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+                if (!isValid) {
+                    LOGGER.warn("isValid() returned false.");
+                }
+            } else {
+                Statement stmt = null;
+                try {
+                    stmt = connection.createStatement();
+                    stmt.setQueryTimeout(validationQueryTimeout);
+                    stmt.execute(query);
+                    isValid = true;
+                } finally {
+                    if (stmt != null)
+                        try {
+                            stmt.close();
+                        } catch (Exception ignore2) {
+                            /* NOOP */}
+                }
+            }
         } catch (Throwable ex) {
             LOGGER.warn("Datasource validation error", ex);
         }
@@ -26,55 +58,18 @@ public class DataSourceValidator implements Validator {
         return isValid;
     }
 
-    private void checkInitSQL(Connection connection, int validateAction) {
-        if (validateAction != PooledConnection.VALIDATE_INIT) {
-            return;
-        }
-
+    private PoolProperties getInitSQL(Connection connection) {
         String url = null;
         String userName = null;
         try {
-
             url = connection.getMetaData().getURL();
             userName = connection.getMetaData().getUserName();
         } catch (Throwable e) {
             LOGGER.warn("Datasource initSQL error", e);
-            return;
+            return null;
         }
 
-        PoolProperties poolProperties = DataSourceLocator.getPoolProperties(url, userName);
-        if (poolProperties == null)
-            return;
-
-        String query = poolProperties.getInitSQL();
-
-        if (query == null) {
-            return;
-        }
-
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-
-            int validationQueryTimeout = poolProperties.getValidationQueryTimeout();
-            if (validationQueryTimeout > 0) {
-                stmt.setQueryTimeout(validationQueryTimeout);
-            }
-
-            stmt.execute(query);
-            stmt.close();
-        } catch (Throwable ex) {
-            if (poolProperties.getLogValidationErrors()) {
-                LOGGER.warn("SQL Validation error", ex);
-            } else if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Unable to validate object:", ex);
-            }
-            if (stmt != null)
-                try {
-                    stmt.close();
-                } catch (Throwable ignore2) {
-                    /* NOOP */}
-        }
+        return DataSourceLocator.getPoolProperties(url, userName);
     }
 
 }

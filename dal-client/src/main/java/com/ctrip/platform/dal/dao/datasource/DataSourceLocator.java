@@ -164,7 +164,7 @@ public class DataSourceLocator {
         return map.get(userName);
     }
 
-    public static String getShortString(String str, String separator) {
+    private static String getShortString(String str, String separator) {
         if (str == null || str.length() == 0)
             return null;
         int index = str.indexOf(separator);

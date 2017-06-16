@@ -28,6 +28,8 @@ public class DataSourceLocator {
 
     private static final Object LOCK = new Object();
     private static final Object LOCK2 = new Object();
+    private static final String SEMICOLON = ";";
+    private static final String AT = "@";
 
     private static ConcurrentHashMap<String, ConcurrentHashMap<String, PoolProperties>> poolPropertiesMap =
             new ConcurrentHashMap<>();
@@ -125,6 +127,8 @@ public class DataSourceLocator {
         if (userName == null || userName.length() == 0)
             return;
 
+        url = getShortString(url, SEMICOLON);
+        userName = getShortString(userName, AT);
         ConcurrentHashMap<String, PoolProperties> map = poolPropertiesMap.get(url);
 
         if (map == null) {
@@ -152,10 +156,21 @@ public class DataSourceLocator {
         if (userName == null || userName.length() == 0)
             return null;
 
+        url = getShortString(url, SEMICOLON);
+        userName = getShortString(userName, AT);
         ConcurrentHashMap<String, PoolProperties> map = poolPropertiesMap.get(url);
         if (map == null)
             return null;
         return map.get(userName);
+    }
+
+    public static String getShortString(String str, String separator) {
+        if (str == null || str.length() == 0)
+            return null;
+        int index = str.indexOf(separator);
+        if (index > -1)
+            str = str.substring(0, index);
+        return str;
     }
 
 }

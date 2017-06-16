@@ -34,6 +34,7 @@ public class DataSourceValidator implements Validator {
         String url = null;
         String userName = null;
         try {
+
             url = connection.getMetaData().getURL();
             userName = connection.getMetaData().getUserName();
         } catch (Throwable e) {

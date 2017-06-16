@@ -367,16 +367,12 @@ public class DalGroupDbResource {
                 dbset.setProvider("mySqlProvider");
         }
 
-        try {
-            Connection connection = DataSourceUtil.getConnection(dbname);
-            String dbType = connection.getMetaData().getDatabaseProductName();
-            if (dbType != null && (!dbType.equals("Microsoft SQL Server"))) {
-                dbset.setProvider("mySqlProvider");
-            }
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
+        /*
+         * try { Connection connection = DataSourceUtil.getConnection(dbname); String dbType =
+         * connection.getMetaData().getDatabaseProductName(); if (dbType != null &&
+         * (!dbType.equals("Microsoft SQL Server"))) { dbset.setProvider("mySqlProvider"); } } catch (Throwable e) {
+         * LoggerManager.getInstance().error(e); throw e; }
+         */
 
         dbset.setGroupId(groupId);
         int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);

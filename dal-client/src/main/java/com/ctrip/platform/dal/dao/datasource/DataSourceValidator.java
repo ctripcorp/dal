@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Statement;
 
 public class DataSourceValidator implements Validator {
@@ -62,10 +63,11 @@ public class DataSourceValidator implements Validator {
         String url = null;
         String userName = null;
         try {
-            url = connection.getMetaData().getURL();
-            userName = connection.getMetaData().getUserName();
+            DatabaseMetaData metaData = connection.getMetaData();
+            url = metaData.getURL();
+            userName = metaData.getUserName();
         } catch (Throwable e) {
-            LOGGER.warn("Datasource getPoolProperties error", e);
+            LOGGER.warn("DataSourceValidator getPoolProperties error", e);
             return null;
         }
 

@@ -65,7 +65,7 @@ public class DataSourceValidator implements Validator {
             url = connection.getMetaData().getURL();
             userName = connection.getMetaData().getUserName();
         } catch (Throwable e) {
-            LOGGER.warn("Datasource initSQL error", e);
+            LOGGER.warn("Datasource getPoolProperties error", e);
             return null;
         }
 

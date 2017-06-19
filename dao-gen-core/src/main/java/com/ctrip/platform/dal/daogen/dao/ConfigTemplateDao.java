@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.dao;
 
 import com.ctrip.platform.dal.daogen.entity.ConfigTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -17,16 +18,12 @@ public class ConfigTemplateDao {
     }
 
     public List<ConfigTemplate> getAllConfigTemplates() {
-        try {
-            return jdbcTemplate.query("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM config_template",
-                    new RowMapper<ConfigTemplate>() {
-                        public ConfigTemplate mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return ConfigTemplate.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query("SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM config_template",
+                new RowMapper<ConfigTemplate>() {
+                    public ConfigTemplate mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return ConfigTemplate.visitRow(rs);
+                    }
+                });
     }
 
     public ConfigTemplate getConfigTemplateById(int templateId) {
@@ -38,8 +35,8 @@ public class ConfigTemplateDao {
                             return ConfigTemplate.visitRow(rs);
                         }
                     });
-        } catch (Throwable e) {
-            throw e;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
     }
 
@@ -56,8 +53,8 @@ public class ConfigTemplateDao {
                             return ConfigTemplate.visitRow(rs);
                         }
                     });
-        } catch (Throwable e) {
-            throw e;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
     }
 
@@ -65,38 +62,25 @@ public class ConfigTemplateDao {
         if (configTemplate == null) {
             return -1;
         }
-        try {
-            return jdbcTemplate.update(
-                    "INSERT INTO config_template(ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE) VALUES(?,?,?,?)",
-                    configTemplate.getId(), configTemplate.getConfig_type(), configTemplate.getLang_type(),
-                    configTemplate.getTemplate());
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("INSERT INTO config_template(ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE) VALUES(?,?,?,?)",
+                configTemplate.getId(), configTemplate.getConfig_type(), configTemplate.getLang_type(),
+                configTemplate.getTemplate());
     }
 
     public int updateConfigTemplate(ConfigTemplate configTemplate) {
         if (configTemplate == null) {
             return -1;
         }
-        try {
-            return jdbcTemplate.update("UPDATE config_template SET CONFIG_TYPE=?, LANG_TYPE=?, TEMPLATE=? WHERE ID=?",
-                    configTemplate.getConfig_type(), configTemplate.getLang_type(), configTemplate.getTemplate(),
-                    configTemplate.getId());
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("UPDATE config_template SET CONFIG_TYPE=?, LANG_TYPE=?, TEMPLATE=? WHERE ID=?",
+                configTemplate.getConfig_type(), configTemplate.getLang_type(), configTemplate.getTemplate(),
+                configTemplate.getId());
     }
 
     public int deleteConfigTemplate(ConfigTemplate configTemplate) {
         if (configTemplate == null) {
             return -1;
         }
-        try {
-            return jdbcTemplate.update("DELETE FROM config_template WHERE ID=?", configTemplate.getId());
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("DELETE FROM config_template WHERE ID=?", configTemplate.getId());
     }
 
 }

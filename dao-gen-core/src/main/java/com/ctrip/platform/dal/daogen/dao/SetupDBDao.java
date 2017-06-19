@@ -21,13 +21,10 @@ public class SetupDBDao {
             return result;
         }
 
-        try {
-            String[] array = sqlScript.split(";"); // toUpperCase().
-            jdbcTemplate.batchUpdate(array);
-            result = true;
-        } catch (Throwable e) {
-            throw e;
-        }
+        String[] array = sqlScript.split(";"); // toUpperCase().
+        jdbcTemplate.batchUpdate(array);
+        result = true;
+
         return result;
     }
 
@@ -49,8 +46,6 @@ public class SetupDBDao {
                     }
                 }
             }
-        } catch (Throwable e) {
-            throw e;
         } finally {
             JdbcUtils.closeResultSet(resultSet);
         }

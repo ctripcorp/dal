@@ -17,74 +17,54 @@ public class DalApiDao {
     }
 
     public List<DalApi> getAllDalApi() {
-        try {
-            return jdbcTemplate.query(
-                    "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list",
-                    new RowMapper<DalApi>() {
-                        public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalApi.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(
+                "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list",
+                new RowMapper<DalApi>() {
+                    public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalApi.visitRow(rs);
+                    }
+                });
     }
 
     public DalApi getDalApiById(Integer id) {
-        try {
-            List<DalApi> apis = jdbcTemplate.query(
-                    "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE id = ?",
-                    new Object[] {id}, new RowMapper<DalApi>() {
-                        public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalApi.visitRow(rs);
-                        }
-                    });
-            return null != apis && apis.size() > 0 ? apis.get(0) : null;
-        } catch (Throwable e) {
-            throw e;
-        }
+        List<DalApi> apis = jdbcTemplate.query(
+                "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE id = ?",
+                new Object[] {id}, new RowMapper<DalApi>() {
+                    public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalApi.visitRow(rs);
+                    }
+                });
+        return null != apis && apis.size() > 0 ? apis.get(0) : null;
     }
 
     public List<DalApi> getDalApiByLanguage(String language) {
-        try {
-            return jdbcTemplate.query(
-                    "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE language = ?",
-                    new Object[] {language}, new RowMapper<DalApi>() {
-                        public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalApi.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(
+                "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE language = ?",
+                new Object[] {language}, new RowMapper<DalApi>() {
+                    public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalApi.visitRow(rs);
+                    }
+                });
     }
 
     public List<DalApi> getDalApiByLanguageAndDbtype(String language, String db_type) {
-        try {
-            return jdbcTemplate.query(
-                    "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE language = ? AND db_type=?",
-                    new Object[] {language, db_type}, new RowMapper<DalApi>() {
-                        public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalApi.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(
+                "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE language = ? AND db_type=?",
+                new Object[] {language, db_type}, new RowMapper<DalApi>() {
+                    public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalApi.visitRow(rs);
+                    }
+                });
     }
 
     public List<DalApi> getDalApiByLanguageAndDbtypeAndSptype(String language, String db_type, String sp_type) {
-        try {
-            return jdbcTemplate.query(
-                    "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE language = ? AND db_type=? AND sp_type=?",
-                    new Object[] {language, db_type, sp_type}, new RowMapper<DalApi>() {
-                        public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalApi.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(
+                "SELECT id, language, db_type, crud_type, method_declaration, method_description,sp_type FROM api_list WHERE language = ? AND db_type=? AND sp_type=?",
+                new Object[] {language, db_type, sp_type}, new RowMapper<DalApi>() {
+                    public DalApi mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalApi.visitRow(rs);
+                    }
+                });
     }
 
 }

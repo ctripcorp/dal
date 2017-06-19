@@ -19,137 +19,93 @@ public class DalGroupDBDao {
     }
 
     public List<String> getAllDbAllinOneNames() {
-        try {
-            return jdbcTemplate.query("SELECT dbname FROM alldbs ", new RowMapper<String>() {
-                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getString("dbname");
-                }
-            });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query("SELECT dbname FROM alldbs ", new RowMapper<String>() {
+            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getString("dbname");
+            }
+        });
     }
 
     public List<DalGroupDB> getAllGroupDbs() {
-        try {
-            return jdbcTemplate.query(
-                    "SELECT t1.id AS id, t1.dbname AS dbname,t2.group_name AS comment,t1.dal_group_id AS dal_group_id,"
-                            + "t1.db_address AS db_address,t1.db_port AS db_port,t1.db_user AS db_user,t1.db_password AS db_password,t1.db_catalog AS db_catalog,"
-                            + "t1.db_providerName AS db_providerName FROM alldbs t1 LEFT JOIN dal_group t2 ON t1.dal_group_id=t2.id ",
-                    new RowMapper<DalGroupDB>() {
-                        public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalGroupDB.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(
+                "SELECT t1.id AS id, t1.dbname AS dbname,t2.group_name AS comment,t1.dal_group_id AS dal_group_id,"
+                        + "t1.db_address AS db_address,t1.db_port AS db_port,t1.db_user AS db_user,t1.db_password AS db_password,t1.db_catalog AS db_catalog,"
+                        + "t1.db_providerName AS db_providerName FROM alldbs t1 LEFT JOIN dal_group t2 ON t1.dal_group_id=t2.id ",
+                new RowMapper<DalGroupDB>() {
+                    public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalGroupDB.visitRow(rs);
+                    }
+                });
     }
 
     public List<DalGroupDB> getGroupDBsByGroup(int groupId) {
-        try {
-            return jdbcTemplate
-                    .query("SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs"
-                            + " WHERE dal_group_id=?", new Object[] {groupId}, new RowMapper<DalGroupDB>() {
-                                public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                    return DalGroupDB.visitRow(rs);
-                                }
-                            });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate
+                .query("SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs"
+                        + " WHERE dal_group_id=?", new Object[] {groupId}, new RowMapper<DalGroupDB>() {
+                            public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                return DalGroupDB.visitRow(rs);
+                            }
+                        });
     }
 
     public DalGroupDB getGroupDBByDbName(String dbname) {
-        try {
-            List<DalGroupDB> dbs = jdbcTemplate
-                    .query("SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs"
-                            + " WHERE dbname=?", new Object[] {dbname}, new RowMapper<DalGroupDB>() {
-                                public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                    return DalGroupDB.visitRow(rs);
-                                }
-                            });
-            return dbs != null && dbs.size() > 0 ? dbs.get(0) : null;
-        } catch (Throwable e) {
-            throw e;
-        }
+        List<DalGroupDB> dbs = jdbcTemplate
+                .query("SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs"
+                        + " WHERE dbname=?", new Object[] {dbname}, new RowMapper<DalGroupDB>() {
+                            public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                return DalGroupDB.visitRow(rs);
+                            }
+                        });
+        return dbs != null && dbs.size() > 0 ? dbs.get(0) : null;
     }
 
     public List<DalGroupDB> getGroupDbsByDbNames(Set<String> dbNames) {
-        try {
-            return jdbcTemplate.query(String.format(
-                    "select id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName from alldbs where dbname in (%s) ",
-                    StringUtils.join(dbNames, ",")), new RowMapper<DalGroupDB>() {
-                        public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalGroupDB.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(String.format(
+                "select id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName from alldbs where dbname in (%s) ",
+                StringUtils.join(dbNames, ",")), new RowMapper<DalGroupDB>() {
+                    public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalGroupDB.visitRow(rs);
+                    }
+                });
     }
 
     public DalGroupDB getGroupDBByDbId(int id) {
-        try {
-            List<DalGroupDB> dbs = jdbcTemplate.query(
-                    "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE id=?",
-                    new Object[] {id}, new RowMapper<DalGroupDB>() {
-                        public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return DalGroupDB.visitRow(rs);
-                        }
-                    });
-            return dbs != null && dbs.size() > 0 ? dbs.get(0) : null;
-        } catch (Throwable e) {
-            throw e;
-        }
+        List<DalGroupDB> dbs = jdbcTemplate.query(
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE id=?",
+                new Object[] {id}, new RowMapper<DalGroupDB>() {
+                    public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return DalGroupDB.visitRow(rs);
+                    }
+                });
+        return dbs != null && dbs.size() > 0 ? dbs.get(0) : null;
     }
 
     public int insertDalGroupDB(DalGroupDB groupDb) {
-        try {
-            return jdbcTemplate.update(
-                    "INSERT INTO alldbs(dbname, comment, dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName)"
-                            + " VALUE(?,?,?,?,?,?,?,?,?)",
-                    groupDb.getDbname(), groupDb.getComment(), groupDb.getDal_group_id(), groupDb.getDb_address(),
-                    groupDb.getDb_port(), groupDb.getDb_user(), groupDb.getDb_password(), groupDb.getDb_catalog(),
-                    groupDb.getDb_providerName());
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update(
+                "INSERT INTO alldbs(dbname, comment, dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName)"
+                        + " VALUE(?,?,?,?,?,?,?,?,?)",
+                groupDb.getDbname(), groupDb.getComment(), groupDb.getDal_group_id(), groupDb.getDb_address(),
+                groupDb.getDb_port(), groupDb.getDb_user(), groupDb.getDb_password(), groupDb.getDb_catalog(),
+                groupDb.getDb_providerName());
     }
 
     public int updateGroupDB(int id, String dbname, String db_address, String db_port, String db_user,
             String db_password, String db_catalog, String db_providerName) {
-        try {
-            return jdbcTemplate.update(
-                    "UPDATE alldbs SET dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=? WHERE id=?",
-                    dbname, db_address, db_port, db_user, db_password, db_catalog, db_providerName, id);
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update(
+                "UPDATE alldbs SET dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=? WHERE id=?",
+                dbname, db_address, db_port, db_user, db_password, db_catalog, db_providerName, id);
     }
 
     public int updateGroupDB(int id, String comment) {
-        try {
-            return jdbcTemplate.update("UPDATE alldbs SET comment=? WHERE id=?", comment, id);
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("UPDATE alldbs SET comment=? WHERE id=?", comment, id);
     }
 
     public int updateGroupDB(int id, Integer groupId) {
-        try {
-            return jdbcTemplate.update("UPDATE alldbs SET dal_group_id=? WHERE id=?", groupId, id);
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("UPDATE alldbs SET dal_group_id=? WHERE id=?", groupId, id);
     }
 
     public int deleteDalGroupDB(int dbId) {
-        try {
-            return jdbcTemplate.update("DELETE FROM alldbs WHERE id=?", dbId);
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("DELETE FROM alldbs WHERE id=?", dbId);
     }
 
 }

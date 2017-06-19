@@ -17,44 +17,28 @@ public class ApproveTaskDao {
     }
 
     public List<ApproveTask> getAllApproveTaskByApproverId(Integer approverId) {
-        try {
-            return jdbcTemplate.query(
-                    "SELECT id, task_id, task_type, create_time, create_user_id, approve_user_id FROM approve_task WHERE approve_user_id=?",
-                    new Object[] {approverId}, new RowMapper<ApproveTask>() {
-                        public ApproveTask mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return ApproveTask.visitRow(rs);
-                        }
-                    });
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.query(
+                "SELECT id, task_id, task_type, create_time, create_user_id, approve_user_id FROM approve_task WHERE approve_user_id=?",
+                new Object[] {approverId}, new RowMapper<ApproveTask>() {
+                    public ApproveTask mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return ApproveTask.visitRow(rs);
+                    }
+                });
     }
 
     public int insertApproveTask(ApproveTask task) {
-        try {
-            return jdbcTemplate.update(
-                    "INSERT INTO approve_task (task_id, task_type, create_time, create_user_id, approve_user_id) VALUE(?,?,?,?,?)",
-                    task.getTask_id(), task.getTask_type(), task.getCreate_time(), task.getCreate_user_id(),
-                    task.getApprove_user_id());
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update(
+                "INSERT INTO approve_task (task_id, task_type, create_time, create_user_id, approve_user_id) VALUE(?,?,?,?,?)",
+                task.getTask_id(), task.getTask_type(), task.getCreate_time(), task.getCreate_user_id(),
+                task.getApprove_user_id());
     }
 
     public int deleteApproveTaskById(Integer id) {
-        try {
-            return jdbcTemplate.update("DELETE FROM approve_task WHERE id=?", id);
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("DELETE FROM approve_task WHERE id=?", id);
     }
 
     public int deleteApproveTaskByTaskIdAndType(Integer id, String taskType) {
-        try {
-            return jdbcTemplate.update("DELETE FROM approve_task WHERE task_id=? AND task_type=?", id, taskType);
-        } catch (Throwable e) {
-            throw e;
-        }
+        return jdbcTemplate.update("DELETE FROM approve_task WHERE task_id=? AND task_type=?", id, taskType);
     }
 
 }

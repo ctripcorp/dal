@@ -5,6 +5,7 @@ public interface DatabasePoolConfigConstants {
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";
     String VALIDATIONQUERY = "validationQuery";
+    String VALIDATIONQUERYTIMEOUT = "validationQueryTimeout";
     String VALIDATIONINTERVAL = "validationInterval";
     String TIMEBETWEENEVICTIONRUNSMILLIS = "timeBetweenEvictionRunsMillis";
     String MAX_AGE = "maxAge";

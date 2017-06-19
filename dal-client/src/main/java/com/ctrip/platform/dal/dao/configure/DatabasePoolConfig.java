@@ -17,6 +17,7 @@ public class DatabasePoolConfig {
         poolProperties.setTestOnBorrow(DatabasePoolConfigParser.DEFAULT_TESTONBORROW);
         poolProperties.setTestOnReturn(DatabasePoolConfigParser.DEFAULT_TESTONRETURN);
         poolProperties.setValidationQuery(DatabasePoolConfigParser.DEFAULT_VALIDATIONQUERY);
+        poolProperties.setValidationQueryTimeout(DatabasePoolConfigParser.DEFAULT_VALIDATIONQUERYTIMEOUT);
         poolProperties.setValidationInterval(DatabasePoolConfigParser.DEFAULT_VALIDATIONINTERVAL);
         poolProperties.setTimeBetweenEvictionRunsMillis(DatabasePoolConfigParser.DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS);
         poolProperties.setMaxActive(DatabasePoolConfigParser.DEFAULT_MAXACTIVE);

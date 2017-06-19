@@ -37,6 +37,7 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
     public static final boolean DEFAULT_TESTONBORROW = false;
     public static final boolean DEFAULT_TESTONRETURN = false;
     public static final String DEFAULT_VALIDATIONQUERY = "SELECT 1";
+    public static final int DEFAULT_VALIDATIONQUERYTIMEOUT = 5;
     public static final long DEFAULT_VALIDATIONINTERVAL = 30000L;
     public static final int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 30000;
     public static final int DEFAULT_MAXACTIVE = 100;
@@ -54,7 +55,7 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
     public static final String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
 
-    private Map<String, DatabasePoolConfig> poolConfigs = new ConcurrentHashMap<String, DatabasePoolConfig>();
+    private Map<String, DatabasePoolConfig> poolConfigs = new ConcurrentHashMap<>();
 
     private String databaseConfigLocation = null;
 
@@ -179,6 +180,12 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
             String validationQuery = getAttribute(resource, VALIDATIONQUERY);
             prop.setValidationQuery(validationQuery);
             map.put(VALIDATIONQUERY, validationQuery);
+        }
+        if (hasAttribute(resource, VALIDATIONQUERYTIMEOUT)) {
+            String value = getAttribute(resource, VALIDATIONQUERYTIMEOUT);
+            int validationQueryTimeout = Integer.parseInt(value);
+            prop.setValidationQueryTimeout(validationQueryTimeout);
+            map.put(VALIDATIONQUERYTIMEOUT, value);
         }
         if (hasAttribute(resource, VALIDATIONINTERVAL)) {
             String value = getAttribute(resource, VALIDATIONINTERVAL);

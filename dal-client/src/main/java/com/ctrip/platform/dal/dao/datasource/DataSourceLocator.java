@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
-import javax.naming.event.ObjectChangeListener;
 import javax.sql.DataSource;
 
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -16,10 +15,6 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
-
-import static oracle.net.aso.C07.n;
-import static oracle.net.aso.C07.p;
-
 
 public class DataSourceLocator {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);

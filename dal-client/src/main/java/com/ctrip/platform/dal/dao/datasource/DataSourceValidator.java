@@ -21,7 +21,7 @@ public class DataSourceValidator implements Validator {
             int validationQueryTimeout = -1;
 
             if (validateAction == PooledConnection.VALIDATE_INIT) {
-                PoolProperties poolProperties = getInitSQL(connection);
+                PoolProperties poolProperties = checkInitSQL(connection);
                 if (poolProperties != null) {
                     query = poolProperties.getInitSQL();
                     validationQueryTimeout = poolProperties.getValidationQueryTimeout();
@@ -58,7 +58,7 @@ public class DataSourceValidator implements Validator {
         return isValid;
     }
 
-    private PoolProperties getInitSQL(Connection connection) {
+    private PoolProperties checkInitSQL(Connection connection) {
         String url = null;
         String userName = null;
         try {

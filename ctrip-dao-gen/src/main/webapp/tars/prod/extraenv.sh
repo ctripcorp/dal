@@ -1,1 +1,1 @@
-JAVA_OPTS="${JAVA_OPTS} -Dbaiji.service.fx-config-service-url=http://ws.config.framework.ctripcorp.com/Configws/ -Denv=prod"
+JAVA_OPTS="${JAVA_OPTS} -Xms4g -Xmx4g -Xmn2560m -Xss512k -XX:PermSize=128m -XX:MaxPermSize=256m -XX:SoftRefLRUPolicyMSPerMB=0 -XX:-UseAdaptiveSizePolicy -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+ExplicitGCInvokesConcurrent -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps"

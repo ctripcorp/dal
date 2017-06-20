@@ -4,11 +4,11 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.5.2</version>
+        <version>1.5.3</version>
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <framework-bom.version>0.8.15</framework-bom.version>

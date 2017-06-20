@@ -29,6 +29,11 @@
             height: 640px;
         }
 
+        .table-size-2 {
+            width: 1500px;
+            height: 800px;
+        }
+
         .display-none {
             display: none;
         }
@@ -72,7 +77,8 @@
             <a href="#dalVersion" aria-controls="dalVersion" role="tab" data-toggle="tab">DAL.version</a>
         </li>
         <li role="presentation">
-            <a href="#dalLocalDatasource" aria-controls="dalLocalDatasource" role="tab" data-toggle="tab">DAL.local.datasource</a>
+            <a id="anchorLocalDatasource" href="#dalLocalDatasource" aria-controls="dalLocalDatasource" role="tab"
+               data-toggle="tab">DAL.local.datasource</a>
         </li>
     </ul>
     <div class="tab-content">
@@ -116,23 +122,37 @@
             </div>
         </div>
         <div role="tabpanel" class="tab-pane" id="dalLocalDatasource">
-            <div class="scroll table-size">
-                <table id="tableLocal" class="table table-striped table-bordered">
-                    <thead>
-                    <tr>
-                        <th>App Id</th>
-                        <th>BU</th>
-                        <th>Version</th>
-                        <th>App Name</th>
-                        <th>Chinese Name</th>
-                        <th>Owner</th>
-                        <th>Owner Email</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="panel">
+                <div class="panel-heading">
+                    <div id="divExport2" class="container-fluid bg-info">
+                        <span id="spanRefresh" class="label label-success span-margin cursor font-size">刷新数据</span>
+                        <span id="spanExport2" class="label label-success span-margin cursor font-size">导出Excel</span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="divLoading2" class="ld ld-ring ld-cycle"></div>
+                    <div id="divTable2" class="display-none">
+                        <p class="bg-success padding-left-right">
+                            <span id="spanCount2"></span>
+                        </p>
+                        <div>
+                            <table id="tableLocal" class="table table-striped table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>App Id</th>
+                                    <th>BU</th>
+                                    <th>App Name</th>
+                                    <th>Chinese Name</th>
+                                    <th>Owner</th>
+                                    <th>Owner Email</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-
         </div>
     </div>
 </div>

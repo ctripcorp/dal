@@ -10,11 +10,16 @@
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.7</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
         <file_encoding>UTF-8</file_encoding>
+        <dao-gen-core-version>1.2.7</dao-gen-core-version>
+        <dal-dao-gen-version>1.2.7</dal-dao-gen-version>
+        <cat-client-version>2.9.0</cat-client-version>
+        <clogging-version>4.1.7</clogging-version>
+        <framework-foundation-version>1.5.2</framework-foundation-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -23,30 +28,63 @@
                 <artifactId>activation</artifactId>
                 <version>1.1.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.jasig.cas.client</groupId>
+                <artifactId>cas-client-core-infosec-credis</artifactId>
+                <version>3.1.12</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.ctrip.framework.clogging</groupId>
+                        <artifactId>clogging-agent</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.dianping.cat</groupId>
+                <artifactId>cat-client</artifactId>
+                <version>${cat-client-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.clogging</groupId>
+                <artifactId>clogging-agent</artifactId>
+                <version>${clogging-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework</groupId>
+                <artifactId>framework-foundation</artifactId>
+                <version>${framework-foundation-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>1.2.1</version>
+            <version>${dao-gen-core-version}</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.2.1</version>
+            <version>${dal-dao-gen-version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
-            <version>1.2.1</version>
+            <version>${dal-dao-gen-version}</version>
             <type>warpath</type>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-core-infosec-credis</artifactId>
-            <version>3.1.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.cat</groupId>
+            <artifactId>cat-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework.clogging</groupId>
+            <artifactId>clogging-agent</artifactId>
         </dependency>
     </dependencies>
     <profiles>
@@ -110,6 +148,9 @@
             </resource>
             <resource>
                 <directory>src/main/resources/velocity</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources/log</directory>
             </resource>
         </resources>
         <finalName>ROOT</finalName>

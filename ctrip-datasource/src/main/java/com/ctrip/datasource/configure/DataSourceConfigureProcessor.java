@@ -4,10 +4,8 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigConstants;
 import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.sun.net.httpserver.Authenticator;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +14,6 @@ import qunar.tc.qconfig.client.MapConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static oracle.net.aso.C07.s;
 
 public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceConfigureProcessor.class);
@@ -197,6 +193,10 @@ public class DataSourceConfigureProcessor implements DatabasePoolConfigConstants
         String validationQuery = datasource.get(VALIDATIONQUERY);
         if (validationQuery != null)
             prop.setValidationQuery(validationQuery);
+
+        String validationQueryTimeout = datasource.get(VALIDATIONQUERYTIMEOUT);
+        if (validationQueryTimeout != null)
+            prop.setValidationQueryTimeout(Integer.parseInt(validationQueryTimeout));
 
         String validationInterval = datasource.get(VALIDATIONINTERVAL);
         if (validationInterval != null)

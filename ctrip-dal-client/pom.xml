@@ -7,7 +7,7 @@
         <version>1.5.2</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.8.5</version>
+    <version>1.8.6</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
@@ -23,11 +23,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-	        <dependency>
-	            <groupId>com.ctrip.platform</groupId>
-	            <artifactId>ctrip-datasource</artifactId>
-	            <version>1.0.5</version>
-	        </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>ctrip-datasource</artifactId>
+                <version>1.0.6</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

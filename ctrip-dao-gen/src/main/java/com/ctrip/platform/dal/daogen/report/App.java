@@ -10,6 +10,7 @@ public class App {
 
     private String dept;
     private String version;
+    private String orgName;
 
     public String getName() {
         return name;
@@ -74,4 +75,13 @@ public class App {
     public void setVersion(String version) {
         this.version = version;
     }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
+
 }

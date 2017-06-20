@@ -54,17 +54,24 @@ public class DalReportDao {
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REQUEST_BODY = "request_body";
 
+    private static final String LOCAL_DATASOURCE = "DAL.local.datasource";
+
+    private static final String ALL = "All";
+
     private static Vector<DalReport> reportVector = null;
     private static ConcurrentHashMap<String, CMSApp> reportMap = null;
     private static Date lastUpdate = null;
 
+    private static final int columnCount = 6;
+    private static final int columnCount2 = 7;
+
     // minutes
     private static final long initDelay = 0;
-    private static final long delay = 5;
+    private static final long delay = 60;
 
     public void init() {
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleWithFixedDelay(new ReportTask(), initDelay, delay, TimeUnit.MINUTES);
+        service.scheduleAtFixedRate(new ReportTask(), initDelay, delay, TimeUnit.MINUTES);
     }
 
     public List<App> getLocalDatasourceAppList() throws Exception {
@@ -80,11 +87,11 @@ public class DalReportDao {
             app.setId(appId);
             DalReport report = map.get(appId);
             if (report != null) {
-                app.setDept(report.getDept());
                 app.setVersion(report.getVersion());
             }
             CMSApp cmsApp = cmsMap.get(appId);
             if (cmsApp != null) {
+                app.setOrgName(cmsApp.getOrgName());
                 app.setName(cmsApp.getAppName());
                 app.setChineseName(cmsApp.getChineseName());
                 app.setOwner(cmsApp.getOwner());
@@ -148,12 +155,18 @@ public class DalReportDao {
             return raw;
         Map<String, Version> map = version.getNames();
         if (map != null && map.size() > 0) {
-            List<String> depts = Arrays.asList(ips);
+            List<String> depts = new ArrayList<>();
+            depts.add(ALL);
+            List<String> temp = Arrays.asList(ips);
+            depts.addAll(temp);
             raw.setDepts(depts);
 
-            List<String> versions = new ArrayList<>(map.keySet());
-            versions = getFuzzyList(versions, DAL_JAVA);
-            Collections.sort(versions);
+            List<String> versions = new ArrayList<>();
+            versions.add(ALL);
+            List<String> list = new ArrayList<>(map.keySet());
+            list = getFuzzyList(list, DAL_JAVA);
+            Collections.sort(list);
+            versions.addAll(list);
             raw.setVersions(versions);
         }
 
@@ -162,7 +175,7 @@ public class DalReportDao {
 
     public Map<String, List<String>> getMapByDept(String dept) throws Exception {
         Map<String, List<String>> map = new LinkedHashMap<>();
-        List<DalReport> list = getDalReport(dept, null);
+        List<DalReport> list = getDalReport(dept, null); // filter by dept
         if (list == null || list.size() == 0)
             return map;
         for (DalReport report : list) {
@@ -179,7 +192,7 @@ public class DalReportDao {
 
     public Map<String, List<String>> getMapByVersion(String version) throws Exception {
         Map<String, List<String>> map = new LinkedHashMap<>();
-        List<DalReport> list = getDalReport(null, version);
+        List<DalReport> list = getDalReport(null, version); // filter by version
         if (list == null || list.size() == 0)
             return map;
         for (DalReport report : list) {
@@ -298,7 +311,7 @@ public class DalReportDao {
                     createCells(row, list);
                     index++;
                 }
-                setAutoSizeColumn(sheet);
+                setAutoSizeColumn(sheet, columnCount);
             }
         }
 
@@ -317,16 +330,45 @@ public class DalReportDao {
                     createCells(row, list);
                     index++;
                 }
-                setAutoSizeColumn(sheet);
+                setAutoSizeColumn(sheet, columnCount);
             }
         }
 
         return workbook;
     }
 
-    private void setAutoSizeColumn(Sheet sheet) {
+    public Workbook getWorkbook2() throws Exception {
+        Workbook workbook = new HSSFWorkbook();
+        List<App> list = getLocalDatasourceAppList();
+        if (list == null || list.size() == 0)
+            return workbook;
+
+        int index = 0;
+        Sheet sheet = workbook.createSheet(LOCAL_DATASOURCE);
+        Row rowTitle = sheet.createRow(index);
+        List<String> title = getLocalDatasourceTitle();
+        createCells(rowTitle, title);
+        index++;
+
+        for (App app : list) {
+            List<String> temp = new ArrayList<>();
+            temp.add(app.getId());
+            temp.add(app.getOrgName());
+            temp.add(app.getName());
+            temp.add(app.getChineseName());
+            temp.add(app.getOwner());
+            temp.add(app.getOwnerEmail());
+            Row row = sheet.createRow(index);
+            createCells(row, temp);
+            index++;
+        }
+        setAutoSizeColumn(sheet, columnCount2);
+        return workbook;
+    }
+
+    private void setAutoSizeColumn(Sheet sheet, int length) {
         if (sheet != null) {
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < length; i++) {
                 sheet.autoSizeColumn(i);
             }
         }
@@ -345,6 +387,17 @@ public class DalReportDao {
         title.add("BU");
         List<String> temp = getCommonTitle();
         title.addAll(temp);
+        return title;
+    }
+
+    private List<String> getLocalDatasourceTitle() {
+        List<String> title = new ArrayList<>();
+        title.add("App Id");
+        title.add("BU");
+        title.add("App Name");
+        title.add("Chinese Name");
+        title.add("Owner");
+        title.add("Owner Email");
         return title;
     }
 
@@ -391,8 +444,9 @@ public class DalReportDao {
         Vector<DalReport> vector = new Vector<>();
         RawInfo raw = getRawInfo();
         Filter filter = new Filter();
-        filter.setDept("酒店");
+        // filter.setDept("酒店"); // debug
         List<Url> urls = getUrls(raw, filter);
+        int index = 0;
         if (urls != null && urls.size() > 0) {
             for (Url url : urls) {
                 Root root = HttpUtil.getJSONEntity(Root.class, url.getUrl(), null, HttpMethod.HttpGet);
@@ -404,6 +458,8 @@ public class DalReportDao {
                     report.setVersion(url.getVersion());
                     vector.add(report);
                 }
+                index++;
+                // System.out.println(index);
             }
         }
         reportVector = vector;
@@ -418,9 +474,13 @@ public class DalReportDao {
                 if (dept != null && dept.length() > 0) {
                     if (report.getDept().equals(dept))
                         flag |= true;
+                    if (dept.equals(ALL))
+                        flag |= true;
                 }
                 if (version != null && version.length() > 0) {
                     if (report.getVersion().equals(version))
+                        flag |= true;
+                    if (version.equals(ALL))
                         flag |= true;
                 }
                 if (flag)

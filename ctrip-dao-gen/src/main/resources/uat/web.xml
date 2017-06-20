@@ -8,14 +8,6 @@
         <param-value>930201</param-value>
     </context-param>
     <context-param>
-        <param-name>loggingServerIP</param-name>
-        <param-value>collector.logging.uat.qa.nt.ctripcorp.com</param-value>
-    </context-param>
-    <context-param>
-        <param-name>loggingServerPort</param-name>
-        <param-value>63100</param-value>
-    </context-param>
-    <context-param>
         <param-name>credisServiceUrl</param-name>
         <param-value>http://ws.config.framework.uat.qa.nt.ctripcorp.com/configws/</param-value>
     </context-param>

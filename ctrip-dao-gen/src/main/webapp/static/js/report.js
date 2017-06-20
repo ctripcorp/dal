@@ -2,6 +2,8 @@
     $(function () {
         getRaw();
         bindExportExcel();
+        bindLocalDatasourceAppList();
+        bindExportExcel2();
     });
 
     function getPieByDept(obj) {
@@ -80,7 +82,7 @@
 
             //info
             $("#spanCount").html(sprintf("共%s条记录", records.length));
-            $("#spanLastUpdate").html(sprintf("上一次缓存更新时间：%s", data[0].lastUpdate));
+            $("#spanLastUpdate").html(sprintf("上一次缓存更新时间：%s (缓存每小时更新一次)", data[0].lastUpdate));
 
             //table
             var tableBody = "";
@@ -171,7 +173,7 @@
 
             //info
             $("#spanCount").html(sprintf("共%s条记录", records.length));
-            $("#spanLastUpdate").html(sprintf("上一次缓存更新时间：%s", data[0].lastUpdate));
+            $("#spanLastUpdate").html(sprintf("上一次缓存更新时间：%s (缓存每小时更新一次)", data[0].lastUpdate));
 
             //table
             var tableBody = "";
@@ -234,5 +236,45 @@
             form.submit();
         });
     };
+
+    function bindLocalDatasourceAppList() {
+        $(document.body).on("click", "#anchorLocalDatasource,#spanRefresh", function () {
+            getLocalDatasourceAppList();
+        });
+    }
+
+    function getLocalDatasourceAppList() {
+        var divLoading = $("#divLoading2");
+        var divTable = $("#divTable2");
+        divTable.hide();
+        divLoading.show();
+        $.getJSON("/rest/report/getLocalDatasourceAppList", function (data) {
+            divLoading.hide();
+            $("#spanCount2").html(sprintf("共%s条记录", data.length));
+
+            var tableBody = "";
+            var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+            $.each(data, function (i, n) {
+                tableBody += sprintf(rowTemplate, n.id, n.orgName, n.name, n.chineseName, n.owner, n.ownerEmail);
+            });
+
+            $("#tableLocal tbody").html(tableBody);
+            $("#divTable2").show();
+        });
+    }
+
+    function bindExportExcel2() {
+        $(document.body).on("click", "#spanExport2", function () {
+            var form = $("<form>");
+            form.attr("style", "display:none");
+            form.attr("target", "");
+            form.attr("method", "get");
+            form.attr("action", "/rest/report/exportExcel2");
+
+            $(document.body).append(form);
+            form.submit();
+        });
+    };
+
 })(jQuery, window, document);
 

@@ -138,12 +138,13 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private static final Map<String, String> titanMapping = new HashMap<>();
 
     static {
-        // LPT,FAT/FWS,UAT,PRO
+        // LPT,FAT/FWS,UAT,PRO(PROD)
         titanMapping.put("FAT", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("FWS", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
+        titanMapping.put("PROD", "https://ws.titan.ctripcorp.com/titanservice/query");
     }
 
     /**

@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class DefaultUserInfo implements UserInfo {
-    private DefaultUserInfo() {
-    }
+    private DefaultUserInfo() {}
 
     private static final DefaultUserInfo INSTANCE = new DefaultUserInfo();
 
@@ -22,12 +22,12 @@ public class DefaultUserInfo implements UserInfo {
 
     private static final DaoOfLoginUser userDao = SpringBeanGetter.getDaoOfLoginUser();
 
-    private LoginUser getLoginUser(String userNo) {
+    private LoginUser getLoginUser(String userNo) throws SQLException {
         return userDao.getUserByNo(userNo);
     }
 
     @Override
-    public String getEmployee(String userNo) {
+    public String getEmployee(String userNo) throws SQLException {
         String number = null;
         LoginUser user = getLoginUser(userNo);
         if (user != null) {
@@ -37,7 +37,7 @@ public class DefaultUserInfo implements UserInfo {
     }
 
     @Override
-    public String getName(String userNo) {
+    public String getName(String userNo) throws SQLException {
         String name = null;
         LoginUser user = getLoginUser(userNo);
         if (user != null) {
@@ -47,7 +47,7 @@ public class DefaultUserInfo implements UserInfo {
     }
 
     @Override
-    public String getMail(String userNo) {
+    public String getMail(String userNo) throws SQLException {
         String email = null;
         LoginUser user = getLoginUser(userNo);
         if (user != null) {
@@ -75,15 +75,13 @@ public class DefaultUserInfo implements UserInfo {
     @Override
     public DalGroupDB getDefaultDBInfo(String dbType) {
         DalGroupDB db = new DalGroupDB();
-
-        if (dbType == null || dbType.isEmpty()) {
+        if (dbType == null || dbType.isEmpty())
             return db;
-        }
 
-        db.setDb_address("");
-        db.setDb_port("");
-        db.setDb_user("");
-        db.setDb_password("");
+        db.setDbAddress("");
+        db.setDbPort("");
+        db.setDbUser("");
+        db.setDbPassword("");
         return db;
     }
 

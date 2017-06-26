@@ -21,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,7 +42,7 @@ public class ProjectResource {
     @GET
     @Path("users")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<LoginUser> getUsers() {
+    public List<LoginUser> getUsers() throws SQLException {
         return SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
     }
 
@@ -77,7 +78,7 @@ public class ProjectResource {
         if (userGroups != null && userGroups.size() >= 1) {
             Set<Integer> groupIds = new HashSet<>();
             for (UserGroup userGroup : userGroups) {
-                groupIds.add(userGroup.getGroup_id());
+                groupIds.add(userGroup.getGroupId());
             }
             groups = getAllJoinedDalGroup(groupIds);
         } else {
@@ -91,7 +92,7 @@ public class ProjectResource {
         return groups;
     }
 
-    private List<DalGroup> getAllJoinedDalGroup(Set<Integer> groupIds) {
+    private List<DalGroup> getAllJoinedDalGroup(Set<Integer> groupIds) throws SQLException {
         Set<Integer> parentGroupIds = new HashSet<>();
         for (Integer childGroupId : groupIds) {
             List<GroupRelation> relations =
@@ -100,7 +101,7 @@ public class ProjectResource {
                 continue;
             }
             for (GroupRelation relation : relations) {
-                parentGroupIds.add(relation.getCurrent_group_id());
+                parentGroupIds.add(relation.getCurrentGroupId());
             }
         }
         // the group that user have joined
@@ -108,7 +109,7 @@ public class ProjectResource {
         List<DalGroup> groups = new ArrayList<>();
         for (Integer groupId : groupIds) {
             DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-            dalGroup.setText(dalGroup.getGroup_name());
+            dalGroup.setText(dalGroup.getGroupName());
             dalGroup.setIcon("glyphicon glyphicon-folder-open");
             dalGroup.setChildren(true);
             groups.add(dalGroup);
@@ -119,7 +120,7 @@ public class ProjectResource {
     @GET
     @Path("groupprojects")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
+    public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) throws SQLException {
         try {
             int groupID = -1;
             groupID = Integer.parseInt(groupId);
@@ -135,7 +136,7 @@ public class ProjectResource {
     @GET
     @Path("project")
     @Produces(MediaType.APPLICATION_JSON)
-    public Project getProject(@QueryParam("id") String id) {
+    public Project getProject(@QueryParam("id") String id) throws SQLException {
         try {
             return SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
         } catch (Throwable e) {
@@ -178,10 +179,10 @@ public class ProjectResource {
                 }
                 proj.setName(name);
                 proj.setNamespace(namespace);
-                proj.setDal_config_name(dalconfigname);
-                proj.setDal_group_id(project_group_id);
-                proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-                proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                proj.setDalConfigName(dalconfigname);
+                proj.setDalGroupId(project_group_id);
+                proj.setUpdateUserNo(user.getUserName() + "(" + userNo + ")");
+                proj.setUpdateTime(new Timestamp(System.currentTimeMillis()));
                 SpringBeanGetter.getDaoOfProject().insertProject(proj);
                 return Status.OK;
             }
@@ -206,9 +207,9 @@ public class ProjectResource {
                 proj.setId(id);
                 proj.setName(name);
                 proj.setNamespace(namespace);
-                proj.setDal_config_name(dalconfigname);
-                proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-                proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                proj.setDalConfigName(dalconfigname);
+                proj.setUpdateUserNo(user.getUserName() + "(" + userNo + ")");
+                proj.setUpdateTime(new Timestamp(System.currentTimeMillis()));
                 SpringBeanGetter.getDaoOfProject().updateProject(proj);
             } else if (action.equals("delete")) {
                 proj.setId(Integer.valueOf(id));
@@ -273,9 +274,9 @@ public class ProjectResource {
         }
     }
 
-    private boolean validateProjectUpdatePermision(String userNo, int prjId, int project_group_id) {
+    private boolean validateProjectUpdatePermision(String userNo, int prjId, int project_group_id) throws SQLException {
         boolean havePermision = false;
-        project_group_id = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId).getDal_group_id();
+        project_group_id = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId).getDalGroupId();
         havePermision = validateProjectUpdatePermisionInCurrentGroup(userNo, prjId, project_group_id);
         if (havePermision) {
             return havePermision;
@@ -284,7 +285,8 @@ public class ProjectResource {
         return havePermision;
     }
 
-    private boolean validateProjectUpdatePermisionInCurrentGroup(String userNo, int prjId, int project_group_id) {
+    private boolean validateProjectUpdatePermisionInCurrentGroup(String userNo, int prjId, int project_group_id)
+            throws SQLException {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> userGroups =
                 SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(project_group_id, user.getId());
@@ -300,14 +302,15 @@ public class ProjectResource {
         String update_user_no = user.getUserName() + "(" + userNo + ")";
         // the user is the original team user, but is not admin, so can only
         // modify prj which is created by himself
-        if (update_user_no.equalsIgnoreCase(prj.getUpdate_user_no())) {
+        if (update_user_no.equalsIgnoreCase(prj.getUpdateUserNo())) {
             return true;
         }
 
         return false;
     }
 
-    private boolean validateProjectUpdatePermisionInChildGroup(String userNo, int prjId, int project_group_id) {
+    private boolean validateProjectUpdatePermisionInChildGroup(String userNo, int prjId, int project_group_id)
+            throws SQLException {
         List<GroupRelation> relations =
                 SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(project_group_id);
         if (relations == null || relations.size() < 1) {
@@ -317,11 +320,11 @@ public class ProjectResource {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
         for (GroupRelation relation : relations) {
-            if (relation.getChild_group_role() == 1) {// the child group, but
+            if (relation.getChildGroupRole() == 1) {// the child group, but
                 // have admin role
                 // permision
                 List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao()
-                        .getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), user.getId());
+                        .getUserGroupByGroupIdAndUserId(relation.getChildGroupId(), user.getId());
                 if (exists != null && exists.size() > 0) { // the user is in the
                     // specific group
                     // whic have
@@ -331,7 +334,7 @@ public class ProjectResource {
                 }
             } else { // the child group which only have limited permison
                 Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(prjId);
-                String updateUserNo = prj.getUpdate_user_no();
+                String updateUserNo = prj.getUpdateUserNo();
                 if (updateUserNo == null || updateUserNo.isEmpty()) { // the prj have no
                     // update user
                     // info
@@ -372,11 +375,11 @@ public class ProjectResource {
                 int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
                 Set<Integer> childGroupIds = getChildGroupId(project_group_id);
                 for (UserGroup userGroup : userGroups) {
-                    if (!childGroupIds.contains(userGroup.getGroup_id())) {
+                    if (!childGroupIds.contains(userGroup.getGroupId())) {
                         continue;
                     }
                     List<UserGroup> exists = SpringBeanGetter.getDalUserGroupDao()
-                            .getUserGroupByGroupIdAndUserId(userGroup.getGroup_id(), userId);
+                            .getUserGroupByGroupIdAndUserId(userGroup.getGroupId(), userId);
                     if (exists != null && exists.size() > 0) {
                         return true;
                     }
@@ -387,7 +390,7 @@ public class ProjectResource {
         return false;
     }
 
-    private Set<Integer> getChildGroupId(int currentGroupId) {
+    private Set<Integer> getChildGroupId(int currentGroupId) throws SQLException {
         Set<Integer> sets = new HashSet<>();
         List<GroupRelation> relations =
                 SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
@@ -396,7 +399,7 @@ public class ProjectResource {
         }
 
         for (GroupRelation relation : relations) {
-            sets.add(relation.getChild_group_id());
+            sets.add(relation.getChildGroupId());
         }
         return sets;
     }
@@ -412,7 +415,7 @@ public class ProjectResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Status addLackDbset(@FormParam("project_id") int project_id) {
         try {
-            int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
+            int groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDalGroupId();
             String info = addLackDb(project_id, groupId);
 
             Set<String> notExistDbset = getLackDbset(groupId, project_id);
@@ -456,7 +459,7 @@ public class ProjectResource {
      *
      * @param dbname
      */
-    private String genDefaultDbset(int groupId, String dbname) {
+    private String genDefaultDbset(int groupId, String dbname) throws SQLException {
         DatabaseSet dbset = new DatabaseSet();
         dbset.setName(dbname);
         dbset.setProvider("sqlProvider");
@@ -468,7 +471,7 @@ public class ProjectResource {
             dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
 
             DatabaseSetEntry entry = new DatabaseSetEntry();
-            entry.setDatabaseSet_Id(dbset.getId());
+            entry.setDatabasesetId(dbset.getId());
             entry.setDatabaseType("Master");
             entry.setName(dbname);
             entry.setConnectionString(dbname);
@@ -478,7 +481,7 @@ public class ProjectResource {
         return info;
     }
 
-    private String addLackDb(int project_id, int groupId) {
+    private String addLackDb(int project_id, int groupId) throws SQLException {
         Set<String> notExistDb = getLackDatabase(groupId, project_id);
         List<String> dbAllinOneNames = SpringBeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
         Set<String> allInOneDbnames = new HashSet<>(dbAllinOneNames);
@@ -486,9 +489,9 @@ public class ProjectResource {
         String info = "";
         for (String dbname : notExistDb) {
             DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
-            if (null != groupdb && groupdb.getDal_group_id() > 0) {
-                DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
-                info += "<span style='color:red;'>数据库" + groupdb.getDbname() + " 已经加入 " + group.getGroup_comment()
+            if (null != groupdb && groupdb.getDalGroupId() > 0) {
+                DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDalGroupId());
+                info += "<span style='color:red;'>数据库" + groupdb.getDbname() + " 已经加入 " + group.getGroupComment()
                         + "，一键补全失败</span><br/>";
             } else if (allInOneDbnames.contains(dbname)) {
                 DalGroupDB groupDb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
@@ -565,13 +568,13 @@ public class ProjectResource {
         generator.generateCode(context);
     }
 
-    private HashSet<String> getProjectSqlStyles(int projectId) {
+    private HashSet<String> getProjectSqlStyles(int projectId) throws SQLException {
         HashSet<String> hashSet = new HashSet<>();
         List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(projectId);
 
         if (autoTasks != null && autoTasks.size() > 0) {
             for (GenTaskBySqlBuilder genTaskBySqlBuilder : autoTasks) {
-                hashSet.add(genTaskBySqlBuilder.getSql_style());
+                hashSet.add(genTaskBySqlBuilder.getSqlStyle());
             }
         }
 
@@ -580,7 +583,7 @@ public class ProjectResource {
 
         if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
             for (GenTaskByTableViewSp genTaskByTableViewSp : tableViewSpTasks) {
-                hashSet.add(genTaskByTableViewSp.getSql_style());
+                hashSet.add(genTaskByTableViewSp.getSqlStyle());
             }
         }
 
@@ -588,14 +591,14 @@ public class ProjectResource {
 
         if (sqlTasks != null && sqlTasks.size() > 0) {
             for (GenTaskByFreeSql genTaskByFreeSql : sqlTasks) {
-                hashSet.add(genTaskByFreeSql.getSql_style());
+                hashSet.add(genTaskByFreeSql.getSqlStyle());
             }
         }
 
         return hashSet;
     }
 
-    private Status validatePermision(String userNo, int project_id) {
+    private Status validatePermision(String userNo, int project_id) throws SQLException {
         Status status = Status.ERROR;
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
@@ -608,7 +611,7 @@ public class ProjectResource {
             return status;
         }
         int groupId = -1;
-        groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDal_group_id();
+        groupId = SpringBeanGetter.getDaoOfProject().getProjectByID(project_id).getDalGroupId();
         String info = "";
         // 验证project的task所需要的databaseSet在组内是否存在
         status = validateDbsetPermision(groupId, project_id);
@@ -629,7 +632,7 @@ public class ProjectResource {
         return Status.OK;
     }
 
-    private Status validateDbsetPermision(int groupId, int project_id) {
+    private Status validateDbsetPermision(int groupId, int project_id) throws SQLException {
         Status status = Status.ERROR;
         Set<String> notExistDbset = getLackDbset(groupId, project_id);
 
@@ -642,7 +645,7 @@ public class ProjectResource {
             }
             info += "</ul>";
             DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-            info = "你所在" + group.getGroup_name() + "中不存在以下逻辑数据库(databaseSet)：</br>" + info
+            info = "你所在" + group.getGroupName() + "中不存在以下逻辑数据库(databaseSet)：</br>" + info
                     + "请先添加逻辑数据库(databaseSet)到你所在DAL Team!</br>"
                     + "点击此处添加逻辑数据库(databaseSet) ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a>";
             status.setInfo(info);
@@ -650,7 +653,7 @@ public class ProjectResource {
         }
     }
 
-    private Set<String> getLackDbset(int groupId, int project_id) {
+    private Set<String> getLackDbset(int groupId, int project_id) throws SQLException {
         List<DatabaseSet> groupDbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
         Set<String> group_dbset_names = new HashSet<>();
         for (DatabaseSet dbset : groupDbsets) {
@@ -660,7 +663,7 @@ public class ProjectResource {
         Set<String> notExistDbset = new HashSet<>();
         List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
         for (GenTaskBySqlBuilder task : autoTasks) {
-            String databaseSet_name = task.getDatabaseSetName();
+            String databaseSet_name = task.getDbName();
             if (!group_dbset_names.contains(databaseSet_name)) {
                 notExistDbset.add(databaseSet_name);
             }
@@ -669,7 +672,7 @@ public class ProjectResource {
         List<GenTaskByTableViewSp> tableViewSpTasks =
                 SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
         for (GenTaskByTableViewSp task : tableViewSpTasks) {
-            String databaseSet_name = task.getDatabaseSetName();
+            String databaseSet_name = task.getDbName();
             if (!group_dbset_names.contains(databaseSet_name)) {
                 notExistDbset.add(databaseSet_name);
             }
@@ -677,7 +680,7 @@ public class ProjectResource {
 
         List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(project_id);
         for (GenTaskByFreeSql task : sqlTasks) {
-            String databaseSet_name = task.getDatabaseSetName();
+            String databaseSet_name = task.getDbName();
             if (!group_dbset_names.contains(databaseSet_name)) {
                 notExistDbset.add(databaseSet_name);
             }
@@ -686,7 +689,7 @@ public class ProjectResource {
         return notExistDbset;
     }
 
-    private Status validateDbPermision(int groupId, int project_id) {
+    private Status validateDbPermision(int groupId, int project_id) throws SQLException {
         Status status = Status.ERROR;
         Set<String> notExistDb = getLackDatabase(groupId, project_id);
 
@@ -699,7 +702,7 @@ public class ProjectResource {
             }
             info += "</ul>";
             DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
-            info = "你所在" + group.getGroup_name() + "中不存在以下数据库(database)：</br>" + info
+            info = "你所在" + group.getGroupName() + "中不存在以下数据库(database)：</br>" + info
                     + "请先添加数据库(database)到你所在DAL Team!</br>"
                     + "点击此处添加组内数据库(database) ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a>";
             status.setInfo(info);
@@ -707,7 +710,7 @@ public class ProjectResource {
         }
     }
 
-    private Set<String> getLackDatabase(int groupId, int project_id) {
+    private Set<String> getLackDatabase(int groupId, int project_id) throws SQLException {
         List<DalGroupDB> groupDbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
         Set<String> group_db_names = new HashSet<>();
         for (DalGroupDB db : groupDbs) {
@@ -724,7 +727,7 @@ public class ProjectResource {
         return notExistDb;
     }
 
-    private Set<String> getProjectAllRequireDbname(int project_id) {
+    private Set<String> getProjectAllRequireDbname(int project_id) throws SQLException {
         List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(project_id);
         List<GenTaskByTableViewSp> tableViewSpTasks =
                 SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
@@ -732,13 +735,13 @@ public class ProjectResource {
         List<String> allRequireDbset = new ArrayList<>();
 
         for (GenTaskBySqlBuilder temp : autoTasks) {
-            allRequireDbset.add(temp.getDatabaseSetName());
+            allRequireDbset.add(temp.getDbName());
         }
         for (GenTaskByTableViewSp temp : tableViewSpTasks) {
-            allRequireDbset.add(temp.getDatabaseSetName());
+            allRequireDbset.add(temp.getDbName());
         }
         for (GenTaskByFreeSql temp : sqlTasks) {
-            allRequireDbset.add(temp.getDatabaseSetName());
+            allRequireDbset.add(temp.getDbName());
         }
         Set<String> result = new HashSet<>();
         for (String dbsetName : allRequireDbset) {

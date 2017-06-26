@@ -1,49 +1,59 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Types;
 
-public class DatabaseSet implements Comparable<DatabaseSet> {
-    private int id;
+@Entity
+@Database(name = "dao")
+@Table(name = "databaseset")
+public class DatabaseSet implements Comparable<DatabaseSet>, DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "name")
+    @Type(value = Types.VARCHAR)
     private String name;
+
+    @Column(name = "provider")
+    @Type(value = Types.VARCHAR)
     private String provider;
+
+    @Column(name = "shardingStrategy")
+    @Type(value = Types.LONGVARCHAR)
     private String shardingStrategy;
-    private int groupId;
 
-    private String update_user_no;
-    private Timestamp update_time;
-    private String str_update_time = "";
+    @Column(name = "groupId")
+    @Type(value = Types.INTEGER)
+    private Integer groupId;
 
-    public static DatabaseSet visitRow(ResultSet rs) throws SQLException {
-        DatabaseSet set = new DatabaseSet();
-        set.setId(rs.getInt(1));
-        set.setName(rs.getString(2));
-        set.setProvider(rs.getString(3));
-        set.setShardingStrategy(rs.getString(4));
-        set.setGroupId(rs.getInt(5));
-        set.setUpdate_user_no(rs.getString("update_user_no"));
-        set.setUpdate_time(rs.getTimestamp("update_time"));
-        try {
-            Date date = new Date(set.getUpdate_time().getTime());
-            set.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-        } catch (Throwable e) {
-        }
-        return set;
-    }
+    @Column(name = "update_user_no")
+    @Type(value = Types.VARCHAR)
+    private String updateUserNo;
 
-    @Override
-    public int compareTo(DatabaseSet o) {
-        return this.name.compareTo(o.getName());
-    }
+    @Column(name = "update_time")
+    @Type(value = Types.TIMESTAMP)
+    private Timestamp updateTime;
 
-    public int getId() {
+    private String str_update_time;
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -71,32 +81,28 @@ public class DatabaseSet implements Comparable<DatabaseSet> {
         this.shardingStrategy = shardingStrategy;
     }
 
-    public int getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
     }
 
-    public boolean hasShardingStrategy() {
-        return this.shardingStrategy != null && !this.shardingStrategy.isEmpty();
+    public String getUpdateUserNo() {
+        return updateUserNo;
     }
 
-    public String getUpdate_user_no() {
-        return update_user_no;
+    public void setUpdateUserNo(String updateUserNo) {
+        this.updateUserNo = updateUserNo;
     }
 
-    public void setUpdate_user_no(String update_user_no) {
-        this.update_user_no = update_user_no;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public Timestamp getUpdate_time() {
-        return update_time;
-    }
-
-    public void setUpdate_time(Timestamp update_time) {
-        this.update_time = update_time;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     public String getStr_update_time() {
@@ -105,6 +111,11 @@ public class DatabaseSet implements Comparable<DatabaseSet> {
 
     public void setStr_update_time(String str_update_time) {
         this.str_update_time = str_update_time;
+    }
+
+    @Override
+    public int compareTo(DatabaseSet o) {
+        return name.compareTo(o.getName());
     }
 
 }

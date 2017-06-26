@@ -1,115 +1,176 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Types;
 
-public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
-    private int id;
-    private int project_id;
-    private String allInOneName;
-    private String databaseSetName;
-    private String class_name;
-    private String pojo_name;
-    private String method_name;
-    // 操作类型，可取值:select、update
-    private String crud_type;
-    private String sql_content;
+@Entity
+@Database(name = "dao")
+@Table(name = "task_sql")
+public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "db_name")
+    @Type(value = Types.VARCHAR)
+    private String dbName;
+
+    @Column(name = "class_name")
+    @Type(value = Types.VARCHAR)
+    private String className;
+
+    @Column(name = "pojo_name")
+    @Type(value = Types.VARCHAR)
+    private String pojoName;
+
+    @Column(name = "method_name")
+    @Type(value = Types.VARCHAR)
+    private String methodName;
+
+    @Column(name = "crud_type")
+    @Type(value = Types.VARCHAR)
+    private String crudType;
+
+    @Column(name = "sql_content")
+    @Type(value = Types.LONGVARCHAR)
+    private String sqlContent;
+
+    @Column(name = "project_id")
+    @Type(value = Types.INTEGER)
+    private Integer projectId;
+
+    @Column(name = "parameters")
+    @Type(value = Types.LONGVARCHAR)
     private String parameters;
-    private boolean generated;
-    private int version;
-    private String update_user_no;
-    private Timestamp update_time;
-    private String str_update_time = "";
-    private String comment;
-    // 可取值：Single、First、List，表示select返回的结果类型
-    private String scalarType;
-    // 实体类型，取值：EntityType、SimpleType，分别表示实体类型、简单类型
-    // 若取值为SimpleType，则pojo_name的值为：简单类型
-    private String pojoType;
-    // 是否增加分页方法，true：增加
-    private boolean pagination;
-    // csharp 或者 java，表示C#风格或者Java风格，@Name or ?
-    private String sql_style;
 
-    private int approved;
-    private String str_approved;
+    @Column(name = "generated")
+    @Type(value = Types.BIT)
+    private Boolean generated;
+
+    @Column(name = "version")
+    @Type(value = Types.INTEGER)
+    private Integer version;
+
+    @Column(name = "update_user_no")
+    @Type(value = Types.VARCHAR)
+    private String updateUserNo;
+
+    @Column(name = "update_time")
+    @Type(value = Types.TIMESTAMP)
+    private Timestamp updateTime;
+
+    @Column(name = "comment")
+    @Type(value = Types.LONGVARCHAR)
+    private String comment;
+
+    @Column(name = "scalarType")
+    @Type(value = Types.VARCHAR)
+    private String scalarType;
+
+    @Column(name = "pojoType")
+    @Type(value = Types.VARCHAR)
+    private String pojoType;
+
+    @Column(name = "pagination")
+    @Type(value = Types.BIT)
+    private Boolean pagination;
+
+    @Column(name = "sql_style")
+    @Type(value = Types.VARCHAR)
+    private String sqlStyle;
+
+    @Column(name = "approved")
+    @Type(value = Types.INTEGER)
+    private Integer approved;
+
+    @Column(name = "approveMsg")
+    @Type(value = Types.LONGVARCHAR)
     private String approveMsg;
 
+    @Column(name = "hints")
+    @Type(value = Types.VARCHAR)
     private String hints;
 
-    public static GenTaskByFreeSql visitRow(ResultSet rs) throws SQLException {
-        GenTaskByFreeSql task = new GenTaskByFreeSql();
-        task.setId(rs.getInt(1));
-        task.setProject_id(rs.getInt(2));
+    private String allInOneName;
 
-        String databaseSet = rs.getString(3);
+    private String str_approved;
 
-        task.setAllInOneName(DatabaseSetUtils.getAllInOneName(databaseSet));
-        task.setDatabaseSetName(databaseSet);
-        task.setClass_name(rs.getString(4));
-        task.setPojo_name(rs.getString(5));
-        task.setMethod_name(rs.getString(6));
-        task.setCrud_type(rs.getString(7));
-        task.setSql_content(rs.getString(8));
-        task.setParameters(rs.getString(9));
-        task.setGenerated(rs.getBoolean(10));
-        task.setVersion(rs.getInt(11));
-        task.setUpdate_user_no(rs.getString(12));
-        task.setUpdate_time(rs.getTimestamp(13));
-        task.setComment(rs.getString(14));
-        task.setScalarType(rs.getString("scalarType"));
-        task.setPojoType(rs.getString("pojoType"));
-        task.setPagination(rs.getBoolean("pagination"));
-        task.setSql_style(rs.getString("sql_style"));
+    private String str_update_time;
 
-        task.setApproved(rs.getInt("approved"));
-        task.setApproveMsg(rs.getString("approveMsg"));
-
-        task.setHints(rs.getString("hints"));
-
-        try {
-            if (task.getApproved() == 1) {
-                task.setStr_approved("未审批");
-            } else if (task.getApproved() == 2) {
-                task.setStr_approved("通过");
-            } else if (task.getApproved() == 3) {
-                task.setStr_approved("未通过");
-            } else {
-                task.setStr_approved("通过");
-            }
-            Date date = new Date(task.getUpdate_time().getTime());
-            task.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-        } catch (Throwable e) {
-        }
-        return task;
+    public Integer getId() {
+        return id;
     }
 
-    @Override
-    public int compareTo(GenTaskByFreeSql o) {
-        int result = this.getAllInOneName().compareTo(o.getAllInOneName());
-        if (result != 0) {
-            return result;
-        }
-
-        result = this.getClass_name().compareTo(o.getClass_name());
-        if (result != 0) {
-            return result;
-        }
-
-        return this.getMethod_name().compareTo(o.getMethod_name());
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public String getDatabaseSetName() {
-        return databaseSetName;
+    public String getDbName() {
+        return dbName;
     }
 
-    public void setDatabaseSetName(String databaseSetName) {
-        this.databaseSetName = databaseSetName;
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getPojoName() {
+        return pojoName;
+    }
+
+    public void setPojoName(String pojoName) {
+        this.pojoName = pojoName;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getCrudType() {
+        return crudType;
+    }
+
+    public void setCrudType(String crudType) {
+        this.crudType = crudType;
+    }
+
+    public String getSqlContent() {
+        return sqlContent;
+    }
+
+    public void setSqlContent(String sqlContent) {
+        this.sqlContent = sqlContent;
+    }
+
+    public Integer getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
     }
 
     public String getParameters() {
@@ -120,100 +181,36 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
         this.parameters = parameters;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getProject_id() {
-        return project_id;
-    }
-
-    public void setProject_id(int project_id) {
-        this.project_id = project_id;
-    }
-
-    public String getAllInOneName() {
-        return allInOneName;
-    }
-
-    public void setAllInOneName(String allInOneName) {
-        this.allInOneName = allInOneName;
-    }
-
-    public String getClass_name() {
-        return class_name;
-    }
-
-    public void setClass_name(String class_name) {
-        this.class_name = class_name;
-    }
-
-    public String getPojo_name() {
-        return pojo_name;
-    }
-
-    public void setPojo_name(String pojo_name) {
-        this.pojo_name = pojo_name;
-    }
-
-    public String getMethod_name() {
-        return method_name;
-    }
-
-    public void setMethod_name(String method_name) {
-        this.method_name = method_name;
-    }
-
-    public String getCrud_type() {
-        return crud_type;
-    }
-
-    public void setCrud_type(String crud_type) {
-        this.crud_type = crud_type;
-    }
-
-    public String getSql_content() {
-        return sql_content;
-    }
-
-    public void setSql_content(String sql_content) {
-        this.sql_content = sql_content;
-    }
-
-    public boolean isGenerated() {
+    public Boolean getGenerated() {
         return generated;
     }
 
-    public void setGenerated(boolean generated) {
+    public void setGenerated(Boolean generated) {
         this.generated = generated;
     }
 
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 
-    public String getUpdate_user_no() {
-        return update_user_no;
+    public String getUpdateUserNo() {
+        return updateUserNo;
     }
 
-    public void setUpdate_user_no(String update_user_no) {
-        this.update_user_no = update_user_no;
+    public void setUpdateUserNo(String updateUserNo) {
+        this.updateUserNo = updateUserNo;
     }
 
-    public Timestamp getUpdate_time() {
-        return update_time;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public void setUpdate_time(Timestamp update_time) {
-        this.update_time = update_time;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     public String getComment() {
@@ -240,44 +237,28 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
         this.pojoType = pojoType;
     }
 
-    public boolean isPagination() {
+    public Boolean getPagination() {
         return pagination;
     }
 
-    public void setPagination(boolean pagination) {
+    public void setPagination(Boolean pagination) {
         this.pagination = pagination;
     }
 
-    public String getSql_style() {
-        return sql_style;
+    public String getSqlStyle() {
+        return sqlStyle;
     }
 
-    public void setSql_style(String sql_style) {
-        this.sql_style = sql_style;
+    public void setSqlStyle(String sqlStyle) {
+        this.sqlStyle = sqlStyle;
     }
 
-    public String getStr_update_time() {
-        return str_update_time;
-    }
-
-    public void setStr_update_time(String str_update_time) {
-        this.str_update_time = str_update_time;
-    }
-
-    public int getApproved() {
+    public Integer getApproved() {
         return approved;
     }
 
-    public void setApproved(int approved) {
+    public void setApproved(Integer approved) {
         this.approved = approved;
-    }
-
-    public String getStr_approved() {
-        return str_approved;
-    }
-
-    public void setStr_approved(String str_approved) {
-        this.str_approved = str_approved;
     }
 
     public String getApproveMsg() {
@@ -295,4 +276,42 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql> {
     public void setHints(String hints) {
         this.hints = hints;
     }
+
+    public String getAllInOneName() {
+        return allInOneName;
+    }
+
+    public void setAllInOneName(String allInOneName) {
+        this.allInOneName = allInOneName;
+    }
+
+    public void setStr_update_time(String str_update_time) {
+        this.str_update_time = str_update_time;
+    }
+
+    public String getStr_update_time() {
+        return str_update_time;
+    }
+
+    public void setStr_approved(String str_approved) {
+        this.str_approved = str_approved;
+    }
+
+    public String getStr_approved() {
+        return str_approved;
+    }
+
+    @Override
+    public int compareTo(GenTaskByFreeSql o) {
+        int result = getAllInOneName().compareTo(o.getAllInOneName());
+        if (result != 0)
+            return result;
+
+        result = getClassName().compareTo(o.getClassName());
+        if (result != 0)
+            return result;
+
+        return getMethodName().compareTo(o.getMethodName());
+    }
+
 }

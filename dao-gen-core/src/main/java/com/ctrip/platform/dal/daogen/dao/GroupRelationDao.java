@@ -1,82 +1,108 @@
 package com.ctrip.platform.dal.daogen.dao;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GroupRelation;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
 
 public class GroupRelationDao {
-    private JdbcTemplate jdbcTemplate;
+    private DalTableDao<GroupRelation> client;
+    private static final String DATA_BASE = "dao";
+    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+    private DalQueryDao queryDao = null;
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    private DalRowMapper<GroupRelation> groupRelationRowMapper = null;
+
+    public GroupRelationDao() throws SQLException {
+        client = new DalTableDao<>(new DalDefaultJpaParser<>(GroupRelation.class));
+        groupRelationRowMapper = new DalDefaultJpaMapper<>(GroupRelation.class);
+        queryDao = new DalQueryDao(DATA_BASE);
     }
 
-    public List<GroupRelation> getAllGroupRelation() {
-        return jdbcTemplate.query(
-                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation",
-                new RowMapper<GroupRelation>() {
-                    public GroupRelation mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GroupRelation.visitRow(rs);
-                    }
-                });
+    public List<GroupRelation> getAllGroupRelationByCurrentGroupId(Integer currentGroupId) throws SQLException {
+        FreeSelectSqlBuilder<List<GroupRelation>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation WHERE current_group_id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "current_group_id", Types.INTEGER, currentGroupId);
+        builder.mapWith(groupRelationRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.query(builder, parameters, hints);
     }
 
-    public List<GroupRelation> getAllGroupRelationByCurrentGroupId(Integer currentGroupId) {
-        return jdbcTemplate.query(
-                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation WHERE current_group_id=?",
-                new Object[] {currentGroupId}, new RowMapper<GroupRelation>() {
-                    public GroupRelation mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GroupRelation.visitRow(rs);
-                    }
-                });
+    public List<GroupRelation> getAllGroupRelationByChildGroupId(Integer childGroupId) throws SQLException {
+        FreeSelectSqlBuilder<List<GroupRelation>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation WHERE child_group_id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "child_group_id", Types.INTEGER, childGroupId);
+        builder.mapWith(groupRelationRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.query(builder, parameters, hints);
     }
 
-    public List<GroupRelation> getAllGroupRelationByChildGroupId(Integer childGroupId) {
-        return jdbcTemplate.query(
-                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation WHERE child_group_id=?",
-                new Object[] {childGroupId}, new RowMapper<GroupRelation>() {
-                    public GroupRelation mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GroupRelation.visitRow(rs);
-                    }
-                });
+    public GroupRelation getGroupRelationByCurrentGroupIdAndChildGroupId(Integer currentGroupId, Integer childGroupId)
+            throws SQLException {
+        FreeSelectSqlBuilder<GroupRelation> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation WHERE current_group_id = ? AND child_group_id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "current_group_id", Types.INTEGER, currentGroupId);
+        parameters.set(i++, "child_group_id", Types.INTEGER, childGroupId);
+        builder.mapWith(groupRelationRowMapper).requireFirst().nullable();
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.query(builder, parameters, hints);
     }
 
-    public GroupRelation getGroupRelationByCurrentGroupIdAndChildGroupId(Integer currentGroupId, Integer childGroupId) {
-        List<GroupRelation> result = jdbcTemplate.query(
-                "SELECT id, current_group_id, child_group_id, child_group_role, adduser, update_user_no ,update_time FROM group_relation WHERE current_group_id=? AND child_group_id=?",
-                new Object[] {currentGroupId, childGroupId}, new RowMapper<GroupRelation>() {
-                    public GroupRelation mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GroupRelation.visitRow(rs);
-                    }
-                });
-        if (result != null && result.size() > 0)
-            return result.get(0);
-        return null;
-    }
-
-    public int insertChildGroup(GroupRelation relation) {
-        return jdbcTemplate.update(
-                "INSERT INTO group_relation(current_group_id, child_group_id, child_group_role, adduser, update_user_no, update_time) VALUE(?,?,?,?,?,?)",
-                relation.getCurrent_group_id(), relation.getChild_group_id(), relation.getChild_group_role(),
-                relation.getAdduser(), relation.getUpdate_user_no(), relation.getUpdate_time());
+    public int insertChildGroup(GroupRelation relation) throws SQLException {
+        if (null == relation)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.insert(hints, relation);
     }
 
     public int updateGroupRelation(Integer currentGroupId, Integer childGroupId, Integer childGroupRole,
-            Integer adduser, String updateUserNo, Timestamp updateTime) {
-
-        return jdbcTemplate.update(
-                "UPDATE group_relation SET child_group_role=?, adduser=?, update_user_no=?,update_time=? WHERE current_group_id=? AND child_group_id=?",
-                childGroupRole, adduser, updateUserNo, updateTime, currentGroupId, childGroupId);
+            Integer adduser, String updateUserNo, Timestamp updateTime) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate(
+                "UPDATE group_relation SET child_group_role=?, adduser=?, update_user_no=?,update_time=? WHERE current_group_id = ? AND child_group_id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "child_group_role", Types.INTEGER, childGroupRole);
+        parameters.set(i++, "adduser", Types.INTEGER, adduser);
+        parameters.set(i++, "update_user_no", Types.VARCHAR, updateUserNo);
+        parameters.set(i++, "update_time", Types.TIMESTAMP, updateTime);
+        parameters.set(i++, "current_group_id", Types.INTEGER, currentGroupId);
+        parameters.set(i++, "child_group_id", Types.INTEGER, childGroupId);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int deleteChildGroupByCurrentGroupIdAndChildGroupId(Integer currentGroupId, Integer childGroupId) {
-        return jdbcTemplate.update("DELETE FROM group_relation WHERE current_group_id=? AND child_group_id=?",
-                currentGroupId, childGroupId);
+    public int deleteChildGroupByCurrentGroupIdAndChildGroupId(Integer currentGroupId, Integer childGroupId)
+            throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("DELETE FROM group_relation WHERE current_group_id = ? AND child_group_id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "current_group_id", Types.INTEGER, currentGroupId);
+        parameters.set(i++, "child_group_id", Types.INTEGER, childGroupId);
+
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 }

@@ -4,7 +4,6 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
-import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import org.apache.log4j.Logger;
@@ -15,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -39,7 +38,7 @@ public class DalGroupDbResource {
             List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
             for (DalGroup group : groups) {
-                group.setText(group.getGroup_name());
+                group.setText(group.getGroupName());
                 group.setIcon("glyphicon glyphicon-folder-close");
                 group.setChildren(false);
             }
@@ -52,7 +51,7 @@ public class DalGroupDbResource {
         }
     }
 
-    private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
+    private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) throws SQLException {
         List<DalGroup> result = new ArrayList<DalGroup>(groups.size());
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
@@ -61,7 +60,7 @@ public class DalGroupDbResource {
                 Iterator<DalGroup> ite = groups.iterator();
                 while (ite.hasNext()) {
                     DalGroup group = ite.next();
-                    if (group.getId() == joinedGroup.getGroup_id()) {
+                    if (group.getId() == joinedGroup.getGroupId()) {
                         result.add(group);
                         ite.remove();
                     }
@@ -75,7 +74,7 @@ public class DalGroupDbResource {
     @GET
     @Path("groupdb")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DalGroupDB> getGroupUsers(@QueryParam("groupId") String id) {
+    public List<DalGroupDB> getGroupUsers(@QueryParam("groupId") String id) throws SQLException {
         try {
             int groupId = -1;
             groupId = Integer.parseInt(id);
@@ -91,18 +90,18 @@ public class DalGroupDbResource {
     @GET
     @Path("allgroupdbs")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DalGroupDB> getAllGroupDbs() {
+    public List<DalGroupDB> getAllGroupDbs() throws SQLException {
         List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getAllGroupDbs();
         for (DalGroupDB db : dbs) {
-            db.setDb_user("******");
-            db.setDb_password("******");
+            db.setDbUser("******");
+            db.setDbPassword("******");
 
-            if (DatabaseType.SQLServer.getValue().equals(db.getDb_providerName())) {
-                db.setDb_providerName("SQLServer");
-            } else if (DatabaseType.MySQL.getValue().equals(db.getDb_providerName())) {
-                db.setDb_providerName("MySQL");
+            if (DatabaseType.SQLServer.getValue().equals(db.getDbProvidername())) {
+                db.setDbProvidername("SQLServer");
+            } else if (DatabaseType.MySQL.getValue().equals(db.getDbProvidername())) {
+                db.setDbProvidername("MySQL");
             } else {
-                db.setDb_providerName("unknown");
+                db.setDbProvidername("unknown");
             }
         }
         Collections.sort(dbs, new Comparator<DalGroupDB>() {
@@ -140,10 +139,10 @@ public class DalGroupDbResource {
             }
 
             DalGroupDB groupdb = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
-            if (null != groupdb && groupdb.getDal_group_id() > 0) {
-                DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
+            if (null != groupdb && groupdb.getDalGroupId() > 0) {
+                DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDalGroupId());
                 Status status = Status.ERROR;
-                status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
+                status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroupName());
                 return status;
             }
 
@@ -306,13 +305,13 @@ public class DalGroupDbResource {
         }
     }
 
-    private boolean validatePermision(String userNo, int groupId) {
+    private boolean validatePermision(String userNo, int groupId) throws SQLException {
         boolean havaPermision = false;
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urGroups != null && urGroups.size() > 0) {
             for (UserGroup urGroup : urGroups) {
-                if (urGroup.getGroup_id() == groupId) {
+                if (urGroup.getGroupId() == groupId) {
                     havaPermision = true;
                 }
             }
@@ -320,7 +319,7 @@ public class DalGroupDbResource {
         return havaPermision;
     }
 
-    private boolean validateTransferPermision(String userNo, int dbId) {
+    private boolean validateTransferPermision(String userNo, int dbId) throws SQLException {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         if (user == null) {
             return false;
@@ -329,7 +328,7 @@ public class DalGroupDbResource {
         if (urGroups != null && urGroups.size() > 0) {
             for (UserGroup urGroup : urGroups) {
                 List<DalGroupDB> groupDbs =
-                        SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(urGroup.getGroup_id());
+                        SpringBeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(urGroup.getGroupId());
                 if (groupDbs != null && groupDbs.size() > 0) {
                     for (DalGroupDB db : groupDbs) {
                         if (db.getId() == dbId) {
@@ -367,20 +366,13 @@ public class DalGroupDbResource {
                 dbset.setProvider("mySqlProvider");
         }
 
-        /*
-         * try { Connection connection = DataSourceUtil.getConnection(dbname); String dbType =
-         * connection.getMetaData().getDatabaseProductName(); if (dbType != null &&
-         * (!dbType.equals("Microsoft SQL Server"))) { dbset.setProvider("mySqlProvider"); } } catch (Throwable e) {
-         * LoggerManager.getInstance().error(e); throw e; }
-         */
-
         dbset.setGroupId(groupId);
         int ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
         if (ret > 0) {
             dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
 
             DatabaseSetEntry entry = new DatabaseSetEntry();
-            entry.setDatabaseSet_Id(dbset.getId());
+            entry.setDatabasesetId(dbset.getId());
             entry.setDatabaseType("Master");
             entry.setName(dbname);
             entry.setConnectionString(dbname);

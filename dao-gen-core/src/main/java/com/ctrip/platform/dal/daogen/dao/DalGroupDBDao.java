@@ -1,111 +1,143 @@
 package com.ctrip.platform.dal.daogen.dao;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public class DalGroupDBDao {
-    private JdbcTemplate jdbcTemplate;
+    private static final String DATA_BASE = "dao";
+    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+    private DalQueryDao queryDao = null;
+    private DalTableDao<DalGroupDB> client;
+    private DalRowMapper<DalGroupDB> dalGroupDBRowMapper = null;
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public DalGroupDBDao() throws SQLException {
+        client = new DalTableDao<>(new DalDefaultJpaParser<>(DalGroupDB.class));
+        dalGroupDBRowMapper = new DalDefaultJpaMapper<>(DalGroupDB.class);
+        queryDao = new DalQueryDao(DATA_BASE);
     }
 
-    public List<String> getAllDbAllinOneNames() {
-        return jdbcTemplate.query("SELECT dbname FROM alldbs ", new RowMapper<String>() {
-            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getString("dbname");
-            }
-        });
+    public List<DalGroupDB> getAllGroupDbs() throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.query(builder, hints);
     }
 
-    public List<DalGroupDB> getAllGroupDbs() {
-        return jdbcTemplate.query(
-                "SELECT t1.id AS id, t1.dbname AS dbname,t2.group_name AS comment,t1.dal_group_id AS dal_group_id,"
-                        + "t1.db_address AS db_address,t1.db_port AS db_port,t1.db_user AS db_user,t1.db_password AS db_password,t1.db_catalog AS db_catalog,"
-                        + "t1.db_providerName AS db_providerName FROM alldbs t1 LEFT JOIN dal_group t2 ON t1.dal_group_id=t2.id ",
-                new RowMapper<DalGroupDB>() {
-                    public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DalGroupDB.visitRow(rs);
-                    }
-                });
+    public List<String> getAllDbAllinOneNames() throws SQLException {
+        FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate("SELECT dbname FROM alldbs");
+        StatementParameters parameters = new StatementParameters();
+        builder.mapWith(dalGroupDBRowMapper).simpleType();
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.query(builder, parameters, hints);
     }
 
-    public List<DalGroupDB> getGroupDBsByGroup(int groupId) {
-        return jdbcTemplate
-                .query("SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs"
-                        + " WHERE dal_group_id=?", new Object[] {groupId}, new RowMapper<DalGroupDB>() {
-                            public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                return DalGroupDB.visitRow(rs);
-                            }
-                        });
+    public DalGroupDB getGroupDBByDbId(int id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.queryByPk(id, hints);
     }
 
-    public DalGroupDB getGroupDBByDbName(String dbname) {
-        List<DalGroupDB> dbs = jdbcTemplate
-                .query("SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs"
-                        + " WHERE dbname=?", new Object[] {dbname}, new RowMapper<DalGroupDB>() {
-                            public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                return DalGroupDB.visitRow(rs);
-                            }
-                        });
-        return dbs != null && dbs.size() > 0 ? dbs.get(0) : null;
+    public List<DalGroupDB> getGroupDBsByGroup(int groupId) throws SQLException {
+        FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE dal_group_id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        builder.mapWith(dalGroupDBRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.query(builder, parameters, hints);
     }
 
-    public List<DalGroupDB> getGroupDbsByDbNames(Set<String> dbNames) {
-        return jdbcTemplate.query(String.format(
-                "select id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName from alldbs where dbname in (%s) ",
-                StringUtils.join(dbNames, ",")), new RowMapper<DalGroupDB>() {
-                    public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DalGroupDB.visitRow(rs);
-                    }
-                });
+    public DalGroupDB getGroupDBByDbName(String dbname) throws SQLException {
+        FreeSelectSqlBuilder<DalGroupDB> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE dbname=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dbname", Types.VARCHAR, dbname);
+        builder.mapWith(dalGroupDBRowMapper).requireFirst().nullable();
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.query(builder, parameters, hints);
     }
 
-    public DalGroupDB getGroupDBByDbId(int id) {
-        List<DalGroupDB> dbs = jdbcTemplate.query(
-                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE id=?",
-                new Object[] {id}, new RowMapper<DalGroupDB>() {
-                    public DalGroupDB mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DalGroupDB.visitRow(rs);
-                    }
-                });
-        return dbs != null && dbs.size() > 0 ? dbs.get(0) : null;
+    public List<DalGroupDB> getGroupDbsByDbNames(Set<String> dbNames) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.select("id", "db_catalog", "db_port", "db_providerName", "dbname", "db_password", "db_user",
+                "db_address", "comment", "dal_group_id");
+        builder.in("dbname", new ArrayList<>(dbNames), Types.VARCHAR, false);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.query(builder, hints);
     }
 
-    public int insertDalGroupDB(DalGroupDB groupDb) {
-        return jdbcTemplate.update(
-                "INSERT INTO alldbs(dbname, comment, dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName)"
-                        + " VALUE(?,?,?,?,?,?,?,?,?)",
-                groupDb.getDbname(), groupDb.getComment(), groupDb.getDal_group_id(), groupDb.getDb_address(),
-                groupDb.getDb_port(), groupDb.getDb_user(), groupDb.getDb_password(), groupDb.getDb_catalog(),
-                groupDb.getDb_providerName());
+    public int insertDalGroupDB(DalGroupDB groupDb) throws SQLException {
+        if (null == groupDb)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.insert(hints, groupDb);
     }
 
     public int updateGroupDB(int id, String dbname, String db_address, String db_port, String db_user,
-            String db_password, String db_catalog, String db_providerName) {
-        return jdbcTemplate.update(
-                "UPDATE alldbs SET dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=? WHERE id=?",
-                dbname, db_address, db_port, db_user, db_password, db_catalog, db_providerName, id);
+            String db_password, String db_catalog, String db_providerName) throws Exception {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate(
+                "UPDATE alldbs SET dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=? WHERE id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dbname", Types.VARCHAR, dbname);
+        parameters.set(i++, "db_address", Types.VARCHAR, db_address);
+        parameters.set(i++, "db_port", Types.VARCHAR, db_port);
+        parameters.set(i++, "db_user", Types.VARCHAR, db_user);
+        parameters.set(i++, "db_password", Types.VARCHAR, db_password);
+        parameters.set(i++, "db_catalog", Types.VARCHAR, db_catalog);
+        parameters.set(i++, "db_providerName", Types.VARCHAR, db_providerName);
+        parameters.set(i++, "id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int updateGroupDB(int id, String comment) {
-        return jdbcTemplate.update("UPDATE alldbs SET comment=? WHERE id=?", comment, id);
+    public int updateGroupDB(int id, String comment) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("UPDATE alldbs SET comment=? WHERE id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "comment", Types.VARCHAR, comment);
+        parameters.set(i++, "id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int updateGroupDB(int id, Integer groupId) {
-        return jdbcTemplate.update("UPDATE alldbs SET dal_group_id=? WHERE id=?", groupId, id);
+    public int updateGroupDB(int id, Integer groupId) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("UPDATE alldbs SET dal_group_id=? WHERE id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        parameters.set(i++, "id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int deleteDalGroupDB(int dbId) {
-        return jdbcTemplate.update("DELETE FROM alldbs WHERE id=?", dbId);
+    public int deleteDalGroupDB(int id) throws SQLException {
+        DalGroupDB groupDb = new DalGroupDB();
+        groupDb.setId(id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.delete(hints, groupDb);
     }
 
 }

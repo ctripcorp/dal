@@ -1,62 +1,76 @@
 package com.ctrip.platform.dal.daogen.entity;
 
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 import com.ctrip.platform.dal.daogen.utils.ConnectionStringUtil;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Types;
 
-public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
-    private int id;
+@Entity
+@Database(name = "dao")
+@Table(name = "databasesetentry")
+public class DatabaseSetEntry implements Comparable<DatabaseSetEntry>, DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "name")
+    @Type(value = Types.LONGVARCHAR)
     private String name;
+
+    @Column(name = "databaseType")
+    @Type(value = Types.VARCHAR)
     private String databaseType;
+
+    @Column(name = "sharding")
+    @Type(value = Types.VARCHAR)
     private String sharding;
+
+    @Column(name = "connectionString")
+    @Type(value = Types.VARCHAR)
     private String connectionString;
-    //private String allInOneConnectionString;
+
+    @Column(name = "databaseSet_Id")
+    @Type(value = Types.INTEGER)
+    private Integer databasesetId;
+
+    @Column(name = "update_user_no")
+    @Type(value = Types.VARCHAR)
+    private String updateUserNo;
+
+    @Column(name = "update_time")
+    @Type(value = Types.TIMESTAMP)
+    private Timestamp updateTime;
+
+    private String str_update_time;
+
     private String providerName;
 
-    private int databaseSet_Id;
-
-    private String update_user_no;
-    private Timestamp update_time;
-    private String str_update_time = "";
-
     private String userName;
+
     private String password;
+
     private String dbAddress;
+
     private String dbPort;
+
     private String dbCatalog;
 
-    public static DatabaseSetEntry visitRow(ResultSet rs) throws SQLException {
-        DatabaseSetEntry entry = new DatabaseSetEntry();
-        entry.setId(rs.getInt(1));
-        entry.setName(rs.getString(2));
-        entry.setDatabaseType(rs.getString(3));
-        entry.setSharding(rs.getString(4));
-        entry.setConnectionString(rs.getString(5));
-        entry.setDatabaseSet_Id(rs.getInt(6));
-        entry.setUpdate_user_no(rs.getString("update_user_no"));
-        entry.setUpdate_time(rs.getTimestamp("update_time"));
-        try {
-            Date date = new Date(entry.getUpdate_time().getTime());
-            entry.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-        } catch (Throwable e) {
-        }
-        return entry;
-    }
-
-    @Override
-    public int compareTo(DatabaseSetEntry o) {
-        return (this.id + this.name + this.databaseType + this.sharding + this.connectionString).compareTo(o.getId() + o.getName() + o.getDatabaseType() + o.getSharding() + o.getConnectionString());
-    }
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -77,7 +91,7 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
     }
 
     public String getSharding() {
-        return sharding == null ? "" : sharding;
+        return sharding;
     }
 
     public void setSharding(String sharding) {
@@ -92,46 +106,28 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
         this.connectionString = connectionString;
     }
 
-    public String getAllInOneConnectionString() {
-        return ConnectionStringUtil.GetConnectionString(getProviderName().toLowerCase(), getDbAddress(), getDbPort(), getUserName(), getPassword(), getDbCatalog());
+    public Integer getDatabasesetId() {
+        return databasesetId;
     }
 
-    /*
-    public void setAllInOneConnectionString(String allInOneConnectionString) {
-        this.allInOneConnectionString = allInOneConnectionString;
-    }
-    */
-
-    public String getProviderName() {
-        return providerName;
+    public void setDatabasesetId(Integer databasesetId) {
+        this.databasesetId = databasesetId;
     }
 
-    public void setProviderName(String providerName) {
-        this.providerName = providerName;
+    public String getUpdateUserNo() {
+        return updateUserNo;
     }
 
-    public int getDatabaseSet_Id() {
-        return databaseSet_Id;
+    public void setUpdateUserNo(String updateUserNo) {
+        this.updateUserNo = updateUserNo;
     }
 
-    public void setDatabaseSet_Id(int databaseSet_Id) {
-        this.databaseSet_Id = databaseSet_Id;
+    public Timestamp getUpdateTime() {
+        return updateTime;
     }
 
-    public String getUpdate_user_no() {
-        return update_user_no;
-    }
-
-    public void setUpdate_user_no(String update_user_no) {
-        this.update_user_no = update_user_no;
-    }
-
-    public Timestamp getUpdate_time() {
-        return update_time;
-    }
-
-    public void setUpdate_time(Timestamp update_time) {
-        this.update_time = update_time;
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
     }
 
     public String getStr_update_time() {
@@ -140,6 +136,14 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
 
     public void setStr_update_time(String str_update_time) {
         this.str_update_time = str_update_time;
+    }
+
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
     }
 
     public String getUserName() {
@@ -181,4 +185,16 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry> {
     public void setDbCatalog(String dbCatalog) {
         this.dbCatalog = dbCatalog;
     }
+
+    public String getAllInOneConnectionString() {
+        return ConnectionStringUtil.GetConnectionString(getProviderName().toLowerCase(), getDbAddress(), getDbPort(),
+                getUserName(), getPassword(), getDbCatalog());
+    }
+
+    @Override
+    public int compareTo(DatabaseSetEntry o) {
+        return (id + name + databaseType + sharding + connectionString)
+                .compareTo(o.getId() + o.getName() + o.getDatabaseType() + o.getSharding() + o.getConnectionString());
+    }
+
 }

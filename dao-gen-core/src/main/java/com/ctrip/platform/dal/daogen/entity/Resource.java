@@ -3,8 +3,6 @@ package com.ctrip.platform.dal.daogen.entity;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 
-import java.sql.SQLException;
-
 public class Resource {
     private String name;
     private String auth = "Container";

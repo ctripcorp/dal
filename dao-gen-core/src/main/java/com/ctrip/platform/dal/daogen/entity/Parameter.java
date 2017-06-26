@@ -1,8 +1,5 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-/**
- * Created by yn.wang on 2017/2/15.
- */
 public class Parameter {
     private String name;
     private int type;

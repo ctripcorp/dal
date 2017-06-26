@@ -14,7 +14,6 @@ import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Resource;
@@ -23,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,16 +67,16 @@ public class GenTaskBySqlBuilderResource {
                 String userNo = RequestUtil.getUserNo(request);
                 LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-                task.setProject_id(project_id);
-                task.setDatabaseSetName(set_name);
-                task.setTable_name(table_name);
-                task.setMethod_name(method_name);
-                task.setSql_style(sql_style);
-                task.setCrud_type(crud_type);
+                task.setProjectId(project_id);
+                task.setDbName(set_name);
+                task.setTableName(table_name);
+                task.setMethodName(method_name);
+                task.setSqlStyle(sql_style);
+                task.setCrudType(crud_type);
                 task.setFields(fields);
-                task.setCondition(condition);
-                task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-                task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                task.setWhereCondition(condition);
+                task.setUpdateUserNo(user.getUserName() + "(" + userNo + ")");
+                task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);
                 task.setScalarType(scalarType);
                 task.setPagination(pagination);
@@ -93,7 +93,7 @@ public class GenTaskBySqlBuilderResource {
                 if (action.equalsIgnoreCase("update")) {
                     task.setId(id);
                     task.setVersion(SpringBeanGetter.getDaoBySqlBuilder().getVersionById(id));
-                    task.setSql_content(sql_content);
+                    task.setSqlContent(sql_content);
                     if (0 >= SpringBeanGetter.getDaoBySqlBuilder().updateTask(task)) {
                         status = Status.ERROR;
                         status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
@@ -102,7 +102,7 @@ public class GenTaskBySqlBuilderResource {
                 } else {
                     task.setGenerated(false);
                     task.setVersion(1);
-                    task.setSql_content(sql_content);
+                    task.setSqlContent(sql_content);
                     if (0 >= SpringBeanGetter.getDaoBySqlBuilder().insertTask(task)) {
                         status = Status.ERROR;
                         status.setInfo("新增出错，数据是否合法？或者已经有同名方法？");
@@ -120,19 +120,19 @@ public class GenTaskBySqlBuilderResource {
         }
     }
 
-    private boolean needApproveTask(int projectId, int userId) {
+    private boolean needApproveTask(int projectId, int userId) throws SQLException {
         Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
         if (prj == null) {
             return true;
         }
         List<UserGroup> lst =
-                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
+                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDalGroupId(), userId);
         if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
             return false;
         }
         // all child group
         List<GroupRelation> grs =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
+                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDalGroupId());
         if (grs == null || grs.size() < 1) {
             return true;
         }
@@ -140,8 +140,8 @@ public class GenTaskBySqlBuilderResource {
         Iterator<GroupRelation> ite = grs.iterator();
         while (ite.hasNext()) {
             GroupRelation gr = ite.next();
-            if (gr.getChild_group_role() == 1) {
-                int groupId = gr.getChild_group_id();
+            if (gr.getChildGroupRole() == 1) {
+                int groupId = gr.getChildGroupId();
                 List<UserGroup> test =
                         SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
                 if (test != null && test.size() > 0) {
@@ -178,7 +178,7 @@ public class GenTaskBySqlBuilderResource {
 
     @POST
     @Path("getDatabaseCategory")
-    public Status getDatabaseCategory(@FormParam("db_set_name") String db_set_name) {
+    public Status getDatabaseCategory(@FormParam("db_set_name") String db_set_name) throws SQLException {
         Status status = Status.OK;
         DatabaseSetEntry databaseSetEntry =
                 SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);

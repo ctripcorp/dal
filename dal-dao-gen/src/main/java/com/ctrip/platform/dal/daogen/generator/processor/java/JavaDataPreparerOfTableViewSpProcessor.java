@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -94,9 +95,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         final Map<String, SpDbHost> _spHostMaps = ctx.getSpHostMaps();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final GenTaskByTableViewSp tableViewSp : tableViewSpTasks) {
-            final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
-            final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
-            final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
+            final String[] viewNames = StringUtils.split(tableViewSp.getViewNames(), ",");
+            final String[] tableNames = StringUtils.split(tableViewSp.getTableNames(), ",");
+            final String[] spNames = StringUtils.split(tableViewSp.getSpNames(), ",");
 
             final DatabaseCategory dbCategory;
             String dbType = DbUtils.getDbType(tableViewSp.getAllInOneName());
@@ -213,12 +214,12 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
     }
 
     private void prepareDbFromTableViewSp(CodeGenContext codeGenCtx, List<GenTaskByTableViewSp> tableViewSps,
-            List<GenTaskBySqlBuilder> sqlBuilders) {
+            List<GenTaskBySqlBuilder> sqlBuilders) throws SQLException {
         for (GenTaskByTableViewSp task : tableViewSps) {
-            addDatabaseSet(codeGenCtx, task.getDatabaseSetName());
+            addDatabaseSet(codeGenCtx, task.getDbName());
         }
         for (GenTaskBySqlBuilder task : sqlBuilders) {
-            addDatabaseSet(codeGenCtx, task.getDatabaseSetName());
+            addDatabaseSet(codeGenCtx, task.getDbName());
         }
     }
 
@@ -236,7 +237,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 
         vhost.setPackageName(ctx.getNamespace());
         vhost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
-        vhost.setDbSetName(tableViewSp.getDatabaseSetName());
+        vhost.setDbSetName(tableViewSp.getDbName());
         vhost.setPojoClassName(className);
         vhost.setViewName(viewName);
 
@@ -286,7 +287,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
 
         spHost.setPackageName(ctx.getNamespace());
         spHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
-        spHost.setDbName(tableViewSp.getDatabaseSetName());
+        spHost.setDbName(tableViewSp.getDbName());
         spHost.setPojoClassName(className);
         spHost.setSpName(spName);
         List<AbstractParameterHost> params = DbUtils.getSpParams(tableViewSp.getAllInOneName(), currentSp,

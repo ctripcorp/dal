@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class DalConfigHost {
@@ -35,7 +36,7 @@ public class DalConfigHost {
         return this.databaseSetEntries.containsKey(setId) ? this.databaseSetEntries.get(setId).values() : null;
     }
 
-    public Map<String, DatabaseSetEntry> getDatabaseSetEntryMap() {
+    public Map<String, DatabaseSetEntry> getDatabaseSetEntryMap() throws SQLException {
         Map<String, DatabaseSetEntry> map = null;
         if (databaseSetEntryMap != null && databaseSetEntryMap.size() > 0) {
             map = new HashMap<>();
@@ -51,12 +52,12 @@ public class DalConfigHost {
                 for (DalGroupDB db : dbs) {
                     DatabaseSetEntry e = new DatabaseSetEntry();
                     e.setConnectionString(db.getDbname());
-                    e.setProviderName(db.getDb_providerName());
-                    e.setDbAddress(db.getDb_address());
-                    e.setDbPort(db.getDb_port());
-                    e.setUserName(db.getDb_user());
-                    e.setPassword(db.getDb_password());
-                    e.setDbCatalog(db.getDb_catalog());
+                    e.setProviderName(db.getDbProvidername());
+                    e.setDbAddress(db.getDbAddress());
+                    e.setDbPort(db.getDbPort());
+                    e.setUserName(db.getDbUser());
+                    e.setPassword(db.getDbPassword());
+                    e.setDbCatalog(db.getDbCatalog());
                     map.put(e.getConnectionString(), e);
                 }
             }
@@ -78,7 +79,7 @@ public class DalConfigHost {
     }
 
     public void addDatabaseSetEntry(DatabaseSetEntry entry) {
-        Integer databaseSetId = entry.getDatabaseSet_Id();
+        Integer databaseSetId = entry.getDatabasesetId();
         Integer databaseSetEntryId = entry.getId();
 
         if (!this.databaseSetEntries.containsKey(databaseSetId)) {

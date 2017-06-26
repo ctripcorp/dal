@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -60,20 +61,20 @@ public class GenTaskByFreeSqlResource {
                 String userNo = RequestUtil.getUserNo(request);
                 LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-                task.setProject_id(project_id);
-                task.setDatabaseSetName(set_name);
-                task.setClass_name(class_name);
-                task.setPojo_name(pojo_name);
-                task.setMethod_name(method_name);
-                task.setCrud_type(crud_type);
-                task.setSql_content(sql_content);
+                task.setProjectId(project_id);
+                task.setDbName(set_name);
+                task.setClassName(class_name);
+                task.setPojoName(pojo_name);
+                task.setMethodName(method_name);
+                task.setCrudType(crud_type);
+                task.setSqlContent(sql_content);
                 task.setParameters(params);
-                task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-                task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                task.setUpdateUserNo(user.getUserName() + "(" + userNo + ")");
+                task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);
                 task.setScalarType(scalarType);
                 task.setPagination(pagination);
-                task.setSql_style(sql_style);
+                task.setSqlStyle(sql_style);
 
                 if ("简单类型".equals(pojo_name)) {
                     task.setPojoType("SimpleType");
@@ -117,19 +118,19 @@ public class GenTaskByFreeSqlResource {
         }
     }
 
-    private boolean needApproveTask(int projectId, int userId) {
+    private boolean needApproveTask(int projectId, int userId) throws SQLException {
         Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
         if (prj == null) {
             return true;
         }
         List<UserGroup> lst =
-                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
+                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDalGroupId(), userId);
         if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
             return false;
         }
         // all child group
         List<GroupRelation> grs =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
+                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDalGroupId());
         if (grs == null || grs.size() < 1) {
             return true;
         }
@@ -137,8 +138,8 @@ public class GenTaskByFreeSqlResource {
         Iterator<GroupRelation> ite = grs.iterator();
         while (ite.hasNext()) {
             GroupRelation gr = ite.next();
-            if (gr.getChild_group_role() == 1) {
-                int groupId = gr.getChild_group_id();
+            if (gr.getChildGroupRole() == 1) {
+                int groupId = gr.getChildGroupId();
                 List<UserGroup> test =
                         SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
                 if (test != null && test.size() > 0) {

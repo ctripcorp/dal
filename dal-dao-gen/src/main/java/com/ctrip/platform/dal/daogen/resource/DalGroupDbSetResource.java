@@ -13,11 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 /**
  * DAL databaseSet of group manage.
@@ -40,7 +40,7 @@ public class DalGroupDbSetResource {
             List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
 
             for (DalGroup group : groups) {
-                group.setText(group.getGroup_name());
+                group.setText(group.getGroupName());
                 group.setIcon("glyphicon glyphicon-folder-close");
                 group.setChildren(false);
             }
@@ -53,7 +53,7 @@ public class DalGroupDbSetResource {
         }
     }
 
-    private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) {
+    private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) throws SQLException {
         List<DalGroup> result = new ArrayList<>(groups.size());
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
@@ -62,7 +62,7 @@ public class DalGroupDbSetResource {
                 Iterator<DalGroup> ite = groups.iterator();
                 while (ite.hasNext()) {
                     DalGroup group = ite.next();
-                    if (group.getId() == joinedGroup.getGroup_id()) {
+                    if (group.getId() == joinedGroup.getGroupId()) {
                         result.add(group);
                         ite.remove();
                     }
@@ -77,7 +77,7 @@ public class DalGroupDbSetResource {
     @Path("getDbset")
     @Produces(MediaType.APPLICATION_JSON)
     public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") int groupId,
-            @QueryParam("daoFlag") boolean daoFlag) {
+            @QueryParam("daoFlag") boolean daoFlag) throws SQLException {
         try {
             List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
             if (!daoFlag)
@@ -100,7 +100,8 @@ public class DalGroupDbSetResource {
     @GET
     @Path("getDbsetEntry")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DatabaseSetEntry> getDatabaseSetEntryByDbsetid(@QueryParam("dbsetId") String dbsetId) {
+    public List<DatabaseSetEntry> getDatabaseSetEntryByDbsetid(@QueryParam("dbsetId") String dbsetId)
+            throws SQLException {
         try {
             int databaseSet_Id = -1;
             databaseSet_Id = Integer.parseInt(dbsetId);
@@ -148,10 +149,10 @@ public class DalGroupDbSetResource {
             dbset.setProvider(provider);
             dbset.setShardingStrategy(shardingStrategy);
             dbset.setGroupId(groupID);
-            dbset.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            dbset.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbset.setUpdate_user_no(upNo);
+            dbset.setUpdateUserNo(upNo);
             ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
             if (ret <= 0) {
                 log.error("Add database set failed, caused by db operation failed, pls check the log.");
@@ -215,10 +216,10 @@ public class DalGroupDbSetResource {
             dbset.setProvider(provider);
             dbset.setShardingStrategy(shardingStrategy);
             dbset.setGroupId(groupID);
-            dbset.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            dbset.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbset.setUpdate_user_no(upNo);
+            dbset.setUpdateUserNo(upNo);
             ret = SpringBeanGetter.getDaoOfDatabaseSet().updateDatabaseSet(dbset);
             if (ret <= 0) {
                 log.error("Update database set failed, caused by db operation failed, pls check the spring log");
@@ -313,11 +314,11 @@ public class DalGroupDbSetResource {
             dbsetEntry.setDatabaseType(databaseType);
             dbsetEntry.setSharding(sharding);
             dbsetEntry.setConnectionString(connectionString);
-            dbsetEntry.setDatabaseSet_Id(dbsetID);
-            dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            dbsetEntry.setDatabasesetId(dbsetID);
+            dbsetEntry.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbsetEntry.setUpdate_user_no(upNo);
+            dbsetEntry.setUpdateUserNo(upNo);
             ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(dbsetEntry);
             if (ret <= 0) {
                 log.error("Add databaseSet Entry failed, caused by db operation failed, pls check the spring log");
@@ -370,11 +371,11 @@ public class DalGroupDbSetResource {
             dbsetEntry.setDatabaseType(databaseType);
             dbsetEntry.setSharding(sharding);
             dbsetEntry.setConnectionString(connectionString);
-            dbsetEntry.setDatabaseSet_Id(dbsetID);
-            dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            dbsetEntry.setDatabasesetId(dbsetID);
+            dbsetEntry.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbsetEntry.setUpdate_user_no(upNo);
+            dbsetEntry.setUpdateUserNo(upNo);
             ret = SpringBeanGetter.getDaoOfDatabaseSet().updateDatabaseSetEntry(dbsetEntry);
             if (ret <= 0) {
                 log.error("Update databaseSet Entry failed, caused by db operation failed, pls check the spring log");
@@ -435,7 +436,7 @@ public class DalGroupDbSetResource {
         }
     }
 
-    private boolean validatePermision(String userNo, int currentGroupId) {
+    private boolean validatePermision(String userNo, int currentGroupId) throws SQLException {
         boolean havePermision = false;
         havePermision = validateUserPermisionInCurrentGroup(userNo, currentGroupId);
         if (havePermision) {
@@ -445,7 +446,7 @@ public class DalGroupDbSetResource {
         return havePermision;
     }
 
-    private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId) {
+    private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId) throws SQLException {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         // 用户加入的所有组
         List<UserGroup> urgroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
@@ -453,14 +454,14 @@ public class DalGroupDbSetResource {
             return false;
         }
         for (UserGroup ug : urgroups) {
-            if (ug.getGroup_id() == currentGroupId) {
+            if (ug.getGroupId() == currentGroupId) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId) {
+    private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId) throws SQLException {
         boolean havePermison = false;
         int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
         List<GroupRelation> relations =
@@ -470,7 +471,7 @@ public class DalGroupDbSetResource {
             GroupRelation relation = ite.next();
             // then check the user whether or not exist in this child group
             List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao()
-                    .getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
+                    .getUserGroupByGroupIdAndUserId(relation.getChildGroupId(), userId);
             if (ugs != null && ugs.size() > 0) {
                 havePermison = true;
             }
@@ -478,7 +479,7 @@ public class DalGroupDbSetResource {
         return havePermison;
     }
 
-    private boolean validatePermision(String userNo, int currentGroupId, int pk_DbSetId) {
+    private boolean validatePermision(String userNo, int currentGroupId, int pk_DbSetId) throws SQLException {
         boolean havePermision = false;
         havePermision = validateUserPermisionInCurrentGroup(userNo, currentGroupId);
         if (havePermision) {
@@ -488,12 +489,13 @@ public class DalGroupDbSetResource {
         return havePermision;
     }
 
-    private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId, int pk_DbSetId) {
+    private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId, int pk_DbSetId)
+            throws SQLException {
         DatabaseSet dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetById(pk_DbSetId);
         if (dbset == null) {
             return false;
         }
-        String updateUN = dbset.getUpdate_user_no();
+        String updateUN = dbset.getUpdateUserNo();
         if (updateUN == null || updateUN.isEmpty()) { // the dbset have no
             // update user info
             // check the user is or not in the current group
@@ -534,11 +536,11 @@ public class DalGroupDbSetResource {
         Iterator<UserGroup> ite = currentDbSetUserGroup.iterator();
         while (ite.hasNext()) {
             UserGroup ug = ite.next();
-            if (!childGroupIds.contains(ug.getGroup_id())) {
+            if (!childGroupIds.contains(ug.getGroupId())) {
                 continue;
             }
             List<UserGroup> exists =
-                    SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(ug.getGroup_id(), userId);
+                    SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(ug.getGroupId(), userId);
             if (exists != null && exists.size() > 0) {
                 return true;
             }
@@ -547,7 +549,7 @@ public class DalGroupDbSetResource {
         return false;
     }
 
-    private Set<Integer> getChildGroupId(int currentGroupId) {
+    private Set<Integer> getChildGroupId(int currentGroupId) throws SQLException {
         Set<Integer> sets = new HashSet<>();
         List<GroupRelation> relations =
                 SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
@@ -556,7 +558,7 @@ public class DalGroupDbSetResource {
         }
 
         for (GroupRelation relation : relations) {
-            sets.add(relation.getChild_group_id());
+            sets.add(relation.getChildGroupId());
         }
         return sets;
     }

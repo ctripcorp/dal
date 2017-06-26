@@ -1,8 +1,5 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-/**
- * Created by yn.wang on 2017/1/9.
- */
 public class ResponseData {
     private String connectionString;
     private String providerName;

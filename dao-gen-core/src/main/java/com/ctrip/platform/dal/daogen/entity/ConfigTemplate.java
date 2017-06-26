@@ -1,36 +1,61 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
-public class ConfigTemplate {
-    private int id;
-    private int config_type;
-    private int lang_type;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Types;
+
+@Entity
+@Database(name = "dao")
+@Table(name = "config_template")
+public class ConfigTemplate implements DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "config_type")
+    @Type(value = Types.INTEGER)
+    private Integer configType;
+
+    @Column(name = "lang_type")
+    @Type(value = Types.INTEGER)
+    private Integer langType;
+
+    @Column(name = "template")
+    @Type(value = Types.VARCHAR)
     private String template;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getConfig_type() {
-        return config_type;
+    public Integer getConfigType() {
+        return configType;
     }
 
-    public void setConfig_type(int config_type) {
-        this.config_type = config_type;
+    public void setConfigType(Integer configType) {
+        this.configType = configType;
     }
 
-    public int getLang_type() {
-        return lang_type;
+    public Integer getLangType() {
+        return langType;
     }
 
-    public void setLang_type(int lang_type) {
-        this.lang_type = lang_type;
+    public void setLangType(Integer langType) {
+        this.langType = langType;
     }
 
     public String getTemplate() {
@@ -39,14 +64,5 @@ public class ConfigTemplate {
 
     public void setTemplate(String template) {
         this.template = template;
-    }
-
-    public static ConfigTemplate visitRow(ResultSet rs) throws SQLException {
-        ConfigTemplate template = new ConfigTemplate();
-        template.setId(rs.getInt("id"));
-        template.setConfig_type(rs.getInt("config_type"));
-        template.setLang_type(rs.getInt("lang_type"));
-        template.setTemplate(rs.getString("template"));
-        return template;
     }
 }

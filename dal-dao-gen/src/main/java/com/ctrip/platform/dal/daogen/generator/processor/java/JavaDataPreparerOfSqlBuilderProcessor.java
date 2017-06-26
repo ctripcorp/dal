@@ -75,7 +75,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
         Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<>();
 
         for (GenTaskBySqlBuilder task : builders) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getTableName());
 
             if (!groupBy.containsKey(key)) {
                 groupBy.put(key, task);
@@ -87,10 +87,10 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
     private JavaTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)
             throws Exception {
         GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
-        tableViewSp.setCud_by_sp(false);
+        tableViewSp.setCudBySp(false);
         tableViewSp.setPagination(false);
         tableViewSp.setAllInOneName(sqlBuilder.getAllInOneName());
-        tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
+        tableViewSp.setDbName(sqlBuilder.getDbName());
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("");
 
@@ -100,7 +100,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
             dbCategory = DatabaseCategory.MySql;
         }
 
-        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(), dbCategory);
+        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTableName(), dbCategory);
     }
 
 }

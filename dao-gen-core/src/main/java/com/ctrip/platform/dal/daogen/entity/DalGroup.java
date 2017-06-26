@@ -1,15 +1,43 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
-public class DalGroup implements Comparable<DalGroup> {
-    private int id;
-    private String group_name;
-    private String group_comment;
-    private String create_user_no;
-    private Timestamp create_time;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Timestamp;
+import java.sql.Types;
+
+@Entity
+@Database(name = "dao")
+@Table(name = "dal_group")
+public class DalGroup implements Comparable<DalGroup>, DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "group_name")
+    @Type(value = Types.VARCHAR)
+    private String groupName;
+
+    @Column(name = "group_comment")
+    @Type(value = Types.LONGVARCHAR)
+    private String groupComment;
+
+    @Column(name = "create_user_no")
+    @Type(value = Types.VARCHAR)
+    private String createUserNo;
+
+    @Column(name = "create_time")
+    @Type(value = Types.TIMESTAMP)
+    private Timestamp createTime;
 
     private String text;
 
@@ -17,59 +45,44 @@ public class DalGroup implements Comparable<DalGroup> {
 
     private boolean children;
 
-    public static DalGroup visitRow(ResultSet rs) throws SQLException {
-        DalGroup group = new DalGroup();
-        group.setId(rs.getInt(1));
-        group.setGroup_name(rs.getString(2));
-        group.setGroup_comment(rs.getString(3));
-        group.setCreate_user_no(rs.getString(4));
-        group.setCreate_time(rs.getTimestamp(5));
-        return group;
-    }
-
-    @Override
-    public int compareTo(DalGroup o) {
-        return this.group_name.compareTo(o.getGroup_name());
-    }
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public String getGroup_name() {
-        return group_name;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setGroup_name(String group_name) {
-        this.group_name = group_name;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
-    public String getGroup_comment() {
-        return group_comment;
+    public String getGroupComment() {
+        return groupComment;
     }
 
-    public void setGroup_comment(String group_comment) {
-        this.group_comment = group_comment;
+    public void setGroupComment(String groupComment) {
+        this.groupComment = groupComment;
     }
 
-    public String getCreate_user_no() {
-        return create_user_no;
+    public String getCreateUserNo() {
+        return createUserNo;
     }
 
-    public void setCreate_user_no(String create_user_no) {
-        this.create_user_no = create_user_no;
+    public void setCreateUserNo(String createUserNo) {
+        this.createUserNo = createUserNo;
     }
 
-    public Timestamp getCreate_time() {
-        return create_time;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setCreate_time(Timestamp create_time) {
-        this.create_time = create_time;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 
     public String getText() {
@@ -94,6 +107,11 @@ public class DalGroup implements Comparable<DalGroup> {
 
     public void setChildren(boolean children) {
         this.children = children;
+    }
+
+    @Override
+    public int compareTo(DalGroup o) {
+        return groupName.compareTo(o.getGroupName());
     }
 
 }

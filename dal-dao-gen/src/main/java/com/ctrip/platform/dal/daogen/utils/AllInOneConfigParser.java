@@ -43,7 +43,7 @@ public class AllInOneConfigParser {
                         String dbLogicName = matcher.group(1);
                         DalGroupDB db = parseDotNetDBConnString(matcher.group(2));
                         db.setDbname(dbLogicName);
-                        db.setDal_group_id(-1);
+                        db.setDalGroupId(-1);
                         this.allDbs.put(dbLogicName, db);
                     }
                     line = br.readLine();
@@ -76,36 +76,36 @@ public class AllInOneConfigParser {
             String dbhost = null;
             Matcher matcher = dbnamePattern.matcher(connStr);
             if (matcher.find()) {
-                db.setDb_catalog(matcher.group(2));
+                db.setDbCatalog(matcher.group(2));
             }
             matcher = dburlPattern.matcher(connStr);
             if (matcher.find()) {
                 String[] dburls = matcher.group(2).split(",");
                 dbhost = dburls[0];
                 if (dburls.length == 2) {
-                    db.setDb_address(dbhost);
-                    db.setDb_port(dburls[1]);
-                    db.setDb_providerName(DatabaseType.SQLServer.getValue());
+                    db.setDbAddress(dbhost);
+                    db.setDbPort(dburls[1]);
+                    db.setDbProvidername(DatabaseType.SQLServer.getValue());
 
                 } else {
                     matcher = dbportPattern.matcher(connStr);
                     if (matcher.find()) {
-                        db.setDb_address(dbhost);
-                        db.setDb_port(matcher.group(2));
+                        db.setDbAddress(dbhost);
+                        db.setDbPort(matcher.group(2));
                     } else {
-                        db.setDb_address(dbhost);
-                        db.setDb_port("3306");
+                        db.setDbAddress(dbhost);
+                        db.setDbPort("3306");
                     }
-                    db.setDb_providerName(DatabaseType.MySQL.getValue());
+                    db.setDbProvidername(DatabaseType.MySQL.getValue());
                 }
             }
             matcher = dbuserPattern.matcher(connStr);
             if (matcher.find()) {
-                db.setDb_user(matcher.group(2));
+                db.setDbUser(matcher.group(2));
             }
             matcher = dbpasswdPattern.matcher(connStr);
             if (matcher.find()) {
-                db.setDb_password(matcher.group(2));
+                db.setDbPassword(matcher.group(2));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

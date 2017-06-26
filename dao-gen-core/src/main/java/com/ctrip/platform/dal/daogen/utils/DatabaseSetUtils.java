@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +29,7 @@ public class DatabaseSetUtils {
         }
     }
 
-    public static String getAllInOneName(String db_set_name) {
+    public static String getAllInOneName(String db_set_name) throws SQLException {
         DatabaseSetEntry databaseSetEntry =
                 SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
         if (null != databaseSetEntry) {

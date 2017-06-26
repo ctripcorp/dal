@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,7 +51,7 @@ public class ConfigTemplateResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getConfigTemplateById")
-    public ConfigTemplate getConfigTemplateById(@QueryParam("id") String id) {
+    public ConfigTemplate getConfigTemplateById(@QueryParam("id") String id) throws SQLException {
         int templateId = -1;
         try {
             templateId = Integer.parseInt(id);
@@ -66,7 +67,7 @@ public class ConfigTemplateResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getConfigTemplateByConditions")
     public ConfigTemplate getConfigTemplateByConditions(@QueryParam("configType") String configType,
-            @QueryParam("langType") String langType) {
+            @QueryParam("langType") String langType) throws SQLException {
         ConfigTemplate configTemplate = null;
         if (configType == null || langType == null)
             return configTemplate;
@@ -79,8 +80,8 @@ public class ConfigTemplateResource {
             lang_type = Integer.parseInt(langType);
 
             ConfigTemplate temp = new ConfigTemplate();
-            temp.setConfig_type(config_type);
-            temp.setLang_type(lang_type);
+            temp.setConfigType(config_type);
+            temp.setLangType(lang_type);
             configTemplate = SpringBeanGetter.getConfigTemplateDao().getConfigTemplateByConditions(temp);
             return configTemplate;
         } catch (Throwable e) {
@@ -108,8 +109,8 @@ public class ConfigTemplateResource {
             lang_type = Integer.parseInt(langType);
 
             ConfigTemplate configTemplate = new ConfigTemplate();
-            configTemplate.setConfig_type(config_type);
-            configTemplate.setLang_type(lang_type);
+            configTemplate.setConfigType(config_type);
+            configTemplate.setLangType(lang_type);
             configTemplate.setTemplate(template);
             SpringBeanGetter.getConfigTemplateDao().insertConfigTemplate(configTemplate);
             return status;
@@ -144,8 +145,8 @@ public class ConfigTemplateResource {
 
             ConfigTemplate configTemplate = new ConfigTemplate();
             configTemplate.setId(templateId);
-            configTemplate.setConfig_type(config_type);
-            configTemplate.setLang_type(lang_type);
+            configTemplate.setConfigType(config_type);
+            configTemplate.setLangType(lang_type);
             configTemplate.setTemplate(template);
             SpringBeanGetter.getConfigTemplateDao().updateConfigTemplate(configTemplate);
             return status;

@@ -1,171 +1,233 @@
 package com.ctrip.platform.dal.daogen.dao;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DaoBySqlBuilder {
-    private JdbcTemplate jdbcTemplate;
+    private DalTableDao<GenTaskBySqlBuilder> client;
+    private static final String DATA_BASE = "dao";
+    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+    private DalQueryDao queryDao = null;
+    private DalRowMapper<GenTaskBySqlBuilder> genTaskBySqlBuilderRowMapper = null;
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public DaoBySqlBuilder() throws SQLException {
+        client = new DalTableDao<>(new DalDefaultJpaParser<>(GenTaskBySqlBuilder.class));
+        genTaskBySqlBuilderRowMapper = new DalDefaultJpaMapper<>(GenTaskBySqlBuilder.class);
+        queryDao = new DalQueryDao(DATA_BASE);
     }
 
-    public int getVersionById(int id) {
-        try {
-            return jdbcTemplate.queryForObject("SELECT version FROM task_auto WHERE id =?", new Object[] {id},
-                    new RowMapper<Integer>() {
-                        public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return rs.getInt(1);
-                        }
-                    });
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
+    public List<GenTaskBySqlBuilder> getAllTasks() throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+        List<GenTaskBySqlBuilder> list = client.query(builder, hints);
+        processList(list);
+        return list;
+    }
+
+    private void processList(List<GenTaskBySqlBuilder> list) throws SQLException {
+        if (list == null || list.size() == 0)
+            return;
+
+        for (GenTaskBySqlBuilder entity : list) {
+            processGenTaskBySqlBuilder(entity);
         }
     }
 
-    public List<GenTaskBySqlBuilder> getAllTasks() {
-        return jdbcTemplate.query("SELECT id, project_id, db_name,table_name,class_name,method_name,sql_style,"
-                + "crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,"
-                + "update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints" + " FROM task_auto",
-                new RowMapper<GenTaskBySqlBuilder>() {
-                    public GenTaskBySqlBuilder mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GenTaskBySqlBuilder.visitRow(rs);
-                    }
-                });
+    private void processGenTaskBySqlBuilder(GenTaskBySqlBuilder entity) throws SQLException {
+        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDbName()));
+        Date date = new Date(entity.getUpdateTime().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+
+        if (entity.getApproved() == 1) {
+            entity.setStr_approved("未审批");
+        } else if (entity.getApproved() == 2) {
+            entity.setStr_approved("通过");
+        } else if (entity.getApproved() == 3) {
+            entity.setStr_approved("未通过");
+        } else {
+            entity.setStr_approved("通过");
+        }
     }
 
-    public List<GenTaskBySqlBuilder> getTasksByProjectId(int id) {
-        return jdbcTemplate.query(
-                "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,"
-                        + "crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,"
-                        + "update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints "
-                        + " FROM task_auto WHERE project_id=?",
-                new Object[] {id}, new RowMapper<GenTaskBySqlBuilder>() {
-                    public GenTaskBySqlBuilder mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GenTaskBySqlBuilder.visitRow(rs);
-                    }
-                });
+    public int getVersionById(int id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        GenTaskBySqlBuilder entity = client.queryByPk(id, hints);
+        if (entity == null)
+            return 0;
+        return entity.getVersion();
     }
 
-    public GenTaskBySqlBuilder getTasksByTaskId(int taskId) {
-        List<GenTaskBySqlBuilder> list =
-                jdbcTemplate.query(
-                        "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,"
-                                + "crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,"
-                                + "update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints "
-                                + " FROM task_auto WHERE id=?",
-                        new Object[] {taskId}, new RowMapper<GenTaskBySqlBuilder>() {
-                            public GenTaskBySqlBuilder mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                return GenTaskBySqlBuilder.visitRow(rs);
-                            }
-                        });
-        return list != null && list.size() > 0 ? list.get(0) : null;
+    public List<GenTaskBySqlBuilder> getTasksByProjectId(int projectId) throws SQLException {
+        FreeSelectSqlBuilder<List<GenTaskBySqlBuilder>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
+        sb.append("FROM task_auto WHERE project_id=?");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, projectId);
+        builder.mapWith(genTaskBySqlBuilderRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<GenTaskBySqlBuilder> list = queryDao.query(builder, parameters, hints);
+        processList(list);
+        return list;
     }
 
-    public List<GenTaskBySqlBuilder> updateAndGetAllTasks(int projectId) {
-        final List<GenTaskBySqlBuilder> tasks = new ArrayList<>();
-        jdbcTemplate.query("SELECT  id, project_id, db_name,table_name,class_name,method_name,sql_style,"
-                + "crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,"
-                + "update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints "
-                + " FROM task_auto WHERE project_id=?", new Object[] {projectId}, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        GenTaskBySqlBuilder task = GenTaskBySqlBuilder.visitRow(rs);
-                        task.setGenerated(true);
-                        if (updateTask(task) > 0) {
-                            tasks.add(task);
-                        }
-                    }
-                });
-        return tasks;
+    public GenTaskBySqlBuilder getTasksByTaskId(int id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.queryByPk(id, hints);
     }
 
-    public List<GenTaskBySqlBuilder> updateAndGetTasks(int projectId) {
-        final List<GenTaskBySqlBuilder> tasks = new ArrayList<>();
-        jdbcTemplate.query(
-                " SELECT  id, project_id, db_name,table_name,class_name,method_name,sql_style, "
-                        + " crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no, "
-                        + " update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints "
-                        + " FROM task_auto  " + " WHERE project_id=? AND `generated`=FALSE",
-                new Object[] {projectId}, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        GenTaskBySqlBuilder task = GenTaskBySqlBuilder.visitRow(rs);
-                        task.setGenerated(true);
-                        if (updateTask(task) > 0) {
-                            tasks.add(task);
-                        }
-                    }
-                });
-        return tasks;
+    public List<GenTaskBySqlBuilder> updateAndGetAllTasks(int projectId) throws SQLException {
+        List<GenTaskBySqlBuilder> result = new ArrayList<>();
+        List<GenTaskBySqlBuilder> list = getTasksByProjectId(projectId);
+        if (list == null || list.size() == 0)
+            return result;
+
+        for (GenTaskBySqlBuilder entity : list) {
+            entity.setGenerated(true);
+            if (updateTask(entity) > 0) {
+                result.add(entity);
+            }
+        }
+
+        return result;
     }
 
-    public int insertTask(GenTaskBySqlBuilder task) {
-        return jdbcTemplate.update(
-                "INSERT INTO task_auto "
-                        + "( project_id, db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints)"
-                        + " SELECT * FROM (SELECT ? AS p1,? AS p2,? AS p3,? AS p4,? AS p5,? AS p6,? AS p7,? AS p8,? AS p9,? AS p10,? AS p11,? AS p12,? AS p13,? AS p14,? AS p15,? AS p16,? AS p17,? AS p18,? AS p19,? AS p20,? AS p21) tmp WHERE NOT exists "
-                        + "(SELECT 1 FROM task_auto WHERE project_id=? AND db_name=? AND table_name=? AND method_name=? LIMIT 1)",
-                task.getProject_id(), task.getDatabaseSetName(), task.getTable_name(), task.getClass_name(),
-                task.getMethod_name(), task.getSql_style(), task.getCrud_type(), task.getFields(), task.getCondition(),
-                task.getSql_content(), task.isGenerated(), task.getVersion(), task.getUpdate_user_no(),
-                task.getUpdate_time(), task.getComment(), task.getScalarType(), task.isPagination(), task.getOrderby(),
-                task.getApproved(), task.getApproveMsg(), task.getHints(), task.getProject_id(),
-                task.getDatabaseSetName(), task.getTable_name(), task.getMethod_name());
+    public List<GenTaskBySqlBuilder> updateAndGetTasks(int projectId) throws SQLException {
+        FreeSelectSqlBuilder<List<GenTaskBySqlBuilder>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "SELECT  id, project_id, db_name,table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
+        sb.append("FROM task_auto WHERE project_id=? AND `generated`=FALSE");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, projectId);
+        builder.mapWith(genTaskBySqlBuilderRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<GenTaskBySqlBuilder> list = queryDao.query(builder, parameters, hints);
+        List<GenTaskBySqlBuilder> result = new ArrayList<>();
+        if (list == null || list.size() == 0)
+            return result;
+        processList(list);
+        for (GenTaskBySqlBuilder entity : list) {
+            entity.setGenerated(true);
+            if (updateTask(entity) > 0) {
+                result.add(entity);
+            }
+        }
+        return result;
     }
 
-    public int updateTask(GenTaskBySqlBuilder task) {
-        final List<Integer> counts = new ArrayList<>();
-        jdbcTemplate.query(
-                "SELECT 1 FROM task_auto WHERE id != ? AND project_id=? AND db_name=? AND table_name=? AND method_name=? LIMIT 1",
-                new Object[] {task.getId(), task.getProject_id(), task.getDatabaseSetName(), task.getTable_name(),
-                        task.getMethod_name()},
-                new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        counts.add(1);
-                    }
-                });
-
-        if (counts.size() > 0)
-            return -1;
-
-        return this.jdbcTemplate.update(
-                "UPDATE task_auto SET project_id=?,db_name=?, table_name=?, class_name=?,method_name=?,"
-                        + "sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,`generated`=?,"
-                        + "version=version+1,update_user_no=?,update_time=?,comment=?,scalarType=?,"
-                        + "pagination=?,orderby=?,approved=?,approveMsg=?,hints=? WHERE id=? AND version = ?",
-                task.getProject_id(), task.getDatabaseSetName(), task.getTable_name(), task.getClass_name(),
-                task.getMethod_name(), task.getSql_style(), task.getCrud_type(), task.getFields(), task.getCondition(),
-                task.getSql_content(), task.isGenerated(), task.getUpdate_user_no(), task.getUpdate_time(),
-                task.getComment(), task.getScalarType(), task.isPagination(), task.getOrderby(), task.getApproved(),
-                task.getApproveMsg(), task.getHints(), task.getId(), task.getVersion());
+    public int insertTask(GenTaskBySqlBuilder task) throws SQLException {
+        if (null == task)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.insert(hints, task);
     }
 
-    public int updateTask(int taskId, int approved, String approveMsg) {
-        return jdbcTemplate.update("UPDATE task_auto SET approved=?, approveMsg=? WHERE id=?", approved, approveMsg,
-                taskId);
+    public int updateTask(GenTaskBySqlBuilder task) throws SQLException {
+        {
+            FreeSelectSqlBuilder<GenTaskBySqlBuilder> builder = new FreeSelectSqlBuilder<>(dbCategory);
+            builder.setTemplate(
+                    "SELECT 1 FROM task_auto WHERE id != ? AND project_id=? AND db_name=? AND table_name=? AND method_name=? LIMIT 1");
+            StatementParameters parameters = new StatementParameters();
+            int i = 1;
+            parameters.set(i++, "id", Types.INTEGER, task.getId());
+            parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
+            parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
+            parameters.set(i++, "table_name", Types.VARCHAR, task.getTableName());
+            parameters.set(i++, "method_name", Types.VARCHAR, task.getMethodName());
+            builder.mapWith(genTaskBySqlBuilderRowMapper).requireFirst().nullable();
+            DalHints hints = DalHints.createIfAbsent(null);
+            GenTaskBySqlBuilder entity = queryDao.query(builder, parameters, hints);
+            if (entity != null)
+                return 0;
+        }
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE task_auto SET project_id=?,db_name=?, table_name=?, class_name=?,method_name=?,");
+        sb.append("sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,`generated`=?,");
+        sb.append("version=version+1,update_user_no=?,update_time=?,comment=?,scalarType=?,");
+        sb.append("pagination=?,orderby=?,approved=?,approveMsg=?,hints=? ");
+        sb.append("WHERE id=? AND version = ?");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
+        parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
+        parameters.set(i++, "table_name", Types.VARCHAR, task.getTableName());
+        parameters.set(i++, "class_name", Types.VARCHAR, task.getClassName());
+        parameters.set(i++, "method_name", Types.VARCHAR, task.getMethodName());
+        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSqlStyle());
+        parameters.set(i++, "crud_type", Types.VARCHAR, task.getCrudType());
+        parameters.set(i++, "fields", Types.LONGVARCHAR, task.getFields());
+        parameters.set(i++, "where_condition", Types.LONGVARCHAR, task.getWhereCondition());
+        parameters.set(i++, "sql_content", Types.LONGVARCHAR, task.getSqlContent());
+        parameters.set(i++, "generated", Types.BIT, task.getGenerated());
+        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdateUserNo());
+        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdateTime());
+        parameters.set(i++, "comment", Types.LONGVARCHAR, task.getComment());
+        parameters.set(i++, "scalarType", Types.VARCHAR, task.getScalarType());
+        parameters.set(i++, "pagination", Types.BIT, task.getPagination());
+        parameters.set(i++, "orderby", Types.VARCHAR, task.getOrderby());
+        parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
+        parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
+        parameters.set(i++, "hints", Types.VARCHAR, task.getHints());
+        parameters.set(i++, "id", Types.INTEGER, task.getId());
+        parameters.set(i++, "version", Types.INTEGER, task.getVersion());
+
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int deleteTask(GenTaskBySqlBuilder task) {
-        return jdbcTemplate.update("DELETE FROM task_auto WHERE id=?", task.getId());
+    public int updateTask(int id, int approved, String approveMsg) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("UPDATE task_auto SET approved=?, approveMsg=? WHERE id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "approved", Types.INTEGER, approved);
+        parameters.set(i++, "approveMsg", Types.VARCHAR, approveMsg);
+        parameters.set(i++, "id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int deleteByProjectId(int id) {
-        return jdbcTemplate.update("DELETE FROM task_auto WHERE project_id=?", id);
+    public int deleteTask(GenTaskBySqlBuilder task) throws SQLException {
+        if (null == task)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.delete(hints, task);
     }
 
-    public int deleteByServerId(int id) {
-        return jdbcTemplate.update("DELETE FROM task_auto WHERE server_id=?", id);
+    public int deleteByProjectId(int projectId) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("DELETE FROM task_auto WHERE project_id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, projectId);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
 }

@@ -1,31 +1,26 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import javax.sql.DataSource;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
 public class SetupDBDao {
-    private JdbcTemplate jdbcTemplate;
+    private static final String DATA_BASE = "dao";
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    public boolean executeSqlScript(String sqlScript) {
-        boolean result = false;
-        if (sqlScript == null || sqlScript.length() == 0) {
-            return result;
-        }
+    public boolean executeSqlScript(String sqlScript) throws SQLException {
+        if (sqlScript == null || sqlScript.length() == 0)
+            return false;
 
         String[] array = sqlScript.split(";"); // toUpperCase().
-        jdbcTemplate.batchUpdate(array);
-        result = true;
-
-        return result;
+        DalClient client = DalClientFactory.getClient(DATA_BASE);
+        client.batchUpdate(array, null);
+        return true;
     }
 
     public Set<String> getCatalogTableNames(String catalog) throws Exception {
@@ -33,10 +28,11 @@ public class SetupDBDao {
         ResultSet resultSet = null;
 
         try {
-            java.sql.DatabaseMetaData databaseMetaData = jdbcTemplate.getDataSource().getConnection().getMetaData();
-            if (databaseMetaData == null) {
+            DatabaseMetaData databaseMetaData =
+                    DalClientFactory.getDalConfigure().getLocator().getConnection(DATA_BASE).getMetaData();
+
+            if (databaseMetaData == null)
                 return set;
-            }
             resultSet = databaseMetaData.getTables(catalog, null, null, null);
             if (resultSet != null) {
                 while (resultSet.next()) {
@@ -51,4 +47,5 @@ public class SetupDBDao {
         }
         return set;
     }
+
 }

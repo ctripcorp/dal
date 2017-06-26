@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.util.List;
 
 @Resource
@@ -47,7 +48,7 @@ public class DalUserResource {
     @GET
     @Path("get")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<LoginUser> getAllUsers() {
+    public List<LoginUser> getAllUsers() throws SQLException {
         try {
             List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
             return users;

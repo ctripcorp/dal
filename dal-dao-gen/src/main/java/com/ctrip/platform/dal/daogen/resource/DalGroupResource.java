@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class DalGroupResource {
     @GET
     @Path("get")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DalGroup> getAllGroup() {
+    public List<DalGroup> getAllGroup() throws SQLException {
         try {
             List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
             return groups;
@@ -40,7 +41,7 @@ public class DalGroupResource {
     @GET
     @Path("onegroup")
     @Produces(MediaType.APPLICATION_JSON)
-    public DalGroup getProject(@QueryParam("id") String id) {
+    public DalGroup getProject(@QueryParam("id") String id) throws SQLException {
         try {
             return SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(Integer.valueOf(id));
         } catch (Throwable e) {
@@ -79,10 +80,10 @@ public class DalGroupResource {
             }
 
             DalGroup group = new DalGroup();
-            group.setGroup_name(groupName);
-            group.setGroup_comment(groupComment);
-            group.setCreate_user_no(userNo);
-            group.setCreate_time(new Timestamp(System.currentTimeMillis()));
+            group.setGroupName(groupName);
+            group.setGroupComment(groupComment);
+            group.setCreateUserNo(userNo);
+            group.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
             int ret = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(group);
             if (ret <= 0) {
@@ -208,13 +209,13 @@ public class DalGroupResource {
                 return status;
             }
             if (null != groupName && !groupName.trim().isEmpty()) {
-                group.setGroup_name(groupName);
+                group.setGroupName(groupName);
             }
             if (null != groupComment && !groupComment.trim().isEmpty()) {
-                group.setGroup_comment(groupComment);
+                group.setGroupComment(groupComment);
             }
 
-            group.setCreate_time(new Timestamp(System.currentTimeMillis()));
+            group.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
             int ret = SpringBeanGetter.getDaoOfDalGroup().updateDalGroup(group);
 
@@ -233,12 +234,12 @@ public class DalGroupResource {
         }
     }
 
-    public static boolean validate(String userNo) {
+    public static boolean validate(String userNo) throws SQLException {
         LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> groups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (groups != null && groups.size() > 0) {
             for (UserGroup group : groups) {
-                if (group.getGroup_id() == SUPER_GROUP_ID) {
+                if (group.getGroupId() == SUPER_GROUP_ID) {
                     return true;
                 }
             }

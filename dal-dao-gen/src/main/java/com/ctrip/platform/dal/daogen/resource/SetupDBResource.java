@@ -11,7 +11,6 @@ import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
@@ -25,7 +24,6 @@ import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Properties;
@@ -193,8 +191,8 @@ public class SetupDBResource {
             }
 
             DalGroup group = new DalGroup();
-            group.setGroup_name(groupName);
-            group.setGroup_comment(groupComment);
+            group.setGroupName(groupName);
+            group.setGroupComment(groupComment);
 
             LoginUser user = new LoginUser();
             user.setUserNo(adminNo);
@@ -399,7 +397,7 @@ public class SetupDBResource {
 
     private boolean setupAdmin(DalGroup dalGroup, LoginUser user) throws Exception {
         boolean result = false;
-        String groupName = dalGroup.getGroup_name();
+        String groupName = dalGroup.getGroupName();
         if (groupName == null || groupName.isEmpty()) {
             return result;
         }
@@ -417,10 +415,10 @@ public class SetupDBResource {
 
         DalGroup group = new DalGroup();
         group.setId(DalGroupResource.SUPER_GROUP_ID);
-        group.setGroup_name(dalGroup.getGroup_name());
-        group.setGroup_comment(dalGroup.getGroup_comment());
-        group.setCreate_user_no(user.getUserNo());
-        group.setCreate_time(new Timestamp(System.currentTimeMillis()));
+        group.setGroupName(dalGroup.getGroupName());
+        group.setGroupComment(dalGroup.getGroupComment());
+        group.setCreateUserNo(user.getUserNo());
+        group.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
         int groupResult = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(group);
         if (groupResult <= 0) {

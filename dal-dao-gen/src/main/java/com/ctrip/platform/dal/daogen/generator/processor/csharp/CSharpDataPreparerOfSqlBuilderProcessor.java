@@ -75,7 +75,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
         Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<>();
 
         for (GenTaskBySqlBuilder task : builders) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getTableName());
 
             if (!groupBy.containsKey(key)) {
                 groupBy.put(key, task);
@@ -87,10 +87,10 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
     private CSharpTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)
             throws Exception {
         GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
-        tableViewSp.setCud_by_sp(false);
+        tableViewSp.setCudBySp(false);
         tableViewSp.setPagination(false);
         tableViewSp.setAllInOneName(sqlBuilder.getAllInOneName());
-        tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
+        tableViewSp.setDbName(sqlBuilder.getDbName());
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("");
 
@@ -101,6 +101,6 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
         }
 
         List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(sqlBuilder.getAllInOneName());
-        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(), dbCategory, allSpNames);
+        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTableName(), dbCategory, allSpNames);
     }
 }

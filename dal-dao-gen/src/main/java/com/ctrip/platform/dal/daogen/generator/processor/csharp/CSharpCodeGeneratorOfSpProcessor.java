@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
 import java.util.ArrayList;

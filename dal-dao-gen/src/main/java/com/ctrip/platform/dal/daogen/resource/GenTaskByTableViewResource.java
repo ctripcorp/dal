@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -56,20 +57,20 @@ public class GenTaskByTableViewResource {
                 String userNo = RequestUtil.getUserNo(request);
                 LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-                task.setProject_id(project_id);
-                task.setDatabaseSetName(set_name);
-                task.setTable_names(table_names);
-                task.setView_names(view_names);
-                task.setSp_names(sp_names);
+                task.setProjectId(project_id);
+                task.setDbName(set_name);
+                task.setTableNames(table_names);
+                task.setViewNames(view_names);
+                task.setSpNames(sp_names);
                 task.setPrefix(prefix);
                 task.setSuffix(suffix);
-                task.setCud_by_sp(cud_by_sp);
+                task.setCudBySp(cud_by_sp);
                 task.setPagination(pagination);
-                task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
-                task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+                task.setUpdateUserNo(user.getUserName() + "(" + userNo + ")");
+                task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);
-                task.setSql_style(sql_style);
-                task.setApi_list(api_list);
+                task.setSqlStyle(sql_style);
+                task.setApiList(api_list);
                 if (needApproveTask(project_id, user.getId())) {
                     task.setApproved(1);
                 } else {
@@ -101,19 +102,19 @@ public class GenTaskByTableViewResource {
         }
     }
 
-    private boolean needApproveTask(int projectId, int userId) {
+    private boolean needApproveTask(int projectId, int userId) throws SQLException {
         Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
         if (prj == null) {
             return true;
         }
         List<UserGroup> lst =
-                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
+                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDalGroupId(), userId);
         if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
             return false;
         }
         // all child group
         List<GroupRelation> grs =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
+                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDalGroupId());
         if (grs == null || grs.size() < 1) {
             return true;
         }
@@ -121,8 +122,8 @@ public class GenTaskByTableViewResource {
         Iterator<GroupRelation> ite = grs.iterator();
         while (ite.hasNext()) {
             GroupRelation gr = ite.next();
-            if (gr.getChild_group_role() == 1) {
-                int groupId = gr.getChild_group_id();
+            if (gr.getChildGroupRole() == 1) {
+                int groupId = gr.getChildGroupId();
                 List<UserGroup> test =
                         SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
                 if (test != null && test.size() > 0) {
@@ -167,16 +168,16 @@ public class GenTaskByTableViewResource {
             }
 
             for (DalApi api : apis) {
-                String method_declaration = api.getMethod_declaration();
+                String method_declaration = api.getMethodDeclaration();
                 method_declaration = method_declaration.replaceAll("<", "&lt;");
                 method_declaration = method_declaration.replaceAll(">", "&gt;");
-                api.setMethod_declaration(method_declaration);
+                api.setMethodDeclaration(method_declaration);
             }
 
             java.util.Collections.sort(apis, new Comparator<DalApi>() {
                 @Override
                 public int compare(DalApi o1, DalApi o2) {
-                    return o1.getMethod_declaration().compareToIgnoreCase(o2.getMethod_declaration());
+                    return o1.getMethodDeclaration().compareToIgnoreCase(o2.getMethodDeclaration());
                 }
             });
 

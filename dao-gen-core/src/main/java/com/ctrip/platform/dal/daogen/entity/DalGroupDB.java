@@ -1,40 +1,68 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
-public class DalGroupDB implements Comparable<DalGroupDB> {
-    private int id;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Types;
+
+@Entity
+@Database(name = "dao")
+@Table(name = "alldbs")
+public class DalGroupDB implements Comparable<DalGroupDB>, DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "dbname")
+    @Type(value = Types.VARCHAR)
     private String dbname;
+
+    @Column(name = "comment")
+    @Type(value = Types.LONGVARCHAR)
     private String comment;
-    private int dal_group_id;
-    private String db_address;
-    private String db_port;
-    private String db_user;
-    private String db_password;
-    private String db_catalog;
-    private String db_providerName;
 
-    public static DalGroupDB visitRow(ResultSet rs) throws SQLException {
-        DalGroupDB group = new DalGroupDB();
-        group.setId(rs.getInt(1));
-        group.setDbname(rs.getString(2));
-        group.setComment(rs.getString(3));
-        group.setDal_group_id(rs.getInt(4));
-        group.setDb_address(rs.getString(5));
-        group.setDb_port(rs.getString(6));
-        group.setDb_user(rs.getString(7));
-        group.setDb_password(rs.getString(8));
-        group.setDb_catalog(rs.getString(9));
-        group.setDb_providerName(rs.getString(10));
-        return group;
-    }
+    @Column(name = "dal_group_id")
+    @Type(value = Types.INTEGER)
+    private Integer dalGroupId;
 
-    public int getId() {
+    @Column(name = "db_address")
+    @Type(value = Types.VARCHAR)
+    private String dbAddress;
+
+    @Column(name = "db_port")
+    @Type(value = Types.VARCHAR)
+    private String dbPort;
+
+    @Column(name = "db_user")
+    @Type(value = Types.VARCHAR)
+    private String dbUser;
+
+    @Column(name = "db_password")
+    @Type(value = Types.VARCHAR)
+    private String dbPassword;
+
+    @Column(name = "db_catalog")
+    @Type(value = Types.VARCHAR)
+    private String dbCatalog;
+
+    @Column(name = "db_providerName")
+    @Type(value = Types.VARCHAR)
+    private String dbProvidername;
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -54,75 +82,72 @@ public class DalGroupDB implements Comparable<DalGroupDB> {
         this.comment = comment;
     }
 
-    public int getDal_group_id() {
-        return dal_group_id;
+    public Integer getDalGroupId() {
+        return dalGroupId;
     }
 
-    public void setDal_group_id(int dal_group_id) {
-        this.dal_group_id = dal_group_id;
+    public void setDalGroupId(Integer dalGroupId) {
+        this.dalGroupId = dalGroupId;
     }
 
-    public String getDb_address() {
-        return db_address;
+    public String getDbAddress() {
+        return dbAddress;
     }
 
-    public void setDb_address(String db_address) {
-        this.db_address = db_address;
+    public void setDbAddress(String dbAddress) {
+        this.dbAddress = dbAddress;
     }
 
-    public String getDb_port() {
-        return db_port;
+    public String getDbPort() {
+        return dbPort;
     }
 
-    public void setDb_port(String db_port) {
-        this.db_port = db_port;
+    public void setDbPort(String dbPort) {
+        this.dbPort = dbPort;
     }
 
-    public String getDb_user() {
-        return db_user;
+    public String getDbUser() {
+        return dbUser;
     }
 
-    public void setDb_user(String db_user) {
-        this.db_user = db_user;
+    public void setDbUser(String dbUser) {
+        this.dbUser = dbUser;
     }
 
-    public String getDb_password() {
-        return db_password;
+    public String getDbPassword() {
+        return dbPassword;
     }
 
-    public void setDb_password(String db_password) {
-        this.db_password = db_password;
+    public void setDbPassword(String dbPassword) {
+        this.dbPassword = dbPassword;
     }
 
-    public String getDb_catalog() {
-        return db_catalog;
+    public String getDbCatalog() {
+        return dbCatalog;
     }
 
-    public void setDb_catalog(String db_catalog) {
-        this.db_catalog = db_catalog;
+    public void setDbCatalog(String dbCatalog) {
+        this.dbCatalog = dbCatalog;
     }
 
-    public String getDb_providerName() {
-        return db_providerName;
+    public String getDbProvidername() {
+        return dbProvidername;
     }
 
-    public void setDb_providerName(String db_providerName) {
-        this.db_providerName = db_providerName;
+    public void setDbProvidername(String dbProvidername) {
+        this.dbProvidername = dbProvidername;
     }
 
     @Override
     public int compareTo(DalGroupDB o) {
-        return this.dbname.compareTo(o.getDbname());
+        return dbname.compareTo(o.getDbname());
     }
 
     @Override
     public String toString() {
-        return "DalGroupDB [id=" + id + ", dbname=" + dbname + ", comment="
-                + comment + ", dal_group_id=" + dal_group_id + ", db_address="
-                + db_address + ", db_port=" + db_port + ", db_user=" + db_user
-                + ", db_password=" + db_password + ", db_catalog=" + db_catalog
-                + ", db_providerName=" + db_providerName + "]";
+        return "DalGroupDB [id=" + id + ", dbname=" + dbname + ", comment=" + comment + ", dal_group_id=" + dalGroupId
+                + ", db_address=" + dbAddress + ", db_port=" + dbPort + ", db_user=" + dbUser + ", db_password="
+                + dbPassword + ", db_catalog=" + dbCatalog + ", db_providerName=" + dbProvidername + "]";
     }
-
 
 }

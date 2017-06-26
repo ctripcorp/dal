@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -28,11 +29,11 @@ public class DalGroupProjectResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DalGroup> getGroups(@QueryParam("root") boolean root) {
+    public List<DalGroup> getGroups(@QueryParam("root") boolean root) throws SQLException {
         try {
             List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
             for (DalGroup group : groups) {
-                group.setText(group.getGroup_name());
+                group.setText(group.getGroupName());
                 group.setIcon("glyphicon glyphicon-folder-open");
                 group.setChildren(true);
             }
@@ -46,7 +47,7 @@ public class DalGroupProjectResource {
     @GET
     @Path("groupprojects")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) {
+    public List<Project> getGroupProjects(@QueryParam("groupId") String groupId) throws SQLException {
         try {
             int groupID = -1;
             groupID = Integer.parseInt(groupId);

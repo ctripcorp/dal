@@ -15,8 +15,8 @@ public class CSharpCodeGenContextCreator implements DalProcessor {
             CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
             Project project = SpringBeanGetter.getDaoOfProject().getProjectByID(ctx.getProjectId());
             DalConfigHost dalConfigHost = null;
-            if (project.getDal_config_name() != null && !project.getDal_config_name().isEmpty()) {
-                dalConfigHost = new DalConfigHost(project.getDal_config_name());
+            if (project.getDalConfigName() != null && !project.getDalConfigName().isEmpty()) {
+                dalConfigHost = new DalConfigHost(project.getDalConfigName());
             } else if (project.getNamespace() != null && !project.getNamespace().isEmpty()) {
                 dalConfigHost = new DalConfigHost(project.getNamespace());
             } else {

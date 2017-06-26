@@ -1,8 +1,5 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-/**
- * Created by yn.wang on 2017/1/9.
- */
 public class Response {
     private String status;
     private ResponseData[] data;

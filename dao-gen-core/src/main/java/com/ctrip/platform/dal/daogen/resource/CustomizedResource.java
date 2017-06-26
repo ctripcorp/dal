@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class CustomizedResource {
@@ -76,19 +77,19 @@ public class CustomizedResource {
         }
     }
 
-    public String getEmployee(String userNo) {
+    public String getEmployee(String userNo) throws SQLException {
         if (userNo == null || userNo.isEmpty())
             return userInfo.getEmployee(userNo);
         return DefaultUserInfo.getInstance().getEmployee(userNo);
     }
 
-    public String getName(String userNo) {
+    public String getName(String userNo) throws SQLException {
         if (userNo == null || userNo.isEmpty())
             return userInfo.getName(userNo);
         return DefaultUserInfo.getInstance().getName(userNo);
     }
 
-    public String getMail(String userNo) {
+    public String getMail(String userNo) throws SQLException {
         if (userNo == null || userNo.isEmpty())
             return userInfo.getMail(userNo);
         return DefaultUserInfo.getInstance().getMail(userNo);

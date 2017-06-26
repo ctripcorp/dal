@@ -15,7 +15,5 @@ public class DaoGenApplication extends ResourceConfig {
         this.register(EntityFilteringFeature.class);
 
         Configuration.addResource("conf.properties");
-
     }
-
 }

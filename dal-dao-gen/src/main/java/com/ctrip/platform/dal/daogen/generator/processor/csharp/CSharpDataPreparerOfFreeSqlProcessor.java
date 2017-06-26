@@ -85,9 +85,9 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                             return result;
 
                         CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-                        host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
+                        host.setDbSetName(currentTasks.get(0).getDbName());
                         host.setClassName(CommonUtils
-                                .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClass_name())));
+                                .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClassName())));
                         host.setNameSpace(namespace);
                         host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
 
@@ -95,13 +95,13 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                         // 每个Method可能就有一个Pojo
                         for (GenTaskByFreeSql task : currentTasks) {
                             CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
-                            if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
+                            if (!_freeSqlPojoHosts.containsKey(task.getPojoName()) && method.getPojoName() != null
                                     && !method.getPojoName().isEmpty()
                                     && (!method.isFirstOrSingle() || !method.isSampleType())
-                                    && !"update".equalsIgnoreCase(task.getCrud_type())) {
+                                    && !"update".equalsIgnoreCase(task.getCrudType())) {
                                 CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
                                 if (null != freeSqlPojoHost) {
-                                    _freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
+                                    _freeSqlPojoHosts.put(task.getPojoName(), freeSqlPojoHost);
                                 }
                             }
                             methods.add(method);
@@ -124,10 +124,10 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
     private CSharpMethodHost buildFreeSqlMethodHost(CSharpCodeGenContext ctx, GenTaskByFreeSql task) throws Exception {
         CSharpMethodHost method = new CSharpMethodHost();
         List<String> inParams = new ArrayList<>();
-        Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSql_content());
-        String temp = task.getSql_content();
+        Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSqlContent());
+        String temp = task.getSqlContent();
         int index = 0;
-        if (task.isPagination()) {
+        if (task.getPagination()) {
             temp = SqlBuilder.pagingQuerySql(temp, getDatabaseCategory(task.getAllInOneName()), CurrentLanguage.CSharp);
             index += 2;
         }
@@ -137,13 +137,13 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             temp = temp.replace(paramName, String.format("({%d}) ", index++));
         }
         method.setSql(temp);
-        method.setName(task.getMethod_name());
-        method.setPaging(task.isPagination());
-        String pojoName = task.getPojo_name();
+        method.setName(task.getMethodName());
+        method.setPaging(task.getPagination());
+        String pojoName = task.getPojoName();
         if (pojoName.equalsIgnoreCase("简单类型")) {
             method.setPojoName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
         } else {
-            method.setPojoName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
+            method.setPojoName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojoName())));
         }
         method.setScalarType(task.getScalarType());
         method.setPojoType(task.getPojoType());
@@ -180,7 +180,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         if (ctx.getFreeSqlPojoHosts().containsKey(method.getPojoName())) {
             method.setPojohost(ctx.getFreeSqlPojoHosts().get(method.getPojoName()));
         }
-        method.setCrud_type(task.getCrud_type());
+        method.setCrud_type(task.getCrudType());
         return method;
     }
 
@@ -189,8 +189,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         Map<String, DatabaseHost> _dbHosts = ctx.getDbHosts();
         Set<String> _freeDaos = ctx.getFreeDaos();
         for (GenTaskByFreeSql task : freeSqls) {
-            addDatabaseSet(ctx, task.getDatabaseSetName());
-            _freeDaos.add(WordUtils.capitalize(task.getClass_name()));
+            addDatabaseSet(ctx, task.getDbName());
+            _freeDaos.add(WordUtils.capitalize(task.getClassName()));
             if (!_dbHosts.containsKey(task.getAllInOneName())) {
                 String provider = "sqlProvider";
                 String dbType = DbUtils.getDbType(task.getAllInOneName());
@@ -200,7 +200,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                 DatabaseHost host = new DatabaseHost();
                 host.setAllInOneName(task.getAllInOneName());
                 host.setProviderType(provider);
-                host.setDatasetName(task.getDatabaseSetName());
+                host.setDatasetName(task.getDbName());
                 _dbHosts.put(task.getAllInOneName(), host);
             }
         }
@@ -210,7 +210,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<>();
 
         for (GenTaskByFreeSql task : tasks) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getClass_name().toLowerCase());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getClassName().toLowerCase());
             if (groupBy.containsKey(key)) {
                 groupBy.get(key).add(task);
             } else {
@@ -232,7 +232,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             dbCategory = DatabaseCategory.MySql;
         }
 
-        List<AbstractParameterHost> list = DbUtils.testAQuerySql(task.getAllInOneName(), task.getSql_content(),
+        List<AbstractParameterHost> list = DbUtils.testAQuerySql(task.getAllInOneName(), task.getSqlContent(),
                 task.getParameters(), new CsharpGivenSqlResultSetExtractor(dbCategory));
 
         for (AbstractParameterHost _ahost : list) {
@@ -241,12 +241,12 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 
         freeSqlHost.setColumns(pHosts);
         freeSqlHost.setTableName("");
-        String className = task.getPojo_name();
+        String className = task.getPojoName();
         if (className.equalsIgnoreCase("简单类型")) {
             freeSqlHost.setClassName(
-                    task.getMethod_name().substring(0, 1).toUpperCase() + task.getMethod_name().substring(1));
+                    task.getMethodName().substring(0, 1).toUpperCase() + task.getMethodName().substring(1));
         } else {
-            freeSqlHost.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
+            freeSqlHost.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojoName())));
         }
 
         freeSqlHost.setNameSpace(codeGenCtx.getNamespace());

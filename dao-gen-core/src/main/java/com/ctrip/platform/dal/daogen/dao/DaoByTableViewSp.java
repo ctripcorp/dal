@@ -1,151 +1,216 @@
 package com.ctrip.platform.dal.daogen.dao;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
+import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DaoByTableViewSp {
-    private JdbcTemplate jdbcTemplate;
+    private DalTableDao<GenTaskByTableViewSp> client;
+    private static final String DATA_BASE = "dao";
+    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+    private DalQueryDao queryDao = null;
+    private DalRowMapper<GenTaskByTableViewSp> genTaskByTableViewSpRowMapper = null;
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public DaoByTableViewSp() throws SQLException {
+        client = new DalTableDao<>(new DalDefaultJpaParser<>(GenTaskByTableViewSp.class));
+        genTaskByTableViewSpRowMapper = new DalDefaultJpaMapper<>(GenTaskByTableViewSp.class);
+        queryDao = new DalQueryDao(DATA_BASE);
+    }
+
+    private void processList(List<GenTaskByTableViewSp> list) throws SQLException {
+        if (list == null || list.size() == 0)
+            return;
+
+        for (GenTaskByTableViewSp entity : list) {
+            processGenTaskByTableViewSp(entity);
+        }
+    }
+
+    private void processGenTaskByTableViewSp(GenTaskByTableViewSp entity) throws SQLException {
+        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDbName()));
+        Date date = new Date(entity.getUpdateTime().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+
+        if (entity.getApproved() == 1) {
+            entity.setStr_approved("未审批");
+        } else if (entity.getApproved() == 2) {
+            entity.setStr_approved("通过");
+        } else if (entity.getApproved() == 3) {
+            entity.setStr_approved("未通过");
+        } else {
+            entity.setStr_approved("通过");
+        }
+    }
+
+    public int getVersionById(int id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        GenTaskByTableViewSp entity = client.queryByPk(id, hints);
+        if (entity == null)
+            return 0;
+        return entity.getVersion();
     }
 
     /**
      * 根据项目主键查询所有任务
      *
-     * @param iD
+     * @param projectId
      * @return
      */
-    public List<GenTaskByTableViewSp> getTasksByProjectId(int iD) {
-        return jdbcTemplate.query(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
-                        + "cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
-                        + "comment,sql_style,api_list,approved,approveMsg FROM task_table " + "WHERE project_id=?",
-                new Object[] {iD}, new RowMapper<GenTaskByTableViewSp>() {
-                    public GenTaskByTableViewSp mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GenTaskByTableViewSp.visitRow(rs);
-                    }
-                });
+    public List<GenTaskByTableViewSp> getTasksByProjectId(int projectId) throws SQLException {
+        FreeSelectSqlBuilder<List<GenTaskByTableViewSp>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix, cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg ");
+        sb.append("FROM task_table WHERE project_id=?");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, projectId);
+        builder.mapWith(genTaskByTableViewSpRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<GenTaskByTableViewSp> list = queryDao.query(builder, parameters, hints);
+        processList(list);
+        return list;
     }
 
     /**
      * 根据task主键查询任务
      *
-     * @param taskId
+     * @param id
      * @return
      */
-    public GenTaskByTableViewSp getTasksByTaskId(int taskId) {
-        List<GenTaskByTableViewSp> list = jdbcTemplate.query(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
-                        + "cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
-                        + "comment,sql_style,api_list,approved,approveMsg FROM task_table " + "WHERE id=?",
-                new Object[] {taskId}, new RowMapper<GenTaskByTableViewSp>() {
-                    public GenTaskByTableViewSp mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return GenTaskByTableViewSp.visitRow(rs);
-                    }
-                });
-        return list != null && list.size() > 0 ? list.get(0) : null;
+    public GenTaskByTableViewSp getTasksByTaskId(int id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.queryByPk(id, hints);
     }
 
-    public List<GenTaskByTableViewSp> updateAndGetAllTasks(int projectId) {
-        final List<GenTaskByTableViewSp> tasks = new ArrayList<>();
-        jdbcTemplate.query(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,"
-                        + "pagination,`generated`,version,update_user_no,update_time,comment,"
-                        + "sql_style,api_list,approved,approveMsg FROM task_table WHERE project_id=?",
-                new Object[] {projectId}, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        GenTaskByTableViewSp task = GenTaskByTableViewSp.visitRow(rs);
-                        task.setGenerated(true);
-                        if (updateTask(task) > 0) {
-                            tasks.add(task);
-                        }
-                    }
-                });
-        return tasks;
-    }
+    public List<GenTaskByTableViewSp> updateAndGetAllTasks(int projectId) throws SQLException {
+        List<GenTaskByTableViewSp> result = new ArrayList<>();
+        List<GenTaskByTableViewSp> list = getTasksByProjectId(projectId);
+        if (list == null || list.size() == 0)
+            return result;
 
-    public List<GenTaskByTableViewSp> updateAndGetTasks(int projectId) {
-        final List<GenTaskByTableViewSp> tasks = new ArrayList<>();
-        jdbcTemplate.query(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,"
-                        + "cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
-                        + "comment,sql_style,api_list,approved,approveMsg FROM task_table "
-                        + "WHERE project_id=? AND `generated`=FALSE",
-                new Object[] {projectId}, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        GenTaskByTableViewSp task = GenTaskByTableViewSp.visitRow(rs);
-                        task.setGenerated(true);
-                        if (updateTask(task) > 0) {
-                            tasks.add(task);
-                        }
-                    }
-                });
-        return tasks;
-    }
-
-    public int insertTask(GenTaskByTableViewSp task) {
-        return jdbcTemplate.update("INSERT INTO task_table ( project_id,  db_name,table_names,view_names,sp_names,"
-                + "prefix,suffix,cud_by_sp,pagination,`generated`,version,update_user_no,update_time,"
-                + "comment,sql_style,api_list,approved,approveMsg)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                task.getProject_id(), task.getDatabaseSetName(), task.getTable_names(), task.getView_names(),
-                task.getSp_names(), task.getPrefix(), task.getSuffix(), task.isCud_by_sp(), task.isPagination(),
-                task.isGenerated(), task.getVersion(), task.getUpdate_user_no(), task.getUpdate_time(),
-                task.getComment(), task.getSql_style(), task.getApi_list(), task.getApproved(), task.getApproveMsg());
-    }
-
-    public int getVersionById(int id) {
-        try {
-            return jdbcTemplate.queryForObject("SELECT version FROM task_table WHERE id =?", new Object[] {id},
-                    new RowMapper<Integer>() {
-                        public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return rs.getInt(1);
-                        }
-                    });
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
+        for (GenTaskByTableViewSp entity : list) {
+            entity.setGenerated(true);
+            if (updateTask(entity) > 0) {
+                result.add(entity);
+            }
         }
+
+        return result;
     }
 
-    public int updateTask(GenTaskByTableViewSp task) {
-        return jdbcTemplate.update("UPDATE task_table SET project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,"
-                + "prefix=?,suffix=?,cud_by_sp=?,pagination=?,`generated`=?,version=version+1,"
-                + "update_user_no=?,update_time=?,comment=?,sql_style=?,"
-                + "api_list=?,approved=?,approveMsg=? WHERE id=? AND version=?",
-
-                task.getProject_id(), task.getDatabaseSetName(), task.getTable_names(), task.getView_names(),
-                task.getSp_names(), task.getPrefix(), task.getSuffix(), task.isCud_by_sp(), task.isPagination(),
-                task.isGenerated(), task.getUpdate_user_no(), task.getUpdate_time(), task.getComment(),
-                task.getSql_style(), task.getApi_list(), task.getApproved(), task.getApproveMsg(), task.getId(),
-                task.getVersion());
+    public List<GenTaskByTableViewSp> updateAndGetTasks(int projectId) throws SQLException {
+        FreeSelectSqlBuilder<List<GenTaskByTableViewSp>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg ");
+        sb.append("FROM task_table WHERE project_id=? AND `generated`=FALSE");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, projectId);
+        builder.mapWith(genTaskByTableViewSpRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<GenTaskByTableViewSp> list = queryDao.query(builder, parameters, hints);
+        List<GenTaskByTableViewSp> result = new ArrayList<>();
+        if (list == null || list.size() == 0)
+            return result;
+        processList(list);
+        for (GenTaskByTableViewSp entity : list) {
+            entity.setGenerated(true);
+            if (updateTask(entity) > 0) {
+                result.add(entity);
+            }
+        }
+        return result;
     }
 
-    public int updateTask(int taskId, int approved, String approveMsg) {
-        return jdbcTemplate.update("UPDATE task_table SET approved=?, approveMsg=? WHERE id=?", approved, approveMsg,
-                taskId);
+    public int insertTask(GenTaskByTableViewSp task) throws SQLException {
+        if (null == task)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.insert(hints, task);
     }
 
-    public int deleteTask(GenTaskByTableViewSp task) {
-        return jdbcTemplate.update("DELETE FROM task_table WHERE id=?", task.getId());
+    public int updateTask(GenTaskByTableViewSp task) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE task_table SET project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,");
+        sb.append("prefix=?,suffix=?,cud_by_sp=?,pagination=?,`generated`=?,version=version+1,");
+        sb.append("update_user_no=?,update_time=?,comment=?,sql_style=?,");
+        sb.append("api_list=?,approved=?,approveMsg=? ");
+        sb.append("WHERE id=? AND version=?");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
+        parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
+        parameters.set(i++, "table_names", Types.LONGVARCHAR, task.getTableNames());
+        parameters.set(i++, "view_names", Types.LONGVARCHAR, task.getViewNames());
+        parameters.set(i++, "sp_names", Types.LONGVARCHAR, task.getSpNames());
+        parameters.set(i++, "prefix", Types.VARCHAR, task.getPrefix());
+        parameters.set(i++, "suffix", Types.VARCHAR, task.getSuffix());
+        parameters.set(i++, "cud_by_sp", Types.BIT, task.getCudBySp());
+        parameters.set(i++, "pagination", Types.BIT, task.getPagination());
+        parameters.set(i++, "generated", Types.BIT, task.getGenerated());
+        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdateUserNo());
+        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdateTime());
+        parameters.set(i++, "comment", Types.LONGVARCHAR, task.getComment());
+        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSqlStyle());
+        parameters.set(i++, "api_list", Types.LONGVARCHAR, task.getApiList());
+        parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
+        parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
+        parameters.set(i++, "id", Types.INTEGER, task.getId());
+        parameters.set(i++, "version", Types.INTEGER, task.getVersion());
+
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int deleteByProjectId(int id) {
-        return jdbcTemplate.update("DELETE FROM task_table WHERE project_id=?", id);
+    public int updateTask(int id, int approved, String approveMsg) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("UPDATE task_table SET approved=?, approveMsg=? WHERE id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "approved", Types.INTEGER, approved);
+        parameters.set(i++, "approveMsg", Types.VARCHAR, approveMsg);
+        parameters.set(i++, "id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
-    public int deleteByServerId(int id) {
-        return jdbcTemplate.update("DELETE FROM task_table WHERE server_id=?", id);
+    public int deleteTask(GenTaskByTableViewSp task) throws SQLException {
+        if (null == task)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.delete(hints, task);
+    }
+
+    public int deleteByProjectId(int id) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("DELETE FROM task_table WHERE project_id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "project_id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
 }

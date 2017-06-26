@@ -1,112 +1,167 @@
 package com.ctrip.platform.dal.daogen.dao;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.DalRowMapper;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class DaoOfDatabaseSet {
-    private JdbcTemplate jdbcTemplate;
+    private DalTableDao<DatabaseSet> client;
+    private DalTableDao<DatabaseSetEntry> client2;
+    private static final String DATA_BASE = "dao";
+    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+    private DalQueryDao queryDao = null;
+    private DalRowMapper<DatabaseSet> databaseSetRowMapper = null;
+    private DalRowMapper<DatabaseSetEntry> databaseSetEntryRowMapper = null;
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public DaoOfDatabaseSet() throws SQLException {
+        client = new DalTableDao<>(new DalDefaultJpaParser<>(DatabaseSet.class));
+        client2 = new DalTableDao<>(new DalDefaultJpaParser<>(DatabaseSetEntry.class));
+        databaseSetRowMapper = new DalDefaultJpaMapper<>(DatabaseSet.class);
+        databaseSetEntryRowMapper = new DalDefaultJpaMapper<>(DatabaseSetEntry.class);
+        queryDao = new DalQueryDao(DATA_BASE);
     }
 
-    public DatabaseSet getAllDatabaseSetById(Integer id) {
-        List<DatabaseSet> dbset = jdbcTemplate.query(
-                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE id = ?",
-                new Object[] {id}, new RowMapper<DatabaseSet>() {
-                    public DatabaseSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DatabaseSet.visitRow(rs);
-                    }
-                });
-        return dbset != null && dbset.size() > 0 ? dbset.get(0) : null;
+    public DatabaseSet getAllDatabaseSetById(Integer id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        DatabaseSet databaseSet = client.queryByPk(id, hints);
+        processDatabaseSet(databaseSet);
+        return databaseSet;
     }
 
-    public List<DatabaseSet> getAllDatabaseSetByName(String name) {
-        List<DatabaseSet> dbset = jdbcTemplate.query(
-                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE name = ?",
-                new Object[] {name}, new RowMapper<DatabaseSet>() {
-                    public DatabaseSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DatabaseSet.visitRow(rs);
-                    }
-                });
-        return dbset;
+    public List<DatabaseSet> getAllDatabaseSetByName(String name) throws SQLException {
+        FreeSelectSqlBuilder<List<DatabaseSet>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE name = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "name", Types.VARCHAR, name);
+        builder.mapWith(databaseSetRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<DatabaseSet> list = queryDao.query(builder, parameters, hints);
+        processList(list);
+        return list;
     }
 
-    public List<DatabaseSet> getAllDatabaseSetByGroupId(Integer groupId) {
-        List<DatabaseSet> dbset = jdbcTemplate.query(
-                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE groupId = ?",
-                new Object[] {groupId}, new RowMapper<DatabaseSet>() {
-                    public DatabaseSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DatabaseSet.visitRow(rs);
-                    }
-                });
-        return dbset;
+    public List<DatabaseSet> getAllDatabaseSetByGroupId(Integer groupId) throws SQLException {
+        FreeSelectSqlBuilder<List<DatabaseSet>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE groupId = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "groupId", Types.INTEGER, groupId);
+        builder.mapWith(databaseSetRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<DatabaseSet> list = queryDao.query(builder, parameters, hints);
+        processList(list);
+        return list;
     }
 
-    public List<DatabaseSetEntry> getAllDatabaseSetEntryByDbsetid(Integer databaseSet_Id) {
-        List<DatabaseSetEntry> dbset = jdbcTemplate.query(
-                "SELECT id, name, databaseType, sharding, connectionString, databaseSet_Id, update_user_no, update_time FROM databasesetentry WHERE databaseSet_Id = ?",
-                new Object[] {databaseSet_Id}, new RowMapper<DatabaseSetEntry>() {
-                    public DatabaseSetEntry mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DatabaseSetEntry.visitRow(rs);
-                    }
-                });
-        return dbset;
-    }
+    private void processList(List<DatabaseSet> list) throws SQLException {
+        if (list == null || list.size() == 0)
+            return;
 
-    public DatabaseSetEntry getMasterDatabaseSetEntryByDatabaseSetName(String dbName) {
-        List<DatabaseSetEntry> list = jdbcTemplate.query(
-                "select en.id, en.name, en.databaseType, en.sharding, en.connectionString, en.databaseSet_Id, en.update_user_no, en.update_time "
-                        + "from databasesetentry as en " + "join databaseset as se on en.databaseSet_Id = se.id "
-                        + "where se.name = '" + dbName + "' and en.databaseType = 'Master' limit 1;",
-                new RowMapper<DatabaseSetEntry>() {
-                    @Override
-                    public DatabaseSetEntry mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DatabaseSetEntry.visitRow(rs);
-                    }
-                });
-        return null != list && list.size() > 0 ? list.get(0) : null;
-    }
-
-    public int insertDatabaseSet(DatabaseSet dbset) {
-        try {
-            return jdbcTemplate.update(
-                    "INSERT INTO databaseset(name, provider, shardingStrategy, groupId, update_user_no, update_time) VALUE(?,?,?,?,?,?)",
-                    dbset.getName(), dbset.getProvider(), dbset.getShardingStrategy(), dbset.getGroupId(),
-                    dbset.getUpdate_user_no(), dbset.getUpdate_time());
-        } catch (Throwable e) {
-            throw e;
+        for (DatabaseSet entity : list) {
+            processDatabaseSet(entity);
         }
     }
 
-    public int insertDatabaseSetEntry(DatabaseSetEntry dbsetEntry) {
-        return jdbcTemplate.update(
-                "INSERT INTO databasesetentry(name, databaseType, sharding, connectionString, databaseSet_Id, update_user_no, update_time) VALUE(?,?,?,?,?,?,?)",
-                dbsetEntry.getName(), dbsetEntry.getDatabaseType(), dbsetEntry.getSharding(),
-                dbsetEntry.getConnectionString(), dbsetEntry.getDatabaseSet_Id(), dbsetEntry.getUpdate_user_no(),
-                dbsetEntry.getUpdate_time());
+    private void processDatabaseSet(DatabaseSet entity) throws SQLException {
+        Date date = new Date(entity.getUpdateTime().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
-    public int updateDatabaseSet(DatabaseSet dbset) {
-        return jdbcTemplate.update(
-                "UPDATE databaseset SET name=?, provider=?, shardingStrategy=?, groupId=?, update_user_no=?, update_time=? WHERE id=?",
-                dbset.getName(), dbset.getProvider(), dbset.getShardingStrategy(), dbset.getGroupId(),
-                dbset.getUpdate_user_no(), dbset.getUpdate_time(), dbset.getId());
+    public List<DatabaseSetEntry> getAllDatabaseSetEntryByDbsetid(Integer databaseSet_Id) throws SQLException {
+        FreeSelectSqlBuilder<List<DatabaseSetEntry>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, name, databaseType, sharding, connectionString, databaseSet_Id, update_user_no, update_time FROM databasesetentry WHERE databaseSet_Id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "databaseSet_Id", Types.INTEGER, databaseSet_Id);
+        builder.mapWith(databaseSetEntryRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<DatabaseSetEntry> list = queryDao.query(builder, parameters, hints);
+        processEntryList(list);
+        return list;
     }
 
-    public int updateDatabaseSetEntry(DatabaseSetEntry dbsetEntry) {
-        return jdbcTemplate.update(
-                "UPDATE databasesetentry SET name=?, databaseType=?, sharding=?, connectionString=?, databaseSet_Id=?, update_user_no=?, update_time=? WHERE id=?",
-                dbsetEntry.getName(), dbsetEntry.getDatabaseType(), dbsetEntry.getSharding(),
-                dbsetEntry.getConnectionString(), dbsetEntry.getDatabaseSet_Id(), dbsetEntry.getUpdate_user_no(),
-                dbsetEntry.getUpdate_time(), dbsetEntry.getId());
+    public DatabaseSetEntry getMasterDatabaseSetEntryByDatabaseSetName(String dbName) throws SQLException {
+        FreeSelectSqlBuilder<DatabaseSetEntry> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT en.id, en.name, en.databaseType, en.sharding, en.connectionString, en.databaseSet_Id, en.update_user_no, en.update_time "
+                        + "FROM databasesetentry as en join databaseset as se on en.databaseSet_Id = se.id "
+                        + "WHERE se.name = ? and en.databaseType = 'Master' limit 1");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "name", Types.VARCHAR, dbName);
+        builder.mapWith(databaseSetEntryRowMapper).requireFirst().nullable();
+        DalHints hints = DalHints.createIfAbsent(null);
+        DatabaseSetEntry entry = queryDao.query(builder, parameters, hints);
+        processDatabaseSetEntry(entry);
+        return entry;
+    }
+
+    private void processEntryList(List<DatabaseSetEntry> list) throws SQLException {
+        if (list == null || list.size() == 0)
+            return;
+
+        for (DatabaseSetEntry entity : list) {
+            processDatabaseSetEntry(entity);
+        }
+    }
+
+    private void processDatabaseSetEntry(DatabaseSetEntry entity) throws SQLException {
+        Date date = new Date(entity.getUpdateTime().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+    }
+
+    public int insertDatabaseSet(DatabaseSet dbset) throws SQLException {
+        if (null == dbset)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.insert(hints, dbset);
+    }
+
+    public int updateDatabaseSet(DatabaseSet dbset) throws SQLException {
+        if (null == dbset)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.update(hints, dbset);
+    }
+
+    public int insertDatabaseSetEntry(DatabaseSetEntry dbsetEntry) throws SQLException {
+        if (null == dbsetEntry)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client2.insert(hints, dbsetEntry);
+    }
+
+    public int updateDatabaseSetEntry(DatabaseSetEntry dbsetEntry) throws SQLException {
+        if (null == dbsetEntry)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client2.update(hints, dbsetEntry);
+    }
+
+    public int deleteDatabaseSetById(Integer dbsetId) throws SQLException {
+        DatabaseSet dbset = new DatabaseSet();
+        dbset.setId(dbsetId);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.delete(hints, dbset);
     }
 
     /**
@@ -115,8 +170,14 @@ public class DaoOfDatabaseSet {
      * @param dbsetId
      * @return
      */
-    public int deleteDatabaseSetEntryByDbsetId(Integer dbsetId) {
-        return jdbcTemplate.update("DELETE FROM databasesetentry WHERE databaseSet_Id=?", dbsetId);
+    public int deleteDatabaseSetEntryByDbsetId(Integer dbsetId) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("DELETE FROM databasesetentry WHERE databaseSet_Id = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.setSensitive(i++, "databaseSet_Id", Types.INTEGER, dbsetId);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
     }
 
     /**
@@ -125,12 +186,11 @@ public class DaoOfDatabaseSet {
      * @param id
      * @return
      */
-    public int deleteDatabaseSetEntryById(Integer id) {
-        return jdbcTemplate.update("DELETE FROM databasesetentry WHERE id=?", id);
-    }
-
-    public int deleteDatabaseSetById(Integer dbsetId) {
-        return jdbcTemplate.update("DELETE FROM databaseset WHERE id=?", dbsetId);
+    public int deleteDatabaseSetEntryById(Integer id) throws SQLException {
+        DatabaseSetEntry entry = new DatabaseSetEntry();
+        entry.setId(id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client2.delete(hints, entry);
     }
 
 }

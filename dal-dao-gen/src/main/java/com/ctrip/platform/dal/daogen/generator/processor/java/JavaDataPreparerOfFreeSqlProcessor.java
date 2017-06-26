@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -39,7 +40,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         }
     }
 
-    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) {
+    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws SQLException {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         int projectId = ctx.getProjectId();
         final Progress progress = ctx.getProgress();
@@ -81,8 +82,8 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                         return result;
 
                     FreeSqlHost host = new FreeSqlHost();
-                    host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
-                    host.setClassName(currentTasks.get(0).getClass_name());
+                    host.setDbSetName(currentTasks.get(0).getDbName());
+                    host.setClassName(currentTasks.get(0).getClassName());
                     host.setPackageName(namespace);
                     host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
 
@@ -90,16 +91,16 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     // 每个Method可能就有一个Pojo
                     for (GenTaskByFreeSql task : currentTasks) {
                         JavaMethodHost method = new JavaMethodHost();
-                        method.setSql(task.getSql_content());
-                        method.setName(task.getMethod_name());
+                        method.setSql(task.getSqlContent());
+                        method.setName(task.getMethodName());
                         method.setPackageName(namespace);
                         method.setScalarType(task.getScalarType());
                         method.setPojoType(task.getPojoType());
-                        method.setPaging(task.isPagination());
-                        method.setCrud_type(task.getCrud_type());
+                        method.setPaging(task.getPagination());
+                        method.setCrud_type(task.getCrudType());
                         method.setComments(task.getComment());
-                        if (task.getPojo_name() != null && !task.getPojo_name().isEmpty())
-                            method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
+                        if (task.getPojoName() != null && !task.getPojoName().isEmpty())
+                            method.setPojoClassName(WordUtils.capitalize(task.getPojoName() + "Pojo"));
 
                         List<JavaParameterHost> params = new ArrayList<>();
                         for (String param : StringUtils.split(task.getParameters(), ";")) {
@@ -114,7 +115,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                             p.setSensitive(sensitive);
                             params.add(p);
                         }
-                        SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), params);
+                        SqlBuilder.rebuildJavaInClauseSQL(task.getSqlContent(), params);
                         method.setParameters(params);
                         method.setHints(task.getHints());
                         methods.add(method);
@@ -125,8 +126,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                             List<JavaParameterHost> paramHosts = new ArrayList<>();
 
                             for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
-                                    task.getSql_content(), task.getParameters(),
-                                    new JavaGivenSqlResultSetExtractor())) {
+                                    task.getSqlContent(), task.getParameters(), new JavaGivenSqlResultSetExtractor())) {
                                 paramHosts.add((JavaParameterHost) _ahost);
                             }
 
@@ -146,9 +146,9 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         return results;
     }
 
-    private void prepareDbFromFreeSql(CodeGenContext codeGenCtx, List<GenTaskByFreeSql> freeSqls) {
+    private void prepareDbFromFreeSql(CodeGenContext codeGenCtx, List<GenTaskByFreeSql> freeSqls) throws SQLException {
         for (GenTaskByFreeSql task : freeSqls) {
-            addDatabaseSet(codeGenCtx, task.getDatabaseSetName());
+            addDatabaseSet(codeGenCtx, task.getDbName());
         }
     }
 
@@ -162,7 +162,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<>();
 
         for (GenTaskByFreeSql task : tasks) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getClass_name().toLowerCase());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getClassName().toLowerCase());
             if (groupBy.containsKey(key)) {
                 groupBy.get(key).add(task);
             } else {

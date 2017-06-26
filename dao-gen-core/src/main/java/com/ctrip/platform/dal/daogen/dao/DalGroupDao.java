@@ -1,68 +1,51 @@
 package com.ctrip.platform.dal.daogen.dao;
 
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalTableDao;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 public class DalGroupDao {
-    private JdbcTemplate jdbcTemplate;
+    private DalTableDao<DalGroup> client;
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    public DalGroupDao() throws SQLException {
+        client = new DalTableDao<>(new DalDefaultJpaParser<>(DalGroup.class));
     }
 
-    public List<DalGroup> getAllGroups() {
-        return jdbcTemplate.query("SELECT id, group_name, group_comment,create_user_no, create_time FROM dal_group",
-                new RowMapper<DalGroup>() {
-                    public DalGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DalGroup.visitRow(rs);
-                    }
-                });
+    public List<DalGroup> getAllGroups() throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.query(builder, hints);
     }
 
-    public DalGroup getDalGroupById(Integer id) {
-        List<DalGroup> groups = jdbcTemplate.query(
-                "SELECT id, group_name, group_comment,create_user_no, create_time FROM dal_group WHERE id = ?",
-                new Object[] {id}, new RowMapper<DalGroup>() {
-                    public DalGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return DalGroup.visitRow(rs);
-                    }
-                });
-        return null != groups && groups.size() > 0 ? groups.get(0) : null;
+    public DalGroup getDalGroupById(Integer id) throws SQLException {
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.queryByPk(id, hints);
     }
 
-    public boolean isDalGroupExisted() {
-        return jdbcTemplate
-                .query("SELECT id, group_name, group_comment,create_user_no, create_time FROM dal_group LIMIT 1",
-                        new RowMapper<DalGroup>() {
-                            public DalGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
-                                return DalGroup.visitRow(rs);
-                            }
-                        })
-                .size() > 0;
+    public int insertDalGroup(DalGroup group) throws SQLException {
+        if (null == group)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.insert(hints, group);
     }
 
-    public int insertDalGroup(DalGroup group) {
-        return jdbcTemplate.update(
-                "INSERT INTO dal_group(id, group_name, group_comment,create_user_no, create_time) VALUE(?,?,?,?,?)",
-                group.getId(), group.getGroup_name(), group.getGroup_comment(), group.getCreate_user_no(),
-                group.getCreate_time());
+    public int updateDalGroup(DalGroup group) throws SQLException {
+        if (null == group)
+            return 0;
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.update(hints, group);
     }
 
-    public int updateDalGroup(DalGroup group) {
-        return jdbcTemplate.update(
-                "UPDATE dal_group SET group_name=?, group_comment=?, create_user_no=?, create_time=? WHERE id=?",
-                group.getGroup_name(), group.getGroup_comment(), group.getCreate_user_no(), group.getCreate_time(),
-                group.getId());
-    }
-
-    public int deleteDalGroup(Integer groupId) {
-        return jdbcTemplate.update("DELETE FROM dal_group WHERE id=?", groupId);
+    public int deleteDalGroup(Integer groupId) throws SQLException {
+        DalGroup group = new DalGroup();
+        group.setId(groupId);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return client.delete(hints, group);
     }
 
 }

@@ -6,7 +6,6 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 
 public class JavaDirectoryPreparerProcessor {
     public void process(CodeGenContext codeGenCtx) throws Exception {

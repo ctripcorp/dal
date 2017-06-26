@@ -1,17 +1,41 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
-public class LoginUser {
-    private int id;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Types;
 
+@Entity
+@Database(name = "dao")
+@Table(name = "login_users")
+public class LoginUser implements DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "user_no")
+    @Type(value = Types.VARCHAR)
     private String userNo;
 
+    @Column(name = "user_name")
+    @Type(value = Types.VARCHAR)
     private String userName;
 
+    @Column(name = "user_email")
+    @Type(value = Types.VARCHAR)
     private String userEmail;
 
+    @Column(name = "password")
+    @Type(value = Types.VARCHAR)
     private String password;
 
     // 以下属性仅在组员管理界面中使用
@@ -19,24 +43,11 @@ public class LoginUser {
     private String adduser;// 是否可以添加组员
     private boolean isDalTeam = false;// true:是DAL Team，false:是正常用户
 
-    public static LoginUser visitRow(ResultSet rs) throws SQLException {
-        if (rs == null) {
-            return null;
-        }
-        LoginUser user = new LoginUser();
-        user.setId(rs.getInt(1));
-        user.setUserNo(rs.getString(2));
-        user.setUserName(rs.getString(3));
-        user.setUserEmail(rs.getString(4));
-        user.setPassword(rs.getString(5));
-        return user;
-    }
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -64,6 +75,14 @@ public class LoginUser {
         this.userEmail = userEmail;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getRole() {
         return role;
     }
@@ -88,11 +107,4 @@ public class LoginUser {
         this.isDalTeam = isDalTeam;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

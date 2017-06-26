@@ -92,9 +92,9 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         final Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final GenTaskByTableViewSp tableViewSp : tableViewSpTasks) {
-            final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
-            final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
-            final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
+            final String[] viewNames = StringUtils.split(tableViewSp.getViewNames(), ",");
+            final String[] tableNames = StringUtils.split(tableViewSp.getTableNames(), ",");
+            final String[] spNames = StringUtils.split(tableViewSp.getSpNames(), ",");
 
             final DatabaseCategory dbCategory;
             String dbType = DbUtils.getDbType(tableViewSp.getAllInOneName());
@@ -210,14 +210,14 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         Set<String> _spDaos = ctx.getSpDaos();
         Map<String, DatabaseHost> _dbHosts = ctx.getDbHosts();
         for (GenTaskByTableViewSp task : tableViewSps) {
-            for (String table : StringUtils.split(task.getTable_names(), ",")) {
+            for (String table : StringUtils.split(task.getTableNames(), ",")) {
                 _tableDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(), table));
                 existsTable.add(table);
             }
-            for (String table : StringUtils.split(task.getView_names(), ",")) {
+            for (String table : StringUtils.split(task.getViewNames(), ",")) {
                 _tableDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(), table));
             }
-            for (String table : StringUtils.split(task.getSp_names(), ",")) {
+            for (String table : StringUtils.split(task.getSpNames(), ",")) {
                 String realSpName = table;
                 if (table.contains(".")) {
                     String[] splitSp = StringUtils.split(table, '.');
@@ -226,7 +226,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                 _spDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(), realSpName.replace("_", "")));
             }
 
-            addDatabaseSet(ctx, task.getDatabaseSetName());
+            addDatabaseSet(ctx, task.getDbName());
 
             if (!_dbHosts.containsKey(task.getAllInOneName())) {
                 String provider = "sqlProvider";
@@ -243,11 +243,11 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         }
 
         for (GenTaskBySqlBuilder task : sqlBuilders) {
-            if (!existsTable.contains(task.getTable_name())) {
-                _tableDaos.add(getPojoClassName("", "", task.getTable_name()));
+            if (!existsTable.contains(task.getTableName())) {
+                _tableDaos.add(getPojoClassName("", "", task.getTableName()));
             }
 
-            addDatabaseSet(ctx, task.getDatabaseSetName());
+            addDatabaseSet(ctx, task.getDbName());
 
             if (!_dbHosts.containsKey(task.getAllInOneName())) {
                 String provider = "sqlProvider";
@@ -283,14 +283,14 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         CSharpTableHost tableHost = new CSharpTableHost();
         tableHost.setNameSpace(ctx.getNamespace());
         tableHost.setDatabaseCategory(dbCategory);
-        tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
+        tableHost.setDbSetName(tableViewSp.getDbName());
         tableHost.setTableName(view);
         tableHost.setClassName(CommonUtils
                 .normalizeVariable(getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), view)));
         tableHost.setTable(false);
         tableHost.setSpa(false);
         tableHost.setColumns(allColumns);
-        tableHost.setHasPagination(tableViewSp.isPagination());
+        tableHost.setHasPagination(tableViewSp.getPagination());
         return tableHost;
     }
 
@@ -323,13 +323,13 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         CSharpTableHost tableHost = new CSharpTableHost();
         tableHost.setNameSpace(ctx.getNamespace());
         tableHost.setDatabaseCategory(dbCategory);
-        tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
+        tableHost.setDbSetName(tableViewSp.getDbName());
         tableHost.setClassName(
                 getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), realSpName.replace("_", "")));
         tableHost.setTable(false);
         tableHost.setSpName(spName);
         tableHost.setSpParams(realParams);
-        tableHost.setApi_list(tableViewSp.getApi_list());
+        tableHost.setApi_list(tableViewSp.getApiList());
 
         return tableHost;
     }

@@ -1,41 +1,56 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.ctrip.platform.dal.dao.DalPojo;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
-public class DalApi implements Comparable<DalApi> {
-    private int id;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Types;
+
+@Entity
+@Database(name = "dao")
+@Table(name = "api_list")
+public class DalApi implements Comparable<DalApi>, DalPojo {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Type(value = Types.INTEGER)
+    private Integer id;
+
+    @Column(name = "language")
+    @Type(value = Types.VARCHAR)
     private String language;
-    private String db_type;
-    private String crud_type;
-    private String method_declaration;
-    private String method_description;
-    private String sp_type;
 
-    public static DalApi visitRow(ResultSet rs) throws SQLException {
-        DalApi api = new DalApi();
-        api.setId(rs.getInt("id"));
-        api.setLanguage(rs.getString("language"));
-        api.setDb_type(rs.getString("db_type"));
-        api.setCrud_type(rs.getString("crud_type"));
-        api.setMethod_declaration(rs.getString("method_declaration"));
-        api.setMethod_description(rs.getString("method_description"));
-        api.setSp_type(rs.getString("sp_type"));
-        return api;
-    }
+    @Column(name = "db_type")
+    @Type(value = Types.VARCHAR)
+    private String dbType;
 
-    @Override
-    public int compareTo(DalApi api) {
-        String str1 = this.language + this.db_type + this.crud_type + this.method_declaration + this.method_description + this.sp_type;
-        String str2 = api.getLanguage() + api.getDb_type() + api.getCrud_type() + api.getMethod_declaration() + api.getMethod_description() + api.getSp_type();
-        return str1.compareTo(str2);
-    }
+    @Column(name = "crud_type")
+    @Type(value = Types.VARCHAR)
+    private String crudType;
 
-    public int getId() {
+    @Column(name = "method_declaration")
+    @Type(value = Types.VARCHAR)
+    private String methodDeclaration;
+
+    @Column(name = "method_description")
+    @Type(value = Types.LONGVARCHAR)
+    private String methodDescription;
+
+    @Column(name = "sp_type")
+    @Type(value = Types.VARCHAR)
+    private String spType;
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -47,44 +62,51 @@ public class DalApi implements Comparable<DalApi> {
         this.language = language;
     }
 
-    public String getDb_type() {
-        return db_type;
+    public String getDbType() {
+        return dbType;
     }
 
-    public void setDb_type(String db_type) {
-        this.db_type = db_type;
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
     }
 
-    public String getCrud_type() {
-        return crud_type;
+    public String getCrudType() {
+        return crudType;
     }
 
-    public void setCrud_type(String crud_type) {
-        this.crud_type = crud_type;
+    public void setCrudType(String crudType) {
+        this.crudType = crudType;
     }
 
-    public String getMethod_declaration() {
-        return method_declaration;
+    public String getMethodDeclaration() {
+        return methodDeclaration;
     }
 
-    public void setMethod_declaration(String method_declaration) {
-        this.method_declaration = method_declaration;
+    public void setMethodDeclaration(String methodDeclaration) {
+        this.methodDeclaration = methodDeclaration;
     }
 
-    public String getMethod_description() {
-        return method_description;
+    public String getMethodDescription() {
+        return methodDescription;
     }
 
-    public void setMethod_description(String method_description) {
-        this.method_description = method_description;
+    public void setMethodDescription(String methodDescription) {
+        this.methodDescription = methodDescription;
     }
 
-    public String getSp_type() {
-        return sp_type;
+    public String getSpType() {
+        return spType;
     }
 
-    public void setSp_type(String sp_type) {
-        this.sp_type = sp_type;
+    public void setSpType(String spType) {
+        this.spType = spType;
     }
 
+    @Override
+    public int compareTo(DalApi api) {
+        String str1 = language + dbType + crudType + methodDeclaration + methodDescription + spType;
+        String str2 = api.getLanguage() + api.getDbType() + api.getCrudType() + api.getMethodDeclaration()
+                + api.getMethodDescription() + api.getSpType();
+        return str1.compareTo(str2);
+    }
 }

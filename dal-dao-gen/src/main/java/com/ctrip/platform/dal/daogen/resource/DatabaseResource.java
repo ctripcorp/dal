@@ -51,7 +51,7 @@ public class DatabaseResource {
             boolean havePersimion = false;
             if (urGroups != null && urGroups.size() > 0) {
                 for (UserGroup ug : urGroups) {
-                    if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID) {
+                    if (ug.getGroupId() == DalGroupResource.SUPER_GROUP_ID) {
                         havePersimion = true;
                         break;
                     }
@@ -75,9 +75,9 @@ public class DatabaseResource {
                     allDbDao.insertDalGroupDB(allDbs.get(key));
                 } else {
                     DalGroupDB fileDB = allDbs.get(key);
-                    allDbDao.updateGroupDB(db.getId(), key, fileDB.getDb_address(), fileDB.getDb_port(),
-                            fileDB.getDb_user(), fileDB.getDb_password(), fileDB.getDb_catalog(),
-                            fileDB.getDb_providerName());
+                    allDbDao.updateGroupDB(db.getId(), key, fileDB.getDbAddress(), fileDB.getDbPort(),
+                            fileDB.getDbUser(), fileDB.getDbPassword(), fileDB.getDbCatalog(),
+                            fileDB.getDbProvidername());
                 }
             }
 
@@ -152,28 +152,28 @@ public class DatabaseResource {
             } else {
                 DalGroupDB groupDb = new DalGroupDB();
                 groupDb.setDbname(allinonename);
-                groupDb.setDb_address(dbaddress);
-                groupDb.setDb_port(dbport);
-                groupDb.setDb_user(dbuser);
-                groupDb.setDb_password(dbpassword);
-                groupDb.setDb_catalog(dbcatalog);
-                groupDb.setDb_providerName(DatabaseType.valueOf(dbtype).getValue());
-                groupDb.setDal_group_id(-1);
+                groupDb.setDbAddress(dbaddress);
+                groupDb.setDbPort(dbport);
+                groupDb.setDbUser(dbuser);
+                groupDb.setDbPassword(dbpassword);
+                groupDb.setDbCatalog(dbcatalog);
+                groupDb.setDbProvidername(DatabaseType.valueOf(dbtype).getValue());
+                groupDb.setDalGroupId(-1);
 
                 // add to current user's group
                 if (addToGroup) {
                     int gid = -1;
                     if (groupId != null && !groupId.isEmpty()) {
                         gid = Integer.parseInt(groupId);
-                        groupDb.setDal_group_id(gid);
+                        groupDb.setDalGroupId(gid);
                     } else {
                         LoginUser user = RequestUtil.getUserInfo(request);
                         if (user != null) {
                             int userId = user.getId();
                             List<UserGroup> list = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(userId);
                             if (list != null && list.size() > 0) {
-                                gid = list.get(0).getGroup_id();
-                                groupDb.setDal_group_id(gid);
+                                gid = list.get(0).getGroupId();
+                                groupDb.setDalGroupId(gid);
                             }
                         }
                     }
@@ -196,15 +196,15 @@ public class DatabaseResource {
         }
     }
 
-    private boolean validatePermision(int userId, int db_group_id) {
+    private boolean validatePermision(int userId, int db_group_id) throws SQLException {
         boolean havaPermision = false;
         List<UserGroup> urGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(userId);
         if (urGroups != null && urGroups.size() > 0) {
             for (UserGroup urGroup : urGroups) {
-                if (urGroup.getGroup_id() == DalGroupResource.SUPER_GROUP_ID) {
+                if (urGroup.getGroupId() == DalGroupResource.SUPER_GROUP_ID) {
                     havaPermision = true;
                 }
-                if (urGroup.getGroup_id() == db_group_id) {
+                if (urGroup.getGroupId() == db_group_id) {
                     havaPermision = true;
                 }
             }
@@ -225,7 +225,7 @@ public class DatabaseResource {
             DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-            if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
+            if (!validatePermision(user.getId(), groupDb.getDalGroupId())) {
                 status = Status.ERROR;
                 status.setInfo("你没有当前DataBase的操作权限.");
             } else {
@@ -253,19 +253,19 @@ public class DatabaseResource {
             DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-            if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
+            if (!validatePermision(user.getId(), groupDb.getDalGroupId())) {
                 status = Status.ERROR;
                 status.setInfo("你没有当前DataBase的操作权限.");
                 return status;
             }
 
             try {
-                if (DatabaseType.MySQL.getValue().equals(groupDb.getDb_providerName())) {
-                    groupDb.setDb_providerName(DatabaseType.MySQL.toString());
-                } else if (DatabaseType.SQLServer.getValue().equals(groupDb.getDb_providerName())) {
-                    groupDb.setDb_providerName(DatabaseType.SQLServer.toString());
+                if (DatabaseType.MySQL.getValue().equals(groupDb.getDbProvidername())) {
+                    groupDb.setDbProvidername(DatabaseType.MySQL.toString());
+                } else if (DatabaseType.SQLServer.getValue().equals(groupDb.getDbProvidername())) {
+                    groupDb.setDbProvidername(DatabaseType.SQLServer.toString());
                 } else {
-                    groupDb.setDb_providerName("no");
+                    groupDb.setDbProvidername("no");
                 }
                 status.setInfo(mapper.writeValueAsString(groupDb));
             } catch (JsonProcessingException e) {
@@ -306,7 +306,7 @@ public class DatabaseResource {
             LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             DalGroupDB groupDb = allDbDao.getGroupDBByDbId(id);
 
-            if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
+            if (!validatePermision(user.getId(), groupDb.getDalGroupId())) {
                 status = Status.ERROR;
                 status.setInfo("你没有当前DataBase的操作权限.");
                 return status;
@@ -326,7 +326,8 @@ public class DatabaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("dbs")
-    public String getDbNames(@QueryParam("groupDBs") boolean groupDBs, @QueryParam("groupId") int groupId) {
+    public String getDbNames(@QueryParam("groupDBs") boolean groupDBs, @QueryParam("groupId") int groupId)
+            throws SQLException {
         try {
             if (groupDBs) {
                 if (-1 != groupId && groupId > 0) {

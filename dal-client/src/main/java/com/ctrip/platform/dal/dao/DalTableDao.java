@@ -122,7 +122,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 			throw new DalException(ErrorCode.ValidatePrimaryKeyCount);
 
 		StatementParameters parameters = new StatementParameters();
-		parameters.set(1, getColumnType(parser.getPrimaryKeyNames()[0]), id);
+		parameters.set(1, parser.getPrimaryKeyNames()[0], getColumnType(parser.getPrimaryKeyNames()[0]), id);
 
 		return queryObject(new BaseTableSelectBuilder(rawTableName, dbCategory).where(pkSql).with(parameters).requireSingle().nullable(), hints);
 	}

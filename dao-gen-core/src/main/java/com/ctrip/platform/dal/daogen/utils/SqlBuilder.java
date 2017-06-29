@@ -9,7 +9,6 @@ import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -24,8 +23,6 @@ import java.util.regex.Pattern;
  * @author wcyuan
  */
 public class SqlBuilder {
-    private static Logger log = Logger.getLogger(SqlBuilder.class);
-
     private static final String regInEx = "(?i)In *\\(?\\?\\)?";
     private static final String regEx = "\\?";
     private static Pattern inRegxPattern = null;

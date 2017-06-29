@@ -1,9 +1,8 @@
 package com.ctrip.platform.dal.daogen.entity;
 
 import com.ctrip.platform.dal.daogen.UserInfo;
-import com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,10 +19,8 @@ public class DefaultUserInfo implements UserInfo {
         return INSTANCE;
     }
 
-    private static final DaoOfLoginUser userDao = SpringBeanGetter.getDaoOfLoginUser();
-
     private LoginUser getLoginUser(String userNo) throws SQLException {
-        return userDao.getUserByNo(userNo);
+        return BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
     }
 
     @Override
@@ -78,10 +75,10 @@ public class DefaultUserInfo implements UserInfo {
         if (dbType == null || dbType.isEmpty())
             return db;
 
-        db.setDbAddress("");
-        db.setDbPort("");
-        db.setDbUser("");
-        db.setDbPassword("");
+        db.setDb_address("");
+        db.setDb_port("");
+        db.setDb_user("");
+        db.setDb_password("");
         return db;
     }
 

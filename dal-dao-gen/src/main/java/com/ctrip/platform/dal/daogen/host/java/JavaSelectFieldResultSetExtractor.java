@@ -1,9 +1,8 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import org.apache.log4j.Logger;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -11,11 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaSelectFieldResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
-    private static Logger log = Logger.getLogger(JavaSelectFieldResultSetExtractor.class);
+public class JavaSelectFieldResultSetExtractor implements DalResultSetExtractor<List<AbstractParameterHost>> {
 
     @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
+    public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
         ResultSetMetaData rsMeta = rs.getMetaData();
         List<AbstractParameterHost> hosts = new ArrayList<>();
         for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
@@ -26,7 +24,6 @@ public class JavaSelectFieldResultSetExtractor implements ResultSetExtractor<Lis
             try {
                 javaClass = Class.forName(rsMeta.getColumnClassName(i));
             } catch (Exception e) {
-                log.warn(e.getMessage(), e);
                 javaClass = Consts.jdbcSqlTypeToJavaClass.get(paramHost.getSqlType());
             }
             paramHost.setJavaClass(javaClass);

@@ -52,8 +52,8 @@ public class DaoBySqlBuilder {
     }
 
     private void processGenTaskBySqlBuilder(GenTaskBySqlBuilder entity) throws SQLException {
-        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDbName()));
-        Date date = new Date(entity.getUpdateTime().getTime());
+        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+        Date date = new Date(entity.getUpdate_time().getTime());
         entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
 
         if (entity.getApproved() == 1) {
@@ -86,7 +86,7 @@ public class DaoBySqlBuilder {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, projectId);
         builder.mapWith(genTaskBySqlBuilderRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<GenTaskBySqlBuilder> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -124,7 +124,7 @@ public class DaoBySqlBuilder {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, projectId);
         builder.mapWith(genTaskBySqlBuilderRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<GenTaskBySqlBuilder> list = queryDao.query(builder, parameters, hints);
         List<GenTaskBySqlBuilder> result = new ArrayList<>();
         if (list == null || list.size() == 0)
@@ -154,12 +154,12 @@ public class DaoBySqlBuilder {
             StatementParameters parameters = new StatementParameters();
             int i = 1;
             parameters.set(i++, "id", Types.INTEGER, task.getId());
-            parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
-            parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
-            parameters.set(i++, "table_name", Types.VARCHAR, task.getTableName());
-            parameters.set(i++, "method_name", Types.VARCHAR, task.getMethodName());
+            parameters.set(i++, "project_id", Types.INTEGER, task.getProject_id());
+            parameters.set(i++, "db_name", Types.VARCHAR, task.getDatabaseSetName());
+            parameters.set(i++, "table_name", Types.VARCHAR, task.getTable_name());
+            parameters.set(i++, "method_name", Types.VARCHAR, task.getMethod_name());
             builder.mapWith(genTaskBySqlBuilderRowMapper).requireFirst().nullable();
-            DalHints hints = DalHints.createIfAbsent(null);
+            DalHints hints = DalHints.createIfAbsent(null).allowPartial();
             GenTaskBySqlBuilder entity = queryDao.query(builder, parameters, hints);
             if (entity != null)
                 return 0;
@@ -174,19 +174,19 @@ public class DaoBySqlBuilder {
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;
-        parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
-        parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
-        parameters.set(i++, "table_name", Types.VARCHAR, task.getTableName());
-        parameters.set(i++, "class_name", Types.VARCHAR, task.getClassName());
-        parameters.set(i++, "method_name", Types.VARCHAR, task.getMethodName());
-        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSqlStyle());
-        parameters.set(i++, "crud_type", Types.VARCHAR, task.getCrudType());
+        parameters.set(i++, "project_id", Types.INTEGER, task.getProject_id());
+        parameters.set(i++, "db_name", Types.VARCHAR, task.getDatabaseSetName());
+        parameters.set(i++, "table_name", Types.VARCHAR, task.getTable_name());
+        parameters.set(i++, "class_name", Types.VARCHAR, task.getClass_name());
+        parameters.set(i++, "method_name", Types.VARCHAR, task.getMethod_name());
+        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSql_style());
+        parameters.set(i++, "crud_type", Types.VARCHAR, task.getCrud_type());
         parameters.set(i++, "fields", Types.LONGVARCHAR, task.getFields());
-        parameters.set(i++, "where_condition", Types.LONGVARCHAR, task.getWhereCondition());
-        parameters.set(i++, "sql_content", Types.LONGVARCHAR, task.getSqlContent());
+        parameters.set(i++, "where_condition", Types.LONGVARCHAR, task.getWhere_condition());
+        parameters.set(i++, "sql_content", Types.LONGVARCHAR, task.getSql_content());
         parameters.set(i++, "generated", Types.BIT, task.getGenerated());
-        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdateUserNo());
-        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdateTime());
+        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdate_user_no());
+        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdate_time());
         parameters.set(i++, "comment", Types.LONGVARCHAR, task.getComment());
         parameters.set(i++, "scalarType", Types.VARCHAR, task.getScalarType());
         parameters.set(i++, "pagination", Types.BIT, task.getPagination());

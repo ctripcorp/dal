@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
@@ -12,10 +11,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 public final class GenUtils {
-    private static Logger log;
 
     static {
-        log = Logger.getLogger(GenUtils.class);
         java.util.Properties property = new java.util.Properties();
         property.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS,
                 "org.apache.velocity.runtime.log.NullLogChute");

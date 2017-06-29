@@ -50,10 +50,10 @@ public class ConfigTemplateDao {
                 "SELECT ID, CONFIG_TYPE, LANG_TYPE, TEMPLATE FROM config_template WHERE CONFIG_TYPE=? AND LANG_TYPE=?");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
-        parameters.set(i++, "CONFIG_TYPE", Types.INTEGER, configTemplate.getConfigType());
-        parameters.set(i++, "LANG_TYPE", Types.INTEGER, configTemplate.getLangType());
+        parameters.set(i++, "CONFIG_TYPE", Types.INTEGER, configTemplate.getConfig_type());
+        parameters.set(i++, "LANG_TYPE", Types.INTEGER, configTemplate.getLang_type());
         builder.mapWith(configTemplateRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 

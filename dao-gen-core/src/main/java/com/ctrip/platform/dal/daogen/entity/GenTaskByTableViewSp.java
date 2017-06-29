@@ -25,23 +25,23 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
 
     @Column(name = "project_id")
     @Type(value = Types.INTEGER)
-    private Integer projectId;
+    private Integer project_id;
 
     @Column(name = "db_name")
     @Type(value = Types.VARCHAR)
-    private String dbName;
+    private String databaseSetName;
 
     @Column(name = "table_names")
     @Type(value = Types.LONGVARCHAR)
-    private String tableNames;
+    private String table_names;
 
     @Column(name = "view_names")
     @Type(value = Types.LONGVARCHAR)
-    private String viewNames;
+    private String view_names;
 
     @Column(name = "sp_names")
     @Type(value = Types.LONGVARCHAR)
-    private String spNames;
+    private String sp_names;
 
     @Column(name = "prefix")
     @Type(value = Types.VARCHAR)
@@ -53,7 +53,7 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
 
     @Column(name = "cud_by_sp")
     @Type(value = Types.BIT)
-    private Boolean cudBySp;
+    private Boolean cud_by_sp;
 
     @Column(name = "pagination")
     @Type(value = Types.BIT)
@@ -69,11 +69,11 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
+    private Timestamp update_time;
 
     @Column(name = "comment")
     @Type(value = Types.LONGVARCHAR)
@@ -81,11 +81,11 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
 
     @Column(name = "sql_style")
     @Type(value = Types.VARCHAR)
-    private String sqlStyle;
+    private String sql_style;
 
     @Column(name = "api_list")
     @Type(value = Types.LONGVARCHAR)
-    private String apiList;
+    private String api_list;
 
     @Column(name = "approved")
     @Type(value = Types.INTEGER)
@@ -109,44 +109,44 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
         this.id = id;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Integer getProject_id() {
+        return project_id;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject_id(Integer project_id) {
+        this.project_id = project_id;
     }
 
-    public String getDbName() {
-        return dbName;
+    public String getDatabaseSetName() {
+        return databaseSetName;
     }
 
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
+    public void setDatabaseSetName(String databaseSetName) {
+        this.databaseSetName = databaseSetName;
     }
 
-    public String getTableNames() {
-        return tableNames;
+    public String getTable_names() {
+        return table_names;
     }
 
-    public void setTableNames(String tableNames) {
-        this.tableNames = tableNames;
+    public void setTable_names(String table_names) {
+        this.table_names = table_names;
     }
 
-    public String getViewNames() {
-        return viewNames;
+    public String getView_names() {
+        return view_names;
     }
 
-    public void setViewNames(String viewNames) {
-        this.viewNames = viewNames;
+    public void setView_names(String view_names) {
+        this.view_names = view_names;
     }
 
-    public String getSpNames() {
-        return spNames;
+    public String getSp_names() {
+        return sp_names;
     }
 
-    public void setSpNames(String spNames) {
-        this.spNames = spNames;
+    public void setSp_names(String sp_names) {
+        this.sp_names = sp_names;
     }
 
     public String getPrefix() {
@@ -165,12 +165,12 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
         this.suffix = suffix;
     }
 
-    public Boolean getCudBySp() {
-        return cudBySp;
+    public Boolean getCud_by_sp() {
+        return cud_by_sp;
     }
 
-    public void setCudBySp(Boolean cudBySp) {
-        this.cudBySp = cudBySp;
+    public void setCud_by_sp(Boolean cud_by_sp) {
+        this.cud_by_sp = cud_by_sp;
     }
 
     public Boolean getPagination() {
@@ -197,20 +197,20 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
         this.version = version;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
     public String getComment() {
@@ -221,20 +221,20 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
         this.comment = comment;
     }
 
-    public String getSqlStyle() {
-        return sqlStyle;
+    public String getSql_style() {
+        return sql_style;
     }
 
-    public void setSqlStyle(String sqlStyle) {
-        this.sqlStyle = sqlStyle;
+    public void setSql_style(String sql_style) {
+        this.sql_style = sql_style;
     }
 
-    public String getApiList() {
-        return apiList;
+    public String getApi_list() {
+        return api_list;
     }
 
-    public void setApiList(String apiList) {
-        this.apiList = apiList;
+    public void setApi_list(String api_list) {
+        this.api_list = api_list;
     }
 
     public Integer getApproved() {
@@ -278,12 +278,12 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
     }
 
     public String getApprovePreview() {
-        String str = getTableNames();
-        if (getViewNames() != null && !getViewNames().isEmpty()) {
-            str += "," + getViewNames();
+        String str = getTable_names();
+        if (getView_names() != null && !getView_names().isEmpty()) {
+            str += "," + getView_names();
         }
-        if (getSpNames() != null && !getSpNames().isEmpty()) {
-            str += "," + getSpNames();
+        if (getSp_names() != null && !getSp_names().isEmpty()) {
+            str += "," + getSp_names();
         }
         return str;
     }

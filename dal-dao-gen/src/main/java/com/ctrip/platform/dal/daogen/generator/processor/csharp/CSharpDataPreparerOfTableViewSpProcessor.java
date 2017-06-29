@@ -16,30 +16,31 @@ import com.ctrip.platform.dal.daogen.host.csharp.*;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
 public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
-    private static Logger log = Logger.getLogger(CSharpDataPreparerOfTableViewSpProcessor.class);
-
     private static DaoBySqlBuilder daoBySqlBuilder;
     private static DaoByTableViewSp daoByTableViewSp;
 
     static {
-        daoBySqlBuilder = SpringBeanGetter.getDaoBySqlBuilder();
-        daoByTableViewSp = SpringBeanGetter.getDaoByTableViewSp();
+        try {
+            daoBySqlBuilder = BeanGetter.getDaoBySqlBuilder();
+            daoByTableViewSp = BeanGetter.getDaoByTableViewSp();
+        } catch (SQLException e) {
+        }
     }
 
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
             List<Callable<ExecuteResult>> _tableViewSpCallables = prepareTableViewSp(context);
-            TaskUtils.invokeBatch(log, _tableViewSpCallables);
+            TaskUtils.invokeBatch(_tableViewSpCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -92,9 +93,9 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         final Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final GenTaskByTableViewSp tableViewSp : tableViewSpTasks) {
-            final String[] viewNames = StringUtils.split(tableViewSp.getViewNames(), ",");
-            final String[] tableNames = StringUtils.split(tableViewSp.getTableNames(), ",");
-            final String[] spNames = StringUtils.split(tableViewSp.getSpNames(), ",");
+            final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
+            final String[] tableNames = StringUtils.split(tableViewSp.getTable_names(), ",");
+            final String[] spNames = StringUtils.split(tableViewSp.getSp_names(), ",");
 
             final DatabaseCategory dbCategory;
             String dbType = DbUtils.getDbType(tableViewSp.getAllInOneName());
@@ -131,8 +132,8 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                             _spHosts.add(currentSpHost);
                         }
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + " exception.", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }
@@ -160,8 +161,8 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                             _tableViewHosts.add(currentViewHost);
                         }
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + " exception.", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }
@@ -191,8 +192,8 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                             _tableViewHosts.add(currentTableHost);
                         }
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + " exception.", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }
@@ -210,14 +211,14 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         Set<String> _spDaos = ctx.getSpDaos();
         Map<String, DatabaseHost> _dbHosts = ctx.getDbHosts();
         for (GenTaskByTableViewSp task : tableViewSps) {
-            for (String table : StringUtils.split(task.getTableNames(), ",")) {
+            for (String table : StringUtils.split(task.getTable_names(), ",")) {
                 _tableDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(), table));
                 existsTable.add(table);
             }
-            for (String table : StringUtils.split(task.getViewNames(), ",")) {
+            for (String table : StringUtils.split(task.getView_names(), ",")) {
                 _tableDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(), table));
             }
-            for (String table : StringUtils.split(task.getSpNames(), ",")) {
+            for (String table : StringUtils.split(task.getSp_names(), ",")) {
                 String realSpName = table;
                 if (table.contains(".")) {
                     String[] splitSp = StringUtils.split(table, '.');
@@ -226,7 +227,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                 _spDaos.add(getPojoClassName(task.getPrefix(), task.getSuffix(), realSpName.replace("_", "")));
             }
 
-            addDatabaseSet(ctx, task.getDbName());
+            addDatabaseSet(ctx, task.getDatabaseSetName());
 
             if (!_dbHosts.containsKey(task.getAllInOneName())) {
                 String provider = "sqlProvider";
@@ -243,11 +244,11 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         }
 
         for (GenTaskBySqlBuilder task : sqlBuilders) {
-            if (!existsTable.contains(task.getTableName())) {
-                _tableDaos.add(getPojoClassName("", "", task.getTableName()));
+            if (!existsTable.contains(task.getTable_name())) {
+                _tableDaos.add(getPojoClassName("", "", task.getTable_name()));
             }
 
-            addDatabaseSet(ctx, task.getDbName());
+            addDatabaseSet(ctx, task.getDatabaseSetName());
 
             if (!_dbHosts.containsKey(task.getAllInOneName())) {
                 String provider = "sqlProvider";
@@ -283,7 +284,7 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         CSharpTableHost tableHost = new CSharpTableHost();
         tableHost.setNameSpace(ctx.getNamespace());
         tableHost.setDatabaseCategory(dbCategory);
-        tableHost.setDbSetName(tableViewSp.getDbName());
+        tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
         tableHost.setTableName(view);
         tableHost.setClassName(CommonUtils
                 .normalizeVariable(getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), view)));
@@ -323,13 +324,13 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
         CSharpTableHost tableHost = new CSharpTableHost();
         tableHost.setNameSpace(ctx.getNamespace());
         tableHost.setDatabaseCategory(dbCategory);
-        tableHost.setDbSetName(tableViewSp.getDbName());
+        tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
         tableHost.setClassName(
                 getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), realSpName.replace("_", "")));
         tableHost.setTable(false);
         tableHost.setSpName(spName);
         tableHost.setSpParams(realParams);
-        tableHost.setApi_list(tableViewSp.getApiList());
+        tableHost.setApi_list(tableViewSp.getApi_list());
 
         return tableHost;
     }

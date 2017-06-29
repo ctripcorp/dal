@@ -1,15 +1,12 @@
 package com.ctrip.platform.dal.daogen.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.log4j.Logger;
 
 public class CommonUtils {
     private static ObjectMapper objectMap;
-    private static Logger log;
 
     static {
         objectMap = new ObjectMapper();
-        log = Logger.getLogger(CommonUtils.class);
     }
 
     public static String normalizeVariable(String variable) {

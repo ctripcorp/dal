@@ -23,11 +23,11 @@ public class UserGroup {
 
     @Column(name = "user_id")
     @Type(value = Types.INTEGER)
-    private Integer userId;
+    private Integer user_id;
 
     @Column(name = "group_id")
     @Type(value = Types.INTEGER)
-    private Integer groupId;
+    private Integer group_id;
 
     @Column(name = "role")
     @Type(value = Types.INTEGER)
@@ -45,20 +45,20 @@ public class UserGroup {
         this.id = id;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public Integer getUser_id() {
+        return user_id;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUser_id(Integer user_id) {
+        this.user_id = user_id;
     }
 
-    public Integer getGroupId() {
-        return groupId;
+    public Integer getGroup_id() {
+        return group_id;
     }
 
-    public void setGroupId(Integer groupId) {
-        this.groupId = groupId;
+    public void setGroup_id(Integer group_id) {
+        this.group_id = group_id;
     }
 
     public Integer getRole() {

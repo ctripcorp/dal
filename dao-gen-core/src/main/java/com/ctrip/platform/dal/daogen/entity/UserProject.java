@@ -19,7 +19,7 @@ public class UserProject implements DalPojo {
 
     @Column(name = "project_id")
     @Type(value = Types.INTEGER)
-    private Integer projectId;
+    private Integer project_id;
 
     @Column(name = "user_no")
     @Type(value = Types.VARCHAR)
@@ -33,20 +33,19 @@ public class UserProject implements DalPojo {
         this.id = id;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Integer getProject_id() {
+        return project_id;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject_id(Integer project_id) {
+        this.project_id = project_id;
     }
 
-    public String getUserNo() {
+    public String getUser_no() {
         return userNo;
     }
 
-    public void setUserNo(String userNo) {
-        this.userNo = userNo;
+    public void setUser_no(String user_no) {
+        this.userNo = user_no;
     }
-
 }

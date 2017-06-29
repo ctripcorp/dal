@@ -1,14 +1,12 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import microsoft.sql.DateTimeOffset;
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
+public class JavaColumnNameResultSetExtractor implements DalResultSetExtractor<List<AbstractParameterHost>> {
     private final String TYPE_NAME = "TYPE_NAME";
     private final String COLUMN_NAME = "COLUMN_NAME";
     private final String ORDINAL_POSITION = "ORDINAL_POSITION";
@@ -24,8 +22,6 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
     private final String REMARKS = "REMARKS";
     private final String COLUMN_DEF = "COLUMN_DEF";
     private final String DATA_TYPE = "DATA_TYPE";
-
-    private static Logger log = Logger.getLogger(JavaColumnNameResultSetExtractor.class);
 
     private String allInOneName;
     private String tableName;
@@ -39,7 +35,7 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
     }
 
     @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException, DataAccessException {
+    public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
         List<AbstractParameterHost> allColumns = new ArrayList<>();
         try {
             Map<String, Integer> columnSqlType = DbUtils.getColumnSqlType(allInOneName, tableName);
@@ -62,14 +58,10 @@ public class JavaColumnNameResultSetExtractor implements ResultSetExtractor<List
                     }
                     if (null == javaClass) {
                         if (null != typeName && typeName.equalsIgnoreCase("sql_variant")) {
-                            log.fatal(String.format("The sql_variant is not support by java.[%s, %s, %s, %s, %s]",
-                                    host.getName(), allInOneName, tableName, host.getSqlType(), javaClass));
                             return null;
                         } else if (null != typeName && typeName.equalsIgnoreCase("datetimeoffset")) {
                             javaClass = DateTimeOffset.class;
                         } else {
-                            log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", host.getName(),
-                                    allInOneName, tableName, host.getSqlType(), javaClass));
                             return null;
                         }
                     }

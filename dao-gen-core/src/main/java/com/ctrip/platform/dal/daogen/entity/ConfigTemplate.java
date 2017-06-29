@@ -24,11 +24,11 @@ public class ConfigTemplate implements DalPojo {
 
     @Column(name = "config_type")
     @Type(value = Types.INTEGER)
-    private Integer configType;
+    private Integer config_type;
 
     @Column(name = "lang_type")
     @Type(value = Types.INTEGER)
-    private Integer langType;
+    private Integer lang_type;
 
     @Column(name = "template")
     @Type(value = Types.VARCHAR)
@@ -42,20 +42,20 @@ public class ConfigTemplate implements DalPojo {
         this.id = id;
     }
 
-    public Integer getConfigType() {
-        return configType;
+    public Integer getConfig_type() {
+        return config_type;
     }
 
-    public void setConfigType(Integer configType) {
-        this.configType = configType;
+    public void setConfig_type(Integer config_type) {
+        this.config_type = config_type;
     }
 
-    public Integer getLangType() {
-        return langType;
+    public Integer getLang_type() {
+        return lang_type;
     }
 
-    public void setLangType(Integer langType) {
-        this.langType = langType;
+    public void setLang_type(Integer lang_type) {
+        this.lang_type = lang_type;
     }
 
     public String getTemplate() {

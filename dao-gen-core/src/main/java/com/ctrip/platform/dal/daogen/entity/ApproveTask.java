@@ -20,23 +20,23 @@ public class ApproveTask implements DalPojo {
 
     @Column(name = "task_id")
     @Type(value = Types.INTEGER)
-    private Integer taskId;
+    private Integer task_id;
 
     @Column(name = "task_type")
     @Type(value = Types.VARCHAR)
-    private String taskType;
+    private String task_type;
 
     @Column(name = "create_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp createTime;
+    private Timestamp create_time;
 
     @Column(name = "create_user_id")
     @Type(value = Types.INTEGER)
-    private Integer createUserId;
+    private Integer create_user_id;
 
     @Column(name = "approve_user_id")
     @Type(value = Types.INTEGER)
-    private Integer approveUserId;
+    private Integer approve_user_id;
 
     private String str_create_time;
 
@@ -50,44 +50,44 @@ public class ApproveTask implements DalPojo {
         this.id = id;
     }
 
-    public Integer getTaskId() {
-        return taskId;
+    public Integer getTask_id() {
+        return task_id;
     }
 
-    public void setTaskId(Integer taskId) {
-        this.taskId = taskId;
+    public void setTask_id(Integer task_id) {
+        this.task_id = task_id;
     }
 
-    public String getTaskType() {
-        return taskType;
+    public String getTask_type() {
+        return task_type;
     }
 
-    public void setTaskType(String taskType) {
-        this.taskType = taskType;
+    public void setTask_type(String task_type) {
+        this.task_type = task_type;
     }
 
-    public Timestamp getCreateTime() {
-        return createTime;
+    public Timestamp getCreate_time() {
+        return create_time;
     }
 
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
+    public void setCreate_time(Timestamp create_time) {
+        this.create_time = create_time;
     }
 
-    public Integer getCreateUserId() {
-        return createUserId;
+    public Integer getCreate_user_id() {
+        return create_user_id;
     }
 
-    public void setCreateUserId(Integer createUserId) {
-        this.createUserId = createUserId;
+    public void setCreate_user_id(Integer create_user_id) {
+        this.create_user_id = create_user_id;
     }
 
-    public Integer getApproveUserId() {
-        return approveUserId;
+    public Integer getApprove_user_id() {
+        return approve_user_id;
     }
 
-    public void setApproveUserId(Integer approveUserId) {
-        this.approveUserId = approveUserId;
+    public void setApprove_user_id(Integer approve_user_id) {
+        this.approve_user_id = approve_user_id;
     }
 
     public String getStr_create_time() {

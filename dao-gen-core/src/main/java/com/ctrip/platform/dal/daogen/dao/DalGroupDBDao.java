@@ -43,7 +43,7 @@ public class DalGroupDBDao {
         builder.setTemplate("SELECT dbname FROM alldbs");
         StatementParameters parameters = new StatementParameters();
         builder.mapWith(dalGroupDBRowMapper).simpleType();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -60,7 +60,7 @@ public class DalGroupDBDao {
         int i = 1;
         parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
         builder.mapWith(dalGroupDBRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -72,7 +72,7 @@ public class DalGroupDBDao {
         int i = 1;
         parameters.set(i++, "dbname", Types.VARCHAR, dbname);
         builder.mapWith(dalGroupDBRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 

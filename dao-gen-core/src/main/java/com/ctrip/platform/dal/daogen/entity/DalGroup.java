@@ -25,19 +25,19 @@ public class DalGroup implements Comparable<DalGroup>, DalPojo {
 
     @Column(name = "group_name")
     @Type(value = Types.VARCHAR)
-    private String groupName;
+    private String group_name;
 
     @Column(name = "group_comment")
     @Type(value = Types.LONGVARCHAR)
-    private String groupComment;
+    private String group_comment;
 
     @Column(name = "create_user_no")
     @Type(value = Types.VARCHAR)
-    private String createUserNo;
+    private String create_user_no;
 
     @Column(name = "create_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp createTime;
+    private Timestamp create_time;
 
     private String text;
 
@@ -53,36 +53,36 @@ public class DalGroup implements Comparable<DalGroup>, DalPojo {
         this.id = id;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getGroup_name() {
+        return group_name;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setGroup_name(String group_name) {
+        this.group_name = group_name;
     }
 
-    public String getGroupComment() {
-        return groupComment;
+    public String getGroup_comment() {
+        return group_comment;
     }
 
-    public void setGroupComment(String groupComment) {
-        this.groupComment = groupComment;
+    public void setGroup_comment(String group_comment) {
+        this.group_comment = group_comment;
     }
 
-    public String getCreateUserNo() {
-        return createUserNo;
+    public String getCreate_user_no() {
+        return create_user_no;
     }
 
-    public void setCreateUserNo(String createUserNo) {
-        this.createUserNo = createUserNo;
+    public void setCreate_user_no(String create_user_no) {
+        this.create_user_no = create_user_no;
     }
 
-    public Timestamp getCreateTime() {
-        return createTime;
+    public Timestamp getCreate_time() {
+        return create_time;
     }
 
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
+    public void setCreate_time(Timestamp create_time) {
+        this.create_time = create_time;
     }
 
     public String getText() {
@@ -111,7 +111,7 @@ public class DalGroup implements Comparable<DalGroup>, DalPojo {
 
     @Override
     public int compareTo(DalGroup o) {
-        return groupName.compareTo(o.getGroupName());
+        return group_name.compareTo(o.getGroup_name());
     }
 
 }

@@ -12,7 +12,7 @@ import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.host.java.*;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
@@ -21,7 +21,7 @@ import java.util.*;
 
 public class AbstractJavaDataPreparer {
     protected void addDatabaseSet(CodeGenContext codeGenCtx, String databaseSetName) throws SQLException {
-        DaoOfDatabaseSet daoOfDatabaseSet = SpringBeanGetter.getDaoOfDatabaseSet();
+        DaoOfDatabaseSet daoOfDatabaseSet = BeanGetter.getDaoOfDatabaseSet();
         List<DatabaseSet> sets = daoOfDatabaseSet.getAllDatabaseSetByName(databaseSetName);
         if (null == sets || sets.isEmpty()) {
             return;
@@ -61,11 +61,11 @@ public class AbstractJavaDataPreparer {
         JavaTableHost tableHost = new JavaTableHost();
         tableHost.setPackageName(ctx.getNamespace());
         tableHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
-        tableHost.setDbSetName(tableViewSp.getDbName());
+        tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
         tableHost.setTableName(tableName);
         tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), tableName));
-        tableHost.setSp(tableViewSp.getCudBySp());
-        tableHost.setApi_list(tableViewSp.getApiList());
+        tableHost.setSp(tableViewSp.getCud_by_sp());
+        tableHost.setApi_list(tableViewSp.getApi_list());
 
         // 主键及所有列
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), tableName);
@@ -147,7 +147,7 @@ public class AbstractJavaDataPreparer {
         while (iter.hasNext()) {
             GenTaskBySqlBuilder currentSqlBuilder = iter.next();
             if (currentSqlBuilder.getAllInOneName().equals(allInOneName)
-                    && currentSqlBuilder.getTableName().equals(tableName)) {
+                    && currentSqlBuilder.getTable_name().equals(tableName)) {
                 currentTableBuilders.add(currentSqlBuilder);
                 iter.remove();
             }
@@ -193,18 +193,18 @@ public class AbstractJavaDataPreparer {
         List<JavaMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("select")) {
+            if (!builder.getCrud_type().equals("select")) {
                 continue;
             }
             JavaMethodHost method = new JavaMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
             method.setComments(builder.getComment());
             method.setField(buildSelectFieldExp(builder));
-            method.setTableName(builder.getTableName());
+            method.setTableName(builder.getTable_name());
 
             String orderBy = builder.getOrderby();
             if (orderBy != null && !orderBy.trim().isEmpty() && orderBy.indexOf("-1,") != 0) {
@@ -215,7 +215,7 @@ public class AbstractJavaDataPreparer {
             }
             // select sql have select field and where condition clause
             List<AbstractParameterHost> paramAbstractHosts = DbUtils.getSelectFieldHosts(builder.getAllInOneName(),
-                    builder.getSqlContent(), new JavaSelectFieldResultSetExtractor());
+                    builder.getSql_content(), new JavaSelectFieldResultSetExtractor());
             List<JavaParameterHost> paramHosts = new ArrayList<>();
             for (AbstractParameterHost phost : paramAbstractHosts) {
                 paramHosts.add((JavaParameterHost) phost);
@@ -233,17 +233,17 @@ public class AbstractJavaDataPreparer {
         List<JavaMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("delete")) {
+            if (!builder.getCrud_type().equals("delete")) {
                 continue;
             }
             JavaMethodHost method = new JavaMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
             method.setComments(builder.getComment());
-            method.setTableName(builder.getTableName());
+            method.setTableName(builder.getTable_name());
             // Only have condition clause
             method.setParameters(buildMethodParameterHost4SqlConditin(builder, allColumns));
             method.setHints(builder.getHints());
@@ -257,23 +257,23 @@ public class AbstractJavaDataPreparer {
         List<JavaMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("insert")) {
+            if (!builder.getCrud_type().equals("insert")) {
                 continue;
             }
             JavaMethodHost method = new JavaMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
             method.setComments(builder.getComment());
-            method.setTableName(builder.getTableName());
+            method.setTableName(builder.getTable_name());
             List<JavaParameterHost> parameters = new ArrayList<>();
 
             // Have no where condition
             String[] fields = StringUtils.split(builder.getFields(), ",");
             Map<String, Boolean> sensitive = new HashMap<>();
-            String conditions = builder.getWhereCondition();
+            String conditions = builder.getWhere_condition();
             if (conditions != null) {
                 String[] temp = conditions.split(";");
                 for (String field : temp) {
@@ -302,18 +302,18 @@ public class AbstractJavaDataPreparer {
         List<JavaMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("update")) {
+            if (!builder.getCrud_type().equals("update")) {
                 continue;
             }
             JavaMethodHost method = new JavaMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
             method.setComments(builder.getComment());
             method.setField(buildSelectFieldExp(builder));
-            method.setTableName(builder.getTableName());
+            method.setTableName(builder.getTable_name());
             List<JavaParameterHost> updateSetParameters = new ArrayList<>();
             // Have both set and condition clause
             String[] fields = StringUtils.split(builder.getFields(), ",");
@@ -337,7 +337,7 @@ public class AbstractJavaDataPreparer {
     private List<JavaParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder,
             List<JavaParameterHost> allColumns) {
         List<JavaParameterHost> parameters = new ArrayList<>();
-        String[] conditions = StringUtils.split(builder.getWhereCondition(), ";");
+        String[] conditions = StringUtils.split(builder.getWhere_condition(), ";");
         for (String condition : conditions) {
             String[] tokens = StringUtils.split(condition, ",");
             if (tokens.length == 1) { //

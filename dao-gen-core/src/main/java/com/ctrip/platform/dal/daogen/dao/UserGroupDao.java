@@ -36,7 +36,7 @@ public class UserGroupDao {
         int i = 1;
         parameters.set(i++, "user_id", Types.INTEGER, userId);
         builder.mapWith(userGroupRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -49,14 +49,14 @@ public class UserGroupDao {
         parameters.set(i++, "group_id", Types.INTEGER, groupId);
         parameters.set(i++, "user_id", Types.INTEGER, userId);
         builder.mapWith(userGroupRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
     public int insertUserGroup(Integer user_id, Integer group_id, Integer role, Integer adduser) throws SQLException {
         UserGroup userGroup = new UserGroup();
-        userGroup.setUserId(user_id);
-        userGroup.setGroupId(group_id);
+        userGroup.setUser_id(user_id);
+        userGroup.setGroup_id(group_id);
         userGroup.setRole(role);
         userGroup.setAdduser(adduser);
         DalHints hints = DalHints.createIfAbsent(null);

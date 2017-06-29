@@ -5,7 +5,7 @@ import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 import com.google.common.base.Charsets;
 
@@ -131,7 +131,7 @@ public class FileResource {
             f = new File(generatePath, id);
         }
 
-        Project proj = SpringBeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
+        Project proj = BeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
         DateFormat format1 = new SimpleDateFormat("yyyyMMddHHmmss");
         String date = format1.format(new Date());
         final String zipFileName = proj.getName() + "-" + date + ".zip";

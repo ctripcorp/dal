@@ -294,14 +294,12 @@
                     style: 'border-right: 1px solid silver;'
                 }, {
                     type: 'main'
-                    // style: 'background-color: white;'
                 }, {
                     type: 'preview',
                     size: '50%',
                     resizable: true
                 }],
                 onResizing: function (event) {
-                    // ace.edit("code_editor").resize();
                 }
             });
         },

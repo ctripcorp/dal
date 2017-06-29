@@ -18,7 +18,7 @@ import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaSelectFieldResultSetExtractor;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -32,7 +32,10 @@ public class AbstractCSharpDataPreparer {
     private static DaoOfDatabaseSet daoOfDatabaseSet;
 
     static {
-        daoOfDatabaseSet = SpringBeanGetter.getDaoOfDatabaseSet();
+        try {
+            daoOfDatabaseSet = BeanGetter.getDaoOfDatabaseSet();
+        } catch (SQLException e) {
+        }
     }
 
     protected void addDatabaseSet(CodeGenContext codeGenCtx, String databaseSetName) throws SQLException {
@@ -85,12 +88,12 @@ public class AbstractCSharpDataPreparer {
         tableHost.setExtraMethods(methods);
         tableHost.setNameSpace(ctx.getNamespace());
         tableHost.setDatabaseCategory(dbCategory);
-        tableHost.setDbSetName(tableViewSp.getDbName());
+        tableHost.setDbSetName(tableViewSp.getDatabaseSetName());
         tableHost.setTableName(table);
         tableHost.setClassName(CommonUtils
                 .normalizeVariable(getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), table)));
         tableHost.setTable(true);
-        tableHost.setSpa(tableViewSp.getCudBySp());
+        tableHost.setSpa(tableViewSp.getCud_by_sp());
 
         // SP方式增删改
         if (tableHost.isSpa()) {
@@ -119,7 +122,7 @@ public class AbstractCSharpDataPreparer {
         tableHost.setHasSptU(allSpNames.contains(expectSptU));
         tableHost.setHasSptD(allSpNames.contains(expectSptD));
         tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU() || tableHost.isHasSptD());
-        tableHost.setApi_list(tableViewSp.getApiList());
+        tableHost.setApi_list(tableViewSp.getApi_list());
         return tableHost;
     }
 
@@ -130,7 +133,7 @@ public class AbstractCSharpDataPreparer {
         Iterator<GenTaskBySqlBuilder> iter = sqlBuilders.iterator();
         while (iter.hasNext()) {
             GenTaskBySqlBuilder currentSqlBuilder = iter.next();
-            if (currentSqlBuilder.getAllInOneName().equals(dbName) && currentSqlBuilder.getTableName().equals(table)) {
+            if (currentSqlBuilder.getAllInOneName().equals(dbName) && currentSqlBuilder.getTable_name().equals(table)) {
                 currentTableBuilders.add(currentSqlBuilder);
                 iter.remove();
             }
@@ -154,20 +157,20 @@ public class AbstractCSharpDataPreparer {
         List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("select")) {
+            if (!builder.getCrud_type().equals("select")) {
                 continue;
             }
             CSharpMethodHost method = new CSharpMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            String sql = builder.getSqlContent();
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            String sql = builder.getSql_content();
             int index = 0;
             if (builder.getPagination()) {
                 sql = SqlBuilder.pagingQuerySql(sql, getDatabaseCategory(builder.getAllInOneName()),
                         CurrentLanguage.CSharp);
                 index += 2;
             }
-            Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSqlContent());
+            Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(builder.getSql_content());
             while (m.find()) {
                 sql = sql.replace(m.group(1), String.format("({%d}) ", index));
                 index++;
@@ -177,7 +180,7 @@ public class AbstractCSharpDataPreparer {
             method.setPaging(builder.getPagination());
 
             List<AbstractParameterHost> paramAbstractHosts = DbUtils.getSelectFieldHosts(builder.getAllInOneName(),
-                    builder.getSqlContent(), new JavaSelectFieldResultSetExtractor());
+                    builder.getSql_content(), new JavaSelectFieldResultSetExtractor());
             List<JavaParameterHost> paramHosts = new ArrayList<>();
             for (AbstractParameterHost phost : paramAbstractHosts) {
                 paramHosts.add((JavaParameterHost) phost);
@@ -220,13 +223,13 @@ public class AbstractCSharpDataPreparer {
         List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("delete")) {
+            if (!builder.getCrud_type().equals("delete")) {
                 continue;
             }
             CSharpMethodHost method = new CSharpMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
 
@@ -242,13 +245,13 @@ public class AbstractCSharpDataPreparer {
         List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("insert")) {
+            if (!builder.getCrud_type().equals("insert")) {
                 continue;
             }
             CSharpMethodHost method = new CSharpMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
 
@@ -275,13 +278,13 @@ public class AbstractCSharpDataPreparer {
         List<CSharpMethodHost> methods = new ArrayList<>();
 
         for (GenTaskBySqlBuilder builder : currentTableBuilders) {
-            if (!builder.getCrudType().equals("update")) {
+            if (!builder.getCrud_type().equals("update")) {
                 continue;
             }
             CSharpMethodHost method = new CSharpMethodHost();
-            method.setCrud_type(builder.getCrudType());
-            method.setName(builder.getMethodName());
-            method.setSql(builder.getSqlContent());
+            method.setCrud_type(builder.getCrud_type());
+            method.setName(builder.getMethod_name());
+            method.setSql(builder.getSql_content());
             method.setScalarType(builder.getScalarType());
             method.setPaging(builder.getPagination());
 
@@ -314,11 +317,11 @@ public class AbstractCSharpDataPreparer {
     private List<CSharpParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder,
             List<CSharpParameterHost> allColumns) {
         List<CSharpParameterHost> parameters = new ArrayList<>();
-        String[] conditions = StringUtils.split(builder.getWhereCondition(), ";");
+        String[] conditions = StringUtils.split(builder.getWhere_condition(), ";");
         for (String condition : conditions) {
             String[] tokens = StringUtils.split(condition, ",");
             if (tokens.length == 1) {
-                if (builder.getCrudType().equals("select")) {
+                if (builder.getCrud_type().equals("select")) {
                     CSharpParameterHost host = new CSharpParameterHost();
                     host.setConditionType(ConditionType.valueOf(Integer.parseInt(tokens[0])));
                     parameters.add(host);

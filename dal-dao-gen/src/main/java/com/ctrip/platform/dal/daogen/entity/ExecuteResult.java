@@ -1,10 +1,5 @@
 package com.ctrip.platform.dal.daogen.entity;
 
-/**
- * Used to record the execute result for logging
- * @author wcyuan
- * @version 2014-05-13
- */
 public class ExecuteResult {
 	private String taskName;
 	private boolean successal;

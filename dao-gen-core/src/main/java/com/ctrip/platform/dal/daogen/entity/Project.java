@@ -33,23 +33,19 @@ public class Project implements DalPojo {
 
     @Column(name = "dal_group_id")
     @Type(value = Types.INTEGER)
-    private Integer dalGroupId;
+    private Integer dal_group_id;
 
     @Column(name = "dal_config_name")
     @Type(value = Types.VARCHAR)
-    private String dalConfigName;
+    private String dal_config_name;
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
-
-    @Column(name = "lang")
-    @Type(value = Types.VARCHAR)
-    private String lang;
+    private Timestamp update_time;
 
     private String str_update_time;
 
@@ -83,44 +79,36 @@ public class Project implements DalPojo {
         this.namespace = namespace;
     }
 
-    public Integer getDalGroupId() {
-        return dalGroupId;
+    public Integer getDal_group_id() {
+        return dal_group_id;
     }
 
-    public void setDalGroupId(Integer dalGroupId) {
-        this.dalGroupId = dalGroupId;
+    public void setDal_group_id(Integer dal_group_id) {
+        this.dal_group_id = dal_group_id;
     }
 
-    public String getDalConfigName() {
-        return dalConfigName;
+    public String getDal_config_name() {
+        return dal_config_name;
     }
 
-    public void setDalConfigName(String dalConfigName) {
-        this.dalConfigName = dalConfigName;
+    public void setDal_config_name(String dal_config_name) {
+        this.dal_config_name = dal_config_name;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public void setLang(String lang) {
-        this.lang = lang;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
     public String getStr_update_time() {

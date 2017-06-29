@@ -13,19 +13,17 @@ import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 
 public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
-    private static Logger log = Logger.getLogger(CSharpDataPreparerOfSqlBuilderProcessor.class);
 
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
             List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
-            TaskUtils.invokeBatch(log, _sqlBuilderCallables);
+            TaskUtils.invokeBatch(_sqlBuilderCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -43,7 +41,6 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 
             for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres.entrySet()) {
                 Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-
                     @Override
                     public ExecuteResult call() throws Exception {
                         /*
@@ -59,8 +56,8 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
                                 _tableViewHosts.add(extraTableHost);
                             }
                             result.setSuccessal(true);
-                        } catch (Exception e) {
-                            log.error(result.getTaskName() + " exception.", e);
+                        } catch (Throwable e) {
+                            throw e;
                         }
                         return result;
                     }
@@ -75,7 +72,7 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
         Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<>();
 
         for (GenTaskBySqlBuilder task : builders) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getTableName());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
 
             if (!groupBy.containsKey(key)) {
                 groupBy.put(key, task);
@@ -87,10 +84,10 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
     private CSharpTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)
             throws Exception {
         GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
-        tableViewSp.setCudBySp(false);
+        tableViewSp.setCud_by_sp(false);
         tableViewSp.setPagination(false);
         tableViewSp.setAllInOneName(sqlBuilder.getAllInOneName());
-        tableViewSp.setDbName(sqlBuilder.getDbName());
+        tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("");
 
@@ -101,6 +98,6 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
         }
 
         List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(sqlBuilder.getAllInOneName());
-        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTableName(), dbCategory, allSpNames);
+        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(), dbCategory, allSpNames);
     }
 }

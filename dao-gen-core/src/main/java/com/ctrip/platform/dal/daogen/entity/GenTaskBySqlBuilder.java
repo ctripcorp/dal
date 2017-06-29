@@ -25,31 +25,31 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
 
     @Column(name = "project_id")
     @Type(value = Types.INTEGER)
-    private Integer projectId;
+    private Integer project_id;
 
     @Column(name = "db_name")
     @Type(value = Types.VARCHAR)
-    private String dbName;
+    private String databaseSetName;
 
     @Column(name = "table_name")
     @Type(value = Types.VARCHAR)
-    private String tableName;
+    private String table_name;
 
     @Column(name = "class_name")
     @Type(value = Types.VARCHAR)
-    private String className;
+    private String class_name;
 
     @Column(name = "method_name")
     @Type(value = Types.VARCHAR)
-    private String methodName;
+    private String method_name;
 
     @Column(name = "sql_style")
     @Type(value = Types.VARCHAR)
-    private String sqlStyle;
+    private String sql_style;
 
     @Column(name = "crud_type")
     @Type(value = Types.VARCHAR)
-    private String crudType;
+    private String crud_type;
 
     @Column(name = "fields")
     @Type(value = Types.LONGVARCHAR)
@@ -57,11 +57,11 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
 
     @Column(name = "where_condition")
     @Type(value = Types.LONGVARCHAR)
-    private String whereCondition;
+    private String condition;
 
     @Column(name = "sql_content")
     @Type(value = Types.LONGVARCHAR)
-    private String sqlContent;
+    private String sql_content;
 
     @Column(name = "generated")
     @Type(value = Types.BIT)
@@ -73,11 +73,11 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
+    private Timestamp update_time;
 
     @Column(name = "comment")
     @Type(value = Types.LONGVARCHAR)
@@ -119,60 +119,60 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
         this.id = id;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Integer getProject_id() {
+        return project_id;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject_id(Integer project_id) {
+        this.project_id = project_id;
     }
 
-    public String getDbName() {
-        return dbName;
+    public String getDatabaseSetName() {
+        return databaseSetName;
     }
 
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
+    public void setDatabaseSetName(String databaseSetName) {
+        this.databaseSetName = databaseSetName;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getTable_name() {
+        return table_name;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setTable_name(String table_name) {
+        this.table_name = table_name;
     }
 
-    public String getClassName() {
-        return className;
+    public String getClass_name() {
+        return class_name;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setClass_name(String class_name) {
+        this.class_name = class_name;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public String getMethod_name() {
+        return method_name;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public void setMethod_name(String method_name) {
+        this.method_name = method_name;
     }
 
-    public String getSqlStyle() {
-        return sqlStyle;
+    public String getSql_style() {
+        return sql_style;
     }
 
-    public void setSqlStyle(String sqlStyle) {
-        this.sqlStyle = sqlStyle;
+    public void setSql_style(String sql_style) {
+        this.sql_style = sql_style;
     }
 
-    public String getCrudType() {
-        return crudType;
+    public String getCrud_type() {
+        return crud_type;
     }
 
-    public void setCrudType(String crudType) {
-        this.crudType = crudType;
+    public void setCrud_type(String crud_type) {
+        this.crud_type = crud_type;
     }
 
     public String getFields() {
@@ -183,20 +183,20 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
         this.fields = fields;
     }
 
-    public String getWhereCondition() {
-        return whereCondition;
+    public String getWhere_condition() {
+        return condition;
     }
 
-    public void setWhereCondition(String whereCondition) {
-        this.whereCondition = whereCondition;
+    public void setWhere_condition(String where_condition) {
+        this.condition = where_condition;
     }
 
-    public String getSqlContent() {
-        return sqlContent;
+    public String getSql_content() {
+        return sql_content;
     }
 
-    public void setSqlContent(String sqlContent) {
-        this.sqlContent = sqlContent;
+    public void setSql_content(String sql_content) {
+        this.sql_content = sql_content;
     }
 
     public Boolean getGenerated() {
@@ -215,20 +215,20 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
         this.version = version;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
     public String getComment() {
@@ -317,10 +317,10 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
         if (result != 0)
             return result;
 
-        result = getTableName().compareTo(o.getTableName());
+        result = getTable_name().compareTo(o.getTable_name());
         if (result != 0)
             return result;
 
-        return getMethodName().compareTo(o.getMethodName());
+        return getMethod_name().compareTo(o.getMethod_name());
     }
 }

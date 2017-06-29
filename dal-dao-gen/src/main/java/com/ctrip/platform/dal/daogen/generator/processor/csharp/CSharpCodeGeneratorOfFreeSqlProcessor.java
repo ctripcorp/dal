@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import java.io.File;
@@ -23,8 +22,6 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 
 public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
-    private static Logger log = Logger.getLogger(CSharpCodeGeneratorOfFreeSqlProcessor.class);
-
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
@@ -32,7 +29,7 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
             int projectId = ctx.getProjectId();
             final File dir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), projectId));
             List<Callable<ExecuteResult>> freeCallables = generateFreeSqlDao(ctx, dir);
-            TaskUtils.invokeBatch(log, freeCallables);
+            TaskUtils.invokeBatch(freeCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -48,7 +45,7 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
         for (final CSharpFreeSqlPojoHost host : _freeSqlPojoHosts.values()) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                 @Override
-                public ExecuteResult call() {
+                public ExecuteResult call() throws Exception {
                     // progress.setOtherMessage("正在生成 " + host.getClassName());
                     ExecuteResult result = new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Pojo");
                     progress.setOtherMessage(result.getTaskName());
@@ -60,8 +57,8 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
                                         CommonUtils.normalizeVariable(host.getClassName())),
                                 ctx.isNewPojo() ? "templates/csharp/PojoNew.cs.tpl" : "templates/csharp/Pojo.cs.tpl");
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + "exception", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }
@@ -74,7 +71,7 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
         for (final CSharpFreeSqlHost host : _freeSqlHosts) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                 @Override
-                public ExecuteResult call() {
+                public ExecuteResult call() throws Exception {
                     // progress.setOtherMessage("正在生成 " + host.getClassName());
                     ExecuteResult result =
                             new ExecuteResult("Generate Free SQL[" + host.getClassName() + "] Dap, Test");
@@ -95,8 +92,8 @@ public class CSharpCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
                                         CommonUtils.normalizeVariable(host.getClassName())),
                                 "templates/csharp/test/FreeSqlUnitTest.cs.tpl");
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + "exception", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }

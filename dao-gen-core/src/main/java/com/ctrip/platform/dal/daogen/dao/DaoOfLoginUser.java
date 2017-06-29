@@ -48,7 +48,7 @@ public class DaoOfLoginUser {
         int i = 1;
         parameters.setSensitive(i++, "user_no", Types.VARCHAR, userNo);
         builder.mapWith(loginUserRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -60,7 +60,7 @@ public class DaoOfLoginUser {
         int i = 1;
         parameters.setSensitive(i++, "group_id", Types.INTEGER, groupId);
         builder.mapWith(loginUserRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 

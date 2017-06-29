@@ -6,7 +6,7 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.resource.CustomizedResource;
 import com.ctrip.platform.dal.daogen.resource.SetupDBResource;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpSession;
@@ -23,17 +23,17 @@ public class UserFilter implements Filter {
             HttpSession session = RequestUtil.getSession(request);
             Object userInfo = session.getAttribute(Consts.USER_INFO);
             if (userInfo == null) {
-                if (SetupDBResource.isJdbcInitialized()) {
+                if (SetupDBResource.isDalInitialized()) {
                     // SSO
                     String userNo = CustomizedResource.getInstance().getEmployee(null);
                     if (userNo != null && !userNo.isEmpty()) {
-                        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                        LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
                         if (user == null) {
                             user = new LoginUser();
                             user.setUserNo(userNo);
                             user.setUserName(CustomizedResource.getInstance().getName(null));
                             user.setUserEmail(CustomizedResource.getInstance().getMail(null));
-                            SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                            BeanGetter.getDaoOfLoginUser().insertUser(user);
                         }
                         session.setAttribute(Consts.USER_INFO, user);
                         session.setAttribute(Consts.USER_NAME, user.getUserName());

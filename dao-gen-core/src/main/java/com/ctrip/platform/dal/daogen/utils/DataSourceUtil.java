@@ -63,17 +63,17 @@ public class DataSourceUtil {
         if (isEmpty(allInOneName))
             throw new SQLException("the param allInOneName is null. So can not get DataSourse.");
 
-        DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+        DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
         DalGroupDB db = allDbDao.getGroupDBByDbName(allInOneName);
         if (db == null)
             throw new SQLException(allInOneName + " is not exist in the table of alldbs.");
 
-        String address = db.getDbAddress();
-        String port = db.getDbPort();
-        String userName = db.getDbUser();
-        String password = db.getDbPassword();
-        String driverClass = db.getDbProvidername();
-        String catalog = db.getDbCatalog();
+        String address = db.getDb_address();
+        String port = db.getDb_port();
+        String userName = db.getDb_user();
+        String password = db.getDb_password();
+        String driverClass = db.getDb_providerName();
+        String catalog = db.getDb_catalog();
         validateParam(allInOneName, address, port, catalog, userName, password, driverClass);
         String key = address.trim() + catalog.trim() + port.trim() + userName.trim() + password.trim();
         DataSource ds = cache2.get(key);

@@ -1,11 +1,10 @@
 package com.ctrip.platform.dal.daogen.host.java;
 
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import org.apache.log4j.Logger;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -13,9 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaSpParamResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
-    private static Logger log = Logger.getLogger(JavaSpParamResultSetExtractor.class);
-
+public class JavaSpParamResultSetExtractor implements DalResultSetExtractor<List<AbstractParameterHost>> {
     private String allInOneName;
     private String spName;
 
@@ -26,7 +23,7 @@ public class JavaSpParamResultSetExtractor implements ResultSetExtractor<List<Ab
     }
 
     @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
+    public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
         List<AbstractParameterHost> parameters = new ArrayList<>();
         try {
             while (rs.next()) {
@@ -50,11 +47,15 @@ public class JavaSpParamResultSetExtractor implements ResultSetExtractor<List<Ab
                 Class<?> javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
                 if (null == javaClass) {
                     if (-153 == host.getSqlType()) {
-                        log.error(String.format("The Table-Valued Parameters is not support for JDBC. [%s, %s]",
-                                allInOneName, spName));
+                        /*
+                         * log.error(String.format("The Table-Valued Parameters is not support for JDBC. [%s, %s]",
+                         * allInOneName, spName));
+                         */
                     } else {
-                        log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", host.getName(),
-                                allInOneName, spName, host.getSqlType(), javaClass));
+                        /*
+                         * log.fatal(String.format("The java type cant be mapped.[%s, %s, %s, %s, %s]", host.getName(),
+                         * allInOneName, spName, host.getSqlType(), javaClass));
+                         */
                     }
                     return null;
                 }

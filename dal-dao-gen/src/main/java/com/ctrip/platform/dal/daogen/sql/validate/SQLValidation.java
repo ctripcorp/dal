@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import microsoft.sql.DateTimeOffset;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -20,12 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SQLValidation {
-
-    /**
-     * Common Logger instance.
-     */
-    private static Logger log = Logger.getLogger(SQLValidation.class);
-
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -168,7 +161,6 @@ public class SQLValidation {
             status.setPassed(true).append("Validate Successfully");
         } catch (Exception e) {
             status.append(e.getMessage());
-            log.error("Validate update failed", e);
         } finally {
             ResourceUtils.rollback(connection);
             ResourceUtils.close(connection);
@@ -230,7 +222,6 @@ public class SQLValidation {
 
         } catch (Exception e) {
             status.clearAppend(e.getMessage());
-            log.error("Validate query failed", e);
         } finally {
             ResourceUtils.close(connection);
         }
@@ -270,11 +261,9 @@ public class SQLValidation {
             } catch (SQLException e) {
                 status.setPassed(false);
                 status.append(e.getMessage());
-                log.error("Validate SQL Server query execute failed", e);
             } catch (Exception e) {
                 status.setPassed(false);
                 status.append(e.getMessage());
-                log.error("Validate SQL Server query failed", e);
             } finally {
                 ResourceUtils.close(rs);
                 ResourceUtils.close(stat);
@@ -339,11 +328,9 @@ public class SQLValidation {
             } catch (SQLException e) {
                 status.setPassed(false);
                 status.append(e.getMessage());
-                log.error("Validate mysql query execute failed", e);
             } catch (Exception e) {
                 status.setPassed(false);
                 status.append(e.getMessage());
-                log.error("Validate mysql query failed");
             } finally {
                 ResourceUtils.close(rs);
                 ResourceUtils.close(stat);
@@ -373,13 +360,10 @@ public class SQLValidation {
             status.setPassed(true);
         } catch (SQLException e) {
             status.append(e.getMessage());
-            log.error("Validate mysql query explain failed", e);
         } catch (JsonProcessingException e) {
             status.append(e.getMessage());
-            log.error("Validate mysql query JSON Explain failed", e);
         } catch (Exception e) {
             status.append(e.getMessage());
-            log.error("Validate mysql query failed");
         } finally {
             ResourceUtils.close(rs);
             ResourceUtils.close(stat);
@@ -535,7 +519,6 @@ public class SQLValidation {
             java.util.Date cur = format1.parse(val);
             return new Date(cur.getTime());
         } catch (ParseException e) {
-            log.warn(e.getMessage());
         }
         return null;
     }

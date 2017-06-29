@@ -1,11 +1,11 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
+public class CsharpColumnNameResultSetExtractor implements DalResultSetExtractor<List<AbstractParameterHost>> {
     private final String COLUMN_NAME = "COLUMN_NAME";
     private final String TYPE_NAME = "TYPE_NAME";
     private final String DATA_TYPE = "DATA_TYPE";
@@ -36,7 +36,7 @@ public class CsharpColumnNameResultSetExtractor implements ResultSetExtractor<Li
     }
 
     @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
+    public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
         List<AbstractParameterHost> allColumns = new ArrayList<>();
         if (rs == null) {
             return allColumns;

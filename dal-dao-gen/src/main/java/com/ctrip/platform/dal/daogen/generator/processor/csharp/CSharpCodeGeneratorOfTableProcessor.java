@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.resource.ProgressResource;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import java.io.File;
@@ -20,8 +19,6 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 
 public class CSharpCodeGeneratorOfTableProcessor implements DalProcessor {
-    private static Logger log = Logger.getLogger(CSharpCodeGeneratorOfTableProcessor.class);
-
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
@@ -30,7 +27,7 @@ public class CSharpCodeGeneratorOfTableProcessor implements DalProcessor {
             Progress progress = ctx.getProgress();
             final File dir = new File(String.format("%s/%s/cs", ctx.getGeneratePath(), projectId));
             List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
-            TaskUtils.invokeBatch(log, tableCallables);
+            TaskUtils.invokeBatch(tableCallables);
             ProgressResource.addDoneFiles(progress, ctx.getTableViewHosts().size());
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -47,7 +44,7 @@ public class CSharpCodeGeneratorOfTableProcessor implements DalProcessor {
         for (final CSharpTableHost host : _tableViewHosts) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                 @Override
-                public ExecuteResult call() {
+                public ExecuteResult call() throws Exception {
                     // progress.setOtherMessage("正在生成 " + host.getClassName());
                     ExecuteResult result = new ExecuteResult("Generate Table[" + host.getTableName() + "] Dao");
                     progress.setOtherMessage(result.getTaskName());
@@ -70,8 +67,8 @@ public class CSharpCodeGeneratorOfTableProcessor implements DalProcessor {
                                 mavenLikeDir.getAbsolutePath(), host.getClassName()),
                                 "templates/csharp/test/DAOUnitTest.cs.tpl");
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + "exception", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }

@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.daogen.dao;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import org.springframework.jdbc.support.JdbcUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -43,7 +42,8 @@ public class SetupDBDao {
                 }
             }
         } finally {
-            JdbcUtils.closeResultSet(resultSet);
+            if (resultSet != null)
+                resultSet.close();
         }
         return set;
     }

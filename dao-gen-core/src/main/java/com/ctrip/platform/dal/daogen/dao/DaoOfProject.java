@@ -85,7 +85,7 @@ public class DaoOfProject {
     public int insertProject(Project project) throws SQLException {
         if (null == project)
             return 0;
-        KeyHolder keyHolder = null;
+        KeyHolder keyHolder = new KeyHolder();
         DalHints hints = DalHints.createIfAbsent(null);
         client.insert(hints, keyHolder, project);
         return keyHolder.getKey().intValue();

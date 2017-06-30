@@ -358,20 +358,18 @@ public class DbUtils {
             connection = DataSourceUtil.getConnection(allInOneName);
             preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
             resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                ResultSetMetaData metaData = resultSet.getMetaData();
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    String columnName = metaData.getColumnName(i);
-                    Integer sqlType = metaData.getColumnType(i);
-                    Class<?> javaType = null;
-                    try {
-                        javaType = Class.forName(metaData.getColumnClassName(i));
-                    } catch (Throwable e) {
-                        javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
-                    }
-                    if (!map.containsKey(columnName) && null != javaType)
-                        map.put(columnName, javaType);
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                String columnName = metaData.getColumnName(i);
+                Integer sqlType = metaData.getColumnType(i);
+                Class<?> javaType = null;
+                try {
+                    javaType = Class.forName(metaData.getColumnClassName(i));
+                } catch (Throwable e) {
+                    javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
                 }
+                if (!map.containsKey(columnName) && null != javaType)
+                    map.put(columnName, javaType);
             }
         } catch (Throwable e) {
             throw e;
@@ -407,16 +405,14 @@ public class DbUtils {
             connection = DataSourceUtil.getConnection(allInOneName);
             preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
             resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                ResultSetMetaData metaData = resultSet.getMetaData();
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    String columnName = metaData.getColumnName(i);
-                    Integer sqlType = metaData.getColumnType(i);
-                    if ("uniqueidentifier".equals(metaData.getColumnTypeName(i)))
-                        sqlType = 10001;
-                    if (!map.containsKey(columnName) && null != sqlType)
-                        map.put(columnName, sqlType);
-                }
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                String columnName = metaData.getColumnName(i);
+                Integer sqlType = metaData.getColumnType(i);
+                if ("uniqueidentifier".equals(metaData.getColumnTypeName(i)))
+                    sqlType = 10001;
+                if (!map.containsKey(columnName) && null != sqlType)
+                    map.put(columnName, sqlType);
             }
         } catch (Throwable e) {
             throw e;

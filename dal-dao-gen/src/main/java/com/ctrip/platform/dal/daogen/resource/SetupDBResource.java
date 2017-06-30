@@ -15,7 +15,9 @@ import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.ctrip.platform.dal.daogen.utils.XmlUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.XMLWriter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -44,9 +46,12 @@ public class SetupDBResource {
     private static final String WEB_XML = "web.xml";
     private static final String DATASOURCE_XML = "datasource.xml";
     private static final String DATASOURCE = "Datasource";
+    private static final String DATASOURCE_NAME = "name";
     private static final String DATASOURCE_USERNAME = "userName";
     private static final String DATASOURCE_PASSWORD = "password";
     private static final String DATASOURCE_CONNECTION_URL = "connectionUrl";
+    private static final String DATASOURCE_DRIVER_CLASS = "driverClassName";
+    private static final String DATASOURCE_MYSQL_DRIVER = "com.mysql.jdbc.Driver";
     private String jdbcUrlTemplate = "jdbc:mysql://%s:%s/%s";
     private static final String SCRIPT_FILE = "script.sql";
     private static final String CREATE_TABLE = "CREATE TABLE";
@@ -320,22 +325,23 @@ public class SetupDBResource {
             String dbcatalog) throws Exception {
         boolean result = false;
         try {
-            Document document = XmlUtil.getDocument(DATASOURCE_XML);
-            if (document == null)
-                return false;
-            Element root = document.getRootElement();
-            List<Element> elements = XmlUtil.getChildElements(root, DATASOURCE);
-            if (elements == null || elements.size() == 0)
-                return false;
-            Element element = elements.get(0);
-            XmlUtil.setAttribute(element, DATASOURCE_USERNAME, dbuser);
-            XmlUtil.setAttribute(element, DATASOURCE_PASSWORD, dbpassword);
             String connectionUrl = String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog);
-            XmlUtil.setAttribute(element, DATASOURCE_CONNECTION_URL, connectionUrl);
+            Document document = DocumentHelper.createDocument();
+            Element root = document.addElement("Datasources");
+            root.addElement("Datasource").addAttribute(DATASOURCE_NAME, LOGIC_DBNAME)
+                    .addAttribute(DATASOURCE_USERNAME, dbuser).addAttribute(DATASOURCE_PASSWORD, dbpassword)
+                    .addAttribute(DATASOURCE_CONNECTION_URL, connectionUrl)
+                    .addAttribute(DATASOURCE_DRIVER_CLASS, DATASOURCE_MYSQL_DRIVER);
+
             URL url = classLoader.getResource(WEB_XML);
             String path = url.getPath().replace(WEB_XML, DATASOURCE_XML);
-            FileWriter out = new FileWriter("foo.xml");
-            document.write(out);
+
+            try (FileWriter fileWriter = new FileWriter(path)) {
+                XMLWriter writer = new XMLWriter(fileWriter);
+                writer.write(document);
+                writer.close();
+            }
+
             DalClientFactory.getClient(LOGIC_DBNAME);
             result = true;
         } catch (Throwable e) {

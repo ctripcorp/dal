@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.dao;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -18,7 +19,8 @@ public class SetupDBDao {
 
         String[] array = sqlScript.split(";"); // toUpperCase().
         DalClient client = DalClientFactory.getClient(DATA_BASE);
-        client.batchUpdate(array, null);
+        DalHints hints = DalHints.createIfAbsent(null);
+        client.batchUpdate(array, hints);
         return true;
     }
 

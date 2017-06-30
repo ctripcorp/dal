@@ -18,6 +18,8 @@ public class XmlUtil {
             classLoader = XmlUtil.class.getClassLoader();
         }
         URL url = classLoader.getResource(fileName);
+        if (url == null)
+            return null;
         SAXReader reader = new SAXReader();
         return reader.read(url);
     }

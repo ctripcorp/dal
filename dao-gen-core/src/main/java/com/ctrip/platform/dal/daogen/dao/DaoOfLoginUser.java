@@ -68,7 +68,7 @@ public class DaoOfLoginUser {
         if (null == user)
             return 0;
 
-        KeyHolder keyHolder = null;
+        KeyHolder keyHolder = new KeyHolder();
         DalHints hints = DalHints.createIfAbsent(null);
         client.insert(hints, keyHolder, user);
         return keyHolder.getKey().intValue();

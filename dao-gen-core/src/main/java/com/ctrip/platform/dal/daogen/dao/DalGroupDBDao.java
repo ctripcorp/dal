@@ -33,9 +33,16 @@ public class DalGroupDBDao {
     }
 
     public List<DalGroupDB> getAllGroupDbs() throws SQLException {
-        SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
-        DalHints hints = DalHints.createIfAbsent(null);
-        return client.query(builder, hints);
+        FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "SELECT a.id,a.dbname,a.dal_group_id,a.db_address,a.db_port,a.db_user,a.db_password,a.db_catalog,a.db_providerName,b.group_name as comment ");
+        sb.append("FROM alldbs a LEFT JOIN dal_group b ON b.id = a.dal_group_id ");
+        builder.setTemplate(sb.toString());
+        StatementParameters parameters = new StatementParameters();
+        builder.mapWith(dalGroupDBRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        return queryDao.query(builder, parameters, hints);
     }
 
     public List<String> getAllDbAllinOneNames() throws SQLException {

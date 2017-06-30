@@ -32,12 +32,12 @@ public class DaoOfLoginUser {
 
     public List<LoginUser> getAllUsers() throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return client.query(builder, hints);
     }
 
     public LoginUser getUserById(int userId) throws SQLException {
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return client.queryByPk(userId, hints);
     }
 

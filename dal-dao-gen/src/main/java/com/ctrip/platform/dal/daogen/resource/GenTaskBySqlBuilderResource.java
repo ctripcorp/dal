@@ -74,7 +74,7 @@ public class GenTaskBySqlBuilderResource {
                 task.setSql_style(sql_style);
                 task.setCrud_type(crud_type);
                 task.setFields(fields);
-                task.setWhere_condition(condition);
+                task.setCondition(condition);
                 task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
                 task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);

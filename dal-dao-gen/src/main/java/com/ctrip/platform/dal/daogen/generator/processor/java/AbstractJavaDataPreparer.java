@@ -273,7 +273,7 @@ public class AbstractJavaDataPreparer {
             // Have no where condition
             String[] fields = StringUtils.split(builder.getFields(), ",");
             Map<String, Boolean> sensitive = new HashMap<>();
-            String conditions = builder.getWhere_condition();
+            String conditions = builder.getCondition();
             if (conditions != null) {
                 String[] temp = conditions.split(";");
                 for (String field : temp) {
@@ -337,7 +337,7 @@ public class AbstractJavaDataPreparer {
     private List<JavaParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder,
             List<JavaParameterHost> allColumns) {
         List<JavaParameterHost> parameters = new ArrayList<>();
-        String[] conditions = StringUtils.split(builder.getWhere_condition(), ";");
+        String[] conditions = StringUtils.split(builder.getCondition(), ";");
         for (String condition : conditions) {
             String[] tokens = StringUtils.split(condition, ",");
             if (tokens.length == 1) { //

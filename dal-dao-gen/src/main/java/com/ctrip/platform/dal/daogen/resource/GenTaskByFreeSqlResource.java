@@ -251,7 +251,7 @@ public class GenTaskByFreeSqlResource {
         Status status = Status.OK;
 
         try {
-            Map<String, Parameter> map = new HashMap<>();
+            Map<String, Parameter> map = new LinkedHashMap<>();
             List<Parameter> list = new ArrayList<>();
             Matcher matcher = pattern.matcher(sql_content);
             while (matcher.find()) {

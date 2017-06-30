@@ -183,12 +183,12 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
         this.fields = fields;
     }
 
-    public String getWhere_condition() {
+    public String getCondition() {
         return condition;
     }
 
-    public void setWhere_condition(String where_condition) {
-        this.condition = where_condition;
+    public void setCondition(String condition) {
+        this.condition = condition;
     }
 
     public String getSql_content() {

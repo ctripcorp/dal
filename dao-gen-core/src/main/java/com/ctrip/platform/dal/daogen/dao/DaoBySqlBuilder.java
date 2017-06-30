@@ -182,7 +182,7 @@ public class DaoBySqlBuilder {
         parameters.set(i++, "sql_style", Types.VARCHAR, task.getSql_style());
         parameters.set(i++, "crud_type", Types.VARCHAR, task.getCrud_type());
         parameters.set(i++, "fields", Types.LONGVARCHAR, task.getFields());
-        parameters.set(i++, "where_condition", Types.LONGVARCHAR, task.getWhere_condition());
+        parameters.set(i++, "where_condition", Types.LONGVARCHAR, task.getCondition());
         parameters.set(i++, "sql_content", Types.LONGVARCHAR, task.getSql_content());
         parameters.set(i++, "generated", Types.BIT, task.getGenerated());
         parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdate_user_no());

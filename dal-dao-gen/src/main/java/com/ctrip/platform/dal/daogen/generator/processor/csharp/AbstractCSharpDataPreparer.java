@@ -317,7 +317,7 @@ public class AbstractCSharpDataPreparer {
     private List<CSharpParameterHost> buildMethodParameterHost4SqlConditin(GenTaskBySqlBuilder builder,
             List<CSharpParameterHost> allColumns) {
         List<CSharpParameterHost> parameters = new ArrayList<>();
-        String[] conditions = StringUtils.split(builder.getWhere_condition(), ";");
+        String[] conditions = StringUtils.split(builder.getCondition(), ";");
         for (String condition : conditions) {
             String[] tokens = StringUtils.split(condition, ",");
             if (tokens.length == 1) {

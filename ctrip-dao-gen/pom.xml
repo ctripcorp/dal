@@ -170,6 +170,9 @@
                 <filtering>true</filtering>
             </resource>
             <resource>
+                <directory>src/main/resources/ignite</directory>
+            </resource>
+            <resource>
                 <directory>src/main/resources/tars</directory>
             </resource>
             <resource>

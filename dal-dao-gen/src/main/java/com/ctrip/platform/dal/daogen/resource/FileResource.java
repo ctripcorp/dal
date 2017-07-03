@@ -1,11 +1,14 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.domain.W2uiElement;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.ZipFolder;
 import com.google.common.base.Charsets;
 
@@ -131,10 +134,16 @@ public class FileResource {
             f = new File(generatePath, id);
         }
 
-        Project proj = BeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
+        Project project = BeanGetter.getDaoOfProject().getProjectByID(Integer.valueOf(id));
+        boolean isValid = validatePermission(request, project.getDal_group_id());
+        if (!isValid) {
+            response.sendError(403, "Forbidden!");
+            return "";
+        }
+
         DateFormat format1 = new SimpleDateFormat("yyyyMMddHHmmss");
         String date = format1.format(new Date());
-        final String zipFileName = proj.getName() + "-" + date + ".zip";
+        final String zipFileName = project.getName() + "-" + date + ".zip";
 
         if (f.isFile()) {
             zipFile(f, zipFileName);
@@ -145,9 +154,7 @@ public class FileResource {
         FileInputStream fis = null;
         BufferedInputStream buff = null;
         OutputStream myout = null;
-
         String path = generatePath + "/" + zipFileName;
-
         File file = new File(path);
 
         try {
@@ -217,6 +224,24 @@ public class FileResource {
             JavaIOUtils.closeInputStream(in);
             JavaIOUtils.closeOutputStream(zos);
         }
+    }
+
+    private boolean validatePermission(HttpServletRequest request, Integer projectGroupId) throws Exception {
+        boolean result = false;
+        LoginUser user = RequestUtil.getUserInfo(request);
+        if (user == null)
+            return result;
+        List<UserGroup> userGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+        if (userGroups == null || userGroups.size() == 0)
+            return result;
+        for (UserGroup group : userGroups) {
+            if (group.getGroup_id() == projectGroupId) {
+                result |= true;
+                break;
+            }
+        }
+
+        return result;
     }
 
 }

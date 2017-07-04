@@ -231,16 +231,18 @@ public class FileResource {
         LoginUser user = RequestUtil.getUserInfo(request);
         if (user == null)
             return result;
-        List<UserGroup> userGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
-        if (userGroups == null || userGroups.size() == 0)
-            return result;
-        for (UserGroup group : userGroups) {
-            if (group.getGroup_id() == projectGroupId) {
-                result |= true;
-                break;
+        try {
+            List<UserGroup> userGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+            if (userGroups == null || userGroups.size() == 0)
+                return result;
+            for (UserGroup group : userGroups) {
+                if (group.getGroup_id().intValue() == projectGroupId.intValue()) {
+                    result |= true;
+                    break;
+                }
             }
+        } catch (Throwable e) {
         }
-
         return result;
     }
 

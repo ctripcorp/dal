@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -23,15 +21,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DbUtils {
-    private static final String DATA_BASE = "dao";
-    private static DalClient dalClient = null;
     private static DalStatementCreator stmtCreator = null;
 
     public static List<Integer> validMode = new ArrayList<>();
     private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", Pattern.CASE_INSENSITIVE);
 
     static {
-        dalClient = DalClientFactory.getClient(DATA_BASE);
         stmtCreator = new DalStatementCreator();
         validMode.add(DatabaseMetaData.procedureColumnIn);
         validMode.add(DatabaseMetaData.procedureColumnInOut);
@@ -75,12 +70,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return result;
     }
@@ -88,13 +80,17 @@ public class DbUtils {
     private static boolean mysqlObjectExist(String allInOneName, String objectType, String objectName)
             throws Exception {
         Connection connection = null;
+        ResultSet resultSet = null;
         String type = "u".equalsIgnoreCase(objectType) ? "TABLE" : "VIEW";
         try {
             connection = DataSourceUtil.getConnection(allInOneName);
-            ResultSet rs = connection.getMetaData().getTables(null, null, objectName, new String[] {type});
-            return rs.next();
+            resultSet = connection.getMetaData().getTables(null, null, objectName, new String[] {type});
+            return resultSet.next();
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
     }
 
@@ -118,10 +114,8 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
         return list;
     }
@@ -149,10 +143,8 @@ public class DbUtils {
             }
         } catch (Throwable e) {
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
 
         return list;
@@ -182,12 +174,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return result;
     }
@@ -218,12 +207,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return list;
     }
@@ -244,10 +230,8 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
         return result;
     }
@@ -265,10 +249,8 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
         return list;
     }
@@ -336,10 +318,8 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
         return result;
     }
@@ -374,12 +354,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return map;
     }
@@ -417,12 +394,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return map;
     }
@@ -461,12 +435,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return list;
     }
@@ -530,12 +501,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
         return result;
     }
@@ -615,8 +583,7 @@ public class DbUtils {
                 Consts.databaseType.put(allInOneName, dbType);
             } catch (Throwable e) {
             } finally {
-                if (connection != null)
-                    connection.close();
+                ResourceUtils.close(connection);
             }
             return dbType;
         }
@@ -661,12 +628,9 @@ public class DbUtils {
         } catch (Throwable e) {
             throw e;
         } finally {
-            if (resultSet != null)
-                resultSet.close();
-            if (preparedStatement != null)
-                preparedStatement.close();
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
 
         return map;

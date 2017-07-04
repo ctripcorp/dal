@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.sql.validate;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.ORMUtils;
@@ -143,25 +144,27 @@ public class SQLValidation {
     private static ValidateResult updateValidate(String dbName, String sql, int[] paramsTypes, Object[] mockedVals) {
         ValidateResult status = new ValidateResult(sql);
         Connection connection = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = DataSourceUtil.getConnection(dbName);
             connection.setAutoCommit(false);
-            PreparedStatement stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
+            preparedStatement = connection.prepareStatement(SqlBuilder.net2Java(sql));
             if (paramsTypes != null) {
                 for (int i = 1; i <= paramsTypes.length; i++) {
                     if (paramsTypes[i - 1] == 10001) {
-                        stat.setObject(i, mockedVals[i - 1], Types.CHAR);
+                        preparedStatement.setObject(i, mockedVals[i - 1], Types.CHAR);
                     } else {
-                        stat.setObject(i, mockedVals[i - 1], paramsTypes[i - 1]);
+                        preparedStatement.setObject(i, mockedVals[i - 1], paramsTypes[i - 1]);
                     }
                 }
             }
-            int rows = stat.executeUpdate();
+            int rows = preparedStatement.executeUpdate();
             status.setAffectRows(rows);
             status.setPassed(true).append("Validate Successfully");
         } catch (Exception e) {
             status.append(e.getMessage());
         } finally {
+            ResourceUtils.close(preparedStatement);
             ResourceUtils.rollback(connection);
             ResourceUtils.close(connection);
         }
@@ -219,7 +222,6 @@ public class SQLValidation {
             } else if (dbType.equals("Microsoft SQL Server")) {
                 sqlserverQueryWithoutExplain(connection, sql, status, paramsTypes, mockedVals);
             }
-
         } catch (Exception e) {
             status.clearAppend(e.getMessage());
         } finally {
@@ -239,7 +241,6 @@ public class SQLValidation {
 
     private static void sqlserverQueryWithoutExplain(Connection connection, String sql, ValidateResult status,
             int[] paramsTypes, Object[] vals) {
-
         sqlserverExplain(connection, sql, status, paramsTypes, vals);
         if (status.isPassed()) {
             ResultSet rs = null;
@@ -277,23 +278,6 @@ public class SQLValidation {
         status.setPassed(true);
     }
 
-    /*
-     * private static void sqlserverQuery(Connection connection, String sql, ValidateResult status, int[] paramsTypes) {
-     * ResultSet rs = null; Statement profile = null; try{ connection.setAutoCommit(false); profile =
-     * connection.createStatement(); profile.execute("SET SHOWPLAN_ALL ON"); for (int i = 0; i < paramsTypes.length;
-     * i++) { Object mockValue = mockSQLValue(paramsTypes[i]); String replacement = mockValue instanceof String ? "'" +
-     * mockValue.toString() + "'" : mockValue.toString(); sql = sql.replaceFirst("\\?", replacement); } rs =
-     * profile.executeQuery(sql); List<SqlServerExplain> explains = new ArrayList<SqlServerExplain>(); while(rs.next()){
-     * explains.add(ORMUtils.map(rs, SqlServerExplain.class)); }
-     * status.append(objectMapper.writeValueAsString(explains)); status.setPassed(true);
-     * profile.execute("SET SHOWPLAN_ALL OFF"); connection.setAutoCommit(true); }catch(SQLException e){
-     * status.append(e.getMessage()); log.error("Validate sql server query sql execute failed", e);
-     * }catch(JsonProcessingException e){ status.append(e.getMessage());
-     * log.error("Validate sql server query JSON parse failed"); }catch(Exception e){ status.append(e.getMessage());
-     * log.error("Validate sql server query failed", e); } finally{ ResourceUtils.close(rs);
-     * ResourceUtils.close(profile); ResourceUtils.rollback(connection); } }
-     */
-
     /**
      * Validate the MySQL Query SQL Statement.
      *
@@ -305,7 +289,6 @@ public class SQLValidation {
 
     private static void mysqlQuery(Connection connection, String sql, ValidateResult status, int[] paramsTypes,
             Object[] vals) {
-
         mysqlExplain(connection, sql, status, paramsTypes, vals);
 
         if (status.isPassed()) {

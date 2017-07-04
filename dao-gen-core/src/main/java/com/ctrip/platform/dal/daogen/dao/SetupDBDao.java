@@ -3,7 +3,9 @@ package com.ctrip.platform.dal.daogen.dao;
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.daogen.utils.ResourceUtils;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,11 +28,12 @@ public class SetupDBDao {
 
     public Set<String> getCatalogTableNames(String catalog) throws Exception {
         Set<String> set = new HashSet<>();
+        Connection connection = null;
         ResultSet resultSet = null;
 
         try {
-            DatabaseMetaData databaseMetaData =
-                    DalClientFactory.getDalConfigure().getLocator().getConnection(DATA_BASE).getMetaData();
+            connection = DalClientFactory.getDalConfigure().getLocator().getConnection(DATA_BASE);
+            DatabaseMetaData databaseMetaData = connection.getMetaData();
 
             if (databaseMetaData == null)
                 return set;
@@ -44,8 +47,8 @@ public class SetupDBDao {
                 }
             }
         } finally {
-            if (resultSet != null)
-                resultSet.close();
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
         return set;
     }

@@ -150,19 +150,20 @@ public class DataSourceUtil {
         p.setJmxEnabled(false);
         p.setTestWhileIdle(false);
         p.setTestOnBorrow(true);
-        p.setValidationQuery("SELECT 1");
         p.setTestOnReturn(false);
-        p.setValidationInterval(30000L);
-        p.setTimeBetweenEvictionRunsMillis(30000);
-        p.setMaxActive(100);
-        p.setInitialSize(10);
-        p.setMaxWait(5000); // 20000
+        p.setValidationQuery("SELECT 1");
         p.setValidationQueryTimeout(5);
+        p.setValidationInterval(30000L);
+        p.setTimeBetweenEvictionRunsMillis(5000);
+        p.setMaxActive(100);
+        p.setMinIdle(0);
+        p.setMaxWait(10000);
+        p.setMaxAge(0L);
+        p.setInitialSize(1);
         p.setRemoveAbandonedTimeout(60);
-        p.setMinEvictableIdleTimeMillis(30000);
-        p.setMinIdle(10);
-        p.setLogAbandoned(false);
         p.setRemoveAbandoned(true);
+        p.setLogAbandoned(true);
+        p.setMinEvictableIdleTimeMillis(30000);
         p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
                 + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
 

@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.ResourceUtils;
 import com.ctrip.platform.dal.daogen.utils.XmlUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dom4j.Document;
@@ -235,10 +236,8 @@ public class SetupDBResource {
             status = Status.ERROR;
             status.setInfo(e.getMessage());
         } finally {
-            if (rs != null)
-                rs.close();
-            if (conn != null)
-                conn.close();
+            ResourceUtils.close(rs);
+            ResourceUtils.close(conn);
         }
 
         return status;

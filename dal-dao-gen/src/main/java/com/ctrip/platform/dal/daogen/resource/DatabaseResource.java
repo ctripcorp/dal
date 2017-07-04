@@ -117,19 +117,16 @@ public class DatabaseResource {
                 status = Status.ERROR;
                 status.setInfo(e.getMessage());
                 return status;
-            } finally {
-                if (rs != null)
-                    rs.close();
-                if (conn != null)
-                    conn.close();
             }
-
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             Status status = Status.ERROR;
             status.setInfo(e.getMessage());
             return status;
+        } finally {
+            ResourceUtils.close(rs);
+            ResourceUtils.close(conn);
         }
     }
 
@@ -382,19 +379,17 @@ public class DatabaseResource {
             @QueryParam("table_name") String tableName) throws Exception {
         List<ColumnMetaData> fields = new ArrayList<>();
         Connection connection = null;
-        ResultSet primaryKeyRs = null;
         try {
             DatabaseSetEntry databaseSetEntry =
                     BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
             String db_Name = databaseSetEntry.getConnectionString();
-
             connection = DataSourceUtil.getConnection(db_Name);
             Set<String> indexedColumns = new HashSet<>();
             Set<String> primaryKeys = new HashSet<>();
             Set<String> allColumns = new HashSet<>();
 
             // 获取所有主键
-
+            ResultSet primaryKeyRs = null;
             try {
                 primaryKeyRs = connection.getMetaData().getPrimaryKeys(null, null, tableName);
 
@@ -404,8 +399,7 @@ public class DatabaseResource {
             } catch (SQLException e) {
                 LoggerManager.getInstance().error(e);
             } finally {
-                if (primaryKeyRs != null)
-                    primaryKeyRs.close();
+                ResourceUtils.close(primaryKeyRs);
             }
 
             // 获取所有列
@@ -418,8 +412,7 @@ public class DatabaseResource {
             } catch (SQLException e) {
                 LoggerManager.getInstance().error(e);
             } finally {
-                if (allColumnsRs != null)
-                    allColumnsRs.close();
+                ResourceUtils.close(allColumnsRs);
             }
 
             // 获取所有索引信息
@@ -436,8 +429,7 @@ public class DatabaseResource {
             } catch (SQLException e) {
                 LoggerManager.getInstance().error(e);
             } finally {
-                if (indexColumnsRs != null)
-                    indexColumnsRs.close();
+                ResourceUtils.close(indexColumnsRs);
             }
 
             for (String str : allColumns) {
@@ -452,8 +444,7 @@ public class DatabaseResource {
             LoggerManager.getInstance().error(e);
             throw e;
         } finally {
-            if (connection != null)
-                connection.close();
+            ResourceUtils.close(connection);
         }
 
         return fields;

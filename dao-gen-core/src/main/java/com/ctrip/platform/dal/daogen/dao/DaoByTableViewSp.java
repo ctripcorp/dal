@@ -43,10 +43,6 @@ public class DaoByTableViewSp {
     }
 
     private void processGenTaskByTableViewSp(GenTaskByTableViewSp entity) throws SQLException {
-        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
-        Date date = new Date(entity.getUpdate_time().getTime());
-        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-
         if (entity.getApproved() == 1) {
             entity.setStr_approved("未审批");
         } else if (entity.getApproved() == 2) {
@@ -56,6 +52,13 @@ public class DaoByTableViewSp {
         } else {
             entity.setStr_approved("通过");
         }
+
+        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
     public int getVersionById(int id) throws SQLException {

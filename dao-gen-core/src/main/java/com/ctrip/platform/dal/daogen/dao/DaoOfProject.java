@@ -75,11 +75,14 @@ public class DaoOfProject {
     }
 
     private void processProject(Project entity) throws SQLException {
-        Date date = new Date(entity.getUpdate_time().getTime());
-        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         entity.setText(entity.getName());
         entity.setChildren(false);
         entity.setIcon("glyphicon glyphicon-tasks");
+
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
     public int insertProject(Project project) throws SQLException {

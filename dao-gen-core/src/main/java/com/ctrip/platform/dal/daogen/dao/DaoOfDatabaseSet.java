@@ -127,6 +127,8 @@ public class DaoOfDatabaseSet {
     }
 
     private void processDatabaseSetEntry(DatabaseSetEntry entity) throws SQLException {
+        if (entity == null)
+            return;
         if (entity.getUpdate_time() == null)
             return;
         Date date = new Date(entity.getUpdate_time().getTime());

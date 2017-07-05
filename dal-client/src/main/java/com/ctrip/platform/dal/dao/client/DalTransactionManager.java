@@ -1,11 +1,19 @@
 package com.ctrip.platform.dal.dao.client;
 
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.CallbackFilter;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.NoOp;
+
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.annotation.DalTransactionInterceptor;
+import com.ctrip.platform.dal.dao.annotation.Transactional;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -103,6 +111,28 @@ public class DalTransactionManager {
 		transactionHolder.set(null);
 	}
 
+    public static <T> T create(Class<T> targetClass) throws InstantiationException, IllegalAccessException {   
+        T target = targetClass.newInstance();
+        return enable(target);  
+    }
+    
+    public static <T> T enable(T target) {   
+        Enhancer enhancer = new Enhancer();  
+        enhancer.setSuperclass(target.getClass());  
+        enhancer.setClassLoader(target.getClass().getClassLoader());
+        enhancer.setCallbackFilter(new TransactionalCallbackFilter());
+        Callback[] callbacks = new Callback[]{new DalTransactionInterceptor(target), NoOp.INSTANCE};
+        enhancer.setCallbacks(callbacks);  
+        return (T)enhancer.create();  
+    }
+    
+    private static class TransactionalCallbackFilter implements CallbackFilter {
+        @Override
+        public int accept(Method method) {
+            return method.isAnnotationPresent(Transactional.class) ? 0 : 1;
+        }
+    }
+    
 	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)throws SQLException{
 		action.initLogEntry(connManager.getLogicDbName(), hints);
 		action.start();

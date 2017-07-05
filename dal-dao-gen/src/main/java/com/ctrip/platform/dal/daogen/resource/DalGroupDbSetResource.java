@@ -4,8 +4,7 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import org.apache.log4j.Logger;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -30,17 +29,15 @@ import java.util.regex.Pattern;
 @Singleton
 @Path("groupdbset")
 public class DalGroupDbSetResource {
-    private static Logger log = Logger.getLogger(DalGroupDbSetResource.class);
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root)
             throws Exception {
         try {
-            List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
+            List<DalGroup> groups = BeanGetter.getDaoOfDalGroup().getAllGroups();
 
             for (DalGroup group : groups) {
-                group.setText(group.getGroupName());
+                group.setText(group.getGroup_name());
                 group.setIcon("glyphicon glyphicon-folder-close");
                 group.setChildren(false);
             }
@@ -55,14 +52,14 @@ public class DalGroupDbSetResource {
 
     private List<DalGroup> sortGroups(List<DalGroup> groups, String userNo) throws SQLException {
         List<DalGroup> result = new ArrayList<>(groups.size());
-        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-        List<UserGroup> joinedGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+        LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+        List<UserGroup> joinedGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (joinedGroups != null && joinedGroups.size() > 0) {
             for (UserGroup joinedGroup : joinedGroups) {
                 Iterator<DalGroup> ite = groups.iterator();
                 while (ite.hasNext()) {
                     DalGroup group = ite.next();
-                    if (group.getId() == joinedGroup.getGroupId()) {
+                    if (group.getId() == joinedGroup.getGroup_id()) {
                         result.add(group);
                         ite.remove();
                     }
@@ -79,14 +76,14 @@ public class DalGroupDbSetResource {
     public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") int groupId,
             @QueryParam("daoFlag") boolean daoFlag) throws SQLException {
         try {
-            List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
+            List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
             if (!daoFlag)
                 return dbsets;
 
             List<DatabaseSet> result = new ArrayList<>();
             for (DatabaseSet dbset : dbsets) { // 排除没有entry的dbset
                 List<DatabaseSetEntry> entrys =
-                        SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.getId());
+                        BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.getId());
                 if (entrys != null && entrys.size() > 0)
                     result.add(dbset);
             }
@@ -107,7 +104,7 @@ public class DalGroupDbSetResource {
             databaseSet_Id = Integer.parseInt(dbsetId);
 
             List<DatabaseSetEntry> dbsetEntry =
-                    SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(databaseSet_Id);
+                    BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(databaseSet_Id);
             return dbsetEntry;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -124,7 +121,6 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add Dbset failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -136,7 +132,7 @@ public class DalGroupDbSetResource {
                 return status;
             }
 
-            List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(name);
+            List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(name);
             if (null != dbsets && dbsets.size() > 0) {
                 Status status = Status.ERROR;
                 status.setInfo("databaseSet Name --> " + name + " 已经存在，请重新命名!");
@@ -149,13 +145,12 @@ public class DalGroupDbSetResource {
             dbset.setProvider(provider);
             dbset.setShardingStrategy(shardingStrategy);
             dbset.setGroupId(groupID);
-            dbset.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            dbset.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbset.setUpdateUserNo(upNo);
-            ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
+            dbset.setUpdate_user_no(upNo);
+            ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
             if (ret <= 0) {
-                log.error("Add database set failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Add operation failed.");
                 return status;
@@ -180,7 +175,6 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Update Dbset failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -198,7 +192,7 @@ public class DalGroupDbSetResource {
                 return status;
             }
 
-            List<DatabaseSet> dbsets = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(name);
+            List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(name);
             if (null != dbsets && dbsets.size() > 0) {
                 for (DatabaseSet dbset : dbsets) {
                     if (dbset.getId() != iD) {
@@ -216,13 +210,12 @@ public class DalGroupDbSetResource {
             dbset.setProvider(provider);
             dbset.setShardingStrategy(shardingStrategy);
             dbset.setGroupId(groupID);
-            dbset.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            dbset.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbset.setUpdateUserNo(upNo);
-            ret = SpringBeanGetter.getDaoOfDatabaseSet().updateDatabaseSet(dbset);
+            dbset.setUpdate_user_no(upNo);
+            ret = BeanGetter.getDaoOfDatabaseSet().updateDatabaseSet(dbset);
             if (ret <= 0) {
-                log.error("Update database set failed, caused by db operation failed, pls check the spring log");
                 Status status = Status.ERROR;
                 status.setInfo("Update operation failed.");
                 return status;
@@ -245,7 +238,6 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Delete databaseSet failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -263,10 +255,9 @@ public class DalGroupDbSetResource {
                 return status;
             }
 
-            int ret1 = SpringBeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetEntryByDbsetId(dbsetID);
-            int ret2 = SpringBeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetById(dbsetID);
+            int ret1 = BeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetEntryByDbsetId(dbsetID);
+            int ret2 = BeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetById(dbsetID);
             if (ret1 < 0 || ret2 < 0) {
-                log.error("Delete databaseSet failed, caused by db operation failed, pls check the spring log");
                 Status status = Status.ERROR;
                 status.setInfo("Delete operation failed.");
                 return status;
@@ -290,7 +281,6 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add Dbset Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -314,14 +304,13 @@ public class DalGroupDbSetResource {
             dbsetEntry.setDatabaseType(databaseType);
             dbsetEntry.setSharding(sharding);
             dbsetEntry.setConnectionString(connectionString);
-            dbsetEntry.setDatabasesetId(dbsetID);
-            dbsetEntry.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            dbsetEntry.setDatabaseSet_Id(dbsetID);
+            dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbsetEntry.setUpdateUserNo(upNo);
-            ret = SpringBeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(dbsetEntry);
+            dbsetEntry.setUpdate_user_no(upNo);
+            ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(dbsetEntry);
             if (ret <= 0) {
-                log.error("Add databaseSet Entry failed, caused by db operation failed, pls check the spring log");
                 Status status = Status.ERROR;
                 status.setInfo("Add operation failed.");
                 return status;
@@ -346,7 +335,6 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Update Dbset Entry failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -371,14 +359,13 @@ public class DalGroupDbSetResource {
             dbsetEntry.setDatabaseType(databaseType);
             dbsetEntry.setSharding(sharding);
             dbsetEntry.setConnectionString(connectionString);
-            dbsetEntry.setDatabasesetId(dbsetID);
-            dbsetEntry.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            dbsetEntry.setDatabaseSet_Id(dbsetID);
+            dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            dbsetEntry.setUpdateUserNo(upNo);
-            ret = SpringBeanGetter.getDaoOfDatabaseSet().updateDatabaseSetEntry(dbsetEntry);
+            dbsetEntry.setUpdate_user_no(upNo);
+            ret = BeanGetter.getDaoOfDatabaseSet().updateDatabaseSetEntry(dbsetEntry);
             if (ret <= 0) {
-                log.error("Update databaseSet Entry failed, caused by db operation failed, pls check the spring log");
                 Status status = Status.ERROR;
                 status.setInfo("Update operation failed.");
                 return status;
@@ -401,8 +388,6 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Delete databaseSet Entry failed, caused by illegal parameters:[userNo=%s]",
-                        userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -420,9 +405,8 @@ public class DalGroupDbSetResource {
                 return status;
             }
 
-            int ret = SpringBeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetEntryById(dbsetEntryID);
+            int ret = BeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetEntryById(dbsetEntryID);
             if (ret < 0) {
-                log.error("Delete databaseSet Entry failed, caused by db operation failed, pls check the spring log");
                 Status status = Status.ERROR;
                 status.setInfo("Delete operation failed.");
                 return status;
@@ -447,14 +431,14 @@ public class DalGroupDbSetResource {
     }
 
     private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId) throws SQLException {
-        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+        LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         // 用户加入的所有组
-        List<UserGroup> urgroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+        List<UserGroup> urgroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urgroups == null) {
             return false;
         }
         for (UserGroup ug : urgroups) {
-            if (ug.getGroupId() == currentGroupId) {
+            if (ug.getGroup_id() == currentGroupId) {
                 return true;
             }
         }
@@ -463,15 +447,15 @@ public class DalGroupDbSetResource {
 
     private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId) throws SQLException {
         boolean havePermison = false;
-        int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+        int userId = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
         List<GroupRelation> relations =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
         Iterator<GroupRelation> ite = relations.iterator();
         while (ite.hasNext()) {
             GroupRelation relation = ite.next();
             // then check the user whether or not exist in this child group
-            List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao()
-                    .getUserGroupByGroupIdAndUserId(relation.getChildGroupId(), userId);
+            List<UserGroup> ugs = BeanGetter.getDalUserGroupDao()
+                    .getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
             if (ugs != null && ugs.size() > 0) {
                 havePermison = true;
             }
@@ -491,17 +475,17 @@ public class DalGroupDbSetResource {
 
     private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId, int pk_DbSetId)
             throws SQLException {
-        DatabaseSet dbset = SpringBeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetById(pk_DbSetId);
+        DatabaseSet dbset = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetById(pk_DbSetId);
         if (dbset == null) {
             return false;
         }
-        String updateUN = dbset.getUpdateUserNo();
+        String updateUN = dbset.getUpdate_user_no();
         if (updateUN == null || updateUN.isEmpty()) { // the dbset have no
             // update user info
             // check the user is or not in the current group
-            int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+            int userId = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
             List<UserGroup> check =
-                    SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(currentGroupId, userId);
+                    BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(currentGroupId, userId);
             if (check != null && check.size() > 0) {
                 return true;
             }
@@ -517,30 +501,30 @@ public class DalGroupDbSetResource {
             return true;
         }
         // the owner of the current database set
-        LoginUser currentDbSetUser = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(upNo);
+        LoginUser currentDbSetUser = BeanGetter.getDaoOfLoginUser().getUserByNo(upNo);
         if (currentDbSetUser == null) {
             return false;
         }
         // the group that the owner of the current database set have been joined
         // in
         List<UserGroup> currentDbSetUserGroup =
-                SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(currentDbSetUser.getId());
+                BeanGetter.getDalUserGroupDao().getUserGroupByUserId(currentDbSetUser.getId());
         if (currentDbSetUserGroup == null || currentDbSetUserGroup.size() < 1) {
             return false;
         }
 
         // now check, the user who want to modify the dbset is or not in the
         // same group compare with the current dbset owner
-        int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+        int userId = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
         Set<Integer> childGroupIds = getChildGroupId(currentGroupId);
         Iterator<UserGroup> ite = currentDbSetUserGroup.iterator();
         while (ite.hasNext()) {
             UserGroup ug = ite.next();
-            if (!childGroupIds.contains(ug.getGroupId())) {
+            if (!childGroupIds.contains(ug.getGroup_id())) {
                 continue;
             }
             List<UserGroup> exists =
-                    SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(ug.getGroupId(), userId);
+                    BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(ug.getGroup_id(), userId);
             if (exists != null && exists.size() > 0) {
                 return true;
             }
@@ -552,13 +536,13 @@ public class DalGroupDbSetResource {
     private Set<Integer> getChildGroupId(int currentGroupId) throws SQLException {
         Set<Integer> sets = new HashSet<>();
         List<GroupRelation> relations =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
         if (relations == null) {
             return sets;
         }
 
         for (GroupRelation relation : relations) {
-            sets.add(relation.getChildGroupId());
+            sets.add(relation.getChild_group_id());
         }
         return sets;
     }

@@ -7,8 +7,7 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import org.apache.log4j.Logger;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -26,7 +25,6 @@ import java.util.List;
 @Singleton
 @Path("user")
 public class DalUserResource {
-    private static Logger log = Logger.getLogger(DalUserResource.class);
 
     private static final String userNumberNullMessage = "工号不能为空";
 
@@ -40,17 +38,12 @@ public class DalUserResource {
 
     private static final String loginFailMessage = "用户名或密码不正确";
 
-    // TBD
-    static {
-        SpringBeanGetter.refreshApplicationContext();
-    }
-
     @GET
     @Path("get")
     @Produces(MediaType.APPLICATION_JSON)
     public List<LoginUser> getAllUsers() throws SQLException {
         try {
-            List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
+            List<LoginUser> users = BeanGetter.getDaoOfLoginUser().getAllUsers();
             return users;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -64,21 +57,18 @@ public class DalUserResource {
             @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
         try {
             if (userNo == null) {
-                log.error(String.format("Add user failed, caused by illegal parameters:userNo=%s", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userName == null) {
-                log.error(String.format("Add user failed, caused by illegal parameters:userName=%s", userName));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userEmail == null) {
-                log.error(String.format("Add user failed, caused by illegal parameters:userEmail=%s", userEmail));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -92,15 +82,13 @@ public class DalUserResource {
             user.setPassword(password);
 
             try {
-                int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                int result = BeanGetter.getDaoOfLoginUser().insertUser(user);
                 if (result < 1) {
-                    log.error("Add user failed, caused by db operation failed, pls check the log.");
                     Status status = Status.ERROR;
                     status.setInfo("Add operation failed.");
                     return status;
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
                 Status status = Status.ERROR;
                 status.setInfo(e.getMessage());
                 return status;
@@ -121,21 +109,18 @@ public class DalUserResource {
             @FormParam("userName") String userName, @FormParam("userEmail") String userEmail) {
         try {
             if (userNo == null) {
-                log.error(String.format("Update user failed, caused by illegal parameters:userNo=%s", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userName == null) {
-                log.error(String.format("Update user failed, caused by illegal parameters:userName=%s", userName));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userEmail == null) {
-                log.error(String.format("Update user failed, caused by illegal parameters:userEmail=%s", userEmail));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -147,15 +132,13 @@ public class DalUserResource {
             user.setUserName(userName);
             user.setUserEmail(userEmail);
             try {
-                int result = SpringBeanGetter.getDaoOfLoginUser().updateUser(user);
+                int result = BeanGetter.getDaoOfLoginUser().updateUser(user);
                 if (result < 1) {
-                    log.error("Update user failed, caused by db operation failed, pls check the log.");
                     Status status = Status.ERROR;
                     status.setInfo("Update operation failed.");
                     return status;
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
                 Status status = Status.ERROR;
                 status.setInfo(e.getMessage());
                 return status;
@@ -174,9 +157,8 @@ public class DalUserResource {
     @Path("delete")
     public Status delete(@FormParam("userId") int userId) {
         try {
-            int result = SpringBeanGetter.getDaoOfLoginUser().deleteUser(userId);
+            int result = BeanGetter.getDaoOfLoginUser().deleteUser(userId);
             if (result < 1) {
-                log.error("Delete user failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Delete operation failed.");
                 return status;
@@ -208,7 +190,7 @@ public class DalUserResource {
             }
 
             try {
-                LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
                 if (user != null) {
                     String pw = user.getPassword();
                     if (pw != null && pw.equals(MD5Util.parseStrToMd5L32(password))) {
@@ -218,7 +200,6 @@ public class DalUserResource {
                     }
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
                 status.setInfo(e.getMessage());
             }
 
@@ -249,14 +230,13 @@ public class DalUserResource {
             }
 
             try {
-                LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
                 if (user != null && user.getUserNo().equals(userNo)) {
                     status.setInfo(userNumberExistMessage);
                     return status;
                 }
             } catch (Exception e) {
                 String message = e.getMessage() == null ? e.toString() : e.getMessage();
-                log.error(message);
                 status.setInfo(message);
                 return status;
             }
@@ -303,9 +283,8 @@ public class DalUserResource {
             user.setPassword(password);
 
             try {
-                int result = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+                int result = BeanGetter.getDaoOfLoginUser().insertUser(user);
                 if (result < 1) {
-                    log.error("用户创建失败");
                     status.setInfo("用户创建失败");
                     return status;
                 }
@@ -313,7 +292,6 @@ public class DalUserResource {
                 status = status.OK;
             } catch (Exception e) {
                 String message = e.getMessage() == null ? e.toString() : e.getMessage();
-                log.error(message);
                 status.setInfo(message);
                 return status;
             }
@@ -382,7 +360,7 @@ public class DalUserResource {
                 return result;
 
             String userNo = RequestUtil.getUserNo(request);
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             if (user != null) {
                 String pass = MD5Util.parseStrToMd5L32(password);
                 String userPass = user.getPassword();
@@ -412,7 +390,7 @@ public class DalUserResource {
                 LoginUser user = RequestUtil.getUserInfo(request);
                 String pass = MD5Util.parseStrToMd5L32(password);
                 user.setPassword(pass);
-                result = SpringBeanGetter.getDaoOfLoginUser().updateUserPassword(user) > 0;
+                result = BeanGetter.getDaoOfLoginUser().updateUserPassword(user) > 0;
             } catch (NullPointerException e) {
                 e.printStackTrace();
             }

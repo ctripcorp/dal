@@ -1,10 +1,10 @@
 package com.ctrip.platform.dal.daogen.host.csharp;
 
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -12,9 +12,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CsharpSpParamResultSetExtractor implements ResultSetExtractor<List<AbstractParameterHost>> {
+public class CsharpSpParamResultSetExtractor implements DalResultSetExtractor<List<AbstractParameterHost>> {
     @Override
-    public List<AbstractParameterHost> extractData(ResultSet rs) throws SQLException {
+    public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
         List<AbstractParameterHost> parameters = new ArrayList<>();
         while (rs.next()) {
             int paramMode = rs.getShort("COLUMN_TYPE");
@@ -24,7 +24,8 @@ public class CsharpSpParamResultSetExtractor implements ResultSetExtractor<List<
             }
 
             CSharpParameterHost host = new CSharpParameterHost();
-            DbType dbType = DbUtils.getDotNetDbType(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"), rs.getInt("LENGTH"), false, null);
+            DbType dbType = DbUtils.getDotNetDbType(rs.getString("TYPE_NAME"), rs.getInt("DATA_TYPE"),
+                    rs.getInt("LENGTH"), false, null);
             host.setDbType(dbType);
             host.setNullable(rs.getShort("NULLABLE") == DatabaseMetaData.columnNullable);
 

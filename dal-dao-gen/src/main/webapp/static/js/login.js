@@ -23,7 +23,7 @@
                     });
                 }
 
-                if (data.info == "!jdbc" || data.info == "!valid") {
+                if (data.info == "!valid") {
                     $("#setupDbModal").modal({
                         "backdrop": "static"
                     });
@@ -110,7 +110,7 @@
 
     function usingCurrentCatalog() {
         cblock($("body"));
-        $.post("/rest/setupDb/initializeJdbc", {
+        $.post("/rest/setupDb/initializeDal", {
             dbaddress: $("#setupdbaddress").val(),
             dbport: $("#setupdbport").val(),
             dbuser: $("#setupdbuser").val(),

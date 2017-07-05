@@ -25,31 +25,31 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
 
     @Column(name = "db_name")
     @Type(value = Types.VARCHAR)
-    private String dbName;
+    private String databaseSetName;
 
     @Column(name = "class_name")
     @Type(value = Types.VARCHAR)
-    private String className;
+    private String class_name;
 
     @Column(name = "pojo_name")
     @Type(value = Types.VARCHAR)
-    private String pojoName;
+    private String pojo_name;
 
     @Column(name = "method_name")
     @Type(value = Types.VARCHAR)
-    private String methodName;
+    private String method_name;
 
     @Column(name = "crud_type")
     @Type(value = Types.VARCHAR)
-    private String crudType;
+    private String crud_type;
 
     @Column(name = "sql_content")
     @Type(value = Types.LONGVARCHAR)
-    private String sqlContent;
+    private String sql_content;
 
     @Column(name = "project_id")
     @Type(value = Types.INTEGER)
-    private Integer projectId;
+    private Integer project_id;
 
     @Column(name = "parameters")
     @Type(value = Types.LONGVARCHAR)
@@ -65,11 +65,11 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
+    private Timestamp update_time;
 
     @Column(name = "comment")
     @Type(value = Types.LONGVARCHAR)
@@ -89,7 +89,7 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
 
     @Column(name = "sql_style")
     @Type(value = Types.VARCHAR)
-    private String sqlStyle;
+    private String sql_style;
 
     @Column(name = "approved")
     @Type(value = Types.INTEGER)
@@ -117,60 +117,60 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
         this.id = id;
     }
 
-    public String getDbName() {
-        return dbName;
+    public String getDatabaseSetName() {
+        return databaseSetName;
     }
 
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
+    public void setDatabaseSetName(String databaseSetName) {
+        this.databaseSetName = databaseSetName;
     }
 
-    public String getClassName() {
-        return className;
+    public String getClass_name() {
+        return class_name;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setClass_name(String class_name) {
+        this.class_name = class_name;
     }
 
-    public String getPojoName() {
-        return pojoName;
+    public String getPojo_name() {
+        return pojo_name;
     }
 
-    public void setPojoName(String pojoName) {
-        this.pojoName = pojoName;
+    public void setPojo_name(String pojo_name) {
+        this.pojo_name = pojo_name;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public String getMethod_name() {
+        return method_name;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public void setMethod_name(String method_name) {
+        this.method_name = method_name;
     }
 
-    public String getCrudType() {
-        return crudType;
+    public String getCrud_type() {
+        return crud_type;
     }
 
-    public void setCrudType(String crudType) {
-        this.crudType = crudType;
+    public void setCrud_type(String crud_type) {
+        this.crud_type = crud_type;
     }
 
-    public String getSqlContent() {
-        return sqlContent;
+    public String getSql_content() {
+        return sql_content;
     }
 
-    public void setSqlContent(String sqlContent) {
-        this.sqlContent = sqlContent;
+    public void setSql_content(String sql_content) {
+        this.sql_content = sql_content;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Integer getProject_id() {
+        return project_id;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject_id(Integer project_id) {
+        this.project_id = project_id;
     }
 
     public String getParameters() {
@@ -197,20 +197,20 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
         this.version = version;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
     public String getComment() {
@@ -245,12 +245,12 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
         this.pagination = pagination;
     }
 
-    public String getSqlStyle() {
-        return sqlStyle;
+    public String getSql_style() {
+        return sql_style;
     }
 
-    public void setSqlStyle(String sqlStyle) {
-        this.sqlStyle = sqlStyle;
+    public void setSql_style(String sql_style) {
+        this.sql_style = sql_style;
     }
 
     public Integer getApproved() {
@@ -307,11 +307,11 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
         if (result != 0)
             return result;
 
-        result = getClassName().compareTo(o.getClassName());
+        result = getClass_name().compareTo(o.getClass_name());
         if (result != 0)
             return result;
 
-        return getMethodName().compareTo(o.getMethodName());
+        return getMethod_name().compareTo(o.getMethod_name());
     }
 
 }

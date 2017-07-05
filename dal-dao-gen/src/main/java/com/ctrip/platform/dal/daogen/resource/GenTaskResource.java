@@ -20,7 +20,7 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.velocity.VelocityContext;
@@ -43,10 +43,9 @@ public class GenTaskResource {
     @Produces(MediaType.APPLICATION_JSON)
     public TaskAggeragation getTasks(@QueryParam("project_id") int id) throws SQLException {
         try {
-            List<GenTaskBySqlBuilder> autoTasks = SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(id);
-            List<GenTaskByTableViewSp> tableViewSpTasks =
-                    SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(id);
-            List<GenTaskByFreeSql> sqlTasks = SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(id);
+            List<GenTaskBySqlBuilder> autoTasks = BeanGetter.getDaoBySqlBuilder().getTasksByProjectId(id);
+            List<GenTaskByTableViewSp> tableViewSpTasks = BeanGetter.getDaoByTableViewSp().getTasksByProjectId(id);
+            List<GenTaskByFreeSql> sqlTasks = BeanGetter.getDaoByFreeSql().getTasksByProjectId(id);
             TaskAggeragation allTasks = new TaskAggeragation();
 
             if (autoTasks != null && autoTasks.size() > 0) {
@@ -76,16 +75,15 @@ public class GenTaskResource {
     public FreeSqlClassPojoNames getClassPojoNames(@QueryParam("project_id") int id,
             @QueryParam("db_name") String db_name) throws SQLException {
         try {
-            List<GenTaskByFreeSql> sqlTasks =
-                    SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(Integer.valueOf(id));
+            List<GenTaskByFreeSql> sqlTasks = BeanGetter.getDaoByFreeSql().getTasksByProjectId(Integer.valueOf(id));
             FreeSqlClassPojoNames result = new FreeSqlClassPojoNames();
             Set<String> clazz = new HashSet<>();
             Set<String> pojos = new HashSet<>();
 
             for (GenTaskByFreeSql freesql : sqlTasks) {
-                if (freesql.getDbName().trim().equals(db_name.trim())) {
-                    clazz.add(freesql.getClassName());
-                    pojos.add(freesql.getPojoName());
+                if (freesql.getDatabaseSetName().trim().equals(db_name.trim())) {
+                    clazz.add(freesql.getClass_name());
+                    pojos.add(freesql.getPojo_name());
                 }
             }
 
@@ -109,11 +107,11 @@ public class GenTaskResource {
             Status status = Status.ERROR;
             daoName = daoName.replaceAll("_", "");
             List<GenTaskByTableViewSp> tableViewSpTasks =
-                    SpringBeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
+                    BeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
             List<GenTaskBySqlBuilder> autoTasks =
-                    SpringBeanGetter.getDaoBySqlBuilder().getTasksByProjectId(Integer.valueOf(project_id));
+                    BeanGetter.getDaoBySqlBuilder().getTasksByProjectId(Integer.valueOf(project_id));
             List<GenTaskByFreeSql> sqlTasks =
-                    SpringBeanGetter.getDaoByFreeSql().getTasksByProjectId(Integer.valueOf(project_id));
+                    BeanGetter.getDaoByFreeSql().getTasksByProjectId(Integer.valueOf(project_id));
 
             // 在同一个project中，不同数据库下面不能存在相同的表名或者Dao类名
             if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
@@ -125,15 +123,15 @@ public class GenTaskResource {
                         if (name.indexOf(prefix) == 0)
                             name = name.replaceFirst(prefix, "");
                         name = name + suffix;
-                        String[] existTableName = task.getTableNames().replaceAll("_", "").split(",");
+                        String[] existTableName = task.getTable_names().replaceAll("_", "").split(",");
                         for (String tableName : existTableName) {
                             if (tableName.indexOf(task.getPrefix()) == 0)
                                 tableName = tableName.replaceFirst(task.getPrefix(), "");
                             String existDaoName = tableName + task.getSuffix();
                             if (existDaoName.equalsIgnoreCase(name)
-                                    && !task.getDbName().equalsIgnoreCase(db_set_name)) {
-                                status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名或者DAO类名.<br/>" + "逻辑数据库" + task.getDbName()
-                                        + "下已经存在名为" + name + "的DAO.");
+                                    && !task.getDatabaseSetName().equalsIgnoreCase(db_set_name)) {
+                                status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名或者DAO类名.<br/>" + "逻辑数据库"
+                                        + task.getDatabaseSetName() + "下已经存在名为" + name + "的DAO.");
                                 return status;
                             }
                         }
@@ -145,12 +143,12 @@ public class GenTaskResource {
                 for (GenTaskBySqlBuilder task : autoTasks) {
                     if ("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)// 修改操作，过滤掉修改的当前记录
                         continue;
-                    String existBuildSqlTableName = task.getTableName().replaceAll("_", "");
+                    String existBuildSqlTableName = task.getTable_name().replaceAll("_", "");
                     String existBuildSqlDaoName = existBuildSqlTableName;
 
                     if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
                         for (GenTaskByTableViewSp tableTask : tableViewSpTasks) {
-                            String[] tableNames = tableTask.getTableNames().replaceAll("_", "").split(",");
+                            String[] tableNames = tableTask.getTable_names().replaceAll("_", "").split(",");
                             for (String tableName : tableNames) {
                                 if (tableName.equalsIgnoreCase(existBuildSqlTableName)) {
                                     if (tableName.indexOf(tableTask.getPrefix()) == 0)
@@ -164,9 +162,9 @@ public class GenTaskResource {
                     }
 
                     if (existBuildSqlDaoName.equalsIgnoreCase(daoName)
-                            && !task.getDbName().equalsIgnoreCase(db_set_name)) {
-                        status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名.<br/>" + "逻辑数据库" + task.getDbName() + "下已经存在名为"
-                                + daoName + "的DAO.");
+                            && !task.getDatabaseSetName().equalsIgnoreCase(db_set_name)) {
+                        status.setInfo("在同一个project中，不同数据库下面不能定义相同的表名.<br/>" + "逻辑数据库" + task.getDatabaseSetName()
+                                + "下已经存在名为" + daoName + "的DAO.");
                         return status;
                     }
                 }
@@ -176,10 +174,10 @@ public class GenTaskResource {
                 for (GenTaskByFreeSql task : sqlTasks) {
                     if ("1".equalsIgnoreCase(is_update) && task.getId() == dao_id)// 修改操作，过滤掉修改的当前记录
                         continue;
-                    if (task.getClassName().equalsIgnoreCase(daoName)
-                            && !task.getDbName().equalsIgnoreCase(db_set_name)) {
-                        status.setInfo("在同一个project中，不同数据库下面不能定义相同的DAO类名.<br/>" + "逻辑数据库" + task.getDbName() + "下已经存在名为"
-                                + daoName + "的DAO.");
+                    if (task.getClass_name().equalsIgnoreCase(daoName)
+                            && !task.getDatabaseSetName().equalsIgnoreCase(db_set_name)) {
+                        status.setInfo("在同一个project中，不同数据库下面不能定义相同的DAO类名.<br/>" + "逻辑数据库" + task.getDatabaseSetName()
+                                + "下已经存在名为" + daoName + "的DAO.");
                         return status;
                     }
                 }
@@ -201,7 +199,7 @@ public class GenTaskResource {
             @FormParam("taskType") String taskType, @FormParam("userId") int userId) throws Exception {
         try {
             Status status = Status.ERROR;
-            LoginUser approver = SpringBeanGetter.getDaoOfLoginUser().getUserById(userId);
+            LoginUser approver = BeanGetter.getDaoOfLoginUser().getUserById(userId);
             if (approver == null) {
                 return status;
             }
@@ -220,34 +218,34 @@ public class GenTaskResource {
             List<GenTaskByFreeSql> sqlTasks = new ArrayList<>();
 
             String userNo = RequestUtil.getUserNo(request);
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
             ApproveTask at = new ApproveTask();
-            at.setApproveUserId(approver.getId());
-            at.setCreateUserId(user.getId());
-            at.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            at.setApprove_user_id(approver.getId());
+            at.setCreate_user_id(user.getId());
+            at.setCreate_time(new Timestamp(System.currentTimeMillis()));
 
             for (int i = 0; i < taskIds.length; i++) {
                 int id = Integer.parseInt(taskIds[i]);
                 String type = taskTypes[i].trim();
                 if ("table_view_sp".equalsIgnoreCase(type)) {
-                    GenTaskByTableViewSp task = SpringBeanGetter.getDaoByTableViewSp().getTasksByTaskId(id);
+                    GenTaskByTableViewSp task = BeanGetter.getDaoByTableViewSp().getTasksByTaskId(id);
                     tableViewSpTasks.add(task);
-                    at.setTaskId(task.getId());
-                    at.setTaskType("table_view_sp");
-                    SpringBeanGetter.getApproveTaskDao().insertApproveTask(at);
+                    at.setTask_id(task.getId());
+                    at.setTask_type("table_view_sp");
+                    BeanGetter.getApproveTaskDao().insertApproveTask(at);
                 } else if ("auto".equalsIgnoreCase(type)) {
-                    GenTaskBySqlBuilder task = SpringBeanGetter.getDaoBySqlBuilder().getTasksByTaskId(id);
+                    GenTaskBySqlBuilder task = BeanGetter.getDaoBySqlBuilder().getTasksByTaskId(id);
                     autoTasks.add(task);
-                    at.setTaskId(task.getId());
-                    at.setTaskType("auto");
-                    SpringBeanGetter.getApproveTaskDao().insertApproveTask(at);
+                    at.setTask_id(task.getId());
+                    at.setTask_type("auto");
+                    BeanGetter.getApproveTaskDao().insertApproveTask(at);
                 } else if ("sql".equalsIgnoreCase(type)) {
-                    GenTaskByFreeSql task = SpringBeanGetter.getDaoByFreeSql().getTasksByTaskId(id);
+                    GenTaskByFreeSql task = BeanGetter.getDaoByFreeSql().getTasksByTaskId(id);
                     sqlTasks.add(task);
-                    at.setTaskId(task.getId());
-                    at.setTaskType("sql");
-                    SpringBeanGetter.getApproveTaskDao().insertApproveTask(at);
+                    at.setTask_id(task.getId());
+                    at.setTask_type("sql");
+                    BeanGetter.getApproveTaskDao().insertApproveTask(at);
                 }
             }
 
@@ -295,7 +293,7 @@ public class GenTaskResource {
             @QueryParam("approveMsg") String approveMsg) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             if (user == null) {
                 return "please login fisrt.";
             }
@@ -310,24 +308,24 @@ public class GenTaskResource {
             List<GenTaskByFreeSql> sqlTasks = new ArrayList<>();
 
             if ("table_view_sp".equalsIgnoreCase(taskType)) {
-                SpringBeanGetter.getDaoByTableViewSp().updateTask(taskId, approveFlag, approveMsg);
-                SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
-                tableViewSpTasks.add(SpringBeanGetter.getDaoByTableViewSp().getTasksByTaskId(taskId));
+                BeanGetter.getDaoByTableViewSp().updateTask(taskId, approveFlag, approveMsg);
+                BeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+                tableViewSpTasks.add(BeanGetter.getDaoByTableViewSp().getTasksByTaskId(taskId));
             } else if ("auto".equalsIgnoreCase(taskType)) {
-                SpringBeanGetter.getDaoBySqlBuilder().updateTask(taskId, approveFlag, approveMsg);
-                SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
-                autoTasks.add(SpringBeanGetter.getDaoBySqlBuilder().getTasksByTaskId(taskId));
+                BeanGetter.getDaoBySqlBuilder().updateTask(taskId, approveFlag, approveMsg);
+                BeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+                autoTasks.add(BeanGetter.getDaoBySqlBuilder().getTasksByTaskId(taskId));
             } else if ("sql".equalsIgnoreCase(taskType)) {
-                SpringBeanGetter.getDaoByFreeSql().updateTask(taskId, approveFlag, approveMsg);
-                SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
-                sqlTasks.add(SpringBeanGetter.getDaoByFreeSql().getTasksByTaskId(taskId));
+                BeanGetter.getDaoByFreeSql().updateTask(taskId, approveFlag, approveMsg);
+                BeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+                sqlTasks.add(BeanGetter.getDaoByFreeSql().getTasksByTaskId(taskId));
             }
 
             java.util.Collections.sort(tableViewSpTasks);
             java.util.Collections.sort(autoTasks);
             java.util.Collections.sort(sqlTasks);
 
-            LoginUser noticeUsr = SpringBeanGetter.getDaoOfLoginUser().getUserById(task.getCreateUserId());
+            LoginUser noticeUsr = BeanGetter.getDaoOfLoginUser().getUserById(task.getCreate_user_id());
 
             VelocityContext context = GenUtils.buildDefaultVelocityContext();
             context.put("standardDao", tableViewSpTasks);
@@ -375,7 +373,7 @@ public class GenTaskResource {
         try {
             Status status = Status.ERROR;
             String userNo = RequestUtil.getUserNo(request);
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             if (user == null) {
                 status.setInfo("please login fisrt.");
                 return status;
@@ -392,24 +390,24 @@ public class GenTaskResource {
             List<GenTaskByFreeSql> sqlTasks = new ArrayList<>();
 
             if ("table_view_sp".equalsIgnoreCase(taskType)) {
-                SpringBeanGetter.getDaoByTableViewSp().updateTask(taskId, approveFlag, approveMsg);
-                SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
-                tableViewSpTasks.add(SpringBeanGetter.getDaoByTableViewSp().getTasksByTaskId(taskId));
+                BeanGetter.getDaoByTableViewSp().updateTask(taskId, approveFlag, approveMsg);
+                BeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+                tableViewSpTasks.add(BeanGetter.getDaoByTableViewSp().getTasksByTaskId(taskId));
             } else if ("auto".equalsIgnoreCase(taskType)) {
-                SpringBeanGetter.getDaoBySqlBuilder().updateTask(taskId, approveFlag, approveMsg);
-                SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
-                autoTasks.add(SpringBeanGetter.getDaoBySqlBuilder().getTasksByTaskId(taskId));
+                BeanGetter.getDaoBySqlBuilder().updateTask(taskId, approveFlag, approveMsg);
+                BeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+                autoTasks.add(BeanGetter.getDaoBySqlBuilder().getTasksByTaskId(taskId));
             } else if ("sql".equalsIgnoreCase(taskType)) {
-                SpringBeanGetter.getDaoByFreeSql().updateTask(taskId, approveFlag, approveMsg);
-                SpringBeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
-                sqlTasks.add(SpringBeanGetter.getDaoByFreeSql().getTasksByTaskId(taskId));
+                BeanGetter.getDaoByFreeSql().updateTask(taskId, approveFlag, approveMsg);
+                BeanGetter.getApproveTaskDao().deleteApproveTaskByTaskIdAndType(taskId, taskType);
+                sqlTasks.add(BeanGetter.getDaoByFreeSql().getTasksByTaskId(taskId));
             }
 
             java.util.Collections.sort(tableViewSpTasks);
             java.util.Collections.sort(autoTasks);
             java.util.Collections.sort(sqlTasks);
 
-            LoginUser noticeUsr = SpringBeanGetter.getDaoOfLoginUser().getUserById(task.getCreateUserId());
+            LoginUser noticeUsr = BeanGetter.getDaoOfLoginUser().getUserById(task.getCreate_user_id());
 
             VelocityContext context = GenUtils.buildDefaultVelocityContext();
             context.put("standardDao", tableViewSpTasks);
@@ -451,11 +449,11 @@ public class GenTaskResource {
     }
 
     private ApproveTask haveApprovePermision(int approverId, int taskId, String taskType) throws SQLException {
-        List<ApproveTask> list = SpringBeanGetter.getApproveTaskDao().getAllApproveTaskByApproverId(approverId);
+        List<ApproveTask> list = BeanGetter.getApproveTaskDao().getAllApproveTaskByApproverId(approverId);
         Iterator<ApproveTask> ite = list.iterator();
         while (ite.hasNext()) {
             ApproveTask task = ite.next();
-            if (taskId == task.getTaskId() && task.getTaskType().equalsIgnoreCase(taskType)) {
+            if (taskId == task.getTask_id() && task.getTask_type().equalsIgnoreCase(taskType)) {
                 return task;
             }
         }
@@ -469,13 +467,13 @@ public class GenTaskResource {
             throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
-            List<ApproveTask> result = SpringBeanGetter.getApproveTaskDao().getAllApproveTaskByApproverId(user.getId());
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            List<ApproveTask> result = BeanGetter.getApproveTaskDao().getAllApproveTaskByApproverId(user.getId());
             Iterator<ApproveTask> ite = result.iterator();
             while (ite.hasNext()) {
                 ApproveTask task = ite.next();
                 String create_user_name =
-                        SpringBeanGetter.getDaoOfLoginUser().getUserById(task.getCreateUserId()).getUserName();
+                        BeanGetter.getDaoOfLoginUser().getUserById(task.getCreate_user_id()).getUserName();
                 task.setCreate_user_name(create_user_name);
             }
             return result;
@@ -494,13 +492,13 @@ public class GenTaskResource {
             int id = Integer.parseInt(taskId);
             List<ApproveTaskDetail> detail = null;
             if ("table_view_sp".equalsIgnoreCase(taskType)) {
-                GenTaskByTableViewSp task = SpringBeanGetter.getDaoByTableViewSp().getTasksByTaskId(id);
+                GenTaskByTableViewSp task = BeanGetter.getDaoByTableViewSp().getTasksByTaskId(id);
                 detail = buildStandardTaskDetail(task);
             } else if ("auto".equalsIgnoreCase(taskType)) {
-                GenTaskBySqlBuilder task = SpringBeanGetter.getDaoBySqlBuilder().getTasksByTaskId(id);
+                GenTaskBySqlBuilder task = BeanGetter.getDaoBySqlBuilder().getTasksByTaskId(id);
                 detail = buildAutoTaskDetail(task);
             } else if ("sql".equalsIgnoreCase(taskType)) {
-                GenTaskByFreeSql task = SpringBeanGetter.getDaoByFreeSql().getTasksByTaskId(id);
+                GenTaskByFreeSql task = BeanGetter.getDaoByFreeSql().getTasksByTaskId(id);
                 detail = buildFreesqlTaskDetail(task);
             }
 
@@ -513,41 +511,41 @@ public class GenTaskResource {
 
     private List<ApproveTaskDetail> buildStandardTaskDetail(GenTaskByTableViewSp task) {
         List<ApproveTaskDetail> detail = new ArrayList<>();
-        detail.add(createOneAttr("Database Set Name:", task.getDbName()));
-        detail.add(createOneAttr("All Select Table:", task.getTableNames()));
-        if (task.getViewNames() != null && !task.getViewNames().isEmpty()) {
-            detail.add(createOneAttr("All Select View:", task.getViewNames()));
+        detail.add(createOneAttr("Database Set Name:", task.getDatabaseSetName()));
+        detail.add(createOneAttr("All Select Table:", task.getTable_names()));
+        if (task.getView_names() != null && !task.getView_names().isEmpty()) {
+            detail.add(createOneAttr("All Select View:", task.getView_names()));
         }
-        if (task.getSpNames() != null && !task.getSpNames().isEmpty()) {
-            detail.add(createOneAttr("All Select SP:", task.getSpNames()));
+        if (task.getSp_names() != null && !task.getSp_names().isEmpty()) {
+            detail.add(createOneAttr("All Select SP:", task.getSp_names()));
         }
         detail.add(createOneAttr("Have Pagination Fun:", String.valueOf(task.getPagination())));
         detail.add(createOneAttr("Comment:", task.getComment()));
-        detail.add(createOneAttr("SQL Style:", task.getSqlStyle()));
+        detail.add(createOneAttr("SQL Style:", task.getSql_style()));
         StringBuilder funs = new StringBuilder();
-        if (task.getApiList() != null && !task.getApiList().isEmpty()) {
-            String api_list = task.getApiList().replaceAll("dal_api_", "");
+        if (task.getApi_list() != null && !task.getApi_list().isEmpty()) {
+            String api_list = task.getApi_list().replaceAll("dal_api_", "");
             String[] apis = api_list.split(",");
             for (int i = 0; i < apis.length; i++) {
                 try {
-                    DalApi api = SpringBeanGetter.getDalApiDao().getDalApiById(Integer.parseInt(apis[i]));
-                    funs.append(api.getMethodDescription()).append("<br/><br/>");
+                    DalApi api = BeanGetter.getDalApiDao().getDalApiById(Integer.parseInt(apis[i]));
+                    funs.append(api.getMethod_description()).append("<br/><br/>");
                 } catch (Exception e) {
                 }
             }
         }
         detail.add(createOneAttr("All Select Method:", funs.toString()));
-        detail.add(createOneAttr("Last Update User:", task.getUpdateUserNo()));
+        detail.add(createOneAttr("Last Update User:", task.getUpdate_user_no()));
         detail.add(createOneAttr("Last Update Time:", task.getStr_update_time()));
         return detail;
     }
 
     private List<ApproveTaskDetail> buildAutoTaskDetail(GenTaskBySqlBuilder task) {
         List<ApproveTaskDetail> detail = new ArrayList<>();
-        detail.add(createOneAttr("Database Set Name:", task.getDbName()));
-        detail.add(createOneAttr("Select Table:", task.getTableName()));
-        detail.add(createOneAttr("SQL Style:", task.getSqlStyle()));
-        String sql = task.getSqlContent();
+        detail.add(createOneAttr("Database Set Name:", task.getDatabaseSetName()));
+        detail.add(createOneAttr("Select Table:", task.getTable_name()));
+        detail.add(createOneAttr("SQL Style:", task.getSql_style()));
+        String sql = task.getSql_content();
         if (sql.length() > 200) {
             sql = sql.replaceAll(",", "  <br/><br/>, ");
             sql = sql.replaceAll("(?i)from", "<br/><br/>from");
@@ -555,18 +553,18 @@ public class GenTaskResource {
             sql = sql.replaceAll("(?i)and", "<br/><br/>	and");
         }
         detail.add(createOneAttr("SQL Preview:", sql));
-        detail.add(createOneAttr("Method Name:", task.getMethodName()));
+        detail.add(createOneAttr("Method Name:", task.getMethod_name()));
         detail.add(createOneAttr("Method Param:", buildAutoTaskMethodParam(task)));
-        detail.add(createOneAttr("Last Update User:", task.getUpdateUserNo()));
+        detail.add(createOneAttr("Last Update User:", task.getUpdate_user_no()));
         detail.add(createOneAttr("Last Update Time:", task.getStr_update_time()));
         return detail;
     }
 
     private List<ApproveTaskDetail> buildFreesqlTaskDetail(GenTaskByFreeSql task) {
         List<ApproveTaskDetail> detail = new ArrayList<>();
-        detail.add(createOneAttr("Database Set Name:", task.getDbName()));
-        detail.add(createOneAttr("SQL Style:", task.getSqlStyle()));
-        String sql = task.getSqlContent();
+        detail.add(createOneAttr("Database Set Name:", task.getDatabaseSetName()));
+        detail.add(createOneAttr("SQL Style:", task.getSql_style()));
+        String sql = task.getSql_content();
         if (sql.length() > 200) {
             sql = sql.replaceAll(",", "  <br/><br/>, ");
             sql = sql.replaceAll("(?i)from", "<br/><br/>from");
@@ -574,9 +572,9 @@ public class GenTaskResource {
             sql = sql.replaceAll("(?i)and", "<br/><br/>	and");
         }
         detail.add(createOneAttr("SQL Preview:", sql));
-        detail.add(createOneAttr("Method Name:", task.getMethodName()));
+        detail.add(createOneAttr("Method Name:", task.getMethod_name()));
         detail.add(createOneAttr("Method Param:", buildFreesqlTaskMethodParam(task)));
-        detail.add(createOneAttr("Last Update User:", task.getUpdateUserNo()));
+        detail.add(createOneAttr("Last Update User:", task.getUpdate_user_no()));
         detail.add(createOneAttr("Last Update Time:", task.getStr_update_time()));
         return detail;
     }
@@ -591,9 +589,9 @@ public class GenTaskResource {
             DalGenerator generator = null;
             CodeGenContext context = null;
             Progress progress = new Progress();
-            if ("java".equalsIgnoreCase(task.getSqlStyle())) {
+            if ("java".equalsIgnoreCase(task.getSql_style())) {
                 generator = new JavaDalGenerator();
-                context = generator.createContext(task.getProjectId(), true, progress, true, true);
+                context = generator.createContext(task.getProject_id(), true, progress, true, true);
                 generator.prepareData(context);
                 JavaCodeGenContext ctx = (JavaCodeGenContext) context;
                 Queue<JavaTableHost> tableHosts = ctx.getTableHosts();
@@ -601,7 +599,7 @@ public class GenTaskResource {
                 while ((tableHost = tableHosts.poll()) != null) {
                     List<JavaMethodHost> methods = tableHost.getMethods();
                     for (JavaMethodHost method : methods) {
-                        if (task.getMethodName().equalsIgnoreCase(method.getName())) {
+                        if (task.getMethod_name().equalsIgnoreCase(method.getName())) {
                             String param = method.getParameterDeclaration();
                             param = param.replaceAll("<", "&lt;");
                             param = param.replaceAll(">", "&gt;");
@@ -611,7 +609,7 @@ public class GenTaskResource {
                 }
             } else {
                 generator = new CSharpDalGenerator();
-                context = generator.createContext(task.getProjectId(), true, progress, true, true);
+                context = generator.createContext(task.getProject_id(), true, progress, true, true);
                 generator.prepareData(context);
                 CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
                 Queue<CSharpTableHost> tableHosts = ctx.getTableViewHosts();
@@ -619,7 +617,7 @@ public class GenTaskResource {
                 while ((tableHost = tableHosts.poll()) != null) {
                     List<CSharpMethodHost> methods = tableHost.getExtraMethods();
                     for (CSharpMethodHost method : methods) {
-                        if (task.getMethodName().equalsIgnoreCase(method.getName())) {
+                        if (task.getMethod_name().equalsIgnoreCase(method.getName())) {
                             String param = method.getParameterDeclaration();
                             param = param.replaceAll("<", "&lt;");
                             param = param.replaceAll(">", "&gt;");
@@ -639,9 +637,9 @@ public class GenTaskResource {
             DalGenerator generator = null;
             CodeGenContext context = null;
             Progress progress = new Progress();
-            if ("java".equalsIgnoreCase(task.getSqlStyle())) {
+            if ("java".equalsIgnoreCase(task.getSql_style())) {
                 generator = new JavaDalGenerator();
-                context = generator.createContext(task.getProjectId(), true, progress, true, true);
+                context = generator.createContext(task.getProject_id(), true, progress, true, true);
                 generator.prepareData(context);
                 JavaCodeGenContext ctx = (JavaCodeGenContext) context;
                 Queue<FreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
@@ -649,7 +647,7 @@ public class GenTaskResource {
                 while ((freeSqlHost = freeSqlHosts.poll()) != null) {
                     List<JavaMethodHost> methods = freeSqlHost.getMethods();
                     for (JavaMethodHost method : methods) {
-                        if (task.getMethodName().equalsIgnoreCase(method.getName())) {
+                        if (task.getMethod_name().equalsIgnoreCase(method.getName())) {
                             String param = method.getParameterDeclaration();
                             param = param.replaceAll("<", "&lt;");
                             param = param.replaceAll(">", "&gt;");
@@ -659,7 +657,7 @@ public class GenTaskResource {
                 }
             } else {
                 generator = new CSharpDalGenerator();
-                context = generator.createContext(task.getProjectId(), true, progress, true, true);
+                context = generator.createContext(task.getProject_id(), true, progress, true, true);
                 generator.prepareData(context);
                 CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
                 Queue<CSharpFreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
@@ -667,7 +665,7 @@ public class GenTaskResource {
                 while ((freeSqlHost = freeSqlHosts.poll()) != null) {
                     List<CSharpMethodHost> methods = freeSqlHost.getMethods();
                     for (CSharpMethodHost method : methods) {
-                        if (task.getMethodName().equalsIgnoreCase(method.getName())) {
+                        if (task.getMethod_name().equalsIgnoreCase(method.getName())) {
                             String param = method.getParameterDeclaration();
                             param = param.replaceAll("<", "&lt;");
                             param = param.replaceAll(">", "&gt;");

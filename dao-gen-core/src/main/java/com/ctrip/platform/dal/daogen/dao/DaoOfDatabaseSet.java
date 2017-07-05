@@ -51,7 +51,7 @@ public class DaoOfDatabaseSet {
         int i = 1;
         parameters.set(i++, "name", Types.VARCHAR, name);
         builder.mapWith(databaseSetRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<DatabaseSet> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -65,7 +65,7 @@ public class DaoOfDatabaseSet {
         int i = 1;
         parameters.set(i++, "groupId", Types.INTEGER, groupId);
         builder.mapWith(databaseSetRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<DatabaseSet> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -81,7 +81,9 @@ public class DaoOfDatabaseSet {
     }
 
     private void processDatabaseSet(DatabaseSet entity) throws SQLException {
-        Date date = new Date(entity.getUpdateTime().getTime());
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
         entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
@@ -93,7 +95,7 @@ public class DaoOfDatabaseSet {
         int i = 1;
         parameters.set(i++, "databaseSet_Id", Types.INTEGER, databaseSet_Id);
         builder.mapWith(databaseSetEntryRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<DatabaseSetEntry> list = queryDao.query(builder, parameters, hints);
         processEntryList(list);
         return list;
@@ -109,7 +111,7 @@ public class DaoOfDatabaseSet {
         int i = 1;
         parameters.set(i++, "name", Types.VARCHAR, dbName);
         builder.mapWith(databaseSetEntryRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         DatabaseSetEntry entry = queryDao.query(builder, parameters, hints);
         processDatabaseSetEntry(entry);
         return entry;
@@ -125,7 +127,11 @@ public class DaoOfDatabaseSet {
     }
 
     private void processDatabaseSetEntry(DatabaseSetEntry entity) throws SQLException {
-        Date date = new Date(entity.getUpdateTime().getTime());
+        if (entity == null)
+            return;
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
         entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 

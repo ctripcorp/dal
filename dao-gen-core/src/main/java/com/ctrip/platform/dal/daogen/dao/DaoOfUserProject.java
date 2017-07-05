@@ -31,7 +31,7 @@ public class DaoOfUserProject {
         int i = 1;
         parameters.set(i++, "user_no", Types.VARCHAR, userNo);
         builder.mapWith(userProjectRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -43,7 +43,7 @@ public class DaoOfUserProject {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, project_id);
         builder.mapWith(userProjectRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 

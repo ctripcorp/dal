@@ -39,7 +39,7 @@ public class ApproveTaskDao {
         int i = 1;
         parameters.set(i++, "approve_user_id", Types.INTEGER, approverId);
         builder.mapWith(approveTaskRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<ApproveTask> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -49,7 +49,7 @@ public class ApproveTaskDao {
         if (list == null || list.size() == 0)
             return;
         for (ApproveTask entity : list) {
-            Date date = new Date(entity.getCreateTime().getTime());
+            Date date = new Date(entity.getCreate_time().getTime());
             entity.setStr_create_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         }
     }

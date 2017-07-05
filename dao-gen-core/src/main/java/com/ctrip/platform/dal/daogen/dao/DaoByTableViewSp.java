@@ -43,10 +43,6 @@ public class DaoByTableViewSp {
     }
 
     private void processGenTaskByTableViewSp(GenTaskByTableViewSp entity) throws SQLException {
-        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDbName()));
-        Date date = new Date(entity.getUpdateTime().getTime());
-        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-
         if (entity.getApproved() == 1) {
             entity.setStr_approved("未审批");
         } else if (entity.getApproved() == 2) {
@@ -56,6 +52,13 @@ public class DaoByTableViewSp {
         } else {
             entity.setStr_approved("通过");
         }
+
+        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
     public int getVersionById(int id) throws SQLException {
@@ -83,7 +86,7 @@ public class DaoByTableViewSp {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, projectId);
         builder.mapWith(genTaskByTableViewSpRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<GenTaskByTableViewSp> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -127,7 +130,7 @@ public class DaoByTableViewSp {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, projectId);
         builder.mapWith(genTaskByTableViewSpRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<GenTaskByTableViewSp> list = queryDao.query(builder, parameters, hints);
         List<GenTaskByTableViewSp> result = new ArrayList<>();
         if (list == null || list.size() == 0)
@@ -160,21 +163,21 @@ public class DaoByTableViewSp {
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;
-        parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
-        parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
-        parameters.set(i++, "table_names", Types.LONGVARCHAR, task.getTableNames());
-        parameters.set(i++, "view_names", Types.LONGVARCHAR, task.getViewNames());
-        parameters.set(i++, "sp_names", Types.LONGVARCHAR, task.getSpNames());
+        parameters.set(i++, "project_id", Types.INTEGER, task.getProject_id());
+        parameters.set(i++, "db_name", Types.VARCHAR, task.getDatabaseSetName());
+        parameters.set(i++, "table_names", Types.LONGVARCHAR, task.getTable_names());
+        parameters.set(i++, "view_names", Types.LONGVARCHAR, task.getView_names());
+        parameters.set(i++, "sp_names", Types.LONGVARCHAR, task.getSp_names());
         parameters.set(i++, "prefix", Types.VARCHAR, task.getPrefix());
         parameters.set(i++, "suffix", Types.VARCHAR, task.getSuffix());
-        parameters.set(i++, "cud_by_sp", Types.BIT, task.getCudBySp());
+        parameters.set(i++, "cud_by_sp", Types.BIT, task.getCud_by_sp());
         parameters.set(i++, "pagination", Types.BIT, task.getPagination());
         parameters.set(i++, "generated", Types.BIT, task.getGenerated());
-        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdateUserNo());
-        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdateTime());
+        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdate_user_no());
+        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdate_time());
         parameters.set(i++, "comment", Types.LONGVARCHAR, task.getComment());
-        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSqlStyle());
-        parameters.set(i++, "api_list", Types.LONGVARCHAR, task.getApiList());
+        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSql_style());
+        parameters.set(i++, "api_list", Types.LONGVARCHAR, task.getApi_list());
         parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
         parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
         parameters.set(i++, "id", Types.INTEGER, task.getId());

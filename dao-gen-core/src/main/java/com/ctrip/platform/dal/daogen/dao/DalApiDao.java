@@ -42,7 +42,7 @@ public class DalApiDao {
         parameters.set(i++, "language", Types.VARCHAR, language);
         parameters.set(i++, "db_type", Types.VARCHAR, db_type);
         builder.mapWith(dalApiRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 

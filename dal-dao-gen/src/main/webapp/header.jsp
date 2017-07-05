@@ -1,5 +1,4 @@
 <%@page pageEncoding="UTF-8" %>
-<%@page import="com.ctrip.platform.dal.daogen.resource.CustomizedResource" %>
 <%@page import="com.ctrip.platform.dal.daogen.Consts" %>
 <%@page import="com.ctrip.platform.dal.daogen.utils.Configuration" %>
 <%

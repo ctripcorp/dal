@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
@@ -10,9 +11,14 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.utils.DataSourceUtil;
 import com.ctrip.platform.dal.daogen.utils.MD5Util;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.ResourceUtils;
+import com.ctrip.platform.dal.daogen.utils.XmlUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.jdbc.support.JdbcUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.XMLWriter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -26,7 +32,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.Properties;
+import java.util.List;
 import java.util.Set;
 
 @Resource
@@ -37,17 +43,21 @@ public class SetupDBResource {
     private static ClassLoader classLoader = null;
     private static ObjectMapper mapper = new ObjectMapper();
 
-    private static final java.lang.String WEB_XML = "web.xml";
-    private static final String JDBC_PROPERTIES = "jdbc.properties";
-    private static final String JDBC_DRIVER_CLASS_NAME = "jdbc.driverClassName";
-    private static final String JDBC_URL = "jdbc.url";
-    private static final String JDBC_USERNAME = "jdbc.username";
-    private static final String JDBC_PASSWORD = "jdbc.password";
+    private static final String LOGIC_DBNAME = "dao";
+    private static final String WEB_XML = "web.xml";
+    private static final String DATASOURCE_XML = "datasource.xml";
+    private static final String DATASOURCE = "Datasource";
+    private static final String DATASOURCE_NAME = "name";
+    private static final String DATASOURCE_USERNAME = "userName";
+    private static final String DATASOURCE_PASSWORD = "password";
+    private static final String DATASOURCE_CONNECTION_URL = "connectionUrl";
+    private static final String DATASOURCE_DRIVER_CLASS = "driverClassName";
+    private static final String DATASOURCE_MYSQL_DRIVER = "com.mysql.jdbc.Driver";
     private String jdbcUrlTemplate = "jdbc:mysql://%s:%s/%s";
     private static final String SCRIPT_FILE = "script.sql";
     private static final String CREATE_TABLE = "CREATE TABLE";
     private static boolean initialized = false;
-    private static Boolean jdbcInitialized = null;
+    private static Boolean dalInitialized = null;
 
     static {
         synchronized (LOCK) {
@@ -58,12 +68,12 @@ public class SetupDBResource {
         }
     }
 
-    public static boolean isJdbcInitialized() {
-        if (jdbcInitialized == null) {
+    public static boolean isDalInitialized() {
+        if (dalInitialized == null) {
             synchronized (LOCK) {
-                if (jdbcInitialized == null) {
+                if (dalInitialized == null) {
                     try {
-                        jdbcInitialized = resourceExists(JDBC_PROPERTIES) & jdbcPropertiesValid();
+                        dalInitialized = resourceExists(DATASOURCE_XML);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -71,7 +81,7 @@ public class SetupDBResource {
             }
         }
 
-        return jdbcInitialized.booleanValue();
+        return dalInitialized.booleanValue();
     }
 
     @GET
@@ -85,30 +95,21 @@ public class SetupDBResource {
         }
 
         try {
-            boolean result = resourceExists(JDBC_PROPERTIES);
-            if (result) {
-                boolean valid = jdbcPropertiesValid();
-                if (!valid) {
-                    result = false;
-                    status = Status.ERROR;
-                    status.setInfo("!valid");
-                }
-            } else {
-                result = false;
+            boolean valid = datasourceXmlValid();
+            if (!valid) {
                 status = Status.ERROR;
-                status.setInfo("!jdbc");
+                status.setInfo("!valid");
             }
 
-            if (result && !initialized) {
+            if (valid && !initialized) {
                 synchronized (LOCK) {
                     if (!initialized) {
                         initialized = true;
-                        jdbcInitialized = true;
+                        dalInitialized = true;
                     }
                 }
 
                 status.setInfo("initialized");
-                initializeConfig();
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -127,13 +128,12 @@ public class SetupDBResource {
         Status status = Status.ERROR;
 
         try {
-            boolean jdbcInitialized = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
-            if (jdbcInitialized) {
+            boolean initialized = initializeDatasourceXml(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
+            if (initialized) {
                 boolean result = tableConsistent(dbcatalog);
                 if (result) {
                     status = Status.OK;
                 }
-                boolean flag = clearJdbcProperties();
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -146,13 +146,13 @@ public class SetupDBResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("initializeJdbc")
-    public Status initializeJdbc(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+    @Path("initializeDal")
+    public Status initializeDal(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
             @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
             @FormParam("dbcatalog") String dbcatalog) {
         Status status = Status.OK;
         try {
-            boolean result = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
+            boolean result = initializeDatasourceXml(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
             if (!result) {
                 status = Status.ERROR;
             }
@@ -175,14 +175,13 @@ public class SetupDBResource {
             @FormParam("adminEmail") String adminEmail, @FormParam("adminPass") String adminPass) {
         Status status = Status.OK;
         try {
-            boolean jdbcResult = initializeJdbcProperties(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
-            if (!jdbcResult) {
+            boolean result = initializeDatasourceXml(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
+            if (!result) {
                 status = Status.ERROR;
                 status.setInfo("Error occured while initializing the jdbc.properties file.");
                 return status;
             }
 
-            initializeConfig(); // to be deleted
             boolean isSetupTables = setupTables();
             if (!isSetupTables) {
                 status = Status.ERROR;
@@ -191,8 +190,8 @@ public class SetupDBResource {
             }
 
             DalGroup group = new DalGroup();
-            group.setGroupName(groupName);
-            group.setGroupComment(groupComment);
+            group.setGroup_name(groupName);
+            group.setGroup_comment(groupComment);
 
             LoginUser user = new LoginUser();
             user.setUserNo(adminNo);
@@ -237,8 +236,8 @@ public class SetupDBResource {
             status = Status.ERROR;
             status.setInfo(e.getMessage());
         } finally {
-            JdbcUtils.closeResultSet(rs);
-            JdbcUtils.closeConnection(conn);
+            ResourceUtils.close(rs);
+            ResourceUtils.close(conn);
         }
 
         return status;
@@ -257,25 +256,28 @@ public class SetupDBResource {
         return result;
     }
 
-    private static boolean jdbcPropertiesValid() throws Exception {
+    private static boolean datasourceXmlValid() throws Exception {
         boolean result = true;
-        Properties properties = new Properties();
-        InputStream inStream = classLoader.getResourceAsStream(JDBC_PROPERTIES);
-        properties.load(inStream);
-        String driverClassName = properties.getProperty(JDBC_DRIVER_CLASS_NAME);
-        result &= (driverClassName != null && driverClassName.trim().length() > 0);
-        String url = properties.getProperty(JDBC_URL);
-        result &= (url != null && url.trim().length() > 0);
-        String userName = properties.getProperty(JDBC_USERNAME);
+        Document document = XmlUtil.getDocument(DATASOURCE_XML);
+        if (document == null)
+            return false;
+        Element root = document.getRootElement();
+        List<Element> nodes = XmlUtil.getChildElements(root, DATASOURCE);
+        if (nodes == null || nodes.size() == 0)
+            return false;
+        Element node = nodes.get(0);
+        String userName = XmlUtil.getAttribute(node, DATASOURCE_USERNAME);
         result &= (userName != null && userName.trim().length() > 0);
-        String password = properties.getProperty(JDBC_PASSWORD);
+        String password = XmlUtil.getAttribute(node, DATASOURCE_PASSWORD);
         result &= (password != null && password.trim().length() > 0);
+        String url = XmlUtil.getAttribute(node, DATASOURCE_CONNECTION_URL);
+        result &= (url != null && url.trim().length() > 0);
         return result;
     }
 
     private boolean tableConsistent(String catalog) throws Exception {
         boolean result = false;
-        Set<String> catalogTableNames = SpringBeanGetter.getSetupDBDao().getCatalogTableNames(catalog);
+        Set<String> catalogTableNames = BeanGetter.getSetupDBDao().getCatalogTableNames(catalog);
         if (catalogTableNames == null || catalogTableNames.size() == 0) {
             return result;
         }
@@ -318,48 +320,31 @@ public class SetupDBResource {
         return set;
     }
 
-    private boolean initializeJdbcProperties(String dbaddress, String dbport, String dbuser, String dbpassword,
-            String dbcatalog) {
+    private boolean initializeDatasourceXml(String dbaddress, String dbport, String dbuser, String dbpassword,
+            String dbcatalog) throws Exception {
         boolean result = false;
         try {
-            Properties properties = new Properties();
-            properties.setProperty(JDBC_DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver"); // Currently
-            // fixed.
-            properties.setProperty(JDBC_URL, String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog));
-            properties.setProperty(JDBC_USERNAME, dbuser);
-            properties.setProperty(JDBC_PASSWORD, dbpassword);
-            URL url = classLoader.getResource(WEB_XML);
-            String path = url.getPath().replace(WEB_XML, JDBC_PROPERTIES);
-            FileOutputStream fileOutputStream = new FileOutputStream(path);
-            properties.store(fileOutputStream, "");
-            fileOutputStream.close();
-            result = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+            String connectionUrl = String.format(jdbcUrlTemplate, dbaddress, dbport, dbcatalog);
+            Document document = DocumentHelper.createDocument();
+            Element root = document.addElement("Datasources");
+            root.addElement("Datasource").addAttribute(DATASOURCE_NAME, LOGIC_DBNAME)
+                    .addAttribute(DATASOURCE_USERNAME, dbuser).addAttribute(DATASOURCE_PASSWORD, dbpassword)
+                    .addAttribute(DATASOURCE_CONNECTION_URL, connectionUrl)
+                    .addAttribute(DATASOURCE_DRIVER_CLASS, DATASOURCE_MYSQL_DRIVER);
 
-    private boolean clearJdbcProperties() {
-        boolean result = false;
-        try {
-            Properties properties = new Properties();
-            properties.setProperty(JDBC_DRIVER_CLASS_NAME, "");
-            properties.setProperty(JDBC_URL, "");
-            properties.setProperty(JDBC_USERNAME, "");
-            properties.setProperty(JDBC_PASSWORD, "");
             URL url = classLoader.getResource(WEB_XML);
-            String path = url.getPath().replace(WEB_XML, JDBC_PROPERTIES);
-            FileOutputStream fileOutputStream = new FileOutputStream(path);
-            properties.store(fileOutputStream, "");
-            fileOutputStream.close();
+            String path = url.getPath().replace(WEB_XML, DATASOURCE_XML);
+
+            try (FileWriter fileWriter = new FileWriter(path)) {
+                XMLWriter writer = new XMLWriter(fileWriter);
+                writer.write(document);
+                writer.close();
+            }
+
+            DalClientFactory.getClient(LOGIC_DBNAME);
             result = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            throw e;
         }
         return result;
     }
@@ -382,22 +367,18 @@ public class SetupDBResource {
         return stringBuffer.toString();
     }
 
-    private void initializeConfig() throws Exception {
-        SpringBeanGetter.refreshApplicationContext();
-    }
-
     private boolean setupTables() throws Exception {
         boolean scriptExists = resourceExists(SCRIPT_FILE);
         if (!scriptExists) {
             throw new Exception("script.sql not found.");
         }
         String scriptContent = getScriptContent(SCRIPT_FILE);
-        return SpringBeanGetter.getSetupDBDao().executeSqlScript(scriptContent);
+        return BeanGetter.getSetupDBDao().executeSqlScript(scriptContent);
     }
 
     private boolean setupAdmin(DalGroup dalGroup, LoginUser user) throws Exception {
         boolean result = false;
-        String groupName = dalGroup.getGroupName();
+        String groupName = dalGroup.getGroup_name();
         if (groupName == null || groupName.isEmpty()) {
             return result;
         }
@@ -407,25 +388,25 @@ public class SetupDBResource {
             return result;
         }
 
-        int userResult = SpringBeanGetter.getDaoOfLoginUser().insertUser(user);
+        int userResult = BeanGetter.getDaoOfLoginUser().insertUser(user);
         if (userResult <= 0) {
             return result;
         }
-        user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(user.getUserNo());
+        user = BeanGetter.getDaoOfLoginUser().getUserByNo(user.getUserNo());
 
         DalGroup group = new DalGroup();
         group.setId(DalGroupResource.SUPER_GROUP_ID);
-        group.setGroupName(dalGroup.getGroupName());
-        group.setGroupComment(dalGroup.getGroupComment());
-        group.setCreateUserNo(user.getUserNo());
-        group.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        group.setGroup_name(dalGroup.getGroup_name());
+        group.setGroup_comment(dalGroup.getGroup_comment());
+        group.setCreate_user_no(user.getUserNo());
+        group.setCreate_time(new Timestamp(System.currentTimeMillis()));
 
-        int groupResult = SpringBeanGetter.getDaoOfDalGroup().insertDalGroup(group);
+        int groupResult = BeanGetter.getDaoOfDalGroup().insertDalGroup(group);
         if (groupResult <= 0) {
             return result;
         }
 
-        int userGroupResult = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(),
+        int userGroupResult = BeanGetter.getDalUserGroupDao().insertUserGroup(user.getId(),
                 DalGroupResource.SUPER_GROUP_ID, RoleType.Admin.getValue(), AddUser.Allow.getValue());
         if (userGroupResult <= 0) {
             return result;

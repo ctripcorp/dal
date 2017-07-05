@@ -52,10 +52,6 @@ public class DaoByFreeSql {
     }
 
     private void processGenTaskByFreeSql(GenTaskByFreeSql entity) throws SQLException {
-        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDbName()));
-        Date date = new Date(entity.getUpdateTime().getTime());
-        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
-
         if (entity.getApproved() == 1) {
             entity.setStr_approved("未审批");
         } else if (entity.getApproved() == 2) {
@@ -65,6 +61,13 @@ public class DaoByFreeSql {
         } else {
             entity.setStr_approved("通过");
         }
+
+        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
     public int getVersionById(int id) throws SQLException {
@@ -86,7 +89,7 @@ public class DaoByFreeSql {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, projectId);
         builder.mapWith(genTaskByFreeSqlRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<GenTaskByFreeSql> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -124,7 +127,7 @@ public class DaoByFreeSql {
         int i = 1;
         parameters.set(i++, "project_id", Types.INTEGER, projectId);
         builder.mapWith(genTaskByFreeSqlRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<GenTaskByFreeSql> list = queryDao.query(builder, parameters, hints);
         List<GenTaskByFreeSql> result = new ArrayList<>();
         if (list == null || list.size() == 0)
@@ -154,12 +157,12 @@ public class DaoByFreeSql {
             StatementParameters parameters = new StatementParameters();
             int i = 1;
             parameters.set(i++, "id", Types.INTEGER, task.getId());
-            parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
-            parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
-            parameters.set(i++, "class_name", Types.VARCHAR, task.getClassName());
-            parameters.set(i++, "method_name", Types.VARCHAR, task.getMethodName());
+            parameters.set(i++, "project_id", Types.INTEGER, task.getProject_id());
+            parameters.set(i++, "db_name", Types.VARCHAR, task.getDatabaseSetName());
+            parameters.set(i++, "class_name", Types.VARCHAR, task.getClass_name());
+            parameters.set(i++, "method_name", Types.VARCHAR, task.getMethod_name());
             builder.mapWith(genTaskByFreeSqlRowMapper).requireFirst().nullable();
-            DalHints hints = DalHints.createIfAbsent(null);
+            DalHints hints = DalHints.createIfAbsent(null).allowPartial();
             GenTaskByFreeSql entity = queryDao.query(builder, parameters, hints);
             if (entity != null)
                 return 0;
@@ -174,22 +177,22 @@ public class DaoByFreeSql {
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;
-        parameters.set(i++, "project_id", Types.INTEGER, task.getProjectId());
-        parameters.set(i++, "db_name", Types.VARCHAR, task.getDbName());
-        parameters.set(i++, "class_name", Types.VARCHAR, task.getClassName());
-        parameters.set(i++, "pojo_name", Types.VARCHAR, task.getPojoName());
-        parameters.set(i++, "method_name", Types.VARCHAR, task.getMethodName());
-        parameters.set(i++, "crud_type", Types.VARCHAR, task.getCrudType());
-        parameters.set(i++, "sql_content", Types.LONGVARCHAR, task.getSqlContent());
+        parameters.set(i++, "project_id", Types.INTEGER, task.getProject_id());
+        parameters.set(i++, "db_name", Types.VARCHAR, task.getDatabaseSetName());
+        parameters.set(i++, "class_name", Types.VARCHAR, task.getClass_name());
+        parameters.set(i++, "pojo_name", Types.VARCHAR, task.getPojo_name());
+        parameters.set(i++, "method_name", Types.VARCHAR, task.getMethod_name());
+        parameters.set(i++, "crud_type", Types.VARCHAR, task.getCrud_type());
+        parameters.set(i++, "sql_content", Types.LONGVARCHAR, task.getSql_content());
         parameters.set(i++, "parameters", Types.LONGVARCHAR, task.getParameters());
         parameters.set(i++, "generated", Types.BIT, task.getGenerated());
-        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdateUserNo());
-        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdateTime());
+        parameters.set(i++, "update_user_no", Types.VARCHAR, task.getUpdate_user_no());
+        parameters.set(i++, "update_time", Types.TIMESTAMP, task.getUpdate_time());
         parameters.set(i++, "comment", Types.LONGVARCHAR, task.getComment());
         parameters.set(i++, "scalarType", Types.VARCHAR, task.getScalarType());
         parameters.set(i++, "pojoType", Types.VARCHAR, task.getPojoType());
         parameters.set(i++, "pagination", Types.BIT, task.getPagination());
-        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSqlStyle());
+        parameters.set(i++, "sql_style", Types.VARCHAR, task.getSql_style());
         parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
         parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
         parameters.set(i++, "hints", Types.VARCHAR, task.getHints());

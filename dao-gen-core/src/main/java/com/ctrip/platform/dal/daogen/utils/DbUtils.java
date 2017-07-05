@@ -1,17 +1,16 @@
 package com.ctrip.platform.dal.daogen.utils;
 
+import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.client.DalStatementCreator;
 import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.domain.StoredProcedure;
 import com.ctrip.platform.dal.daogen.entity.Parameter;
-import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.mysql.jdbc.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ConnectionCallback;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,11 +21,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DbUtils {
-    private static Logger log = Logger.getLogger(DbUtils.class);
+    private static DalStatementCreator stmtCreator = null;
+
     public static List<Integer> validMode = new ArrayList<>();
     private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", Pattern.CASE_INSENSITIVE);
 
     static {
+        stmtCreator = new DalStatementCreator();
         validMode.add(DatabaseMetaData.procedureColumnIn);
         validMode.add(DatabaseMetaData.procedureColumnInOut);
         validMode.add(DatabaseMetaData.procedureColumnOut);
@@ -52,63 +53,71 @@ public class DbUtils {
     private static boolean mssqlObjectExist(String allInOneName, String objectType, String objectName)
             throws Exception {
         String sql = "select Name from sysobjects where xtype = ? and status>=0 and Name=?";
-        return query(allInOneName, sql, new Object[] {objectType, objectName}, new ResultSetExtractor<Boolean>() {
-            @Override
-            public Boolean extractData(ResultSet rs) throws SQLException {
-                return rs.next();
-            }
-        });
-    }
-
-    private static boolean mysqlObjectExist(String allInOneName, final String objectType, final String objectName)
-            throws Exception {
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "xtype", Types.VARCHAR, objectType);
+        parameters.set(i++, "Name", Types.VARCHAR, objectName);
+        DalHints hints = DalHints.createIfAbsent(null);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        boolean result = false;
         try {
-            return execute(allInOneName, new ConnectionCallback<Boolean>() {
-                @Override
-                public Boolean doInConnection(Connection connection) throws SQLException, DataAccessException {
-                    String type = "u".equalsIgnoreCase(objectType) ? "TABLE" : "VIEW";
-                    ResultSet rs = connection.getMetaData().getTables(null, null, objectName, new String[] {type});
-                    return rs.next();
-                }
-            });
+            connection = DataSourceUtil.getConnection(allInOneName);
+            preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+            resultSet = preparedStatement.executeQuery();
+            result = resultSet.next();
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
+        return result;
     }
 
-    private static JdbcTemplate createJdbcTemplate(String allInOneName) throws Exception {
-        return new JdbcTemplate(DataSourceUtil.getDataSource(allInOneName));
-    }
-
-    private static <T> T query(String allInOneName, String sql, Object[] params, ResultSetExtractor<T> extractor)
+    private static boolean mysqlObjectExist(String allInOneName, String objectType, String objectName)
             throws Exception {
-        JdbcTemplate jdbcTemplate = createJdbcTemplate(allInOneName);
-        return jdbcTemplate.query(sql, params, extractor);
-    }
-
-    private static <T> T execute(String allInOneName, ConnectionCallback<T> action) throws Exception {
-        JdbcTemplate jdbcTemplate = createJdbcTemplate(allInOneName);
-        return jdbcTemplate.execute(action);
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String type = "u".equalsIgnoreCase(objectType) ? "TABLE" : "VIEW";
+        try {
+            connection = DataSourceUtil.getConnection(allInOneName);
+            resultSet = connection.getMetaData().getTables(null, null, objectName, new String[] {type});
+            return resultSet.next();
+        } catch (Throwable e) {
+            throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
+        }
     }
 
     /**
      * 获取所有表名
      */
     public static List<String> getAllTableNames(String allInOneName) throws Exception {
-        return execute(allInOneName, new ConnectionCallback<List<String>>() {
-            @Override
-            public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
-                List<String> results = new ArrayList<>();
-                ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"TABLE"});
-                while (rs.next()) {
-                    String tableName = rs.getString("TABLE_NAME");
-                    if ("sysdiagrams".equals(tableName.toLowerCase()))
-                        continue;
-                    results.add(rs.getString("TABLE_NAME"));
-                }
-                return results;
+        List<String> list = new ArrayList<>();
+        Connection connection = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = DataSourceUtil.getConnection(allInOneName);
+            resultSet = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"TABLE"});
+            while (resultSet.next()) {
+                String tableName = resultSet.getString("TABLE_NAME");
+                if ("sysdiagrams".equals(tableName.toLowerCase()))
+                    continue;
+                list.add(resultSet.getString("TABLE_NAME"));
             }
-        });
+        } catch (Throwable e) {
+            throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
+        }
+        return list;
     }
 
     public static boolean viewExists(String allInOneName, String viewName) throws Exception {
@@ -123,101 +132,127 @@ public class DbUtils {
      * 获取所有视图
      */
     public static List<String> getAllViewNames(String allInOneName) throws Exception {
-        return execute(allInOneName, new ConnectionCallback<List<String>>() {
-            @Override
-            public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
-                List<String> results = new ArrayList<>();
-                ResultSet rs = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"VIEW"});
-                while (rs.next()) {
-                    results.add(rs.getString("TABLE_NAME"));
-                }
-                return results;
+        List<String> list = new ArrayList<>();
+        Connection connection = null;
+        ResultSet resultSet = null;
+        try {
+            connection = DataSourceUtil.getConnection(allInOneName);
+            resultSet = connection.getMetaData().getTables(null, "dbo", "%", new String[] {"VIEW"});
+            while (resultSet.next()) {
+                list.add(resultSet.getString("TABLE_NAME"));
             }
-        });
+        } catch (Throwable e) {
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
+        }
+
+        return list;
     }
 
-    public static boolean spExists(String allInOneName, final StoredProcedure sp) throws Exception {
+    public static boolean spExists(String allInOneName, StoredProcedure sp) throws Exception {
+        boolean result = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "SPECIFIC_SCHEMA", Types.VARCHAR, sp.getSchema());
+        parameters.set(i++, "SPECIFIC_NAME", Types.VARCHAR, sp.getName());
+        DalHints hints = DalHints.createIfAbsent(null);
+
         try {
             // 如果是Sql Server，通过Sql语句获取所有表和视图的名称
             if (!isMySqlServer(allInOneName)) {
                 String sql =
                         "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
-                return query(allInOneName, sql, new Object[] {sp.getSchema(), sp.getName()},
-                        new ResultSetExtractor<Boolean>() {
-                            @Override
-                            public Boolean extractData(ResultSet rs) throws SQLException {
-                                return rs.next();
-                            }
-                        });
+                connection = DataSourceUtil.getConnection(allInOneName);
+                preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+                resultSet = preparedStatement.executeQuery();
+                result = resultSet.next();
             }
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
-        return false;
+        return result;
     }
 
     public static List<StoredProcedure> getAllSpNames(String allInOneName) throws Exception {
+        List<StoredProcedure> list = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        StatementParameters parameters = new StatementParameters();
+        DalHints hints = DalHints.createIfAbsent(null);
+
         try {
             // 如果是Sql Server，通过Sql语句获取所有视图的名称
             if (!isMySqlServer(allInOneName)) {
                 String sql =
                         "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'";
-                return query(allInOneName, sql, null, new ResultSetExtractor<List<StoredProcedure>>() {
-                    @Override
-                    public List<StoredProcedure> extractData(ResultSet rs) throws SQLException {
-                        List<StoredProcedure> results = new ArrayList<>();
-                        while (rs.next()) {
-                            StoredProcedure sp = new StoredProcedure();
-                            sp.setSchema(rs.getString(1));
-                            sp.setName(rs.getString(2));
-                            results.add(sp);
-                        }
-                        return results;
-                    }
-                });
+                connection = DataSourceUtil.getConnection(allInOneName);
+                preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    StoredProcedure sp = new StoredProcedure();
+                    sp.setSchema(resultSet.getString(1));
+                    sp.setName(resultSet.getString(2));
+                    list.add(sp);
+                }
             }
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
-        return new ArrayList<>();
+        return list;
     }
 
     /**
      * 获取存储过程的所有参数
      */
-    public static <T> T getSpParams(String allInOneName, final StoredProcedure sp,
-            final ResultSetExtractor<T> extractor) throws Exception {
+    public static <T> T getSpParams(String allInOneName, StoredProcedure sp, DalResultSetExtractor<T> extractor)
+            throws Exception {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        T result = null;
+
         try {
-            return execute(allInOneName, new ConnectionCallback<T>() {
-                @Override
-                public T doInConnection(Connection connection) throws SQLException, DataAccessException {
-                    ResultSet spParamRs =
-                            connection.getMetaData().getProcedureColumns(null, sp.getSchema(), sp.getName(), null);
-                    return extractor.extractData(spParamRs);
-                }
-            });
+            connection = DataSourceUtil.getConnection(allInOneName);
+            resultSet = connection.getMetaData().getProcedureColumns(null, sp.getSchema(), sp.getName(), null);
+            result = extractor.extract(resultSet);
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
+        return result;
     }
 
-    public static List<String> getPrimaryKeyNames(String allInOneName, final String tableName) throws Exception {
+    public static List<String> getPrimaryKeyNames(String allInOneName, String tableName) throws Exception {
+        List<String> list = new ArrayList<>();
+        Connection connection = null;
+        ResultSet resultSet = null;
         try {
-            return execute(allInOneName, new ConnectionCallback<List<String>>() {
-                @Override
-                public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
-                    List<String> primaryKeys = new ArrayList<>();
-                    // 获取所有主键
-                    ResultSet primaryKeyRs = connection.getMetaData().getPrimaryKeys(null, null, tableName);
-                    while (primaryKeyRs.next())
-                        primaryKeys.add(primaryKeyRs.getString("COLUMN_NAME"));
-                    return primaryKeys;
-                }
-
-            });
+            connection = DataSourceUtil.getConnection(allInOneName);
+            resultSet = connection.getMetaData().getPrimaryKeys(null, null, tableName);
+            while (resultSet.next()) {
+                list.add(resultSet.getString("COLUMN_NAME"));
+            }
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
+        return list;
     }
 
     public static DbType getDotNetDbType(String typeName, int dataType, int length, boolean isUnsigned,
@@ -270,49 +305,60 @@ public class DbUtils {
         return result;
     }
 
-    public static <T> T getAllColumnNames(String allInOneName, final String tableName,
-            final ResultSetExtractor<T> extractor) throws Exception {
+    public static <T> T getAllColumnNames(String allInOneName, String tableName, DalResultSetExtractor<T> extractor)
+            throws Exception {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        T result = null;
+
         try {
-            return execute(allInOneName, new ConnectionCallback<T>() {
-                @Override
-                public T doInConnection(Connection connection) throws SQLException, DataAccessException {
-                    ResultSet allColumnsRs = connection.getMetaData().getColumns(null, null, tableName, null);
-                    return extractor.extractData(allColumnsRs);
-                }
-            });
+            connection = DataSourceUtil.getConnection(allInOneName);
+            resultSet = connection.getMetaData().getColumns(null, null, tableName, null);
+            result = extractor.extract(resultSet);
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(connection);
         }
+        return result;
     }
 
     public static Map<String, Class<?>> getSqlType2JavaTypeMaper(String allInOneName, String tableViewName)
             throws Exception {
+        Map<String, Class<?>> map = new HashMap<>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
         try {
             String sql = buildColumnSql(allInOneName, tableViewName);
-            return query(allInOneName, sql, null, new ResultSetExtractor<Map<String, Class<?>>>() {
-                @Override
-                public Map<String, Class<?>> extractData(ResultSet rs) throws SQLException {
-                    Map<String, Class<?>> map = new HashMap<>();
-                    ResultSetMetaData rsMeta = rs.getMetaData();
-                    for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-                        String columnName = rsMeta.getColumnName(i);
-                        Integer sqlType = rsMeta.getColumnType(i);
-                        Class<?> javaType = null;
-                        try {
-                            javaType = Class.forName(rsMeta.getColumnClassName(i));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
-                        }
-                        if (!map.containsKey(columnName) && null != javaType)
-                            map.put(columnName, javaType);
-                    }
-                    return map;
+            StatementParameters parameters = new StatementParameters();
+            DalHints hints = DalHints.createIfAbsent(null);
+            connection = DataSourceUtil.getConnection(allInOneName);
+            preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+            resultSet = preparedStatement.executeQuery();
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                String columnName = metaData.getColumnName(i);
+                Integer sqlType = metaData.getColumnType(i);
+                Class<?> javaType = null;
+                try {
+                    javaType = Class.forName(metaData.getColumnClassName(i));
+                } catch (Throwable e) {
+                    javaType = Consts.jdbcSqlTypeToJavaClass.get(sqlType);
                 }
-            });
+                if (!map.containsKey(columnName) && null != javaType)
+                    map.put(columnName, javaType);
+            }
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
+        return map;
     }
 
     private static String buildColumnSql(String allInOneName, String tableViewName) throws Exception {
@@ -324,32 +370,38 @@ public class DbUtils {
     }
 
     public static Map<String, Integer> getColumnSqlType(String allInOneName, String tableViewName) throws Exception {
+        Map<String, Integer> map = new HashMap<>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
         try {
             String sql = buildColumnSql(allInOneName, tableViewName);
-            return query(allInOneName, sql, null, new ResultSetExtractor<Map<String, Integer>>() {
-                @Override
-                public Map<String, Integer> extractData(ResultSet rs) throws SQLException {
-                    ResultSetMetaData rsMeta = rs.getMetaData();
-                    Map<String, Integer> map = new HashMap<>();
-                    for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-                        String columnName = rsMeta.getColumnName(i);
-                        Integer sqlType = rsMeta.getColumnType(i);
-                        if ("uniqueidentifier".equals(rsMeta.getColumnTypeName(i))) {
-                            sqlType = 10001;
-                        }
-                        if (!map.containsKey(columnName) && null != sqlType) {
-                            map.put(columnName, sqlType);
-                        }
-                    }
-                    return map;
-                }
-            });
-        } catch (Exception e) {
+            StatementParameters parameters = new StatementParameters();
+            DalHints hints = DalHints.createIfAbsent(null);
+            connection = DataSourceUtil.getConnection(allInOneName);
+            preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+            resultSet = preparedStatement.executeQuery();
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                String columnName = metaData.getColumnName(i);
+                Integer sqlType = metaData.getColumnType(i);
+                if ("uniqueidentifier".equals(metaData.getColumnTypeName(i)))
+                    sqlType = 10001;
+                if (!map.containsKey(columnName) && null != sqlType)
+                    map.put(columnName, sqlType);
+            }
+        } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
+        return map;
     }
 
-    private static boolean isMySqlServer(String allInOneName) throws Exception {
+    private static boolean isMySqlServer(String allInOneName) throws SQLException {
         String dbType = getDbType(allInOneName);
         if (dbType.equalsIgnoreCase("Microsoft SQL Server")) {
             return false;
@@ -359,82 +411,101 @@ public class DbUtils {
     }
 
     public static List<AbstractParameterHost> getSelectFieldHosts(String allInOneName, String sql,
-            ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
+            DalResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
+        List<AbstractParameterHost> list = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        StatementParameters parameters = new StatementParameters();
+        DalHints hints = DalHints.createIfAbsent(null);
         String testSql = sql;
         int whereIndex = StringUtils.indexOfIgnoreCase(testSql, "where");
         if (whereIndex > 0)
             testSql = sql.substring(0, whereIndex);
+        if (isMySqlServer(allInOneName)) {
+            testSql = testSql + " limit 1";
+        } else {
+            testSql = testSql.replace("select", "select top(1)");
+        }
         try {
-            if (isMySqlServer(allInOneName)) {
-                testSql = testSql + " limit 1";
-            } else {
-                testSql = testSql.replace("select", "select top(1)");
-            }
-            return query(allInOneName, testSql, null, extractor);
+            connection = DataSourceUtil.getConnection(allInOneName);
+            preparedStatement = stmtCreator.createPreparedStatement(connection, testSql, parameters, hints);
+            resultSet = preparedStatement.executeQuery();
+            list = extractor.extract(resultSet);
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
+        return list;
     }
 
-    public static List<AbstractParameterHost> testAQuerySql(String allInOneName, final String sql, final String params,
-            final ResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
+    public static List<AbstractParameterHost> testAQuerySql(String allInOneName, String sql, String params,
+            DalResultSetExtractor<List<AbstractParameterHost>> extractor) throws Exception {
+        List<AbstractParameterHost> result = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
         try {
-            return execute(allInOneName, new ConnectionCallback<List<AbstractParameterHost>>() {
-                @Override
-                public List<AbstractParameterHost> doInConnection(Connection connection)
-                        throws SQLException, DataAccessException {
-                    List<Parameter> list = new ArrayList<>();
-                    String[] parameters = params.split(";");
-                    if (parameters != null && parameters.length > 0) {
-                        for (String p : parameters) {
-                            if (p.isEmpty()) {
-                                continue;
-                            }
-                            String[] tuple = p.split(",");
-                            if (tuple != null && tuple.length > 0) {
-                                Parameter parameter = new Parameter();
-                                parameter.setName(tuple[0]);
-                                parameter.setType(Integer.valueOf(tuple[1]));
-                                list.add(parameter);
-                            }
-                        }
+            connection = DataSourceUtil.getConnection(allInOneName);
+            List<Parameter> list = new ArrayList<>();
+            String[] parameters = params.split(";");
+            if (parameters != null && parameters.length > 0) {
+                for (String p : parameters) {
+                    if (p.isEmpty()) {
+                        continue;
                     }
-
-                    Matcher matcher = pattern.matcher(sql);
-                    // Match C# parameters
-                    if (matcher.find()) {
-                        list = getActualParameters(sql, list);
+                    String[] tuple = p.split(",");
+                    if (tuple != null && tuple.length > 0) {
+                        Parameter parameter = new Parameter();
+                        parameter.setName(tuple[0]);
+                        parameter.setType(Integer.valueOf(tuple[1]));
+                        list.add(parameter);
                     }
-
-                    Matcher m = inRegxPattern.matcher(sql);
-                    String temp = sql;
-                    while (m.find()) {
-                        temp = temp.replace(m.group(1), String.format("(?) "));
-                    }
-                    String replacedSql = temp.replaceAll(expression, "?");
-                    PreparedStatement ps = connection.prepareStatement(replacedSql);
-                    int index = 0;
-                    for (Parameter parameter : list) {
-                        String name = parameter.getName();
-                        int type = parameter.getType();
-                        try {
-                            index = Integer.valueOf(name);
-                        } catch (NumberFormatException ex) {
-                            index++;
-                        }
-                        if (type == 10001) {
-                            ps.setObject(index, mockATest(type), Types.BINARY);
-                        } else {
-                            ps.setObject(index, mockATest(type), type);
-                        }
-                    }
-                    ResultSet rs = ps.executeQuery();
-                    return extractor.extractData(rs);
                 }
-            });
+            }
+
+            Matcher matcher = pattern.matcher(sql);
+            // Match C# parameters
+            if (matcher.find()) {
+                list = getActualParameters(sql, list);
+            }
+
+            Matcher m = inRegxPattern.matcher(sql);
+            String temp = sql;
+            while (m.find()) {
+                temp = temp.replace(m.group(1), String.format("(?) "));
+            }
+            String replacedSql = temp.replaceAll(expression, "?");
+            PreparedStatement ps = connection.prepareStatement(replacedSql);
+            int index = 0;
+            for (Parameter parameter : list) {
+                String name = parameter.getName();
+                int type = parameter.getType();
+                try {
+                    index = Integer.valueOf(name);
+                } catch (NumberFormatException ex) {
+                    index++;
+                }
+                if (type == 10001) {
+                    ps.setObject(index, mockATest(type), Types.BINARY);
+                } else {
+                    ps.setObject(index, mockATest(type), type);
+                }
+            }
+            ResultSet rs = ps.executeQuery();
+            result = extractor.extract(rs);
         } catch (Throwable e) {
             throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
         }
+        return result;
     }
 
     private static final String expression = "[@:]\\w+";
@@ -500,18 +571,21 @@ public class DbUtils {
         }
     }
 
-    public static String getDbType(final String allInOneName) throws Exception {
+    public static String getDbType(final String allInOneName) throws SQLException {
         if (Consts.databaseType.containsKey(allInOneName)) {
             return Consts.databaseType.get(allInOneName);
         } else {
-            return execute(allInOneName, new ConnectionCallback<String>() {
-                @Override
-                public String doInConnection(Connection connection) throws SQLException, DataAccessException {
-                    String dbType = connection.getMetaData().getDatabaseProductName();
-                    Consts.databaseType.put(allInOneName, dbType);
-                    return dbType;
-                }
-            });
+            Connection connection = null;
+            String dbType = null;
+            try {
+                connection = DataSourceUtil.getConnection(allInOneName);
+                dbType = connection.getMetaData().getDatabaseProductName();
+                Consts.databaseType.put(allInOneName, dbType);
+            } catch (Throwable e) {
+            } finally {
+                ResourceUtils.close(connection);
+            }
+            return dbType;
         }
     }
 
@@ -530,22 +604,36 @@ public class DbUtils {
         if (isMySqlServer(allInOneName))
             return map;
 
-        String sql = "" + "SELECT sys.columns.name as name, " + "       CONVERT(VARCHAR(1000), (SELECT VALUE "
-                + "                              FROM   sys.extended_properties "
-                + "                              WHERE  sys.extended_properties.major_id = sys.columns.object_id "
-                + "                                     AND sys.extended_properties.minor_id = sys.columns.column_id)) AS description "
-                + "FROM   sys.columns, " + "       sys.tables " + "WHERE  sys.columns.object_id = sys.tables.object_id "
-                + "       AND sys.tables.name = ? " + "ORDER  BY sys.columns.column_id ";
-        return query(allInOneName, sql, new Object[] {tableName}, new ResultSetExtractor<Map<String, String>>() {
-            @Override
-            public Map<String, String> extractData(ResultSet rs) throws SQLException {
-                Map<String, String> map = new HashMap<>();
-                while (rs.next()) {
-                    map.put(rs.getString("name").toLowerCase(), rs.getString("description"));
-                }
-                return map;
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                "SELECT sys.columns.name as name, CONVERT(VARCHAR(1000), (SELECT VALUE FROM sys.extended_properties ");
+        sb.append("WHERE  sys.extended_properties.major_id = sys.columns.object_id ");
+        sb.append("AND sys.extended_properties.minor_id = sys.columns.column_id)) AS description ");
+        sb.append("FROM sys.columns, sys.tables WHERE sys.columns.object_id = sys.tables.object_id ");
+        sb.append("AND sys.tables.name = ? ORDER BY sys.columns.column_id ");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "name", Types.VARCHAR, tableName);
+        DalHints hints = DalHints.createIfAbsent(null);
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = DataSourceUtil.getConnection(allInOneName);
+            preparedStatement = stmtCreator.createPreparedStatement(connection, sb.toString(), parameters, hints);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                map.put(resultSet.getString("name"), resultSet.getString("description"));
             }
-        });
+        } catch (Throwable e) {
+            throw e;
+        } finally {
+            ResourceUtils.close(resultSet);
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
+        }
+
+        return map;
     }
 
 }

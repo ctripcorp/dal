@@ -12,19 +12,16 @@ import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements DalProcessor {
-    private static Logger log = Logger.getLogger(JavaDataPreparerOfSqlBuilderProcessor.class);
-
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
             List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
-            TaskUtils.invokeBatch(log, _sqlBuilderCallables);
+            TaskUtils.invokeBatch(_sqlBuilderCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -75,7 +72,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
         Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<>();
 
         for (GenTaskBySqlBuilder task : builders) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getTableName());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
 
             if (!groupBy.containsKey(key)) {
                 groupBy.put(key, task);
@@ -87,10 +84,10 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
     private JavaTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)
             throws Exception {
         GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
-        tableViewSp.setCudBySp(false);
+        tableViewSp.setCud_by_sp(false);
         tableViewSp.setPagination(false);
         tableViewSp.setAllInOneName(sqlBuilder.getAllInOneName());
-        tableViewSp.setDbName(sqlBuilder.getDbName());
+        tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("");
 
@@ -100,7 +97,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
             dbCategory = DatabaseCategory.MySql;
         }
 
-        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTableName(), dbCategory);
+        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(), dbCategory);
     }
 
 }

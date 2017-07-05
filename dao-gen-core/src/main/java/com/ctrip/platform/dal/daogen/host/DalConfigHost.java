@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.daogen.host;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSet;
 import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -42,22 +42,21 @@ public class DalConfigHost {
             map = new HashMap<>();
             Set<String> set = new HashSet<>();
             for (Map.Entry<Integer, DatabaseSetEntry> entry : databaseSetEntryMap.entrySet()) {
-                String key = String.format("'%s'", entry.getValue().getConnectionString());
-                set.add(key);
+                set.add(entry.getValue().getConnectionString());
             }
 
-            List<DalGroupDB> dbs = SpringBeanGetter.getDaoOfDalGroupDB().getGroupDbsByDbNames(set);
+            List<DalGroupDB> dbs = BeanGetter.getDaoOfDalGroupDB().getGroupDbsByDbNames(set);
 
             if (dbs != null && dbs.size() > 0) {
                 for (DalGroupDB db : dbs) {
                     DatabaseSetEntry e = new DatabaseSetEntry();
                     e.setConnectionString(db.getDbname());
-                    e.setProviderName(db.getDbProvidername());
-                    e.setDbAddress(db.getDbAddress());
-                    e.setDbPort(db.getDbPort());
-                    e.setUserName(db.getDbUser());
-                    e.setPassword(db.getDbPassword());
-                    e.setDbCatalog(db.getDbCatalog());
+                    e.setProviderName(db.getDb_providerName());
+                    e.setDbAddress(db.getDb_address());
+                    e.setDbPort(db.getDb_port());
+                    e.setUserName(db.getDb_user());
+                    e.setPassword(db.getDb_password());
+                    e.setDbCatalog(db.getDb_catalog());
                     map.put(e.getConnectionString(), e);
                 }
             }
@@ -79,7 +78,7 @@ public class DalConfigHost {
     }
 
     public void addDatabaseSetEntry(DatabaseSetEntry entry) {
-        Integer databaseSetId = entry.getDatabasesetId();
+        Integer databaseSetId = entry.getDatabaseSet_Id();
         Integer databaseSetEntryId = entry.getId();
 
         if (!this.databaseSetEntries.containsKey(databaseSetId)) {

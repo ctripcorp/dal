@@ -4,8 +4,7 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import org.apache.log4j.Logger;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -30,17 +29,15 @@ import java.util.List;
 @Singleton
 @Path("member")
 public class DalGroupMemberResource {
-    private static Logger log = Logger.getLogger(DalGroupMemberResource.class);
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<DalGroup> getGroups(@Context HttpServletRequest request, @QueryParam("root") boolean root)
             throws SQLException {
         try {
-            List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
+            List<DalGroup> groups = BeanGetter.getDaoOfDalGroup().getAllGroups();
 
             for (DalGroup group : groups) {
-                group.setText(group.getGroupName());
+                group.setText(group.getGroup_name());
                 group.setIcon("glyphicon glyphicon-th");
                 group.setChildren(false);
             }
@@ -57,17 +54,17 @@ public class DalGroupMemberResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<LoginUser> getGroupUsers(@QueryParam("groupId") int currentGroupId) throws SQLException {
         try {
-            List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getUserByGroupId(currentGroupId);
+            List<LoginUser> users = BeanGetter.getDaoOfLoginUser().getUserByGroupId(currentGroupId);
             if (users != null && users.size() > 0) {
                 for (LoginUser user : users) {
-                    if ("1".equalsIgnoreCase(user.getRole())) {
+                    if (1 == user.getIntRole()) {
                         user.setRole("Admin");
-                    } else if ("2".equalsIgnoreCase(user.getRole())) {
+                    } else if (2 == user.getIntRole()) {
                         user.setRole("Limited");
                     } else {
                         user.setRole("Unkown");
                     }
-                    if ("1".equalsIgnoreCase(user.getAdduser())) {
+                    if (1 == user.getIntAdduser()) {
                         user.setAdduser("允许");
                     } else {
                         user.setAdduser("禁止");
@@ -76,18 +73,18 @@ public class DalGroupMemberResource {
             }
 
             List<GroupRelation> relations =
-                    SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+                    BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
             if (relations != null && relations.size() > 0) {
                 for (GroupRelation relation : relations) {
-                    DalGroup group = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(relation.getChildGroupId());
+                    DalGroup group = BeanGetter.getDaoOfDalGroup().getDalGroupById(relation.getChild_group_id());
                     if (group != null) {
                         LoginUser user = new LoginUser();
                         user.setId(group.getId());
-                        user.setUserName(group.getGroupName());
-                        user.setUserEmail(group.getGroupComment());
-                        if (1 == relation.getChildGroupRole()) {
+                        user.setUserName(group.getGroup_name());
+                        user.setUserEmail(group.getGroup_comment());
+                        if (1 == relation.getChild_group_role()) {
                             user.setRole("Admin");
-                        } else if (2 == relation.getChildGroupRole()) {
+                        } else if (2 == relation.getChild_group_role()) {
                             user.setRole("Limited");
                         } else {
                             user.setRole("Unkown");
@@ -115,7 +112,7 @@ public class DalGroupMemberResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<LoginUser> getAllUsers() throws SQLException {
         try {
-            List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getAllUsers();
+            List<LoginUser> users = BeanGetter.getDaoOfLoginUser().getAllUsers();
             return users;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -132,7 +129,6 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add member failed, caused by illegal parameters:userNo=%s", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -150,20 +146,19 @@ public class DalGroupMemberResource {
                 return status;
             }
 
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserById(userID);
-            List<UserGroup> ugGroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserById(userID);
+            List<UserGroup> ugGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
             Iterator<UserGroup> ite = ugGroups.iterator();
             while (ite.hasNext()) {
-                if (ite.next().getGroupId() == currentGroupId) {
+                if (ite.next().getGroup_id() == currentGroupId) {
                     Status status = Status.ERROR;
                     status.setInfo("用户[" + user.getUserName() + "]已经加入当前DAL Team.");
                     return status;
                 }
             }
             int adduser = allowAddUser == true ? 1 : 2;
-            int ret = SpringBeanGetter.getDalUserGroupDao().insertUserGroup(userID, currentGroupId, user_role, adduser);
+            int ret = BeanGetter.getDalUserGroupDao().insertUserGroup(userID, currentGroupId, user_role, adduser);
             if (ret <= 0) {
-                log.error("Add dal group member failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Add operation failed.");
                 return status;
@@ -188,7 +183,6 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add member failed, caused by illegal parameters:userNo=%s", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -207,10 +201,8 @@ public class DalGroupMemberResource {
             }
 
             int adduser = allowAddUser == true ? 1 : 2;
-            int ret = SpringBeanGetter.getDalUserGroupDao().updateUserPersimion(userID, currentGroupId, user_role,
-                    adduser);
+            int ret = BeanGetter.getDalUserGroupDao().updateUserPersimion(userID, currentGroupId, user_role, adduser);
             if (ret <= 0) {
-                log.error("Update dal group user failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Update operation failed.");
                 return status;
@@ -233,7 +225,6 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add group failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -257,28 +248,27 @@ public class DalGroupMemberResource {
                 return status;
             }
 
-            GroupRelation relation = SpringBeanGetter.getGroupRelationDao()
+            GroupRelation relation = BeanGetter.getGroupRelationDao()
                     .getGroupRelationByCurrentGroupIdAndChildGroupId(currentGroupId, childGroupId);
             if (relation != null) {
-                DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(childGroupId);
+                DalGroup dalGroup = BeanGetter.getDaoOfDalGroup().getDalGroupById(childGroupId);
                 Status status = Status.ERROR;
-                status.setInfo("DAL Team[" + dalGroup.getGroupName() + "]已经加入当前DAL Team.");
+                status.setInfo("DAL Team[" + dalGroup.getGroup_name() + "]已经加入当前DAL Team.");
                 return status;
             }
 
             int adduser = allowGroupAddUser == true ? 1 : 2;
             relation = new GroupRelation();
             relation.setAdduser(adduser);
-            relation.setChildGroupId(childGroupId);
-            relation.setChildGroupRole(child_group_role);
-            relation.setCurrentGroupId(currentGroupId);
-            relation.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-            LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+            relation.setChild_group_id(childGroupId);
+            relation.setChild_group_role(child_group_role);
+            relation.setCurrent_group_id(currentGroupId);
+            relation.setUpdate_time(new Timestamp(System.currentTimeMillis()));
+            LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
-            relation.setUpdateUserNo(upNo);
-            int ret = SpringBeanGetter.getGroupRelationDao().insertChildGroup(relation);
+            relation.setUpdate_user_no(upNo);
+            int ret = BeanGetter.getGroupRelationDao().insertChildGroup(relation);
             if (ret <= 0) {
-                log.error("Add dal group failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Add operation failed.");
                 return status;
@@ -301,7 +291,6 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add member failed, caused by illegal parameters:[userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -320,11 +309,10 @@ public class DalGroupMemberResource {
             }
 
             int adduser = allowGroupAddUser == true ? 1 : 2;
-            String updateUserNo = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getUserName();
-            int ret = SpringBeanGetter.getGroupRelationDao().updateGroupRelation(currentGroupId, childGroupId,
-                    childGroupRole, adduser, updateUserNo, new Timestamp(System.currentTimeMillis()));
+            String updateUserNo = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getUserName();
+            int ret = BeanGetter.getGroupRelationDao().updateGroupRelation(currentGroupId, childGroupId, childGroupRole,
+                    adduser, updateUserNo, new Timestamp(System.currentTimeMillis()));
             if (ret <= 0) {
-                log.error("Update dal group failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Update operation failed.");
                 return status;
@@ -346,7 +334,6 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                log.error(String.format("Add member failed, caused by illegal parameters: [userNo=%s]", userNo));
                 Status status = Status.ERROR;
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -360,10 +347,9 @@ public class DalGroupMemberResource {
 
             if (isDalTeam) {
                 int childGroupId = userId;
-                int ret = SpringBeanGetter.getGroupRelationDao()
+                int ret = BeanGetter.getGroupRelationDao()
                         .deleteChildGroupByCurrentGroupIdAndChildGroupId(currentGroupId, childGroupId);
                 if (ret <= 0) {
-                    log.error("Delete dal team failed, caused by db operation failed, pls check the log.");
                     Status status = Status.ERROR;
                     status.setInfo("Delete operation failed.");
                     return status;
@@ -371,9 +357,8 @@ public class DalGroupMemberResource {
                 return Status.OK;
             }
 
-            int ret = SpringBeanGetter.getDalUserGroupDao().deleteUserFromGroup(userId, currentGroupId);
+            int ret = BeanGetter.getDalUserGroupDao().deleteUserFromGroup(userId, currentGroupId);
             if (ret <= 0) {
-                log.error("Delete user failed, caused by db operation failed, pls check the log.");
                 Status status = Status.ERROR;
                 status.setInfo("Delete operation failed.");
                 return status;
@@ -392,18 +377,18 @@ public class DalGroupMemberResource {
     @Produces(MediaType.APPLICATION_JSON)
     public List<LoginUser> getApproveUsers(@QueryParam("projectId") int projectId) throws SQLException {
         try {
-            Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
+            Project prj = BeanGetter.getDaoOfProject().getProjectByID(projectId);
             if (prj == null) {
                 return null;
             }
-            DalGroup dalGroup = SpringBeanGetter.getDaoOfDalGroup().getDalGroupById(prj.getDalGroupId());
+            DalGroup dalGroup = BeanGetter.getDaoOfDalGroup().getDalGroupById(prj.getDal_group_id());
             if (dalGroup == null) {
                 return null;
             }
-            List<LoginUser> users = SpringBeanGetter.getDaoOfLoginUser().getUserByGroupId(dalGroup.getId());
+            List<LoginUser> users = BeanGetter.getDaoOfLoginUser().getUserByGroupId(dalGroup.getId());
             List<LoginUser> result = new ArrayList<>();
             for (LoginUser user : users) {
-                if ("1".equalsIgnoreCase(user.getRole())) {
+                if (1 == user.getIntRole()) {
                     result.add(user);
                 }
             }
@@ -425,17 +410,17 @@ public class DalGroupMemberResource {
     }
 
     private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId) throws SQLException {
-        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+        LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         // 用户加入的所有组
-        List<UserGroup> urgroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+        List<UserGroup> urgroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urgroups == null) {
             return false;
         }
         for (UserGroup ug : urgroups) {
-            if (ug.getGroupId() == DalGroupResource.SUPER_GROUP_ID && ug.getAdduser() == 1) {
+            if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID && ug.getAdduser() == 1) {
                 return true;
             }
-            if (ug.getGroupId() == currentGroupId && ug.getAdduser() == 1) {
+            if (ug.getGroup_id() == currentGroupId && ug.getAdduser() == 1) {
                 return true;
             }
         }
@@ -444,17 +429,17 @@ public class DalGroupMemberResource {
 
     private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId) throws SQLException {
         boolean havePermison = false;
-        int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+        int userId = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
         List<GroupRelation> relations =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
         Iterator<GroupRelation> ite = relations.iterator();
         while (ite.hasNext()) {
             GroupRelation relation = ite.next();
             if (relation.getAdduser() == 1) { // the child group can manage the
                 // current parent group user
                 // then check the user whether or not exist in this child group
-                List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao()
-                        .getUserGroupByGroupIdAndUserId(relation.getChildGroupId(), userId);
+                List<UserGroup> ugs = BeanGetter.getDalUserGroupDao()
+                        .getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
                 if (ugs != null && ugs.size() > 0) {
                     havePermison = true;
                 }
@@ -475,21 +460,21 @@ public class DalGroupMemberResource {
 
     private boolean validateUserPermisionInCurrentGroup(String userNo, int currentGroupId, int user_role)
             throws SQLException {
-        LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+        LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         // 用户加入的所有组
-        List<UserGroup> urgroups = SpringBeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
+        List<UserGroup> urgroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urgroups == null) {
             return false;
         }
         for (UserGroup ug : urgroups) {
-            if (ug.getGroupId() == DalGroupResource.SUPER_GROUP_ID && ug.getAdduser() == 1
+            if (ug.getGroup_id() == DalGroupResource.SUPER_GROUP_ID && ug.getAdduser() == 1
                     && ug.getRole() <= user_role) {
                 return true;
             }
-            if (ug.getGroupId() == currentGroupId && ug.getAdduser() == 1 && ug.getRole() <= user_role) {
+            if (ug.getGroup_id() == currentGroupId && ug.getAdduser() == 1 && ug.getRole() <= user_role) {
                 return true;
             }
-            if (ug.getGroupId() == currentGroupId && ug.getAdduser() == 1 && ug.getRole() <= user_role) {
+            if (ug.getGroup_id() == currentGroupId && ug.getAdduser() == 1 && ug.getRole() <= user_role) {
                 return true;
             }
         }
@@ -499,20 +484,20 @@ public class DalGroupMemberResource {
     private boolean validateUserPermisionInChildGroup(String userNo, int currentGroupId, int user_role)
             throws SQLException {
         boolean havePermison = false;
-        int userId = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
+        int userId = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo).getId();
         List<GroupRelation> relations =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
+                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(currentGroupId);
         Iterator<GroupRelation> ite = relations.iterator();
         while (ite.hasNext()) {
             GroupRelation relation = ite.next();
             if (relation.getAdduser() == 1) { // the child group can manage the
                 // current parent group user
                 // then check the user whether or not exist in this child group
-                List<UserGroup> ugs = SpringBeanGetter.getDalUserGroupDao()
-                        .getUserGroupByGroupIdAndUserId(relation.getChildGroupId(), userId);
+                List<UserGroup> ugs = BeanGetter.getDalUserGroupDao()
+                        .getUserGroupByGroupIdAndUserId(relation.getChild_group_id(), userId);
                 if (ugs != null && ugs.size() > 0) {// user is in the child
                     // group
-                    if (relation.getChildGroupRole() <= user_role) { // check
+                    if (relation.getChild_group_role() <= user_role) { // check
                         // the
                         // child
                         // group
@@ -534,17 +519,17 @@ public class DalGroupMemberResource {
 
     private void transferProjectToGroup(String userNo, int groupId) throws SQLException {
         // 当前用户的所有Project
-        List<UserProject> userProjects = SpringBeanGetter.getDaoOfUserProject().getUserProjectsByUser(userNo);
+        List<UserProject> userProjects = BeanGetter.getDaoOfUserProject().getUserProjectsByUser(userNo);
         for (UserProject proj : userProjects) {
-            int project_id = proj.getProjectId();
+            int project_id = proj.getProject_id();
             // project_id符合当前迭代的Project，且在user_project中id最小
-            UserProject project = SpringBeanGetter.getDaoOfUserProject().getMinUserProjectByProjectId(project_id);
+            UserProject project = BeanGetter.getDaoOfUserProject().getMinUserProjectByProjectId(project_id);
             // 验证当前project是否是由当前user创建
             if (proj.getId() == project.getId()) {
                 // 更新Project表的groupId为当前用户的gourpId
-                SpringBeanGetter.getDaoOfProject().updateProjectGroupById(groupId, project_id);
+                BeanGetter.getDaoOfProject().updateProjectGroupById(groupId, project_id);
                 // 删除user_project表中所有project_id符合当前迭代的Project
-                SpringBeanGetter.getDaoOfUserProject().deleteUserProject(project_id);
+                BeanGetter.getDaoOfUserProject().deleteUserProject(project_id);
             }
         }
     }

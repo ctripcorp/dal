@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.daogen.host.java.SpHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import java.io.File;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
-    private static Logger log = Logger.getLogger(JavaCodeGeneratorOfSpProcessor.class);
 
     @Override
     public void process(CodeGenContext context) throws Exception {
@@ -29,7 +27,7 @@ public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
             int projectId = ctx.getProjectId();
             File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
             List<Callable<ExecuteResult>> spCallables = generateSpDao(ctx, dir);
-            TaskUtils.invokeBatch(log, spCallables);
+            TaskUtils.invokeBatch(spCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -68,8 +66,8 @@ public class JavaCodeGeneratorOfSpProcessor implements DalProcessor {
                                     "templates/java/Pojo.java.tpl");
                         }
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + " exception", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }

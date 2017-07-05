@@ -45,7 +45,7 @@ public class DaoOfProject {
         int i = 1;
         parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
         builder.mapWith(projectRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<Project> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -59,7 +59,7 @@ public class DaoOfProject {
         int i = 1;
         parameters.set(i++, "dal_config_name", Types.VARCHAR, dal_config_name);
         builder.mapWith(projectRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<Project> list = queryDao.query(builder, parameters, hints);
         processList(list);
         return list;
@@ -75,17 +75,20 @@ public class DaoOfProject {
     }
 
     private void processProject(Project entity) throws SQLException {
-        Date date = new Date(entity.getUpdateTime().getTime());
-        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         entity.setText(entity.getName());
         entity.setChildren(false);
         entity.setIcon("glyphicon glyphicon-tasks");
+
+        if (entity.getUpdate_time() == null)
+            return;
+        Date date = new Date(entity.getUpdate_time().getTime());
+        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
     public int insertProject(Project project) throws SQLException {
         if (null == project)
             return 0;
-        KeyHolder keyHolder = null;
+        KeyHolder keyHolder = new KeyHolder();
         DalHints hints = DalHints.createIfAbsent(null);
         client.insert(hints, keyHolder, project);
         return keyHolder.getKey().intValue();

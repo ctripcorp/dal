@@ -3,8 +3,7 @@ package com.ctrip.platform.dal.daogen.resource;
 import com.ctrip.platform.dal.daogen.entity.DalGroup;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
-import org.apache.log4j.Logger;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -25,15 +24,13 @@ import java.util.List;
 @Singleton
 @Path("projectview")
 public class DalGroupProjectResource {
-    private static Logger log = Logger.getLogger(DalGroupProjectResource.class);
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<DalGroup> getGroups(@QueryParam("root") boolean root) throws SQLException {
         try {
-            List<DalGroup> groups = SpringBeanGetter.getDaoOfDalGroup().getAllGroups();
+            List<DalGroup> groups = BeanGetter.getDaoOfDalGroup().getAllGroups();
             for (DalGroup group : groups) {
-                group.setText(group.getGroupName());
+                group.setText(group.getGroup_name());
                 group.setIcon("glyphicon glyphicon-folder-open");
                 group.setChildren(true);
             }
@@ -52,7 +49,7 @@ public class DalGroupProjectResource {
             int groupID = -1;
             groupID = Integer.parseInt(groupId);
 
-            return SpringBeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
+            return BeanGetter.getDaoOfProject().getProjectByGroupId(groupID);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;

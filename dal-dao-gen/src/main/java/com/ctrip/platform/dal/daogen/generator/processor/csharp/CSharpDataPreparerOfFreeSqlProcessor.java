@@ -16,25 +16,27 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 
 public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
-    private static Logger log = Logger.getLogger(CSharpDataPreparerOfFreeSqlProcessor.class);
     private static DaoByFreeSql daoByFreeSql;
 
     static {
-        daoByFreeSql = SpringBeanGetter.getDaoByFreeSql();
+        try {
+            daoByFreeSql = BeanGetter.getDaoByFreeSql();
+        } catch (SQLException e) {
+        }
     }
 
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
             List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(context);
-            TaskUtils.invokeBatch(log, _freeSqlCallables);
+            TaskUtils.invokeBatch(_freeSqlCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -85,9 +87,9 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                             return result;
 
                         CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-                        host.setDbSetName(currentTasks.get(0).getDbName());
+                        host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
                         host.setClassName(CommonUtils
-                                .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClassName())));
+                                .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClass_name())));
                         host.setNameSpace(namespace);
                         host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
 
@@ -95,13 +97,13 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                         // 每个Method可能就有一个Pojo
                         for (GenTaskByFreeSql task : currentTasks) {
                             CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
-                            if (!_freeSqlPojoHosts.containsKey(task.getPojoName()) && method.getPojoName() != null
+                            if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
                                     && !method.getPojoName().isEmpty()
                                     && (!method.isFirstOrSingle() || !method.isSampleType())
-                                    && !"update".equalsIgnoreCase(task.getCrudType())) {
+                                    && !"update".equalsIgnoreCase(task.getCrud_type())) {
                                 CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
                                 if (null != freeSqlPojoHost) {
-                                    _freeSqlPojoHosts.put(task.getPojoName(), freeSqlPojoHost);
+                                    _freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
                                 }
                             }
                             methods.add(method);
@@ -109,8 +111,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                         host.setMethods(methods);
                         _freeSqlHosts.add(host);
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + "exception", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }
@@ -124,8 +126,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
     private CSharpMethodHost buildFreeSqlMethodHost(CSharpCodeGenContext ctx, GenTaskByFreeSql task) throws Exception {
         CSharpMethodHost method = new CSharpMethodHost();
         List<String> inParams = new ArrayList<>();
-        Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSqlContent());
-        String temp = task.getSqlContent();
+        Matcher m = CSharpCodeGenContext.inRegxPattern.matcher(task.getSql_content());
+        String temp = task.getSql_content();
         int index = 0;
         if (task.getPagination()) {
             temp = SqlBuilder.pagingQuerySql(temp, getDatabaseCategory(task.getAllInOneName()), CurrentLanguage.CSharp);
@@ -137,13 +139,13 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             temp = temp.replace(paramName, String.format("({%d}) ", index++));
         }
         method.setSql(temp);
-        method.setName(task.getMethodName());
+        method.setName(task.getMethod_name());
         method.setPaging(task.getPagination());
-        String pojoName = task.getPojoName();
+        String pojoName = task.getPojo_name();
         if (pojoName.equalsIgnoreCase("简单类型")) {
             method.setPojoName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
         } else {
-            method.setPojoName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojoName())));
+            method.setPojoName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
         }
         method.setScalarType(task.getScalarType());
         method.setPojoType(task.getPojoType());
@@ -180,7 +182,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         if (ctx.getFreeSqlPojoHosts().containsKey(method.getPojoName())) {
             method.setPojohost(ctx.getFreeSqlPojoHosts().get(method.getPojoName()));
         }
-        method.setCrud_type(task.getCrudType());
+        method.setCrud_type(task.getCrud_type());
         return method;
     }
 
@@ -189,8 +191,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         Map<String, DatabaseHost> _dbHosts = ctx.getDbHosts();
         Set<String> _freeDaos = ctx.getFreeDaos();
         for (GenTaskByFreeSql task : freeSqls) {
-            addDatabaseSet(ctx, task.getDbName());
-            _freeDaos.add(WordUtils.capitalize(task.getClassName()));
+            addDatabaseSet(ctx, task.getDatabaseSetName());
+            _freeDaos.add(WordUtils.capitalize(task.getClass_name()));
             if (!_dbHosts.containsKey(task.getAllInOneName())) {
                 String provider = "sqlProvider";
                 String dbType = DbUtils.getDbType(task.getAllInOneName());
@@ -200,7 +202,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                 DatabaseHost host = new DatabaseHost();
                 host.setAllInOneName(task.getAllInOneName());
                 host.setProviderType(provider);
-                host.setDatasetName(task.getDbName());
+                host.setDatasetName(task.getDatabaseSetName());
                 _dbHosts.put(task.getAllInOneName(), host);
             }
         }
@@ -210,7 +212,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<>();
 
         for (GenTaskByFreeSql task : tasks) {
-            String key = String.format("%s_%s", task.getAllInOneName(), task.getClassName().toLowerCase());
+            String key = String.format("%s_%s", task.getAllInOneName(), task.getClass_name().toLowerCase());
             if (groupBy.containsKey(key)) {
                 groupBy.get(key).add(task);
             } else {
@@ -232,7 +234,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             dbCategory = DatabaseCategory.MySql;
         }
 
-        List<AbstractParameterHost> list = DbUtils.testAQuerySql(task.getAllInOneName(), task.getSqlContent(),
+        List<AbstractParameterHost> list = DbUtils.testAQuerySql(task.getAllInOneName(), task.getSql_content(),
                 task.getParameters(), new CsharpGivenSqlResultSetExtractor(dbCategory));
 
         for (AbstractParameterHost _ahost : list) {
@@ -241,12 +243,12 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 
         freeSqlHost.setColumns(pHosts);
         freeSqlHost.setTableName("");
-        String className = task.getPojoName();
+        String className = task.getPojo_name();
         if (className.equalsIgnoreCase("简单类型")) {
             freeSqlHost.setClassName(
-                    task.getMethodName().substring(0, 1).toUpperCase() + task.getMethodName().substring(1));
+                    task.getMethod_name().substring(0, 1).toUpperCase() + task.getMethod_name().substring(1));
         } else {
-            freeSqlHost.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojoName())));
+            freeSqlHost.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getPojo_name())));
         }
 
         freeSqlHost.setNameSpace(codeGenCtx.getNamespace());

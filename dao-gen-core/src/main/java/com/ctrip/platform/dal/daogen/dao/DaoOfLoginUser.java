@@ -32,12 +32,12 @@ public class DaoOfLoginUser {
 
     public List<LoginUser> getAllUsers() throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return client.query(builder, hints);
     }
 
     public LoginUser getUserById(int userId) throws SQLException {
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return client.queryByPk(userId, hints);
     }
 
@@ -48,7 +48,7 @@ public class DaoOfLoginUser {
         int i = 1;
         parameters.setSensitive(i++, "user_no", Types.VARCHAR, userNo);
         builder.mapWith(loginUserRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -60,7 +60,7 @@ public class DaoOfLoginUser {
         int i = 1;
         parameters.setSensitive(i++, "group_id", Types.INTEGER, groupId);
         builder.mapWith(loginUserRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -68,7 +68,7 @@ public class DaoOfLoginUser {
         if (null == user)
             return 0;
 
-        KeyHolder keyHolder = null;
+        KeyHolder keyHolder = new KeyHolder();
         DalHints hints = DalHints.createIfAbsent(null);
         client.insert(hints, keyHolder, user);
         return keyHolder.getKey().intValue();

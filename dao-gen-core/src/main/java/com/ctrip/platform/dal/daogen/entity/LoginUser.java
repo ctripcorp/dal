@@ -38,9 +38,18 @@ public class LoginUser implements DalPojo {
     @Type(value = Types.VARCHAR)
     private String password;
 
-    // 以下属性仅在组员管理界面中使用
-    private String role;// 组员的权限
-    private String adduser;// 是否可以添加组员
+    @Column(name = "role")
+    @Type(value = Types.INTEGER)
+    private Integer intRole;
+
+    @Column(name = "adduser")
+    @Type(value = Types.INTEGER)
+    private Integer intAdduser;
+
+    private String role;
+
+    private String adduser;
+
     private boolean isDalTeam = false;// true:是DAL Team，false:是正常用户
 
     public Integer getId() {
@@ -81,6 +90,22 @@ public class LoginUser implements DalPojo {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Integer getIntRole() {
+        return intRole;
+    }
+
+    public void setIntRole(Integer intRole) {
+        this.intRole = intRole;
+    }
+
+    public Integer getIntAdduser() {
+        return intAdduser;
+    }
+
+    public void setIntAdduser(Integer intAdduser) {
+        this.intAdduser = intAdduser;
     }
 
     public String getRole() {

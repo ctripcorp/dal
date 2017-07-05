@@ -39,7 +39,7 @@ public class GroupRelationDao {
         int i = 1;
         parameters.set(i++, "current_group_id", Types.INTEGER, currentGroupId);
         builder.mapWith(groupRelationRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -51,7 +51,7 @@ public class GroupRelationDao {
         int i = 1;
         parameters.set(i++, "child_group_id", Types.INTEGER, childGroupId);
         builder.mapWith(groupRelationRowMapper);
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 
@@ -65,7 +65,7 @@ public class GroupRelationDao {
         parameters.set(i++, "current_group_id", Types.INTEGER, currentGroupId);
         parameters.set(i++, "child_group_id", Types.INTEGER, childGroupId);
         builder.mapWith(groupRelationRowMapper).requireFirst().nullable();
-        DalHints hints = DalHints.createIfAbsent(null);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
 

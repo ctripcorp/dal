@@ -42,15 +42,15 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry>, DalPojo {
 
     @Column(name = "databaseSet_Id")
     @Type(value = Types.INTEGER)
-    private Integer databasesetId;
+    private Integer databaseSet_Id;
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
+    private Timestamp update_time;
 
     private String str_update_time;
 
@@ -106,28 +106,28 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry>, DalPojo {
         this.connectionString = connectionString;
     }
 
-    public Integer getDatabasesetId() {
-        return databasesetId;
+    public Integer getDatabaseSet_Id() {
+        return databaseSet_Id;
     }
 
-    public void setDatabasesetId(Integer databasesetId) {
-        this.databasesetId = databasesetId;
+    public void setDatabaseSet_Id(Integer databaseSet_Id) {
+        this.databaseSet_Id = databaseSet_Id;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
     public String getStr_update_time() {

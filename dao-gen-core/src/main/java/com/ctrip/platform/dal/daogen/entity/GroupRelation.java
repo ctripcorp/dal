@@ -25,16 +25,16 @@ public class GroupRelation implements DalPojo {
 
     @Column(name = "current_group_id")
     @Type(value = Types.INTEGER)
-    private Integer currentGroupId;
+    private Integer current_group_id;
 
     @Column(name = "child_group_id")
     @Type(value = Types.INTEGER)
-    private Integer childGroupId;
+    private Integer child_group_id;
 
     // 子类组的角色，1：当前组的管理员，2：受限用户
     @Column(name = "child_group_role")
     @Type(value = Types.INTEGER)
-    private Integer childGroupRole = 2;
+    private Integer child_group_role = 2;
 
     @Column(name = "adduser")
     @Type(value = Types.INTEGER)
@@ -42,11 +42,11 @@ public class GroupRelation implements DalPojo {
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
+    private Timestamp update_time;
 
     public Integer getId() {
         return id;
@@ -56,28 +56,28 @@ public class GroupRelation implements DalPojo {
         this.id = id;
     }
 
-    public Integer getCurrentGroupId() {
-        return currentGroupId;
+    public Integer getCurrent_group_id() {
+        return current_group_id;
     }
 
-    public void setCurrentGroupId(Integer currentGroupId) {
-        this.currentGroupId = currentGroupId;
+    public void setCurrent_group_id(Integer current_group_id) {
+        this.current_group_id = current_group_id;
     }
 
-    public Integer getChildGroupId() {
-        return childGroupId;
+    public Integer getChild_group_id() {
+        return child_group_id;
     }
 
-    public void setChildGroupId(Integer childGroupId) {
-        this.childGroupId = childGroupId;
+    public void setChild_group_id(Integer child_group_id) {
+        this.child_group_id = child_group_id;
     }
 
-    public Integer getChildGroupRole() {
-        return childGroupRole;
+    public Integer getChild_group_role() {
+        return child_group_role;
     }
 
-    public void setChildGroupRole(Integer childGroupRole) {
-        this.childGroupRole = childGroupRole;
+    public void setChild_group_role(Integer child_group_role) {
+        this.child_group_role = child_group_role;
     }
 
     public Integer getAdduser() {
@@ -88,20 +88,20 @@ public class GroupRelation implements DalPojo {
         this.adduser = adduser;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
 }

@@ -32,31 +32,31 @@ public class DalGroupDB implements Comparable<DalGroupDB>, DalPojo {
 
     @Column(name = "dal_group_id")
     @Type(value = Types.INTEGER)
-    private Integer dalGroupId;
+    private Integer dal_group_id;
 
     @Column(name = "db_address")
     @Type(value = Types.VARCHAR)
-    private String dbAddress;
+    private String db_address;
 
     @Column(name = "db_port")
     @Type(value = Types.VARCHAR)
-    private String dbPort;
+    private String db_port;
 
     @Column(name = "db_user")
     @Type(value = Types.VARCHAR)
-    private String dbUser;
+    private String db_user;
 
     @Column(name = "db_password")
     @Type(value = Types.VARCHAR)
-    private String dbPassword;
+    private String db_password;
 
     @Column(name = "db_catalog")
     @Type(value = Types.VARCHAR)
-    private String dbCatalog;
+    private String db_catalog;
 
     @Column(name = "db_providerName")
     @Type(value = Types.VARCHAR)
-    private String dbProvidername;
+    private String db_providerName;
 
     public Integer getId() {
         return id;
@@ -82,60 +82,60 @@ public class DalGroupDB implements Comparable<DalGroupDB>, DalPojo {
         this.comment = comment;
     }
 
-    public Integer getDalGroupId() {
-        return dalGroupId;
+    public Integer getDal_group_id() {
+        return dal_group_id;
     }
 
-    public void setDalGroupId(Integer dalGroupId) {
-        this.dalGroupId = dalGroupId;
+    public void setDal_group_id(Integer dal_group_id) {
+        this.dal_group_id = dal_group_id;
     }
 
-    public String getDbAddress() {
-        return dbAddress;
+    public String getDb_address() {
+        return db_address;
     }
 
-    public void setDbAddress(String dbAddress) {
-        this.dbAddress = dbAddress;
+    public void setDb_address(String db_address) {
+        this.db_address = db_address;
     }
 
-    public String getDbPort() {
-        return dbPort;
+    public String getDb_port() {
+        return db_port;
     }
 
-    public void setDbPort(String dbPort) {
-        this.dbPort = dbPort;
+    public void setDb_port(String db_port) {
+        this.db_port = db_port;
     }
 
-    public String getDbUser() {
-        return dbUser;
+    public String getDb_user() {
+        return db_user;
     }
 
-    public void setDbUser(String dbUser) {
-        this.dbUser = dbUser;
+    public void setDb_user(String db_user) {
+        this.db_user = db_user;
     }
 
-    public String getDbPassword() {
-        return dbPassword;
+    public String getDb_password() {
+        return db_password;
     }
 
-    public void setDbPassword(String dbPassword) {
-        this.dbPassword = dbPassword;
+    public void setDb_password(String db_password) {
+        this.db_password = db_password;
     }
 
-    public String getDbCatalog() {
-        return dbCatalog;
+    public String getDb_catalog() {
+        return db_catalog;
     }
 
-    public void setDbCatalog(String dbCatalog) {
-        this.dbCatalog = dbCatalog;
+    public void setDb_catalog(String db_catalog) {
+        this.db_catalog = db_catalog;
     }
 
-    public String getDbProvidername() {
-        return dbProvidername;
+    public String getDb_providerName() {
+        return db_providerName;
     }
 
-    public void setDbProvidername(String dbProvidername) {
-        this.dbProvidername = dbProvidername;
+    public void setDb_providerName(String db_providerName) {
+        this.db_providerName = db_providerName;
     }
 
     @Override
@@ -145,9 +145,9 @@ public class DalGroupDB implements Comparable<DalGroupDB>, DalPojo {
 
     @Override
     public String toString() {
-        return "DalGroupDB [id=" + id + ", dbname=" + dbname + ", comment=" + comment + ", dal_group_id=" + dalGroupId
-                + ", db_address=" + dbAddress + ", db_port=" + dbPort + ", db_user=" + dbUser + ", db_password="
-                + dbPassword + ", db_catalog=" + dbCatalog + ", db_providerName=" + dbProvidername + "]";
+        return "DalGroupDB [id=" + id + ", dbname=" + dbname + ", comment=" + comment + ", dal_group_id=" + dal_group_id
+                + ", db_address=" + db_address + ", db_port=" + db_port + ", db_user=" + db_user + ", db_password="
+                + db_password + ", db_catalog=" + db_catalog + ", db_providerName=" + db_providerName + "]";
     }
 
 }

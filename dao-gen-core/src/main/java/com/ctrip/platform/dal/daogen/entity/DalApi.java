@@ -28,23 +28,23 @@ public class DalApi implements Comparable<DalApi>, DalPojo {
 
     @Column(name = "db_type")
     @Type(value = Types.VARCHAR)
-    private String dbType;
+    private String db_type;
 
     @Column(name = "crud_type")
     @Type(value = Types.VARCHAR)
-    private String crudType;
+    private String crud_type;
 
     @Column(name = "method_declaration")
     @Type(value = Types.VARCHAR)
-    private String methodDeclaration;
+    private String method_declaration;
 
     @Column(name = "method_description")
     @Type(value = Types.LONGVARCHAR)
-    private String methodDescription;
+    private String method_description;
 
     @Column(name = "sp_type")
     @Type(value = Types.VARCHAR)
-    private String spType;
+    private String sp_type;
 
     public Integer getId() {
         return id;
@@ -62,51 +62,51 @@ public class DalApi implements Comparable<DalApi>, DalPojo {
         this.language = language;
     }
 
-    public String getDbType() {
-        return dbType;
+    public String getDb_type() {
+        return db_type;
     }
 
-    public void setDbType(String dbType) {
-        this.dbType = dbType;
+    public void setDb_type(String db_type) {
+        this.db_type = db_type;
     }
 
-    public String getCrudType() {
-        return crudType;
+    public String getCrud_type() {
+        return crud_type;
     }
 
-    public void setCrudType(String crudType) {
-        this.crudType = crudType;
+    public void setCrud_type(String crud_type) {
+        this.crud_type = crud_type;
     }
 
-    public String getMethodDeclaration() {
-        return methodDeclaration;
+    public String getMethod_declaration() {
+        return method_declaration;
     }
 
-    public void setMethodDeclaration(String methodDeclaration) {
-        this.methodDeclaration = methodDeclaration;
+    public void setMethod_declaration(String method_declaration) {
+        this.method_declaration = method_declaration;
     }
 
-    public String getMethodDescription() {
-        return methodDescription;
+    public String getMethod_description() {
+        return method_description;
     }
 
-    public void setMethodDescription(String methodDescription) {
-        this.methodDescription = methodDescription;
+    public void setMethod_description(String method_description) {
+        this.method_description = method_description;
     }
 
-    public String getSpType() {
-        return spType;
+    public String getSp_type() {
+        return sp_type;
     }
 
-    public void setSpType(String spType) {
-        this.spType = spType;
+    public void setSp_type(String sp_type) {
+        this.sp_type = sp_type;
     }
 
     @Override
     public int compareTo(DalApi api) {
-        String str1 = language + dbType + crudType + methodDeclaration + methodDescription + spType;
-        String str2 = api.getLanguage() + api.getDbType() + api.getCrudType() + api.getMethodDeclaration()
-                + api.getMethodDescription() + api.getSpType();
+        String str1 = language + db_type + crud_type + method_declaration + method_description + sp_type;
+        String str2 = api.getLanguage() + api.getDb_type() + api.getCrud_type() + api.getMethod_declaration()
+                + api.getMethod_description() + api.getSp_type();
         return str1.compareTo(str2);
     }
 }

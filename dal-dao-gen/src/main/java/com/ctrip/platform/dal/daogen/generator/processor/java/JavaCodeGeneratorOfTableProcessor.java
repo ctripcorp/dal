@@ -9,7 +9,6 @@ import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.GenUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
-import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 
 import java.io.File;
@@ -19,8 +18,6 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 
 public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
-    private static Logger log = Logger.getLogger(JavaCodeGeneratorOfTableProcessor.class);
-
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
@@ -28,7 +25,7 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
             int projectId = ctx.getProjectId();
             File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), projectId));
             List<Callable<ExecuteResult>> tableCallables = generateTableDao(ctx, dir);
-            TaskUtils.invokeBatch(log, tableCallables);
+            TaskUtils.invokeBatch(tableCallables);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -64,8 +61,8 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
                                 "templates/java/test/DaoUnitTests.java.tpl");
 
                         result.setSuccessal(true);
-                    } catch (Exception e) {
-                        log.error(result.getTaskName() + " exception", e);
+                    } catch (Throwable e) {
+                        throw e;
                     }
                     return result;
                 }

@@ -41,11 +41,11 @@ public class DatabaseSet implements Comparable<DatabaseSet>, DalPojo {
 
     @Column(name = "update_user_no")
     @Type(value = Types.VARCHAR)
-    private String updateUserNo;
+    private String update_user_no;
 
     @Column(name = "update_time")
     @Type(value = Types.TIMESTAMP)
-    private Timestamp updateTime;
+    private Timestamp update_time;
 
     private String str_update_time;
 
@@ -81,6 +81,10 @@ public class DatabaseSet implements Comparable<DatabaseSet>, DalPojo {
         this.shardingStrategy = shardingStrategy;
     }
 
+    public boolean hasShardingStrategy() {
+        return shardingStrategy != null && !shardingStrategy.isEmpty();
+    }
+
     public Integer getGroupId() {
         return groupId;
     }
@@ -89,20 +93,20 @@ public class DatabaseSet implements Comparable<DatabaseSet>, DalPojo {
         this.groupId = groupId;
     }
 
-    public String getUpdateUserNo() {
-        return updateUserNo;
+    public String getUpdate_user_no() {
+        return update_user_no;
     }
 
-    public void setUpdateUserNo(String updateUserNo) {
-        this.updateUserNo = updateUserNo;
+    public void setUpdate_user_no(String update_user_no) {
+        this.update_user_no = update_user_no;
     }
 
-    public Timestamp getUpdateTime() {
-        return updateTime;
+    public Timestamp getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdate_time(Timestamp update_time) {
+        this.update_time = update_time;
     }
 
     public String getStr_update_time() {

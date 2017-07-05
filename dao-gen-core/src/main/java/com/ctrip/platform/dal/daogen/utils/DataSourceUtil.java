@@ -63,17 +63,17 @@ public class DataSourceUtil {
         if (isEmpty(allInOneName))
             throw new SQLException("the param allInOneName is null. So can not get DataSourse.");
 
-        DalGroupDBDao allDbDao = SpringBeanGetter.getDaoOfDalGroupDB();
+        DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
         DalGroupDB db = allDbDao.getGroupDBByDbName(allInOneName);
         if (db == null)
             throw new SQLException(allInOneName + " is not exist in the table of alldbs.");
 
-        String address = db.getDbAddress();
-        String port = db.getDbPort();
-        String userName = db.getDbUser();
-        String password = db.getDbPassword();
-        String driverClass = db.getDbProvidername();
-        String catalog = db.getDbCatalog();
+        String address = db.getDb_address();
+        String port = db.getDb_port();
+        String userName = db.getDb_user();
+        String password = db.getDb_password();
+        String driverClass = db.getDb_providerName();
+        String catalog = db.getDb_catalog();
         validateParam(allInOneName, address, port, catalog, userName, password, driverClass);
         String key = address.trim() + catalog.trim() + port.trim() + userName.trim() + password.trim();
         DataSource ds = cache2.get(key);
@@ -150,19 +150,20 @@ public class DataSourceUtil {
         p.setJmxEnabled(false);
         p.setTestWhileIdle(false);
         p.setTestOnBorrow(true);
-        p.setValidationQuery("SELECT 1");
         p.setTestOnReturn(false);
-        p.setValidationInterval(30000L);
-        p.setTimeBetweenEvictionRunsMillis(30000);
-        p.setMaxActive(100);
-        p.setInitialSize(10);
-        p.setMaxWait(5000); // 20000
+        p.setValidationQuery("SELECT 1");
         p.setValidationQueryTimeout(5);
+        p.setValidationInterval(30000L);
+        p.setTimeBetweenEvictionRunsMillis(5000);
+        p.setMaxActive(100);
+        p.setMinIdle(0);
+        p.setMaxWait(10000);
+        p.setMaxAge(0L);
+        p.setInitialSize(1);
         p.setRemoveAbandonedTimeout(60);
-        p.setMinEvictableIdleTimeMillis(30000);
-        p.setMinIdle(10);
-        p.setLogAbandoned(false);
         p.setRemoveAbandoned(true);
+        p.setLogAbandoned(true);
+        p.setMinEvictableIdleTimeMillis(30000);
         p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
                 + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
 

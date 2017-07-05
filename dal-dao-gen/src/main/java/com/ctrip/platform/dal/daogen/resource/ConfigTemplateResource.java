@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.daogen.entity.ConfigTemplate;
 import com.ctrip.platform.dal.daogen.entity.Language;
 import com.ctrip.platform.dal.daogen.enums.ConfigType;
 import com.ctrip.platform.dal.daogen.enums.LanguageType;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -40,7 +40,7 @@ public class ConfigTemplateResource {
     @Path("getAllConfigTemplates")
     public List<ConfigTemplate> getAllConfigTemplates() throws Exception {
         try {
-            List<ConfigTemplate> configTemplates = SpringBeanGetter.getConfigTemplateDao().getAllConfigTemplates();
+            List<ConfigTemplate> configTemplates = BeanGetter.getConfigTemplateDao().getAllConfigTemplates();
             return configTemplates;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -55,7 +55,7 @@ public class ConfigTemplateResource {
         int templateId = -1;
         try {
             templateId = Integer.parseInt(id);
-            ConfigTemplate configTemplate = SpringBeanGetter.getConfigTemplateDao().getConfigTemplateById(templateId);
+            ConfigTemplate configTemplate = BeanGetter.getConfigTemplateDao().getConfigTemplateById(templateId);
             return configTemplate;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -80,9 +80,9 @@ public class ConfigTemplateResource {
             lang_type = Integer.parseInt(langType);
 
             ConfigTemplate temp = new ConfigTemplate();
-            temp.setConfigType(config_type);
-            temp.setLangType(lang_type);
-            configTemplate = SpringBeanGetter.getConfigTemplateDao().getConfigTemplateByConditions(temp);
+            temp.setConfig_type(config_type);
+            temp.setLang_type(lang_type);
+            configTemplate = BeanGetter.getConfigTemplateDao().getConfigTemplateByConditions(temp);
             return configTemplate;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -109,10 +109,10 @@ public class ConfigTemplateResource {
             lang_type = Integer.parseInt(langType);
 
             ConfigTemplate configTemplate = new ConfigTemplate();
-            configTemplate.setConfigType(config_type);
-            configTemplate.setLangType(lang_type);
+            configTemplate.setConfig_type(config_type);
+            configTemplate.setLang_type(lang_type);
             configTemplate.setTemplate(template);
-            SpringBeanGetter.getConfigTemplateDao().insertConfigTemplate(configTemplate);
+            BeanGetter.getConfigTemplateDao().insertConfigTemplate(configTemplate);
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -145,10 +145,10 @@ public class ConfigTemplateResource {
 
             ConfigTemplate configTemplate = new ConfigTemplate();
             configTemplate.setId(templateId);
-            configTemplate.setConfigType(config_type);
-            configTemplate.setLangType(lang_type);
+            configTemplate.setConfig_type(config_type);
+            configTemplate.setLang_type(lang_type);
             configTemplate.setTemplate(template);
-            SpringBeanGetter.getConfigTemplateDao().updateConfigTemplate(configTemplate);
+            BeanGetter.getConfigTemplateDao().updateConfigTemplate(configTemplate);
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
@@ -174,7 +174,7 @@ public class ConfigTemplateResource {
 
             ConfigTemplate configTemplate = new ConfigTemplate();
             configTemplate.setId(templateId);
-            SpringBeanGetter.getConfigTemplateDao().deleteConfigTemplate(configTemplate);
+            BeanGetter.getConfigTemplateDao().deleteConfigTemplate(configTemplate);
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);

@@ -6,7 +6,7 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.SpringBeanGetter;
+import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Resource;
@@ -50,27 +50,27 @@ public class GenTaskByTableViewResource {
 
             if (action.equalsIgnoreCase("delete")) {
                 task.setId(id);
-                if (0 >= SpringBeanGetter.getDaoByTableViewSp().deleteTask(task)) {
+                if (0 >= BeanGetter.getDaoByTableViewSp().deleteTask(task)) {
                     return Status.ERROR;
                 }
             } else {
                 String userNo = RequestUtil.getUserNo(request);
-                LoginUser user = SpringBeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
+                LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
-                task.setProjectId(project_id);
-                task.setDbName(set_name);
-                task.setTableNames(table_names);
-                task.setViewNames(view_names);
-                task.setSpNames(sp_names);
+                task.setProject_id(project_id);
+                task.setDatabaseSetName(set_name);
+                task.setTable_names(table_names);
+                task.setView_names(view_names);
+                task.setSp_names(sp_names);
                 task.setPrefix(prefix);
                 task.setSuffix(suffix);
-                task.setCudBySp(cud_by_sp);
+                task.setCud_by_sp(cud_by_sp);
                 task.setPagination(pagination);
-                task.setUpdateUserNo(user.getUserName() + "(" + userNo + ")");
-                task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+                task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
+                task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);
-                task.setSqlStyle(sql_style);
-                task.setApiList(api_list);
+                task.setSql_style(sql_style);
+                task.setApi_list(api_list);
                 if (needApproveTask(project_id, user.getId())) {
                     task.setApproved(1);
                 } else {
@@ -80,14 +80,14 @@ public class GenTaskByTableViewResource {
 
                 if (action.equalsIgnoreCase("update")) {
                     task.setId(id);
-                    task.setVersion(SpringBeanGetter.getDaoByTableViewSp().getVersionById(id));
-                    if (0 >= SpringBeanGetter.getDaoByTableViewSp().updateTask(task)) {
+                    task.setVersion(BeanGetter.getDaoByTableViewSp().getVersionById(id));
+                    if (0 >= BeanGetter.getDaoByTableViewSp().updateTask(task)) {
                         return Status.ERROR;
                     }
                 } else {
                     task.setGenerated(false);
                     task.setVersion(1);
-                    if (0 >= SpringBeanGetter.getDaoByTableViewSp().insertTask(task)) {
+                    if (0 >= BeanGetter.getDaoByTableViewSp().insertTask(task)) {
                         return Status.ERROR;
                     }
                 }
@@ -103,18 +103,18 @@ public class GenTaskByTableViewResource {
     }
 
     private boolean needApproveTask(int projectId, int userId) throws SQLException {
-        Project prj = SpringBeanGetter.getDaoOfProject().getProjectByID(projectId);
+        Project prj = BeanGetter.getDaoOfProject().getProjectByID(projectId);
         if (prj == null) {
             return true;
         }
         List<UserGroup> lst =
-                SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDalGroupId(), userId);
+                BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
         if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
             return false;
         }
         // all child group
         List<GroupRelation> grs =
-                SpringBeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDalGroupId());
+                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
         if (grs == null || grs.size() < 1) {
             return true;
         }
@@ -122,10 +122,9 @@ public class GenTaskByTableViewResource {
         Iterator<GroupRelation> ite = grs.iterator();
         while (ite.hasNext()) {
             GroupRelation gr = ite.next();
-            if (gr.getChildGroupRole() == 1) {
-                int groupId = gr.getChildGroupId();
-                List<UserGroup> test =
-                        SpringBeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
+            if (gr.getChild_group_role() == 1) {
+                int groupId = gr.getChild_group_id();
+                List<UserGroup> test = BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
                 if (test != null && test.size() > 0) {
                     return false;
                 }
@@ -144,40 +143,40 @@ public class GenTaskByTableViewResource {
         try {
             List<DalApi> apis = null;
             DatabaseSetEntry databaseSetEntry =
-                    SpringBeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
+                    BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
             DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
 
             if ("csharp".equalsIgnoreCase(sql_style)) {
                 if (dbCategory == DatabaseCategory.MySql) {
-                    apis = SpringBeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("csharp", "MySQL");
+                    apis = BeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("csharp", "MySQL");
                 } else {
-                    apis = SpringBeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("csharp", "SQLServer");
+                    apis = BeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("csharp", "SQLServer");
                 }
             } else {
                 if (dbCategory == DatabaseCategory.MySql) {
-                    apis = SpringBeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("java", "MySQL");
+                    apis = BeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("java", "MySQL");
                 } else {
                     // SpType spType =
                     // spType(databaseSetEntry.getConnectionString(),
                     // table_names);
                     // apis =
-                    // SpringBeanGetter.getDalApiDao().getDalApiByLanguageAndDbtypeAndSptype("java",
+                    // BeanGetter.getDalApiDao().getDalApiByLanguageAndDbtypeAndSptype("java",
                     // "SQLServer", spType.getValue());
-                    apis = SpringBeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("java", "SQLServer");
+                    apis = BeanGetter.getDalApiDao().getDalApiByLanguageAndDbtype("java", "SQLServer");
                 }
             }
 
             for (DalApi api : apis) {
-                String method_declaration = api.getMethodDeclaration();
+                String method_declaration = api.getMethod_declaration();
                 method_declaration = method_declaration.replaceAll("<", "&lt;");
                 method_declaration = method_declaration.replaceAll(">", "&gt;");
-                api.setMethodDeclaration(method_declaration);
+                api.setMethod_declaration(method_declaration);
             }
 
             java.util.Collections.sort(apis, new Comparator<DalApi>() {
                 @Override
                 public int compare(DalApi o1, DalApi o2) {
-                    return o1.getMethodDeclaration().compareToIgnoreCase(o2.getMethodDeclaration());
+                    return o1.getMethod_declaration().compareToIgnoreCase(o2.getMethod_declaration());
                 }
             });
 

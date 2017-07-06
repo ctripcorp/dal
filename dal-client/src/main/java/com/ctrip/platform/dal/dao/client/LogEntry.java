@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
-	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao";
+	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao.";
 	
 	private boolean sensitive;
 	private String[] sqls;

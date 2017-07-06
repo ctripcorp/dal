@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -17,17 +15,13 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import java.sql.*;
 import java.util.List;
 
-public class DaoOfLoginUser {
+public class DaoOfLoginUser extends BaseDao {
     private DalTableDao<LoginUser> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<LoginUser> loginUserRowMapper = null;
 
     public DaoOfLoginUser() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(LoginUser.class));
         loginUserRowMapper = new DalDefaultJpaMapper<>(LoginUser.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public List<LoginUser> getAllUsers() throws SQLException {

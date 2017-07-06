@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
@@ -13,15 +11,11 @@ import com.ctrip.platform.dal.daogen.entity.UserProject;
 import java.sql.*;
 import java.util.List;
 
-public class DaoOfUserProject {
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
+public class DaoOfUserProject extends BaseDao {
     private DalRowMapper<UserProject> userProjectRowMapper = null;
 
     public DaoOfUserProject() throws SQLException {
         userProjectRowMapper = new DalDefaultJpaMapper<>(UserProject.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public List<UserProject> getUserProjectsByUser(String userNo) throws SQLException {

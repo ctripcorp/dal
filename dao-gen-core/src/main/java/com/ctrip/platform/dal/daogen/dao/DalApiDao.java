@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -15,17 +13,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-public class DalApiDao {
+public class DalApiDao extends BaseDao {
     private DalTableDao<DalApi> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<DalApi> dalApiRowMapper = null;
 
     public DalApiDao() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(DalApi.class));
         dalApiRowMapper = new DalDefaultJpaMapper<>(DalApi.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public DalApi getDalApiById(Integer id) throws SQLException {

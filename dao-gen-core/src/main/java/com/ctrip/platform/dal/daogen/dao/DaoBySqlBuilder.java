@@ -21,17 +21,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class DaoBySqlBuilder {
+public class DaoBySqlBuilder extends BaseDao {
     private DalTableDao<GenTaskBySqlBuilder> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<GenTaskBySqlBuilder> genTaskBySqlBuilderRowMapper = null;
 
     public DaoBySqlBuilder() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(GenTaskBySqlBuilder.class));
         genTaskBySqlBuilderRowMapper = new DalDefaultJpaMapper<>(GenTaskBySqlBuilder.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public List<GenTaskBySqlBuilder> getAllTasks() throws SQLException {

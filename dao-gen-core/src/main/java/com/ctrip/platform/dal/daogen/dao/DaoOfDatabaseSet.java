@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -19,12 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class DaoOfDatabaseSet {
+public class DaoOfDatabaseSet extends BaseDao {
     private DalTableDao<DatabaseSet> client;
     private DalTableDao<DatabaseSetEntry> client2;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<DatabaseSet> databaseSetRowMapper = null;
     private DalRowMapper<DatabaseSetEntry> databaseSetEntryRowMapper = null;
 
@@ -33,7 +28,6 @@ public class DaoOfDatabaseSet {
         client2 = new DalTableDao<>(new DalDefaultJpaParser<>(DatabaseSetEntry.class));
         databaseSetRowMapper = new DalDefaultJpaMapper<>(DatabaseSet.class);
         databaseSetEntryRowMapper = new DalDefaultJpaMapper<>(DatabaseSetEntry.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public DatabaseSet getAllDatabaseSetById(Integer id) throws SQLException {

@@ -15,12 +15,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 public class DalTransactionInterceptor implements MethodInterceptor {
-    private Object orginalObj;
-    
-    public DalTransactionInterceptor(Object orginalObj) {
-        this.orginalObj = orginalObj;
-    }
-    
     @Override
     public Object intercept(final Object obj, final Method method, final Object[] args, final MethodProxy proxy) throws Throwable {
         DalHints hints = null;
@@ -58,9 +52,9 @@ public class DalTransactionInterceptor implements MethodInterceptor {
             @Override
             public boolean execute(DalClient client) throws SQLException {
                 try {
-                    result.set(proxy.invoke(orginalObj, args));
+                    result.set(proxy.invokeSuper(obj, args));
                 } catch (Throwable e) {
-                    DalException.wrap(e);
+                    throw DalException.wrap(e);
                 }
                 return false;
             }

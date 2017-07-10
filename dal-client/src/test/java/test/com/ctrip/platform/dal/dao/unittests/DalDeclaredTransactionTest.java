@@ -1,14 +1,17 @@
 package test.com.ctrip.platform.dal.dao.unittests;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.fail;
 import test.com.ctrip.platform.dal.dao.unitbase.BaseTestStub;
 import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
 
@@ -16,13 +19,15 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.annotation.DalTransactionalBeanPostProcessor;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 
 public class DalDeclaredTransactionTest extends BaseTestStub {
+    private final String DONE = "done";
+    
     private static SqlServerDatabaseInitializer initializer = new SqlServerDatabaseInitializer();
     private static final String DATABASE_NAME = SqlServerDatabaseInitializer.DATABASE_NAME;
+    private static ApplicationContext ctx;
     
     public DalDeclaredTransactionTest() {
         super(initializer.DATABASE_NAME, initializer.diff);
@@ -31,6 +36,8 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializer.setUpBeforeClass();
+        ctx = new ClassPathXmlApplicationContext("transactionTest.xml");
+        
         DalQueryDaoTestStub.prepareData(initializer.DATABASE_NAME);
     }
 
@@ -40,23 +47,71 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
     }
     
     @Test
-    public void testPostProcess() {
-        DalTransactionalBeanPostProcessor bpp = new DalTransactionalBeanPostProcessor();
-        TransactionTestClassSqlServer test = (TransactionTestClassSqlServer)bpp.postProcessAfterInitialization(new TransactionTestClassSqlServer(), "");
-        test.perform();
+    public void testGetFromContext() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = (TransactionTestClassSqlServer)ctx.getBean("TransactionTestClassSqlServer");
+        Assert.assertEquals(DONE, test.perform());
+    }
+    
+    @Test
+    public void testAutoWire() throws InstantiationException, IllegalAccessException {
+        TransactionTestUser test = (TransactionTestUser)ctx.getBean(TransactionTestUser.class);
+        Assert.assertEquals(DONE, test.perform());
+    }
+    
+    @Test
+    public void testAutoWireNest() throws InstantiationException, IllegalAccessException {
+        TransactionTestUser test = (TransactionTestUser)ctx.getBean(TransactionTestUser.class);
+        Assert.assertEquals(DONE, test.performNest());
     }
     
     @Test
     public void testDeclareOnClass() throws InstantiationException, IllegalAccessException {
         TransactionTestClassSqlServer test = DalTransactionManager.create(TransactionTestClassSqlServer.class);
-        test.perform();
+        Assert.assertEquals(DONE, test.perform());
     }
     
     @Test
-    public void testDeclareOnObject() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
-        test.perform();
+    public void testDeclareOnObject() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.perform());
+    }
+    
+    Class targetClass = TransactionTestClassSqlServer.class;
+            
+    @Test
+    public void testNestedTransaction() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.performNest());
+        
+        test = (TransactionTestClassSqlServer)ctx.getBean("TransactionTestClassSqlServer");
+        Assert.assertEquals(DONE, test.performNest());
+    }
+    
+    @Test
+    public void testNestedDistributedTransaction() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        assertTrue(DalTransactionManager.isInTransaction() == false);
+        
+        try {
+            test.performNestDistributedTransaction();
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        assertTrue(DalTransactionManager.isInTransaction() == false);
+    }
+    
+    @Test
+    public void testNestedTransaction2() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.performNest2());
+    }
+    
+    @Test
+    public void testNestedTransaction3() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.performNest3());
     }
     
     @Test
@@ -67,80 +122,75 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
         try {
             test.performFail();
             fail();
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
         
         assertTrue(DalTransactionManager.isInTransaction() == false);
     }
     
     @Test
-    public void testWithShard() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
-        test.perform("1");
-        test.perform(1);
-        test.perform(new Integer(1));
+    public void testWithShard() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.perform("1"));
+        Assert.assertEquals(DONE, test.perform(1));
+        Assert.assertEquals(DONE, test.perform(new Integer(1)));
     }
     
     @Test
-    public void testWithHints() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
-        test.perform("1", new DalHints().inShard(1));
-        test.perform("1", new DalHints().inShard("1"));
-        test.perform("1", new DalHints().inShard(0));
-        test.perform("1", new DalHints().inShard("0"));
+    public void testWithHints() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard(1)));
+        Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard("1")));
+        Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard(0)));
+        Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard("0")));
     }
     
     @Test
-    public void testWithHintsFail() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
+    public void testWithHintsFail() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
         
         assertTrue(DalTransactionManager.isInTransaction() == false);
         
         try {
             test.performFail("1", new DalHints().inShard(1));
             fail();
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
         
         assertTrue(DalTransactionManager.isInTransaction() == false);
     }
     
     @Test
-    public void testWithShardAndHints() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
-        test.performWitShard("1", new DalHints().inShard(1));
-        test.performWitShard("1", new DalHints().inShard(1));
-        test.performWitShard("1", new DalHints().inShard(0));
-        test.performWitShard("1", new DalHints().inShard("0"));
+    public void testWithShardAndHints() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard(1)));
+        Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard("1")));
+        Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard(0)));
+        Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard("0")));
     }
     
     @Test
-    public void testWithShardAndHintsNest() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
-        test.performWitShardNest("1", new DalHints().inShard(1));
-        test.performWitShardNest("1", new DalHints().inShard(1));
-        test.performWitShardNest("1", new DalHints().inShard(0));
-        test.performWitShardNest("1", new DalHints().inShard("0"));
+    public void testWithShardAndHintsNest() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard(1)));
+        Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard("1")));
+        Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard(0)));
+        Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard("0")));
     }
     
     @Test
-    public void testWithShardAndHintsNestFail() {
-        TransactionTestClassSqlServer test = new TransactionTestClassSqlServer();
-        test = DalTransactionManager.enable(test);
-        test.performWitShardNest("1", new DalHints().inShard(1));
-        test.performWitShardNest("1", new DalHints().inShard(1));
-        test.performWitShardNest("1", new DalHints().inShard(0));
-        test.performWitShardNest("1", new DalHints().inShard("0"));
+    public void testWithShardAndHintsNestFail() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        try {
+            test.performWitShardNestFail("1", new DalHints().inShard(1));
+            fail();
+        } catch (Exception e) {
+        }
     }
     
     @Test
-    public void testWithShardAndHintsNestWithCommand() throws SQLException {
-        final TransactionTestClassSqlServer test = DalTransactionManager.enable(new TransactionTestClassSqlServer());
+    public void testWithShardAndHintsNestWithCommand() throws SQLException, InstantiationException, IllegalAccessException {
+        final TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
         DalClientFactory.getClient(test.DB_NAME_SHARD).execute(new DalCommand() {
             
             @Override
@@ -154,8 +204,8 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
     }
     
     @Test
-    public void testWithShardAndHintsNestWithCommandFail() throws SQLException {
-        final TransactionTestClassSqlServer test = DalTransactionManager.enable(new TransactionTestClassSqlServer());
+    public void testWithShardAndHintsNestWithCommandFail() throws SQLException, InstantiationException, IllegalAccessException {
+        final TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
         try {
             assertTrue(DalTransactionManager.isInTransaction() == false);
             
@@ -169,26 +219,40 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
                     throw new RuntimeException();
                 }
             }, new DalHints().inShard(1));
-        } catch (Throwable e) {
+        } catch (Exception e) {
         }
         
         assertTrue(DalTransactionManager.isInTransaction() == false);
     }
     
     @Test
-    public void testCommandNestWithShardAndHints() throws SQLException {
-        TransactionTestClassSqlServer test = DalTransactionManager.enable(new TransactionTestClassSqlServer());
+    public void testCommandNestWithShardAndHints() throws SQLException, InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
         test.performCommandWitShardNest("1", new DalHints());
     }
     
     @Test
-    public void testCommandNestWithShardAndHintsFail() throws SQLException {
-        TransactionTestClassSqlServer test = DalTransactionManager.enable(new TransactionTestClassSqlServer());
+    public void testCommandNestWithShardAndHintsFail() throws SQLException, InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
         try {
             assertTrue(DalTransactionManager.isInTransaction() == false);
             test.performCommandWitShardNestFail("1", new DalHints());
             fail();
-        } catch (Throwable e) {
+        } catch (Exception e) {
+        }
+        
+        assertTrue(DalTransactionManager.isInTransaction() == false);
+    }
+    
+    @Test
+    public void testDetectDistributedTransaction() throws SQLException, InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        try {
+            assertTrue(DalTransactionManager.isInTransaction() == false);
+            test.performDetectDistributedTransaction("1", new DalHints());
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         
         assertTrue(DalTransactionManager.isInTransaction() == false);

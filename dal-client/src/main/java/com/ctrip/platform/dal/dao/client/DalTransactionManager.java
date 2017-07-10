@@ -112,16 +112,11 @@ public class DalTransactionManager {
 	}
 
     public static <T> T create(Class<T> targetClass) throws InstantiationException, IllegalAccessException {   
-        T target = targetClass.newInstance();
-        return enable(target);  
-    }
-    
-    public static <T> T enable(T target) {   
         Enhancer enhancer = new Enhancer();  
-        enhancer.setSuperclass(target.getClass());  
-        enhancer.setClassLoader(target.getClass().getClassLoader());
+        enhancer.setSuperclass(targetClass);  
+        enhancer.setClassLoader(targetClass.getClassLoader());
         enhancer.setCallbackFilter(new TransactionalCallbackFilter());
-        Callback[] callbacks = new Callback[]{new DalTransactionInterceptor(target), NoOp.INSTANCE};
+        Callback[] callbacks = new Callback[]{new DalTransactionInterceptor(), NoOp.INSTANCE};
         enhancer.setCallbacks(callbacks);  
         return (T)enhancer.create();  
     }

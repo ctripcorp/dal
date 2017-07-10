@@ -17,12 +17,18 @@ import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 public class TransactionTestClassSqlServer {
     public static final String DB_NAME = SqlServerDatabaseInitializer.DATABASE_NAME;
     public static final String DB_NAME_SHARD = "dao_test_sqlsvr_dbShard";
+    public static final String DONE = "done";
     
+    public String performNormal() {
+        assertTrue(!DalTransactionManager.isInTransaction());
+        return DONE;
+    }
+
     @Transactional(logicalDbName = DB_NAME)
     public String perform() {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(DB_NAME, DalTransactionManager.getLogicDbName());
-        return null;
+        return DONE;
     }
 
     @Transactional(logicalDbName = DB_NAME)
@@ -32,12 +38,41 @@ public class TransactionTestClassSqlServer {
         throw new RuntimeException();
     }
 
+    @Transactional(logicalDbName = DB_NAME)
+    public String performNest() {
+        assertTrue(DalTransactionManager.isInTransaction());
+        assertEquals(DB_NAME, DalTransactionManager.getLogicDbName());
+        perform();
+        return DONE;
+    }
+
+    @Transactional(logicalDbName = DB_NAME)
+    public String performNestDistributedTransaction() {
+        assertTrue(DalTransactionManager.isInTransaction());
+        assertEquals(DB_NAME, DalTransactionManager.getLogicDbName());
+        perform(1);
+        return DONE;
+    }
+
+    public String performNest2() {
+        assertTrue(!DalTransactionManager.isInTransaction());
+        perform();
+        return DONE;
+    }
+
+    public String performNest3() throws InstantiationException, IllegalAccessException {
+        assertTrue(!DalTransactionManager.isInTransaction());
+        TransactionTestClassSqlServer target = DalTransactionManager.create(TransactionTestClassSqlServer.class);
+        target.perform();
+        return DONE;
+    }
+
     @Transactional(logicalDbName = DB_NAME_SHARD)
     public String perform(@Shard String id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(DB_NAME_SHARD, DalTransactionManager.getLogicDbName());
         assertEquals(id, DalTransactionManager.getCurrentDbMeta().getShardId());
-        return null;
+        return DONE;
     }
 
     @Transactional(logicalDbName = DB_NAME_SHARD)
@@ -45,21 +80,21 @@ public class TransactionTestClassSqlServer {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(DB_NAME_SHARD, DalTransactionManager.getLogicDbName());
         assertEquals(id.toString(), DalTransactionManager.getCurrentDbMeta().getShardId());
-        return null;
+        return DONE;
     }
 
     @Transactional(logicalDbName = DB_NAME_SHARD)
     public String perform(@Shard int id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(String.valueOf(id), DalTransactionManager.getCurrentDbMeta().getShardId());
-        return null;
+        return DONE;
     }
 
     @Transactional(logicalDbName = DB_NAME_SHARD)
     public String perform(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(hints.getShardId(), DalTransactionManager.getCurrentDbMeta().getShardId());
-        return null;
+        return DONE;
     }
     
     @Transactional(logicalDbName = DB_NAME_SHARD)
@@ -73,7 +108,7 @@ public class TransactionTestClassSqlServer {
     public String performWitShard(@Shard String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(id, DalTransactionManager.getCurrentDbMeta().getShardId());
-        return null;
+        return DONE;
     }
     
     @Transactional(logicalDbName = "dao_test_sqlsvr_dbShard")
@@ -81,7 +116,15 @@ public class TransactionTestClassSqlServer {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(id, DalTransactionManager.getCurrentDbMeta().getShardId());
         performWitShard(id, hints);
-        return null;
+        return DONE;
+    }
+    
+    @Transactional(logicalDbName = "dao_test_sqlsvr_dbShard")
+    public String performWitShardNestFail(@Shard String id, DalHints hints) {
+        assertTrue(DalTransactionManager.isInTransaction());
+        assertEquals(id, DalTransactionManager.getCurrentDbMeta().getShardId());
+        performFail(id, hints.inShard(id));
+        return DONE;
     }
     
     @Transactional(logicalDbName = "dao_test_sqlsvr_dbShard")
@@ -98,7 +141,7 @@ public class TransactionTestClassSqlServer {
             }
         }, new DalHints().inShard(id));
         
-        return "";
+        return DONE;
     }
     
     @Transactional(logicalDbName = "dao_test_sqlsvr_dbShard")
@@ -111,10 +154,29 @@ public class TransactionTestClassSqlServer {
                 perform(id, new DalHints().inShard(id));
                 performWitShard(id, new DalHints().inShard(id));
                 performWitShardNest(id, new DalHints().inShard(id));
-                throw new RuntimeException();
+                performFail(id, new DalHints().inShard(id));
+                return false;
             }
         }, new DalHints().inShard(id));
         
-        return "";
+        return DONE;
+    }
+    
+    @Transactional(logicalDbName = "dao_test_sqlsvr_dbShard")
+    public String performDetectDistributedTransaction(final @Shard String id, DalHints hints) throws SQLException {
+        DalClientFactory.getClient(DB_NAME_SHARD).execute(new DalCommand() {
+            
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                perform(id, new DalHints().inShard(id));
+                perform(id, new DalHints().inShard(id));
+                performWitShard(id, new DalHints().inShard(id));
+                performWitShardNest(id, new DalHints().inShard(id));
+                performFail(id, new DalHints().inShard(id+id));
+                return false;
+            }
+        }, new DalHints().inShard(id));
+        
+        return DONE;
     }
 }

@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -17,18 +15,13 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
 
-public class GroupRelationDao {
+public class GroupRelationDao extends BaseDao {
     private DalTableDao<GroupRelation> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
-
     private DalRowMapper<GroupRelation> groupRelationRowMapper = null;
 
     public GroupRelationDao() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(GroupRelation.class));
         groupRelationRowMapper = new DalDefaultJpaMapper<>(GroupRelation.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public List<GroupRelation> getAllGroupRelationByCurrentGroupId(Integer currentGroupId) throws SQLException {

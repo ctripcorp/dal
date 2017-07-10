@@ -623,7 +623,7 @@ public class DbUtils {
             preparedStatement = stmtCreator.createPreparedStatement(connection, sb.toString(), parameters, hints);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                map.put(resultSet.getString("name"), resultSet.getString("description"));
+                map.put(resultSet.getString("name").toLowerCase(), resultSet.getString("description"));
             }
         } catch (Throwable e) {
             throw e;

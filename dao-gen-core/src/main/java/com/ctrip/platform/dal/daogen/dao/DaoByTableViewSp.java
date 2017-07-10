@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -20,17 +18,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class DaoByTableViewSp {
+public class DaoByTableViewSp extends BaseDao {
     private DalTableDao<GenTaskByTableViewSp> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<GenTaskByTableViewSp> genTaskByTableViewSpRowMapper = null;
 
     public DaoByTableViewSp() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(GenTaskByTableViewSp.class));
         genTaskByTableViewSpRowMapper = new DalDefaultJpaMapper<>(GenTaskByTableViewSp.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     private void processList(List<GenTaskByTableViewSp> list) throws SQLException {

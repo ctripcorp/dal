@@ -53,9 +53,8 @@ namespace Arch.Data.DbEngine.DB
                         if (readWriteSplit == null)
                             readWriteSplit = RWSplittingManager.Instance;
                     }
-
-                    result = readWriteSplit.GetOperationalDatabases(statement);
                 }
+                result = readWriteSplit.GetOperationalDatabases(statement);
             }
 
             //如果没有合适的数据库

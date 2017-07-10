@@ -19,15 +19,27 @@ namespace Arch.Data.DbEngine.RW
             {
                 String databaseSet = statement.DatabaseSet;
                 var master = DALBootstrap.DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Master).Single();
-                var slaves = DALBootstrap.DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave)
-                    .OrderByDescending(p => p.Ratio).ToList();
 
-                if (slaves != null && slaves.Count > 0)
+                if (statement.OperationType == OperationType.Read)
                 {
-                    databases.FirstCandidate = slaves[0].Database;
-                    slaves.RemoveAt(0);
-                    slaves.ForEach(p => databases.OtherCandidates.Add(p.Database));
-                    databases.OtherCandidates.Add(master.Database);
+                    var slaves = DALBootstrap.DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave)
+                                .OrderByDescending(p => p.Ratio).ToList();
+
+                    if (slaves != null && slaves.Count > 0)
+                    {
+                        databases.FirstCandidate = slaves[0].Database;
+                        slaves.RemoveAt(0);
+                        slaves.ForEach(p => databases.OtherCandidates.Add(p.Database));
+                        databases.OtherCandidates.Add(master.Database);
+                    }
+                    else
+                    {
+                        databases.FirstCandidate = master.Database;
+                    }
+                }
+                else
+                {
+                    databases.FirstCandidate = master.Database;
                 }
             }
             catch

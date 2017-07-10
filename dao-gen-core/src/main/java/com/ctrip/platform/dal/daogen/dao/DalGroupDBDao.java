@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -19,17 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class DalGroupDBDao {
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
+public class DalGroupDBDao extends BaseDao {
     private DalTableDao<DalGroupDB> client;
     private DalRowMapper<DalGroupDB> dalGroupDBRowMapper = null;
 
     public DalGroupDBDao() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(DalGroupDB.class));
         dalGroupDBRowMapper = new DalDefaultJpaMapper<>(DalGroupDB.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public List<DalGroupDB> getAllGroupDbs() throws SQLException {

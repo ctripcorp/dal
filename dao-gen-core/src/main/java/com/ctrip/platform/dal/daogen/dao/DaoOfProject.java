@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -17,17 +15,13 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class DaoOfProject {
+public class DaoOfProject extends BaseDao {
     private DalTableDao<Project> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<Project> projectRowMapper = null;
 
     public DaoOfProject() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(Project.class));
         projectRowMapper = new DalDefaultJpaMapper<>(Project.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public Project getProjectByID(int id) throws SQLException {

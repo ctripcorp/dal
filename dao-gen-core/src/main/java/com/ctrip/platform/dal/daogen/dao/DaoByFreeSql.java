@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -21,17 +19,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class DaoByFreeSql {
+public class DaoByFreeSql extends BaseDao {
     private DalTableDao<GenTaskByFreeSql> client;
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<GenTaskByFreeSql> genTaskByFreeSqlRowMapper = null;
 
     public DaoByFreeSql() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(GenTaskByFreeSql.class));
         genTaskByFreeSqlRowMapper = new DalDefaultJpaMapper<>(GenTaskByFreeSql.class);
-        queryDao = new DalQueryDao(DATA_BASE);
     }
 
     public List<GenTaskByFreeSql> getAllTasks() throws SQLException {

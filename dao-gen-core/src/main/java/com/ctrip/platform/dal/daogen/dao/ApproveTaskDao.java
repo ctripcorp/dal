@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -18,16 +16,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class ApproveTaskDao {
-    private static final String DATA_BASE = "dao";
-    private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+public class ApproveTaskDao extends BaseDao {
     private DalTableDao<ApproveTask> client;
-    private DalQueryDao queryDao = null;
     private DalRowMapper<ApproveTask> approveTaskRowMapper = null;
 
     public ApproveTaskDao() throws SQLException {
         client = new DalTableDao<>(new DalDefaultJpaParser<>(ApproveTask.class));
-        queryDao = new DalQueryDao(DATA_BASE);
         approveTaskRowMapper = new DalDefaultJpaMapper<>(ApproveTask.class);
     }
 

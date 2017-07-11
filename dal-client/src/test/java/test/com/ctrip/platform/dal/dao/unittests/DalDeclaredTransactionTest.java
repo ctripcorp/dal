@@ -76,7 +76,7 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
         Assert.assertEquals(DONE, test.perform());
     }
     
-    Class targetClass = TransactionTestClassSqlServer.class;
+    Class<TransactionTestClassSqlServer> targetClass = TransactionTestClassSqlServer.class;
             
     @Test
     public void testNestedTransaction() throws InstantiationException, IllegalAccessException {

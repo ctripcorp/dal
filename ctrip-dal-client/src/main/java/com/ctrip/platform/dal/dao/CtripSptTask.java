@@ -14,29 +14,29 @@ import java.util.TreeMap;
 public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     private static final String TVP_TPL = "TVP_%s";
     private static final String TVP_EXEC = "exec %s %s";
-    
+
     private static final String INSERT_SPT_TPL = "spT_%s_i";
     private static final String DELETE_SPT_TPL = "spT_%s_d";
     private static final String UPDATE_SPT_TPL = "spT_%s_u";
 
     private String sptTpl;
-    
+
     public static <T> CtripSptTask<T> createSptInsertTask() {
         return new CtripSptTask<>(INSERT_SPT_TPL);
     }
-    
+
     public static <T> CtripSptTask<T> createSptDeleteTask() {
         return new CtripSptTask<>(DELETE_SPT_TPL);
     }
-    
+
     public static <T> CtripSptTask<T> createSptUpdateTask() {
         return new CtripSptTask<>(UPDATE_SPT_TPL);
     }
-    
+
     private CtripSptTask(String sptTpl) {
         this.sptTpl = sptTpl;
     }
-    
+
     @Override
     public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext)
             throws SQLException {
@@ -47,11 +47,17 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         SQLServerDataTable dataTable = getDataTable(daoPojos);
         StatementParameters parameters = new StatementParameters();
         int index = 1;
-        parameters.set(index, tvpName, -1, dataTable);
+        parameters.set(index, tvpName, -1000, dataTable);
         DalHints newHints = hints.clone();
         newHints.retrieveAllResultsFromSp();
+        int length = daoPojos.size();
+        int[] result = new int[length];
         Map<String, ?> map = client.call(execSql, parameters, newHints);
-        return new int[0];
+        int value = getReturnValue(map);
+        for (int i = 0; i < length; i++) {
+            result[i] = value;
+        }
+        return result;
     }
 
     private SQLServerDataTable getDataTable(Map<Integer, Map<String, ?>> daoPojos) throws SQLServerException {
@@ -77,6 +83,31 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         }
 
         return dataTable;
+    }
+
+    private int getReturnValue(Map<String, ?> map) {
+        int result = -1;
+        if (map == null || map.size() == 0)
+            return result;
+
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
+            try {
+                List list = (ArrayList) entry.getValue();
+                if (list.size() == 1) {
+                    Map<String, Integer> temp = (Map<String, Integer>) list.get(0);
+                    if (temp == null || temp.size() == 0)
+                        return result;
+
+                    for (Map.Entry<String, Integer> e : temp.entrySet()) {
+                        result = e.getValue().intValue();
+                        break;
+                    }
+                }
+            } catch (Throwable e1) {
+            }
+            break;
+        }
+        return result;
     }
 
     private String buildTvpName(String tableName) {

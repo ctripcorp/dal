@@ -287,7 +287,7 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
 
     public static class TransactionTestInternal {
 
-        @Transactional(logicalDbName = DATABASE_NAME)
+        @Transactional(logicDbName = DATABASE_NAME)
         public String perform() {
             assertTrue(DalTransactionManager.isInTransaction());
             return null;
@@ -297,7 +297,7 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
 
     public class TransactionTestInternal1 {
 
-        @Transactional(logicalDbName = DATABASE_NAME)
+        @Transactional(logicDbName = DATABASE_NAME)
         public String perform() {
             assertTrue(DalTransactionManager.isInTransaction());
             return null;
@@ -307,7 +307,7 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
 
     private static class TransactionTestInternal2 {
 
-        @Transactional(logicalDbName = DATABASE_NAME)
+        @Transactional(logicDbName = DATABASE_NAME)
         public String perform() {
             assertTrue(DalTransactionManager.isInTransaction());
             return null;

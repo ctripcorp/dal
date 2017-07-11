@@ -47,7 +47,7 @@ public class DalTransactionInterceptor implements MethodInterceptor {
         Transactional tran = method.getAnnotation(Transactional.class);
         
         
-        DalClientFactory.getClient(tran.logicalDbName()).execute(new DalCommand() {
+        DalClientFactory.getClient(tran.logicDbName()).execute(new DalCommand() {
             
             @Override
             public boolean execute(DalClient client) throws SQLException {

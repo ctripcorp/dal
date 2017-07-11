@@ -15,5 +15,5 @@ public @interface Transactional {
     /**
      * @return logic database name defined in dal.config/xml
      */
-    String logicalDbName();
+    String logicDbName();
 }

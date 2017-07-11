@@ -6,7 +6,9 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+
 import static com.ctrip.platform.dal.dao.task.DefaultTaskFactory.getDbCategory;
+
 import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
@@ -29,6 +31,11 @@ public class CtripTaskFactory implements DalTaskFactory {
     private DefaultTaskFactory defaultFactory;
     private static final String CALL_SP_BY_NAME = "callSpbyName";
     private static final String CALL_SPT = "callSpt";
+    
+    private static final String INSERT_SPT_TPL = "spT_%s_i";
+    private static final String DELETE_SPT_TPL = "spT_%s_d";
+    private static final String UPDATE_SPT_TPL = "spT_%s_u";
+
 
     // Default enabled, to compatible with current behavior
     static boolean callSpbyName = true;
@@ -102,7 +109,7 @@ public class CtripTaskFactory implements DalTaskFactory {
         if (!callSpt) {
             bulkTask = new BatchInsertSp3Task<>();
         } else {
-            bulkTask = CtripSptTask.createSptInsertTask();
+            bulkTask = new CtripSptTask<>(INSERT_SPT_TPL);
         }
         bulkTask.initialize(parser);
         return bulkTask;
@@ -117,7 +124,7 @@ public class CtripTaskFactory implements DalTaskFactory {
         if (!callSpt) {
             bulkTask = new BatchDeleteSp3Task<>();
         } else {
-            bulkTask = CtripSptTask.createSptDeleteTask();
+            bulkTask = new CtripSptTask<>(DELETE_SPT_TPL);
         }
         bulkTask.initialize(parser);
         return bulkTask;
@@ -132,7 +139,7 @@ public class CtripTaskFactory implements DalTaskFactory {
         if (!callSpt) {
             bulkTask = new BatchUpdateSp3Task<>();
         } else {
-            bulkTask = CtripSptTask.createSptUpdateTask();
+            bulkTask = new CtripSptTask<>(UPDATE_SPT_TPL);
         }
         bulkTask.initialize(parser);
         return bulkTask;

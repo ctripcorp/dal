@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
 import com.ctrip.platform.dal.dao.task.BulkTaskContext;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
@@ -15,25 +16,9 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     private static final String TVP_TPL = "TVP_%s";
     private static final String TVP_EXEC = "exec %s %s";
 
-    private static final String INSERT_SPT_TPL = "spT_%s_i";
-    private static final String DELETE_SPT_TPL = "spT_%s_d";
-    private static final String UPDATE_SPT_TPL = "spT_%s_u";
-
     private String sptTpl;
-
-    public static <T> CtripSptTask<T> createSptInsertTask() {
-        return new CtripSptTask<>(INSERT_SPT_TPL);
-    }
-
-    public static <T> CtripSptTask<T> createSptDeleteTask() {
-        return new CtripSptTask<>(DELETE_SPT_TPL);
-    }
-
-    public static <T> CtripSptTask<T> createSptUpdateTask() {
-        return new CtripSptTask<>(UPDATE_SPT_TPL);
-    }
-
-    private CtripSptTask(String sptTpl) {
+    
+    public CtripSptTask(String sptTpl) {
         this.sptTpl = sptTpl;
     }
 
@@ -47,7 +32,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         SQLServerDataTable dataTable = getDataTable(daoPojos);
         StatementParameters parameters = new StatementParameters();
         int index = 1;
-        parameters.set(index, tvpName, -1000, dataTable);
+        parameters.set(index, tvpName, DatabaseCategory.SQL_SERVER_TYPE_TVP, dataTable);
         DalHints newHints = hints.clone();
         newHints.retrieveAllResultsFromSp();
         int length = daoPojos.size();

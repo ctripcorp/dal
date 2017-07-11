@@ -1,9 +1,15 @@
 package com.ctrip.platform.dal.common.enums;
 
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.markdown.ErrorContext;
+import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
+import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
 
 public enum DatabaseCategory {
@@ -44,6 +50,9 @@ public enum DatabaseCategory {
 			new int[]{-2,233,845,846,847,1421},
 			new int[]{2,53,701,802,945,1204,1222}
 			){
+	    
+	    public static final int TYPE_TVP = -1000;
+	    
 		public String quote(String fieldName){
 			return "[" + fieldName + "]";
 		}
@@ -68,6 +77,12 @@ public enum DatabaseCategory {
 			return String.format(selectSqlTemplate + " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", start, count);
 		}
 
+	    public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
+	        if(parameter.getValue() != null && parameter.getSqlType() == TYPE_TVP){
+	            SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement)statement;
+                sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(), (SQLServerDataTable)parameter.getValue());
+	        }
+	    }
 	},
 	
 	Oracle(
@@ -183,8 +198,40 @@ public enum DatabaseCategory {
 	
 	public abstract String buildPage(String selectSqlTemplate, int start, int count);
 
+    public void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException{
+        if(parameter.isDefaultType()){
+            statement.setObject(parameter.getIndex(), parameter.getValue());
+        }
+        else{
+            statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+        }
+    }
 
-	public String getNullableUpdateTpl() {
+	public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
+        if(parameter.getValue() == null) {
+            if(parameter.isDefaultType()){
+                statement.setObject(parameter.getIndex(), null);
+            }
+            else{
+                if(parameter.getName() == null)
+                    statement.setNull(parameter.getIndex(), parameter.getSqlType());
+                else
+                    statement.setNull(parameter.getName(), parameter.getSqlType());
+            }
+        } else {
+            if(parameter.isDefaultType()){
+                statement.setObject(parameter.getIndex(), parameter.getValue());
+            }
+            else{
+                if(parameter.getName() == null)
+                    statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+                else
+                    statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+            }
+        }
+    }
+
+    public String getNullableUpdateTpl() {
 		return nullableUpdateTpl;
 	}
 

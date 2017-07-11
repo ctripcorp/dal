@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
@@ -17,6 +18,11 @@ import com.ctrip.platform.dal.dao.status.DalStatusManager;
 public class DalStatementCreator {
 	private static final int DEFAULT_RESULT_SET_TYPE = ResultSet.TYPE_FORWARD_ONLY;
 	private static final int DEFAULT_RESULT_SET_CONCURRENCY = ResultSet.CONCUR_READ_ONLY;
+	
+	private DatabaseCategory dbCategory;
+	public DalStatementCreator(DatabaseCategory dbCategory) {
+	    this.dbCategory = dbCategory;
+	}
 	
 	public Statement createStatement(Connection conn, DalHints hints) throws Exception {
 		Statement statement = conn.createStatement(getResultSetType(hints), getResultSetConcurrency(hints));
@@ -82,52 +88,18 @@ public class DalStatementCreator {
 	private void setParameter(PreparedStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isInputParameter())
-				setObject(statement, parameter);
+			    dbCategory.setObject(statement, parameter);
 		}
 	}
 	
 	private void setParameter(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isInputParameter()) {
-				setObject(statement, parameter);
+			    dbCategory.setObject(statement, parameter);
 			}
 		}
 	}
 
-	
-	private void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException{
-		if(parameter.isDefaultType()){
-			statement.setObject(parameter.getIndex(), parameter.getValue());
-		}
-		else{
-			statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-		}
-	}
-	
-	private void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
-		if(parameter.getValue() == null) {
-			if(parameter.isDefaultType()){
-				statement.setObject(parameter.getIndex(), null);
-			}
-			else{
-				if(parameter.getName() == null)
-					statement.setNull(parameter.getIndex(), parameter.getSqlType());
-				else
-					statement.setNull(parameter.getName(), parameter.getSqlType());
-			}
-		} else {
-			if(parameter.isDefaultType()){
-				statement.setObject(parameter.getIndex(), parameter.getValue());
-			}
-			else{
-				if(parameter.getName() == null)
-					statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-				else
-					statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
-			}
-		}
-	}
-	
 	private void registerOutParameters(CallableStatement statement, StatementParameters parameters) throws Exception {
 		for (StatementParameter parameter: parameters.values()) {
 			if(parameter.isOutParameter()) {

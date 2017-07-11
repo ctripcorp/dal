@@ -31,13 +31,14 @@ import com.ctrip.platform.dal.exceptions.DalException;
  * @author jhhe
  */
 public class DalDirectClient implements DalClient {
-	private DalStatementCreator stmtCreator = new DalStatementCreator();
+	private DalStatementCreator stmtCreator;
 	private DalConnectionManager connManager;
 	private DalTransactionManager transManager;
 
 	public DalDirectClient(DalConfigure config, String logicDbName) {
 		connManager = new DalConnectionManager(logicDbName, config);
 		transManager = new DalTransactionManager(connManager);
+		stmtCreator = new DalStatementCreator(config.getDatabaseSet(logicDbName).getDatabaseCategory());
 	}
 
 	@Override

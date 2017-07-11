@@ -51,8 +51,6 @@ public enum DatabaseCategory {
 			new int[]{2,53,701,802,945,1204,1222}
 			){
 	    
-	    public static final int TYPE_TVP = -1000;
-	    
 		public String quote(String fieldName){
 			return "[" + fieldName + "]";
 		}
@@ -78,7 +76,7 @@ public enum DatabaseCategory {
 		}
 
 	    public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
-	        if(parameter.getValue() != null && parameter.getSqlType() == TYPE_TVP){
+	        if(parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP){
 	            SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement)statement;
                 sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(), (SQLServerDataTable)parameter.getValue());
 	        }
@@ -128,6 +126,8 @@ public enum DatabaseCategory {
 	public static final String SQL_PROVIDER = "sqlProvider";
 	public static final String MYSQL_PROVIDER = "mySqlProvider";
 	public static final String ORACLE_PROVIDER = "oracleProvider";
+	
+	public static final int SQL_SERVER_TYPE_TVP = -1000;
 
 	public static DatabaseCategory matchWith(String provider) {
 		if(provider == null || provider.trim().length() == 0)

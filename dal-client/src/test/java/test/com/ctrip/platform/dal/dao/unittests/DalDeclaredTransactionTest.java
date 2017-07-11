@@ -47,43 +47,32 @@ public class DalDeclaredTransactionTest extends BaseTestStub {
     }
     
     @Test
-    public void testGetFromContext() throws InstantiationException, IllegalAccessException {
+    public void testGetFromApplicationContext() throws InstantiationException, IllegalAccessException {
         TransactionTestClassSqlServer test = (TransactionTestClassSqlServer)ctx.getBean("TransactionTestClassSqlServer");
         Assert.assertEquals(DONE, test.perform());
+        
+        Assert.assertEquals(DONE, test.performNest());
     }
     
     @Test
     public void testAutoWire() throws InstantiationException, IllegalAccessException {
         TransactionTestUser test = (TransactionTestUser)ctx.getBean(TransactionTestUser.class);
         Assert.assertEquals(DONE, test.perform());
-    }
-    
-    @Test
-    public void testAutoWireNest() throws InstantiationException, IllegalAccessException {
-        TransactionTestUser test = (TransactionTestUser)ctx.getBean(TransactionTestUser.class);
+
         Assert.assertEquals(DONE, test.performNest());
-    }
-    
-    @Test
-    public void testDeclareOnClass() throws InstantiationException, IllegalAccessException {
-        TransactionTestClassSqlServer test = DalTransactionManager.create(TransactionTestClassSqlServer.class);
-        Assert.assertEquals(DONE, test.perform());
-    }
-    
-    @Test
-    public void testDeclareOnObject() throws InstantiationException, IllegalAccessException {
-        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
-        Assert.assertEquals(DONE, test.perform());
     }
     
     Class<TransactionTestClassSqlServer> targetClass = TransactionTestClassSqlServer.class;
-            
+    
+    @Test
+    public void testSingleLevel() throws InstantiationException, IllegalAccessException {
+        TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
+        Assert.assertEquals(DONE, test.perform());
+    }
+    
     @Test
     public void testNestedTransaction() throws InstantiationException, IllegalAccessException {
         TransactionTestClassSqlServer test = DalTransactionManager.create(targetClass);
-        Assert.assertEquals(DONE, test.performNest());
-        
-        test = (TransactionTestClassSqlServer)ctx.getBean("TransactionTestClassSqlServer");
         Assert.assertEquals(DONE, test.performNest());
     }
     

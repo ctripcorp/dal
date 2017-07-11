@@ -36,6 +36,8 @@ public class DalTransactionManager {
 					connManager.getLogicDbName());
 			
 			transactionHolder.set(transaction);
+		}else{
+		    transaction.validate(connManager.getLogicDbName());
 		}
 		return transaction.startTransaction();
 	}

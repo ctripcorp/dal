@@ -11,12 +11,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public abstract class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
-    protected static final String TVP_TPL = "TVP_%s";
-    protected static final String TVP_EXEC = "exec %s %s";
+public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
+    private static final String TVP_TPL = "TVP_%s";
+    private static final String TVP_EXEC = "exec %s %s";
+    
+    private static final String INSERT_SPT_TPL = "spT_%s_i";
+    private static final String DELETE_SPT_TPL = "spT_%s_d";
+    private static final String UPDATE_SPT_TPL = "spT_%s_u";
 
-    public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext,
-            String sptTpl) throws SQLException {
+    private String sptTpl;
+    
+    public static <T> CtripSptTask<T> createSptInsertTask() {
+        return new CtripSptTask<>(INSERT_SPT_TPL);
+    }
+    
+    public static <T> CtripSptTask<T> createSptDeleteTask() {
+        return new CtripSptTask<>(DELETE_SPT_TPL);
+    }
+    
+    public static <T> CtripSptTask<T> createSptUpdateTask() {
+        return new CtripSptTask<>(UPDATE_SPT_TPL);
+    }
+    
+    private CtripSptTask(String sptTpl) {
+        this.sptTpl = sptTpl;
+    }
+    
+    @Override
+    public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext)
+            throws SQLException {
         String tableName = getRawTableName(hints);
         String tvpName = buildTvpName(tableName);
         String spName = String.format(sptTpl, tableName);

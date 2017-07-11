@@ -102,7 +102,7 @@ public class CtripTaskFactory implements DalTaskFactory {
         if (!callSpt) {
             bulkTask = new BatchInsertSp3Task<>();
         } else {
-            bulkTask = new BatchInsertSptTask<>();
+            bulkTask = CtripSptTask.createSptInsertTask();
         }
         bulkTask.initialize(parser);
         return bulkTask;
@@ -117,7 +117,7 @@ public class CtripTaskFactory implements DalTaskFactory {
         if (!callSpt) {
             bulkTask = new BatchDeleteSp3Task<>();
         } else {
-            bulkTask = new BatchDeleteSptTask<>();
+            bulkTask = CtripSptTask.createSptDeleteTask();
         }
         bulkTask.initialize(parser);
         return bulkTask;
@@ -132,7 +132,7 @@ public class CtripTaskFactory implements DalTaskFactory {
         if (!callSpt) {
             bulkTask = new BatchUpdateSp3Task<>();
         } else {
-            bulkTask = new BatchUpdateSptTask<>();
+            bulkTask = CtripSptTask.createSptUpdateTask();
         }
         bulkTask.initialize(parser);
         return bulkTask;

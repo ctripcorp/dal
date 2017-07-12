@@ -9,7 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 @Entity
@@ -32,8 +32,8 @@ public class Person implements DalPojo {
     private Integer age;
 
     @Column(name = "Birth")
-    @Type(value = Types.DATE)
-    private Date birth;
+    @Type(value = Types.TIMESTAMP)
+    private Timestamp birth;
 
     @Column(name = "Test")
     @Type(value = Types.NVARCHAR)
@@ -63,11 +63,11 @@ public class Person implements DalPojo {
         this.age = age;
     }
 
-    public Date getBirth() {
+    public Timestamp getBirth() {
         return birth;
     }
 
-    public void setBirth(Date birth) {
+    public void setBirth(Timestamp birth) {
         this.birth = birth;
     }
 

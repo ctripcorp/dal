@@ -149,6 +149,11 @@ public enum ErrorCode {
 	TransactionNoFound(ErrorClassify.Transaction, 5604, "There is no transaction found"),
 	
     /**
+     * DAL do not support distributed transaction in same db but different shard
+     */
+    TransactionDistributedShard(ErrorClassify.Transaction, 5605, "DAL do not support distributed transaction in same DB but different shard. Current shard: %s, requested in hints: %s"),
+    
+    /**
      * The result mapping is faild.
      */
     ResultMappingError(ErrorClassify.Extract, 5700, "Can not extract from result set. If the columns in result set does not match with columns in pojo, please check with DalHintEnum.partialQuery."),

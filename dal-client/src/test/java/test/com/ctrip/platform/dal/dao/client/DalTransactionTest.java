@@ -16,6 +16,7 @@ import org.junit.Test;
 import test.com.ctrip.platform.dal.dao.task.SqlServerTestInitializer;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalConnection;
 import com.ctrip.platform.dal.dao.client.DalTransaction;
 import com.ctrip.platform.dal.dao.client.DbMeta;
@@ -54,7 +55,7 @@ public class DalTransactionTest {
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DalClientFactory.getDalConfigure().getLocator().getConnection(logicDbName);
-		return new DalConnection(conn, DbMeta.createIfAbsent(logicDbName, null, null, true, conn));
+		return new DalConnection(conn, true, null, DbMeta.createIfAbsent(logicDbName, null, conn));
 	}
 
 	@Test
@@ -78,7 +79,7 @@ public class DalTransactionTest {
 		DalTransaction test = null;
 		try {
 			test = new DalTransaction(getDalConnection(), logicDbName);
-			test.validate(logicDbName);
+			test.validate(logicDbName, new DalHints());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -89,7 +90,7 @@ public class DalTransactionTest {
 			
 		try {
 			test = new DalTransaction(getDalConnection(), logicDbName);
-			test.validate("invalid");
+			test.validate("invalid", new DalHints());
 			fail();
 		} catch (Throwable e) {
 		}finally {

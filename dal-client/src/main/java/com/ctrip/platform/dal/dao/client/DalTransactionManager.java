@@ -27,18 +27,20 @@ public class DalTransactionManager {
 		this.connManager = connManager;
 	}
 	
-	private int startTransaction(DalHints hints, DalEventEnum operation) throws SQLException {
+	private <T> int startTransaction(DalHints hints, ConnectionAction<T> action) throws SQLException {
 		DalTransaction transaction = transactionHolder.get();
 
 		if(transaction == null) {
 			transaction = new DalTransaction( 
-					getConnection(hints, true, operation), 
+					getConnection(hints, true, action.operation), 
 					connManager.getLogicDbName());
 			
 			transactionHolder.set(transaction);
 		}else{
-		    transaction.validate(connManager.getLogicDbName());
+		    transaction.validate(connManager.getLogicDbName(), hints);
 		}
+		
+        action.connHolder = transaction.getConnection();
 		return transaction.startTransaction();
 	}
 
@@ -92,6 +94,12 @@ public class DalTransactionManager {
 					null;
 	}
 	
+	public static String getCurrentShardId() {
+        return isInTransaction() ?
+                transactionHolder.get().getConnection().getShardId() :
+                    null;
+	}
+
 	public static DbMeta getCurrentDbMeta() {
 		return isInTransaction() ?
 				transactionHolder.get().getConnection().getMeta() :
@@ -104,7 +112,7 @@ public class DalTransactionManager {
 		if(transaction == null) {
 			return connManager.getNewConnection(hints, useMaster, operation);
 		} else {
-			transaction.validate(connManager.getLogicDbName());
+			transaction.validate(connManager.getLogicDbName(), hints);
 			return transaction.getConnection();
 		}
 	}
@@ -138,7 +146,7 @@ public class DalTransactionManager {
 		T result = null;
 		int level;
 		try {
-			level = startTransaction(hints, action.operation);
+			level = startTransaction(hints, action);
 			action.populateDbMeta();
 
 			result = action.execute();

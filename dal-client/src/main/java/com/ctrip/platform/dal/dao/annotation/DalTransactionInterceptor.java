@@ -40,7 +40,8 @@ public class DalTransactionInterceptor implements MethodInterceptor {
         
         if(shardParaIndex != -1) {
             Object shard = args[shardParaIndex];
-            hints.inShard(shard.toString());
+            if(shard != null)
+                hints.inShard(shard.toString());
         }
         
         final AtomicReference<Object> result = new AtomicReference<>();

@@ -18,8 +18,6 @@ public class DbMeta {
 	private DatabaseCategory dbCategory;
 	private String dataBaseKeyName;
 	private String userName;
-	private String shardId;
-	private boolean isMaster;
 	private String url;
 	private String host;
 
@@ -28,7 +26,7 @@ public class DbMeta {
 		hostRegxPattern = Pattern.compile(regEx);
 	}
 	
-	private DbMeta(Connection conn, String realDbName, DatabaseCategory dbCategory, String shardId, boolean master) throws SQLException {
+	private DbMeta(Connection conn, String realDbName, DatabaseCategory dbCategory) throws SQLException {
 		DatabaseMetaData meta = conn.getMetaData();
 
 		databaseName = conn.getCatalog();
@@ -38,8 +36,6 @@ public class DbMeta {
 		
 		dataBaseKeyName = realDbName;
 		this.dbCategory = dbCategory;
-		isMaster = master;
-		this.shardId = shardId;
 	}
 	
 	public void populate(LogEntry entry) {
@@ -47,16 +43,14 @@ public class DbMeta {
 		entry.setServerAddress(host);
 		entry.setDbUrl(url);
 		entry.setUserName(userName);
-		entry.setMaster(isMaster);
-		entry.setShardId(shardId);
 		entry.setDataBaseKeyName(dataBaseKeyName);
 	}
 	
 
-	public static DbMeta createIfAbsent(String realDbName, DatabaseCategory dbCategory, String shardId, boolean isMaster, Connection conn) throws SQLException {
+	public static DbMeta createIfAbsent(String realDbName, DatabaseCategory dbCategory, Connection conn) throws SQLException {
 		DbMeta meta = metaMap.get(realDbName);
 		if(meta == null) {
-			meta = new DbMeta(conn, realDbName, dbCategory, shardId, isMaster);
+			meta = new DbMeta(conn, realDbName, dbCategory);
 			DbMeta oldMeta = metaMap.putIfAbsent(realDbName, meta);
 			meta = oldMeta == null ? meta : oldMeta;
 		}
@@ -77,10 +71,6 @@ public class DbMeta {
 	
 	public DatabaseCategory getDatabaseCategory() {
 		return dbCategory;
-	}
-
-	public String getShardId() {
-		return shardId;
 	}
 	
 	private String parseHostFromDBURL(String url) {

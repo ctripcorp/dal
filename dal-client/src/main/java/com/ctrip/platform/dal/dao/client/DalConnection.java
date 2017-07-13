@@ -11,12 +11,16 @@ public class DalConnection {
 	private Integer oldIsolationLevel;
 	private Integer newIsolationLevel;
 	private Connection conn;
+	private boolean master;
+	private String shardId;
 	private DbMeta meta;
 	private DalLogger logger;
 	
-	public DalConnection(Connection conn, DbMeta meta) throws SQLException {
+	public DalConnection(Connection conn, boolean master, String shardId, DbMeta meta) throws SQLException {
 		this.oldIsolationLevel = conn.getTransactionIsolation();
 		this.conn = conn;
+		this.master = master;
+		this.shardId = shardId;
 		this.meta = meta;
 		this.logger = DalClientFactory.getDalLogger();
 	}
@@ -25,11 +29,19 @@ public class DalConnection {
 		return conn;
 	}
 
-	public DbMeta getMeta() {
+	public boolean isMaster() {
+        return master;
+    }
+
+    public DbMeta getMeta() {
 		return meta;
 	}
 
-	public String getDatabaseName() throws SQLException {
+	public String getShardId() {
+        return shardId;
+    }
+
+    public String getDatabaseName() throws SQLException {
 		return meta.getDatabaseName();
 	}
 

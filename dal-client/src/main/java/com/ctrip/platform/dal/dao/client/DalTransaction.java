@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -25,12 +26,23 @@ public class DalTransaction  {
 		this.logger = DalClientFactory.getDalLogger();
 	}
 	
-	public void validate(String logicDbName) throws SQLException {
+	public void validate(String logicDbName, DalHints hints) throws SQLException {
 		if(logicDbName == null || logicDbName.length() == 0)
 			throw new DalException(ErrorCode.LogicDbEmpty);
 		
 		if(!logicDbName.equals(this.logicDbName))
 			throw new DalException(ErrorCode.TransactionDistributed, this.logicDbName, logicDbName);
+		
+		String curShard = connHolder.getShardId();
+		if(curShard == null)
+		    return;
+		
+		String desiganateShard = hints.getShardId();
+		if(desiganateShard == null)
+		    return;
+		
+		if(!curShard.equals(desiganateShard))
+		    throw new DalException(ErrorCode.TransactionDistributedShard, curShard, desiganateShard);
 	}
 	
 	public String getLogicDbName() {

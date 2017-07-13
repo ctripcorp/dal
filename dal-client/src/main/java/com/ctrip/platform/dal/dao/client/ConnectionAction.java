@@ -90,13 +90,18 @@ public abstract class ConnectionAction<T> {
 
 		if(DalTransactionManager.isInTransaction()) {
 			meta = DalTransactionManager.getCurrentDbMeta();
+			
 		} else {
-			if(connHolder != null)
+			if(connHolder != null) {
 				meta = connHolder.getMeta();
+			}
 		}
 		
 		if(meta != null)
 			meta.populate(entry);
+		
+        entry.setMaster(connHolder.isMaster());
+        entry.setShardId(connHolder.getShardId());
 	}
 	
 	public void initLogEntry(String logicDbName, DalHints hints) {

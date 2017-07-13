@@ -96,8 +96,8 @@ public class DalConnectionManager {
 		
 		try {	
 			conn = locator.getConnection(allInOneKey);
-			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), shardId, isMaster, conn);
-			return new DalConnection(conn, meta);
+			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
+			return new DalConnection(conn, isMaster, shardId, meta);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}

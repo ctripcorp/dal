@@ -6,11 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.datasource.titan.TitanProvider;
-import com.dianping.cat.message.Transaction;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static javafx.scene.input.KeyCode.T;
 
 public class AllInOneConfigureReaderTest {
     @Test

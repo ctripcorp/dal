@@ -67,6 +67,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     public static final String APPID = "appid";
     public static final String TIMEOUT = "timeout";
     public static final String USE_LOCAL_CONFIG = "useLocalConfig";
+    public static final String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
     public static final String OVERWRITE_DATASOURCE_CONFIG = "overwriteDSConfig";
     private static final String PROD_SUFFIX = "_SH";
 
@@ -75,6 +76,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private String subEnv;
     private int timeout;
     private boolean useLocal;
+    private String databaseConfigLocation;
     private ConnectionStringParser parser = new ConnectionStringParser();
     // used for simulate prod environemnt
     private boolean isDebug;
@@ -110,7 +112,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     public void initialize(Map<String, String> settings) throws Exception {
         ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
-        
+
         startUpLog.clear();
         config = new HashMap<>(settings);
 
@@ -127,6 +129,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
         info("Use local: " + useLocal);
+
+        databaseConfigLocation = settings.get(DATABASE_CONFIG_LOCATION);
+        info("DatabaseConfig location:" + (databaseConfigLocation == null ? "N/A" : databaseConfigLocation));
 
         String timeoutStr = settings.get(TIMEOUT);
         timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
@@ -147,10 +152,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     }
 
     /**
-     * Get titan service URL in order of 
-     * 1. environment varaible
-     * 2. serviceAddress
-     * 3. local
+     * Get titan service URL in order of 1. environment varaible 2. serviceAddress 3. local
      * 
      * @param settings
      * @return
@@ -158,10 +160,10 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private String discoverTitanServiceUrl(Map<String, String> settings) {
         // First we use environment to determine titan service address
         Env env = Foundation.server().getEnv();
-        if(titanMapping.containsKey(env.toString()))
+        if (titanMapping.containsKey(env.toString()))
             return titanMapping.get(env.toString());
-        
-        // Then we check serviceAddress 
+
+        // Then we check serviceAddress
         String svcUrl = settings.get(SERVICE_ADDRESS);
 
         // A little clean up
@@ -207,7 +209,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         // If it uses local Database.Config
         if (svcUrl == null || svcUrl.isEmpty() || useLocal) {
-            dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal);
+            dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal, databaseConfigLocation);
         } else {
             // If it uses Titan service
             boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
@@ -539,8 +541,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
         tag.put(DB_NAME, allInOneKey);
         MetricManager.getMetricer().log(TITAN, 1, tag);
     }
-    
-    private String initVersion(){
+
+    private String initVersion() {
         String path = "/CtripDatasourceVersion.prop";
         InputStream stream = Version.class.getResourceAsStream(path);
         if (stream == null) {
@@ -550,9 +552,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
         try {
             props.load(stream);
             stream.close();
-            return (String)props.get("version");
+            return (String) props.get("version");
         } catch (IOException e) {
             return "UNKNOWN";
         }
-    }    
+    }
 }

@@ -1,9 +1,12 @@
 package com.ctrip.platform.dal.dao.vi;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import qunar.tc.qconfig.client.TypedConfig;
 
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.datasource.titan.TitanProvider.LogEntry;
@@ -11,8 +14,8 @@ import com.ctrip.framework.vi.IgniteManager.SimpleLogger;
 import com.ctrip.framework.vi.annotation.Ignite;
 import com.ctrip.framework.vi.ignite.AbstractCtripIgnitePlugin;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-
-import static oracle.net.aso.C01.e;
+import com.ctrip.platform.dal.dao.configure.CtripDalConfig;
+import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 @Ignite(id = "fx.dal.ignite", type = Ignite.PluginType.Component)
 public class DalIgnite extends AbstractCtripIgnitePlugin {
@@ -30,6 +33,14 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
     @Override
     public boolean warmUP(SimpleLogger logger) {
+        if(!isDalConfigExist(logger)) {
+            logger.warn("Can not find dal.config from either local or remote.");
+            logger.warn("This maybe normal case for those who upgrade from older ctrip-dal-cleint.");
+            logger.warn("If app only use dal data source, please change dependecy from ctrip-dal-client to ctrip-datasource.");
+            logger.warn("Refer to http://conf.ctripcorp.com/pages/viewpage.action?pageId=136437942 for more infomation");
+            return true;
+        }
+            
         try {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
@@ -44,7 +55,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             return true;
         } catch (Throwable e) {
             if (TitanProvider.config == null) {
-                logger.error("Can not find dal.config from neither local nor remote.");
+                logger.error("Can not load dal.config from neither local nor remote.");
             } else {
                 configs.putAll(TitanProvider.config);
             }
@@ -52,6 +63,30 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             log(logger);
             logger.error("Fail", e);
             logger.info("Please check http://conf.ctripcorp.com/pages/viewpage.action?pageId=60842135");
+            return false;
+        }
+    }
+    
+    private boolean isDalConfigExist(SimpleLogger logger) {
+        logger.info("Try to locate dal.config from local");
+        URL dalLoc = DalConfigureFactory.getDalConfigUrl();
+        
+        if(dalLoc != null) {
+            logger.info("Found dal.config at " + dalLoc);
+            return true;
+        }else{
+            logger.warn("Can not found dal.config from local");
+        }
+        
+        logger.info("Try to locate dal.config from qConfig");
+        
+        try{
+            TypedConfig<String> config = TypedConfig.get(CtripDalConfig.DAL_CONFIG, TypedConfig.STRING_PARSER);
+            String content = config.current();
+            logger.info("Found dal.config from qConfig");
+            return true;
+        }catch(Throwable e) {
+            logger.warn("Can not found dal.config from qConfig :" + e.getMessage());
             return false;
         }
     }

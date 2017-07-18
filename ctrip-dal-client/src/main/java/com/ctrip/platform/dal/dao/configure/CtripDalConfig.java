@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 
 public class CtripDalConfig implements DalConfigLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfig.class);
-    private static final String DAL_CONFIG = "dal.config";
+    public static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final String DAL_CONFIG_LOG = "DAL";
     private static final String DAL_CONFIG_LOAD = "dal.config::";

@@ -286,6 +286,6 @@ public class DalShardingHelper {
 
 	private static void isSameShard(String shardId) throws SQLException {
 		if(!shardId.equals(DalTransactionManager.getCurrentShardId()))
-			throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentShardId() + ". Requeted shardId: " + shardId);
+			throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentShardId() + ". Requested shardId: " + shardId);
 	}
 }

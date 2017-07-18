@@ -14,6 +14,7 @@ import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.annotation.DalTransactionInterceptor;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
+import com.ctrip.platform.dal.dao.annotation.TransactionalIntercepted;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -121,14 +122,16 @@ public class DalTransactionManager {
 		transactionHolder.set(null);
 	}
 
+    @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> targetClass) throws InstantiationException, IllegalAccessException {   
         Enhancer enhancer = new Enhancer();  
         enhancer.setSuperclass(targetClass);  
         enhancer.setClassLoader(targetClass.getClassLoader());
         enhancer.setCallbackFilter(new TransactionalCallbackFilter());
         Callback[] callbacks = new Callback[]{new DalTransactionInterceptor(), NoOp.INSTANCE};
-        enhancer.setCallbacks(callbacks);  
-        return (T)enhancer.create();  
+        enhancer.setCallbacks(callbacks);
+        enhancer.setInterfaces(new Class[]{TransactionalIntercepted.class});
+        return (T)enhancer.create();
     }
     
     private static class TransactionalCallbackFilter implements CallbackFilter {

@@ -79,6 +79,8 @@ public enum DatabaseCategory {
 	        if(parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP){
 	            SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement)statement;
                 sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(), (SQLServerDataTable)parameter.getValue());
+	        }else{
+	            super.setObject(statement, parameter);
 	        }
 	    }
 	},

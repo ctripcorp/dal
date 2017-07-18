@@ -2,7 +2,9 @@ package com.ctrip.platform.dal.dao;
 
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
+
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -11,6 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TVPTest {
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        DalClientFactory.initClientFactory();
+        CtripTaskFactory.callSpt = true;
+    }
 
     @Test
     public void testTVP() throws Exception {

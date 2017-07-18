@@ -26,5 +26,7 @@ import org.junit.runners.Suite.SuiteClasses;
     SingleDeleteSpaTaskTest.class, 
     SingleUpdateSpaTaskTest.class, 
 	
+    //TVP must be tested at last to avoid spoil old sp3 batch
+    TVPTest.class,
 })
 public class AllTests {}

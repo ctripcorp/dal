@@ -25,20 +25,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static oracle.net.aso.C01.e;
+
 @Resource
 @Singleton
 @Path("report")
 public class DalReportResource {
-    public static DalReportDao reportDao = null;
+    private static DalReportDao reportDao = null;
     private static final String MIME_EXCEL = "application/vnd.ms-excel";
-    private static final String excelFileName = "dal_version";
-    private static final String excelFileName2 = "dal_local_datasource";
+    private static final String EXCEL_FILE_NAME = "dal_version";
+    private static final String EXCEL_FILE_NAME2 = "dal_local_datasource";
 
     // thread safe
     static {
         try {
             reportDao = new DalReportDao();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -72,7 +74,7 @@ public class DalReportResource {
             Date lastUpdate = reportDao.getLastUpdate();
             for (Map.Entry<String, List<String>> entry : map.entrySet()) {
                 List<String> appIds = entry.getValue();
-                if (appIds == null || appIds.size() == 0)
+                if (appIds == null || appIds.isEmpty())
                     continue;
 
                 Dept d = new Dept();
@@ -84,7 +86,7 @@ public class DalReportResource {
                 list.add(d);
             }
             return list;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
         }
@@ -108,7 +110,7 @@ public class DalReportResource {
             Date lastUpdate = reportDao.getLastUpdate();
             for (Map.Entry<String, List<String>> entry : map.entrySet()) {
                 List<String> appIds = entry.getValue();
-                if (appIds == null || appIds.size() == 0)
+                if (appIds == null || appIds.isEmpty())
                     continue;
 
                 Client c = new Client();
@@ -120,7 +122,7 @@ public class DalReportResource {
                 list.add(c);
             }
             return list;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
         }
@@ -130,38 +132,28 @@ public class DalReportResource {
     @Path("exportExcel")
     @Produces(MIME_EXCEL)
     public String exportExcel(@Context HttpServletResponse response) throws Exception {
-        try {
-            Workbook workbook = null;
-            ByteArrayOutputStream byteArrayStream = null;
-            OutputStream stream = null;
-            try {
-                response.setContentType(MIME_EXCEL);
-                response.setHeader("Content-Disposition", String.format("attachment; filename=%s.xls", excelFileName));
-                workbook = reportDao.getWorkbook();
-                byteArrayStream = new ByteArrayOutputStream();
-                workbook.write(byteArrayStream);
-                byte[] outArray = byteArrayStream.toByteArray();
-                stream = response.getOutputStream();
-                stream.write(outArray);
-            } catch (Throwable e) {
-                throw e;
-            } finally {
-                if (workbook != null)
-                    workbook.close();
-                if (byteArrayStream != null) {
-                    byteArrayStream.flush();
-                    byteArrayStream.close();
-                }
-                if (stream != null) {
-                    stream.flush();
-                    stream.close();
-                }
-            }
-            return "";
-        } catch (Throwable e) {
+        Workbook workbook = null;
+        OutputStream stream = null;
+        try (ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream()) {
+            response.setContentType(MIME_EXCEL);
+            response.setHeader("Content-Disposition", String.format("attachment; filename=%s.xls", EXCEL_FILE_NAME));
+            workbook = reportDao.getWorkbook();
+            workbook.write(byteArrayStream);
+            byte[] outArray = byteArrayStream.toByteArray();
+            stream = response.getOutputStream();
+            stream.write(outArray);
+        } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
+        } finally {
+            if (workbook != null)
+                workbook.close();
+            if (stream != null) {
+                stream.flush();
+                stream.close();
+            }
         }
+        return "";
     }
 
     @GET
@@ -176,27 +168,21 @@ public class DalReportResource {
     @Produces(MIME_EXCEL)
     public String exportExcel2(@Context HttpServletResponse response) throws Exception {
         Workbook workbook = null;
-        ByteArrayOutputStream byteArrayStream = null;
         OutputStream stream = null;
-        try {
+        try (ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream()) {
             response.setContentType(MIME_EXCEL);
-            response.setHeader("Content-Disposition", String.format("attachment; filename=%s.xls", excelFileName2));
+            response.setHeader("Content-Disposition", String.format("attachment; filename=%s.xls", EXCEL_FILE_NAME2));
             workbook = reportDao.getWorkbook2();
-            byteArrayStream = new ByteArrayOutputStream();
             workbook.write(byteArrayStream);
             byte[] outArray = byteArrayStream.toByteArray();
             stream = response.getOutputStream();
             stream.write(outArray);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
         } finally {
             if (workbook != null)
                 workbook.close();
-            if (byteArrayStream != null) {
-                byteArrayStream.flush();
-                byteArrayStream.close();
-            }
             if (stream != null) {
                 stream.flush();
                 stream.close();

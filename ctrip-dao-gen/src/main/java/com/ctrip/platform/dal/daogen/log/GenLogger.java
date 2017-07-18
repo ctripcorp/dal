@@ -6,17 +6,18 @@ import com.dianping.cat.Cat;
 
 public class GenLogger implements ILogger {
     private static ILog logger;
-    private static final String name = "CodeGen";
+    private static final String NAME = "CodeGen";
 
     static {
-        logger = LogManager.getLogger(name);
+        logger = LogManager.getLogger(NAME);
     }
 
     public void error(Throwable e) {
         try {
             Cat.logError(e);
-            logger.error(name, e);
-        } catch (Throwable e1) {
+            logger.error(NAME, e);
+        } catch (Exception e1) {
+            e1.printStackTrace();
         }
     }
 }

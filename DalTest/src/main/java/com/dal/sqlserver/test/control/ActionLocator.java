@@ -1,7 +1,7 @@
 package com.dal.sqlserver.test.control;
 
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Locator;
+import com.xrosstools.xunit.Context;
+import com.xrosstools.xunit.Locator;
 
 /**
  * To simplify the sample, this is not used

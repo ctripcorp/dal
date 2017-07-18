@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Locator;
+import com.xrosstools.xunit.Context;
+import com.xrosstools.xunit.Locator;
 
 public class ActionCategoryLocator implements Locator {
 	private String defaultKey;

@@ -4,13 +4,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
+import com.xrosstools.xunit.Context;
+import com.xrosstools.xunit.Processor;
 
 public class PopulateHints implements Processor {
 

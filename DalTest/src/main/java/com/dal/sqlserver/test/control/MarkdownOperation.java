@@ -2,8 +2,8 @@ package com.dal.sqlserver.test.control;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
+import com.xrosstools.xunit.Context;
+import com.xrosstools.xunit.Processor;
 
 //TODO get from JMX
 public class MarkdownOperation implements Processor {

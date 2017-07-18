@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.dal.sqlserver.test.People;
 import com.dal.sqlserver.test.PeopleDao;
-import com.xross.tools.xunit.Context;
+import com.xrosstools.xunit.Context;
 
 public class WebContext implements Context {
 	private HttpServletRequest request;

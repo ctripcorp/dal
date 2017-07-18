@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dal.sqlserver.test.control.WebContext;
-import com.xross.tools.xunit.Processor;
-import com.xross.tools.xunit.XunitFactory;
+import com.xrosstools.xunit.Processor;
+import com.xrosstools.xunit.XunitFactory;
 
 @WebServlet("/PeoplePortal")
 public class XunitPeoplePortal extends HttpServlet {

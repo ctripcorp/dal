@@ -12,8 +12,8 @@ import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.sql.logging.CommonUtil;
 import com.dal.sqlserver.test.PeopleDao;
-import com.xross.tools.xunit.Context;
-import com.xross.tools.xunit.Processor;
+import com.xrosstools.xunit.Context;
+import com.xrosstools.xunit.Processor;
 
 public class ManagementAndTimeout implements Processor {
 

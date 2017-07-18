@@ -43,6 +43,7 @@ public class DalTransactionTest {
 	}
 
 	private static final String logicDbName = "dao_test_sqlsvr";
+	private static final String logicShardDbName = "dao_test_sqlsvr_dbShard";
 
 	static{
 		try {
@@ -57,6 +58,12 @@ public class DalTransactionTest {
 		conn = DalClientFactory.getDalConfigure().getLocator().getConnection(logicDbName);
 		return new DalConnection(conn, true, null, DbMeta.createIfAbsent(logicDbName, null, conn));
 	}
+
+    private DalConnection getDalConnection(int shard) throws Exception {
+        Connection conn = null;
+        conn = DalClientFactory.getDalConfigure().getLocator().getConnection("SqlSvrShard_" + shard);
+        return new DalConnection(conn, true, String.valueOf(shard), DbMeta.createIfAbsent(logicDbName, null, conn));
+    }
 
 	@Test
 	public void testDalTransaction() {
@@ -79,7 +86,7 @@ public class DalTransactionTest {
 		DalTransaction test = null;
 		try {
 			test = new DalTransaction(getDalConnection(), logicDbName);
-			test.validate(logicDbName, new DalHints());
+			test.validate(logicDbName, null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -90,7 +97,7 @@ public class DalTransactionTest {
 			
 		try {
 			test = new DalTransaction(getDalConnection(), logicDbName);
-			test.validate("invalid", new DalHints());
+			test.validate("invalid", null);
 			fail();
 		} catch (Throwable e) {
 		}finally {
@@ -98,6 +105,41 @@ public class DalTransactionTest {
 				test.getConnection().close();
 		}
 	}
+
+    @Test
+    public void testValidateWithShard() {
+        DalTransaction test = null;
+        try {
+            test = new DalTransaction(getDalConnection(0), logicShardDbName);
+            test.validate(logicShardDbName, String.valueOf(0));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }finally {
+            if(test != null && test.getConnection() != null)
+                test.getConnection().close();
+        }
+            
+        try {
+            test = new DalTransaction(getDalConnection(0), logicShardDbName);
+            test.validate(logicShardDbName, String.valueOf(1));
+            fail();
+        } catch (Throwable e) {
+        }finally {
+            if(test != null && test.getConnection() != null)
+                test.getConnection().close();
+        }
+        
+        try {
+            test = new DalTransaction(getDalConnection(0), logicShardDbName);
+            test.validate("invalid", null);
+            fail();
+        } catch (Throwable e) {
+        }finally {
+            if(test != null && test.getConnection() != null)
+                test.getConnection().close();
+        }
+    }
 
 	@Test
 	public void testGetConnection() {

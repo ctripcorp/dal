@@ -70,6 +70,28 @@ public class DalConnectionManager {
 		return connHolder;
 	}
 
+	public String evaluateShard(DalHints hints) throws SQLException {
+        DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+        String shardId;
+        
+        if(!dbSet.isShardingSupported())
+            return null;
+
+        DalShardingStrategy strategy = dbSet.getStrategy();
+
+        shardId = hints.getShardId();
+        if(shardId == null)
+            shardId = strategy.locateDbShard(config, logicDbName, hints);
+        
+        // We allow this happen
+        if(shardId == null)
+            return null;
+        
+        dbSet.validate(shardId);
+        
+        return shardId;
+	}
+
 	private DalConnection getConnectionFromDSLocator(DalHints hints,
 			boolean isMaster, boolean isSelect) throws SQLException {
 		Connection conn;

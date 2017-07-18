@@ -37,7 +37,7 @@ public class DalTransactionManager {
 			
 			transactionHolder.set(transaction);
 		}else{
-		    transaction.validate(connManager.getLogicDbName(), hints);
+		    transaction.validate(connManager.getLogicDbName(), connManager.evaluateShard(hints));
 		}
 		
         action.connHolder = transaction.getConnection();
@@ -112,7 +112,7 @@ public class DalTransactionManager {
 		if(transaction == null) {
 			return connManager.getNewConnection(hints, useMaster, operation);
 		} else {
-			transaction.validate(connManager.getLogicDbName(), hints);
+			transaction.validate(connManager.getLogicDbName(), connManager.evaluateShard(hints));
 			return transaction.getConnection();
 		}
 	}

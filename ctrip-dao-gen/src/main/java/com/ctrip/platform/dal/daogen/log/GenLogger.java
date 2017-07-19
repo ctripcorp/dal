@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.log;
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 
 public class GenLogger implements ILogger {
     private static ILog logger;
@@ -10,6 +11,14 @@ public class GenLogger implements ILogger {
 
     static {
         logger = LogManager.getLogger(NAME);
+    }
+
+    public void logEvent(String type, String name, String status, String nameValuePairs) {
+        try {
+            Cat.logEvent(type, name, Message.SUCCESS, nameValuePairs);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     public void error(Throwable e) {

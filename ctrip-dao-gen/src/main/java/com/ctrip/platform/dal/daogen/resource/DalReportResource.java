@@ -25,8 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static oracle.net.aso.C01.e;
-
 @Resource
 @Singleton
 @Path("report")

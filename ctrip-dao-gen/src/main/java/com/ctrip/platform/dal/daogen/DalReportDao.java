@@ -34,13 +34,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static oracle.net.aso.C01.e;
 
 public class DalReportDao {
     private static final String DAL_VERSION_URL =
@@ -60,7 +57,7 @@ public class DalReportDao {
 
     private static final String ALL = "All";
 
-    private Vector<DalReport> reportVector = null;
+    private List<DalReport> reportList = null;
     private ConcurrentHashMap<String, CMSApp> reportMap = null;
     private Date lastUpdate = null;
 
@@ -79,10 +76,10 @@ public class DalReportDao {
     public List<App> getLocalDatasourceAppList() throws Exception {
         List<App> list = new ArrayList<>();
         List<String> appIds = getLocalDatasourceAppIds();
-        if (appIds == null || appIds.isEmpty())
+        if (appIds.isEmpty())
             return list;
         Collections.sort(appIds);
-        Map<String, DalReport> map = convertVectorToMap(reportVector);
+        Map<String, DalReport> map = convertListToMap(reportList);
         Map<String, CMSApp> cmsMap = getAllCMSAppInfo();
         for (String appId : appIds) {
             App app = new App();
@@ -178,7 +175,7 @@ public class DalReportDao {
     public Map<String, List<String>> getMapByDept(String dept) {
         Map<String, List<String>> map = new LinkedHashMap<>();
         List<DalReport> list = getDalReport(dept, null); // filter by dept
-        if (list == null || list.isEmpty())
+        if (list.isEmpty())
             return map;
         for (DalReport report : list) {
             List<String> appIds = report.getAppIds();
@@ -195,7 +192,7 @@ public class DalReportDao {
     public Map<String, List<String>> getMapByVersion(String version) {
         Map<String, List<String>> map = new LinkedHashMap<>();
         List<DalReport> list = getDalReport(null, version); // filter by version
-        if (list == null || list.isEmpty())
+        if (list.isEmpty())
             return map;
         for (DalReport report : list) {
             List<String> appIds = report.getAppIds();
@@ -241,14 +238,14 @@ public class DalReportDao {
     }
 
     public Workbook getWorkbook() throws Exception {
-        if (reportVector == null || reportVector.isEmpty())
+        if (reportList == null || reportList.isEmpty())
             return null;
 
         Map<String, List<List<String>>> deptMap = new LinkedHashMap<>();
         Map<String, List<List<String>>> versionMap = new LinkedHashMap<>();
         try {
             Map<String, CMSApp> cmsAppMap = getAllCMSAppInfo();
-            for (DalReport report : reportVector) {
+            for (DalReport report : reportList) {
                 processReport(report, cmsAppMap, deptMap, versionMap);
             }
         } catch (Exception e) {
@@ -440,10 +437,10 @@ public class DalReportDao {
 
     private List<DalReport> getDalReport(String dept, String version) {
         List<DalReport> list = new ArrayList<>();
-        if (reportVector == null || reportVector.isEmpty())
+        if (reportList == null || reportList.isEmpty())
             return list;
 
-        for (DalReport report : reportVector) {
+        for (DalReport report : reportList) {
             boolean flag = getFlag(report, dept, version);
             if (flag)
                 list.add(report);
@@ -469,18 +466,6 @@ public class DalReportDao {
         return flag;
     }
 
-    private List<String> getFilteredList(List<String> raw, String filter) {
-        if (raw == null || raw.isEmpty())
-            return raw;
-        if (filter == null || filter.length() == 0)
-            return raw;
-        if (!raw.contains(filter))
-            return raw;
-        List<String> list = new ArrayList<>();
-        list.add(filter);
-        return list;
-    }
-
     private List<String> getFuzzyList(List<String> raw, String filter) {
         if (raw == null || raw.isEmpty())
             return raw;
@@ -495,11 +480,11 @@ public class DalReportDao {
         return list;
     }
 
-    private Map<String, DalReport> convertVectorToMap(Vector<DalReport> vector) {
+    private Map<String, DalReport> convertListToMap(List<DalReport> list) {
         Map<String, DalReport> map = new HashMap<>();
-        if (vector == null || vector.isEmpty())
+        if (list == null || list.isEmpty())
             return map;
-        for (DalReport report : vector) {
+        for (DalReport report : list) {
             List<String> appIds = report.getAppIds();
             if (appIds == null || appIds.isEmpty())
                 continue;
@@ -527,28 +512,28 @@ public class DalReportDao {
         }
 
         private void getAllDalReportVector() throws Exception {
-            Vector<DalReport> vector = new Vector<>();
+            List<DalReport> list = new ArrayList<>();
             RawInfo raw = getRawInfo();
             Filter filter = new Filter();
             // filter.setDept("酒店"); // debug
             List<Url> urls = getUrls(raw, filter);
             int index = 0;
-            if (urls != null && urls.size() > 0) {
+            if (urls != null && !urls.isEmpty()) {
                 for (Url url : urls) {
                     Root root = HttpUtil.getJSONEntity(Root.class, url.getUrl(), null, HttpMethod.HttpGet);
                     List<String> appIds = getAppIds(root);
-                    if (appIds != null && appIds.size() > 0) {
+                    if (appIds != null && !appIds.isEmpty()) {
                         DalReport report = new DalReport();
                         report.setAppIds(appIds);
                         report.setDept(url.getDept());
                         report.setVersion(url.getVersion());
-                        vector.add(report);
+                        list.add(report);
                     }
                     index++;
                     System.out.println(index);
                 }
             }
-            reportVector = vector;
+            reportList = list;
             lastUpdate = new Date();
         }
 
@@ -561,7 +546,7 @@ public class DalReportDao {
                     HttpUtil.getJSONEntity(CMSAppInfo.class, CMS_ALL_APPS_URL, parameters, HttpMethod.HttpPost);
             if (info != null) {
                 List<CMSApp> list = info.getData();
-                if (list != null && list.size() > 0) {
+                if (list != null && !list.isEmpty()) {
                     for (CMSApp app : list) {
                         map.put(app.getAppId(), app);
                     }
@@ -626,6 +611,18 @@ public class DalReportDao {
             appIds = new ArrayList<>(map.keySet());
             Collections.sort(appIds);
             return appIds;
+        }
+
+        private List<String> getFilteredList(List<String> raw, String filter) {
+            if (raw == null || raw.isEmpty())
+                return raw;
+            if (filter == null || filter.length() == 0)
+                return raw;
+            if (!raw.contains(filter))
+                return raw;
+            List<String> list = new ArrayList<>();
+            list.add(filter);
+            return list;
         }
 
     }

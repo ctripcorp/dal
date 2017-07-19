@@ -17,12 +17,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalTableDaoMySqlTest.class,
 	DalTableDaoSqlServerTest.class,
 	DalTableDaoOracleTest.class,
-	
-	DalTransactionalAnnotationMySqlTest.class,
-	DalTransactionalAnnotationSqlServerTest.class,
-	DalTransactionalAnnotationOracleTest.class,
-	test.com.ctrip.platform.dal.dao.annotation.AllTest.class,
-	
+		
 	DatabaseSelectorTest.class,
 	DalClientFactoryTest.class,
 	DalClientFactoryLazeLoadTest.class,

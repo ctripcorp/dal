@@ -8,6 +8,5 @@
   
     <context:component-scan base-package="test.com.ctrip.platform.dal.dao.annotation.beanDefine" />
     <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.annotation.DalAnnotationValidator"/>  
-    <bean id="TransactionAnnoClassOracle" class="test.com.ctrip.platform.dal.dao.unittests.TransactionAnnoClassOracle"/>
     
 </beans>  

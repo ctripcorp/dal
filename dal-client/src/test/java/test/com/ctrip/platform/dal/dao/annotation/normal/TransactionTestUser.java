@@ -1,4 +1,4 @@
-package test.com.ctrip.platform.dal.dao.unittests;
+package test.com.ctrip.platform.dal.dao.annotation.normal;
 
 
 public interface TransactionTestUser {

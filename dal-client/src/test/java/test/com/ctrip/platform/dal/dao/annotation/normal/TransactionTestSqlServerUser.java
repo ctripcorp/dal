@@ -1,12 +1,12 @@
-package test.com.ctrip.platform.dal.dao.unittests;
+package test.com.ctrip.platform.dal.dao.annotation.normal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionTestMySqlUser implements TransactionTestUser{
+public class TransactionTestSqlServerUser implements TransactionTestUser{
     @Autowired
-    private TransactionAnnoClassMySql test;
+    private TransactionAnnoClassSqlServer test;
     
     public String perform() {
         return test.perform();

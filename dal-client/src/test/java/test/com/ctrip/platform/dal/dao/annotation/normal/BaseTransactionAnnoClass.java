@@ -1,4 +1,4 @@
-package test.com.ctrip.platform.dal.dao.unittests;
+package test.com.ctrip.platform.dal.dao.annotation.normal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

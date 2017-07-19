@@ -1,20 +1,21 @@
-package test.com.ctrip.platform.dal.dao.unittests;
+package test.com.ctrip.platform.dal.dao.annotation.normal;
 
 import java.sql.SQLException;
 
-import test.com.ctrip.platform.dal.dao.unitbase.SqlServerDatabaseInitializer;
+import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.annotation.Shard;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
 
-public class TransactionAnnoClassSqlServer extends BaseTransactionAnnoClass {
-    public static final String DB_NAME = SqlServerDatabaseInitializer.DATABASE_NAME;
-    public static final String DB_NAME_SHARD = "dao_test_sqlsvr_dbShard";
+public class TransactionAnnoClassMySql extends BaseTransactionAnnoClass {
+    public static final String DB_NAME = MySqlDatabaseInitializer.DATABASE_NAME;
+    public static final String DB_NAME_SHARD = "dao_test_mysql_dbShard";
     
-    public TransactionAnnoClassSqlServer() {
+    public TransactionAnnoClassMySql() {
         super(DB_NAME, DB_NAME_SHARD, "select 1");
     }
+    
     @Transactional(logicDbName = DB_NAME)
     public String perform() {
         return super.perform();

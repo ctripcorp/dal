@@ -15,6 +15,7 @@ public class TransactionAnnoClassMySql extends BaseTransactionAnnoClass {
     public TransactionAnnoClassMySql() {
         super(DB_NAME, DB_NAME_SHARD, "select 1");
     }
+    
     @Transactional(logicDbName = DB_NAME)
     public String perform() {
         return super.perform();

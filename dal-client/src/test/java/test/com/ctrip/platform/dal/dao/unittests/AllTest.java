@@ -4,9 +4,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import test.com.ctrip.platform.dal.dao.annotation.autowire.DalTransactionalValidatorAutoWireTest;
-import test.com.ctrip.platform.dal.dao.annotation.beanDefine.DalTransactionalValidatorTest;
-
 @RunWith(Suite.class)
 @SuiteClasses({
 	DalDirectClientMySqlTest.class,
@@ -24,8 +21,7 @@ import test.com.ctrip.platform.dal.dao.annotation.beanDefine.DalTransactionalVal
 	DalTransactionalAnnotationMySqlTest.class,
 	DalTransactionalAnnotationSqlServerTest.class,
 	DalTransactionalAnnotationOracleTest.class,
-	DalTransactionalValidatorTest.class,
-	DalTransactionalValidatorAutoWireTest.class,
+	test.com.ctrip.platform.dal.dao.annotation.AllTest.class,
 	
 	DatabaseSelectorTest.class,
 	DalClientFactoryTest.class,

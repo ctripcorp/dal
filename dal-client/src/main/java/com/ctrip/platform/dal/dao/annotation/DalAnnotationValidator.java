@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DalAnnotationValidator implements BeanPostProcessor {
-    private static final String CGLIB_SIGNATURE = "EnhancedByCGLIB";
+    private static final String CGLIB_SIGNATURE = "$$EnhancerByCGLIB$$";
     
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -20,13 +20,14 @@ public class DalAnnotationValidator implements BeanPostProcessor {
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Class targetClass = bean.getClass();
         
-        for(Class interf: targetClass.getInterfaces()) {
-            if(interf == TransactionalIntercepted.class)
-                return bean;
-        }
-        
-        while(targetClass.getName().contains(CGLIB_SIGNATURE))
+        while(targetClass.getName().contains(CGLIB_SIGNATURE)) {
+            for(Class interf: targetClass.getInterfaces()) {
+                if(interf == TransactionalIntercepted.class)
+                    return bean;
+            }
+            
             targetClass = targetClass.getSuperclass();
+        }
 
         Method[] methods = targetClass.getDeclaredMethods();
 

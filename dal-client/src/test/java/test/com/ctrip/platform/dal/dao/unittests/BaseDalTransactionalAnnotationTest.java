@@ -32,7 +32,13 @@ public class BaseDalTransactionalAnnotationTest{
         this.targetClass = annoTestClass;
         this.autoWireClass = autoWireClass;
     }
-        
+
+    @Test
+    public void testAutoWireWithinFactoryCreatedBean() {
+        BaseTransactionAnnoClass test = (BaseTransactionAnnoClass)ctx.getBean(targetClass);
+        Assert.assertNotNull(test.getJac());
+    }
+
     @Test
     public void testAutoWire() throws InstantiationException, IllegalAccessException {
         TransactionTestUser test = (TransactionTestUser)ctx.getBean(autoWireClass);

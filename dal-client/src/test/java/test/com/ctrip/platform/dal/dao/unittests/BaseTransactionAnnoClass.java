@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -34,6 +36,13 @@ public class BaseTransactionAnnoClass {
         this.noShardDb = noShardDb;
         this.shardDb = shardDb;
         this.query = query;
+    }
+    
+    @Autowired
+    private JustAnotherClass jac;
+    
+    public JustAnotherClass getJac() {
+        return jac;
     }
     
     public String performNormal() {

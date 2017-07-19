@@ -40,8 +40,4 @@ public class DalAnnotationValidator implements BeanPostProcessor {
         
         return bean;
     }
-    
-    private void check(Object bean){
-        
-    }
 }

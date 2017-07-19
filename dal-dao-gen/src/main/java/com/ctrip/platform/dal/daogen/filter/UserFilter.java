@@ -13,6 +13,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class UserFilter implements Filter {
+    private static final String DAL = "DAL";
+    private static final String DAL_CODEGEN = "CodeGen::UserName";
+
     @Override
     public void destroy() {}
 
@@ -35,6 +38,8 @@ public class UserFilter implements Filter {
                             user.setUserEmail(CustomizedResource.getInstance().getMail(null));
                             BeanGetter.getDaoOfLoginUser().insertUser(user);
                         }
+
+                        LoggerManager.getInstance().logEvent(DAL, DAL_CODEGEN, "", user.getUserName());
                         session.setAttribute(Consts.USER_INFO, user);
                         session.setAttribute(Consts.USER_NAME, user.getUserName());
                     }

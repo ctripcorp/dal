@@ -100,8 +100,10 @@ public abstract class ConnectionAction<T> {
 		if(meta != null)
 			meta.populate(entry);
 		
-        entry.setMaster(connHolder.isMaster());
-        entry.setShardId(connHolder.getShardId());
+		if(connHolder !=null) {
+		    entry.setMaster(connHolder.isMaster());
+		    entry.setShardId(connHolder.getShardId());
+		}
 	}
 	
 	public void initLogEntry(String logicDbName, DalHints hints) {

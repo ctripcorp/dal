@@ -13,9 +13,9 @@ public class GenLogger implements ILogger {
         logger = LogManager.getLogger(NAME);
     }
 
-    public void logEvent(String type, String name, String status, String nameValuePairs) {
+    public void logEvent(String type, String name) {
         try {
-            Cat.logEvent(type, name, Message.SUCCESS, nameValuePairs);
+            Cat.logEvent(type, name);
         } catch (Throwable e) {
             e.printStackTrace();
         }

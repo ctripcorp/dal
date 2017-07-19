@@ -75,7 +75,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             logger.info("Found dal.config at " + dalLoc);
             return true;
         }else{
-            logger.warn("Can not found dal.config from local");
+            logger.warn("Can not find dal.config from local");
         }
         
         logger.info("Try to locate dal.config from qConfig");
@@ -86,7 +86,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             logger.info("Found dal.config from qConfig");
             return true;
         }catch(Throwable e) {
-            logger.warn("Can not found dal.config from qConfig :" + e.getMessage());
+            logger.warn("Can not find dal.config from qConfig :" + e.getMessage());
             return false;
         }
     }

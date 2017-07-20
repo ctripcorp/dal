@@ -19,7 +19,7 @@ import org.springframework.beans.BeansException;
 
 import test.com.ctrip.platform.dal.dao.annotation.autowire.TransactionAnnoClass;
 
-import com.ctrip.platform.dal.dao.annotation.DalAnnotationValidator;
+import com.ctrip.platform.dal.dao.client.DalAnnotationValidator;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 
 public class DalAnnotationValidatorTest {

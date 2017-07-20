@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.annotation;
+package com.ctrip.platform.dal.dao.client;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,6 +12,8 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.annotation.Shard;
+import com.ctrip.platform.dal.dao.annotation.Transactional;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 public class DalTransactionInterceptor implements MethodInterceptor {

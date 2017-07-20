@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.annotation;
+package com.ctrip.platform.dal.dao.client;
 
 import java.lang.reflect.Method;
 
@@ -6,6 +6,8 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
+
+import com.ctrip.platform.dal.dao.annotation.Transactional;
 
 @Component
 public class DalAnnotationValidator implements BeanPostProcessor {

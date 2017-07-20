@@ -7,7 +7,7 @@
        http://www.springframework.org/schema/context/spring-context-3.0.xsd">  
   
     <context:component-scan base-package="test.com.ctrip.platform.dal.dao.annotation.normal" />
-    <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.annotation.DalAnnotationValidator"/>  
+    <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.client.DalAnnotationValidator"/>  
     <bean id="TransactionAnnoClassSqlServer" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
         <constructor-arg name="targetClass" type="Class" value="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassSqlServer" />
     </bean>

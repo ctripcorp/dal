@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.annotation;
+package com.ctrip.platform.dal.dao.client;
 
 /**
  * Just a flag to indicate that the annotation is correct intercepted by DalTransactionInterceptor.

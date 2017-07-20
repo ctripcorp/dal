@@ -12,9 +12,7 @@ import net.sf.cglib.proxy.NoOp;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.annotation.DalTransactionInterceptor;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
-import com.ctrip.platform.dal.dao.annotation.TransactionalIntercepted;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;

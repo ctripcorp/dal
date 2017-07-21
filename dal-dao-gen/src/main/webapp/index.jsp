@@ -234,8 +234,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="steps step2-1 row-fluid">
-                    <div class="row-fluid">
+                <div class="steps step2-1 row-fluid height-340">
+                    <div class="row-fluid margin-bottom-20">
                         <div class="control-group">
                             <label class="control-label popup_label">选择表：</label> <select id="table_list"
                                                                                           multiple="multiple"
@@ -244,7 +244,7 @@
                         </select>
                         </div>
                     </div>
-                    <div class="row-fluid">
+                    <div class="row-fluid margin-bottom-20">
                         <div class="control-group">
                             <label class="control-label popup_label">选择视图：</label> <select id="view_list"
                                                                                            multiple="multiple"
@@ -253,7 +253,7 @@
                         </select>
                         </div>
                     </div>
-                    <div class="row-fluid mysql_hide">
+                    <div class="row-fluid mysql_hide margin-bottom-20">
                         <div class="control-group">
                             <label class="control-label popup_label">选择存储过程：</label> <select id="sp_list"
                                                                                              multiple="multiple"
@@ -262,22 +262,22 @@
                         </select>
                         </div>
                     </div>
-                    <div class="row-fluid">
+                    <div class="row-fluid margin-bottom-20">
                         <div class="control-group">
                             <label class="control-label popup_label">移除DAO名前缀：</label> <input type="text" id="prefix"
                                                                                               class="span9 popup_text input-sm">
                         </div>
                     </div>
-                    <div class="row-fluid">
+                    <div class="row-fluid margin-bottom-20">
                         <div class="control-group">
                             <label class="control-label popup_label">添加DAO名后缀：</label> <input type="text" id="suffix"
                                                                                               class="span9 popup_text input-sm">
                         </div>
                     </div>
-                    <div class="row-fluid mysql_hide">
+                    <div class="row-fluid mysql_hide margin-bottom-20">
                         <label class="popup_label"><input id="cud_by_sp" type="checkbox">增删改使用SPA或SP3（SqlServer请勾选，MySql请去除）</label>
                     </div>
-                    <div class="row-fluid">
+                    <div class="row-fluid margin-bottom-20">
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
                     </div>
                 </div>
@@ -741,7 +741,7 @@
 <![endif]-->
 <script src="/static/jquery/jquery-1.10.2.min.js?codegen=${version}"></script>
 <script src="/static/jquery/jquery.blockui.min.js?codegen=${version}"></script>
-<script src="/static/jquery/jquery.multiple.select.js?codegen=${version}"></script>
+<script src="/static/jquery/multiple-select.js?codegen=${version}"></script>
 <script src="/static/bootstrap/js/bootstrap.min.js?codegen=${version}"></script>
 <script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${version}"></script>
 <script src="/static/jstree/jstree.js?codegen=${version}"></script>

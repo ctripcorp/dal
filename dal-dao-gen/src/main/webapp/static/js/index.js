@@ -6,6 +6,10 @@
             $('#main_layout').height($(document).height() - 50);
         });
 
+        $("#table_list").multipleSelect({
+            filter: true
+        });
+
         $(document.body).on("click", "#addProj", function () {
             $("#proj_error_msg").empty();
             if ($("#projectModal").attr("is_root") == "0") {

@@ -86,6 +86,14 @@ ul.navbar-nav li:last-child {
     height: 30px;
 }
 
+.margin-bottom-20{
+    margin-bottom: 20px;
+}
+
+.height-340{
+    height: 340px;
+}
+
 div[class*='tooltip'] {
     text-align: left;
 }

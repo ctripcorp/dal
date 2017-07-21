@@ -252,7 +252,7 @@
 <![endif]-->
 <script src="/static/jquery/jquery-1.10.2.min.js?codegen=${version}"></script>
 <script src="/static/jquery/jquery.blockui.min.js?codegen=${version}"></script>
-<script src="/static/jquery/jquery.multiple.select.js?codegen=${version}"></script>
+<script src="/static/jquery/multiple-select.js?codegen=${version}"></script>
 <script src="/static/bootstrap/js/bootstrap.min.js?codegen=${version}"></script>
 <script src="/static/w2ui/w2ui-1.3.2.min.js?codegen=${version}"></script>
 <script src="/static/jstree/jstree.js?codegen=${version}"></script>

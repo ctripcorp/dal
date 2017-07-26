@@ -9,7 +9,7 @@
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
         <commons-codec-version>1.8</commons-codec-version>
-        <sqljdbc-version>6.1.0.jre7</sqljdbc-version>
+        <sqljdbc-version>6.2.1.jre7</sqljdbc-version>
         <mysql-connector-version>5.1.38</mysql-connector-version>
         <oracle-jdbc-thin-version>10.2.0.4</oracle-jdbc-thin-version>
         <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>

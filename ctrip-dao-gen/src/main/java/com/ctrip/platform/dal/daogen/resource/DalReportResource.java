@@ -37,7 +37,7 @@ public class DalReportResource {
     // thread safe
     static {
         try {
-            reportDao = new DalReportDao();
+            reportDao = DalReportDao.getInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -187,6 +187,17 @@ public class DalReportResource {
             }
         }
         return "";
+    }
+
+    @GET
+    @Path("forceFresh")
+    public String forceFresh() throws Exception {
+        String result = "Task is running,can't refresh right now,please try again later.";
+        if (!reportDao.isTaskRunning) {
+            reportDao.runTask();
+            result = "Task completed.";
+        }
+        return result;
     }
 
 }

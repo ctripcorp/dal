@@ -2,6 +2,7 @@
     $(function () {
         getRaw();
         bindExportExcel();
+        bindForceFresh();
         bindLocalDatasourceAppList();
         bindExportExcel2();
     });
@@ -236,6 +237,17 @@
             form.submit();
         });
     };
+
+    function bindForceFresh() {
+        $(document.body).on("click", "#spanForceFresh", function () {
+            var divLoading = $("#divLoading");
+            divLoading.show();
+            $.get("/rest/report/forceFresh", function (data) {
+                divLoading.hide();
+                alert(data);
+            });
+        });
+    }
 
     function bindLocalDatasourceAppList() {
         $(document.body).on("click", "#anchorLocalDatasource,#spanRefresh", function () {

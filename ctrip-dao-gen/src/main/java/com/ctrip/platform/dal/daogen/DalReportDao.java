@@ -40,6 +40,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class DalReportDao {
+    private static DalReportDao reportDao = null;
+
+    public static DalReportDao getInstance() {
+        if (reportDao == null) {
+            reportDao = new DalReportDao();
+        }
+        return reportDao;
+    }
+
     private static final String DAL_VERSION_URL =
             "http://cat.ctripcorp.com/cat/r/e?domain=All&type=DAL.version&forceDownload=json";
     private static final String DAL_VERSION_URL_FORMAT =
@@ -60,6 +69,8 @@ public class DalReportDao {
     private List<DalReport> reportList = null;
     private ConcurrentHashMap<String, CMSApp> reportMap = null;
     private Date lastUpdate = null;
+
+    public boolean isTaskRunning = false;
 
     private static final int COLUMN_COUNT = 6;
     private static final int COLUMN_COUNT2 = 7;
@@ -500,131 +511,136 @@ public class DalReportDao {
         return map;
     }
 
+    public void runTask() throws Exception {
+        getAllDalReportVector();
+        getAllAppInfoMap();
+    }
+
+    private void getAllDalReportVector() throws Exception {
+        List<DalReport> list = new ArrayList<>();
+        RawInfo raw = getRawInfo();
+        Filter filter = new Filter();
+        // filter.setDept("酒店"); // debug
+        List<Url> urls = getUrls(raw, filter);
+        int index = 0;
+        if (urls != null && !urls.isEmpty()) {
+            for (Url url : urls) {
+                Root root = HttpUtil.getJSONEntity(Root.class, url.getUrl(), null, HttpMethod.HttpGet);
+                List<String> appIds = getAppIds(root);
+                if (appIds != null && !appIds.isEmpty()) {
+                    DalReport report = new DalReport();
+                    report.setAppIds(appIds);
+                    report.setDept(url.getDept());
+                    report.setVersion(url.getVersion());
+                    list.add(report);
+                }
+                index++;
+                System.out.println(index);
+            }
+        }
+        reportList = list;
+        lastUpdate = new Date();
+    }
+
+    private void getAllAppInfoMap() throws Exception {
+        ConcurrentHashMap<String, CMSApp> map = new ConcurrentHashMap<>();
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(ACCESS_TOKEN, CMS_TOKEN);
+        parameters.put(REQUEST_BODY, "{}");
+        CMSAppInfo info = HttpUtil.getJSONEntity(CMSAppInfo.class, CMS_ALL_APPS_URL, parameters, HttpMethod.HttpPost);
+        if (info != null) {
+            List<CMSApp> list = info.getData();
+            if (list != null && !list.isEmpty()) {
+                for (CMSApp app : list) {
+                    map.put(app.getAppId(), app);
+                }
+            }
+        }
+
+        reportMap = map;
+        lastUpdate = new Date();
+    }
+
+    private List<Url> getUrls(RawInfo rawInfo, Filter filter) {
+        List<Url> urls = null;
+        if (rawInfo == null)
+            return urls;
+        List<String> depts = rawInfo.getDepts();
+        List<String> versions = rawInfo.getVersions();
+        // filter
+        if (filter != null) {
+            depts = getFilteredList(depts, filter.getDept());
+            versions = getFilteredList(versions, filter.getVersion());
+        }
+        if (depts == null || versions == null)
+            return urls;
+        urls = new ArrayList<>();
+        for (String dept : depts) {
+            for (String version : versions) {
+                String format = String.format(DAL_VERSION_URL_FORMAT, dept, version);
+                Url url = new Url();
+                url.setDept(dept);
+                url.setVersion(version);
+                url.setUrl(format);
+                urls.add(url);
+            }
+        }
+
+        return urls;
+    }
+
+    private List<String> getAppIds(Root root) {
+        List<String> appIds = null;
+        if (root == null)
+            return appIds;
+        Report report = root.getReport();
+        if (report == null)
+            return appIds;
+        TypeDomains typeDomains = report.getTypeDomains();
+        if (typeDomains == null)
+            return appIds;
+        DALVersion dalVersion = typeDomains.getDalVersion();
+        if (dalVersion == null)
+            return appIds;
+        Map<String, NameDomain> nameDomainMap = dalVersion.getNameDomains();
+        if (nameDomainMap == null || nameDomainMap.size() == 0)
+            return appIds;
+        Map.Entry<String, NameDomain> entry = nameDomainMap.entrySet().iterator().next();
+        NameDomain nameDomain = entry.getValue();
+        if (nameDomain == null)
+            return appIds;
+        Map<String, NameDomainCount> map = nameDomain.getNameDomainCounts();
+        if (map == null || map.size() == 0)
+            return appIds;
+        appIds = new ArrayList<>(map.keySet());
+        Collections.sort(appIds);
+        return appIds;
+    }
+
+    private List<String> getFilteredList(List<String> raw, String filter) {
+        if (raw == null || raw.isEmpty())
+            return raw;
+        if (filter == null || filter.length() == 0)
+            return raw;
+        if (!raw.contains(filter))
+            return raw;
+        List<String> list = new ArrayList<>();
+        list.add(filter);
+        return list;
+    }
+
     private class ReportTask implements Runnable {
         @Override
         public void run() {
             try {
-                getAllDalReportVector();
-                getAllAppInfoMap();
+                isTaskRunning = true;
+                runTask();
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                isTaskRunning = false;
             }
         }
-
-        private void getAllDalReportVector() throws Exception {
-            List<DalReport> list = new ArrayList<>();
-            RawInfo raw = getRawInfo();
-            Filter filter = new Filter();
-            // filter.setDept("酒店"); // debug
-            List<Url> urls = getUrls(raw, filter);
-            int index = 0;
-            if (urls != null && !urls.isEmpty()) {
-                for (Url url : urls) {
-                    Root root = HttpUtil.getJSONEntity(Root.class, url.getUrl(), null, HttpMethod.HttpGet);
-                    List<String> appIds = getAppIds(root);
-                    if (appIds != null && !appIds.isEmpty()) {
-                        DalReport report = new DalReport();
-                        report.setAppIds(appIds);
-                        report.setDept(url.getDept());
-                        report.setVersion(url.getVersion());
-                        list.add(report);
-                    }
-                    index++;
-                    System.out.println(index);
-                }
-            }
-            reportList = list;
-            lastUpdate = new Date();
-        }
-
-        private void getAllAppInfoMap() throws Exception {
-            ConcurrentHashMap<String, CMSApp> map = new ConcurrentHashMap<>();
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put(ACCESS_TOKEN, CMS_TOKEN);
-            parameters.put(REQUEST_BODY, "{}");
-            CMSAppInfo info =
-                    HttpUtil.getJSONEntity(CMSAppInfo.class, CMS_ALL_APPS_URL, parameters, HttpMethod.HttpPost);
-            if (info != null) {
-                List<CMSApp> list = info.getData();
-                if (list != null && !list.isEmpty()) {
-                    for (CMSApp app : list) {
-                        map.put(app.getAppId(), app);
-                    }
-                }
-            }
-
-            reportMap = map;
-            lastUpdate = new Date();
-        }
-
-        private List<Url> getUrls(RawInfo rawInfo, Filter filter) {
-            List<Url> urls = null;
-            if (rawInfo == null)
-                return urls;
-            List<String> depts = rawInfo.getDepts();
-            List<String> versions = rawInfo.getVersions();
-            // filter
-            if (filter != null) {
-                depts = getFilteredList(depts, filter.getDept());
-                versions = getFilteredList(versions, filter.getVersion());
-            }
-            if (depts == null || versions == null)
-                return urls;
-            urls = new ArrayList<>();
-            for (String dept : depts) {
-                for (String version : versions) {
-                    String format = String.format(DAL_VERSION_URL_FORMAT, dept, version);
-                    Url url = new Url();
-                    url.setDept(dept);
-                    url.setVersion(version);
-                    url.setUrl(format);
-                    urls.add(url);
-                }
-            }
-
-            return urls;
-        }
-
-        private List<String> getAppIds(Root root) {
-            List<String> appIds = null;
-            if (root == null)
-                return appIds;
-            Report report = root.getReport();
-            if (report == null)
-                return appIds;
-            TypeDomains typeDomains = report.getTypeDomains();
-            if (typeDomains == null)
-                return appIds;
-            DALVersion dalVersion = typeDomains.getDalVersion();
-            if (dalVersion == null)
-                return appIds;
-            Map<String, NameDomain> nameDomainMap = dalVersion.getNameDomains();
-            if (nameDomainMap == null || nameDomainMap.size() == 0)
-                return appIds;
-            Map.Entry<String, NameDomain> entry = nameDomainMap.entrySet().iterator().next();
-            NameDomain nameDomain = entry.getValue();
-            if (nameDomain == null)
-                return appIds;
-            Map<String, NameDomainCount> map = nameDomain.getNameDomainCounts();
-            if (map == null || map.size() == 0)
-                return appIds;
-            appIds = new ArrayList<>(map.keySet());
-            Collections.sort(appIds);
-            return appIds;
-        }
-
-        private List<String> getFilteredList(List<String> raw, String filter) {
-            if (raw == null || raw.isEmpty())
-                return raw;
-            if (filter == null || filter.length() == 0)
-                return raw;
-            if (!raw.contains(filter))
-                return raw;
-            List<String> list = new ArrayList<>();
-            list.add(filter);
-            return list;
-        }
-
     }
 
 }

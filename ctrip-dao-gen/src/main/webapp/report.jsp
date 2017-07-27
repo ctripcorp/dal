@@ -35,7 +35,7 @@
         }
 
         .display-none {
-            display: none !important;
+            display: none;
         }
 
         .float-left {
@@ -92,7 +92,8 @@
                     </div>
                     <div id="divExport" class="container-fluid bg-info">
                         <span id="spanExport" class="label label-success span-margin cursor font-size">导出Excel</span>
-                        <span id="spanForceFresh" class="label label-success span-margin cursor font-size display-none">强制刷新</span>
+                        <span id="spanForceFresh" class="label label-success span-margin cursor font-size"
+                              style="display: none;">强制刷新</span>
                     </div>
                 </div>
                 <div class="panel-body">

@@ -27,7 +27,7 @@ public class DbUtils {
     private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", Pattern.CASE_INSENSITIVE);
 
     static {
-        stmtCreator = new DalStatementCreator();
+        stmtCreator = new DalStatementCreator(com.ctrip.platform.dal.common.enums.DatabaseCategory.MySql);
         validMode.add(DatabaseMetaData.procedureColumnIn);
         validMode.add(DatabaseMetaData.procedureColumnInOut);
         validMode.add(DatabaseMetaData.procedureColumnOut);

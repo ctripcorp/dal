@@ -48,22 +48,24 @@ public class DaoBySqlBuilder extends BaseDao {
     }
 
     private void processGenTaskBySqlBuilder(GenTaskBySqlBuilder entity) throws SQLException {
-        if (entity.getApproved() == 1) {
-            entity.setStr_approved("未审批");
-        } else if (entity.getApproved() == 2) {
-            entity.setStr_approved("通过");
-        } else if (entity.getApproved() == 3) {
-            entity.setStr_approved("未通过");
-        } else {
-            entity.setStr_approved("通过");
+        if (entity.getApproved() != null) {
+            if (entity.getApproved() == 1) {
+                entity.setStr_approved("未审批");
+            } else if (entity.getApproved() == 2) {
+                entity.setStr_approved("通过");
+            } else if (entity.getApproved() == 3) {
+                entity.setStr_approved("未通过");
+            } else {
+                entity.setStr_approved("通过");
+            }
+        }
+
+        if (entity.getUpdate_time() != null) {
+            Date date = new Date(entity.getUpdate_time().getTime());
+            entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         }
 
         entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
-
-        if (entity.getUpdate_time() == null)
-            return;
-        Date date = new Date(entity.getUpdate_time().getTime());
-        entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 
     public int getVersionById(int id) throws SQLException {

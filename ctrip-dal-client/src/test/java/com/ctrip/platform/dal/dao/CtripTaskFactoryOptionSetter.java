@@ -18,4 +18,11 @@ public class CtripTaskFactoryOptionSetter {
         CtripTaskFactory.callSpbyName = false;
         CtripTaskFactory.callSpt = true;
     }
+    
+    public static void callSpByNativeSyntax() throws Exception {
+        CtripTaskFactory.callSpbySqlServerSyntax = true;
+        CtripTaskFactory.callSpbyName = false;
+        CtripTaskFactory.callSpt = false;
+    }
+    
 }

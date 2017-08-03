@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
-public class CtripTableSpDaoTest {
+public abstract class BaseCtripTableSpDaoTest {
 
 	private final static String DATABASE_NAME = "SimpleShard";
 	

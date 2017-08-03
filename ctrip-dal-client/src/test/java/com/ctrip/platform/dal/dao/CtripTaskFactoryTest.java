@@ -7,24 +7,20 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class CtripTaskFactoryTest {
-
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-        CtripTaskFactory.callSpbyName = false;
-    }
-    
     @Test
     public void testCreateTaskValidationFail() throws SQLException {
-        // sorry for this ugly usage
         CtripTaskFactory ctf = new CtripTaskFactory();
+        
         Map<String, String> settings = new HashMap<>();
         settings.put("callSpbyName", "false");
+        settings.put("callSpbySqlServerSyntax", "false");
+        settings.put("callSpt", "false");
+        
         ctf.initialize(settings);
         
         DalParser<PeopleOldVersion> parser = new DalDefaultJpaParser<>(PeopleOldVersion.class);

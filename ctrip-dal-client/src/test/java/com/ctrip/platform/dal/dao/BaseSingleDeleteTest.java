@@ -14,7 +14,12 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 
 public abstract class BaseSingleDeleteTest {
-    public abstract <T> SingleTask<T> getTest(DalParser<T> parser);
+    public abstract void setOptionTest();
+    
+    private <T> SingleTask<T> getTest(DalParser<T> parser) {
+        setOptionTest();
+        return new CtripTaskFactory().createSingleDeleteTask(parser);
+    }
     
 	private final static String DATABASE_NAME = "SimpleShard";
 	

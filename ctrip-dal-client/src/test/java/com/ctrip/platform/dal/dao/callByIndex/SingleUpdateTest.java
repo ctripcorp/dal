@@ -1,13 +1,10 @@
 package com.ctrip.platform.dal.dao.callByIndex;
 
 import com.ctrip.platform.dal.dao.BaseSingleUpdateTest;
-import com.ctrip.platform.dal.dao.CtripTaskFactory;
-import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.task.SingleTask;
+import com.ctrip.platform.dal.dao.CtripTaskFactoryOptionSetter;
 
 public class SingleUpdateTest extends BaseSingleUpdateTest {
-    @Override
-    public <T> SingleTask<T> getTest(DalParser<T> parser) {
-        return new CtripTaskFactory().createSingleUpdateTask(parser);
+    public void setOptionTest() {
+        CtripTaskFactoryOptionSetter.callSpByIndex();
     }
 }

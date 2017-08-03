@@ -1,13 +1,10 @@
 package com.ctrip.platform.dal.dao.callByName;
 
 import com.ctrip.platform.dal.dao.BaseBatchInsertTest;
-import com.ctrip.platform.dal.dao.CtripTaskFactory;
-import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.task.BulkTask;
+import com.ctrip.platform.dal.dao.CtripTaskFactoryOptionSetter;
 
 public class BatchInsertTest extends BaseBatchInsertTest {
-    @Override
-    public <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
-        return (BulkTask<int[], T>)new CtripTaskFactory().createBatchInsertTask(parser);
+    public void setOptionTest() {
+        CtripTaskFactoryOptionSetter.callSpByName();
     }
 }

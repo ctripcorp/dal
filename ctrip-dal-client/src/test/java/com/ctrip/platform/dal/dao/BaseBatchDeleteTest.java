@@ -97,7 +97,12 @@ public abstract class BaseBatchDeleteTest {
 		}
 	}
 	
-    public abstract <T> BulkTask<int[], T> getTest(DalParser<T> parser);
+	public abstract void setOptionTest();
+	
+    private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
+        setOptionTest();
+        return (BulkTask<int[], T>)new CtripTaskFactory().createBatchDeleteTask(parser);
+    }
         
     @Test
 	public void testExecute() {

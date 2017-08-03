@@ -1,11 +1,9 @@
 package com.ctrip.platform.dal.dao.callBySpt;
 
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.ctrip.platform.dal.dao.CtripTaskFactoryOptionSetter;
 import com.ctrip.platform.dal.dao.callByName.SingleDeleteTest;
 import com.ctrip.platform.dal.dao.callByName.SingleInsertTest;
 import com.ctrip.platform.dal.dao.callByName.SingleUpdateTest;
@@ -22,9 +20,4 @@ import com.ctrip.platform.dal.dao.callByName.SingleUpdateTest;
 
     CtripTableSpDaoTest.class,
 })
-public class AllTests {
-    @BeforeClass
-    public static void tearDownAfterClass() throws Exception {
-        CtripTaskFactoryOptionSetter.callSpt();
-    }
-}
+public class AllTests {}

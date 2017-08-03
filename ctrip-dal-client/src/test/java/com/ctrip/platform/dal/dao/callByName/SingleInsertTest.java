@@ -1,13 +1,10 @@
 package com.ctrip.platform.dal.dao.callByName;
 
 import com.ctrip.platform.dal.dao.BaseSingleInsertTest;
-import com.ctrip.platform.dal.dao.CtripTaskFactory;
-import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.task.SingleTask;
+import com.ctrip.platform.dal.dao.CtripTaskFactoryOptionSetter;
 
 public class SingleInsertTest extends BaseSingleInsertTest {
-    @Override
-    public <T> SingleTask<T> getTest(DalParser<T> parser) {
-        return new CtripTaskFactory().createSingleInsertTask(parser);
+    public void setOptionTest() {
+        CtripTaskFactoryOptionSetter.callSpByName();
     }
 }

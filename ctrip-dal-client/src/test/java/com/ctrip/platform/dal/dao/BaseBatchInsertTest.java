@@ -16,7 +16,6 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 
 public abstract class BaseBatchInsertTest {
-
 	private final static String DATABASE_NAME = "SimpleShard";
 	
 	private final static String TABLE_NAME = "People";
@@ -60,7 +59,12 @@ public abstract class BaseBatchInsertTest {
 		}
 	}
 	
-	public abstract <T> BulkTask<int[], T> getTest(DalParser<T> parser);
+    public abstract void setOptionTest();
+
+	private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
+	    setOptionTest();
+	    return (BulkTask<int[], T>)new CtripTaskFactory().createBatchInsertTask(parser);
+	}
         
 	@Test
 	public void testExecute() {

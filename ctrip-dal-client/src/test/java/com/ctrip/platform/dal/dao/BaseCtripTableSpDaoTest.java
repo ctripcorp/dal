@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 
 public abstract class BaseCtripTableSpDaoTest {
+    public abstract void setOptionTest();
 
 	private final static String DATABASE_NAME = "SimpleShard";
 	
@@ -45,6 +46,7 @@ public abstract class BaseCtripTableSpDaoTest {
 
 	@Before
 	public void setUp() throws Exception {
+        setOptionTest();	    
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		insertSqls = new String[6];

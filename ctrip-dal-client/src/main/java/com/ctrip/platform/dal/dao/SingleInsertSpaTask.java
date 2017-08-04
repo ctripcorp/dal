@@ -12,6 +12,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	private static final String INSERT_SPA_TPL = "spA_%s_i";
 
 	private String outputIdName;
+	private int outputIdIndex;
 	
 	private static final String RET_CODE = "retcode";
 	
@@ -20,7 +21,13 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
-		outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;		
+		outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
+		int outputIdIndex = 0;
+		for(String name: parser.getColumnNames()){
+		    if(name.equals(outputIdName))
+		        break;
+		    outputIdIndex++;
+		}
 	}
 	
 	@Override
@@ -68,7 +75,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
              * Must to be first one
              */
 	        if(outputIdName != null) {
-	            map.put(outputIdName, parameters.get(0).getValue());
+	            map.put(outputIdName, parameters.get(outputIdIndex).getValue());
 	        }
 		}
 		

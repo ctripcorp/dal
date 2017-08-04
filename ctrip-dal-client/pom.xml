@@ -11,7 +11,7 @@
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>0.8.35</framework-bom.version>
+        <framework-bom.version>0.10.2</framework-bom.version>
     </properties>
     <dependencyManagement>
         <dependencies>

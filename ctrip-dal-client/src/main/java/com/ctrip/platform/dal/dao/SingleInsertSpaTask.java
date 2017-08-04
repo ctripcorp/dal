@@ -22,7 +22,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
 		outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
-		int outputIdIndex = 0;
+		outputIdIndex = 0;
 		for(String name: parser.getColumnNames()){
 		    if(name.equals(outputIdName))
 		        break;

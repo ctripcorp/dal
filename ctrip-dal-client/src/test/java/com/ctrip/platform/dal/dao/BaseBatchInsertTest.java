@@ -41,6 +41,7 @@ public abstract class BaseBatchInsertTest {
 
 	@Before
 	public void setUp() throws Exception {
+	    setOptionTest();
 		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
 	}
 
@@ -62,7 +63,6 @@ public abstract class BaseBatchInsertTest {
     public abstract void setOptionTest();
 
 	private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
-	    setOptionTest();
 	    return (BulkTask<int[], T>)new CtripTaskFactory().createBatchInsertTask(parser);
 	}
         

@@ -19,7 +19,6 @@ public abstract class BaseSingleUpdateTest {
     public abstract void setOptionTest();
     
     private <T> SingleTask<T> getTest(DalParser<T> parser) {
-        setOptionTest();
         return new CtripTaskFactory().createSingleUpdateTask(parser);
     }
 
@@ -48,6 +47,7 @@ public abstract class BaseSingleUpdateTest {
 
 	@Before
 	public void setUp() throws Exception {
+        setOptionTest();
 		String[] insertSqls = new String[4];
 		insertSqls[0] = "SET IDENTITY_INSERT "+ TABLE_NAME + " ON";
 		insertSqls[1] = "DELETE FROM " + TABLE_NAME;

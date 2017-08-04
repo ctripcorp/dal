@@ -41,6 +41,7 @@ public abstract class BaseBatchUpdateTest {
 
 	@Before
 	public void setUp() throws Exception {
+        setOptionTest();
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		insertSqls = new String[6];
@@ -99,7 +100,6 @@ public abstract class BaseBatchUpdateTest {
     public abstract void setOptionTest();
 
     private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
-        setOptionTest();
         return (BulkTask<int[], T>)new CtripTaskFactory().createBatchUpdateTask(parser);
     }
 

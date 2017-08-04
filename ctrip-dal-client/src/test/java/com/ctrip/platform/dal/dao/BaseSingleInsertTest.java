@@ -20,7 +20,6 @@ public abstract class BaseSingleInsertTest {
     public abstract void setOptionTest();
     
     private <T> SingleTask<T> getTest(DalParser<T> parser) {
-        setOptionTest();
         return new CtripTaskFactory().createSingleInsertTask(parser);
     }
 
@@ -48,6 +47,7 @@ public abstract class BaseSingleInsertTest {
 
 	@Before
 	public void setUp() throws Exception {
+        setOptionTest();
 		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
 		tearDownShard();
 	}

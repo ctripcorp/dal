@@ -41,6 +41,8 @@ public abstract class BaseBatchDeleteTest {
 
 	@Before
 	public void setUp() throws Exception {
+        setOptionTest();
+
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		insertSqls = new String[6];
@@ -100,7 +102,6 @@ public abstract class BaseBatchDeleteTest {
 	public abstract void setOptionTest();
 	
     private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
-        setOptionTest();
         return (BulkTask<int[], T>)new CtripTaskFactory().createBatchDeleteTask(parser);
     }
         

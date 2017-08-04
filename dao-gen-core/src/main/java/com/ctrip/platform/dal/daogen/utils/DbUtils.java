@@ -582,6 +582,7 @@ public class DbUtils {
                 dbType = connection.getMetaData().getDatabaseProductName();
                 Consts.databaseType.put(allInOneName, dbType);
             } catch (Throwable e) {
+                throw new SQLException(String.format("getDbType error,allInOneName is:%s", allInOneName), e);
             } finally {
                 ResourceUtils.close(connection);
             }

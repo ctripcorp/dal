@@ -56,7 +56,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 	         * Must to be first one
 	         */
     		if(outputIdName != null) {
-    			parameters.get(0).setDirection(InputOutput);
+    			parameters.get(outputIdIndex).setDirection(InputOutput);
     		}
 	    }
 	}

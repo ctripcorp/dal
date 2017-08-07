@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
 public class DataSourceLocator {
@@ -74,43 +72,20 @@ public class DataSourceLocator {
     }
 
     private DataSource createDataSource(String name) throws SQLException {
-        DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+//        DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
+        
         DataSourceConfigure config = provider.getDataSourceConfigure(name);
-
-        if (config == null && poolConfig == null) {
-            throw new SQLException("Can not find any connection configure for " + name);
+        if (config == null) {
+            throw new SQLException("Can not find connection configure for " + name);
         }
-
-        if (poolConfig == null) {
-            // Create default connection pool configure
-            poolConfig = new DatabasePoolConfig();
-        }
-
-        PoolProperties p = poolConfig.getPoolProperties();
-
-        /**
-         * It is assumed that user name/password/url/driver class name are provided in pool config If not, it should be
-         * provided by the config provider
-         */
-        if (config != null) {
-            p.setUrl(config.getConnectionUrl());
-            p.setUsername(config.getUserName());
-            p.setPassword(config.getPassword());
-            p.setDriverClassName(config.getDriverClass());
-        }
-
-        setPoolProperties(p);
-
-        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(p);
-
-        ds.createPool();
-
-        logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
-
-        return ds;
+        
+        RefreshableDataSource rds = new RefreshableDataSource(name, config);
+        provider.register(name, rds);
+        
+        return rds;
     }
 
-    private void setPoolProperties(PoolProperties poolProperties) {
+    static void setPoolProperties(PoolProperties poolProperties) {
         if (poolProperties == null)
             return;
 

@@ -28,10 +28,6 @@ public class DatabasePoolConfigParser implements DatabasePoolConfigConstants {
 
     private static final String RESOURCE_NODE = "Datasource";
     private static final String NAME = "name";
-    private static final String USER_NAME = "userName";
-    private static final String PASSWORD = "password";
-    private static final String CONNECTION_URL = "connectionUrl";
-    private static final String DRIVER_CLASS_NAME = "driverClassName";
 
     public static final boolean DEFAULT_TESTWHILEIDLE = false;
     public static final boolean DEFAULT_TESTONBORROW = false;

@@ -48,8 +48,9 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
 	@Override
 	public DataSourceConfigure getDataSourceConfigure(String dbName) {
-		DataSourceConfigure conf = new DataSourceConfigure();
-		
+		DatabasePoolConfig dpc = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(dbName);
+		DataSourceConfigure conf = dpc == null ? new DataSourceConfigure(dbName) : new DataSourceConfigure(dbName, dpc.getMap());
+
 		conf.setUserName(databaseConfig.getProperty(dbName + USER_NAME));
 		conf.setPassword(databaseConfig.getProperty(dbName + PASSWORD));
 		conf.setConnectionUrl(databaseConfig.getProperty(dbName + CONNECTION_URL));
@@ -68,4 +69,8 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 			}
 		}
 	}
+	
+    @Override
+    public void register(String dbName, DataSourceConfigureChangeListener listener) {
+    }
 }

@@ -26,4 +26,11 @@ public interface DataSourceConfigureProvider extends DalComponent {
 	 * @return
 	 */
 	DataSourceConfigure getDataSourceConfigure(String dbName);
+	
+	/**
+	 * Allow register datasource config change listener
+	 * @param dbName
+	 * @param listener
+	 */
+	void register(String dbName, DataSourceConfigureChangeListener listener);
 }

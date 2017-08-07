@@ -1,6 +1,10 @@
 package com.ctrip.platform.dal.dao.configure;
 
 public interface DatabasePoolConfigConstants {
+    String USER_NAME = "userName";
+    String PASSWORD = "password";
+    String CONNECTION_URL = "connectionUrl";
+    String DRIVER_CLASS_NAME = "driverClassName";
     String TESTWHILEIDLE = "testWhileIdle";
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";

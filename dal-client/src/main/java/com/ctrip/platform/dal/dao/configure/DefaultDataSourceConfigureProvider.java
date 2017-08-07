@@ -11,10 +11,18 @@ public class DefaultDataSourceConfigureProvider implements DataSourceConfigurePr
 
 	@Override
 	public DataSourceConfigure getDataSourceConfigure(String dbName) {
-		return null;
+	    DatabasePoolConfig dpc = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(dbName);
+	    if(dpc == null)
+	        return new DataSourceConfigure(dbName);
+	    
+	    return new DataSourceConfigure(dbName, dpc.getMap());
 	}
 
 	@Override
 	public void setup(Set<String> dbNames) {
 	}
+
+    @Override
+    public void register(String dbName, DataSourceConfigureChangeListener listener) {
+    }
 }

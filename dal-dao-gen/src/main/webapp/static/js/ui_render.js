@@ -203,8 +203,6 @@
             return;
         }
         if (confirm("您确定要删除吗?")) {
-            var records = w2ui['grid'].getSelection();
-            var record = w2ui['grid'].get(records[0]);
             var url = "";
             if (record.task_type == "table_view_sp") {
                 url = "rest/task/table";
@@ -451,11 +449,16 @@
                     type: 'text'
                 }],
                 columns: [{
+                    field: 'id',
+                    caption: 'ID',
+                    size: '5%',
+                    sortable: true,
+                    resizable: true
+                }, {
                     field: 'databaseSetName',
                     caption: '逻辑数据库',
                     size: '20%',
                     sortable: true,
-                    attr: 'align=center',
                     resizable: true
                 }, {
                     field: 'class_name',
@@ -493,12 +496,12 @@
                 }, {
                     field: 'update_user_no',
                     caption: '最后修改',
-                    size: '7%',
+                    size: '5%',
                     resizable: true
                 }, {
                     field: 'str_update_time',
                     caption: '修改时间',
-                    size: '13%',
+                    size: '10%',
                     resizable: true
                 }, {
                     field: 'str_approved',

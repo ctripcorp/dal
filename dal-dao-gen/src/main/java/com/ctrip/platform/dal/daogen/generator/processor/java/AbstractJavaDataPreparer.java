@@ -55,7 +55,7 @@ public class AbstractJavaDataPreparer {
             String tableName, DatabaseCategory dbCategory) throws Exception {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         if (!DbUtils.tableExists(tableViewSp.getAllInOneName(), tableName)) {
-            throw new Exception(String.format("The table[%s,%s] doesn't exist, pls check",
+            throw new Exception(String.format("Task id[%s]:\r\nTable[%s,%s] doesn't exist.", tableViewSp.getId(),
                     tableViewSp.getAllInOneName(), tableName));
         }
         JavaTableHost tableHost = new JavaTableHost();
@@ -72,7 +72,7 @@ public class AbstractJavaDataPreparer {
         List<AbstractParameterHost> allColumnsAbstract = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(),
                 tableName, new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), tableName, dbCategory));
         if (null == allColumnsAbstract) {
-            throw new Exception(String.format("The column names of tabel[%s, %s] is null",
+            throw new Exception(String.format("The column names of table[%s, %s] is null",
                     tableViewSp.getAllInOneName(), tableName));
         }
         List<JavaParameterHost> allColumns = new ArrayList<>();

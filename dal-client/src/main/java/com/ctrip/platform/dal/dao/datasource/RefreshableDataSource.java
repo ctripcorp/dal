@@ -4,148 +4,159 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigConstants;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 
-public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener, DatabasePoolConfigConstants {
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);
-    
+public class RefreshableDataSource
+        implements DataSource, DataSourceConfigureChangeListener, DataSourceConfigureConstants {
+    private static final Logger logger = LoggerFactory.getLogger(RefreshableDataSource.class);
+
     private String name;
-    private AtomicReference<DataSource> dataSourceRef = new AtomicReference<>();
-    
+    private AtomicReference<SingleDataSource> dataSourceRef = new AtomicReference<>();
+
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         this.name = name;
-        dataSourceRef.set(create(config));
+        SingleDataSource dataSource = create(config);
+        dataSourceRef.set(dataSource);
     }
-        
+
     @Override
-    public synchronized void configChanged(DataSourceConfigure config) throws SQLException {
-        DataSource newDS = create(config);
-        DataSource oldDS = dataSourceRef.getAndSet(newDS);
-        shutdown(oldDS);
+    public synchronized void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
+        DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
+        SingleDataSource newDataSource = create(newConfigure);
+        SingleDataSource oldDataSource = dataSourceRef.getAndSet(newDataSource);
+        close(oldDataSource);
     }
-    
-    private DataSource create(DataSourceConfigure config) throws SQLException {
+
+    private SingleDataSource create(DataSourceConfigure config) throws SQLException {
         if (config == null)
             throw new SQLException("Can not find any connection configure for " + name);
-        
+
         PoolProperties p = convert(config);
-
         DataSourceLocator.setPoolProperties(p);
-
-        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(p);
-
-        ds.createPool();
-
+        org.apache.tomcat.jdbc.pool.DataSource dataSource = new org.apache.tomcat.jdbc.pool.DataSource(p);
+        dataSource.createPool();
         logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
-
-        return ds;
+        return new SingleDataSource(name, config, dataSource, new Date());
     }
-    
+
     private PoolProperties convert(DataSourceConfigure config) {
-        PoolProperties poolProperties = new PoolProperties();
-        
+        PoolProperties properties = new PoolProperties();
+
         /**
          * It is assumed that user name/password/url/driver class name are provided in pool config If not, it should be
          * provided by the config provider
          */
-        poolProperties.setUrl(config.getConnectionUrl());
-        poolProperties.setUsername(config.getUserName());
-        poolProperties.setPassword(config.getPassword());
-        poolProperties.setDriverClassName(config.getDriverClass());
-        
-        poolProperties.setTestWhileIdle(config.getBooleanProperty(TESTWHILEIDLE, DatabasePoolConfigParser.DEFAULT_TESTWHILEIDLE));
-        poolProperties.setTestOnBorrow(config.getBooleanProperty(TESTONBORROW, DatabasePoolConfigParser.DEFAULT_TESTONBORROW));
-        poolProperties.setTestOnReturn(config.getBooleanProperty(TESTONRETURN, DatabasePoolConfigParser.DEFAULT_TESTONRETURN));
-        
-        poolProperties.setValidationQuery(config.getProperty(VALIDATIONQUERY, DatabasePoolConfigParser.DEFAULT_VALIDATIONQUERY));
-        poolProperties.setValidationQueryTimeout(config.getIntProperty(VALIDATIONQUERYTIMEOUT, DatabasePoolConfigParser.DEFAULT_VALIDATIONQUERYTIMEOUT));
-        poolProperties.setValidationInterval(config.getLongProperty(VALIDATIONINTERVAL, DatabasePoolConfigParser.DEFAULT_VALIDATIONINTERVAL));
-        
-        poolProperties.setTimeBetweenEvictionRunsMillis(config.getIntProperty(TIMEBETWEENEVICTIONRUNSMILLIS, DatabasePoolConfigParser.DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS));
-        
-        poolProperties.setMaxActive(config.getIntProperty(MAXACTIVE, DatabasePoolConfigParser.DEFAULT_MAXACTIVE));
-        poolProperties.setMinIdle(config.getIntProperty(MINIDLE, DatabasePoolConfigParser.DEFAULT_MINIDLE));
-        poolProperties.setMaxWait(config.getIntProperty(MAXWAIT, DatabasePoolConfigParser.DEFAULT_MAXWAIT));
-        poolProperties.setMaxAge(config.getIntProperty(MAX_AGE, DatabasePoolConfigParser.DEFAULT_MAXAGE));
-        poolProperties.setInitialSize(config.getIntProperty(INITIALSIZE, DatabasePoolConfigParser.DEFAULT_INITIALSIZE));
-        
-        poolProperties.setRemoveAbandonedTimeout(config.getIntProperty(REMOVEABANDONEDTIMEOUT, DatabasePoolConfigParser.DEFAULT_REMOVEABANDONEDTIMEOUT));
-        poolProperties.setRemoveAbandoned(config.getBooleanProperty(REMOVEABANDONED, DatabasePoolConfigParser.DEFAULT_REMOVEABANDONED));
-        poolProperties.setLogAbandoned(config.getBooleanProperty(LOGABANDONED, DatabasePoolConfigParser.DEFAULT_LOGABANDONED));
-        
-        poolProperties.setMinEvictableIdleTimeMillis(DatabasePoolConfigParser.DEFAULT_MINEVICTABLEIDLETIMEMILLIS);
-        poolProperties.setConnectionProperties(config.getProperty(CONNECTIONPROPERTIES, DatabasePoolConfigParser.DEFAULT_CONNECTIONPROPERTIES));
-        
-        poolProperties.setValidatorClassName(config.getProperty(VALIDATORCLASSNAME, DatabasePoolConfigParser.DEFAULT_VALIDATORCLASSNAME));
-        
+        properties.setUrl(config.getConnectionUrl());
+        properties.setUsername(config.getUserName());
+        properties.setPassword(config.getPassword());
+        properties.setDriverClassName(config.getDriverClass());
+
+        properties.setTestWhileIdle(
+                config.getBooleanProperty(TESTWHILEIDLE, DataSourceConfigureParser.DEFAULT_TESTWHILEIDLE));
+        properties.setTestOnBorrow(
+                config.getBooleanProperty(TESTONBORROW, DataSourceConfigureParser.DEFAULT_TESTONBORROW));
+        properties.setTestOnReturn(
+                config.getBooleanProperty(TESTONRETURN, DataSourceConfigureParser.DEFAULT_TESTONRETURN));
+
+        properties.setValidationQuery(
+                config.getProperty(VALIDATIONQUERY, DataSourceConfigureParser.DEFAULT_VALIDATIONQUERY));
+        properties.setValidationQueryTimeout(config.getIntProperty(VALIDATIONQUERYTIMEOUT,
+                DataSourceConfigureParser.DEFAULT_VALIDATIONQUERYTIMEOUT));
+        properties.setValidationInterval(
+                config.getLongProperty(VALIDATIONINTERVAL, DataSourceConfigureParser.DEFAULT_VALIDATIONINTERVAL));
+
+        properties.setTimeBetweenEvictionRunsMillis(config.getIntProperty(TIMEBETWEENEVICTIONRUNSMILLIS,
+                DataSourceConfigureParser.DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS));
+        properties.setMinEvictableIdleTimeMillis(DataSourceConfigureParser.DEFAULT_MINEVICTABLEIDLETIMEMILLIS);
+
+        properties.setMaxAge(config.getIntProperty(MAX_AGE, DataSourceConfigureParser.DEFAULT_MAXAGE));
+        properties.setMaxActive(config.getIntProperty(MAXACTIVE, DataSourceConfigureParser.DEFAULT_MAXACTIVE));
+        properties.setMinIdle(config.getIntProperty(MINIDLE, DataSourceConfigureParser.DEFAULT_MINIDLE));
+        properties.setMaxWait(config.getIntProperty(MAXWAIT, DataSourceConfigureParser.DEFAULT_MAXWAIT));
+        properties.setInitialSize(config.getIntProperty(INITIALSIZE, DataSourceConfigureParser.DEFAULT_INITIALSIZE));
+
+        properties.setRemoveAbandonedTimeout(config.getIntProperty(REMOVEABANDONEDTIMEOUT,
+                DataSourceConfigureParser.DEFAULT_REMOVEABANDONEDTIMEOUT));
+        properties.setRemoveAbandoned(
+                config.getBooleanProperty(REMOVEABANDONED, DataSourceConfigureParser.DEFAULT_REMOVEABANDONED));
+        properties.setLogAbandoned(
+                config.getBooleanProperty(LOGABANDONED, DataSourceConfigureParser.DEFAULT_LOGABANDONED));
+
+        properties.setConnectionProperties(
+                config.getProperty(CONNECTIONPROPERTIES, DataSourceConfigureParser.DEFAULT_CONNECTIONPROPERTIES));
+        properties.setValidatorClassName(
+                config.getProperty(VALIDATORCLASSNAME, DataSourceConfigureParser.DEFAULT_VALIDATORCLASSNAME));
+
         // This are current hard coded as default value
-        poolProperties.setJmxEnabled(DatabasePoolConfigParser.DEFAULT_JMXENABLED);
-        poolProperties.setJdbcInterceptors(DatabasePoolConfigParser.DEFAULT_JDBCINTERCEPTORS);
-        
-        return poolProperties;
-    }
-    
-    private void shutdown(DataSource toBeClosed) {
-        //TO BE closed when no lent connection out there
+        properties.setJmxEnabled(DataSourceConfigureParser.DEFAULT_JMXENABLED);
+        properties.setJdbcInterceptors(DataSourceConfigureParser.DEFAULT_JDBCINTERCEPTORS);
+
+        return properties;
     }
 
-    private DataSource getDS() {
-        return dataSourceRef.get();
+    private void close(SingleDataSource dataSource) {
+        DataSourceTerminator.getInstance().close(dataSource);
+    }
+
+    private DataSource getDataSource() {
+        return dataSourceRef.get().getDataSource();
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return getDS().getConnection();
+        return getDataSource().getConnection();
     }
 
     @Override
     public Connection getConnection(String paramString1, String paramString2) throws SQLException {
-        return getDS().getConnection(paramString1, paramString2);
+        return getDataSource().getConnection(paramString1, paramString2);
     }
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        return getDS().getLogWriter();
+        return getDataSource().getLogWriter();
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        return getDS().getLoginTimeout();
+        return getDataSource().getLoginTimeout();
     }
 
     @Override
     public void setLogWriter(PrintWriter paramPrintWriter) throws SQLException {
-        getDS().setLogWriter(paramPrintWriter);
+        getDataSource().setLogWriter(paramPrintWriter);
     }
 
     @Override
     public void setLoginTimeout(int paramInt) throws SQLException {
-        getDS().setLoginTimeout(paramInt);
+        getDataSource().setLoginTimeout(paramInt);
     }
 
     @Override
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return getDS().getParentLogger();
+        return getDataSource().getParentLogger();
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return getDS().unwrap(iface);
+        return getDataSource().unwrap(iface);
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return getDS().isWrapperFor(iface);
+        return getDataSource().isWrapperFor(iface);
     }
 }

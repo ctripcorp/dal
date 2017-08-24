@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
-public interface DatabasePoolConfigConstants {
+public interface DataSourceConfigureConstants {
     String USER_NAME = "userName";
     String PASSWORD = "password";
     String CONNECTION_URL = "connectionUrl";
@@ -23,8 +23,10 @@ public interface DatabasePoolConfigConstants {
     String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
     String CONNECTIONPROPERTIES = "connectionProperties";
     String INIT_SQL = "initSql";
+
     // This is for typo error
     String INIT_SQL2 = "initSQL";
+
     // This is for backward compatible, option serves the same purpose as connectionProperties
     // If both option and connectionProperties present, the correspond connectionProperties value is used
     // And if only option is set, it will be set into connectionProperties

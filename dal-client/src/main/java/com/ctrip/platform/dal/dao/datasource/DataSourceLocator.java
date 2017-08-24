@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
@@ -17,7 +19,7 @@ import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 public class DataSourceLocator {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceLocator.class);
 
-    private static final ConcurrentHashMap<String, DataSource> cache = new ConcurrentHashMap<String, DataSource>();
+    private static final ConcurrentHashMap<String, DataSource> cache = new ConcurrentHashMap<>();
 
     private static final Object LOCK = new Object();
     private static final Object LOCK2 = new Object();
@@ -72,16 +74,14 @@ public class DataSourceLocator {
     }
 
     private DataSource createDataSource(String name) throws SQLException {
-//        DatabasePoolConfig poolConfig = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
-        
         DataSourceConfigure config = provider.getDataSourceConfigure(name);
         if (config == null) {
             throw new SQLException("Can not find connection configure for " + name);
         }
-        
+
         RefreshableDataSource rds = new RefreshableDataSource(name, config);
         provider.register(name, rds);
-        
+
         return rds;
     }
 
@@ -141,6 +141,19 @@ public class DataSourceLocator {
         if (index > -1)
             str = str.substring(0, index);
         return str;
+    }
+
+    public static Map<String, Integer> getActiveConnectionNumber() {
+        Map<String, Integer> map = new HashMap<>();
+        for (Map.Entry<String, DataSource> entry : cache.entrySet()) {
+            DataSource dataSource = entry.getValue();
+            if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+                org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
+                map.put(entry.getKey(), ds.getActive());
+            }
+        }
+
+        return map;
     }
 
 }

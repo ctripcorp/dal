@@ -60,9 +60,6 @@ import com.dianping.cat.status.ProductVersionManager;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.TypedConfig;
 
-import static com.ctrip.platform.dal.dao.DalHintEnum.timeout;
-
-
 public class TitanProvider implements DataSourceConfigureProvider {
     // This is to make sure we can get APPID if user really set so
     private static final Logger logger = LoggerFactory.getLogger(TitanProvider.class);
@@ -293,6 +290,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
             if (config != null) {
                 String connectionString = config.current();
+                connectionString = decrypt(connectionString);
                 DataSourceConfigure configure = parser.parse(name, connectionString);
                 configures.put(name, configure);
                 config.addListener(new Configuration.ConfigListener<String>() {

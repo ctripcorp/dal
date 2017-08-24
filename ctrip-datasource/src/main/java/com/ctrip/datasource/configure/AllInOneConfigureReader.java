@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -19,7 +20,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 
 public class AllInOneConfigureReader {
 
@@ -93,7 +93,7 @@ public class AllInOneConfigureReader {
     }
 
     private String getUserDefinedLocation(String databaseConfigLocation) {
-        String location = DatabasePoolConfigParser.getInstance().getDatabaseConfigLocation();
+        String location = DataSourceConfigureParser.getInstance().getDatabaseConfigLocation();
         if (location == null || location.length() == 0) {
             location = databaseConfigLocation;
         }

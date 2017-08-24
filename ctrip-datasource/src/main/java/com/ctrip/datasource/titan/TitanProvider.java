@@ -18,6 +18,10 @@ import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -36,7 +40,6 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +54,14 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
+import qunar.tc.qconfig.client.Configuration;
+import qunar.tc.qconfig.client.TypedConfig;
+
+import static com.ctrip.platform.dal.dao.DalHintEnum.timeout;
+
 
 public class TitanProvider implements DataSourceConfigureProvider {
     // This is to make sure we can get APPID if user really set so
@@ -68,13 +74,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
     public static final String TIMEOUT = "timeout";
     public static final String USE_LOCAL_CONFIG = "useLocalConfig";
     public static final String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
-    public static final String OVERWRITE_DATASOURCE_CONFIG = "overwriteDSConfig";
     private static final String PROD_SUFFIX = "_SH";
 
     private String svcUrl;
-    private String appid;
+    private String app_id;
     private String subEnv;
-    private int timeout;
+    private int time_out;
     private boolean useLocal;
     private String databaseConfigLocation;
     private ConnectionStringParser parser = new ConnectionStringParser();
@@ -88,6 +93,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
+    private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
+
+    private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
+    private static final String DAL_DYNAMIC_DATASOURCE_LISTENER = "";
+    private static final String TITAN_APP_ID = "100008423";
+
 
     public static class LogEntry {
         public static final int INFO = 0;
@@ -108,10 +119,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
      * Used to access local Database.config file fo dev environment
      */
     private AllInOneConfigureReader allinonProvider = new AllInOneConfigureReader();
-    private Map<String, DataSourceConfigure> dataSourceConfigures;
 
     public void initialize(Map<String, String> settings) throws Exception {
         ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
+
+        if (DataSourceConfigureParser.getInstance().isDataSourceXmlExist()) {
+            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCELOCATION,
+                    DataSourceConfigureParser.getInstance().getDataSourceXmlLocation());
+        }
 
         startUpLog.clear();
         config = new HashMap<>(settings);
@@ -119,12 +134,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
         info("Initialize Titan provider");
 
         svcUrl = discoverTitanServiceUrl(settings);
-        appid = discoverAppId(settings);
+        app_id = discoverAppId(settings);
         subEnv = Foundation.server().getSubEnv();
         subEnv = subEnv == null ? null : subEnv.trim();
 
         info("Titan Service Url: " + svcUrl);
-        info("Appid: " + appid);
+        info("Appid: " + app_id);
         info("Sub-environment: " + (subEnv == null ? "N/A" : subEnv));
 
         useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
@@ -134,26 +149,15 @@ public class TitanProvider implements DataSourceConfigureProvider {
         info("DatabaseConfig location:" + (databaseConfigLocation == null ? "N/A" : databaseConfigLocation));
 
         String timeoutStr = settings.get(TIMEOUT);
-        timeout = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
-        info("Titan connection timeout: " + timeout);
+        time_out = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
+        info("Titan connection timeout: " + time_out);
 
         isDebug = Boolean.parseBoolean(settings.get("isDebug"));
     }
 
-    private static final Map<String, String> titanMapping = new HashMap<>();
-
-    static {
-        // LPT,FAT/FWS,UAT,PRO
-        titanMapping.put("FAT", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("FWS", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
-    }
-
     /**
      * Get titan service URL in order of 1. environment varaible 2. serviceAddress 3. local
-     * 
+     *
      * @param settings
      * @return
      */
@@ -180,9 +184,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     private String discoverAppId(Map<String, String> settings) throws DalException {
         // First try framework foundation
-        appid = Foundation.app().getAppId();
-        if (!(appid == null || appid.trim().isEmpty()))
-            return appid.trim();
+        app_id = Foundation.app().getAppId();
+        if (!(app_id == null || app_id.trim().isEmpty()))
+            return app_id.trim();
 
         // Try pre-configred settings
         String appid = settings.get(APPID);
@@ -202,51 +206,45 @@ public class TitanProvider implements DataSourceConfigureProvider {
         throw e;
     }
 
+    private static final Map<String, String> titanMapping = new HashMap<>();
+
+    static {
+        // LPT,FAT/FWS,UAT,PRO
+        titanMapping.put("FAT", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
+        titanMapping.put("FWS", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
+        titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
+        titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
+        titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
+    }
+
     @Override
     public void setup(Set<String> dbNames) {
         // Try best to match pool configure for the given names.
         checkMissingPoolConfig(dbNames);
 
         // If it uses local Database.Config
+        Map<String, DataSourceConfigure> dataSourceConfigures = null;
         if (svcUrl == null || svcUrl.isEmpty() || useLocal) {
             dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal, databaseConfigLocation);
         } else {
-            // If it uses Titan service
-            boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
-
-            Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
-
             try {
-                Map<String, TitanData> rawConnStrings = new HashMap<>();
-                Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
-
-                if (isProdEnv) {
-                    for (String name : dbNames) {
-                        if (name.endsWith(PROD_SUFFIX))
-                            rawConnStrings.put(name, tmpRawConnStrings.get(name));
-                        else
-                            rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
-                    }
-                } else {
-                    rawConnStrings = tmpRawConnStrings;
-                }
-                dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
+                dataSourceConfigures = getDataSourceConfigureConnectionSettings(dbNames);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
                 throw new RuntimeException(e);
             }
         }
 
-        for (String name : dbNames)
-            processPoolSettings(name);
-
+        addDataSourceConfigures(dataSourceConfigures);
+        processDataSourcePoolSettings(dbNames);
         info("--- End datasource config  ---");
     }
 
     private void checkMissingPoolConfig(Set<String> dbNames) {
-        DatabasePoolConfigParser parser = DatabasePoolConfigParser.getInstance();
-        if (parser.isDatasourceXmlExist())
-            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, appid);
+        DataSourceConfigureParser parser = DataSourceConfigureParser.getInstance();
+
+        if (parser.isDataSourceXmlExist())
+            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, app_id);
 
         for (String name : dbNames) {
             if (parser.contains(name))
@@ -256,21 +254,106 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     : name + PROD_SUFFIX;
 
             if (parser.contains(possibleName)) {
-                parser.copyDatabasePoolConifg(possibleName, name);
+                parser.copyDataSourceConfigure(possibleName, name);
             } else {
                 // It is strongly recommended to add datasource config in datasource.xml for each of the
                 // connectionString in dal.config
                 // Add missing one
-                DatabasePoolConfig c = new DatabasePoolConfig();
+                DataSourceConfigure c = new DataSourceConfigure();
                 c.setName(name);
-                parser.addDatabasePoolConifg(name, c);
+                parser.addDataSourceConfigure(name, c);
             }
         }
     }
 
-    @Override
-    public DataSourceConfigure getDataSourceConfigure(String dbName) {
-        return dataSourceConfigures.get(dbName);
+    private Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings(Set<String> dbNames)
+            throws Exception {
+        Map<String, DataSourceConfigure> configures = new HashMap<>();
+        if (dbNames == null || dbNames.size() == 0)
+            return configures;
+
+        for (final String name : dbNames) {
+            if (isDebug) {
+                configures.put(name, new DataSourceConfigure());
+                continue;
+            }
+
+            // Get connection string from QConfig
+            TypedConfig<String> config = null;
+            try {
+                config = TypedConfig.get(TITAN_APP_ID, name, null, new TypedConfig.Parser<String>() {
+                    public String parse(String connectionString) {
+                        return connectionString;
+                    }
+                });
+            } catch (Throwable e) {
+                throw new DalException(
+                        String.format("Get connection string from QConfig for %s error:", name) + e.getMessage(), e);
+            }
+
+            if (config != null) {
+                String connectionString = config.current();
+                DataSourceConfigure configure = parser.parse(name, connectionString);
+                configures.put(name, configure);
+                config.addListener(new Configuration.ConfigListener<String>() {
+                    @Override
+                    public void onLoad(String connectionString) {
+                        Set<String> names = new HashSet<>();
+                        names.add(name);
+                        try {
+                            notifyListeners(names);
+                        } catch (Throwable e) {
+                            throw new RuntimeException(
+                                    new DalException(String.format("Nofity listener for %s error", name), e));
+                        }
+                    }
+                });
+            }
+        }
+
+        return configures;
+    }
+
+    private Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings2(Set<String> dbNames)
+            throws Exception {
+        Map<String, TitanData> rawConnStrings = getRawConnectionStrings(dbNames);
+        return getDataSourceConfigures(rawConnStrings);
+    }
+
+    private Map<String, TitanData> getRawConnectionStrings(Set<String> dbNames) throws Exception {
+        Map<String, TitanData> rawConnStrings = new HashMap<>();
+        // If it uses Titan service
+        boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
+        Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
+        Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
+
+        if (isProdEnv) {
+            for (String name : dbNames) {
+                if (name.endsWith(PROD_SUFFIX))
+                    rawConnStrings.put(name, tmpRawConnStrings.get(name));
+                else
+                    rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
+            }
+        } else {
+            rawConnStrings = tmpRawConnStrings;
+        }
+
+        return rawConnStrings;
+    }
+
+    private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData)
+            throws Exception {
+        Map<String, DataSourceConfigure> configures = new HashMap<>();
+        for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
+            if (isDebug) {
+                configures.put(entry.getKey(), new DataSourceConfigure());
+            } else {
+                configures.put(entry.getKey(),
+                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
+            }
+        }
+
+        return configures;
     }
 
     /*
@@ -289,40 +372,93 @@ public class TitanProvider implements DataSourceConfigureProvider {
         return prodDbNames;
     }
 
-    private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData)
-            throws Exception {
-        Map<String, DataSourceConfigure> configures = new HashMap<>();
-        for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
-            if (isDebug)
-                configures.put(entry.getKey(), new DataSourceConfigure());
-            else
-                configures.put(entry.getKey(),
-                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
-        }
+    private void addDataSourceConfigures(Map<String, DataSourceConfigure> map) {
+        if (map == null)
+            return;
 
-        return configures;
+        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
+            DataSourceConfigureParser.getInstance().addDataSourceConfigure(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void processDataSourcePoolSettings(Set<String> dbNames) {
+        for (String name : dbNames) {
+            processPoolSettings(name);
+        }
+    }
+
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(String dbName) {
+        return DataSourceConfigureParser.getInstance().getDataSourceConfigure(dbName);
+    }
+
+    @Override
+    public void register(String dbName, DataSourceConfigureChangeListener listener) {
+        DataSourceConfigureParser.getInstance().addChangeListener(dbName, listener);
+    }
+
+    private void notifyListeners(Set<String> dbNames) throws Exception {
+        if (dbNames == null || dbNames.size() == 0)
+            return;
+
+        // get new DataSourceConfigure connection settings
+        Map<String, DataSourceConfigure> map = getDataSourceConfigureConnectionSettings(dbNames);
+
+        Map<String, DataSourceConfigureChangeListener> listeners =
+                DataSourceConfigureParser.getInstance().getChangeListeners();
+        for (String name : dbNames) {
+            DataSourceConfigureChangeListener listener = listeners.get(name);
+            if (listener == null)
+                continue;
+
+            DataSourceConfigure connectionSettingsConfigure = map.get(name);
+            if (connectionSettingsConfigure == null)
+                continue;
+
+            // fetch old configure
+            DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+
+            // refresh DataSourceConfigure connection settings
+            DataSourceConfigure newConfigure = refreshConnectionSettings(name, connectionSettingsConfigure);
+
+            // notify listener to recreate datasource,destroy old datasource,etc
+            DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
+            listener.configChanged(event);
+        }
+    }
+
+    private DataSourceConfigure refreshConnectionSettings(String name,
+            DataSourceConfigure connectionSettingsConfigure) {
+        DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+        DataSourceConfigure newConfigure = DataSourceConfigureProcessor.getInstance()
+                .refreshConnectionSettings(connectionSettingsConfigure, oldConfigure);
+        DataSourceConfigureParser.getInstance().addDataSourceConfigure(name, newConfigure);
+        return newConfigure;
     }
 
     private void processPoolSettings(String name) {
+        //// TODO
+        // log active connection number for each titan keyname
+
         info("--- Key datasource config for " + name + " ---");
-        DatabasePoolConfig config = DatabasePoolConfigParser.getInstance().getDatabasePoolConifg(name);
-        // Process DatabasePoolConfig
-        config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
-        DatabasePoolConfigParser.getInstance().addDatabasePoolConifg(name, config);
+        DataSourceConfigure dataSourceConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+        // Process DataSourceConfigure
+        dataSourceConfigure = DataSourceConfigureProcessor.getInstance().getDataSourceConfigure(dataSourceConfigure);
+        DataSourceConfigureParser.getInstance().addDataSourceConfigure(name, dataSourceConfigure);
 
-        PoolProperties pc = config.getPoolProperties();
-        info("connectionProperties: " + pc.getConnectionProperties());
+        Properties properties = dataSourceConfigure.getProperties();
+        info("maxAge: " + properties.getProperty(DataSourceConfigureConstants.MAX_AGE));
+        info("maxActive: " + properties.getProperty(DataSourceConfigureConstants.MAXACTIVE));
+        info("minIdle: " + properties.getProperty(DataSourceConfigureConstants.MINIDLE));
+        info("initialSize: " + properties.getProperty(DataSourceConfigureConstants.INITIALSIZE));
 
-        info("minIdle: " + pc.getMinIdle());
-        info("maxAge: " + pc.getMaxAge());
-        info("testWhileIdle: " + pc.isTestWhileIdle());
+        info("testWhileIdle: " + properties.getProperty(DataSourceConfigureConstants.TESTWHILEIDLE));
+        info("testOnBorrow: " + properties.getProperty(DataSourceConfigureConstants.TESTONBORROW));
+        info("testOnReturn: " + properties.getProperty(DataSourceConfigureConstants.TESTONRETURN));
 
-        info("testOnBorrow: " + pc.isTestOnBorrow());
-        info("testOnReturn: " + pc.isTestOnReturn());
+        info("removeAbandonedTimeout: " + properties.getProperty(DataSourceConfigureConstants.REMOVEABANDONEDTIMEOUT));
 
-        info("maxActive: " + pc.getMaxActive());
-        info("initialSize: " + pc.getInitialSize());
-        info("removeAbandonedTimeout: " + pc.getRemoveAbandonedTimeout());
+        info("connectionProperties: " + properties.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
     }
 
     private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception {
@@ -346,7 +482,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         info("Titan service URL: " + svcUrl);
 
-        URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
+        URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", app_id);
         if (!(subEnv == null || subEnv.isEmpty())) {
             builder.addParameter("envt", subEnv);
             info("Sub environment: " + subEnv);
@@ -444,8 +580,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
          * Set timeout option
          */
         RequestConfig.Builder configBuilder = RequestConfig.custom();
-        configBuilder.setConnectTimeout(timeout);
-        configBuilder.setSocketTimeout(timeout);
+        configBuilder.setConnectTimeout(time_out);
+        configBuilder.setSocketTimeout(time_out);
         b.setDefaultRequestConfig(configBuilder.build());
 
         // finally, build the HttpClient;
@@ -557,4 +693,5 @@ public class TitanProvider implements DataSourceConfigureProvider {
             return "UNKNOWN";
         }
     }
+
 }

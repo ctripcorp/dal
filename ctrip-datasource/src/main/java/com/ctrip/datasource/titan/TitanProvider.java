@@ -2,12 +2,6 @@ package com.ctrip.datasource.titan;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,40 +9,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.net.ssl.SSLContext;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.ConnectionStringParser;
 import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
-import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.Version;
@@ -94,8 +68,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
     private static final String DAL_DYNAMIC_DATASOURCE_LISTENER = "";
-    private static final String TITAN_APP_ID = "100008423";
+    private static final String TITAN_APP_ID = "123456";
 
+    private static Map<String, TypedConfig<String>> configMap = new ConcurrentHashMap<>();
 
     public static class LogEntry {
         public static final int INFO = 0;
@@ -225,7 +200,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
             dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal, databaseConfigLocation);
         } else {
             try {
+                refreshTypedConfigMap(dbNames);
                 dataSourceConfigures = getDataSourceConfigureConnectionSettings(dbNames);
+                addListeners(dbNames);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
                 throw new RuntimeException(e);
@@ -263,111 +240,74 @@ public class TitanProvider implements DataSourceConfigureProvider {
         }
     }
 
+    private void refreshTypedConfigMap(Set<String> dbNames) {
+        if (dbNames == null || dbNames.size() == 0)
+            return;
+        for (String name : dbNames) {
+            try {
+                TypedConfig<String> config =
+                        TypedConfig.get(TITAN_APP_ID, name, null, new TypedConfig.Parser<String>() {
+                            public String parse(String connectionString) {
+                                return connectionString;
+                            }
+                        });
+
+                if (config != null) {
+                    configMap.put(name, config);
+                }
+            } catch (Throwable e) {
+                throw new RuntimeException(
+                        new DalException(String.format("Get TypedConfig from QConfig error:", e.getMessage()), e));
+            }
+        }
+    }
+
     private Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings(Set<String> dbNames)
             throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
-        if (dbNames == null || dbNames.size() == 0)
+        if (dbNames == null || dbNames.size() == 0) {
             return configures;
+        }
 
-        for (final String name : dbNames) {
+        for (String name : dbNames) {
             if (isDebug) {
                 configures.put(name, new DataSourceConfigure());
                 continue;
             }
 
-            // Get connection string from QConfig
-            TypedConfig<String> config = null;
-            try {
-                config = TypedConfig.get(TITAN_APP_ID, name, null, new TypedConfig.Parser<String>() {
-                    public String parse(String connectionString) {
-                        return connectionString;
-                    }
-                });
-            } catch (Throwable e) {
-                throw new DalException(
-                        String.format("Get connection string from QConfig for %s error:", name) + e.getMessage(), e);
-            }
-
+            TypedConfig<String> config = configMap.get(name);
             if (config != null) {
                 String connectionString = config.current();
                 connectionString = decrypt(connectionString);
                 DataSourceConfigure configure = parser.parse(name, connectionString);
                 configures.put(name, configure);
-                config.addListener(new Configuration.ConfigListener<String>() {
-                    @Override
-                    public void onLoad(String connectionString) {
-                        Set<String> names = new HashSet<>();
-                        names.add(name);
-                        try {
-                            notifyListeners(names);
-                        } catch (Throwable e) {
-                            throw new RuntimeException(
-                                    new DalException(String.format("Nofity listener for %s error", name), e));
-                        }
+            }
+        }
+
+        return configures;
+    }
+
+    private void addListeners(Set<String> dbNames) {
+        if (dbNames == null || dbNames.size() == 0)
+            return;
+        for (final String name : dbNames) {
+            TypedConfig<String> config = configMap.get(name);
+            if (config == null)
+                continue;
+            config.addListener(new Configuration.ConfigListener<String>() {
+                @Override
+                public void onLoad(String connectionString) {
+                    Set<String> names = new HashSet<>();
+                    names.add(name);
+                    try {
+                        notifyListeners(names);
+                    } catch (Throwable e) {
+                        throw new RuntimeException(
+                                new DalException(String.format("Notify listener for %s error", name, e)));
                     }
-                });
-            }
+                }
+            });
         }
-
-        return configures;
-    }
-
-    private Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings2(Set<String> dbNames)
-            throws Exception {
-        Map<String, TitanData> rawConnStrings = getRawConnectionStrings(dbNames);
-        return getDataSourceConfigures(rawConnStrings);
-    }
-
-    private Map<String, TitanData> getRawConnectionStrings(Set<String> dbNames) throws Exception {
-        Map<String, TitanData> rawConnStrings = new HashMap<>();
-        // If it uses Titan service
-        boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
-        Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
-        Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
-
-        if (isProdEnv) {
-            for (String name : dbNames) {
-                if (name.endsWith(PROD_SUFFIX))
-                    rawConnStrings.put(name, tmpRawConnStrings.get(name));
-                else
-                    rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
-            }
-        } else {
-            rawConnStrings = tmpRawConnStrings;
-        }
-
-        return rawConnStrings;
-    }
-
-    private Map<String, DataSourceConfigure> getDataSourceConfigures(Map<String, TitanData> rawConnData)
-            throws Exception {
-        Map<String, DataSourceConfigure> configures = new HashMap<>();
-        for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
-            if (isDebug) {
-                configures.put(entry.getKey(), new DataSourceConfigure());
-            } else {
-                configures.put(entry.getKey(),
-                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
-            }
-        }
-
-        return configures;
-    }
-
-    /*
-     * Ctrip all in one key is not consistent between PROD and non PROD environment. In PROD, the all in one name will
-     * be added with '_SH' suffix. To simplify suer end configuration, we auto add the '_SH' to name to get config.
-     */
-    private Set<String> normalizedForProd(Set<String> dbNames) {
-        info("It is production environment and titan key will be appended with _SH suffix");
-        Set<String> prodDbNames = new HashSet<>();
-        for (String name : dbNames) {
-            if (name.endsWith(PROD_SUFFIX))
-                prodDbNames.add(name);
-            else
-                prodDbNames.add(name + PROD_SUFFIX);
-        }
-        return prodDbNames;
     }
 
     private void addDataSourceConfigures(Map<String, DataSourceConfigure> map) {
@@ -398,6 +338,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private void notifyListeners(Set<String> dbNames) throws Exception {
         if (dbNames == null || dbNames.size() == 0)
             return;
+
+        // refresh TypedConfig
+        refreshTypedConfigMap(dbNames);
 
         // get new DataSourceConfigure connection settings
         Map<String, DataSourceConfigure> map = getDataSourceConfigureConnectionSettings(dbNames);
@@ -459,136 +402,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         info("connectionProperties: " + properties.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
     }
 
-    private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception {
-        info("Start getting all in one connection string from titan service.");
-        info("Database key names are " + dbNames);
-
-        long start = System.currentTimeMillis();
-
-        StringBuilder sb = new StringBuilder();
-        for (String name : dbNames)
-            sb.append(name.trim()).append(",");
-
-        String ids = sb.substring(0, sb.length() - 1);
-        Map<String, TitanData> result = new HashMap<>();
-
-        if (isDebug) {
-            for (String name : dbNames)
-                result.put(name, new TitanData());
-            return result;
-        }
-
-        info("Titan service URL: " + svcUrl);
-
-        URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", app_id);
-        if (!(subEnv == null || subEnv.isEmpty())) {
-            builder.addParameter("envt", subEnv);
-            info("Sub environment: " + subEnv);
-        }
-
-        URI uri = builder.build();
-        info(uri.toURL().toString());
-
-        HttpClient sslClient = initWeakSSLClient();
-        if (sslClient != null) {
-            HttpGet httpGet = new HttpGet();
-            httpGet.setURI(uri);
-
-            HttpResponse response = sslClient.execute(httpGet);
-
-            HttpEntity entity = response.getEntity();
-
-            String content = EntityUtils.toString(entity);
-
-            TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
-
-            if (!"200".equals(resp.getStatus())) {
-                logger.warn(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
-                        resp.getStatus(), resp.getMessage()));
-                throw new RuntimeException(
-                        String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
-                                resp.getStatus(), resp.getMessage()));
-            }
-
-            for (TitanData data : resp.getData()) {
-                info("Parsing " + data.getName());
-                // Fail fast
-                if (data.getErrorCode() != null) {
-                    warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
-                            data.getName(), data.getErrorCode(), data.getErrorMessage()));
-                    throw new RuntimeException(
-                            String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
-                                    data.getName(), data.getErrorCode(), data.getErrorMessage()));
-                }
-
-                // Decrypt raw connection string
-                result.put(data.getName(), data);
-                info(data.getName() + " loaded");
-                if (data.getEnv() != null) {
-                    info(String.format("Sub environment %s detected.", data.getEnv()));
-                    reportTitanAccessSunEnv(subEnv, data.getName());
-                    reportTitanAccessSunEnvMetrics(subEnv, data.getName());
-                }
-            }
-        }
-
-        long cost = System.currentTimeMillis() - start;
-        info("Time costed by getting all in one connection string from titan service(ms): " + cost);
-        reportTitanAccessCost(cost);
-
-        return result;
-    }
-
-    private HttpClient initWeakSSLClient() {
-        HttpClientBuilder b = HttpClientBuilder.create();
-
-        // setup a Trust Strategy that allows all certificates.
-        //
-        SSLContext sslContext = null;
-        try {
-            sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    return true;
-                }
-            }).build();
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            // do nothing, has been handled outside
-        }
-        b.setSslcontext(sslContext);
-
-        // don't check Hostnames, either.
-        // -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
-        X509HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-        // here's the special part:
-        // -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
-        // -- and create a Registry, to register it.
-        //
-        SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", sslSocketFactory)
-                .build();
-
-        // now, we create connection-manager using our Registry.
-        // -- allows multi-threaded use
-        PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        b.setConnectionManager(connMgr);
-
-        /**
-         * Set timeout option
-         */
-        RequestConfig.Builder configBuilder = RequestConfig.custom();
-        configBuilder.setConnectTimeout(time_out);
-        configBuilder.setSocketTimeout(time_out);
-        b.setDefaultRequestConfig(configBuilder.build());
-
-        // finally, build the HttpClient;
-        // -- done!
-        HttpClient sslClient = b.build();
-
-        return sslClient;
-    }
-
     private String decrypt(String dataSource) {
         if (dataSource == null || dataSource.length() == 0) {
             return "";
@@ -623,24 +436,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         startUpLog.add(ent);
     }
 
-    private void warn(String msg) {
-        logger.warn(msg);
-
-        LogEntry ent = new LogEntry();
-        ent.type = LogEntry.WARN;
-        ent.msg = msg;
-        startUpLog.add(ent);
-    }
-
-    private void error(String msg) {
-        logger.error(msg);
-
-        LogEntry ent = new LogEntry();
-        ent.type = LogEntry.ERROR;
-        ent.msg = msg;
-        startUpLog.add(ent);
-    }
-
     private void error(String msg, Throwable e) {
         logger.error(msg, e);
 
@@ -648,32 +443,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         ent.type = LogEntry.ERROR2;
         ent.msg = msg;
         startUpLog.add(ent);
-    }
-
-    public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {
-        try {
-            Cat.logEvent("Accessing Titan sub environment[Dal Java]", subEnv, "0", DB_NAME + "=" + allInOneKey);
-        } catch (Throwable e1) {
-            e1.printStackTrace();
-        }
-    }
-
-    public static void reportTitanAccessCost(long cost) {
-        try {
-            Cat.logSizeEvent("Accessing Titan cost[Dal Java]", cost);
-        } catch (Throwable e1) {
-            e1.printStackTrace();
-        }
-    }
-
-    public void reportTitanAccessSunEnvMetrics(String subEnv, String allInOneKey) {
-        if (subEnv == null)
-            return;
-
-        Map<String, String> tag = new HashMap<String, String>();
-        tag.put(SUB_ENV, subEnv);
-        tag.put(DB_NAME, allInOneKey);
-        MetricManager.getMetricer().log(TITAN, 1, tag);
     }
 
     private String initVersion() {

@@ -142,7 +142,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                         }
                         result.setSuccessal(true);
                     } catch (Exception e) {
-                        progress.setOtherMessage(e.getMessage());
+                        String message = String.format("Task id[%s]:\r\n %s", tableViewSp.getId(), e.getMessage());
+                        progress.setOtherMessage(message);
+                        throw new Exception(message);
                     }
                     return result;
                 }
@@ -172,7 +174,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                             _viewHosts.add(vhost);
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        throw e;
+                        throw new Exception(String.format("Task id[%s]:\r\n %s", tableViewSp.getId(), e.getMessage()));
                     }
                     return result;
                 }
@@ -203,7 +205,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                             _tableHosts.add(tableHost);
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        throw e;
+                        throw new Exception(String.format("Task id[%s]:\r\n %s", tableViewSp.getId(), e.getMessage()));
                     }
                     return result;
                 }

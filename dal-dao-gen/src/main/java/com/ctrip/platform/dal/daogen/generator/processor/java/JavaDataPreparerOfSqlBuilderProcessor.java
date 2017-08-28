@@ -56,8 +56,10 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
                             }
                             result.setSuccessal(true);
                         } catch (Throwable e) {
-                            LoggerManager.getInstance().error(e);
-                            progress.setOtherMessage(e.getMessage());
+                            String message =
+                                    String.format("Task id[%s]:\r\n %s", _table.getValue().getId(), e.getMessage());
+                            progress.setOtherMessage(message);
+                            throw new Exception(message);
                         }
                         return result;
                     }

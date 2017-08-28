@@ -87,49 +87,53 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     List<JavaMethodHost> methods = new ArrayList<>();
                     // 每个Method可能就有一个Pojo
                     for (GenTaskByFreeSql task : currentTasks) {
-                        JavaMethodHost method = new JavaMethodHost();
-                        method.setSql(task.getSql_content());
-                        method.setName(task.getMethod_name());
-                        method.setPackageName(namespace);
-                        method.setScalarType(task.getScalarType());
-                        method.setPojoType(task.getPojoType());
-                        method.setPaging(task.getPagination());
-                        method.setCrud_type(task.getCrud_type());
-                        method.setComments(task.getComment());
-                        if (task.getPojo_name() != null && !task.getPojo_name().isEmpty())
-                            method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
+                        try {
+                            JavaMethodHost method = new JavaMethodHost();
+                            method.setSql(task.getSql_content());
+                            method.setName(task.getMethod_name());
+                            method.setPackageName(namespace);
+                            method.setScalarType(task.getScalarType());
+                            method.setPojoType(task.getPojoType());
+                            method.setPaging(task.getPagination());
+                            method.setCrud_type(task.getCrud_type());
+                            method.setComments(task.getComment());
+                            if (task.getPojo_name() != null && !task.getPojo_name().isEmpty())
+                                method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
 
-                        List<JavaParameterHost> params = new ArrayList<>();
-                        for (String param : StringUtils.split(task.getParameters(), ";")) {
-                            String[] splitedParam = StringUtils.split(param, ",");
-                            JavaParameterHost p = new JavaParameterHost();
-                            p.setName(splitedParam[0]);
-                            p.setSqlType(Integer.valueOf(splitedParam[1]));
-                            p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
-                            p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
-                            boolean sensitive =
-                                    splitedParam.length >= 3 ? Boolean.parseBoolean(splitedParam[2]) : false;
-                            p.setSensitive(sensitive);
-                            params.add(p);
-                        }
-                        SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), params);
-                        method.setParameters(params);
-                        method.setHints(task.getHints());
-                        methods.add(method);
-
-                        if (method.getPojoClassName() != null && !method.getPojoClassName().isEmpty()
-                                && !_freeSqlPojoHosts.containsKey(method.getPojoClassName())
-                                && !"update".equalsIgnoreCase(method.getCrud_type())) {
-                            List<JavaParameterHost> paramHosts = new ArrayList<>();
-
-                            for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
-                                    task.getSql_content(), task.getParameters(),
-                                    new JavaGivenSqlResultSetExtractor())) {
-                                paramHosts.add((JavaParameterHost) _ahost);
+                            List<JavaParameterHost> params = new ArrayList<>();
+                            for (String param : StringUtils.split(task.getParameters(), ";")) {
+                                String[] splitedParam = StringUtils.split(param, ",");
+                                JavaParameterHost p = new JavaParameterHost();
+                                p.setName(splitedParam[0]);
+                                p.setSqlType(Integer.valueOf(splitedParam[1]));
+                                p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
+                                p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
+                                boolean sensitive =
+                                        splitedParam.length >= 3 ? Boolean.parseBoolean(splitedParam[2]) : false;
+                                p.setSensitive(sensitive);
+                                params.add(p);
                             }
+                            SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), params);
+                            method.setParameters(params);
+                            method.setHints(task.getHints());
+                            methods.add(method);
 
-                            method.setFields(paramHosts);
-                            _freeSqlPojoHosts.put(method.getPojoClassName(), method);
+                            if (method.getPojoClassName() != null && !method.getPojoClassName().isEmpty()
+                                    && !_freeSqlPojoHosts.containsKey(method.getPojoClassName())
+                                    && !"update".equalsIgnoreCase(method.getCrud_type())) {
+                                List<JavaParameterHost> paramHosts = new ArrayList<>();
+
+                                for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
+                                        task.getSql_content(), task.getParameters(),
+                                        new JavaGivenSqlResultSetExtractor())) {
+                                    paramHosts.add((JavaParameterHost) _ahost);
+                                }
+
+                                method.setFields(paramHosts);
+                                _freeSqlPojoHosts.put(method.getPojoClassName(), method);
+                            }
+                        } catch (Throwable e) {
+                            throw new Exception(String.format("Task id[%s]:\r\n %s", task.getId(), e.getMessage()));
                         }
                     }
                     host.setMethods(methods);

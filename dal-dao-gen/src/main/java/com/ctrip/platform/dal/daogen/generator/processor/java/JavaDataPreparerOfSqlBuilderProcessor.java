@@ -17,16 +17,9 @@ import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements DalProcessor {
     @Override
-    public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> tasks = prepareSqlBuilder(context);
-            TaskUtils.invokeBatch(tasks);
-        } catch (Throwable e) {
-            throw e;
-        }
-    }
+    public void process(CodeGenContext context) throws Exception {}
 
-    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) throws Exception {
+    public List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) throws Exception {
         final JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();

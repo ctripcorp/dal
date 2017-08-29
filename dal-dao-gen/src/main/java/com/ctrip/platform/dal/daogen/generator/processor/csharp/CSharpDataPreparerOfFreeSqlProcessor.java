@@ -32,16 +32,9 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
     }
 
     @Override
-    public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> tasks = prepareFreeSql(context);
-            TaskUtils.invokeBatch(tasks);
-        } catch (Throwable e) {
-            throw e;
-        }
-    }
+    public void process(CodeGenContext context) throws Exception {}
 
-    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext context) throws Exception {
+    public List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext context) throws Exception {
         final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();

@@ -19,16 +19,9 @@ import java.util.concurrent.Callable;
 public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 
     @Override
-    public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> tasks = prepareSqlBuilder(context);
-            TaskUtils.invokeBatch(tasks);
-        } catch (Throwable e) {
-            throw e;
-        }
-    }
+    public void process(CodeGenContext context) throws Exception {}
 
-    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext codeGenCtx) {
+    public List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext codeGenCtx) {
         final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();

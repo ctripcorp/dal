@@ -35,16 +35,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
     }
 
     @Override
-    public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> tasks = prepareTableViewSp(context);
-            TaskUtils.invokeBatch(tasks);
-        } catch (Throwable e) {
-            throw e;
-        }
-    }
+    public void process(CodeGenContext context) throws Exception {}
 
-    private List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
+    public List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
         final JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();

@@ -2,12 +2,18 @@ package com.ctrip.platform.dal.daogen.generator.java;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
+import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.processor.java.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class JavaDalGenerator implements DalGenerator {
     @Override
@@ -45,13 +51,14 @@ public class JavaDalGenerator implements DalGenerator {
     }
 
     @Override
-    public void prepareData(CodeGenContext codeGenCtx) throws Exception {
+    public void prepareData(CodeGenContext context) throws Exception {
         try {
-            new JavaDataPreparerOfFreeSqlProcessor().process(codeGenCtx);
-            new JavaDataPreparerOfTableViewSpProcessor().process(codeGenCtx);
-            new JavaDataPreparerOfSqlBuilderProcessor().process(codeGenCtx);
+            List<Callable<ExecuteResult>> tasks = new ArrayList<>();
+            tasks.addAll(new JavaDataPreparerOfTableViewSpProcessor().prepareTableViewSp(context));
+            tasks.addAll(new JavaDataPreparerOfSqlBuilderProcessor().prepareSqlBuilder(context));
+            tasks.addAll(new JavaDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
+            TaskUtils.invokeBatch(tasks);
         } catch (Exception e) {
-            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

@@ -26,16 +26,9 @@ import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer implements DalProcessor {
     @Override
-    public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> tasks = prepareFreeSql(context);
-            TaskUtils.invokeBatch(tasks);
-        } catch (Throwable e) {
-            throw e;
-        }
-    }
+    public void process(CodeGenContext context) throws Exception {}
 
-    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
+    public List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         int projectId = ctx.getProjectId();
         final Progress progress = ctx.getProgress();

@@ -26,18 +26,18 @@ public class TaskUtils {
     public static void invokeBatch(List<Callable<ExecuteResult>> tasks) throws Exception {
         try {
             executor.invokeAll(tasks);
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-        }
 
-        if (errorMap != null && errorMap.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            for (Map.Entry<Integer, String> entry : errorMap.entrySet()) {
-                sb.append(String.format("Task Id[%s]:%s\r\n", entry.getKey(), entry.getValue()));
+            if (errorMap != null && errorMap.size() > 0) {
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<Integer, String> entry : errorMap.entrySet()) {
+                    sb.append(String.format("Task Id[%s]:%s\r\n", entry.getKey(), entry.getValue()));
+                }
+
+                clearMap();
+                throw new Exception(sb.toString());
             }
-
-            clearMap();
-            throw new Exception(sb.toString());
+        } catch (Throwable e) {
+            throw e;
         }
     }
 

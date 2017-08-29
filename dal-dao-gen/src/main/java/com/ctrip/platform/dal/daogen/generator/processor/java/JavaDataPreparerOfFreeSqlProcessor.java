@@ -13,7 +13,6 @@ import com.ctrip.platform.dal.daogen.host.java.FreeSqlHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaGivenSqlResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaMethodHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
@@ -29,21 +28,20 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
     @Override
     public void process(CodeGenContext context) throws Exception {
         try {
-            List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql((CodeGenContext) context);
-            TaskUtils.invokeBatch(_freeSqlCallables);
+            List<Callable<ExecuteResult>> tasks = prepareFreeSql(context);
+            TaskUtils.invokeBatch(tasks);
         } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
             throw e;
         }
     }
 
-    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws SQLException {
+    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         int projectId = ctx.getProjectId();
         final Progress progress = ctx.getProgress();
         final String namespace = ctx.getNamespace();
-        final Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
-        final Queue<FreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
+        final Map<String, JavaMethodHost> freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
+        final Queue<FreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
         DaoByFreeSql daoByFreeSql = BeanGetter.getDaoByFreeSql();
         List<GenTaskByFreeSql> freeSqlTasks;
         if (ctx.isRegenerate()) {
@@ -64,10 +62,9 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
             }
         }
 
-        // 按照DbName以及ClassName做一次GroupBy(相同DbName的GenTaskByFreeSql作为一组)，且ClassName不区分大小写
         final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(freeSqlTasks);
         List<Callable<ExecuteResult>> results = new ArrayList<>();
-        // 以DbName以及ClassName为维度，为每个维度生成一个DAO类
+
         for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                 @Override
@@ -119,7 +116,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                             methods.add(method);
 
                             if (method.getPojoClassName() != null && !method.getPojoClassName().isEmpty()
-                                    && !_freeSqlPojoHosts.containsKey(method.getPojoClassName())
+                                    && !freeSqlPojoHosts.containsKey(method.getPojoClassName())
                                     && !"update".equalsIgnoreCase(method.getCrud_type())) {
                                 List<JavaParameterHost> paramHosts = new ArrayList<>();
 
@@ -130,14 +127,15 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                                 }
 
                                 method.setFields(paramHosts);
-                                _freeSqlPojoHosts.put(method.getPojoClassName(), method);
+                                freeSqlPojoHosts.put(method.getPojoClassName(), method);
                             }
                         } catch (Throwable e) {
-                            throw new Exception(String.format("Task id[%s]:\r\n %s", task.getId(), e.getMessage()));
+                            TaskUtils.addError(task.getId(), e.getMessage());
                         }
                     }
+
                     host.setMethods(methods);
-                    _freeSqlHosts.add(host);
+                    freeSqlHosts.add(host);
                     result.setSuccessal(true);
                     return result;
                 }
@@ -148,31 +146,30 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         return results;
     }
 
-    private void prepareDbFromFreeSql(CodeGenContext codeGenCtx, List<GenTaskByFreeSql> freeSqls) throws SQLException {
-        for (GenTaskByFreeSql task : freeSqls) {
-            addDatabaseSet(codeGenCtx, task.getDatabaseSetName());
+    private void prepareDbFromFreeSql(CodeGenContext context, List<GenTaskByFreeSql> tasks) throws SQLException {
+        if (tasks == null || tasks.size() == 0)
+            return;
+
+        for (GenTaskByFreeSql task : tasks) {
+            addDatabaseSet(context, task.getDatabaseSetName());
         }
     }
 
-    /**
-     * 按照DbName以及ClassName做一次GroupBy(相同DbName的GenTaskByFreeSql作为一组)， 且ClassName不区分大小写
-     *
-     * @param tasks
-     * @return
-     */
     private Map<String, List<GenTaskByFreeSql>> freeSqlGroupBy(List<GenTaskByFreeSql> tasks) {
-        Map<String, List<GenTaskByFreeSql>> groupBy = new HashMap<>();
+        Map<String, List<GenTaskByFreeSql>> map = new HashMap<>();
+        if (tasks == null || tasks.size() == 0)
+            return map;
 
         for (GenTaskByFreeSql task : tasks) {
             String key = String.format("%s_%s", task.getAllInOneName(), task.getClass_name().toLowerCase());
-            if (groupBy.containsKey(key)) {
-                groupBy.get(key).add(task);
+            if (map.containsKey(key)) {
+                map.get(key).add(task);
             } else {
-                groupBy.put(key, new ArrayList<GenTaskByFreeSql>());
-                groupBy.get(key).add(task);
+                map.put(key, new ArrayList<GenTaskByFreeSql>());
+                map.get(key).add(task);
             }
         }
-        return groupBy;
+        return map;
     }
 
 }

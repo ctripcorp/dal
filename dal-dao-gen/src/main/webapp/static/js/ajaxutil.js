@@ -388,7 +388,7 @@
                     $("#viewCode").val(data.info);
                 }
                 else {
-                    $("#generateCodeProcessErrorMess").html(data.info);
+                    $("#generateCodeProcessErrorMess").html(data.info.replace(/\r\n/g, "<br />"));
                     $("#generateCodeProcessErrorDiv").modal();
                     progress.reportException("generate success return but not ok");
                 }

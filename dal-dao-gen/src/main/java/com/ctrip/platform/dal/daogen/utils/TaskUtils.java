@@ -4,31 +4,40 @@ import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.*;
 
 public class TaskUtils {
     private static ExecutorService executor =
             new ThreadPoolExecutor(20, 50, 120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
-    public static void invokeBatch(List<Callable<ExecuteResult>> tasks) throws Exception {
-        try {
-            TaskUtils.log(executor.invokeAll(tasks));
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
+    private static Map<Integer, String> errorMap = new TreeMap<>();
+
+    public static void addError(Integer taskId, String errorMessage) {
+        errorMap.put(taskId, errorMessage);
     }
 
-    public static void log(List<Future<ExecuteResult>> tasks) throws Exception {
-        for (Future<ExecuteResult> future : tasks) {
-            try {
-                ExecuteResult result = future.get();
-                // log.info(String.format("Execute [%s] task completed: %s", result.getTaskName(),
-                // result.isSuccessal()));
-            } catch (Throwable e) {
-                LoggerManager.getInstance().error(e);
-                throw e;
+    private static void clearMap() {
+        errorMap = null;
+        errorMap = new TreeMap<>();
+    }
+
+    public static void invokeBatch(List<Callable<ExecuteResult>> tasks) throws Exception {
+        try {
+            executor.invokeAll(tasks);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+        }
+
+        if (errorMap != null && errorMap.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<Integer, String> entry : errorMap.entrySet()) {
+                sb.append(String.format("Task Id[%s]:%s\r\n", entry.getKey(), entry.getValue()));
             }
+
+            clearMap();
+            throw new Exception(sb.toString());
         }
     }
 

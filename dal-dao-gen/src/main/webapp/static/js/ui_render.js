@@ -138,10 +138,33 @@
         $(".step2-3-3").hide();
         $(".step2-3-4").hide();
         $(".step2-3-5").hide();
+        setLanguageType(current_project);
         $("#page1").attr('is_update', '0');
         $("#page1").modal({"backdrop": "static"});
         window.ajaxutil.reload_dbsets();
     };
+
+    function setLanguageType(id) {
+        $.getJSON("rest/task/getLanguageType", {project_id: id}, function (data) {
+            var sql_style = $("#sql_style");
+            if (data.code == "OK") {
+                sql_style.val(data.info);
+                sql_style.attr("readonly", true);
+                sql_style.change(function () {
+                    sql_style.val(data.info);
+                });
+            }
+            else if (data.code == "Error") {
+                recoverLanguageType();
+            }
+        });
+    }
+
+    function recoverLanguageType() {
+        $("#sql_style").removeAttr("readonly");
+        $("#sql_style").unbind("change");
+        sql_style.selectedIndex = 0;
+    }
 
     var editDAO = function () {
         var current_project = w2ui['grid'].current_project;
@@ -178,11 +201,16 @@
         window.ajaxutil.reload_dbsets(function () {
             $("#databases")[0].selectize.setValue(record['databaseSetName']);
         });
+
         $("#page1").attr('is_update', '1');
         $("#gen_style").val(record.task_type);
+
+        recoverLanguageType();
+
         if (record['sql_style']) {
             $("#sql_style").val(record.sql_style);
         }
+
         $("#comment").val(record.comment);
         $("#page1").modal({"backdrop": "static"});
     };

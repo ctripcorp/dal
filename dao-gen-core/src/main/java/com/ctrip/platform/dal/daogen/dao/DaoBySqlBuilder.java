@@ -81,7 +81,7 @@ public class DaoBySqlBuilder extends BaseDao {
         StringBuilder sb = new StringBuilder();
         sb.append(
                 "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
-        sb.append("FROM task_auto WHERE project_id=?");
+        sb.append("FROM task_auto WHERE project_id=? order by id");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;

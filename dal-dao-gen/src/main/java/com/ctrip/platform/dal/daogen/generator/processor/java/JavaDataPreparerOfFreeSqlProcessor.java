@@ -65,7 +65,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
                     progress.setOtherMessage(result.getTaskName());
                     List<GenTaskByFreeSql> currentTasks = entry.getValue();
-                    if (currentTasks.size() < 1)
+                    if (currentTasks.size() == 0)
                         return result;
 
                     FreeSqlHost host = new FreeSqlHost();

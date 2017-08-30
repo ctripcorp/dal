@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.domain.FreeSqlClassPojoNames;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.TaskAggeragation;
 import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.enums.LanguageType;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
@@ -39,6 +40,9 @@ import java.util.*;
 @Singleton
 @Path("task")
 public class GenTaskResource {
+    private static final String CSHARP = "csharp";
+    private static final String JAVA = "java";
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public TaskAggeragation getTasks(@QueryParam("project_id") int id) throws SQLException {
@@ -67,6 +71,58 @@ public class GenTaskResource {
             LoggerManager.getInstance().error(e);
             throw e;
         }
+    }
+
+    @GET
+    @Path("getLanguageType")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Status getLanguageType(@QueryParam("project_id") int id) throws Exception {
+        Status status = Status.ERROR;
+        status.setCode("Error");
+        TaskAggeragation task = getTasks(id);
+        List<GenTaskByTableViewSp> tableTasks = task.getTableViewSpTasks();
+        if (tableTasks != null && tableTasks.size() > 0) {
+            for (GenTaskByTableViewSp table : tableTasks) {
+                if (table.getSql_style().equals(CSHARP)) {
+                    status.setInfo(CSHARP);
+                } else if (table.getSql_style().equals(JAVA)) {
+                    status.setInfo(JAVA);
+                }
+                break;
+            }
+            status.setCode("OK");
+            return status;
+        }
+
+        List<GenTaskBySqlBuilder> buildTasks = task.getAutoTasks();
+        if (buildTasks != null && buildTasks.size() > 0) {
+            for (GenTaskBySqlBuilder build : buildTasks) {
+                if (build.getSql_style().equals(CSHARP)) {
+                    status.setInfo(CSHARP);
+                } else if (build.getSql_style().equals(JAVA)) {
+                    status.setInfo(JAVA);
+                }
+                break;
+            }
+            status.setCode("OK");
+            return status;
+        }
+
+        List<GenTaskByFreeSql> sqlTasks = task.getSqlTasks();
+        if (sqlTasks != null && sqlTasks.size() > 0) {
+            for (GenTaskByFreeSql sql : sqlTasks) {
+                if (sql.getSql_style().equals(CSHARP)) {
+                    status.setInfo(CSHARP);
+                } else if (sql.getSql_style().equals(JAVA)) {
+                    status.setInfo(JAVA);
+                }
+                break;
+            }
+            status.setCode("OK");
+            return status;
+        }
+
+        return status;
     }
 
     @GET

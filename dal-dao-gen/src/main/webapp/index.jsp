@@ -221,6 +221,11 @@
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">选择SQL风格：</label>
+                            <a style="margin-left: 8px;" href="#" class="ctip"
+                               data-toggle="tooltip" data-placement="left" title="1、同一个Project下不允许C#和Java DAO共存<br/>
+                               2、新建DAO时，语言强制指定为该Project下第一个DAO的语言类型">
+                                <span class="glyphicon glyphicon-question-sign"></span>
+                            </a>
                             <select id="sql_style" class="span8">
                                 <option value="csharp" selected="selected">C#风格(参数形式为@Name)</option>
                                 <option value="java">JAVA风格(参数形式为?)</option>

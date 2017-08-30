@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 
 import java.util.List;
 import java.util.Map;

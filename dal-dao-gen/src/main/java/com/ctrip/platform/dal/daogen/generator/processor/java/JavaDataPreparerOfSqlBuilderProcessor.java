@@ -26,35 +26,37 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
         Queue<GenTaskBySqlBuilder> sqlBuilders = ctx.getSqlBuilders();
         final Queue<JavaTableHost> tableHosts = ctx.getTableHosts();
         if (sqlBuilders.size() > 0) {
-            Map<String, GenTaskBySqlBuilder> tempSqlBuildres = sqlBuilderBroupBy(sqlBuilders);
+            Map<String, List<GenTaskBySqlBuilder>> tempSqlBuildres = sqlBuilderBroupBy(sqlBuilders);
 
-            for (final Map.Entry<String, GenTaskBySqlBuilder> sqlBuilder : tempSqlBuildres.entrySet()) {
-                Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-                    @Override
-                    public ExecuteResult call() throws Exception {
-                        ExecuteResult result = new ExecuteResult("Build Extral SQL["
-                                + sqlBuilder.getValue().getAllInOneName() + "." + sqlBuilder.getKey() + "] Host");
-                        progress.setOtherMessage(result.getTaskName());
-                        try {
-                            JavaTableHost extraTableHost = buildExtraSqlBuilderHost(ctx, sqlBuilder.getValue());
-                            if (null != extraTableHost) {
-                                tableHosts.add(extraTableHost);
+            for (final Map.Entry<String, List<GenTaskBySqlBuilder>> sqlBuilder : tempSqlBuildres.entrySet()) {
+                for (final GenTaskBySqlBuilder builder : sqlBuilder.getValue()) {
+                    Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+                        @Override
+                        public ExecuteResult call() throws Exception {
+                            ExecuteResult result = new ExecuteResult("Build Extral SQL[" + builder.getAllInOneName()
+                                    + "." + sqlBuilder.getKey() + "] Host");
+                            progress.setOtherMessage(result.getTaskName());
+                            try {
+                                JavaTableHost extraTableHost = buildExtraSqlBuilderHost(ctx, builder);
+                                if (null != extraTableHost) {
+                                    tableHosts.add(extraTableHost);
+                                }
+                                result.setSuccessal(true);
+                            } catch (Throwable e) {
+                                TaskUtils.addError(builder.getId(), e.getMessage());
                             }
-                            result.setSuccessal(true);
-                        } catch (Throwable e) {
-                            TaskUtils.addError(sqlBuilder.getValue().getId(), e.getMessage());
+                            return result;
                         }
-                        return result;
-                    }
-                };
-                results.add(worker);
+                    };
+                    results.add(worker);
+                }
             }
         }
         return results;
     }
 
-    private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(Queue<GenTaskBySqlBuilder> tasks) {
-        Map<String, GenTaskBySqlBuilder> map = new HashMap<>();
+    private Map<String, List<GenTaskBySqlBuilder>> sqlBuilderBroupBy(Queue<GenTaskBySqlBuilder> tasks) {
+        Map<String, List<GenTaskBySqlBuilder>> map = new HashMap<>();
         if (tasks == null || tasks.size() == 0)
             return map;
 
@@ -62,7 +64,8 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
             String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
 
             if (!map.containsKey(key))
-                map.put(key, task);
+                map.put(key, new ArrayList<GenTaskBySqlBuilder>());
+            map.get(key).add(task);
         }
 
         return map;

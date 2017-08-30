@@ -106,9 +106,10 @@ public class DaoBySqlBuilder extends BaseDao {
 
         for (GenTaskBySqlBuilder entity : list) {
             entity.setGenerated(true);
-            if (updateTask(entity) > 0) {
-                result.add(entity);
-            }
+            result.add(entity);
+            /*
+             * if (updateTask(entity) > 0) { result.add(entity); }
+             */
         }
 
         return result;

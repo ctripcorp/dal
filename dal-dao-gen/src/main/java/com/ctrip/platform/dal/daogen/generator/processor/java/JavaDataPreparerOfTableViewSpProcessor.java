@@ -228,8 +228,8 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), viewName);
         List<AbstractParameterHost> params = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), viewName,
                 new JavaColumnNameResultSetExtractor(tableViewSp.getAllInOneName(), viewName, dbCategory));
-        List<JavaParameterHost> realParams = new ArrayList<JavaParameterHost>();
-        if (null == params) {
+        List<JavaParameterHost> realParams = new ArrayList<>();
+        if (params == null || params.size() == 0) {
             throw new Exception(
                     String.format("The column names of view[%s, %s] is null", tableViewSp.getAllInOneName(), viewName));
         }

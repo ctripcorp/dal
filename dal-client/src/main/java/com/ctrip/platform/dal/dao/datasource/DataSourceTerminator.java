@@ -64,6 +64,7 @@ public class DataSourceTerminator {
 
                 if (ds.getActive() == 0 || elapsedSeconds >= abandonedTimeout) {
                     ds.close();
+
                 } else {
                     throw new Exception(String.format("Cannot close dataSource[%s] since there are busy connections.",
                             singleDataSource.getName()));

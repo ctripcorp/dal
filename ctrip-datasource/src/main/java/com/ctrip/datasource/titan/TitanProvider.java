@@ -256,8 +256,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     configMap.put(name, config);
                 }
             } catch (Throwable e) {
-                throw new RuntimeException(
-                        new DalException(String.format("Get TypedConfig from QConfig error:", e.getMessage()), e));
+                throw new RuntimeException(new DalException(
+                        String.format("Get titan keyname %s from QConfig error:%s", name, e.getMessage()), e));
             }
         }
     }
@@ -278,7 +278,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TypedConfig<String> config = configMap.get(name);
             if (config != null) {
                 String connectionString = config.current();
-                connectionString = decrypt(connectionString);
+                // connectionString = decrypt(connectionString);
                 DataSourceConfigure configure = parser.parse(name, connectionString);
                 configures.put(name, configure);
             }
@@ -339,14 +339,19 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (dbNames == null || dbNames.size() == 0)
             return;
 
+        Map<String, DataSourceConfigureChangeListener> listeners =
+                DataSourceConfigureParser.getInstance().getChangeListeners();
+
+        if (listeners == null || listeners.size() == 0)
+            return;
+
         // refresh TypedConfig
         refreshTypedConfigMap(dbNames);
 
         // get new DataSourceConfigure connection settings
         Map<String, DataSourceConfigure> map = getDataSourceConfigureConnectionSettings(dbNames);
 
-        Map<String, DataSourceConfigureChangeListener> listeners =
-                DataSourceConfigureParser.getInstance().getChangeListeners();
+
         for (String name : dbNames) {
             DataSourceConfigureChangeListener listener = listeners.get(name);
             if (listener == null)

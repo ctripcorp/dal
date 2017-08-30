@@ -40,11 +40,8 @@ public class AllInOneConfigureReader {
     public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal,
             String databaseConfigLocation) {
         String location = getAllInOneConfigLocation(databaseConfigLocation);
-
         Map<String, DataSourceConfigure> config = parseDBAllInOneConfig(location, dbNames, useLocal);
-
         validate(dbNames, config);
-
         return config;
     }
 

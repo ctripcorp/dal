@@ -205,10 +205,14 @@
         $("#page1").attr('is_update', '1');
         $("#gen_style").val(record.task_type);
 
-        recoverLanguageType();
-
         if (record['sql_style']) {
-            $("#sql_style").val(record.sql_style);
+            var sql_style = $("#sql_style");
+            recoverLanguageType();
+            sql_style.val(record.sql_style);
+            sql_style.attr("readonly", true);
+            sql_style.change(function () {
+                sql_style.val(record.sql_style);
+            });
         }
 
         $("#comment").val(record.comment);

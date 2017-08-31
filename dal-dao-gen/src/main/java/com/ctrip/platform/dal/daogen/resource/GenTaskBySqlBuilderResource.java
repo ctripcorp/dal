@@ -356,6 +356,7 @@ public class GenTaskBySqlBuilderResource {
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             status = Status.ERROR;
+            status.setCode("Error");
             status.setInfo(e.getMessage());
             return status;
         }
@@ -365,6 +366,7 @@ public class GenTaskBySqlBuilderResource {
             status.setExplanJson(validResult.getMessage());
         } else {
             status = Status.ERROR;
+            status.setCode("Error");
             status.setInfo(validResult.getMessage());
         }
         return status;

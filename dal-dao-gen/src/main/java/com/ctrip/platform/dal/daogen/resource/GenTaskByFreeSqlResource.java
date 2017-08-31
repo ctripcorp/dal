@@ -332,11 +332,13 @@ public class GenTaskByFreeSqlResource {
                 status.setExplanJson(validResult.getMessage());
             } else {
                 status = Status.ERROR;
+                status.setCode("Error");
                 status.setInfo(validResult.getMessage());
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             status = Status.ERROR;
+            status.setCode("Error");
             status.setInfo(e.getMessage());
         }
 

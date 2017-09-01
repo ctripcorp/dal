@@ -228,7 +228,7 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
 
     public boolean isDataChangeLastTimeField() {
         boolean result = true;
-        // result &= isMySql();
+        result &= isMySql();
         result &= isDataChangeLastTime();
         result &= isTimestampType();
         result &= isDefaultValueDefined();

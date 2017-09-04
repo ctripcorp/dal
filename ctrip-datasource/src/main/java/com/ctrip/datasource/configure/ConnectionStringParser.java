@@ -16,6 +16,8 @@ public class ConnectionStringParser {
             Pattern.compile("(database|initial\\scatalog)=([^;]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern dbcharsetPattern = Pattern.compile("(charset)=([^;]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern dbportPattern = Pattern.compile("(port)=([^;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern versionPattern = Pattern.compile("(version)=([^;]+)", Pattern.CASE_INSENSITIVE);
+
     private static final String PORT_SPLIT = ",";
     private static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
     private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s";
@@ -34,21 +36,26 @@ public class ConnectionStringParser {
      * 
      * @return DataSourceConfigure
      */
-    public DataSourceConfigure parse(String name, String connStr) {
+    public DataSourceConfigure parse(String name, String connectionString) {
         DataSourceConfigure config = new DataSourceConfigure();
 
-        String url = null;
-        String userName = null;
-        String password = null;
-        String driverClass = null;
+        String version = null;
+        Matcher matcher = versionPattern.matcher(connectionString);
+        if (matcher.find()) {
+            version = matcher.group(2);
+        }
 
-        String dbname = null, charset = null, dbhost = null;
-        Matcher matcher = dbnamePattern.matcher(connStr);
+        String dbname = null;
+        matcher = dbnamePattern.matcher(connectionString);
         if (matcher.find()) {
             dbname = matcher.group(2);
         }
 
-        matcher = dburlPattern.matcher(connStr);
+        String dbhost = null;
+        String url = null;
+        String charset = null;
+        String driverClass = null;
+        matcher = dburlPattern.matcher(connectionString);
         boolean isSqlServer;
         if (matcher.find()) {
             String[] dburls = matcher.group(2).split(PORT_SPLIT);
@@ -58,13 +65,13 @@ public class ConnectionStringParser {
                 url = String.format(DBURL_SQLSERVER, dbhost, dburls[1], dbname);
             } else {// should be mysql
                 isSqlServer = false;
-                matcher = dbcharsetPattern.matcher(connStr);
+                matcher = dbcharsetPattern.matcher(connectionString);
                 if (matcher.find()) {
                     charset = matcher.group(2);
                 } else {
                     charset = DEFAULT_ENCODING;
                 }
-                matcher = dbportPattern.matcher(connStr);
+                matcher = dbportPattern.matcher(connectionString);
                 if (matcher.find()) {
                     url = String.format(DBURL_MYSQL, dbhost, matcher.group(2), dbname, charset);
                 } else {
@@ -73,15 +80,18 @@ public class ConnectionStringParser {
             }
 
             driverClass = isSqlServer ? DRIVER_SQLSERVRE : DRIVER_MYSQL;
-        } else
+        } else {
             throw new RuntimeException("The format of connection string is incorrect for " + name);
+        }
 
-        matcher = dbuserPattern.matcher(connStr);
+        String userName = null;
+        matcher = dbuserPattern.matcher(connectionString);
         if (matcher.find()) {
             userName = matcher.group(2);
         }
 
-        matcher = dbpasswdPattern.matcher(connStr);
+        String password = null;
+        matcher = dbpasswdPattern.matcher(connectionString);
         if (matcher.find()) {
             password = matcher.group(2);
         }
@@ -90,6 +100,7 @@ public class ConnectionStringParser {
         config.setUserName(userName);
         config.setPassword(password);
         config.setDriverClass(driverClass);
+        config.setVersion(version);
         applyDefaultCtripOptionsIfEmpty(name, isSqlServer);
 
         return config;
@@ -107,4 +118,5 @@ public class ConnectionStringParser {
         String defaultConnectionProperties = isSqlServer ? MSSQL_CONNECTION_PROPERTIES : MYSQL_CONNECTION_PROPERTIES;
         dataSourceConfigure.setProperty(connectionProperties, defaultConnectionProperties);
     }
+
 }

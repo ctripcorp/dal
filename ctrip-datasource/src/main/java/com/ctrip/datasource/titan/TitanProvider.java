@@ -1,5 +1,6 @@
 package com.ctrip.datasource.titan;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +71,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
     private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
-    private static final String DAL_DYNAMIC_DATASOURCE_LISTENER = "";
+    private static final String DAL_REFRESH_DATASOURCE = "DataSource::refreshDataSourceConfig";
+    private static final String DATASOURCE_OLD_CONNECTIONURL = "DataSource::oldConnectionUrl";
+    private static final String DATASOURCE_NEW_CONNECTIONURL = "DataSource::newConnectionUrl";
+
+    // private static final String
     private static final String TITAN_APP_ID = "123456";
 
     private static Map<String, TypedConfig<String>> configMap = new ConcurrentHashMap<>();
@@ -256,8 +264,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     configMap.put(name, config);
                 }
             } catch (Throwable e) {
-                throw new RuntimeException(new DalException(
-                        String.format("Get titan keyname %s from QConfig error:%s", name, e.getMessage()), e));
+                throw new RuntimeException(new FileNotFoundException(String.format(
+                        "An error occured while getting titan keyname %s from QConfig:%s", name, e.getMessage())));
             }
         }
     }
@@ -278,8 +286,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TypedConfig<String> config = configMap.get(name);
             if (config != null) {
                 String connectionString = config.current();
-                // connectionString = decrypt(connectionString);
-                DataSourceConfigure configure = parser.parse(name, connectionString);
+                DataSourceConfigure configure = null;
+                try {
+                    configure = parser.parse(name, connectionString);
+                } catch (Throwable e) {
+                    throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
+                }
                 configures.put(name, configure);
             }
         }
@@ -302,8 +314,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     try {
                         notifyListeners(names);
                     } catch (Throwable e) {
-                        throw new RuntimeException(
-                                new DalException(String.format("Notify listener for %s error", name, e)));
+                        DalConfigException exception = new DalConfigException(e);
+                        Cat.logError(exception);
+                        logger.error(String.format("DalConfigException:%s", e.getMessage()), exception);
                     }
                 }
             });
@@ -325,23 +338,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
         }
     }
 
-    @Override
-    public DataSourceConfigure getDataSourceConfigure(String dbName) {
-        return DataSourceConfigureParser.getInstance().getDataSourceConfigure(dbName);
-    }
-
-    @Override
-    public void register(String dbName, DataSourceConfigureChangeListener listener) {
-        DataSourceConfigureParser.getInstance().addChangeListener(dbName, listener);
-    }
-
     private void notifyListeners(Set<String> dbNames) throws Exception {
         if (dbNames == null || dbNames.size() == 0)
             return;
 
         Map<String, DataSourceConfigureChangeListener> listeners =
                 DataSourceConfigureParser.getInstance().getChangeListeners();
-
         if (listeners == null || listeners.size() == 0)
             return;
 
@@ -350,7 +352,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         // get new DataSourceConfigure connection settings
         Map<String, DataSourceConfigure> map = getDataSourceConfigureConnectionSettings(dbNames);
-
 
         for (String name : dbNames) {
             DataSourceConfigureChangeListener listener = listeners.get(name);
@@ -361,15 +362,48 @@ public class TitanProvider implements DataSourceConfigureProvider {
             if (connectionSettingsConfigure == null)
                 continue;
 
-            // fetch old configure
-            DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+            Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE);
+            try {
+                // fetch old configure
+                DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
 
-            // refresh DataSourceConfigure connection settings
-            DataSourceConfigure newConfigure = refreshConnectionSettings(name, connectionSettingsConfigure);
+                // refresh DataSourceConfigure connection settings
+                DataSourceConfigure newConfigure = refreshConnectionSettings(name, connectionSettingsConfigure);
 
-            // notify listener to recreate datasource,destroy old datasource,etc
-            DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
-            listener.configChanged(event);
+                // compare version
+                String oldVersion = oldConfigure.getVersion();
+                String newVersion = newConfigure.getVersion();
+                if (oldVersion != null && newVersion != null) {
+                    if (oldVersion.equals(newVersion)) {
+                        continue;
+                    }
+                }
+
+                // log old configure & new configure
+                String oldConnectionUrl = oldConfigure.toConnectionUrl();
+                transaction.addData(DATASOURCE_OLD_CONNECTIONURL, oldConnectionUrl);
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                        String.format("%s:%s", DATASOURCE_OLD_CONNECTIONURL, oldConnectionUrl));
+
+                String newConnectionUrl = newConfigure.toConnectionUrl();
+                transaction.addData(DATASOURCE_NEW_CONNECTIONURL, newConnectionUrl);
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                        String.format("%s:%s", DATASOURCE_NEW_CONNECTIONURL, newConnectionUrl));
+
+
+                // notify listener to recreate datasource,destroy old datasource,etc
+                DataSourceConfigureChangeEvent event =
+                        new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
+
+                listener.configChanged(event);
+                transaction.setStatus(Transaction.SUCCESS);
+            } catch (Throwable e) {
+                transaction.setStatus(e);
+                Cat.logError(e);
+                throw e;
+            } finally {
+                transaction.complete();
+            }
         }
     }
 
@@ -380,6 +414,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 .refreshConnectionSettings(connectionSettingsConfigure, oldConfigure);
         DataSourceConfigureParser.getInstance().addDataSourceConfigure(name, newConfigure);
         return newConfigure;
+    }
+
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(String dbName) {
+        return DataSourceConfigureParser.getInstance().getDataSourceConfigure(dbName);
+    }
+
+    @Override
+    public void register(String dbName, DataSourceConfigureChangeListener listener) {
+        DataSourceConfigureParser.getInstance().addChangeListener(dbName, listener);
     }
 
     private void processPoolSettings(String name) {

@@ -30,26 +30,26 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     private static final String DAL_DATASOURCE_XML_LOCAL = "readLocal";
 
     public static final boolean DEFAULT_TESTWHILEIDLE = false;
-    public static final boolean DEFAULT_TESTONBORROW = false;
+    public static final boolean DEFAULT_TESTONBORROW = true;
     public static final boolean DEFAULT_TESTONRETURN = false;
     public static final String DEFAULT_VALIDATIONQUERY = "SELECT 1";
     public static final int DEFAULT_VALIDATIONQUERYTIMEOUT = 5;
     public static final long DEFAULT_VALIDATIONINTERVAL = 30000L;
-    public static final int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 30000;
-    public static final int DEFAULT_MAXAGE = 30000;
+    public static final String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
+    public static final int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 5000;
+    public static final int DEFAULT_MAXAGE = 0;
     public static final int DEFAULT_MAXACTIVE = 100;
     public static final int DEFAULT_MINIDLE = 0;
     public static final int DEFAULT_MAXWAIT = 10000;
-    public static final int DEFAULT_INITIALSIZE = 10;
+    public static final int DEFAULT_INITIALSIZE = 1;
     public static final int DEFAULT_REMOVEABANDONEDTIMEOUT = 60;
     public static final boolean DEFAULT_REMOVEABANDONED = true;
-    public static final boolean DEFAULT_LOGABANDONED = true;
+    public static final boolean DEFAULT_LOGABANDONED = false;
     public static final int DEFAULT_MINEVICTABLEIDLETIMEMILLIS = 30000;
     public static final String DEFAULT_CONNECTIONPROPERTIES = null;
     public static final boolean DEFAULT_JMXENABLED = true;
     public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
-    public static final String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
 
     private Map<String, DataSourceConfigure> dataSourceConfigures = new ConcurrentHashMap<>();
 

@@ -32,4 +32,7 @@ public interface DataSourceConfigureConstants {
     // And if only option is set, it will be set into connectionProperties
     String OPTION = "option";
     String VALIDATORCLASSNAME = "validatorClassName";
+
+    String VERSION = "version";
+
 }

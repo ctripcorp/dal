@@ -77,6 +77,14 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         setProperty(DRIVER_CLASS_NAME, driverClass);
     }
 
+    public String getVersion() {
+        return getProperty(VERSION);
+    }
+
+    public void setVersion(String version) {
+        setProperty(VERSION, version);
+    }
+
     public Properties getProperties() {
         return properties;
     }
@@ -117,4 +125,9 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
     public void setMap(Map<String, String> map) {
         this.map = map;
     }
+
+    public String toConnectionUrl() {
+        return String.format("{ConnectionUrl:%s,UserName:%s}", getConnectionUrl(), getUserName());
+    }
+
 }

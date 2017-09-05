@@ -242,8 +242,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
             configure.setDriverClass(driverClass);
 
         String version = connectionSettingsConfigure.getVersion();
-        if (version != null && !version.isEmpty())
-            configure.setVersion(version);
+        configure.setVersion(version);
 
         return configure;
     }
@@ -255,6 +254,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         dataSourceConfigure.setName(configure.getName());
         dataSourceConfigure.setProperties(configure.getProperties());
         dataSourceConfigure.setMap(new HashMap<>(configure.getMap()));
+        dataSourceConfigure.setVersion(configure.getVersion());
         return dataSourceConfigure;
     }
 

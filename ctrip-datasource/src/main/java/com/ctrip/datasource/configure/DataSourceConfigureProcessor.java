@@ -241,6 +241,10 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         if (driverClass != null && !driverClass.isEmpty())
             configure.setDriverClass(driverClass);
 
+        String version = connectionSettingsConfigure.getVersion();
+        if (version != null && !version.isEmpty())
+            configure.setVersion(version);
+
         return configure;
     }
 

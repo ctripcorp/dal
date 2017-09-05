@@ -366,30 +366,26 @@ public class TitanProvider implements DataSourceConfigureProvider {
             try {
                 // fetch old configure
                 DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
-
-                // refresh DataSourceConfigure connection settings
-                DataSourceConfigure newConfigure = refreshConnectionSettings(name, connectionSettingsConfigure);
-
-                // compare version
                 String oldVersion = oldConfigure.getVersion();
-                String newVersion = newConfigure.getVersion();
-                if (oldVersion != null && newVersion != null) {
-                    if (oldVersion.equals(newVersion)) {
-                        continue;
-                    }
-                }
-
-                // log old configure & new configure
                 String oldConnectionUrl = oldConfigure.toConnectionUrl();
                 transaction.addData(DATASOURCE_OLD_CONNECTIONURL, oldConnectionUrl);
                 Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
                         String.format("%s:%s", DATASOURCE_OLD_CONNECTIONURL, oldConnectionUrl));
 
+                // refresh DataSourceConfigure connection settings
+                DataSourceConfigure newConfigure = refreshConnectionSettings(name, connectionSettingsConfigure);
+                String newVersion = newConfigure.getVersion();
                 String newConnectionUrl = newConfigure.toConnectionUrl();
                 transaction.addData(DATASOURCE_NEW_CONNECTIONURL, newConnectionUrl);
                 Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
                         String.format("%s:%s", DATASOURCE_NEW_CONNECTIONURL, newConnectionUrl));
 
+                // compare version
+                if (oldVersion != null && newVersion != null) {
+                    if (oldVersion.equals(newVersion)) {
+                        continue;
+                    }
+                }
 
                 // notify listener to recreate datasource,destroy old datasource,etc
                 DataSourceConfigureChangeEvent event =

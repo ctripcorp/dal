@@ -33,6 +33,4 @@ public interface DataSourceConfigureConstants {
     String OPTION = "option";
     String VALIDATORCLASSNAME = "validatorClassName";
 
-    String VERSION = "version";
-
 }

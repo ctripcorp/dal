@@ -8,6 +8,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
     private String name;
     private Properties properties = new Properties();
     private Map<String, String> map = new HashMap<>();
+    private String version;
 
     public DataSourceConfigure() {}
 
@@ -78,11 +79,11 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
     }
 
     public String getVersion() {
-        return getProperty(VERSION);
+        return version;
     }
 
     public void setVersion(String version) {
-        setProperty(VERSION, version);
+        this.version = version;
     }
 
     public Properties getProperties() {

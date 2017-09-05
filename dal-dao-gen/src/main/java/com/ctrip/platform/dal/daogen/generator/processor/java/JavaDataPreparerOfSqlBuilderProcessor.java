@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -43,7 +42,9 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
                                 }
                                 result.setSuccessal(true);
                             } catch (Throwable e) {
-                                TaskUtils.addError(builder.getId(), e.getMessage());
+                                progress.setOtherMessage(e.getMessage());
+                                throw new Exception(
+                                        String.format("Task Id[%s]:%s\r\n", builder.getId(), e.getMessage()), e);
                             }
                             return result;
                         }

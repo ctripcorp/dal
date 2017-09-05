@@ -59,12 +59,11 @@ public class CSharpDalGenerator implements DalGenerator {
     public void prepareData(CodeGenContext context) throws Exception {
         try {
             List<Callable<ExecuteResult>> tasks = new ArrayList<>();
+            tasks.addAll(new CSharpDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
             tasks.addAll(new CSharpDataPreparerOfTableViewSpProcessor().prepareTableViewSp(context));
             tasks.addAll(new CSharpDataPreparerOfSqlBuilderProcessor().prepareSqlBuilder(context));
-            tasks.addAll(new CSharpDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
             TaskUtils.invokeBatch(tasks);
         } catch (Exception e) {
-            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

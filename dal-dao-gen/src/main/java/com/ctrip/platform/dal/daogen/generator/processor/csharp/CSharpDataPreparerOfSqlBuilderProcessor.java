@@ -11,7 +11,6 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -45,7 +44,9 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
                             }
                             result.setSuccessal(true);
                         } catch (Throwable e) {
-                            TaskUtils.addError(sqlBuilder.getValue().getId(), e.getMessage());
+                            throw new Exception(
+                                    String.format("Task Id[%s]:%s\r\n", sqlBuilder.getValue().getId(), e.getMessage()),
+                                    e);
                         }
                         return result;
                     }

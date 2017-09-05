@@ -16,7 +16,6 @@ import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
@@ -123,7 +122,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                                 freeSqlPojoHosts.put(method.getPojoClassName(), method);
                             }
                         } catch (Throwable e) {
-                            TaskUtils.addError(task.getId(), e.getMessage());
+                            throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }
                     }
 

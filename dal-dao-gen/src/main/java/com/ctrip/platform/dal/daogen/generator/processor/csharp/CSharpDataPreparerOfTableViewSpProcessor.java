@@ -16,7 +16,6 @@ import com.ctrip.platform.dal.daogen.host.csharp.*;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
@@ -124,7 +123,8 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                         }
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        TaskUtils.addError(tableViewSp.getId(), e.getMessage());
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }
@@ -153,7 +153,8 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                         }
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        TaskUtils.addError(tableViewSp.getId(), e.getMessage());
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }
@@ -183,7 +184,8 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                         }
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        TaskUtils.addError(tableViewSp.getId(), e.getMessage());
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }

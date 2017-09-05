@@ -71,7 +71,6 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                     ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
                     progress.setOtherMessage(result.getTaskName());
 
-
                     List<GenTaskByFreeSql> currentTasks = entry.getValue();
                     if (currentTasks.size() < 1)
                         return result;
@@ -99,7 +98,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                             }
                             methods.add(method);
                         } catch (Throwable e) {
-                            TaskUtils.addError(task.getId(), e.getMessage());
+                            throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }
                     }
                     host.setMethods(methods);

@@ -15,7 +15,6 @@ import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.*;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
@@ -133,7 +132,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                         }
                         result.setSuccessal(true);
                     } catch (Exception e) {
-                        TaskUtils.addError(tableViewSp.getId(), e.getMessage());
+                        progress.setOtherMessage(e.getMessage());
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }
@@ -160,7 +161,8 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                             _viewHosts.add(vhost);
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        TaskUtils.addError(tableViewSp.getId(), e.getMessage());
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }
@@ -188,7 +190,8 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
                             _tableHosts.add(tableHost);
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        TaskUtils.addError(tableViewSp.getId(), e.getMessage());
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }

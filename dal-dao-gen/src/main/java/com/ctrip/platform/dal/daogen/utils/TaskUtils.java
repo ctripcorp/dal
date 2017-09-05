@@ -2,42 +2,44 @@ package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.*;
 
 public class TaskUtils {
     private static ExecutorService executor =
             new ThreadPoolExecutor(20, 50, 120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
-    private static Map<Integer, String> errorMap = new TreeMap<>();
-
-    public static void addError(Integer taskId, String errorMessage) {
-        errorMap.put(taskId, errorMessage);
-    }
-
-    private static void clearMap() {
-        errorMap = null;
-        errorMap = new TreeMap<>();
-    }
-
     public static void invokeBatch(List<Callable<ExecuteResult>> tasks) throws Exception {
         try {
-            executor.invokeAll(tasks);
-
-            if (errorMap != null && errorMap.size() > 0) {
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<Integer, String> entry : errorMap.entrySet()) {
-                    sb.append(String.format("Task Id[%s]:%s\r\n", entry.getKey(), entry.getValue()));
-                }
-
-                clearMap();
-                throw new Exception(sb.toString());
-            }
+            log(executor.invokeAll(tasks));
         } catch (Throwable e) {
             throw e;
         }
+    }
+
+    private static void log(List<Future<ExecuteResult>> tasks) throws Exception {
+        if (tasks == null || tasks.size() == 0)
+            return;
+
+        List<String> exceptions = new ArrayList<>();
+        for (Future<ExecuteResult> future : tasks) {
+            try {
+                ExecuteResult result = future.get();
+            } catch (Throwable e) {
+                exceptions.add(e.getMessage());
+            }
+        }
+
+        if (exceptions.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String exception : exceptions) {
+                sb.append(exception);
+            }
+
+            throw new RuntimeException(sb.toString());
+        }
+
     }
 
 }

@@ -54,9 +54,9 @@ public class JavaDalGenerator implements DalGenerator {
     public void prepareData(CodeGenContext context) throws Exception {
         try {
             List<Callable<ExecuteResult>> tasks = new ArrayList<>();
+            tasks.addAll(new JavaDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
             tasks.addAll(new JavaDataPreparerOfTableViewSpProcessor().prepareTableViewSp(context));
             tasks.addAll(new JavaDataPreparerOfSqlBuilderProcessor().prepareSqlBuilder(context));
-            tasks.addAll(new JavaDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
             TaskUtils.invokeBatch(tasks);
         } catch (Exception e) {
             throw e;

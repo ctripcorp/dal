@@ -23,6 +23,9 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import static oracle.net.aso.C01.e;
+import static oracle.net.aso.C07.i;
+
 public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer implements DalProcessor {
     private static DaoByFreeSql daoByFreeSql;
 
@@ -115,7 +118,6 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                                     && !freeSqlPojoHosts.containsKey(methodHost.getPojoClassName())
                                     && !"update".equalsIgnoreCase(methodHost.getCrud_type())) {
                                 List<JavaParameterHost> fieldHosts = new ArrayList<>();
-
                                 for (AbstractParameterHost fieldHost : DbUtils.testAQuerySql(task.getAllInOneName(),
                                         task.getSql_content(), task.getParameters(),
                                         new JavaGivenSqlResultSetExtractor())) {
@@ -124,6 +126,9 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
 
                                 methodHost.setFields(fieldHosts);
                                 freeSqlPojoHosts.put(methodHost.getPojoClassName(), methodHost);
+                            } else if ("update".equalsIgnoreCase(methodHost.getCrud_type())) {
+                                DbUtils.testUpdateSql(task.getAllInOneName(), task.getSql_content(),
+                                        task.getParameters());
                             }
                         } catch (Throwable e) {
                             throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);

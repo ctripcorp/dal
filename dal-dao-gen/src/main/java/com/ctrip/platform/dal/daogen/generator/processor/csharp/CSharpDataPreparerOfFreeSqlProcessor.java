@@ -80,6 +80,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                         List<CSharpMethodHost> methods = new ArrayList<>();
                         try {
                             CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
+                            methods.add(method);
+
                             if (!freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
                                     && !method.getPojoName().isEmpty()
                                     && (!method.isFirstOrSingle() || !method.isSampleType())
@@ -88,8 +90,10 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                                 if (null != freeSqlPojoHost) {
                                     freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
                                 }
+                            } else if ("update".equalsIgnoreCase(task.getCrud_type())) {
+                                DbUtils.testUpdateSql(task.getAllInOneName(), task.getSql_content(),
+                                        task.getParameters());
                             }
-                            methods.add(method);
                         } catch (Throwable e) {
                             throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }

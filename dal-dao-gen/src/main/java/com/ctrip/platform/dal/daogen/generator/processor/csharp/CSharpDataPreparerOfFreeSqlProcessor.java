@@ -65,26 +65,19 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         final Queue<CSharpFreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
 
         for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
-            Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-                @Override
-                public ExecuteResult call() throws Exception {
-                    ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
-                    progress.setOtherMessage(result.getTaskName());
+            for (final GenTaskByFreeSql task : entry.getValue()) {
+                Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+                    @Override
+                    public ExecuteResult call() throws Exception {
+                        ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
+                        progress.setOtherMessage(result.getTaskName());
+                        CSharpFreeSqlHost host = new CSharpFreeSqlHost();
+                        host.setDbSetName(task.getDatabaseSetName());
+                        host.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getClass_name())));
+                        host.setNameSpace(namespace);
+                        host.setDatabaseCategory(getDatabaseCategory(task.getAllInOneName()));
 
-                    List<GenTaskByFreeSql> currentTasks = entry.getValue();
-                    if (currentTasks.size() < 1)
-                        return result;
-
-                    CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-                    host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
-                    host.setClassName(
-                            CommonUtils.normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClass_name())));
-                    host.setNameSpace(namespace);
-                    host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
-
-                    List<CSharpMethodHost> methods = new ArrayList<>();
-                    // 每个Method可能就有一个Pojo
-                    for (GenTaskByFreeSql task : currentTasks) {
+                        List<CSharpMethodHost> methods = new ArrayList<>();
                         try {
                             CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
                             if (!freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
@@ -100,14 +93,15 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                         } catch (Throwable e) {
                             throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }
+
+                        host.setMethods(methods);
+                        freeSqlHosts.add(host);
+                        result.setSuccessal(true);
+                        return result;
                     }
-                    host.setMethods(methods);
-                    freeSqlHosts.add(host);
-                    result.setSuccessal(true);
-                    return result;
-                }
-            };
-            results.add(worker);
+                };
+                results.add(worker);
+            }
         }
 
         return results;

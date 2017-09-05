@@ -24,6 +24,15 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer implements DalProcessor {
+    private static DaoByFreeSql daoByFreeSql;
+
+    static {
+        try {
+            daoByFreeSql = BeanGetter.getDaoByFreeSql();
+        } catch (SQLException e) {
+        }
+    }
+
     @Override
     public void process(CodeGenContext context) throws Exception {}
 
@@ -34,7 +43,6 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         final String namespace = ctx.getNamespace();
         final Map<String, JavaMethodHost> freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
         final Queue<FreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
-        DaoByFreeSql daoByFreeSql = BeanGetter.getDaoByFreeSql();
         List<GenTaskByFreeSql> freeSqlTasks;
         if (ctx.isRegenerate()) {
             freeSqlTasks = daoByFreeSql.updateAndGetAllTasks(projectId);
@@ -58,81 +66,77 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         List<Callable<ExecuteResult>> results = new ArrayList<>();
 
         for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
-            Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-                @Override
-                public ExecuteResult call() throws Exception {
-                    ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
-                    progress.setOtherMessage(result.getTaskName());
-                    List<GenTaskByFreeSql> currentTasks = entry.getValue();
-                    if (currentTasks.size() == 0)
-                        return result;
+            for (final GenTaskByFreeSql task : entry.getValue()) {
+                Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+                    @Override
+                    public ExecuteResult call() throws Exception {
+                        ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
+                        progress.setOtherMessage(result.getTaskName());
 
-                    FreeSqlHost host = new FreeSqlHost();
-                    host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
-                    host.setClassName(currentTasks.get(0).getClass_name());
-                    host.setPackageName(namespace);
-                    host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
+                        FreeSqlHost host = new FreeSqlHost();
+                        host.setDbSetName(task.getDatabaseSetName());
+                        host.setClassName(task.getClass_name());
+                        host.setPackageName(namespace);
+                        host.setDatabaseCategory(getDatabaseCategory(task.getAllInOneName()));
 
-                    List<JavaMethodHost> methods = new ArrayList<>();
-                    // 每个Method可能就有一个Pojo
-                    for (GenTaskByFreeSql task : currentTasks) {
+                        List<JavaMethodHost> methodHosts = new ArrayList<>();
                         try {
-                            JavaMethodHost method = new JavaMethodHost();
-                            method.setSql(task.getSql_content());
-                            method.setName(task.getMethod_name());
-                            method.setPackageName(namespace);
-                            method.setScalarType(task.getScalarType());
-                            method.setPojoType(task.getPojoType());
-                            method.setPaging(task.getPagination());
-                            method.setCrud_type(task.getCrud_type());
-                            method.setComments(task.getComment());
+                            JavaMethodHost methodHost = new JavaMethodHost();
+                            methodHost.setSql(task.getSql_content());
+                            methodHost.setName(task.getMethod_name());
+                            methodHost.setPackageName(namespace);
+                            methodHost.setScalarType(task.getScalarType());
+                            methodHost.setPojoType(task.getPojoType());
+                            methodHost.setPaging(task.getPagination());
+                            methodHost.setCrud_type(task.getCrud_type());
+                            methodHost.setComments(task.getComment());
                             if (task.getPojo_name() != null && !task.getPojo_name().isEmpty())
-                                method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
+                                methodHost.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
 
-                            List<JavaParameterHost> params = new ArrayList<>();
-                            for (String param : StringUtils.split(task.getParameters(), ";")) {
-                                String[] splitedParam = StringUtils.split(param, ",");
+                            List<JavaParameterHost> parameterHosts = new ArrayList<>();
+                            for (String parameter : StringUtils.split(task.getParameters(), ";")) {
+                                String[] array = StringUtils.split(parameter, ",");
                                 JavaParameterHost p = new JavaParameterHost();
-                                p.setName(splitedParam[0]);
-                                p.setSqlType(Integer.valueOf(splitedParam[1]));
+                                p.setName(array[0]);
+                                p.setSqlType(Integer.valueOf(array[1]));
                                 p.setJavaClass(Consts.jdbcSqlTypeToJavaClass.get(p.getSqlType()));
                                 p.setValidationValue(DbUtils.mockATest(p.getSqlType()));
-                                boolean sensitive =
-                                        splitedParam.length >= 3 ? Boolean.parseBoolean(splitedParam[2]) : false;
+                                boolean sensitive = array.length >= 3 ? Boolean.parseBoolean(array[2]) : false;
                                 p.setSensitive(sensitive);
-                                params.add(p);
+                                parameterHosts.add(p);
                             }
-                            SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), params);
-                            method.setParameters(params);
-                            method.setHints(task.getHints());
-                            methods.add(method);
 
-                            if (method.getPojoClassName() != null && !method.getPojoClassName().isEmpty()
-                                    && !freeSqlPojoHosts.containsKey(method.getPojoClassName())
-                                    && !"update".equalsIgnoreCase(method.getCrud_type())) {
-                                List<JavaParameterHost> paramHosts = new ArrayList<>();
+                            SqlBuilder.rebuildJavaInClauseSQL(task.getSql_content(), parameterHosts);
+                            methodHost.setParameters(parameterHosts);
+                            methodHost.setHints(task.getHints());
+                            methodHosts.add(methodHost);
 
-                                for (AbstractParameterHost _ahost : DbUtils.testAQuerySql(task.getAllInOneName(),
+                            if (methodHost.getPojoClassName() != null && !methodHost.getPojoClassName().isEmpty()
+                                    && !freeSqlPojoHosts.containsKey(methodHost.getPojoClassName())
+                                    && !"update".equalsIgnoreCase(methodHost.getCrud_type())) {
+                                List<JavaParameterHost> fieldHosts = new ArrayList<>();
+
+                                for (AbstractParameterHost fieldHost : DbUtils.testAQuerySql(task.getAllInOneName(),
                                         task.getSql_content(), task.getParameters(),
                                         new JavaGivenSqlResultSetExtractor())) {
-                                    paramHosts.add((JavaParameterHost) _ahost);
+                                    fieldHosts.add((JavaParameterHost) fieldHost);
                                 }
 
-                                method.setFields(paramHosts);
-                                freeSqlPojoHosts.put(method.getPojoClassName(), method);
+                                methodHost.setFields(fieldHosts);
+                                freeSqlPojoHosts.put(methodHost.getPojoClassName(), methodHost);
                             }
                         } catch (Throwable e) {
                             throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }
-                    }
 
-                    host.setMethods(methods);
-                    freeSqlHosts.add(host);
-                    result.setSuccessal(true);
-                    return result;
-                }
-            };
-            results.add(worker);
+                        host.setMethods(methodHosts);
+                        freeSqlHosts.add(host);
+                        result.setSuccessal(true);
+                        return result;
+                    }
+                };
+                results.add(worker);
+            }
         }
 
         return results;

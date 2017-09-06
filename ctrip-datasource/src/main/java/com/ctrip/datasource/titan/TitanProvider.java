@@ -76,7 +76,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private static final String DATASOURCE_NEW_CONNECTIONURL = "DataSource::newConnectionUrl";
 
     // private static final String
-    private static final String TITAN_APP_ID = "123456";
+    private static final String TITAN_APP_ID = "100010061";
 
     private static Map<String, TypedConfig<String>> configMap = new ConcurrentHashMap<>();
 

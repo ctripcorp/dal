@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.*;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -33,18 +32,10 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
     }
 
     @Override
-    public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(context);
-            TaskUtils.invokeBatch(_freeSqlCallables);
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
-    }
+    public void process(CodeGenContext context) throws Exception {}
 
-    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
-        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
+    public List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext context) throws Exception {
+        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();
         final Progress progress = ctx.getProgress();
@@ -68,56 +59,53 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             }
         }
 
-        // 首先按照DbName以及ClassName做一次GroupBy，且ClassName不区分大小写
         final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(freeSqlTasks);
         List<Callable<ExecuteResult>> results = new ArrayList<>();
-        final Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = ctx.getFreeSqlPojoHosts();
-        final Queue<CSharpFreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
-        // 随后，以DbName以及ClassName为维度，为每个维度生成一个DAO类
+        final Map<String, CSharpFreeSqlPojoHost> freeSqlPojoHosts = ctx.getFreeSqlPojoHosts();
+        final Queue<CSharpFreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
+
         for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
-            Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-                @Override
-                public ExecuteResult call() throws Exception {
-                    ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
-                    progress.setOtherMessage(result.getTaskName());
-
-                    try {
-                        List<GenTaskByFreeSql> currentTasks = entry.getValue();
-                        if (currentTasks.size() < 1)
-                            return result;
-
+            for (final GenTaskByFreeSql task : entry.getValue()) {
+                Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+                    @Override
+                    public ExecuteResult call() throws Exception {
+                        ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
+                        progress.setOtherMessage(result.getTaskName());
                         CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-                        host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
-                        host.setClassName(CommonUtils
-                                .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClass_name())));
+                        host.setDbSetName(task.getDatabaseSetName());
+                        host.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getClass_name())));
                         host.setNameSpace(namespace);
-                        host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
+                        host.setDatabaseCategory(getDatabaseCategory(task.getAllInOneName()));
 
                         List<CSharpMethodHost> methods = new ArrayList<>();
-                        // 每个Method可能就有一个Pojo
-                        for (GenTaskByFreeSql task : currentTasks) {
+                        try {
                             CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
-                            if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
+                            methods.add(method);
+
+                            if (!freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
                                     && !method.getPojoName().isEmpty()
                                     && (!method.isFirstOrSingle() || !method.isSampleType())
                                     && !"update".equalsIgnoreCase(task.getCrud_type())) {
                                 CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
                                 if (null != freeSqlPojoHost) {
-                                    _freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
+                                    freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
                                 }
+                            } else if ("update".equalsIgnoreCase(task.getCrud_type())) {
+                                DbUtils.testUpdateSql(task.getAllInOneName(), task.getSql_content(),
+                                        task.getParameters());
                             }
-                            methods.add(method);
+                        } catch (Throwable e) {
+                            throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }
+
                         host.setMethods(methods);
-                        _freeSqlHosts.add(host);
+                        freeSqlHosts.add(host);
                         result.setSuccessal(true);
-                    } catch (Throwable e) {
-                        throw e;
+                        return result;
                     }
-                    return result;
-                }
-            };
-            results.add(worker);
+                };
+                results.add(worker);
+            }
         }
 
         return results;
@@ -150,20 +138,12 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         method.setScalarType(task.getScalarType());
         method.setPojoType(task.getPojoType());
 
-        /*
-         * Pattern ptn = Pattern.compile("@([^\\s\\(\\)]+)", Pattern.CASE_INSENSITIVE); Matcher mt =
-         * ptn.matcher(method.getSql()); Queue<String> sqlParamQueue = new LinkedList<>(); while (mt.find()) {
-         * sqlParamQueue.add(mt.group(1)); }
-         */
-
         List<CSharpParameterHost> params = new ArrayList<>();
         for (String param : StringUtils.split(task.getParameters(), ";")) {
             String[] splitedParam = StringUtils.split(param, ",");
             CSharpParameterHost p = new CSharpParameterHost();
             p.setName(splitedParam[0]);
-            /*
-             * String sqlParamName = sqlParamQueue.poll(); if (sqlParamName == null) sqlParamName = splitedParam[0];
-             */
+
             String sqlParamName = splitedParam[0];
             p.setSqlParamName(sqlParamName);
             p.setInParameter(inParams.contains(p.getName()));

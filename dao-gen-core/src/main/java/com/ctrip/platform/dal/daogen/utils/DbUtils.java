@@ -21,13 +21,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DbUtils {
-    private static DalStatementCreator stmtCreator = null;
+    private static DalStatementCreator statementCreator = null;
 
     public static List<Integer> validMode = new ArrayList<>();
     private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", Pattern.CASE_INSENSITIVE);
 
     static {
-        stmtCreator = new DalStatementCreator(com.ctrip.platform.dal.common.enums.DatabaseCategory.MySql);
+        statementCreator = new DalStatementCreator(com.ctrip.platform.dal.common.enums.DatabaseCategory.MySql);
         validMode.add(DatabaseMetaData.procedureColumnIn);
         validMode.add(DatabaseMetaData.procedureColumnInOut);
         validMode.add(DatabaseMetaData.procedureColumnOut);
@@ -64,7 +64,7 @@ public class DbUtils {
         boolean result = false;
         try {
             connection = DataSourceUtil.getConnection(allInOneName);
-            preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+            preparedStatement = statementCreator.createPreparedStatement(connection, sql, parameters, hints);
             resultSet = preparedStatement.executeQuery();
             result = resultSet.next();
         } catch (Throwable e) {
@@ -167,7 +167,7 @@ public class DbUtils {
                 String sql =
                         "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE' and SPECIFIC_SCHEMA=? and SPECIFIC_NAME=?";
                 connection = DataSourceUtil.getConnection(allInOneName);
-                preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+                preparedStatement = statementCreator.createPreparedStatement(connection, sql, parameters, hints);
                 resultSet = preparedStatement.executeQuery();
                 result = resultSet.next();
             }
@@ -195,7 +195,7 @@ public class DbUtils {
                 String sql =
                         "select SPECIFIC_SCHEMA,SPECIFIC_NAME from information_schema.routines where routine_type = 'PROCEDURE'";
                 connection = DataSourceUtil.getConnection(allInOneName);
-                preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+                preparedStatement = statementCreator.createPreparedStatement(connection, sql, parameters, hints);
                 resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     StoredProcedure sp = new StoredProcedure();
@@ -336,7 +336,7 @@ public class DbUtils {
             StatementParameters parameters = new StatementParameters();
             DalHints hints = DalHints.createIfAbsent(null);
             connection = DataSourceUtil.getConnection(allInOneName);
-            preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+            preparedStatement = statementCreator.createPreparedStatement(connection, sql, parameters, hints);
             resultSet = preparedStatement.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
@@ -380,7 +380,7 @@ public class DbUtils {
             StatementParameters parameters = new StatementParameters();
             DalHints hints = DalHints.createIfAbsent(null);
             connection = DataSourceUtil.getConnection(allInOneName);
-            preparedStatement = stmtCreator.createPreparedStatement(connection, sql, parameters, hints);
+            preparedStatement = statementCreator.createPreparedStatement(connection, sql, parameters, hints);
             resultSet = preparedStatement.executeQuery();
             ResultSetMetaData metaData = resultSet.getMetaData();
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
@@ -429,7 +429,7 @@ public class DbUtils {
         }
         try {
             connection = DataSourceUtil.getConnection(allInOneName);
-            preparedStatement = stmtCreator.createPreparedStatement(connection, testSql, parameters, hints);
+            preparedStatement = statementCreator.createPreparedStatement(connection, testSql, parameters, hints);
             resultSet = preparedStatement.executeQuery();
             list = extractor.extract(resultSet);
         } catch (Throwable e) {
@@ -480,7 +480,7 @@ public class DbUtils {
                 temp = temp.replace(m.group(1), String.format("(?) "));
             }
             String replacedSql = temp.replaceAll(expression, "?");
-            PreparedStatement ps = connection.prepareStatement(replacedSql);
+            preparedStatement = connection.prepareStatement(replacedSql);
             int index = 0;
             for (Parameter parameter : list) {
                 String name = parameter.getName();
@@ -491,18 +491,82 @@ public class DbUtils {
                     index++;
                 }
                 if (type == 10001) {
-                    ps.setObject(index, mockATest(type), Types.BINARY);
+                    preparedStatement.setObject(index, mockATest(type), Types.BINARY);
                 } else {
-                    ps.setObject(index, mockATest(type), type);
+                    preparedStatement.setObject(index, mockATest(type), type);
                 }
             }
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = preparedStatement.executeQuery();
             result = extractor.extract(rs);
         } catch (Throwable e) {
             throw e;
         } finally {
             ResourceUtils.close(resultSet);
             ResourceUtils.close(preparedStatement);
+            ResourceUtils.close(connection);
+        }
+        return result;
+    }
+
+    public static int testUpdateSql(String allInOneName, String sql, String params) throws Exception {
+        int result;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = DataSourceUtil.getConnection(allInOneName);
+            connection.setAutoCommit(false);
+            List<Parameter> list = new ArrayList<>();
+            String[] parameters = params.split(";");
+            if (parameters != null && parameters.length > 0) {
+                for (String p : parameters) {
+                    if (p.isEmpty()) {
+                        continue;
+                    }
+                    String[] tuple = p.split(",");
+                    if (tuple != null && tuple.length > 0) {
+                        Parameter parameter = new Parameter();
+                        parameter.setName(tuple[0]);
+                        parameter.setType(Integer.valueOf(tuple[1]));
+                        list.add(parameter);
+                    }
+                }
+            }
+
+            Matcher matcher = pattern.matcher(sql);
+            // Match C# parameters
+            if (matcher.find()) {
+                list = getActualParameters(sql, list);
+            }
+
+            Matcher m = inRegxPattern.matcher(sql);
+            String temp = sql;
+            while (m.find()) {
+                temp = temp.replace(m.group(1), String.format("(?) "));
+            }
+            String replacedSql = temp.replaceAll(expression, "?");
+            preparedStatement = connection.prepareStatement(replacedSql);
+            int index = 0;
+            for (Parameter parameter : list) {
+                String name = parameter.getName();
+                int type = parameter.getType();
+                try {
+                    index = Integer.valueOf(name);
+                } catch (NumberFormatException ex) {
+                    index++;
+                }
+                if (type == 10001) {
+                    preparedStatement.setObject(index, mockATest(type), Types.BINARY);
+                } else {
+                    preparedStatement.setObject(index, mockATest(type), type);
+                }
+            }
+            result = preparedStatement.executeUpdate();
+        } catch (Throwable e) {
+            throw e;
+        } finally {
+            ResourceUtils.close(preparedStatement);
+            ResourceUtils.rollback(connection);
             ResourceUtils.close(connection);
         }
         return result;
@@ -621,7 +685,7 @@ public class DbUtils {
         ResultSet resultSet = null;
         try {
             connection = DataSourceUtil.getConnection(allInOneName);
-            preparedStatement = stmtCreator.createPreparedStatement(connection, sb.toString(), parameters, hints);
+            preparedStatement = statementCreator.createPreparedStatement(connection, sb.toString(), parameters, hints);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 map.put(resultSet.getString("name").toLowerCase(), resultSet.getString("description"));

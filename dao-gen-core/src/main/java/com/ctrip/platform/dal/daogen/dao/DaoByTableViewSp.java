@@ -76,7 +76,7 @@ public class DaoByTableViewSp extends BaseDao {
         StringBuilder sb = new StringBuilder();
         sb.append(
                 "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix, cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg ");
-        sb.append("FROM task_table WHERE project_id=?");
+        sb.append("FROM task_table WHERE project_id=? order by id");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;

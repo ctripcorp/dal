@@ -2,15 +2,20 @@ package com.ctrip.platform.dal.daogen.generator.csharp;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
+import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.processor.csharp.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class CSharpDalGenerator implements DalGenerator {
     @Override
@@ -51,13 +56,14 @@ public class CSharpDalGenerator implements DalGenerator {
     }
 
     @Override
-    public void prepareData(CodeGenContext codeGenCtx) throws Exception {
+    public void prepareData(CodeGenContext context) throws Exception {
         try {
-            new CSharpDataPreparerOfFreeSqlProcessor().process(codeGenCtx);
-            new CSharpDataPreparerOfTableViewSpProcessor().process(codeGenCtx);
-            new CSharpDataPreparerOfSqlBuilderProcessor().process(codeGenCtx);
+            List<Callable<ExecuteResult>> tasks = new ArrayList<>();
+            tasks.addAll(new CSharpDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
+            tasks.addAll(new CSharpDataPreparerOfTableViewSpProcessor().prepareTableViewSp(context));
+            tasks.addAll(new CSharpDataPreparerOfSqlBuilderProcessor().prepareSqlBuilder(context));
+            TaskUtils.invokeBatch(tasks);
         } catch (Exception e) {
-            LoggerManager.getInstance().error(e);
             throw e;
         }
     }

@@ -7,11 +7,15 @@
     String sqlServerSpec = Configuration.get("sql_server_spec");
     String mySqlSpec = Configuration.get("mysql_spec");
     String dalTeamEmail = Configuration.get("dal_team_email");
+    String reportPage = Configuration.get("report_page");
+    String decryptionPage = Configuration.get("decryption_page");
     request.setAttribute("codegenManual", codegenManual);
     request.setAttribute("dalManual", dalManual);
     request.setAttribute("sqlServerSpec", sqlServerSpec);
     request.setAttribute("mySqlSpec", mySqlSpec);
     request.setAttribute("dalTeamEmail", dalTeamEmail);
+    request.setAttribute("reportPage", reportPage);
+    request.setAttribute("decryptionPage", decryptionPage);
 %>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top" role="navigation">
     <div class="navbar-header">
@@ -59,6 +63,9 @@
                            onclick="window.open('${mySqlSpec}', '_blank');">MySQL
                         开发规范详解</a>
                     </li>
+                    <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">Java DAL 参数解密</a>
+                    </li>
+                    <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">Java DAL 版本统计</a></li>
                     <li><a href="mailto:${dalTeamEmail}"><span
                             class="glyphicon glyphicon-envelope"></span>&nbsp;联系我们</a>
                     </li>

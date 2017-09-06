@@ -13,11 +13,7 @@ public class Status {
         this.info = info;
     }
 
-    public static final Status OK = new Status("OK");
-    public static final Status ERROR = new Status("Error");
-
-    public Status() {
-    }
+    public Status() {}
 
     public Status(String code) {
         this.code = code;
@@ -37,6 +33,14 @@ public class Status {
 
     public void setExplanJson(String explanJson) {
         this.explanJson = explanJson;
+    }
+
+    public static Status OK() {
+        return new Status("OK");
+    }
+
+    public static Status ERROR() {
+        return new Status("Error");
     }
 
 }

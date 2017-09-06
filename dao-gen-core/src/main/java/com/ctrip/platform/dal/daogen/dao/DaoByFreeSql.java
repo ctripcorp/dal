@@ -79,7 +79,7 @@ public class DaoByFreeSql extends BaseDao {
         StringBuilder sb = new StringBuilder();
         sb.append(
                 "SELECT id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,`generated`,version,update_user_no,update_time,comment,scalarType,pojoType,pagination,sql_style,approved,approveMsg,hints ");
-        sb.append("FROM task_sql WHERE project_id=?");
+        sb.append("FROM task_sql WHERE project_id=? order by id");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;

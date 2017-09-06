@@ -119,7 +119,7 @@ public class DalGroupDbResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || groupId == null || dbname == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
@@ -128,7 +128,7 @@ public class DalGroupDbResource {
             groupID = Integer.parseInt(groupId);
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限。");
                 return status;
             }
@@ -136,7 +136,7 @@ public class DalGroupDbResource {
             DalGroupDB groupdb = BeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
             if (null != groupdb && groupdb.getDal_group_id() > 0) {
                 DalGroup group = BeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
                 return status;
             }
@@ -146,27 +146,27 @@ public class DalGroupDbResource {
                 ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);
                 BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
             } else {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB。");
                 return status;
             }
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Add operation failed.");
                 return status;
             }
 
             if (gen_default_dbset) {
                 Status status = genDefaultDbset(groupID, dbname, null);
-                if (status == Status.ERROR) {
+                if (status == Status.ERROR()) {
                     return status;
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -180,7 +180,7 @@ public class DalGroupDbResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || groupId == null || dbId == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
@@ -191,22 +191,22 @@ public class DalGroupDbResource {
             groupID = Integer.parseInt(groupId);
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限。");
                 return status;
             }
 
             int ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, comment);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Update operation failed.");
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -220,7 +220,7 @@ public class DalGroupDbResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || groupId == null || dbId == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
@@ -231,21 +231,21 @@ public class DalGroupDbResource {
             dbID = Integer.parseInt(dbId);
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限。");
                 return status;
             }
 
             int ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, -1);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Delete operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -259,7 +259,7 @@ public class DalGroupDbResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || groupId == null || dbId == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
@@ -270,21 +270,21 @@ public class DalGroupDbResource {
             dbID = Integer.parseInt(dbId);
 
             if (!this.validateTransferPermision(userNo, dbID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DataBase的操作权限。");
                 return status;
             }
 
             int ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(dbID, groupID);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("transfer operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -331,10 +331,10 @@ public class DalGroupDbResource {
      * @param dbname
      */
     public static Status genDefaultDbset(int groupId, String dbname, String dbProvider) throws Exception {
-        Status status = Status.OK;
+        Status status = Status.OK();
         List<DatabaseSet> exist = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo("数据库" + dbname + "已添加成功。由于已存在名为" + dbname
                     + "的逻辑数据库，所以无法默认生成同名的逻辑库，请到逻辑数据库管理页面中手动添加不同名称的逻辑库。请点击关闭按钮以关闭窗口。");
             return status;

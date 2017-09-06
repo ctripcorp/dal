@@ -77,7 +77,7 @@ public class GenTaskResource {
     @Path("getLanguageType")
     @Produces(MediaType.APPLICATION_JSON)
     public Status getLanguageType(@QueryParam("project_id") int id) throws Exception {
-        Status status = Status.ERROR;
+        Status status = Status.ERROR();
         status.setCode("Error");
         TaskAggeragation task = getTasks(id);
         List<GenTaskByTableViewSp> tableTasks = task.getTableViewSpTasks();
@@ -160,7 +160,7 @@ public class GenTaskResource {
             @FormParam("is_update") String is_update, @FormParam("dao_id") int dao_id,
             @FormParam("prefix") String prefix, @FormParam("suffix") String suffix) {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             daoName = daoName.replaceAll("_", "");
             List<GenTaskByTableViewSp> tableViewSpTasks =
                     BeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
@@ -239,10 +239,10 @@ public class GenTaskResource {
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -254,7 +254,7 @@ public class GenTaskResource {
     public Status approveTask(@Context HttpServletRequest request, @FormParam("taskId") String taskId,
             @FormParam("taskType") String taskType, @FormParam("userId") int userId) throws Exception {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             LoginUser approver = BeanGetter.getDaoOfLoginUser().getUserById(userId);
             if (approver == null) {
                 return status;
@@ -332,10 +332,10 @@ public class GenTaskResource {
                 e.printStackTrace();
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -427,7 +427,7 @@ public class GenTaskResource {
             @QueryParam("taskType") String taskType, @QueryParam("approveFlag") int approveFlag,
             @QueryParam("approveMsg") String approveMsg) throws Exception {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             String userNo = RequestUtil.getUserNo(request);
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             if (user == null) {
@@ -495,10 +495,10 @@ public class GenTaskResource {
                 e.printStackTrace();
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

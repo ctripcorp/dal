@@ -55,13 +55,13 @@ public class GenTaskBySqlBuilderResource {
             @FormParam("pagination") boolean pagination, @FormParam("orderby") String orderby,
             @FormParam("hints") String hints) throws Exception {
         try {
-            Status status = Status.OK;
+            Status status = Status.OK();
             GenTaskBySqlBuilder task = new GenTaskBySqlBuilder();
 
             if (action.equalsIgnoreCase("delete")) {
                 task.setId(id);
                 if (0 >= BeanGetter.getDaoBySqlBuilder().deleteTask(task)) {
-                    return Status.ERROR;
+                    return Status.ERROR();
                 }
             } else {
                 String userNo = RequestUtil.getUserNo(request);
@@ -95,7 +95,7 @@ public class GenTaskBySqlBuilderResource {
                     task.setVersion(BeanGetter.getDaoBySqlBuilder().getVersionById(id));
                     task.setSql_content(sql_content);
                     if (0 >= BeanGetter.getDaoBySqlBuilder().updateTask(task)) {
-                        status = Status.ERROR;
+                        status = Status.ERROR();
                         status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
                         return status;
                     }
@@ -104,7 +104,7 @@ public class GenTaskBySqlBuilderResource {
                     task.setVersion(1);
                     task.setSql_content(sql_content);
                     if (0 >= BeanGetter.getDaoBySqlBuilder().insertTask(task)) {
-                        status = Status.ERROR;
+                        status = Status.ERROR();
                         status.setInfo("新增出错，数据是否合法？或者已经有同名方法？");
                         return status;
                     }
@@ -114,7 +114,7 @@ public class GenTaskBySqlBuilderResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -157,7 +157,7 @@ public class GenTaskBySqlBuilderResource {
             // name
             @FormParam("sql_style") String sql_style, // C#风格或者Java风格
             @FormParam("sql_content") String sql_content) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         try {
             DatabaseSetEntry databaseSetEntry =
                     BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
@@ -167,7 +167,7 @@ public class GenTaskBySqlBuilderResource {
             status.setInfo(pagingSQL);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -178,7 +178,7 @@ public class GenTaskBySqlBuilderResource {
     @POST
     @Path("getDatabaseCategory")
     public Status getDatabaseCategory(@FormParam("db_set_name") String db_set_name) throws SQLException {
-        Status status = Status.OK;
+        Status status = Status.OK();
         DatabaseSetEntry databaseSetEntry =
                 BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
         try {
@@ -190,7 +190,7 @@ public class GenTaskBySqlBuilderResource {
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -202,14 +202,14 @@ public class GenTaskBySqlBuilderResource {
     public Status getMockValue(@FormParam("db_name") String set_name, @FormParam("table_name") String table_name,
             @FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
             @FormParam("condition") String condition, @FormParam("pagination") boolean pagination) throws Exception {
-        Status status = Status.OK;
+        Status status = Status.OK();
         int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
         Object[] values = SQLValidation.mockStringValues(sqlTypes);
         try {
             status.setInfo(mapper.writeValueAsString(values));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -330,7 +330,7 @@ public class GenTaskBySqlBuilderResource {
             @FormParam("crud_type") String crud_type, @FormParam("fields") String fields,
             @FormParam("condition") String condition, @FormParam("sql_content") String sql_content,
             @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) throws Exception {
-        Status status = Status.OK;
+        Status status = Status.OK();
         sql_content = sql_content.replaceAll("[@:]\\w+", "?");
         int[] sqlTypes = getSqlTypes(set_name, table_name, crud_type, fields, condition);
         String[] vals = mockValues.split(";");
@@ -355,7 +355,7 @@ public class GenTaskBySqlBuilderResource {
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setCode("Error");
             status.setInfo(e.getMessage());
             return status;
@@ -365,8 +365,7 @@ public class GenTaskBySqlBuilderResource {
             status.setInfo(resultPrefix + validResult.getAffectRows());
             status.setExplanJson(validResult.getMessage());
         } else {
-            status = Status.ERROR;
-            status.setCode("Error");
+            status = Status.ERROR();
             status.setInfo(validResult.getMessage());
         }
         return status;

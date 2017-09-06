@@ -51,7 +51,7 @@ public class GenTaskByTableViewResource {
             if (action.equalsIgnoreCase("delete")) {
                 task.setId(id);
                 if (0 >= BeanGetter.getDaoByTableViewSp().deleteTask(task)) {
-                    return Status.ERROR;
+                    return Status.ERROR();
                 }
             } else {
                 String userNo = RequestUtil.getUserNo(request);
@@ -82,21 +82,21 @@ public class GenTaskByTableViewResource {
                     task.setId(id);
                     task.setVersion(BeanGetter.getDaoByTableViewSp().getVersionById(id));
                     if (0 >= BeanGetter.getDaoByTableViewSp().updateTask(task)) {
-                        return Status.ERROR;
+                        return Status.ERROR();
                     }
                 } else {
                     task.setGenerated(false);
                     task.setVersion(1);
                     if (0 >= BeanGetter.getDaoByTableViewSp().insertTask(task)) {
-                        return Status.ERROR;
+                        return Status.ERROR();
                     }
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -138,7 +138,7 @@ public class GenTaskByTableViewResource {
     @Path("apiList")
     public Status getApiList(@QueryParam("db_name") String db_set_name, @QueryParam("table_names") String table_names,
             @QueryParam("sql_style") String sql_style) {
-        Status status = Status.OK;
+        Status status = Status.OK();
 
         try {
             List<DalApi> apis = null;
@@ -183,7 +183,7 @@ public class GenTaskByTableViewResource {
             status.setInfo(mapper.writeValueAsString(apis));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

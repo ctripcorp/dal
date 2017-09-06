@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
+import org.apache.tomcat.jdbc.pool.PooledConnection;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -122,7 +124,7 @@ public class ConnectionActionTest {
 		Throwable e = null;
 		try {
 			Thread.sleep(10l);
-			test.end(result, e);
+			test.end(result);
 			assertTrue( test.entry.getDuration() >= 10);
 			assertEquals(0, test.entry.getResultCount());
 		} catch (Exception e1) {
@@ -152,6 +154,31 @@ public class ConnectionActionTest {
 		}
 	}
 	
+    @Test
+    public void testCleanupCloseConnection() {
+        try {
+            TestConnectionAction test = new TestConnectionAction();
+            DalConnection connHolder = getDalConnection();
+            test.connHolder = connHolder;
+            test.statement = test.connHolder.getConn().createStatement();
+            test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
+            test.rs.next();
+            PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
+            connHolder.error(new SQLException("test discard", "08006"));
+            
+            test.cleanup();
+            assertTrue(c.isDiscarded());
+            assertNotNull(test);
+            assertTrue(test.conn == null);
+            assertTrue(test.statement == null);
+            assertTrue(test.rs == null);
+            assertTrue(test.connHolder == null);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+            fail("There should be no exception here");
+        }
+    }
+    
 	private static class TestConnectionAction extends ConnectionAction<Object>{
 		
 		public TestConnectionAction() {

@@ -163,6 +163,22 @@ public enum DatabaseCategory {
 		return errorCodes;
 	}
 	
+	public boolean isDisconnectionError(String sqlState) {
+	    if (sqlState == null)
+	        return false;
+        
+	    switch (this) {
+        case MySql:
+            //SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
+            return sqlState.equals("08S01");
+        case SqlServer:
+            //SQLServerException.EXCEPTION_XOPEN_CONNECTION_FAILURE
+            return sqlState.equals("08006");
+        default:
+            return false;
+        }	    
+	}
+	
 	public String getTimestampExp() {
 		return timestampExp;
 	}

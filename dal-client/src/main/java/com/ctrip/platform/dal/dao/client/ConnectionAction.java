@@ -40,6 +40,7 @@ public abstract class ConnectionAction<T> {
 	
 	public DalLogger logger = DalClientFactory.getDalLogger();
 	public LogEntry entry;
+	public Throwable e;
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
@@ -136,7 +137,12 @@ public abstract class ConnectionAction<T> {
 		logger.start(entry);
 	}
 	
-	public void end(Object result, Throwable e) throws SQLException {
+	public void error(Throwable e) throws SQLException {
+	    this.e = e;
+	    connHolder.error(e);
+	}
+	
+	public void end(Object result) throws SQLException {
 		log(result, e);	
 		handleException(e);
 	}

@@ -23,9 +23,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import static oracle.net.aso.C01.e;
-import static oracle.net.aso.C07.i;
-
 public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer implements DalProcessor {
     private static DaoByFreeSql daoByFreeSql;
 

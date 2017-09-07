@@ -259,14 +259,18 @@ public class JavaTableHost {
             allTypes.addAll(SpUpdate.getParameters());
 
         for (JavaParameterHost field : allTypes) {
-            Class<?> clazz = field.getJavaClass();
-            if (byte[].class.equals(clazz))
-                continue;
-            if (null == clazz)
-                continue;
-            if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
-                continue;
-            imports.add(clazz.getName());
+            try {
+                Class<?> clazz = field.getJavaClass();
+                if (byte[].class.equals(clazz))
+                    continue;
+                if (null == clazz)
+                    continue;
+                if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+                    continue;
+                imports.add(clazz.getName());
+            } catch (Throwable e) {
+                throw e;
+            }
         }
 
         return imports;

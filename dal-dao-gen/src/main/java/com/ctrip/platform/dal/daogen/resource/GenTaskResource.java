@@ -78,7 +78,6 @@ public class GenTaskResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Status getLanguageType(@QueryParam("project_id") int id) throws Exception {
         Status status = Status.ERROR();
-        status.setCode("Error");
         TaskAggeragation task = getTasks(id);
         List<GenTaskByTableViewSp> tableTasks = task.getTableViewSpTasks();
         if (tableTasks != null && tableTasks.size() > 0) {

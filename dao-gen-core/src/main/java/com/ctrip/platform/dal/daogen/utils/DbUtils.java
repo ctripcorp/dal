@@ -401,7 +401,7 @@ public class DbUtils {
         return map;
     }
 
-    private static boolean isMySqlServer(String allInOneName) throws SQLException {
+    public static boolean isMySqlServer(String allInOneName) throws SQLException {
         String dbType = getDbType(allInOneName);
         if (dbType.equalsIgnoreCase("Microsoft SQL Server")) {
             return false;

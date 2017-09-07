@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.daogen.generator.java;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
-import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.generator.processor.java.*;
@@ -13,7 +12,6 @@ import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 public class JavaDalGenerator implements DalGenerator {
     @Override
@@ -52,14 +50,35 @@ public class JavaDalGenerator implements DalGenerator {
 
     @Override
     public void prepareData(CodeGenContext context) throws Exception {
+        List<String> exceptions = new ArrayList<>();
         try {
-            List<Callable<ExecuteResult>> tasks = new ArrayList<>();
-            tasks.addAll(new JavaDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
-            tasks.addAll(new JavaDataPreparerOfTableViewSpProcessor().prepareTableViewSp(context));
-            tasks.addAll(new JavaDataPreparerOfSqlBuilderProcessor().prepareSqlBuilder(context));
-            TaskUtils.invokeBatch(tasks);
+            new JavaDataPreparerOfTableViewSpProcessor().process(context);
         } catch (Exception e) {
-            throw e;
+            LoggerManager.getInstance().error(e);
+            exceptions.add(e.getMessage());
+        }
+
+        try {
+            new JavaDataPreparerOfSqlBuilderProcessor().process(context);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            exceptions.add(e.getMessage());
+        }
+
+        try {
+            new JavaDataPreparerOfFreeSqlProcessor().process(context);
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            exceptions.add(e.getMessage());
+        }
+
+        if (exceptions.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String exception : exceptions) {
+                sb.append(exception);
+            }
+
+            throw new RuntimeException(sb.toString());
         }
     }
 

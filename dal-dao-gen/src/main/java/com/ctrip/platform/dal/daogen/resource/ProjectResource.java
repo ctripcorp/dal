@@ -522,20 +522,24 @@ public class ProjectResource {
                 return status;
             }
 
-            DalGenerator generator = null;
-            CodeGenContext context = null;
             HashSet<String> hashSet = getProjectSqlStyles(id);
+            if (hashSet.size() == 0) {
+                progress.setStatus(ProgressResource.FINISH);
+                status = Status.ERROR();
+                status.setInfo(String.format("Language error for Task Id %s", id));
+                return status;
+            }
             String code = "";
             if (hashSet.contains(JAVA)) {
                 code = JAVA;
-                generator = new JavaDalGenerator();
-                context = generator.createContext(id, true, progress, newPojo, false);
+                DalGenerator generator = new JavaDalGenerator();
+                CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
                 generateLanguageProject(generator, context);
             }
             if (hashSet.contains(CS)) { // cs
                 code = "cs";
-                generator = new CSharpDalGenerator();
-                context = generator.createContext(id, true, progress, newPojo, false);
+                DalGenerator generator = new CSharpDalGenerator();
+                CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
                 generateLanguageProject(generator, context);
             }
             status = Status.OK();
@@ -563,19 +567,19 @@ public class ProjectResource {
 
     private HashSet<String> getProjectSqlStyles(int projectId) throws SQLException {
         HashSet<String> hashSet = new HashSet<>();
-        List<GenTaskBySqlBuilder> autoTasks = BeanGetter.getDaoBySqlBuilder().getTasksByProjectId(projectId);
-
-        if (autoTasks != null && autoTasks.size() > 0) {
-            for (GenTaskBySqlBuilder genTaskBySqlBuilder : autoTasks) {
-                hashSet.add(genTaskBySqlBuilder.getSql_style());
-            }
-        }
-
         List<GenTaskByTableViewSp> tableViewSpTasks = BeanGetter.getDaoByTableViewSp().getTasksByProjectId(projectId);
 
         if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
             for (GenTaskByTableViewSp genTaskByTableViewSp : tableViewSpTasks) {
                 hashSet.add(genTaskByTableViewSp.getSql_style());
+            }
+        }
+
+        List<GenTaskBySqlBuilder> autoTasks = BeanGetter.getDaoBySqlBuilder().getTasksByProjectId(projectId);
+
+        if (autoTasks != null && autoTasks.size() > 0) {
+            for (GenTaskBySqlBuilder genTaskBySqlBuilder : autoTasks) {
+                hashSet.add(genTaskBySqlBuilder.getSql_style());
             }
         }
 
@@ -598,7 +602,7 @@ public class ProjectResource {
             status.setInfo("你没有权限生成代码.请先加入一个 DAL Team.");
             return status;
         }
-        if (urGroups.size() < 1) {
+        if (urGroups.size() == 0) {
             status.setInfo("你没有权限生成代码.请先加入一个 DAL Team.");
             return status;
         }
@@ -615,7 +619,7 @@ public class ProjectResource {
         if (status.getCode().equals(Status.ERROR().getCode())) {
             info += "</br>" + status.getInfo();
         }
-        if (!"".equals(info)) {
+        if (info.length() > 0) {
             status = Status.ERROR();
             status.setInfo(info);
             return status;

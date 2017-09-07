@@ -10,15 +10,19 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 
 public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements DalProcessor {
     @Override
-    public void process(CodeGenContext context) throws Exception {}
+    public void process(CodeGenContext context) throws Exception {
+        List<Callable<ExecuteResult>> tasks = prepareSqlBuilder(context);
+        TaskUtils.invokeBatch(tasks);
+    }
 
-    public List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) throws Exception {
+    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) throws Exception {
         final JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();

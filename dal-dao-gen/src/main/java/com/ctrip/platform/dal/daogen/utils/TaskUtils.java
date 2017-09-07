@@ -11,19 +11,12 @@ public class TaskUtils {
             new ThreadPoolExecutor(20, 50, 120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     public static void invokeBatch(List<Callable<ExecuteResult>> tasks) throws Exception {
-        try {
-            log(executor.invokeAll(tasks));
-        } catch (Throwable e) {
-            throw e;
-        }
-    }
-
-    private static void log(List<Future<ExecuteResult>> tasks) throws Exception {
         if (tasks == null || tasks.size() == 0)
             return;
 
+        List<Future<ExecuteResult>> results = executor.invokeAll(tasks);
         List<String> exceptions = new ArrayList<>();
-        for (Future<ExecuteResult> future : tasks) {
+        for (Future<ExecuteResult> future : results) {
             try {
                 ExecuteResult result = future.get();
             } catch (Throwable e) {
@@ -39,7 +32,6 @@ public class TaskUtils {
 
             throw new RuntimeException(sb.toString());
         }
-
     }
 
 }

@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static oracle.net.aso.C07.s;
+
 @Resource
 @Singleton
 @Path("project")
@@ -523,10 +525,10 @@ public class ProjectResource {
             }
 
             HashSet<String> hashSet = getProjectSqlStyles(id);
-            if (hashSet.size() == 0) {
+            if (hashSet.isEmpty()) {
                 progress.setStatus(ProgressResource.FINISH);
                 status = Status.ERROR();
-                status.setInfo(String.format("Language error for Task Id %s", id));
+                status.setInfo(String.format("Language error for project %s", id));
                 return status;
             }
             String code = "";
@@ -534,13 +536,17 @@ public class ProjectResource {
                 code = JAVA;
                 DalGenerator generator = new JavaDalGenerator();
                 CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
+                LoggerManager.getInstance().info(String.format("Begin to generate java task for project %s", id));
                 generateLanguageProject(generator, context);
+                LoggerManager.getInstance().info(String.format("Java task for project %s generated.", id));
             }
             if (hashSet.contains(CS)) { // cs
                 code = "cs";
                 DalGenerator generator = new CSharpDalGenerator();
                 CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
+                LoggerManager.getInstance().info(String.format("Begin to generate csharp task for project %s", id));
                 generateLanguageProject(generator, context);
+                LoggerManager.getInstance().info(String.format("Csharp task for project %s generated.", id));
             }
             status = Status.OK();
             status.setInfo(code);

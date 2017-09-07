@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -18,10 +19,13 @@ import java.util.concurrent.Callable;
 public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataPreparer implements DalProcessor {
 
     @Override
-    public void process(CodeGenContext context) throws Exception {}
+    public void process(CodeGenContext context) throws Exception {
+        List<Callable<ExecuteResult>> tasks = prepareSqlBuilder(context);
+        TaskUtils.invokeBatch(tasks);
+    }
 
-    public List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext codeGenCtx) {
-        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
+    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) {
+        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         Queue<GenTaskBySqlBuilder> sqlBuilders = ctx.getSqlBuilders();

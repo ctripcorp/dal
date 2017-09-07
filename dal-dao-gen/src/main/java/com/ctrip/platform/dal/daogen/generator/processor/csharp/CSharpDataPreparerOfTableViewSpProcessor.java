@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.daogen.host.csharp.*;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
@@ -35,9 +36,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
     }
 
     @Override
-    public void process(CodeGenContext context) throws Exception {}
+    public void process(CodeGenContext context) throws Exception {
+        List<Callable<ExecuteResult>> tasks = prepareTableViewSp(context);
+        TaskUtils.invokeBatch(tasks);
+    }
 
-    public List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
+    private List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
         final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();

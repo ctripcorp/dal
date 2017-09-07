@@ -8,7 +8,6 @@ import com.ctrip.platform.dal.daogen.generator.processor.java.*;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +38,14 @@ public class JavaDalGenerator implements DalGenerator {
     }
 
     @Override
-    public void prepareDirectory(CodeGenContext codeGenCtx) throws Exception {
+    public void prepareDirectory(CodeGenContext context) throws Exception {
         try {
-            new JavaDirectoryPreparerProcessor().process(codeGenCtx);
+            JavaCodeGenContext ctx = (JavaCodeGenContext) context;
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare java directory for project %s", ctx.getProjectId()));
+            new JavaDirectoryPreparerProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare java directory for project %s completed.", ctx.getProjectId()));
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -51,22 +55,35 @@ public class JavaDalGenerator implements DalGenerator {
     @Override
     public void prepareData(CodeGenContext context) throws Exception {
         List<String> exceptions = new ArrayList<>();
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         try {
-            new JavaDataPreparerOfTableViewSpProcessor().process(context);
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare java table data for project %s", ctx.getProjectId()));
+            new JavaDataPreparerOfTableViewSpProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare java table data for project %s completed.", ctx.getProjectId()));
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             exceptions.add(e.getMessage());
         }
 
         try {
-            new JavaDataPreparerOfSqlBuilderProcessor().process(context);
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare java sqlbuilder data for project %s", ctx.getProjectId()));
+            new JavaDataPreparerOfSqlBuilderProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare java sqlbuilder data for project %s completed.", ctx.getProjectId()));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             exceptions.add(e.getMessage());
         }
 
         try {
-            new JavaDataPreparerOfFreeSqlProcessor().process(context);
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare java freesql data for project %s", ctx.getProjectId()));
+            new JavaDataPreparerOfFreeSqlProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare java freesql data for project %s completed.", ctx.getProjectId()));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             exceptions.add(e.getMessage());
@@ -83,16 +100,42 @@ public class JavaDalGenerator implements DalGenerator {
     }
 
     @Override
-    public void generateCode(CodeGenContext codeGenCtx) throws Exception {
+    public void generateCode(CodeGenContext context) throws Exception {
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         try {
-            new JavaCodeGeneratorOfTableProcessor().process(codeGenCtx);
-            new JavaCodeGeneratorOfViewProcessor().process(codeGenCtx);
-            new JavaCodeGeneratorOfSpProcessor().process(codeGenCtx);
-            new JavaCodeGeneratorOfFreeSqlProcessor().process(codeGenCtx);
-            new JavaCodeGeneratorOfOthersProcessor().process(codeGenCtx);
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate java table code for project %s", ctx.getProjectId()));
+            new JavaCodeGeneratorOfTableProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate java table code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate java view code for project %s", ctx.getProjectId()));
+            new JavaCodeGeneratorOfViewProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate java view code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate java sp code for project %s", ctx.getProjectId()));
+            new JavaCodeGeneratorOfSpProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate java sp code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate java freesql code for project %s", ctx.getProjectId()));
+            new JavaCodeGeneratorOfFreeSqlProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate java freesql code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate java other code for project %s", ctx.getProjectId()));
+            new JavaCodeGeneratorOfOthersProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate java other code for project %s completed.", ctx.getProjectId()));
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
         }
     }
+
 }

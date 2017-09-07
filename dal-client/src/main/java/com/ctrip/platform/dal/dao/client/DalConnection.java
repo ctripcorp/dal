@@ -102,7 +102,7 @@ public class DalConnection {
 	    }
 	    
 	    while(e!= null && !(e instanceof SQLException)) {
-	        e =e.getCause();
+	        e = e.getCause();
 	    }
 	    
 	    if(e == null)

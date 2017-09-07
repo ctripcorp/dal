@@ -139,7 +139,10 @@ public abstract class ConnectionAction<T> {
 	
 	public void error(Throwable e) throws SQLException {
 	    this.e = e;
-	    connHolder.error(e);
+	    
+	    // When Db is markdown, there will be no connHolder
+	    if(connHolder!=null)
+	        connHolder.error(e);
 	}
 	
 	public void end(Object result) throws SQLException {

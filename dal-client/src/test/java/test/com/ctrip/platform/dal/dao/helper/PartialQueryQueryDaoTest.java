@@ -21,6 +21,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
@@ -45,24 +46,56 @@ public class PartialQueryQueryDaoTest {
 	// ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
 
 	private static DalTableDao<Person> pdao;
+    private final static String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
+    private final static String TABLE_NAME = "person";
+    private final static int mod = 2;
+    private final static int tableMod = 4;
+    
+    //Create the the table
+    private final static String DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL = "DROP TABLE IF EXISTS " + TABLE_NAME;
+    
+    //Create the the table
+    // Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
+    private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"("
+            + "PeopleID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+            + "Name VARCHAR(64),"
+            + "CityID int,"
+            + "ProvinceID int,"
+            + "CountryID int, "
+            + "DataChange_LastTime timestamp default CURRENT_TIMESTAMP)";
+    
+    private static DalClient clientMySql;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		/**
-		 * Initialize DalClientFactory. The Dal.config can be specified from
-		 * class-path or local file path. One of follow three need to be
-		 * enabled.
-		 **/
-		// DalClientFactory.initPrivateFactory(); //Load from class-path
-		// connections.properties
-		DalClientFactory.initClientFactory(); // load from class-path Dal.config
-		// DalClientFactory.initClientFactory("E:/DalMult.config"); // load from
-		// the specified Dal.config file path
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        DalClientFactory.initClientFactory();
+        clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+        DalHints hints = new DalHints();
+        String[] sqls = null;
+        // For SQL server
+        hints = new DalHints();
+        for(int i = 0; i < mod; i++) {
+            sqls = new String[] { 
+                    DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, 
+                    CREATE_TABLE_SQL_MYSQL_TPL};
+            clientMySql.batchUpdate(sqls, hints.inShard(i));
+        }
+        
+        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class,
+                "MySqlSimpleShard", "PERSON");
+        pdao = new DalTableDao<>(parser);
+    }
 
-		DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class,
-				"MySqlSimpleShard", "PERSON");
-		pdao = new DalTableDao<>(parser);
-	}
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        DalHints hints = new DalHints();
+        String[] sqls = null;
+        //For Sql Server
+        hints = new DalHints();
+        for(int i = 0; i < mod; i++) {
+            clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
+        }
+    }
 
 	@Before
 	public void setUp() throws Exception {
@@ -99,11 +132,6 @@ public class PartialQueryQueryDaoTest {
 					pdao.query("1=1", new StatementParameters(),
 							new DalHints().inShard(i)));
 		}
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-
 	}
 
 	//Result set is same than entity

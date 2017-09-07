@@ -26,6 +26,7 @@ import com.ctrip.platform.dal.dao.client.DalConnectionManager;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
+import com.ctrip.platform.dal.exceptions.DalException;
 
 public class ConnectionActionTest {
 	@BeforeClass
@@ -156,6 +157,43 @@ public class ConnectionActionTest {
 	
     @Test
     public void testCleanupCloseConnection() {
+        // Case 1 detect direct SQLException
+        SQLException e1 = new SQLException("test discard", "08006");
+        // Case 2 detect embedded SQLException wrapped by DalException
+        DalException e2 = new DalException("test discard", new SQLException("test discard", "08006"));
+        // Case 2 detect embedded SQLException wrapped by NullPinterException
+        Exception e3 = new RuntimeException("test discard", new SQLException("test discard", "08006"));
+        
+        
+        Exception[] el = new Exception[]{e1,e2,e3}; 
+        
+        for(Exception e: el) {
+            try {
+                TestConnectionAction test = new TestConnectionAction();
+                DalConnection connHolder = getDalConnection();
+                test.connHolder = connHolder;
+                test.statement = test.connHolder.getConn().createStatement();
+                test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
+                test.rs.next();
+                PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
+                connHolder.error(e);
+                
+                test.cleanup();
+                assertTrue(c.isDiscarded());
+                assertNotNull(test);
+                assertTrue(test.conn == null);
+                assertTrue(test.statement == null);
+                assertTrue(test.rs == null);
+                assertTrue(test.connHolder == null);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                fail("There should be no exception here");
+            }
+        }
+    }
+    
+    @Test
+    public void testCleanupCloseConnectionNegative() {
         try {
             TestConnectionAction test = new TestConnectionAction();
             DalConnection connHolder = getDalConnection();
@@ -164,19 +202,19 @@ public class ConnectionActionTest {
             test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
             test.rs.next();
             PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
-            connHolder.error(new SQLException("test discard", "08006"));
+            connHolder.error(new NullPointerException("0800"));
             
             test.cleanup();
-            assertTrue(c.isDiscarded());
+            assertTrue(!c.isDiscarded());
             assertNotNull(test);
             assertTrue(test.conn == null);
             assertTrue(test.statement == null);
             assertTrue(test.rs == null);
             assertTrue(test.connHolder == null);
-        } catch (Exception e1) {
-            e1.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             fail("There should be no exception here");
-        }
+        }        
     }
     
 	private static class TestConnectionAction extends ConnectionAction<Object>{

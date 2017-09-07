@@ -180,6 +180,7 @@ public class ConnectionActionTest {
                 
                 test.cleanup();
                 assertTrue(c.isDiscarded());
+                assertTrue(c.isReleased());
                 assertNotNull(test);
                 assertTrue(test.conn == null);
                 assertTrue(test.statement == null);
@@ -206,6 +207,7 @@ public class ConnectionActionTest {
             
             test.cleanup();
             assertTrue(!c.isDiscarded());
+            assertTrue(!c.isReleased());
             assertNotNull(test);
             assertTrue(test.conn == null);
             assertTrue(test.statement == null);

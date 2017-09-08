@@ -173,7 +173,7 @@ public enum DatabaseCategory {
             return sqlState.equals("08S01");
         case SqlServer:
             //SQLServerException.EXCEPTION_XOPEN_CONNECTION_FAILURE
-            return sqlState.equals("08006");
+            return sqlState.equals("08S01") || sqlState.equals("08006");
         default:
             // The default connection related error codes are start with "08"
             return sqlState.startsWith("08");

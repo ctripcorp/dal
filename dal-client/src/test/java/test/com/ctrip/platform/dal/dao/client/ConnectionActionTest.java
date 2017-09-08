@@ -157,15 +157,29 @@ public class ConnectionActionTest {
 	
     @Test
     public void testCleanupCloseConnection() {
-        // Case 1 detect direct SQLException
-        SQLException e1 = new SQLException("test discard", "08006");
-        // Case 2 detect embedded SQLException wrapped by DalException
-        DalException e2 = new DalException("test discard", new SQLException("test discard", "08006"));
-        // Case 2 detect embedded SQLException wrapped by NullPinterException
-        Exception e3 = new RuntimeException("test discard", new SQLException("test discard", "08006"));
-        
-        
-        Exception[] el = new Exception[]{e1,e2,e3}; 
+        SQLException e1 = new SQLException("test discard", "1234");
+        e1.setNextException(new SQLException("test discard", "08006"));
+
+        SQLException e2 = new SQLException("test discard", "1234");
+        e2.setNextException(new SQLException("test discard", "08S01"));
+
+        Exception[] el = new Exception[]{
+                // Case 1 detect direct SQLException
+                new SQLException("test discard", "08006"),
+                // Case 2 detect embedded SQLException wrapped by DalException
+                new DalException("test discard", new SQLException("test discard", "08006")),
+                // Case 3 detect embedded SQLException wrapped by NullPinterException
+                new RuntimeException("test discard", new SQLException("test discard", "08006")),
+                // Case 4 detect embedded SQLException wrapped by NullPinterException
+                new RuntimeException("test discard", e1),
+                // Case 1 detect direct SQLException
+                new SQLException("test discard", "08006"),
+                // Case 2 detect embedded SQLException wrapped by DalException
+                new DalException("test discard", new SQLException("test discard", "08006")),
+                // Case 3 detect embedded SQLException wrapped by NullPinterException
+                new RuntimeException("test discard", new SQLException("test discard", "08006")),
+                // Case 4 detect embedded SQLException wrapped by NullPinterException
+                new RuntimeException("test discard", e2),}; 
         
         for(Exception e: el) {
             try {

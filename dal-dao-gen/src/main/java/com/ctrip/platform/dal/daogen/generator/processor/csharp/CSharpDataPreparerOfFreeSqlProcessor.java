@@ -32,10 +32,13 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
     }
 
     @Override
-    public void process(CodeGenContext context) throws Exception {}
+    public void process(CodeGenContext context) throws Exception {
+        List<Callable<ExecuteResult>> tasks = prepareFreeSql(context);
+        TaskUtils.invokeBatch(tasks);
+    }
 
-    public List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext context) throws Exception {
-        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
+    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
+        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();
         final Progress progress = ctx.getProgress();
@@ -59,53 +62,65 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
             }
         }
 
+        // 首先按照DbName以及ClassName做一次GroupBy，且ClassName不区分大小写
         final Map<String, List<GenTaskByFreeSql>> groupBy = freeSqlGroupBy(freeSqlTasks);
         List<Callable<ExecuteResult>> results = new ArrayList<>();
-        final Map<String, CSharpFreeSqlPojoHost> freeSqlPojoHosts = ctx.getFreeSqlPojoHosts();
-        final Queue<CSharpFreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
-
+        final Map<String, CSharpFreeSqlPojoHost> _freeSqlPojoHosts = ctx.getFreeSqlPojoHosts();
+        final Queue<CSharpFreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
+        // 随后，以DbName以及ClassName为维度，为每个维度生成一个DAO类
         for (final Map.Entry<String, List<GenTaskByFreeSql>> entry : groupBy.entrySet()) {
-            for (final GenTaskByFreeSql task : entry.getValue()) {
-                Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-                    @Override
-                    public ExecuteResult call() throws Exception {
-                        ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
-                        progress.setOtherMessage(result.getTaskName());
+            Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+                @Override
+                public ExecuteResult call() throws Exception {
+                    ExecuteResult result = new ExecuteResult("Build  Free SQL[" + entry.getKey() + "] Host");
+                    progress.setOtherMessage(result.getTaskName());
+
+                    try {
+                        List<GenTaskByFreeSql> currentTasks = entry.getValue();
+                        if (currentTasks.size() < 1)
+                            return result;
+
                         CSharpFreeSqlHost host = new CSharpFreeSqlHost();
-                        host.setDbSetName(task.getDatabaseSetName());
-                        host.setClassName(CommonUtils.normalizeVariable(WordUtils.capitalize(task.getClass_name())));
+                        host.setDbSetName(currentTasks.get(0).getDatabaseSetName());
+                        host.setClassName(CommonUtils
+                                .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClass_name())));
                         host.setNameSpace(namespace);
-                        host.setDatabaseCategory(getDatabaseCategory(task.getAllInOneName()));
+                        host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
 
                         List<CSharpMethodHost> methods = new ArrayList<>();
-                        try {
-                            CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
-                            methods.add(method);
-
-                            if (!freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
-                                    && !method.getPojoName().isEmpty()
-                                    && (!method.isFirstOrSingle() || !method.isSampleType())
-                                    && !"update".equalsIgnoreCase(task.getCrud_type())) {
-                                CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
-                                if (null != freeSqlPojoHost) {
-                                    freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
+                        // 每个Method可能就有一个Pojo
+                        for (GenTaskByFreeSql task : currentTasks) {
+                            try {
+                                CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
+                                if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
+                                        && !method.getPojoName().isEmpty()
+                                        && (!method.isFirstOrSingle() || !method.isSampleType())
+                                        && !"update".equalsIgnoreCase(task.getCrud_type())) {
+                                    CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
+                                    if (null != freeSqlPojoHost) {
+                                        _freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
+                                    }
+                                } else if ("update".equalsIgnoreCase(task.getCrud_type())) {
+                                    DbUtils.testUpdateSql(task.getAllInOneName(), task.getSql_content(),
+                                            task.getParameters());
                                 }
-                            } else if ("update".equalsIgnoreCase(task.getCrud_type())) {
-                                DbUtils.testUpdateSql(task.getAllInOneName(), task.getSql_content(),
-                                        task.getParameters());
+                                methods.add(method);
+                            } catch (Throwable e) {
+                                progress.setOtherMessage(e.getMessage());
+                                throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()),
+                                        e);
                             }
-                        } catch (Throwable e) {
-                            throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
                         }
-
                         host.setMethods(methods);
-                        freeSqlHosts.add(host);
+                        _freeSqlHosts.add(host);
                         result.setSuccessal(true);
-                        return result;
+                    } catch (Throwable e) {
+                        throw e;
                     }
-                };
-                results.add(worker);
-            }
+                    return result;
+                }
+            };
+            results.add(worker);
         }
 
         return results;

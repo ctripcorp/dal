@@ -28,6 +28,7 @@ public class DbUtils {
 
     static {
         statementCreator = new DalStatementCreator(com.ctrip.platform.dal.common.enums.DatabaseCategory.MySql);
+        // statementCreator = new DalStatementCreator();
         validMode.add(DatabaseMetaData.procedureColumnIn);
         validMode.add(DatabaseMetaData.procedureColumnInOut);
         validMode.add(DatabaseMetaData.procedureColumnOut);
@@ -401,7 +402,7 @@ public class DbUtils {
         return map;
     }
 
-    private static boolean isMySqlServer(String allInOneName) throws SQLException {
+    public static boolean isMySqlServer(String allInOneName) throws SQLException {
         String dbType = getDbType(allInOneName);
         if (dbType.equalsIgnoreCase("Microsoft SQL Server")) {
             return false;

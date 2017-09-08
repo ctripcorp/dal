@@ -5,7 +5,11 @@ import com.ctrip.platform.dal.daogen.DalGenerator;
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
+import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.processor.csharp.*;
+import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfFreeSqlProcessor;
+import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfSqlBuilderProcessor;
+import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfTableViewSpProcessor;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
@@ -46,9 +50,14 @@ public class CSharpDalGenerator implements DalGenerator {
     }
 
     @Override
-    public void prepareDirectory(CodeGenContext codeGenCtx) throws Exception {
+    public void prepareDirectory(CodeGenContext context) throws Exception {
         try {
-            new CSharpDirectoryPreparerProcessor().process(codeGenCtx);
+            CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare csharp directory for project %s", ctx.getProjectId()));
+            new CSharpDirectoryPreparerProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare csharp directory for project %s completed.", ctx.getProjectId()));
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
@@ -57,24 +66,78 @@ public class CSharpDalGenerator implements DalGenerator {
 
     @Override
     public void prepareData(CodeGenContext context) throws Exception {
+        List<String> exceptions = new ArrayList<>();
+        CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         try {
-            List<Callable<ExecuteResult>> tasks = new ArrayList<>();
-            tasks.addAll(new CSharpDataPreparerOfFreeSqlProcessor().prepareFreeSql(context));
-            tasks.addAll(new CSharpDataPreparerOfTableViewSpProcessor().prepareTableViewSp(context));
-            tasks.addAll(new CSharpDataPreparerOfSqlBuilderProcessor().prepareSqlBuilder(context));
-            TaskUtils.invokeBatch(tasks);
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare csharp table data for project %s", ctx.getProjectId()));
+            new CSharpDataPreparerOfTableViewSpProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare csharp table data for project %s completed.", ctx.getProjectId()));
         } catch (Exception e) {
-            throw e;
+            LoggerManager.getInstance().error(e);
+            exceptions.add(e.getMessage());
+        }
+
+        try {
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare csharp sqlbuilder data for project %s", ctx.getProjectId()));
+            new CSharpDataPreparerOfSqlBuilderProcessor().process(ctx);
+            LoggerManager.getInstance().info(
+                    String.format("Prepare csharp sqlbuilder data for project %s completed.", ctx.getProjectId()));
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            exceptions.add(e.getMessage());
+        }
+
+        try {
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to prepare csharp freesql data for project %s", ctx.getProjectId()));
+            new CSharpDataPreparerOfFreeSqlProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Prepare java csharp data for project %s completed.", ctx.getProjectId()));
+        } catch (Throwable e) {
+            LoggerManager.getInstance().error(e);
+            exceptions.add(e.getMessage());
+        }
+
+        if (exceptions.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String exception : exceptions) {
+                sb.append(exception);
+            }
+
+            throw new RuntimeException(sb.toString());
         }
     }
 
     @Override
-    public void generateCode(CodeGenContext codeGenCtx) throws Exception {
+    public void generateCode(CodeGenContext context) throws Exception {
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         try {
-            new CSharpCodeGeneratorOfTableProcessor().process(codeGenCtx);
-            new CSharpCodeGeneratorOfSpProcessor().process(codeGenCtx);
-            new CSharpCodeGeneratorOfFreeSqlProcessor().process(codeGenCtx);
-            new CSharpCodeGeneratorOfOthersProcessor().process(codeGenCtx);
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate csharp table code for project %s", ctx.getProjectId()));
+            new CSharpCodeGeneratorOfTableProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate csharp table code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate csharp sp code for project %s", ctx.getProjectId()));
+            new CSharpCodeGeneratorOfSpProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate csharp sp code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate csharp freesql code for project %s", ctx.getProjectId()));
+            new CSharpCodeGeneratorOfFreeSqlProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate csharp freesql code for project %s completed.", ctx.getProjectId()));
+
+            LoggerManager.getInstance()
+                    .info(String.format("Begin to generate csharp other code for project %s", ctx.getProjectId()));
+            new CSharpCodeGeneratorOfOthersProcessor().process(ctx);
+            LoggerManager.getInstance()
+                    .info(String.format("Generate csharp other code for project %s completed.", ctx.getProjectId()));
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;

@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.*;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
@@ -34,9 +35,12 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
     }
 
     @Override
-    public void process(CodeGenContext context) throws Exception {}
+    public void process(CodeGenContext context) throws Exception {
+        List<Callable<ExecuteResult>> tasks = prepareTableViewSp(context);
+        TaskUtils.invokeBatch(tasks);
+    }
 
-    public List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
+    private List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
         final JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();

@@ -128,8 +128,8 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
     }
 
     public String toConnectionUrl() {
-        return String.format("{ConnectionUrl:%s,UserName:%s,Version:%s}", getConnectionUrl(), getUserName(),
-                (version == null ? "" : version));
+        return String.format("{ConnectionUrl:%s,Version:%s,CRC:%s}", getConnectionUrl(),
+                (version == null ? "" : version), "");
     }
 
 }

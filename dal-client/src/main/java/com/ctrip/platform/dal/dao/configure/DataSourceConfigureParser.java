@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.slf4j.Logger;
@@ -24,10 +23,6 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     private static final String LOCATION = "location";
     private static final String RESOURCE_NODE = "Datasource";
     private static final String NAME = "name";
-
-    private static final String DAL = "DAL";
-    private static final String DAL_DATASOURCE_XML = "datasource.xml::";
-    private static final String DAL_DATASOURCE_XML_LOCAL = "readLocal";
 
     public static final boolean DEFAULT_TESTWHILEIDLE = false;
     public static final boolean DEFAULT_TESTONBORROW = true;
@@ -51,6 +46,10 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
 
+    // user datasource.xml configure
+    private Map<String, DataSourceConfigure> userDataSourceConfigures = new ConcurrentHashMap<>();
+
+    // actual datasource configure
     private Map<String, DataSourceConfigure> dataSourceConfigures = new ConcurrentHashMap<>();
 
     // DataSourceConfigure change listener
@@ -74,8 +73,6 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
                 logger.info("datasource property will use file :" + url.getFile());
                 parse(url.openStream());
             }
-
-
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -88,6 +85,10 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         }
 
         return dataSourceConfigureParser;
+    }
+
+    public DataSourceConfigure getUserDataSourceConfigure(String name) {
+        return userDataSourceConfigures.get(name);
     }
 
     public DataSourceConfigure getDataSourceConfigure(String name) {
@@ -152,6 +153,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         List<Node> resourceList = getChildNodes(root, RESOURCE_NODE);
         for (Node resource : resourceList) {
             DataSourceConfigure dataSourceConfigure = parseResource(resource);
+            userDataSourceConfigures.put(dataSourceConfigure.getName(), dataSourceConfigure);
             dataSourceConfigures.put(dataSourceConfigure.getName(), dataSourceConfigure);
         }
     }

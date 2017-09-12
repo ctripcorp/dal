@@ -96,6 +96,7 @@ public class ConnectionStringParser {
             password = matcher.group(2);
         }
 
+        config.setName(name);
         config.setConnectionUrl(url);
         config.setUserName(userName);
         config.setPassword(password);

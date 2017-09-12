@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DataSourceConfigureProcessor implements DataSourceConfigureConstants {
     private static DataSourceConfigureProcessor instance = null;
@@ -26,12 +27,15 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
     private static final String PROD_SUFFIX = "_SH";
-    private Map<String, String> originalMap = null;
-    private DataSourceConfigure dataSourceConfigure = null;
-    private Map<String, DataSourceConfigure> dataSourceConfigureMap = null;
+    private AtomicReference<DataSourceConfigureWrapper> dataSourceConfigureWrapperReference = new AtomicReference<>();
     private static final String DAL_DATASOURCE = "DAL";
     private static final String DAL_GET_DATASOURCE = "DataSource::getRemoteDataSourceConfig";
     private static final String DAL_MERGE_DATASOURCE = "DataSource::mergeDataSourceConfig";
+
+    private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
+    private static final String DAL_NOTIFY_LISTENER = "DataSource::notifyListener";
+    private static final String DAL_NOTIFY_LISTENER_START = "DataSource.notifyListener.start";
+    private static final String DAL_NOTIFY_LISTENER_END = "DataSource.notifyListener.end";
 
     public synchronized static DataSourceConfigureProcessor getInstance() {
         if (instance == null) {
@@ -47,7 +51,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
             return;
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE);
         try {
-            MapConfig config = MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null);// Get config from QConfig
+            MapConfig config = getMapConfig();
             if (config != null) {
                 Map<String, String> map = config.asMap();
                 loadPoolSettings(map);
@@ -55,11 +59,17 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
                 config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
                     @Override
                     public void onLoad(Map<String, String> map) {
+                        Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
+                        t.addData(DAL_NOTIFY_LISTENER_START);
                         try {
-                            notifyListeners(map);
+                            notifyListeners();
+                            t.addData(DAL_NOTIFY_LISTENER_END);
+                            t.setStatus(Transaction.SUCCESS);
                         } catch (Throwable e) {
                             String msg = "DataSourceConfigurePoolSettings notifyListeners warn:" + e.getMessage();
                             LOGGER.warn(msg, e);
+                        } finally {
+                            t.complete();
                         }
                     }
                 });
@@ -75,25 +85,47 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         }
     }
 
-    private void loadPoolSettings(Map<String, String> map) {
-        originalMap = new HashMap<>(map);
+    private MapConfig getMapConfig() {
+        return MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
+    }
+
+    private synchronized void loadPoolSettings(Map<String, String> map) {
+        Map<String, String> originalMap = new HashMap<>(map);
         Map<String, String> datasource = new HashMap<>(); // app level
         Map<String, Map<String, String>> datasourceMap = new HashMap<>(); // datasource level
         processDataSourceConfigure(map, datasource, datasourceMap);
-        dataSourceConfigure = new DataSourceConfigure();
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         setDataSourceConfigure(dataSourceConfigure, datasource);// set app level map
-        dataSourceConfigureMap = new ConcurrentHashMap<>();
+        Map<String, DataSourceConfigure> dataSourceConfigureMap = new ConcurrentHashMap<>();
         setDataSourceConfigureMap(dataSourceConfigureMap, datasourceMap);// set datasource level map
+
+        DataSourceConfigureWrapper updated =
+                new DataSourceConfigureWrapper(originalMap, dataSourceConfigure, dataSourceConfigureMap);
+
+        dataSourceConfigureWrapperReference.set(updated);
 
         String log = "DataSource配置:" + mapToString(map);
         Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
         LOGGER.info(log);
     }
 
-    private void notifyListeners(Map<String, String> map) throws Exception {
-        if (map == null || map.size() == 0)
+    private void notifyListeners() throws Exception {
+        Map<String, DataSourceConfigureChangeListener> listeners =
+                DataSourceConfigureParser.getInstance().getChangeListeners();
+        if (listeners == null || listeners.isEmpty())
             return;
-        if (map.equals(originalMap)) // nothing changes
+
+        // retrieve datasource.properties
+        Map<String, String> map = null;
+        MapConfig config = getMapConfig();
+        if (config != null) {
+            map = new HashMap<>(config.asMap());
+        }
+
+        if (map == null || map.isEmpty())
+            return;
+        DataSourceConfigureWrapper reference = dataSourceConfigureWrapperReference.get();
+        if (map.equals(reference.getOriginalMap())) // nothing changes
             return;
 
         // reload pool settings
@@ -106,17 +138,25 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
 
         Map<String, DataSourceConfigure> newConfigures = new HashMap<>();
         for (Map.Entry<String, DataSourceConfigure> entry : configures.entrySet()) {
-            DataSourceConfigure configure = entry.getValue();
-            DataSourceConfigure newConfigure = getDataSourceConfigure(configure);
-            newConfigures.put(entry.getKey(), newConfigure);
+            String name = entry.getKey();
+            DataSourceConfigure c = entry.getValue();
+            DataSourceConfigure configure = cloneDataSourceConfigure(c);
+            DataSourceConfigure newConfigure = getDataSourceConfigure(null);
+            overrideDataSourceConfigure(configure, newConfigure);
+            DataSourceConfigure localConfigure =
+                    DataSourceConfigureParser.getInstance().getUserDataSourceConfigure(name);
+            if (localConfigure != null) {
+                overrideDataSourceConfigure(configure, localConfigure);
+            }
+
+            newConfigures.put(name, configure);
         }
 
-        Map<String, DataSourceConfigureChangeListener> listeners =
-                DataSourceConfigureParser.getInstance().getChangeListeners();
         for (Map.Entry<String, DataSourceConfigure> entry : newConfigures.entrySet()) {
             String name = entry.getKey();
             DataSourceConfigure newConfigure = entry.getValue();
-            DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+            DataSourceConfigure c = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+            DataSourceConfigure oldConfigure = cloneDataSourceConfigure(c);
             DataSourceConfigureParser.getInstance().addDataSourceConfigure(name, newConfigure);
             DataSourceConfigureChangeListener listener = listeners.get(name);
             if (listener == null)
@@ -129,14 +169,14 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
     }
 
     private void setDataSourceConfigure(DataSourceConfigure configure, Map<String, String> datasource) {
-        if (configure == null || datasource.size() == 0)
+        if (configure == null || datasource.isEmpty())
             return;
         configure.setMap(datasource);
     }
 
     private void setDataSourceConfigureMap(Map<String, DataSourceConfigure> configureMap,
             Map<String, Map<String, String>> datasourceMap) {
-        if (configureMap == null || datasourceMap.size() == 0)
+        if (configureMap == null || datasourceMap.isEmpty())
             return;
         for (Map.Entry<String, Map<String, String>> entry : datasourceMap.entrySet()) {
             DataSourceConfigure config = new DataSourceConfigure();
@@ -147,7 +187,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
 
     private void processDataSourceConfigure(Map<String, String> map, Map<String, String> datasource,
             Map<String, Map<String, String>> datasourceMap) {
-        if (map == null || map.size() == 0)
+        if (map == null || map.isEmpty())
             return;
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String[] array = entry.getKey().split(SEPARATOR);
@@ -164,43 +204,50 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
     }
 
     /*
-     * Input parameter 'DatabasePoolConfig config' currently indicates the datasource config which read from
-     * datasource.xml Override order: Config center global datasource <-- datasource.xml <-- Config center app
-     * datasource <-- Config center per datasource
+     * Input parameter 'DataSourceConfigure configure' currently indicates the datasource config which read from
+     * datasource.xml ***Override order: global datasource <-- app level setting <-- datasource level setting <--
+     * datasource.xml datasource
      */
     public DataSourceConfigure getDataSourceConfigure(DataSourceConfigure configure) {
         DataSourceConfigure c = cloneDataSourceConfigure(null);
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_MERGE_DATASOURCE);
 
         try {
+            DataSourceConfigureWrapper reference = dataSourceConfigureWrapperReference.get();
+
             // override app-level config from QConfig
+            DataSourceConfigure dataSourceConfigure = reference.getDataSourceConfigure();
             if (dataSourceConfigure != null) {
                 overrideDataSourceConfigure(c, dataSourceConfigure);
                 String log = "App 覆盖结果:" + mapToString(c.getMap());
                 LOGGER.info(log);
             }
             // override datasource-level config from QConfig
-            String name = configure.getName();
-            if (name != null && dataSourceConfigureMap != null) {
-                DataSourceConfigure sourceConfigure = dataSourceConfigureMap.get(name);
-                if (sourceConfigure != null) {
-                    overrideDataSourceConfigure(c, sourceConfigure);
-                    String log = name + " 覆盖结果:" + mapToString(c.getMap());
-                    LOGGER.info(log);
-                } else {
-                    String possibleName = name.endsWith(PROD_SUFFIX)
-                            ? name.substring(0, name.length() - PROD_SUFFIX.length()) : name + PROD_SUFFIX;
-                    DataSourceConfigure sc = dataSourceConfigureMap.get(possibleName);
-                    if (sc != null) {
-                        overrideDataSourceConfigure(c, sc);
-                        String log = possibleName + " 覆盖结果:" + mapToString(c.getMap());
+            Map<String, DataSourceConfigure> dataSourceConfigureMap = reference.getDataSourceConfigureMap();
+            if (configure != null && dataSourceConfigureMap != null) {
+                String name = configure.getName();
+                if (name != null) {
+                    DataSourceConfigure sourceConfigure = dataSourceConfigureMap.get(name);
+                    if (sourceConfigure != null) {
+                        overrideDataSourceConfigure(c, sourceConfigure);
+                        String log = name + " 覆盖结果:" + mapToString(c.getMap());
                         LOGGER.info(log);
+                    } else {
+                        String possibleName = name.endsWith(PROD_SUFFIX)
+                                ? name.substring(0, name.length() - PROD_SUFFIX.length()) : name + PROD_SUFFIX;
+                        DataSourceConfigure sc = dataSourceConfigureMap.get(possibleName);
+                        if (sc != null) {
+                            overrideDataSourceConfigure(c, sc);
+                            String log = possibleName + " 覆盖结果:" + mapToString(c.getMap());
+                            LOGGER.info(log);
+                        }
                     }
                 }
             }
             // override config from datasource.xml,connection settings
             if (configure != null) {
                 overrideDataSourceConfigure(c, configure);
+                c.setVersion(configure.getVersion());
                 String log = "datasource.xml 覆盖结果:" + mapToString(c.getMap());
                 LOGGER.info(log);
             }

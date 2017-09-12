@@ -19,7 +19,6 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,17 +65,21 @@ public class TitanProvider implements DataSourceConfigureProvider {
     public static final String SUB_ENV = "subEnvironment";
     public static final String DB_NAME = "DBKeyName";
 
+    // private static final String
+    private static final String TITAN_APP_ID = "123456"; // 100010061
+
     private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
     private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
+    private static final String DAL_NOTIFY_LISTENER = "DataSource::notifyListener";
+    private static final String DAL_NOTIFY_LISTENER_START = "DataSource.notifyListener.start";
+    private static final String DAL_NOTIFY_LISTENER_END = "DataSource.notifyListener.end";
+
     private static final String DAL_REFRESH_DATASOURCE = "DataSource::refreshDataSourceConfig";
     private static final String DATASOURCE_OLD_CONNECTIONURL = "DataSource::oldConnectionUrl";
     private static final String DATASOURCE_NEW_CONNECTIONURL = "DataSource::newConnectionUrl";
-
-    // private static final String
-    private static final String TITAN_APP_ID = "100010061";
 
     private static Map<String, TypedConfig<String>> configMap = new ConcurrentHashMap<>();
 
@@ -249,7 +252,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     }
 
     private void refreshTypedConfigMap(Set<String> dbNames) {
-        if (dbNames == null || dbNames.size() == 0)
+        if (dbNames == null || dbNames.isEmpty())
             return;
         for (String name : dbNames) {
             try {
@@ -273,7 +276,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings(Set<String> dbNames)
             throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
-        if (dbNames == null || dbNames.size() == 0) {
+        if (dbNames == null || dbNames.isEmpty()) {
             return configures;
         }
 
@@ -286,37 +289,61 @@ public class TitanProvider implements DataSourceConfigureProvider {
             TypedConfig<String> config = configMap.get(name);
             if (config != null) {
                 String connectionString = config.current();
-                DataSourceConfigure configure = null;
+                DataSourceConfigure connectionSetting = null;
+                DataSourceConfigure configure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
                 try {
-                    configure = parser.parse(name, connectionString);
+                    connectionSetting = parser.parse(name, connectionString);
+                    mergeConnectionSettings(configure, connectionSetting);
                 } catch (Throwable e) {
                     throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
                 }
-                configures.put(name, configure);
+                configures.put(name, connectionSetting);
             }
         }
 
         return configures;
     }
 
+    private void mergeConnectionSettings(DataSourceConfigure configure, DataSourceConfigure connectionSettings) {
+        if (configure == null)
+            return;
+
+        Map<String, String> connectionSettingsMap = connectionSettings.getMap();
+        Map<String, String> map = configure.getMap();
+        if (connectionSettingsMap == null || map == null)
+            return;
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            connectionSettingsMap.put(entry.getKey(), entry.getValue());
+        }
+    }
+
     private void addListeners(Set<String> dbNames) {
-        if (dbNames == null || dbNames.size() == 0)
+        if (dbNames == null || dbNames.isEmpty())
             return;
         for (final String name : dbNames) {
             TypedConfig<String> config = configMap.get(name);
             if (config == null)
                 continue;
+
             config.addListener(new Configuration.ConfigListener<String>() {
                 @Override
                 public void onLoad(String connectionString) {
+                    Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
+                    transaction.addData(DAL_NOTIFY_LISTENER_START);
                     Set<String> names = new HashSet<>();
                     names.add(name);
                     try {
                         notifyListeners(names);
+                        transaction.addData(DAL_NOTIFY_LISTENER_END);
+                        transaction.setStatus(Transaction.SUCCESS);
                     } catch (Throwable e) {
                         DalConfigException exception = new DalConfigException(e);
+                        transaction.setStatus(exception);
                         Cat.logError(exception);
                         logger.error(String.format("DalConfigException:%s", e.getMessage()), exception);
+                    } finally {
+                        transaction.complete();
                     }
                 }
             });
@@ -339,12 +366,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
     }
 
     private void notifyListeners(Set<String> dbNames) throws Exception {
-        if (dbNames == null || dbNames.size() == 0)
+        if (dbNames == null || dbNames.isEmpty())
             return;
 
         Map<String, DataSourceConfigureChangeListener> listeners =
                 DataSourceConfigureParser.getInstance().getChangeListeners();
-        if (listeners == null || listeners.size() == 0)
+        if (listeners == null || listeners.isEmpty())
             return;
 
         // refresh TypedConfig
@@ -445,31 +472,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         info("removeAbandonedTimeout: " + properties.getProperty(DataSourceConfigureConstants.REMOVEABANDONEDTIMEOUT));
 
         info("connectionProperties: " + properties.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
-    }
-
-    private String decrypt(String dataSource) {
-        if (dataSource == null || dataSource.length() == 0) {
-            return "";
-        }
-        byte[] sources = Base64.decodeBase64(dataSource);
-        int dataLen = sources.length;
-        int keyLen = (int) sources[0];
-        int len = dataLen - keyLen - 1;
-        byte[] datas = new byte[len];
-        int offset = dataLen - 1;
-        int i = 0;
-        int j = 0;
-        byte t;
-        for (int o = 0; o < len; o++) {
-            i = (i + 1) % keyLen;
-            j = (j + sources[offset - i]) % keyLen;
-            t = sources[offset - i];
-            sources[offset - i] = sources[offset - j];
-            sources[offset - j] = t;
-            datas[o] =
-                    (byte) (sources[o + 1] ^ sources[offset - ((sources[offset - i] + sources[offset - j]) % keyLen)]);
-        }
-        return new String(datas);
     }
 
     private void info(String msg) {

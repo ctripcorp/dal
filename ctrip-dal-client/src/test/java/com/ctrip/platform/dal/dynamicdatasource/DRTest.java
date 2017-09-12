@@ -49,31 +49,34 @@ public class DRTest {
 
     @Test
     public void testDynamicDatasource() throws Exception {
-        int i = 0;
-        // long startTime=System.currentTimeMillis();
-        while (1 == 1) {
-            try {
-                log.info(String.format("Test %d started", i));
-                log.info(String.format("current database is: %s ", dao.selectDatabase(null)));
-                // log.info("clear data ",dao.test_def_update(new DalHints()));
-                // DRTestPojo daoPojo = new DRTestPojo();
-                // daoPojo.setName(dao.selectHostname(null));
-                // log.info("insert data ",dao.insert(null, daoPojo));
-                // log.info("query data "+dao.queryByPk(1, null).getName());
-                // log.info(String.format("Test %d passed",i));
-                Thread.sleep(3 * 1000);
-            } catch (Exception e) {
-                log.error(String.format("Test %d failed", i), e);
-            }
-            i++;
-            // Thread.sleep(1000);
-            // long endTime=System.currentTimeMillis();
-            // long costTime=endTime-startTime;
-            // System.out.println(String.format("costTime: %d",costTime));
-            // if(costTime>=25000&&costTime<30000){
-            // System.out.println("25s...waiting for validation...");
-            // Thread.sleep(5000);}
-        }
+        dao.selectDatabase(null);
+        new DynamicDataSourcePoolSettingsTest().testDynamicDataSourcePoolSettings();
+
+        // int i = 0;
+        // // long startTime=System.currentTimeMillis();
+        // while (1 == 1) {
+        // try {
+        // log.info(String.format("Test %d started", i));
+        // log.info(String.format("current database is: %s ", dao.selectDatabase(null)));
+        // // log.info("clear data ",dao.test_def_update(new DalHints()));
+        // // DRTestPojo daoPojo = new DRTestPojo();
+        // // daoPojo.setName(dao.selectHostname(null));
+        // // log.info("insert data ",dao.insert(null, daoPojo));
+        // // log.info("query data "+dao.queryByPk(1, null).getName());
+        // // log.info(String.format("Test %d passed",i));
+        // Thread.sleep(3 * 1000);
+        // } catch (Exception e) {
+        // log.error(String.format("Test %d failed", i), e);
+        // }
+        // i++;
+        // // Thread.sleep(1000);
+        // // long endTime=System.currentTimeMillis();
+        // // long costTime=endTime-startTime;
+        // // System.out.println(String.format("costTime: %d",costTime));
+        // // if(costTime>=25000&&costTime<30000){
+        // // System.out.println("25s...waiting for validation...");
+        // // Thread.sleep(5000);}
+        // }
 
     }
 

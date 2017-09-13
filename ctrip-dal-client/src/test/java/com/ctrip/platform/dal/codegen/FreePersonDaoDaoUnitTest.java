@@ -27,30 +27,55 @@ import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 **/
 public class FreePersonDaoDaoUnitTest {
 
-	private static final String DATA_BASE = "MySqlSimpleShard";
+	private static final String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
 	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
+    private final static String TABLE_NAME = "person";
 
 	private static DalTableDao<Person> pdao;
 	private static FreePersonDaoDao dao = null;
 	private static DalClient client = null;
+	private final static int mod = 2;
 	
+    //Drop the the table
+    private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME;
+    
+    //Create the the table
+    // Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
+    private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"("
+            + "PeopleID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+            + "CityID int,"
+            + "ProvinceID int,"
+            + "CountryID int,"
+            + "Name VARCHAR(64) not null, "
+            + "DataChange_LastTime timestamp default CURRENT_TIMESTAMP)";
+    
+    private static DalClient clientMySql;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		/**
-		* Initialize DalClientFactory.
-		* The Dal.config can be specified from class-path or local file path.
-		* One of follow three need to be enabled.
-		**/
-		//DalClientFactory.initPrivateFactory(); //Load from class-path connections.properties
-		DalClientFactory.initClientFactory(); // load from class-path Dal.config
-		//DalClientFactory.initClientFactory("E:/DalMult.config"); // load from the specified Dal.config file path
-		
-		client = DalClientFactory.getClient(DATA_BASE);
-		dao = new FreePersonDaoDao();
-		DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, "MySqlSimpleShard", "PERSON");
-		pdao = new DalTableDao<>(parser);
-	}
-	
+        DalClientFactory.initClientFactory();
+        clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+        DalHints hints = new DalHints();
+        String[] sqls = null;
+        for(int i = 0; i < mod; i++) {
+            sqls = new String[] { DROP_TABLE_SQL_MYSQL_TPL, CREATE_TABLE_SQL_MYSQL_TPL};
+            clientMySql.batchUpdate(sqls, hints.inShard(i));
+        }
+
+        client = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+        dao = new FreePersonDaoDao();
+        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, "MySqlSimpleShard", "PERSON");
+        pdao = new DalTableDao<>(parser);
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        DalHints hints = new DalHints();
+        String[] sqls = null;
+        for(int i = 0; i < mod; i++) {
+            sqls = new String[] { DROP_TABLE_SQL_MYSQL_TPL};
+            clientMySql.batchUpdate(sqls, hints.inShard(i));
+        }
+    }
 	
 	@Before
 	public void setUp() throws Exception {
@@ -84,12 +109,6 @@ public class FreePersonDaoDaoUnitTest {
 			pdao.delete(new DalHints().inShard(i), pdao.query("1=1", new StatementParameters(), new DalHints().inShard(i)));
 		}
 	} 
-	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		
-	}
-	
 	
 	@Test
 	public void testupdate() throws Exception {

@@ -19,6 +19,7 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
+import com.ctrip.platform.dal.dao.StatementParameters;
 
 /**
  * JUnit test of PersonDao class.
@@ -26,27 +27,62 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 **/
 public class PersonDaoUnitTest {
 
-	private static final String DATA_BASE = "MySqlSimpleShard";
-	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
+	private static final String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
 
 	private static PersonDao dao = null;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		/**
-		* Initialize DalClientFactory.
-		* The Dal.config can be specified from class-path or local file path.
-		* One of follow three need to be enabled.
-		**/
-//		DalClientFactory.initClientFactory(); // load from class-path Dal.config
-//		DalClientFactory.warmUpConnections();
-		dao = new PersonDao();
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		
-	}
+    private final static String TABLE_NAME = "person";
+    private final static int mod = 2;
+    private final static int tableMod = 4;
+    
+    //Drop the the table
+    private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
+    
+    //Create the the table
+    // Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
+    private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
+            + "PeopleID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+            + "CityID int,"
+            + "ProvinceID int,"
+            + "CountryID int,"
+            + "Name VARCHAR(64) not null, "
+            + "DataChange_LastTime timestamp default CURRENT_TIMESTAMP)";
+    
+    private static DalClient clientMySql;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        DalClientFactory.initClientFactory();
+        clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+        DalHints hints = new DalHints();
+        String[] sqls = null;
+        // For SQL server
+        hints = new DalHints();
+        for(int i = 0; i < mod; i++) {
+            for(int j = 0; j < tableMod; j++) {
+                sqls = new String[] { 
+                        String.format(DROP_TABLE_SQL_MYSQL_TPL, j), 
+                        String.format(CREATE_TABLE_SQL_MYSQL_TPL, j)};
+                clientMySql.batchUpdate(sqls, hints.inShard(i));
+            }
+        }
+        dao = new PersonDao();
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        DalHints hints = new DalHints();
+        String[] sqls = null;
+        //For Sql Server
+        hints = new DalHints();
+        for(int i = 0; i < mod; i++) {
+            sqls = new String[tableMod];
+            for(int j = 0; j < tableMod; j++) {
+                sqls[j] = String.format(DROP_TABLE_SQL_MYSQL_TPL, j);
+            }
+            clientMySql.batchUpdate(sqls, hints.inShard(i));
+        }
+    }	
 	
 	@Before
 	public void setUp() throws Exception {

@@ -101,7 +101,7 @@ public class DalCatLoggerTest {
 		for( int i = 0; i < SAMPLE; i++) {
 			CtripLogEntry entry = new CtripLogEntry();
 			DalCatLogger.start(entry);
-			DalCatLogger.catTransactionSuccess(entry);
+			DalCatLogger.catTransactionSuccess(entry, 10);
 		}
 		TimeUnit.SECONDS.sleep(10);
 	}

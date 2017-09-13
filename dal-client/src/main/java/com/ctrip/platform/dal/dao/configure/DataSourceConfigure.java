@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 public class DataSourceConfigure implements DataSourceConfigureConstants {
     private String name;
@@ -130,6 +132,22 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
     public String toConnectionUrl() {
         return String.format("{ConnectionUrl:%s,Version:%s,CRC:%s}", getConnectionUrl(),
                 (version == null ? "" : version), "");
+    }
+
+    public Map<String, String> toMap() {
+        Map<String, String> m = new HashMap<>();
+        Set<String> set = new HashSet<>();
+        set.add(USER_NAME);
+        set.add(PASSWORD);
+        set.add(CONNECTION_URL);
+        set.add(DRIVER_CLASS_NAME);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (!set.contains(entry.getKey())) {
+                m.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return m;
     }
 
 }

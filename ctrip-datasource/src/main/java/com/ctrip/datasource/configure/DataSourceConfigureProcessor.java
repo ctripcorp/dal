@@ -37,6 +37,10 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
     private static final String DAL_NOTIFY_LISTENER_START = "DataSource.notifyListener.start";
     private static final String DAL_NOTIFY_LISTENER_END = "DataSource.notifyListener.end";
 
+    private static final String DAL_REFRESH_DATASOURCE = "DataSource::refreshDataSourceConfig";
+    private static final String DATASOURCE_OLD_CONFIGURE = "DataSource::oldConfigure";
+    private static final String DATASOURCE_NEW_CONFIGURE = "DataSource::newConfigure";
+
     public synchronized static DataSourceConfigureProcessor getInstance() {
         if (instance == null) {
             instance = new DataSourceConfigureProcessor();
@@ -154,17 +158,39 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
 
         for (Map.Entry<String, DataSourceConfigure> entry : newConfigures.entrySet()) {
             String name = entry.getKey();
-            DataSourceConfigure newConfigure = entry.getValue();
-            DataSourceConfigure c = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
-            DataSourceConfigure oldConfigure = cloneDataSourceConfigure(c);
-            DataSourceConfigureParser.getInstance().addDataSourceConfigure(name, newConfigure);
             DataSourceConfigureChangeListener listener = listeners.get(name);
             if (listener == null)
                 continue;
 
-            // notify listener to recreate datasource,destroy old datasource,etc
-            DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
-            listener.configChanged(event);
+            Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE);
+            try {
+                DataSourceConfigure c = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
+                DataSourceConfigure oldConfigure = cloneDataSourceConfigure(c);
+                transaction.addData(DATASOURCE_OLD_CONFIGURE,
+                        String.format("%s:%s", name, mapToString(oldConfigure.toMap())));
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                        String.format("%s:%s:%s", DATASOURCE_OLD_CONFIGURE, name, mapToString(oldConfigure.toMap())));
+
+                DataSourceConfigure newConfigure = entry.getValue();
+                transaction.addData(DATASOURCE_NEW_CONFIGURE,
+                        String.format("%s:%s", name, mapToString(newConfigure.toMap())));
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                        String.format("%s:%s:%s", DATASOURCE_NEW_CONFIGURE, name, mapToString(newConfigure.toMap())));
+
+                DataSourceConfigureParser.getInstance().addDataSourceConfigure(name, newConfigure);
+
+                // notify listener to recreate datasource,destroy old datasource,etc
+                DataSourceConfigureChangeEvent event =
+                        new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
+                listener.configChanged(event);
+                transaction.setStatus(Transaction.SUCCESS);
+            } catch (Throwable e) {
+                transaction.setStatus(e);
+                Cat.logError(e);
+                throw e;
+            } finally {
+                transaction.complete();
+            }
         }
     }
 
@@ -219,7 +245,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
             DataSourceConfigure dataSourceConfigure = reference.getDataSourceConfigure();
             if (dataSourceConfigure != null) {
                 overrideDataSourceConfigure(c, dataSourceConfigure);
-                String log = "App 覆盖结果:" + mapToString(c.getMap());
+                String log = "App 覆盖结果:" + mapToString(c.toMap());
                 LOGGER.info(log);
             }
             // override datasource-level config from QConfig
@@ -230,7 +256,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
                     DataSourceConfigure sourceConfigure = dataSourceConfigureMap.get(name);
                     if (sourceConfigure != null) {
                         overrideDataSourceConfigure(c, sourceConfigure);
-                        String log = name + " 覆盖结果:" + mapToString(c.getMap());
+                        String log = name + " 覆盖结果:" + mapToString(c.toMap());
                         LOGGER.info(log);
                     } else {
                         String possibleName = name.endsWith(PROD_SUFFIX)
@@ -238,7 +264,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
                         DataSourceConfigure sc = dataSourceConfigureMap.get(possibleName);
                         if (sc != null) {
                             overrideDataSourceConfigure(c, sc);
-                            String log = possibleName + " 覆盖结果:" + mapToString(c.getMap());
+                            String log = possibleName + " 覆盖结果:" + mapToString(c.toMap());
                             LOGGER.info(log);
                         }
                     }
@@ -248,10 +274,10 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
             if (configure != null) {
                 overrideDataSourceConfigure(c, configure);
                 c.setVersion(configure.getVersion());
-                String log = "datasource.xml 覆盖结果:" + mapToString(c.getMap());
+                String log = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
                 LOGGER.info(log);
             }
-            Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS, mapToString(c.getMap()));
+            Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS, mapToString(c.toMap()));
             Map<String, String> datasource = c.getMap();
             Properties prop = c.getProperties();
             setProperties(datasource, prop); // set properties from map
@@ -298,11 +324,24 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         if (configure == null)
             return dataSourceConfigure;
+
         dataSourceConfigure.setName(configure.getName());
-        dataSourceConfigure.setProperties(configure.getProperties());
         dataSourceConfigure.setMap(new HashMap<>(configure.getMap()));
+        dataSourceConfigure.setProperties(deepCopyProperties(configure.getProperties()));
         dataSourceConfigure.setVersion(configure.getVersion());
         return dataSourceConfigure;
+    }
+
+    private Properties deepCopyProperties(Properties properties) {
+        if (properties == null)
+            return null;
+
+        Properties p = new Properties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            p.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        }
+
+        return p;
     }
 
     private void overrideDataSourceConfigure(DataSourceConfigure lowlevel, DataSourceConfigure highlevel) {
@@ -315,6 +354,9 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         for (Map.Entry<String, String> entry : highlevelMap.entrySet()) {
             lowlevelMap.put(entry.getKey(), entry.getValue()); // override entry of map
         }
+
+        Properties prop = lowlevel.getProperties();
+        setProperties(lowlevelMap, prop); // set properties from map
     }
 
     private void setProperties(Map<String, String> datasource, Properties prop) {

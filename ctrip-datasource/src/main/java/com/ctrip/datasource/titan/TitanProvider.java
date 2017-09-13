@@ -395,17 +395,17 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 DataSourceConfigure oldConfigure = DataSourceConfigureParser.getInstance().getDataSourceConfigure(name);
                 String oldVersion = oldConfigure.getVersion();
                 String oldConnectionUrl = oldConfigure.toConnectionUrl();
-                transaction.addData(DATASOURCE_OLD_CONNECTIONURL, oldConnectionUrl);
+                transaction.addData(DATASOURCE_OLD_CONNECTIONURL, String.format("%s:%s", name, oldConnectionUrl));
                 Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
-                        String.format("%s:%s", DATASOURCE_OLD_CONNECTIONURL, oldConnectionUrl));
+                        String.format("%s:%s:%s", DATASOURCE_OLD_CONNECTIONURL, name, oldConnectionUrl));
 
                 // refresh DataSourceConfigure connection settings
                 DataSourceConfigure newConfigure = refreshConnectionSettings(name, connectionSettingsConfigure);
                 String newVersion = newConfigure.getVersion();
                 String newConnectionUrl = newConfigure.toConnectionUrl();
-                transaction.addData(DATASOURCE_NEW_CONNECTIONURL, newConnectionUrl);
+                transaction.addData(DATASOURCE_NEW_CONNECTIONURL, String.format("%s:%s", name, newConnectionUrl));
                 Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
-                        String.format("%s:%s", DATASOURCE_NEW_CONNECTIONURL, newConnectionUrl));
+                        String.format("%s:%s:%s", DATASOURCE_NEW_CONNECTIONURL, name, newConnectionUrl));
 
                 // compare version
                 if (oldVersion != null && newVersion != null) {

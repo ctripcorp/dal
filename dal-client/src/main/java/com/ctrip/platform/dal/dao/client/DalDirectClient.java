@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +55,16 @@ public class DalDirectClient implements DalClient {
 				rs = preparedStatement.executeQuery();
 				DalWatcher.endExectue();
 				
+				T result;
+				
 				if(extractor instanceof HintsAwareExtractor)
-				    return ((DalResultSetExtractor<T>)((HintsAwareExtractor)extractor).extractWith(hints)).extract(rs);
+				    result = ((DalResultSetExtractor<T>)((HintsAwareExtractor)extractor).extractWith(hints)).extract(rs);
 				else
-				    return extractor.extract(rs);
+				    result = extractor.extract(rs);
+				
+				entry.setResultCount(fetchSize(rs, result));
+				
+				return result;
 			}
 		};
 		action.populate(DalEventEnum.QUERY, sql, parameters);
@@ -77,6 +84,8 @@ public class DalDirectClient implements DalClient {
 				DalWatcher.beginExecute();
 
 				preparedStatement.execute();
+				
+				int count = 0;
 				for(DalResultSetExtractor<?> extractor: extractors) {
 		            ResultSet resultSet = preparedStatement.getResultSet();
 		            Object partResult;
@@ -85,10 +94,15 @@ public class DalDirectClient implements DalClient {
 	                else
 	                    partResult = extractor.extract(resultSet);
 	            	result.add(partResult);
-	                preparedStatement.getMoreResults();
+	            	
+	            	count += fetchSize(resultSet, partResult);
+	                
+	            	preparedStatement.getMoreResults();
 				}
 
 				DalWatcher.endExectue();
+
+				entry.setResultCount(count);
 				
 				return result;
 			}
@@ -282,6 +296,37 @@ public class DalDirectClient implements DalClient {
 		return executeBatch(action, hints);
 	}
 	
+    /**
+     * First try getRow(), then try parse result
+     * @param rs
+     * @param result
+     * @return
+     * @throws SQLException
+     */
+	private int fetchSize(ResultSet rs, Object result) throws SQLException {
+        int rowCount = 0;
+        try {
+            rowCount = rs.getRow();
+            if(rowCount == 0 && rs.isAfterLast()) {
+                rs.last();
+                rowCount = rs.getRow();
+            }
+        } catch (Throwable e) {
+            // In case not support this feature
+        }
+        
+        if(rowCount > 0)
+            return rowCount;
+        
+        if(result == null)
+            return 0;
+        
+        if(result instanceof Collection<?>)
+            return ((Collection<?>)result).size();
+        
+        return 1;
+    }
+
 	private Map<String, Object> extractReturnedResults(CallableStatement statement, List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
 		Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 		if(hints.is(DalHintEnum.skipResultsProcessing))

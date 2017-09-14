@@ -154,17 +154,13 @@ public abstract class ConnectionAction<T> {
 		try {
 			entry.setDuration(System.currentTimeMillis() - start);
 			if(e == null) {
-				logger.success(entry, fetchQueryRows(result));
+				logger.success(entry, entry.getResultCount());
 			}else{
 				logger.fail(entry, e);
 			}
 		} catch (Throwable e1) {
 			logger.error("Can not log", e1);
 		}
-	}
-
-	private int fetchQueryRows(Object result) {
-		return null != result && result instanceof Collection<?> ? ((Collection<?>)result).size() : 0;
 	}
 	
 	public void cleanup() {

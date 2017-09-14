@@ -304,20 +304,20 @@ public class DalDirectClient implements DalClient {
      * @throws SQLException
      */
 	private int fetchSize(ResultSet rs, Object result) throws SQLException {
-        int rowCount = 0;
-        try {
-            rowCount = rs.getRow();
-            if(rowCount == 0 && rs.isAfterLast()) {
-                rs.last();
-                rowCount = rs.getRow();
-            }
-        } catch (Throwable e) {
-            // In case not support this feature
-        }
-        
-        if(rowCount > 0)
-            return rowCount;
-        
+//        int rowCount = 0;
+//        try {
+//            rowCount = rs.getRow();
+//            if(rowCount == 0 && rs.isAfterLast()) {
+//                rs.last();
+//                rowCount = rs.getRow();
+//            }
+//        } catch (Throwable e) {
+//            // In case not support this feature
+//        }
+//        
+//        if(rowCount > 0)
+//            return rowCount;
+//        
         if(result == null)
             return 0;
         

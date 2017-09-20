@@ -11,6 +11,7 @@ import java.sql.Types;
 @Entity
 @Database(name = "noShardTestOnMysql")
 @Table(name = "testTable")
+
 public class DRTestPojo extends UpdatableEntity {
 
     @Id

@@ -35,7 +35,6 @@ public class AllInOneConfigureReader {
     private static String DEV_FLAG = "dev";
 
     private static final String CLASSPATH_LOCATION = "$classpath";
-    private ConnectionStringParser parser = new ConnectionStringParser();
 
     public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal,
             String databaseConfigLocation) {
@@ -135,7 +134,7 @@ public class AllInOneConfigureReader {
                 String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
 
                 logger.info("Try to read config for " + name);
-                DataSourceConfigure config = parser.parse(name, connectionString);
+                DataSourceConfigure config = ConnectionStringParser.getInstance().parse(name, connectionString);
                 dataSourceConfigures.put(name, config);
             }
             in.close();

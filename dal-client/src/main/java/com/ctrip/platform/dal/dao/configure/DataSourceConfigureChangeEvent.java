@@ -5,7 +5,6 @@ public class DataSourceConfigureChangeEvent {
     private DataSourceConfigure newDataSourceConfigure;
     private DataSourceConfigure oldDataSourceConfigure;
 
-
     public DataSourceConfigureChangeEvent(String name, DataSourceConfigure newDataSourceConfigure,
             DataSourceConfigure oldDataSourceConfigure) {
         this.name = name;

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.slf4j.Logger;
@@ -17,48 +16,26 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class DataSourceConfigureParser implements DataSourceConfigureConstants {
+    public synchronized static DataSourceConfigureParser getInstance() {
+        if (dataSourceConfigureParser == null) {
+            dataSourceConfigureParser = new DataSourceConfigureParser();
+        }
+        return dataSourceConfigureParser;
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(DataSourceConfigureParser.class);
     private static DataSourceConfigureParser dataSourceConfigureParser = null;
     private static final String DBPOOL_CONFIG = "datasource.xml";
     private static final String LOCATION = "location";
     private static final String RESOURCE_NODE = "Datasource";
     private static final String NAME = "name";
-
-    public static final boolean DEFAULT_TESTWHILEIDLE = false;
-    public static final boolean DEFAULT_TESTONBORROW = true;
-    public static final boolean DEFAULT_TESTONRETURN = false;
-    public static final String DEFAULT_VALIDATIONQUERY = "SELECT 1";
-    public static final int DEFAULT_VALIDATIONQUERYTIMEOUT = 5;
-    public static final long DEFAULT_VALIDATIONINTERVAL = 30000L;
-    public static final String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
-    public static final int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 5000;
-    public static final int DEFAULT_MAXAGE = 0;
-    public static final int DEFAULT_MAXACTIVE = 100;
-    public static final int DEFAULT_MINIDLE = 0;
-    public static final int DEFAULT_MAXWAIT = 10000;
-    public static final int DEFAULT_INITIALSIZE = 1;
-    public static final int DEFAULT_REMOVEABANDONEDTIMEOUT = 60;
-    public static final boolean DEFAULT_REMOVEABANDONED = true;
-    public static final boolean DEFAULT_LOGABANDONED = false;
-    public static final int DEFAULT_MINEVICTABLEIDLETIMEMILLIS = 30000;
-    public static final String DEFAULT_CONNECTIONPROPERTIES = null;
-    public static final boolean DEFAULT_JMXENABLED = true;
-    public static final String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-            + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
-
-    // user datasource.xml configure
-    private Map<String, DataSourceConfigure> userDataSourceConfigures = new ConcurrentHashMap<>();
-
-    // actual datasource configure
-    private Map<String, DataSourceConfigure> dataSourceConfigures = new ConcurrentHashMap<>();
-
-    // DataSourceConfigure change listener
-    private Map<String, DataSourceConfigureChangeListener> listeners = new ConcurrentHashMap<>();
+    private static final String PROD_SUFFIX = "_SH";
 
     private String databaseConfigLocation = null;
-
     private String dataSourceXmlLocation = null;
     private boolean dataSourceXmlExist = false;
+
+    private DataSourceConfigureHolder dataSourceConfigureHolder = DataSourceConfigureHolder.getInstance();
 
     private DataSourceConfigureParser() {
         try {
@@ -79,50 +56,12 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         }
     }
 
-    public synchronized static DataSourceConfigureParser getInstance() {
-        if (dataSourceConfigureParser == null) {
-            dataSourceConfigureParser = new DataSourceConfigureParser();
-        }
-
-        return dataSourceConfigureParser;
+    public boolean isDataSourceXmlExist() {
+        return dataSourceXmlExist;
     }
 
-    public DataSourceConfigure getUserDataSourceConfigure(String name) {
-        return userDataSourceConfigures.get(name);
-    }
-
-    public DataSourceConfigure getDataSourceConfigure(String name) {
-        return dataSourceConfigures.get(name);
-    }
-
-    public Map<String, DataSourceConfigure> getDataSourceConfigures() {
-        return dataSourceConfigures;
-    }
-
-    public boolean contains(String name) {
-        return dataSourceConfigures.containsKey(name);
-    }
-
-    public void addDataSourceConfigure(String name, DataSourceConfigure configure) {
-        dataSourceConfigures.put(name, configure);
-    }
-
-    public void copyDataSourceConfigure(String sampleName, String newName) {
-        DataSourceConfigure oldConfig = dataSourceConfigures.get(sampleName);
-
-        DataSourceConfigure newConfig = new DataSourceConfigure();
-        newConfig.setName(newName);
-        newConfig.setProperties(oldConfig.getProperties());
-        newConfig.setMap(new HashMap<>(oldConfig.getMap()));
-        dataSourceConfigures.put(newName, newConfig);
-    }
-
-    public void addChangeListener(String dbName, DataSourceConfigureChangeListener listener) {
-        listeners.put(dbName, listener);
-    }
-
-    public Map<String, DataSourceConfigureChangeListener> getChangeListeners() {
-        return listeners;
+    public String getDataSourceXmlLocation() {
+        return dataSourceXmlLocation;
     }
 
     public String getDatabaseConfigLocation() {
@@ -138,8 +77,8 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
             if (in != null) {
                 try {
                     in.close();
-                } catch (Throwable e1) {
-                    logger.warn(e1.getMessage(), e1);
+                } catch (Throwable e) {
+                    logger.warn(e.getMessage(), e);
                 }
             }
         }
@@ -151,11 +90,34 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
             databaseConfigLocation = getAttribute(root, LOCATION);
         }
         List<Node> resourceList = getChildNodes(root, RESOURCE_NODE);
+        Map<String, DataSourceConfigure> map = new HashMap<>();
         for (Node resource : resourceList) {
             DataSourceConfigure dataSourceConfigure = parseResource(resource);
-            userDataSourceConfigures.put(dataSourceConfigure.getName(), dataSourceConfigure);
-            dataSourceConfigures.put(dataSourceConfigure.getName(), dataSourceConfigure);
+            map.put(dataSourceConfigure.getName(), dataSourceConfigure);
         }
+
+        map = getDuplicatedMap(map);
+        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
+            dataSourceConfigureHolder.addUserDataSourceConfigure(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public Map<String, DataSourceConfigure> getDuplicatedMap(Map<String, DataSourceConfigure> map) {
+        Map<String, DataSourceConfigure> result = new HashMap<>();
+        if (map == null || map.isEmpty())
+            return result;
+
+        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
+            String name = entry.getKey();
+            result.put(name, entry.getValue());
+
+            String possibleName = getPossibleName(name);
+            if (!map.containsKey(possibleName)) {
+                result.put(possibleName.toUpperCase(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     private DataSourceConfigure parseResource(Node resource) {
@@ -256,12 +218,9 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         return node.getAttributes().getNamedItem(attributeName).getNodeValue();
     }
 
-    public boolean isDataSourceXmlExist() {
-        return dataSourceXmlExist;
-    }
-
-    public String getDataSourceXmlLocation() {
-        return dataSourceXmlLocation;
+    public String getPossibleName(String name) {
+        return name.endsWith(PROD_SUFFIX) ? name.substring(0, name.length() - PROD_SUFFIX.length())
+                : name + PROD_SUFFIX;
     }
 
 }

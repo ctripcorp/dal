@@ -71,7 +71,7 @@ public class DataSourceValidator implements Validator {
             return null;
         }
 
-        return DataSourceLocator.getPoolProperties(url, userName);
+        return PoolPropertiesHolder.getInstance().getPoolProperties(url, userName);
     }
 
 }

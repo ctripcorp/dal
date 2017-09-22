@@ -40,10 +40,8 @@ class DalBase64 extends Base64 {
     final Base64 b64 = isChunked ? new DalBase64(urlSafe) : new DalBase64(0, CHUNK_SEPARATOR, urlSafe);
     final long len = b64.getEncodedLength(binaryData);
     if (len > maxResultSize) {
-      throw new IllegalArgumentException("Input array too big, the output array would be bigger (" +
-          len +
-          ") than the specified maximum size of " +
-          maxResultSize);
+      throw new IllegalArgumentException("Input array too big, the output array would be bigger (" + len +
+          ") than the specified maximum size of " + maxResultSize);
     }
 
     return b64.encode(binaryData);

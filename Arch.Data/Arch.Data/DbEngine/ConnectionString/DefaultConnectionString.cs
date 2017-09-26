@@ -78,7 +78,8 @@ namespace Arch.Data.DbEngine.ConnectionString
 
             try
             {
-                using (var stream = new FileStream(configPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                String path = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, configPath);
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (var reader = XmlReader.Create(stream, settings))
                     {

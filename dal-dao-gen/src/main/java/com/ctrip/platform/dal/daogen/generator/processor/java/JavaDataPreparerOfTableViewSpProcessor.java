@@ -215,9 +215,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         }
     }
 
-    private ViewHost buildViewHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp,
+    private ViewHost buildViewHost(CodeGenContext context, GenTaskByTableViewSp tableViewSp,
             DatabaseCategory dbCategory, String viewName) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         if (!DbUtils.viewExists(tableViewSp.getAllInOneName(), viewName)) {
             return null;
         }
@@ -231,6 +231,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         vhost.setDbSetName(tableViewSp.getDatabaseSetName());
         vhost.setPojoClassName(className);
         vhost.setViewName(viewName);
+        vhost.setLength(tableViewSp.getLength());
 
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), viewName);
         List<AbstractParameterHost> params = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), viewName,
@@ -252,9 +253,9 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         return vhost;
     }
 
-    private SpHost buildSpHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp, String spName)
+    private SpHost buildSpHost(CodeGenContext context, GenTaskByTableViewSp tableViewSp, String spName)
             throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         String schema = "dbo";
         String realSpName = spName;
         if (spName.contains(".")) {
@@ -263,41 +264,42 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
             realSpName = splitSp[1];
         }
 
-        StoredProcedure currentSp = new StoredProcedure();
-        currentSp.setSchema(schema);
-        currentSp.setName(realSpName);
+        StoredProcedure sp = new StoredProcedure();
+        sp.setSchema(schema);
+        sp.setName(realSpName);
 
-        if (!DbUtils.spExists(tableViewSp.getAllInOneName(), currentSp)) {
+        if (!DbUtils.spExists(tableViewSp.getAllInOneName(), sp)) {
             throw new Exception(String.format("The store procedure[%s, %s] doesn't exist, pls check",
-                    tableViewSp.getAllInOneName(), currentSp.getName()));
+                    tableViewSp.getAllInOneName(), sp.getName()));
         }
 
-        SpHost spHost = new SpHost();
+        SpHost host = new SpHost();
         String className = realSpName.replace("_", "");
         className = getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), className);
 
-        spHost.setPackageName(ctx.getNamespace());
-        spHost.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
-        spHost.setDbName(tableViewSp.getDatabaseSetName());
-        spHost.setPojoClassName(className);
-        spHost.setSpName(spName);
-        List<AbstractParameterHost> params = DbUtils.getSpParams(tableViewSp.getAllInOneName(), currentSp,
-                new JavaSpParamResultSetExtractor(tableViewSp.getAllInOneName(), currentSp.getName()));
+        host.setPackageName(ctx.getNamespace());
+        host.setDatabaseCategory(getDatabaseCategory(tableViewSp.getAllInOneName()));
+        host.setDbName(tableViewSp.getDatabaseSetName());
+        host.setPojoClassName(className);
+        host.setSpName(spName);
+        host.setLength(tableViewSp.getLength());
+
+        List<AbstractParameterHost> params = DbUtils.getSpParams(tableViewSp.getAllInOneName(), sp,
+                new JavaSpParamResultSetExtractor(tableViewSp.getAllInOneName(), sp.getName()));
         List<JavaParameterHost> realParams = new ArrayList<>();
         String callParams = "";
-        if (null == params) {
-            throw new Exception(String.format("The sp[%s, %s] parameters is null", tableViewSp.getAllInOneName(),
-                    currentSp.getName()));
+        if (params == null) {
+            throw new Exception(
+                    String.format("The sp[%s, %s] parameters is null", tableViewSp.getAllInOneName(), sp.getName()));
         }
         for (AbstractParameterHost p : params) {
             callParams += "?,";
             realParams.add((JavaParameterHost) p);
         }
-        spHost.setCallParameters(StringUtils.removeEnd(callParams, ","));
-        spHost.setFields(realParams);
 
-        return spHost;
+        host.setCallParameters(StringUtils.removeEnd(callParams, ","));
+        host.setFields(realParams);
+        return host;
     }
-
 
 }

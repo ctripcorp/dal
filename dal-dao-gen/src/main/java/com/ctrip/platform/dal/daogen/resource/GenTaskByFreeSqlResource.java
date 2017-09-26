@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -35,7 +34,7 @@ import java.util.regex.Pattern;
 @Resource
 @Singleton
 @Path("task/sql")
-public class GenTaskByFreeSqlResource {
+public class GenTaskByFreeSqlResource extends ApproveResource {
     private static ObjectMapper mapper = new ObjectMapper();
 
     @POST
@@ -47,7 +46,7 @@ public class GenTaskByFreeSqlResource {
             @FormParam("sql_content") String sql_content, @FormParam("params") String params,
             @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
             @FormParam("scalarType") String scalarType, @FormParam("pagination") boolean pagination,
-            @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+            @FormParam("length") boolean length, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
             @FormParam("hints") String hints) throws Exception {
         try {
             GenTaskByFreeSql task = new GenTaskByFreeSql();
@@ -74,6 +73,7 @@ public class GenTaskByFreeSqlResource {
                 task.setComment(comment);
                 task.setScalarType(scalarType);
                 task.setPagination(pagination);
+                task.setLength(length);
                 task.setSql_style(sql_style);
 
                 if ("简单类型".equals(pojo_name)) {
@@ -116,37 +116,6 @@ public class GenTaskByFreeSqlResource {
             status.setInfo(e.getMessage());
             return status;
         }
-    }
-
-    private boolean needApproveTask(int projectId, int userId) throws SQLException {
-        Project prj = BeanGetter.getDaoOfProject().getProjectByID(projectId);
-        if (prj == null) {
-            return true;
-        }
-        List<UserGroup> lst =
-                BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
-        if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
-            return false;
-        }
-        // all child group
-        List<GroupRelation> grs =
-                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
-        if (grs == null || grs.size() < 1) {
-            return true;
-        }
-        // check user is or not in the child group which have admin role
-        Iterator<GroupRelation> ite = grs.iterator();
-        while (ite.hasNext()) {
-            GroupRelation gr = ite.next();
-            if (gr.getChild_group_role() == 1) {
-                int groupId = gr.getChild_group_id();
-                List<UserGroup> test = BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
-                if (test != null && test.size() > 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     @POST

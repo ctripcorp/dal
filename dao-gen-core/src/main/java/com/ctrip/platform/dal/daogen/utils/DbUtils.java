@@ -15,8 +15,10 @@ import com.mysql.jdbc.StringUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,13 +27,14 @@ public class DbUtils {
 
     public static List<Integer> validMode = new ArrayList<>();
     private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", Pattern.CASE_INSENSITIVE);
+    private static Set<Integer> stringTypeSet = null;
 
     static {
         statementCreator = new DalStatementCreator(com.ctrip.platform.dal.common.enums.DatabaseCategory.MySql);
-        // statementCreator = new DalStatementCreator();
         validMode.add(DatabaseMetaData.procedureColumnIn);
         validMode.add(DatabaseMetaData.procedureColumnInOut);
         validMode.add(DatabaseMetaData.procedureColumnOut);
+        stringTypeSet = getStringTypeSet();
     }
 
     public static boolean tableExists(String allInOneName, String tableName) throws Exception {
@@ -700,6 +703,21 @@ public class DbUtils {
         }
 
         return map;
+    }
+
+    private static Set<Integer> getStringTypeSet() {
+        Set<Integer> set = new HashSet<>();
+        set.add(Types.CHAR);
+        set.add(Types.VARCHAR);
+        set.add(Types.LONGVARCHAR);
+        set.add(Types.NCHAR);
+        set.add(Types.NVARCHAR);
+        set.add(Types.LONGNVARCHAR);
+        return set;
+    }
+
+    public static boolean isStringType(int sqlType) {
+        return stringTypeSet.contains(sqlType);
     }
 
 }

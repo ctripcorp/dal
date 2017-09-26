@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
+import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import org.apache.commons.lang.WordUtils;
 
 import java.sql.Types;
@@ -318,4 +319,9 @@ public class JavaParameterHost extends AbstractParameterHost {
     private boolean isDefaultValueDefined() {
         return defaultValue != null;
     }
+
+    public boolean isStringType() {
+        return DbUtils.isStringType(sqlType);
+    }
+
 }

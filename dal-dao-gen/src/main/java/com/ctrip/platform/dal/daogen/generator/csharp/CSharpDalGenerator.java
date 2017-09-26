@@ -2,24 +2,17 @@ package com.ctrip.platform.dal.daogen.generator.csharp;
 
 import com.ctrip.platform.dal.daogen.CodeGenContext;
 import com.ctrip.platform.dal.daogen.DalGenerator;
-import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
 import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.entity.Project;
-import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.processor.csharp.*;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfFreeSqlProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfSqlBuilderProcessor;
-import com.ctrip.platform.dal.daogen.generator.processor.java.JavaDataPreparerOfTableViewSpProcessor;
 import com.ctrip.platform.dal.daogen.host.DalConfigHost;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
-import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 public class CSharpDalGenerator implements DalGenerator {
     @Override
@@ -95,7 +88,7 @@ public class CSharpDalGenerator implements DalGenerator {
                     .info(String.format("Begin to prepare csharp freesql data for project %s", ctx.getProjectId()));
             new CSharpDataPreparerOfFreeSqlProcessor().process(ctx);
             LoggerManager.getInstance()
-                    .info(String.format("Prepare java csharp data for project %s completed.", ctx.getProjectId()));
+                    .info(String.format("Prepare csharp freesql data for project %s completed.", ctx.getProjectId()));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             exceptions.add(e.getMessage());
@@ -113,7 +106,7 @@ public class CSharpDalGenerator implements DalGenerator {
 
     @Override
     public void generateCode(CodeGenContext context) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
+        CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         try {
             LoggerManager.getInstance()
                     .info(String.format("Begin to generate csharp table code for project %s", ctx.getProjectId()));

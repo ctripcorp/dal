@@ -75,6 +75,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     host.setClassName(currentTasks.get(0).getClass_name());
                     host.setPackageName(namespace);
                     host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
+                    host.setLength(currentTasks.get(0).getLength());
 
                     List<JavaMethodHost> methods = new ArrayList<>();
                     for (GenTaskByFreeSql task : currentTasks) {
@@ -128,6 +129,8 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         method.setPaging(task.getPagination());
         method.setCrud_type(task.getCrud_type());
         method.setComments(task.getComment());
+        method.setLength(task.getLength());
+
         if (task.getPojo_name() != null && !task.getPojo_name().isEmpty())
             method.setPojoClassName(WordUtils.capitalize(task.getPojo_name() + "Pojo"));
 

@@ -32,13 +32,13 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
         }
     }
 
-    private List<Callable<ExecuteResult>> generateTableDao(CodeGenContext codeGenCtx, final File mavenLikeDir) {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+    private List<Callable<ExecuteResult>> generateTableDao(CodeGenContext context, final File mavenLikeDir) {
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         final Progress progress = ctx.getProgress();
-        Queue<JavaTableHost> _tableHosts = ctx.getTableHosts();
+        Queue<JavaTableHost> tableHosts = ctx.getTableHosts();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
 
-        for (final JavaTableHost host : _tableHosts) {
+        for (final JavaTableHost host : tableHosts) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
                 @Override
@@ -53,9 +53,11 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
                         GenUtils.mergeVelocityContext(context, String.format("%s/Dao/%sDao.java",
                                 mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
                                 "templates/java/dao/standard/DAO.java.tpl");
+
                         GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
                                 mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
                                 "templates/java/Pojo.java.tpl");
+
                         GenUtils.mergeVelocityContext(context, String.format("%s/Test/%sDaoUnitTest.java",
                                 mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
                                 "templates/java/test/DaoUnitTests.java.tpl");
@@ -68,10 +70,8 @@ public class JavaCodeGeneratorOfTableProcessor implements DalProcessor {
                 }
             };
             results.add(worker);
-
         }
         return results;
     }
-
 
 }

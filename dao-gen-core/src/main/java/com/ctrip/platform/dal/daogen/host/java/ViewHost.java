@@ -16,6 +16,7 @@ public class ViewHost {
     private List<JavaParameterHost> fields = new ArrayList<>();
     private DatabaseCategory databaseCategory;
     private Set<String> imports = new TreeSet<>();
+    private boolean length;
 
     public String getPackageName() {
         return packageName;
@@ -131,4 +132,13 @@ public class ViewHost {
         }
         return StringUtils.join(tokens, ",");
     }
+
+    public boolean isLength() {
+        return length;
+    }
+
+    public void setLength(boolean length) {
+        this.length = length;
+    }
+
 }

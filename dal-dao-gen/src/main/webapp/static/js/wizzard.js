@@ -206,9 +206,23 @@
                 if (record.suffix != undefined) {
                     $("#suffix").val(record.suffix);
                 }
+                if (record.pagination != undefined) {
+                    $("#pagination").prop("checked", record.pagination);
+                }
+                if (record.length != undefined) {
+                    $("#standard_length_property").prop("checked", record.length);
+                }
             }
-            current.hide();
 
+            var divLength = $("#divStandardLength");
+            if ($("#sql_style").val() == "csharp") {
+                divLength.hide();
+            }
+            else {
+                divLength.show();
+            }
+
+            current.hide();
             step.show();
             nextStep.removeAttr("disabled");
             nextStep.addClass("btn-primary");
@@ -372,13 +386,25 @@
                 } else {
                     $("#free_sql_scalarType").val("List");
                 }
+
                 $("#free_sql_pagination").prop("checked", record.pagination);
+                $("#free_length_property").prop("checked", record.length);
                 $("#free_sql_crud_option").val(record.crud_type);
                 $("#free_sql_crud_option").trigger("change");
+
                 if (record.crud_type == "select") {
                     $("#free_sql_scalarType").trigger("change");
                 }
             }
+
+            var divLength = $("#divFreeLength");
+            if ($("#sql_style").val() == "csharp") {
+                divLength.hide();
+            }
+            else {
+                divLength.show();
+            }
+
         }).fail(function (data) {
             $("#error_msg").text("获取历史记录失败");
         });
@@ -653,6 +679,7 @@
                     window.sql_builder.build();
                 }
             });
+
             if ($("#page1").attr("is_update") == "1") {
                 var orderBy = record.orderby;
                 if (!$.isEmpty(orderBy)) {
@@ -664,8 +691,11 @@
                 } else {
                     $("#auto_sql_scalarType").val("List");
                 }
+
                 $("#auto_sql_pagination").prop("checked", record.pagination);
+                $("#build_length_property").prop("chcked", record.length);
                 $("#fields").multipleSelect("setSelects", record.fields.split(","));
+
                 if (record.condition != undefined && record.condition.length > 0) {
                     var selectedConditions = record.condition.split(";");
                     if (selectedConditions != undefined && selectedConditions.length > 0) {
@@ -689,6 +719,14 @@
                 sql_builder.setReadOnly(true);
             } else {
                 window.sql_builder.build();
+            }
+
+            var divLength = $("#divBuildLength");
+            if ($("#sql_style").val() == "csharp") {
+                divLength.hide();
+            }
+            else {
+                divLength.show();
             }
 
             current.hide();

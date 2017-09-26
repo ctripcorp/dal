@@ -85,6 +85,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
         tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("");
+        tableViewSp.setLength(sqlBuilder.getLength());
 
         DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
         String dbType = DbUtils.getDbType(sqlBuilder.getAllInOneName());

@@ -51,9 +51,9 @@ public class AbstractJavaDataPreparer {
         }
     }
 
-    protected JavaTableHost buildTableHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp,
-            String tableName, DatabaseCategory dbCategory) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+    protected JavaTableHost buildTableHost(CodeGenContext context, GenTaskByTableViewSp tableViewSp, String tableName,
+            DatabaseCategory dbCategory) throws Exception {
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         if (!DbUtils.tableExists(tableViewSp.getAllInOneName(), tableName)) {
             throw new Exception(String.format("Table[%s.%s] doesn't exist.", tableViewSp.getAllInOneName(), tableName));
         }
@@ -65,6 +65,7 @@ public class AbstractJavaDataPreparer {
         tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), tableName));
         tableHost.setSp(tableViewSp.getCud_by_sp());
         tableHost.setApi_list(tableViewSp.getApi_list());
+        tableHost.setLength(tableViewSp.getLength());
 
         // 主键及所有列
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), tableName);

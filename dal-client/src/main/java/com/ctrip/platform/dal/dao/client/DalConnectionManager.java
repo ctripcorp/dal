@@ -157,14 +157,14 @@ public class DalConnectionManager {
 			result = action.execute();
 		} catch (Throwable e) {
 			MarkdownManager.detect(action.connHolder, action.start, e);
-			ex = e;
+			action.error(e);
 		} finally {
 			DalWatcher.endExectue();
 			action.populateDbMeta();
 			action.cleanup();
 		}
 		
-		action.end(result, ex);
+		action.end(result);
 		return result;
 	}
 }

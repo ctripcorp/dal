@@ -15,10 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,7 +29,7 @@ import java.util.List;
 @Resource
 @Singleton
 @Path("task/table")
-public class GenTaskByTableViewResource {
+public class GenTaskByTableViewResource extends ApproveResource {
     private static ObjectMapper mapper = new ObjectMapper();
 
     @POST
@@ -41,8 +39,8 @@ public class GenTaskByTableViewResource {
             @FormParam("table_names") String table_names, @FormParam("view_names") String view_names,
             @FormParam("sp_names") String sp_names, @FormParam("prefix") String prefix,
             @FormParam("suffix") String suffix, @FormParam("cud_by_sp") boolean cud_by_sp,
-            @FormParam("pagination") boolean pagination, @FormParam("version") int version,
-            @FormParam("action") String action, @FormParam("comment") String comment,
+            @FormParam("pagination") boolean pagination, @FormParam("length") boolean length,
+            @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
             @FormParam("sql_style") String sql_style, // C#风格或者Java风格
             @FormParam("api_list") String api_list) throws Exception {
         try {
@@ -51,7 +49,7 @@ public class GenTaskByTableViewResource {
             if (action.equalsIgnoreCase("delete")) {
                 task.setId(id);
                 if (0 >= BeanGetter.getDaoByTableViewSp().deleteTask(task)) {
-                    return Status.ERROR;
+                    return Status.ERROR();
                 }
             } else {
                 String userNo = RequestUtil.getUserNo(request);
@@ -66,6 +64,7 @@ public class GenTaskByTableViewResource {
                 task.setSuffix(suffix);
                 task.setCud_by_sp(cud_by_sp);
                 task.setPagination(pagination);
+                task.setLength(length);
                 task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
                 task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);
@@ -82,55 +81,24 @@ public class GenTaskByTableViewResource {
                     task.setId(id);
                     task.setVersion(BeanGetter.getDaoByTableViewSp().getVersionById(id));
                     if (0 >= BeanGetter.getDaoByTableViewSp().updateTask(task)) {
-                        return Status.ERROR;
+                        return Status.ERROR();
                     }
                 } else {
                     task.setGenerated(false);
                     task.setVersion(1);
                     if (0 >= BeanGetter.getDaoByTableViewSp().insertTask(task)) {
-                        return Status.ERROR;
+                        return Status.ERROR();
                     }
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
-    }
-
-    private boolean needApproveTask(int projectId, int userId) throws SQLException {
-        Project prj = BeanGetter.getDaoOfProject().getProjectByID(projectId);
-        if (prj == null) {
-            return true;
-        }
-        List<UserGroup> lst =
-                BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
-        if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
-            return false;
-        }
-        // all child group
-        List<GroupRelation> grs =
-                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
-        if (grs == null || grs.size() < 1) {
-            return true;
-        }
-        // check user is or not in the child group which have admin role
-        Iterator<GroupRelation> ite = grs.iterator();
-        while (ite.hasNext()) {
-            GroupRelation gr = ite.next();
-            if (gr.getChild_group_role() == 1) {
-                int groupId = gr.getChild_group_id();
-                List<UserGroup> test = BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
-                if (test != null && test.size() > 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     @GET
@@ -138,7 +106,7 @@ public class GenTaskByTableViewResource {
     @Path("apiList")
     public Status getApiList(@QueryParam("db_name") String db_set_name, @QueryParam("table_names") String table_names,
             @QueryParam("sql_style") String sql_style) {
-        Status status = Status.OK;
+        Status status = Status.OK();
 
         try {
             List<DalApi> apis = null;
@@ -183,7 +151,7 @@ public class GenTaskByTableViewResource {
             status.setInfo(mapper.writeValueAsString(apis));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

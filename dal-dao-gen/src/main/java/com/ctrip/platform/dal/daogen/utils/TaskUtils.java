@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.daogen.utils;
 
 import com.ctrip.platform.dal.daogen.entity.ExecuteResult;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -11,24 +11,26 @@ public class TaskUtils {
             new ThreadPoolExecutor(20, 50, 120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     public static void invokeBatch(List<Callable<ExecuteResult>> tasks) throws Exception {
-        try {
-            TaskUtils.log(executor.invokeAll(tasks));
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
-    }
+        if (tasks == null || tasks.size() == 0)
+            return;
 
-    public static void log(List<Future<ExecuteResult>> tasks) throws Exception {
-        for (Future<ExecuteResult> future : tasks) {
+        List<Future<ExecuteResult>> results = executor.invokeAll(tasks);
+        List<String> exceptions = new ArrayList<>();
+        for (Future<ExecuteResult> future : results) {
             try {
                 ExecuteResult result = future.get();
-                // log.info(String.format("Execute [%s] task completed: %s", result.getTaskName(),
-                // result.isSuccessal()));
             } catch (Throwable e) {
-                LoggerManager.getInstance().error(e);
-                throw e;
+                exceptions.add(e.getMessage());
             }
+        }
+
+        if (exceptions.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String exception : exceptions) {
+                sb.append(exception);
+            }
+
+            throw new RuntimeException(sb.toString());
         }
     }
 

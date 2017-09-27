@@ -63,13 +63,13 @@ public class DalGroupResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || groupName == null || groupName.isEmpty()) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validate(userNo)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
@@ -82,14 +82,14 @@ public class DalGroupResource {
 
             int ret = BeanGetter.getDaoOfDalGroup().insertDalGroup(group);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Add operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -102,13 +102,13 @@ public class DalGroupResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || id == null || id.isEmpty()) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validate(userNo)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
@@ -116,46 +116,46 @@ public class DalGroupResource {
             try {
                 groupId = Integer.parseInt(id);
             } catch (NumberFormatException ex) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal group id");
                 return status;
             }
 
             List<Project> prjs = BeanGetter.getDaoOfProject().getProjectByGroupId(groupId);
             if (prjs != null && prjs.size() > 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("当前DAL Team中还有Project，请清空Project后再操作！");
                 return status;
             }
             List<DalGroupDB> dbs = BeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
             if (dbs != null && dbs.size() > 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("当前DAL Team中还有DataBase，请清空DataBase后再操作！");
                 return status;
             }
             List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
             if (dbsets != null && dbsets.size() > 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("当前DAL Team中还有DataBaseSet，请清空DataBaseSet后再操作！");
                 return status;
             }
             List<LoginUser> us = BeanGetter.getDaoOfLoginUser().getUserByGroupId(groupId);
             if (us != null && us.size() > 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("当前DAL Team中还有Member，请清空Member后再操作！");
                 return status;
             }
 
             int ret = BeanGetter.getDaoOfDalGroup().deleteDalGroup(groupId);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Delete operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -169,13 +169,13 @@ public class DalGroupResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null || id == null || id.isEmpty()) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validate(userNo)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
@@ -184,14 +184,14 @@ public class DalGroupResource {
             try {
                 groupId = Integer.parseInt(id);
             } catch (NumberFormatException ex) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal group id");
                 return status;
             }
 
             DalGroup group = BeanGetter.getDaoOfDalGroup().getDalGroupById(groupId);
             if (null == group) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Group id not existed");
                 return status;
             }
@@ -207,14 +207,14 @@ public class DalGroupResource {
             int ret = BeanGetter.getDaoOfDalGroup().updateDalGroup(group);
 
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("update operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

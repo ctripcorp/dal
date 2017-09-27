@@ -9,7 +9,6 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.java.JavaTableHost;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
@@ -19,69 +18,65 @@ import java.util.concurrent.Callable;
 public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPreparer implements DalProcessor {
     @Override
     public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
-            TaskUtils.invokeBatch(_sqlBuilderCallables);
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
+        List<Callable<ExecuteResult>> tasks = prepareSqlBuilder(context);
+        TaskUtils.invokeBatch(tasks);
     }
 
-    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext codeGenCtx) {
-        final JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) throws Exception {
+        final JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
-        Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
-        final Queue<JavaTableHost> _tableHosts = ctx.getTableHosts();
-        if (_sqlBuilders.size() > 0) {
-            // 按照DbName和TableName进行分组
-            Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
+        Queue<GenTaskBySqlBuilder> sqlBuilders = ctx.getSqlBuilders();
+        final Queue<JavaTableHost> tableHosts = ctx.getTableHosts();
+        if (sqlBuilders.size() > 0) {
+            Map<String, List<GenTaskBySqlBuilder>> tempSqlBuildres = sqlBuilderBroupBy(sqlBuilders);
 
-            for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres.entrySet()) {
-                Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
-
-                    @Override
-                    public ExecuteResult call() throws Exception {
-                        /*
-                         * progress.setOtherMessage("正在整理表 " + _table.getValue().getClass_name());
-                         */
-                        ExecuteResult result = new ExecuteResult("Build Extral SQL["
-                                + _table.getValue().getAllInOneName() + "." + _table.getKey() + "] Host");
-                        progress.setOtherMessage(result.getTaskName());
-                        try {
-                            JavaTableHost extraTableHost = buildExtraSqlBuilderHost(ctx, _table.getValue());
-                            if (null != extraTableHost) {
-                                _tableHosts.add(extraTableHost);
+            for (final Map.Entry<String, List<GenTaskBySqlBuilder>> sqlBuilder : tempSqlBuildres.entrySet()) {
+                for (final GenTaskBySqlBuilder builder : sqlBuilder.getValue()) {
+                    Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
+                        @Override
+                        public ExecuteResult call() throws Exception {
+                            ExecuteResult result = new ExecuteResult("Build Extral SQL[" + builder.getAllInOneName()
+                                    + "." + sqlBuilder.getKey() + "] Host");
+                            progress.setOtherMessage(result.getTaskName());
+                            try {
+                                JavaTableHost extraTableHost = buildExtraSqlBuilderHost(ctx, builder);
+                                if (null != extraTableHost) {
+                                    tableHosts.add(extraTableHost);
+                                }
+                                result.setSuccessal(true);
+                            } catch (Throwable e) {
+                                progress.setOtherMessage(e.getMessage());
+                                throw new Exception(
+                                        String.format("Task Id[%s]:%s\r\n", builder.getId(), e.getMessage()), e);
                             }
-                            result.setSuccessal(true);
-                        } catch (Throwable e) {
-                            LoggerManager.getInstance().error(e);
-                            progress.setOtherMessage(e.getMessage());
+                            return result;
                         }
-                        return result;
-                    }
-                };
-                results.add(worker);
+                    };
+                    results.add(worker);
+                }
             }
         }
         return results;
     }
 
-    private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(Queue<GenTaskBySqlBuilder> builders) {
-        Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<>();
+    private Map<String, List<GenTaskBySqlBuilder>> sqlBuilderBroupBy(Queue<GenTaskBySqlBuilder> tasks) {
+        Map<String, List<GenTaskBySqlBuilder>> map = new HashMap<>();
+        if (tasks == null || tasks.size() == 0)
+            return map;
 
-        for (GenTaskBySqlBuilder task : builders) {
+        for (GenTaskBySqlBuilder task : tasks) {
             String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
 
-            if (!groupBy.containsKey(key)) {
-                groupBy.put(key, task);
-            }
+            if (!map.containsKey(key))
+                map.put(key, new ArrayList<GenTaskBySqlBuilder>());
+            map.get(key).add(task);
         }
-        return groupBy;
+
+        return map;
     }
 
-    private JavaTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)
+    private JavaTableHost buildExtraSqlBuilderHost(CodeGenContext context, GenTaskBySqlBuilder sqlBuilder)
             throws Exception {
         GenTaskByTableViewSp tableViewSp = new GenTaskByTableViewSp();
         tableViewSp.setCud_by_sp(false);
@@ -90,6 +85,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
         tableViewSp.setDatabaseSetName(sqlBuilder.getDatabaseSetName());
         tableViewSp.setPrefix("");
         tableViewSp.setSuffix("");
+        tableViewSp.setLength(sqlBuilder.getLength());
 
         DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
         String dbType = DbUtils.getDbType(sqlBuilder.getAllInOneName());
@@ -97,7 +93,7 @@ public class JavaDataPreparerOfSqlBuilderProcessor extends AbstractJavaDataPrepa
             dbCategory = DatabaseCategory.MySql;
         }
 
-        return buildTableHost(codeGenCtx, tableViewSp, sqlBuilder.getTable_name(), dbCategory);
+        return buildTableHost(context, tableViewSp, sqlBuilder.getTable_name(), dbCategory);
     }
 
 }

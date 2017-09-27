@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static oracle.net.aso.C07.s;
+
 @Resource
 @Singleton
 @Path("project")
@@ -154,7 +156,7 @@ public class ProjectResource {
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
             if (user == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("You have not login.");
                 return status;
             }
@@ -162,7 +164,7 @@ public class ProjectResource {
             List<UserGroup> urGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
 
             if (urGroups == null || urGroups.size() < 1) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("请先加入某个DAL Team.");
                 return status;
             }
@@ -170,7 +172,7 @@ public class ProjectResource {
             if (action.equals("insert")) {
                 List<Project> pjs = BeanGetter.getDaoOfProject().getProjectByConfigname(dalconfigname);
                 if (null != pjs && pjs.size() > 0) {
-                    Status status = Status.ERROR;
+                    Status status = Status.ERROR();
                     status.setInfo("Dal.config Name --> " + dalconfigname + " 已经存在，请重新命名!");
                     return status;
                 }
@@ -181,11 +183,11 @@ public class ProjectResource {
                 proj.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
                 proj.setUpdate_time(new Timestamp(System.currentTimeMillis()));
                 BeanGetter.getDaoOfProject().insertProject(proj);
-                return Status.OK;
+                return Status.OK();
             }
 
             if (!validateProjectUpdatePermision(userNo, id, project_group_id)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前Project的操作权限.");
                 return status;
             }
@@ -195,7 +197,7 @@ public class ProjectResource {
                 if (null != pjs && pjs.size() > 0) {
                     for (Project temp : pjs) {
                         if (temp.getId() != id) {
-                            Status status = Status.ERROR;
+                            Status status = Status.ERROR();
                             status.setInfo("Dal.config Name --> " + dalconfigname + " 已经存在，请重新命名!");
                             return status;
                         }
@@ -218,10 +220,10 @@ public class ProjectResource {
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -236,14 +238,14 @@ public class ProjectResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (!validateProjectUpdatePermision(userNo, prjId, -1)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAO的操作权限.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -261,10 +263,10 @@ public class ProjectResource {
                     FileUtils.forceDelete(dir);
                 } catch (IOException e) {
                 }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -434,17 +436,17 @@ public class ProjectResource {
             if (!"".equals(info)) {
                 info += "点击此处添加databaseSet ： <a href='dbsetsmanage.jsp' target='_blank'>逻辑数据库管理</a><br/>";
                 info += "点击此处添加组内database ： <a href='dbmanage.jsp' target='_blank'>数据库管理</a><br/>";
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo(info);
                 return status;
             } else {
-                Status status = Status.OK;
+                Status status = Status.OK();
                 status.setInfo("一键补全成功！");
                 return status;
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -517,32 +519,40 @@ public class ProjectResource {
             progress = ProgressResource.getProgress(userNo, id, random);
 
             status = validatePermision(userNo, id);
-            if (status.getCode().equals(Status.ERROR.getCode())) {
+            if (status.getCode().equals(Status.ERROR().getCode())) {
                 progress.setStatus(ProgressResource.FINISH);
                 return status;
             }
 
-            DalGenerator generator = null;
-            CodeGenContext context = null;
             HashSet<String> hashSet = getProjectSqlStyles(id);
+            if (hashSet.isEmpty()) {
+                progress.setStatus(ProgressResource.FINISH);
+                status = Status.ERROR();
+                status.setInfo(String.format("Language error for project %s", id));
+                return status;
+            }
             String code = "";
             if (hashSet.contains(JAVA)) {
                 code = JAVA;
-                generator = new JavaDalGenerator();
-                context = generator.createContext(id, true, progress, newPojo, false);
+                DalGenerator generator = new JavaDalGenerator();
+                CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
+                LoggerManager.getInstance().info(String.format("Begin to generate java task for project %s", id));
                 generateLanguageProject(generator, context);
+                LoggerManager.getInstance().info(String.format("Java task for project %s generated.", id));
             }
             if (hashSet.contains(CS)) { // cs
                 code = "cs";
-                generator = new CSharpDalGenerator();
-                context = generator.createContext(id, true, progress, newPojo, false);
+                DalGenerator generator = new CSharpDalGenerator();
+                CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
+                LoggerManager.getInstance().info(String.format("Begin to generate csharp task for project %s", id));
                 generateLanguageProject(generator, context);
+                LoggerManager.getInstance().info(String.format("Csharp task for project %s generated.", id));
             }
-            status = Status.OK;
+            status = Status.OK();
             status.setInfo(code);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         } finally {
@@ -563,19 +573,19 @@ public class ProjectResource {
 
     private HashSet<String> getProjectSqlStyles(int projectId) throws SQLException {
         HashSet<String> hashSet = new HashSet<>();
-        List<GenTaskBySqlBuilder> autoTasks = BeanGetter.getDaoBySqlBuilder().getTasksByProjectId(projectId);
-
-        if (autoTasks != null && autoTasks.size() > 0) {
-            for (GenTaskBySqlBuilder genTaskBySqlBuilder : autoTasks) {
-                hashSet.add(genTaskBySqlBuilder.getSql_style());
-            }
-        }
-
         List<GenTaskByTableViewSp> tableViewSpTasks = BeanGetter.getDaoByTableViewSp().getTasksByProjectId(projectId);
 
         if (tableViewSpTasks != null && tableViewSpTasks.size() > 0) {
             for (GenTaskByTableViewSp genTaskByTableViewSp : tableViewSpTasks) {
                 hashSet.add(genTaskByTableViewSp.getSql_style());
+            }
+        }
+
+        List<GenTaskBySqlBuilder> autoTasks = BeanGetter.getDaoBySqlBuilder().getTasksByProjectId(projectId);
+
+        if (autoTasks != null && autoTasks.size() > 0) {
+            for (GenTaskBySqlBuilder genTaskBySqlBuilder : autoTasks) {
+                hashSet.add(genTaskBySqlBuilder.getSql_style());
             }
         }
 
@@ -591,14 +601,14 @@ public class ProjectResource {
     }
 
     private Status validatePermision(String userNo, int project_id) throws SQLException {
-        Status status = Status.ERROR;
+        Status status = Status.ERROR();
         LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
         List<UserGroup> urGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
         if (urGroups == null) {
             status.setInfo("你没有权限生成代码.请先加入一个 DAL Team.");
             return status;
         }
-        if (urGroups.size() < 1) {
+        if (urGroups.size() == 0) {
             status.setInfo("你没有权限生成代码.请先加入一个 DAL Team.");
             return status;
         }
@@ -607,29 +617,29 @@ public class ProjectResource {
         String info = "";
         // 验证project的task所需要的databaseSet在组内是否存在
         status = validateDbsetPermision(groupId, project_id);
-        if (status.getCode().equals(Status.ERROR.getCode())) {
+        if (status.getCode().equals(Status.ERROR().getCode())) {
             info = status.getInfo();
         }
         // 验证project的task所需要的database在组内是否存在
         status = validateDbPermision(groupId, project_id);
-        if (status.getCode().equals(Status.ERROR.getCode())) {
+        if (status.getCode().equals(Status.ERROR().getCode())) {
             info += "</br>" + status.getInfo();
         }
-        if (!"".equals(info)) {
-            status = Status.ERROR;
+        if (info.length() > 0) {
+            status = Status.ERROR();
             status.setInfo(info);
             return status;
         }
 
-        return Status.OK;
+        return Status.OK();
     }
 
     private Status validateDbsetPermision(int groupId, int project_id) throws SQLException {
-        Status status = Status.ERROR;
+        Status status = Status.ERROR();
         Set<String> notExistDbset = getLackDbset(groupId, project_id);
 
         if (notExistDbset == null || notExistDbset.size() <= 0) {
-            return Status.OK;
+            return Status.OK();
         } else {
             String info = "<ul>";
             for (String temp : notExistDbset) {
@@ -681,11 +691,11 @@ public class ProjectResource {
     }
 
     private Status validateDbPermision(int groupId, int project_id) throws SQLException {
-        Status status = Status.ERROR;
+        Status status = Status.ERROR();
         Set<String> notExistDb = getLackDatabase(groupId, project_id);
 
         if (notExistDb == null || notExistDb.size() <= 0) {
-            return Status.OK;
+            return Status.OK();
         } else {
             String info = "<ul>";
             for (String temp : notExistDb) {

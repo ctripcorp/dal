@@ -15,15 +15,15 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
 
     private String alias;
 
-    //where条件是否是in,如 select * from Person where id in ?
+    // where条件是否是in,如 select * from Person where id in ?
     private boolean inParameter;
 
     private ParameterDirection direction;
 
-    //C#的DbType
+    // C#的DbType
     private DbType dbType;
 
-    //C#的数据类型
+    // C#的数据类型
     private String type;
 
     private boolean identity;
@@ -36,18 +36,17 @@ public class CSharpParameterHost extends AbstractParameterHost implements Compar
 
     private ConditionType conditionType;
 
-    //sql语句中以@开头的参数名称
+    // sql语句中以@开头的参数名称
     private String sqlParamName;
 
-    //列的默认值
+    // 列的默认值
     private String defaultValue;
 
     private DatabaseCategory dbCategory;
 
     private int dataType;
 
-    public CSharpParameterHost() {
-    }
+    public CSharpParameterHost() {}
 
     public CSharpParameterHost(CSharpParameterHost host) {
         this.name = host.getName();

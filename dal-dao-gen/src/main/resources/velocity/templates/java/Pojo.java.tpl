@@ -28,7 +28,7 @@ public class ${host.getPojoClassName()} implements DalPojo {
 #if(${field.isPrimary()})
 	@Id
 #end
-	@Column(name="${field.getName()}"#if($field.isDataChangeLastTimeField()), insertable=false, updatable=false#end)
+	@Column(name="${field.getName()}"#if($field.isDataChangeLastTimeField()), insertable=false, updatable=false#end#if($field.isStringType() && $host.getLength()), length = ${field.getLength()}#end)
 #if(${field.isIdentity()})
 	@GeneratedValue(strategy = GenerationType.AUTO)
 #end

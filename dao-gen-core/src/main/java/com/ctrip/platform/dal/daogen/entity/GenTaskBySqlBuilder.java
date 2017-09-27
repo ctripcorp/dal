@@ -107,6 +107,10 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
     @Type(value = Types.VARCHAR)
     private String hints;
 
+    @Column(name = "length")
+    @Type(value = Types.TINYINT)
+    private Boolean length;
+
     private String allInOneName;
     private String str_update_time;
     private String str_approved;
@@ -285,6 +289,14 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
 
     public void setHints(String hints) {
         this.hints = hints;
+    }
+
+    public Boolean getLength() {
+        return length;
+    }
+
+    public void setLength(Boolean length) {
+        this.length = length;
     }
 
     public String getAllInOneName() {

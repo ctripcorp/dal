@@ -121,20 +121,20 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
 
             List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(name);
             if (null != dbsets && dbsets.size() > 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("databaseSet Name --> " + name + " 已经存在，请重新命名!");
                 return status;
             }
@@ -151,15 +151,15 @@ public class DalGroupDbSetResource {
             dbset.setUpdate_user_no(upNo);
             ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Add operation failed.");
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -175,19 +175,19 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
 
             if (!validatePermision(userNo, groupID, iD)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你只能操作你们组创建的逻辑数据库.");
                 return status;
             }
@@ -196,7 +196,7 @@ public class DalGroupDbSetResource {
             if (null != dbsets && dbsets.size() > 0) {
                 for (DatabaseSet dbset : dbsets) {
                     if (dbset.getId() != iD) {
-                        Status status = Status.ERROR;
+                        Status status = Status.ERROR();
                         status.setInfo("databaseSet Name --> " + name + "已经存在，请重新命名!");
                         return status;
                     }
@@ -216,15 +216,15 @@ public class DalGroupDbSetResource {
             dbset.setUpdate_user_no(upNo);
             ret = BeanGetter.getDaoOfDatabaseSet().updateDatabaseSet(dbset);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Update operation failed.");
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -238,19 +238,19 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
 
             if (!validatePermision(userNo, groupID, dbsetID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你只能操作你们组创建的逻辑数据库.");
                 return status;
             }
@@ -258,14 +258,14 @@ public class DalGroupDbSetResource {
             int ret1 = BeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetEntryByDbsetId(dbsetID);
             int ret2 = BeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetById(dbsetID);
             if (ret1 < 0 || ret2 < 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Delete operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -281,19 +281,19 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
 
             if (!validatePermision(userNo, groupID, dbsetID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你只能操作你们组创建的逻辑数据库.");
                 return status;
             }
@@ -311,15 +311,15 @@ public class DalGroupDbSetResource {
             dbsetEntry.setUpdate_user_no(upNo);
             ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(dbsetEntry);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Add operation failed.");
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -335,19 +335,19 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
 
             if (!validatePermision(userNo, groupID, dbsetID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你只能操作你们组创建的逻辑数据库.");
                 return status;
             }
@@ -366,15 +366,15 @@ public class DalGroupDbSetResource {
             dbsetEntry.setUpdate_user_no(upNo);
             ret = BeanGetter.getDaoOfDatabaseSet().updateDatabaseSetEntry(dbsetEntry);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Update operation failed.");
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -388,33 +388,33 @@ public class DalGroupDbSetResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, groupID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的操作权限.");
                 return status;
             }
 
             if (!validatePermision(userNo, groupID, dbsetID)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你只能操作你们组创建的逻辑数据库.");
                 return status;
             }
 
             int ret = BeanGetter.getDaoOfDatabaseSet().deleteDatabaseSetEntryById(dbsetEntryID);
             if (ret < 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Delete operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

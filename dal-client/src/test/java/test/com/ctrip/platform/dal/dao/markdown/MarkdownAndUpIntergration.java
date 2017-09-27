@@ -51,6 +51,7 @@ public class MarkdownAndUpIntergration {
 			this.testQuery(logicName);
 			Assert.fail();
 		}catch(Exception e){
+		    e.printStackTrace();
 			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), 
 					((DalException)e).getErrorCode());
 		}

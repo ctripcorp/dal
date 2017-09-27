@@ -75,8 +75,8 @@ public class DaoByTableViewSp extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskByTableViewSp>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix, cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg ");
-        sb.append("FROM task_table WHERE project_id=?");
+                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix, cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg,length ");
+        sb.append("FROM task_table WHERE project_id=? order by id");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;
@@ -119,7 +119,7 @@ public class DaoByTableViewSp extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskByTableViewSp>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg ");
+                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix,cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg,length ");
         sb.append("FROM task_table WHERE project_id=? AND `generated`=FALSE");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
@@ -154,7 +154,7 @@ public class DaoByTableViewSp extends BaseDao {
         sb.append("UPDATE task_table SET project_id=?,db_name=?,table_names=?,view_names=?,sp_names=?,");
         sb.append("prefix=?,suffix=?,cud_by_sp=?,pagination=?,`generated`=?,version=version+1,");
         sb.append("update_user_no=?,update_time=?,comment=?,sql_style=?,");
-        sb.append("api_list=?,approved=?,approveMsg=? ");
+        sb.append("api_list=?,approved=?,approveMsg=?,length=? ");
         sb.append("WHERE id=? AND version=?");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
@@ -176,6 +176,7 @@ public class DaoByTableViewSp extends BaseDao {
         parameters.set(i++, "api_list", Types.LONGVARCHAR, task.getApi_list());
         parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
         parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
+        parameters.set(i++, "length", Types.TINYINT, task.getLength());
         parameters.set(i++, "id", Types.INTEGER, task.getId());
         parameters.set(i++, "version", Types.INTEGER, task.getVersion());
 

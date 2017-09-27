@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.daogen.dao;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -39,7 +37,7 @@ public class DaoBySqlBuilder extends BaseDao {
     }
 
     private void processList(List<GenTaskBySqlBuilder> list) throws SQLException {
-        if (list == null || list.size() == 0)
+        if (list == null || list.isEmpty())
             return;
 
         for (GenTaskBySqlBuilder entity : list) {
@@ -80,8 +78,8 @@ public class DaoBySqlBuilder extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskBySqlBuilder>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
-        sb.append("FROM task_auto WHERE project_id=?");
+                "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints,length ");
+        sb.append("FROM task_auto WHERE project_id=? order by id ");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;
@@ -101,14 +99,12 @@ public class DaoBySqlBuilder extends BaseDao {
     public List<GenTaskBySqlBuilder> updateAndGetAllTasks(int projectId) throws SQLException {
         List<GenTaskBySqlBuilder> result = new ArrayList<>();
         List<GenTaskBySqlBuilder> list = getTasksByProjectId(projectId);
-        if (list == null || list.size() == 0)
+        if (list == null || list.isEmpty())
             return result;
 
         for (GenTaskBySqlBuilder entity : list) {
             entity.setGenerated(true);
-            if (updateTask(entity) > 0) {
-                result.add(entity);
-            }
+            result.add(entity);
         }
 
         return result;
@@ -118,7 +114,7 @@ public class DaoBySqlBuilder extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskBySqlBuilder>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT  id, project_id, db_name,table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
+                "SELECT  id, project_id, db_name,table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints,length ");
         sb.append("FROM task_auto WHERE project_id=? AND `generated`=FALSE");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
@@ -170,7 +166,7 @@ public class DaoBySqlBuilder extends BaseDao {
         sb.append("UPDATE task_auto SET project_id=?,db_name=?, table_name=?, class_name=?,method_name=?,");
         sb.append("sql_style=?,crud_type=?,fields=?,where_condition=?,sql_content=?,`generated`=?,");
         sb.append("version=version+1,update_user_no=?,update_time=?,comment=?,scalarType=?,");
-        sb.append("pagination=?,orderby=?,approved=?,approveMsg=?,hints=? ");
+        sb.append("pagination=?,orderby=?,approved=?,approveMsg=?,hints=?,length=? ");
         sb.append("WHERE id=? AND version = ?");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
@@ -195,6 +191,7 @@ public class DaoBySqlBuilder extends BaseDao {
         parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
         parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
         parameters.set(i++, "hints", Types.VARCHAR, task.getHints());
+        parameters.set(i++, "length", Types.TINYINT, task.getLength());
         parameters.set(i++, "id", Types.INTEGER, task.getId());
         parameters.set(i++, "version", Types.INTEGER, task.getVersion());
 

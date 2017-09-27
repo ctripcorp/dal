@@ -21,8 +21,8 @@ public class JavaTableHost {
     private SpOperationHost SpDelete;
     private SpOperationHost SpUpdate;
     private List<JavaMethodHost> methods = new ArrayList<>();
-
     private String api_list;
+    private boolean length;
 
     public boolean generateAPI(Integer... apiID) {
         if (api_list == null || api_list.isEmpty()) {
@@ -259,14 +259,18 @@ public class JavaTableHost {
             allTypes.addAll(SpUpdate.getParameters());
 
         for (JavaParameterHost field : allTypes) {
-            Class<?> clazz = field.getJavaClass();
-            if (byte[].class.equals(clazz))
-                continue;
-            if (null == clazz)
-                continue;
-            if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
-                continue;
-            imports.add(clazz.getName());
+            try {
+                Class<?> clazz = field.getJavaClass();
+                if (byte[].class.equals(clazz))
+                    continue;
+                if (null == clazz)
+                    continue;
+                if (clazz.getPackage().getName().equals(String.class.getPackage().getName()))
+                    continue;
+                imports.add(clazz.getName());
+            } catch (Throwable e) {
+                throw e;
+            }
         }
 
         return imports;
@@ -329,4 +333,13 @@ public class JavaTableHost {
     public boolean isSampleType() {
         return null != this.fields && this.fields.size() == 1;
     }
+
+    public boolean getLength() {
+        return length;
+    }
+
+    public void setLength(boolean length) {
+        this.length = length;
+    }
+
 }

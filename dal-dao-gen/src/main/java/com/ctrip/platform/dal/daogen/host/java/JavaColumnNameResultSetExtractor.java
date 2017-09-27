@@ -15,13 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 public class JavaColumnNameResultSetExtractor implements DalResultSetExtractor<List<AbstractParameterHost>> {
-    private final String TYPE_NAME = "TYPE_NAME";
-    private final String COLUMN_NAME = "COLUMN_NAME";
-    private final String ORDINAL_POSITION = "ORDINAL_POSITION";
-    private final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
-    private final String REMARKS = "REMARKS";
-    private final String COLUMN_DEF = "COLUMN_DEF";
-    private final String DATA_TYPE = "DATA_TYPE";
+    private static final String TYPE_NAME = "TYPE_NAME";
+    private static final String COLUMN_NAME = "COLUMN_NAME";
+    private static final String ORDINAL_POSITION = "ORDINAL_POSITION";
+    private static final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
+    private static final String REMARKS = "REMARKS";
+    private static final String COLUMN_DEF = "COLUMN_DEF";
+    private static final String DATA_TYPE = "DATA_TYPE";
+    private static final String COLUMN_SIZE = "COLUMN_SIZE";
 
     private String allInOneName;
     private String tableName;
@@ -38,6 +39,7 @@ public class JavaColumnNameResultSetExtractor implements DalResultSetExtractor<L
     public List<AbstractParameterHost> extract(ResultSet rs) throws SQLException {
         List<AbstractParameterHost> allColumns = new ArrayList<>();
         try {
+            boolean isMySql = DbUtils.isMySqlServer(allInOneName);
             Map<String, Integer> columnSqlType = DbUtils.getColumnSqlType(allInOneName, tableName);
             Map<String, Class<?>> typeMapper = DbUtils.getSqlType2JavaTypeMaper(allInOneName, tableName);
             Map<String, String> columnComment;
@@ -51,20 +53,29 @@ public class JavaColumnNameResultSetExtractor implements DalResultSetExtractor<L
                     host.setName(columnName);
                     host.setSqlType(columnSqlType.get(host.getName()));
                     Class<?> javaClass = null;
-                    if (null != typeMapper && typeMapper.containsKey(host.getName())) {
+                    if (typeMapper != null && typeMapper.containsKey(host.getName())) {
                         javaClass = typeMapper.get(host.getName());
                     } else {
                         javaClass = Consts.jdbcSqlTypeToJavaClass.get(host.getSqlType());
                     }
-                    if (null == javaClass) {
-                        if (null != typeName && typeName.equalsIgnoreCase("sql_variant")) {
+
+                    int columnSize = rs.getInt(COLUMN_SIZE);
+                    host.setLength(columnSize);
+                    if (javaClass == null) {
+                        if (typeName != null && typeName.equalsIgnoreCase("sql_variant")) {
                             return null;
-                        } else if (null != typeName && typeName.equalsIgnoreCase("datetimeoffset")) {
+                        } else if (typeName != null && typeName.equalsIgnoreCase("datetimeoffset")) {
                             javaClass = DateTimeOffset.class;
                         } else {
                             return null;
                         }
                     }
+
+                    // bit to byte[]
+                    if (isMySql && typeName.equals("BIT") && columnSize > 1) {
+                        javaClass = byte[].class;
+                    }
+
                     host.setJavaClass(javaClass);
                     host.setIndex(rs.getInt(ORDINAL_POSITION));
                     host.setIdentity(rs.getString(IS_AUTOINCREMENT).equalsIgnoreCase("YES"));
@@ -82,10 +93,8 @@ public class JavaColumnNameResultSetExtractor implements DalResultSetExtractor<L
                     allColumns.add(host);
                 }
             }
-
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
-            // throw e;
         }
         return allColumns;
     }

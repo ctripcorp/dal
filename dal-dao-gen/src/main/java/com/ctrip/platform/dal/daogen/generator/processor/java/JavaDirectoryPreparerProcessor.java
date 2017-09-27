@@ -8,8 +8,8 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 
 public class JavaDirectoryPreparerProcessor {
-    public void process(CodeGenContext codeGenCtx) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+    public void process(CodeGenContext context) throws Exception {
+        JavaCodeGenContext ctx = (JavaCodeGenContext) context;
         File dir = new File(String.format("%s/%s/java", ctx.getGeneratePath(), ctx.getProjectId()));
 
         try {

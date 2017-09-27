@@ -78,8 +78,8 @@ public class DaoByFreeSql extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskByFreeSql>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,`generated`,version,update_user_no,update_time,comment,scalarType,pojoType,pagination,sql_style,approved,approveMsg,hints ");
-        sb.append("FROM task_sql WHERE project_id=?");
+                "SELECT id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,`generated`,version,update_user_no,update_time,comment,scalarType,pojoType,pagination,sql_style,approved,approveMsg,hints,length ");
+        sb.append("FROM task_sql WHERE project_id=? order by id");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         int i = 1;
@@ -116,7 +116,7 @@ public class DaoByFreeSql extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskByFreeSql>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,`generated`,version,update_user_no,update_time,comment,scalarType,pojoType,pagination,sql_style,approved,approveMsg,hints ");
+                "SELECT id, project_id, db_name, class_name,pojo_name,method_name,crud_type,sql_content,parameters,`generated`,version,update_user_no,update_time,comment,scalarType,pojoType,pagination,sql_style,approved,approveMsg,hints,length ");
         sb.append("FROM task_sql WHERE project_id=? AND `generated`=FALSE");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
@@ -168,7 +168,7 @@ public class DaoByFreeSql extends BaseDao {
         sb.append("UPDATE task_sql SET project_id=?, db_name=?,class_name=?,pojo_name=?,");
         sb.append("method_name=?,crud_type=?,sql_content=?,parameters=?,`generated`=?,");
         sb.append("version=version+1,update_user_no=?,update_time=?,comment=?,");
-        sb.append("scalarType=?,pojoType=?,pagination=?,sql_style=?,approved=?,approveMsg=?,hints=?");
+        sb.append("scalarType=?,pojoType=?,pagination=?,sql_style=?,approved=?,approveMsg=?,hints=?,length=? ");
         sb.append(" WHERE id=? AND version=?");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
@@ -192,6 +192,7 @@ public class DaoByFreeSql extends BaseDao {
         parameters.set(i++, "approved", Types.INTEGER, task.getApproved());
         parameters.set(i++, "approveMsg", Types.LONGVARCHAR, task.getApproveMsg());
         parameters.set(i++, "hints", Types.VARCHAR, task.getHints());
+        parameters.set(i++, "length", Types.TINYINT, task.getLength());
         parameters.set(i++, "id", Types.INTEGER, task.getId());
         parameters.set(i++, "version", Types.INTEGER, task.getVersion());
 

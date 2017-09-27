@@ -12,7 +12,6 @@ import com.ctrip.platform.dal.daogen.enums.DbType;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.*;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -34,13 +33,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> _freeSqlCallables = prepareFreeSql(context);
-            TaskUtils.invokeBatch(_freeSqlCallables);
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
+        List<Callable<ExecuteResult>> tasks = prepareFreeSql(context);
+        TaskUtils.invokeBatch(tasks);
     }
 
     private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
@@ -96,17 +90,26 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                         List<CSharpMethodHost> methods = new ArrayList<>();
                         // 每个Method可能就有一个Pojo
                         for (GenTaskByFreeSql task : currentTasks) {
-                            CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
-                            if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
-                                    && !method.getPojoName().isEmpty()
-                                    && (!method.isFirstOrSingle() || !method.isSampleType())
-                                    && !"update".equalsIgnoreCase(task.getCrud_type())) {
-                                CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
-                                if (null != freeSqlPojoHost) {
-                                    _freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
+                            try {
+                                CSharpMethodHost method = buildFreeSqlMethodHost(ctx, task);
+                                if (!_freeSqlPojoHosts.containsKey(task.getPojo_name()) && method.getPojoName() != null
+                                        && !method.getPojoName().isEmpty()
+                                        && (!method.isFirstOrSingle() || !method.isSampleType())
+                                        && !"update".equalsIgnoreCase(task.getCrud_type())) {
+                                    CSharpFreeSqlPojoHost freeSqlPojoHost = buildFreeSqlPojoHost(ctx, task);
+                                    if (null != freeSqlPojoHost) {
+                                        _freeSqlPojoHosts.put(task.getPojo_name(), freeSqlPojoHost);
+                                    }
+                                } else if ("update".equalsIgnoreCase(task.getCrud_type())) {
+                                    DbUtils.testUpdateSql(task.getAllInOneName(), task.getSql_content(),
+                                            task.getParameters());
                                 }
+                                methods.add(method);
+                            } catch (Throwable e) {
+                                progress.setOtherMessage(e.getMessage());
+                                throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()),
+                                        e);
                             }
-                            methods.add(method);
                         }
                         host.setMethods(methods);
                         _freeSqlHosts.add(host);
@@ -150,20 +153,12 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         method.setScalarType(task.getScalarType());
         method.setPojoType(task.getPojoType());
 
-        /*
-         * Pattern ptn = Pattern.compile("@([^\\s\\(\\)]+)", Pattern.CASE_INSENSITIVE); Matcher mt =
-         * ptn.matcher(method.getSql()); Queue<String> sqlParamQueue = new LinkedList<>(); while (mt.find()) {
-         * sqlParamQueue.add(mt.group(1)); }
-         */
-
         List<CSharpParameterHost> params = new ArrayList<>();
         for (String param : StringUtils.split(task.getParameters(), ";")) {
             String[] splitedParam = StringUtils.split(param, ",");
             CSharpParameterHost p = new CSharpParameterHost();
             p.setName(splitedParam[0]);
-            /*
-             * String sqlParamName = sqlParamQueue.poll(); if (sqlParamName == null) sqlParamName = splitedParam[0];
-             */
+
             String sqlParamName = splitedParam[0];
             p.setSqlParamName(sqlParamName);
             p.setInParameter(inParams.contains(p.getName()));

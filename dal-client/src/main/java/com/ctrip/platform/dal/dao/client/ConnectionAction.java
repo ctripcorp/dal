@@ -40,6 +40,7 @@ public abstract class ConnectionAction<T> {
 	
 	public DalLogger logger = DalClientFactory.getDalLogger();
 	public LogEntry entry;
+	public Throwable e;
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
@@ -136,7 +137,15 @@ public abstract class ConnectionAction<T> {
 		logger.start(entry);
 	}
 	
-	public void end(Object result, Throwable e) throws SQLException {
+	public void error(Throwable e) throws SQLException {
+	    this.e = e;
+	    
+	    // When Db is markdown, there will be no connHolder
+	    if(connHolder!=null)
+	        connHolder.error(e);
+	}
+	
+	public void end(Object result) throws SQLException {
 		log(result, e);	
 		handleException(e);
 	}
@@ -145,17 +154,13 @@ public abstract class ConnectionAction<T> {
 		try {
 			entry.setDuration(System.currentTimeMillis() - start);
 			if(e == null) {
-				logger.success(entry, fetchQueryRows(result));
+				logger.success(entry, entry.getResultCount());
 			}else{
 				logger.fail(entry, e);
 			}
 		} catch (Throwable e1) {
 			logger.error("Can not log", e1);
 		}
-	}
-
-	private int fetchQueryRows(Object result) {
-		return null != result && result instanceof Collection<?> ? ((Collection<?>)result).size() : 0;
 	}
 	
 	public void cleanup() {

@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -35,7 +34,7 @@ import java.util.regex.Pattern;
 @Resource
 @Singleton
 @Path("task/sql")
-public class GenTaskByFreeSqlResource {
+public class GenTaskByFreeSqlResource extends ApproveResource {
     private static ObjectMapper mapper = new ObjectMapper();
 
     @POST
@@ -47,7 +46,7 @@ public class GenTaskByFreeSqlResource {
             @FormParam("sql_content") String sql_content, @FormParam("params") String params,
             @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
             @FormParam("scalarType") String scalarType, @FormParam("pagination") boolean pagination,
-            @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+            @FormParam("length") boolean length, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
             @FormParam("hints") String hints) throws Exception {
         try {
             GenTaskByFreeSql task = new GenTaskByFreeSql();
@@ -55,7 +54,7 @@ public class GenTaskByFreeSqlResource {
             if (action.equalsIgnoreCase("delete")) {
                 task.setId(id);
                 if (0 >= BeanGetter.getDaoByFreeSql().deleteTask(task)) {
-                    return Status.ERROR;
+                    return Status.ERROR();
                 }
             } else {
                 String userNo = RequestUtil.getUserNo(request);
@@ -74,6 +73,7 @@ public class GenTaskByFreeSqlResource {
                 task.setComment(comment);
                 task.setScalarType(scalarType);
                 task.setPagination(pagination);
+                task.setLength(length);
                 task.setSql_style(sql_style);
 
                 if ("简单类型".equals(pojo_name)) {
@@ -94,7 +94,7 @@ public class GenTaskByFreeSqlResource {
                     task.setId(id);
                     task.setVersion(BeanGetter.getDaoByFreeSql().getVersionById(id));
                     if (0 >= BeanGetter.getDaoByFreeSql().updateTask(task)) {
-                        Status status = Status.ERROR;
+                        Status status = Status.ERROR();
                         status.setInfo("更新出错，数据是否合法？或者已经有同名方法？");
                         return status;
                     }
@@ -102,51 +102,20 @@ public class GenTaskByFreeSqlResource {
                     task.setGenerated(false);
                     task.setVersion(1);
                     if (0 >= BeanGetter.getDaoByFreeSql().insertTask(task)) {
-                        Status status = Status.ERROR;
+                        Status status = Status.ERROR();
                         status.setInfo("新增出错，数据是否合法？或者已经有同名方法？");
                         return status;
                     }
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
-    }
-
-    private boolean needApproveTask(int projectId, int userId) throws SQLException {
-        Project prj = BeanGetter.getDaoOfProject().getProjectByID(projectId);
-        if (prj == null) {
-            return true;
-        }
-        List<UserGroup> lst =
-                BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(prj.getDal_group_id(), userId);
-        if (lst != null && lst.size() > 0 && lst.get(0).getRole() == 1) {
-            return false;
-        }
-        // all child group
-        List<GroupRelation> grs =
-                BeanGetter.getGroupRelationDao().getAllGroupRelationByCurrentGroupId(prj.getDal_group_id());
-        if (grs == null || grs.size() < 1) {
-            return true;
-        }
-        // check user is or not in the child group which have admin role
-        Iterator<GroupRelation> ite = grs.iterator();
-        while (ite.hasNext()) {
-            GroupRelation gr = ite.next();
-            if (gr.getChild_group_role() == 1) {
-                int groupId = gr.getChild_group_id();
-                List<UserGroup> test = BeanGetter.getDalUserGroupDao().getUserGroupByGroupIdAndUserId(groupId, userId);
-                if (test != null && test.size() > 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     @POST
@@ -155,7 +124,7 @@ public class GenTaskByFreeSqlResource {
             @FormParam("sql_style") String sql_style, // C#风格或者Java风格
             @FormParam("sql_content") String sql_content) {
         try {
-            Status status = Status.OK;
+            Status status = Status.OK();
             DatabaseSetEntry databaseSetEntry =
                     BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
             CurrentLanguage lang = (sql_content.contains("@") || "csharp".equals(sql_style)) ? CurrentLanguage.CSharp
@@ -166,7 +135,7 @@ public class GenTaskByFreeSqlResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -176,19 +145,19 @@ public class GenTaskByFreeSqlResource {
     @Path("getMockValue")
     public Status getMockValue(@FormParam("params") String params) {
         try {
-            Status status = Status.OK;
+            Status status = Status.OK();
             int[] sqlTypes = getSqlTypes(params);
             Object[] values = SQLValidation.mockStringValues(sqlTypes);
             try {
                 status.setInfo(mapper.writeValueAsString(values));
             } catch (JsonProcessingException e) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("获取mock value异常.");
             }
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -248,7 +217,7 @@ public class GenTaskByFreeSqlResource {
     public Status validateSQL(@FormParam("db_name") String set_name, @FormParam("crud_type") String crud_type,
             @FormParam("sql_content") String sql_content, @FormParam("params") String params,
             @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) {
-        Status status = Status.OK;
+        Status status = Status.OK();
 
         try {
             Map<String, Parameter> map = new LinkedHashMap<>();
@@ -331,12 +300,12 @@ public class GenTaskByFreeSqlResource {
                 status.setInfo(resultPrefix + validResult.getAffectRows());
                 status.setExplanJson(validResult.getMessage());
             } else {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo(validResult.getMessage());
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
         }
 

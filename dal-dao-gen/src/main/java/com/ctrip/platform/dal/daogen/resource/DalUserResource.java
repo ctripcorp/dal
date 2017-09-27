@@ -57,19 +57,19 @@ public class DalUserResource {
             @FormParam("userEmail") String userEmail, @FormParam("password") String password) {
         try {
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userName == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userEmail == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
@@ -84,20 +84,20 @@ public class DalUserResource {
             try {
                 int result = BeanGetter.getDaoOfLoginUser().insertUser(user);
                 if (result < 1) {
-                    Status status = Status.ERROR;
+                    Status status = Status.ERROR();
                     status.setInfo("Add operation failed.");
                     return status;
                 }
             } catch (Exception e) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo(e.getMessage());
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -109,19 +109,19 @@ public class DalUserResource {
             @FormParam("userName") String userName, @FormParam("userEmail") String userEmail) {
         try {
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userName == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (userEmail == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
@@ -134,20 +134,20 @@ public class DalUserResource {
             try {
                 int result = BeanGetter.getDaoOfLoginUser().updateUser(user);
                 if (result < 1) {
-                    Status status = Status.ERROR;
+                    Status status = Status.ERROR();
                     status.setInfo("Update operation failed.");
                     return status;
                 }
             } catch (Exception e) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo(e.getMessage());
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -159,18 +159,18 @@ public class DalUserResource {
         try {
             int result = BeanGetter.getDaoOfLoginUser().deleteUser(userId);
             if (result < 1) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Delete operation failed.");
                 return status;
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
 
-        return Status.OK;
+        return Status.OK();
     }
 
     @POST
@@ -178,7 +178,7 @@ public class DalUserResource {
     public Status userSignIn(@Context HttpServletRequest request, @FormParam("userNo") String userNo,
             @FormParam("password") String password) {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             if (userNo == null || userNo.isEmpty()) {
                 status.setInfo(userNumberNullMessage);
                 return status;
@@ -194,7 +194,7 @@ public class DalUserResource {
                 if (user != null) {
                     String pw = user.getPassword();
                     if (pw != null && pw.equals(MD5Util.parseStrToMd5L32(password))) {
-                        status = Status.OK;
+                        status = Status.OK();
                         setSession(request, user);
                         return status;
                     }
@@ -207,7 +207,7 @@ public class DalUserResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -223,7 +223,7 @@ public class DalUserResource {
     @Path("exist")
     public Status isUserExists(@FormParam("userNo") String userNo) {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             if (userNo == null || userNo.isEmpty()) {
                 status.setInfo(userNumberNullMessage);
                 return status;
@@ -241,11 +241,11 @@ public class DalUserResource {
                 return status;
             }
 
-            status = Status.OK;
+            status = Status.OK();
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -257,7 +257,7 @@ public class DalUserResource {
             @FormParam("userName") String userName, @FormParam("userEmail") String userEmail,
             @FormParam("password") String password) {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             if (userNo == null || userNo.isEmpty()) {
                 status.setInfo(userNumberNullMessage);
                 return status;
@@ -289,7 +289,7 @@ public class DalUserResource {
                     return status;
                 }
                 setSession(request, user);
-                status = status.OK;
+                status = Status.OK();
             } catch (Exception e) {
                 String message = e.getMessage() == null ? e.toString() : e.getMessage();
                 status.setInfo(message);
@@ -299,7 +299,7 @@ public class DalUserResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

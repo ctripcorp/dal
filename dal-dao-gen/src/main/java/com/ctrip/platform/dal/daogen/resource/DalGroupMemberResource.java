@@ -129,19 +129,19 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的组员操作权限.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId, user_role)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你所授予的权限大于你所拥有的权限.");
                 return status;
             }
@@ -151,7 +151,7 @@ public class DalGroupMemberResource {
             Iterator<UserGroup> ite = ugGroups.iterator();
             while (ite.hasNext()) {
                 if (ite.next().getGroup_id() == currentGroupId) {
-                    Status status = Status.ERROR;
+                    Status status = Status.ERROR();
                     status.setInfo("用户[" + user.getUserName() + "]已经加入当前DAL Team.");
                     return status;
                 }
@@ -159,16 +159,16 @@ public class DalGroupMemberResource {
             int adduser = allowAddUser == true ? 1 : 2;
             int ret = BeanGetter.getDalUserGroupDao().insertUserGroup(userID, currentGroupId, user_role, adduser);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Add operation failed.");
                 return status;
             } else {
                 transferProjectToGroup(user.getUserNo(), currentGroupId);
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -183,19 +183,19 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的组员操作权限.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId, user_role)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你所授予的权限大于你所拥有的权限.");
                 return status;
             }
@@ -203,14 +203,14 @@ public class DalGroupMemberResource {
             int adduser = allowAddUser == true ? 1 : 2;
             int ret = BeanGetter.getDalUserGroupDao().updateUserPersimion(userID, currentGroupId, user_role, adduser);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Update operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -225,25 +225,25 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (currentGroupId == childGroupId) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("不能将当前组加入当前组.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的组员操作权限.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId, child_group_role)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你所授予的权限大于你所拥有的权限.");
                 return status;
             }
@@ -252,7 +252,7 @@ public class DalGroupMemberResource {
                     .getGroupRelationByCurrentGroupIdAndChildGroupId(currentGroupId, childGroupId);
             if (relation != null) {
                 DalGroup dalGroup = BeanGetter.getDaoOfDalGroup().getDalGroupById(childGroupId);
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("DAL Team[" + dalGroup.getGroup_name() + "]已经加入当前DAL Team.");
                 return status;
             }
@@ -269,14 +269,14 @@ public class DalGroupMemberResource {
             relation.setUpdate_user_no(upNo);
             int ret = BeanGetter.getGroupRelationDao().insertChildGroup(relation);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Add operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -291,19 +291,19 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的组员操作权限.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId, childGroupRole)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你所授予的权限大于你所拥有的权限.");
                 return status;
             }
@@ -313,14 +313,14 @@ public class DalGroupMemberResource {
             int ret = BeanGetter.getGroupRelationDao().updateGroupRelation(currentGroupId, childGroupId, childGroupRole,
                     adduser, updateUserNo, new Timestamp(System.currentTimeMillis()));
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Update operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -334,13 +334,13 @@ public class DalGroupMemberResource {
             String userNo = RequestUtil.getUserNo(request);
 
             if (userNo == null) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
             }
 
             if (!this.validatePermision(userNo, currentGroupId)) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("你没有当前DAL Team的组员操作权限.");
                 return status;
             }
@@ -350,23 +350,23 @@ public class DalGroupMemberResource {
                 int ret = BeanGetter.getGroupRelationDao()
                         .deleteChildGroupByCurrentGroupIdAndChildGroupId(currentGroupId, childGroupId);
                 if (ret <= 0) {
-                    Status status = Status.ERROR;
+                    Status status = Status.ERROR();
                     status.setInfo("Delete operation failed.");
                     return status;
                 }
-                return Status.OK;
+                return Status.OK();
             }
 
             int ret = BeanGetter.getDalUserGroupDao().deleteUserFromGroup(userId, currentGroupId);
             if (ret <= 0) {
-                Status status = Status.ERROR;
+                Status status = Status.ERROR();
                 status.setInfo("Delete operation failed.");
                 return status;
             }
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

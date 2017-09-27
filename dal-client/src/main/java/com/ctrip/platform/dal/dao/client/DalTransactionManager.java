@@ -154,14 +154,14 @@ public class DalTransactionManager {
 
 			endTransaction(level);
 		} catch (Throwable e) {
-			ex = e;
+		    action.error(e);
 			rollbackTransaction();
 			MarkdownManager.detect(action.connHolder, action.start, e);
 		}finally{
 			action.cleanup();
 		}
 
-		action.end(result, ex);
+		action.end(result);
 
 		return result;
 	}

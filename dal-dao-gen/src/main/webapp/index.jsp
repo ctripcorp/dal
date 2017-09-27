@@ -221,6 +221,11 @@
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">选择SQL风格：</label>
+                            <a style="margin-left: 8px;" href="#" class="ctip"
+                               data-toggle="tooltip" data-placement="left" title="1、同一个Project下不允许C#和Java DAO共存<br/>
+                               2、新建DAO时，语言强制指定为该Project下第一个DAO的语言类型">
+                                <span class="glyphicon glyphicon-question-sign"></span>
+                            </a>
                             <select id="sql_style" class="span8">
                                 <option value="csharp" selected="selected">C#风格(参数形式为@Name)</option>
                                 <option value="java">JAVA风格(参数形式为?)</option>
@@ -279,6 +284,10 @@
                     </div>
                     <div class="row-fluid margin-bottom-20">
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
+                    </div>
+                    <div class="row-fluid margin-bottom-20" id="divStandardLength">
+                        <label class="popup_label"><input id="standard_length_property" type="checkbox">增加Column
+                            length属性</label>
                     </div>
                 </div>
                 <div class="steps step2-1-2 row-fluid">
@@ -381,9 +390,7 @@
                             </div>
                         </div>
                     </div>
-                    <br>
-
-                    <div id="where_condition" class="step2-2-1-2">
+                    <div id="where_condition" class="step2-2-1-2" style="margin-top: 16px;">
                         <div class="row-fluid">
                             <div class="control-group">
                                 <label class="control-label popup_label">Where条件：</label> <select id="conditions"
@@ -411,44 +418,48 @@
                                              class="span2 btn btn-primary popup_text input-sm" value="添加">
                             </div>
                         </div>
-                        <br>
-
-                        <div class="row-fluid">
+                        <div class="row-fluid" style="margin-top: 16px;">
                             <select class="span10" id="selected_condition" multiple="multiple" style="height: 120px;">
                             </select> <input id="del_condition" type="button"
                                              class="span2 btn btn-danger popup_text input-sm" value="删除">
                         </div>
                     </div>
-                    <br>
-
-                    <div class="row-fluid" id="auto_sql_scalarTypeDiv">
+                    <div class="row-fluid" id="auto_sql_scalarTypeDiv" style="margin-top: 16px;">
                         <div class="control-group">
                             <label class="control-label popup_label">返回形式：</label> <select id="auto_sql_scalarType"
                                                                                            class='span5'>
                             <option value='List'>列表(List)</option>
                             <option value='Single'>唯一的(Single)</option>
                             <option value='First'>第一个(First)</option>
-                        </select> <label class="popup_label" style="padding-left: 15px">
-                            <input id="auto_sql_pagination" type="checkbox"> 增加分页方法
-                        </label>
+                        </select>
                         </div>
                     </div>
-                    <div id="orderby">
-                        <div class="row-fluid">
-                            <div class="control-group">
-                                <label class="control-label popup_label">Order by：</label> <select id="orderby_field"
-                                                                                                   class="span5">
-                                <option value='-1'>--请选择--</option>
-                            </select> <select id="orderby_sort" class='span3'>
-                                <option value='asc'>ASC</option>
-                                <option value='desc'>DESC</option>
-                            </select>
-                            </div>
+                    <div class="row-fluid" id="orderby">
+                        <div class="control-group">
+                            <label class="control-label popup_label">Order by：</label> <select id="orderby_field"
+                                                                                               class="span5">
+                            <option value='-1'>--请选择--</option>
+                        </select> <select id="orderby_sort" class='span3'>
+                            <option value='asc'>ASC</option>
+                            <option value='desc'>DESC</option>
+                        </select>
                         </div>
                     </div>
-                    <br>
-
                     <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="popup_label">
+                                <input id="auto_sql_pagination" type="checkbox"> 增加分页方法
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row-fluid" id="divBuildLength">
+                        <div class="control-group">
+                            <label class="popup_label">
+                                <input id="build_length_property" type="checkbox"> 增加Column length属性
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row-fluid" style="margin-top: 16px;">
                         <div id="sql_builder" class="span12" style="height: 100px;">
                         </div>
                     </div>
@@ -565,20 +576,31 @@
                             <select id="sql_pojo_name" class="span9"></select>
                         </div>
                     </div>
-                    <div class="row-fluid" id="free_sql_scalarTypeDiv" style="margin-top: 12px">
+                    <div class="row-fluid" id="free_sql_scalarTypeDiv">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 90px;">返回形式：</label>
                             <select id="free_sql_scalarType" class='span5'>
                                 <option value='List'>列表(List)</option>
                                 <option value='Single'>唯一的(Single)</option>
                                 <option value='First'>第一个(First)</option>
-                            </select> <label class="popup_label" style="padding-left: 20px">
-                            <input id="free_sql_pagination" type="checkbox"> 增加分页方法
-                        </label>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="popup_label">
+                                <input id="free_sql_pagination" type="checkbox"> 增加分页方法
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row-fluid" id="divFreeLength">
+                        <div class="control-group">
+                            <label class="popup_label">
+                                <input id="free_length_property" type="checkbox"> 增加Column length属性
+                            </label>
                         </div>
                     </div>
                     <label class="control-label popup_label">输入SQL，占位符：Java请使用?，c#请使用@Name形式</label>
-
                     <div class="row-fluid">
                         <div id="sql_editor" class="span12" style="height: 200px;">
                         </div>

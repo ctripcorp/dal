@@ -12,21 +12,22 @@
      * @param postData
      */
     var post_task_table_view_sp = function (postData) {
-        postData["table_names"] = $('#table_list').multipleSelect('getSelects').join(",");
-        postData["view_names"] = $('#view_list').multipleSelect('getSelects').join(",");
-        postData["sp_names"] = $('#sp_list').multipleSelect('getSelects').join(",");
+        postData["table_names"] = $("#table_list").multipleSelect("getSelects").join(",");
+        postData["view_names"] = $("#view_list").multipleSelect("getSelects").join(",");
+        postData["sp_names"] = $("#sp_list").multipleSelect("getSelects").join(",");
         postData["prefix"] = $("#prefix").val();
         postData["suffix"] = $("#suffix").val();
         postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
         postData["pagination"] = $("#pagination").is(":checked");
+        postData["length"] = $("#standard_length_property").is(":checked");
         var api_list = new Array();
         $.each($(".step2-1-2 input:checked"), function (index, value) {
             api_list.push($(value).attr("id"));
         });
         postData["api_list"] = api_list.join(",");
         $.post("/rest/task/table", postData, function (data) {
-            $("#page1").modal('hide');
-            w2ui["grid_toolbar"].click('refreshDAO', null);
+            $("#page1").modal("hide");
+            w2ui["grid_toolbar"].click("refreshDAO", null);
             if ($("#gen_on_save").is(":checked")) {
                 $("#generateCode").modal({
                     "backdrop": "static"
@@ -57,8 +58,9 @@
             postData["orderby"] = "";
         }
 
-        postData["fields"] = $('#fields').multipleSelect('getSelects').join(",");
+        postData["fields"] = $("#fields").multipleSelect("getSelects").join(",");
         postData["sql_content"] = ace.edit("sql_builder").getValue();
+        postData["length"] = $("#build_length_property").is(":checked");
 
         var paramList = [];
         var paramValues = [];
@@ -145,8 +147,8 @@
 
         $.post("/rest/task/auto", postData, function (data) {
             if (data.code == "OK") {
-                $("#page1").modal('hide');
-                w2ui["grid_toolbar"].click('refreshDAO', null);
+                $("#page1").modal("hide");
+                w2ui["grid_toolbar"].click("refreshDAO", null);
                 if ($("#gen_on_save").is(":checked")) {
                     // window.ajaxutil.generate_code($("#gen_language").val());
                     $("#generateCode").modal({"backdrop": "static"});
@@ -187,6 +189,7 @@
 
         $("#error_msg").text("");
 
+        postData["length"] = $("#free_length_property").is(":checked");
         postData["crud_type"] = $("#free_sql_crud_option").val();
         postData["sql_content"] = ace.edit("sql_editor").getValue();
         var paramList = [];
@@ -388,7 +391,7 @@
                     $("#viewCode").val(data.info);
                 }
                 else {
-                    $("#generateCodeProcessErrorMess").html(data.info);
+                    $("#generateCodeProcessErrorMess").html(data.info.replace(/\r\n/g, "<br />"));
                     $("#generateCodeProcessErrorDiv").modal();
                     progress.reportException("generate success return but not ok");
                 }

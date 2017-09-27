@@ -43,7 +43,7 @@ public class DatabaseResource {
     public Status mergeDB(@Context HttpServletRequest request) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
-            Status status = Status.OK;
+            Status status = Status.OK();
 
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             List<UserGroup> urGroups = BeanGetter.getDalUserGroupDao().getUserGroupByUserId(user.getId());
@@ -58,7 +58,7 @@ public class DatabaseResource {
             }
 
             if (!havePersimion) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("You have no permision, only DAL Admin Team can do this.");
                 return status;
             }
@@ -80,10 +80,10 @@ public class DatabaseResource {
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -98,7 +98,7 @@ public class DatabaseResource {
         Connection conn = null;
         ResultSet rs = null;
         try {
-            Status status = Status.OK;
+            Status status = Status.OK();
             try {
                 conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
                         DatabaseType.valueOf(dbtype).getValue());
@@ -110,18 +110,18 @@ public class DatabaseResource {
                 }
                 status.setInfo(mapper.writeValueAsString(allCatalog));
             } catch (SQLException e) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo(e.getMessage());
                 return status;
             } catch (JsonProcessingException e) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo(e.getMessage());
                 return status;
             }
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         } finally {
@@ -140,11 +140,11 @@ public class DatabaseResource {
             @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId,
             @FormParam("gen_default_dbset") boolean isGenDefault) throws Exception {
         try {
-            Status status = Status.OK;
+            Status status = Status.OK();
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
 
             if (allDbDao.getGroupDBByDbName(allinonename) != null) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo(allinonename + "已经存在!");
                 return status;
             } else {
@@ -185,10 +185,10 @@ public class DatabaseResource {
                 allDbDao.insertDalGroupDB(groupDb);
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -217,14 +217,14 @@ public class DatabaseResource {
             throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
-            Status status = Status.OK;
+            Status status = Status.OK();
 
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
             DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
             if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("你没有当前DataBase的操作权限.");
             } else {
                 allDbDao.deleteDalGroupDB(groupDb.getId());
@@ -232,7 +232,7 @@ public class DatabaseResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -245,14 +245,14 @@ public class DatabaseResource {
             throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
-            Status status = Status.OK;
+            Status status = Status.OK();
 
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
             DalGroupDB groupDb = allDbDao.getGroupDBByDbName(allinonename);
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
 
             if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("你没有当前DataBase的操作权限.");
                 return status;
             }
@@ -267,15 +267,15 @@ public class DatabaseResource {
                 }
                 status.setInfo(mapper.writeValueAsString(groupDb));
             } catch (JsonProcessingException e) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo(e.getMessage());
                 return status;
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -290,12 +290,12 @@ public class DatabaseResource {
             @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
             @FormParam("dbcatalog") String dbcatalog) throws Exception {
         try {
-            Status status = Status.OK;
+            Status status = Status.OK();
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
             DalGroupDB db = allDbDao.getGroupDBByDbName(allinonename);
 
             if (db != null && db.getId() != id) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo(allinonename + "已经存在!");
                 return status;
             }
@@ -305,17 +305,17 @@ public class DatabaseResource {
             DalGroupDB groupDb = allDbDao.getGroupDBByDbId(id);
 
             if (!validatePermision(user.getId(), groupDb.getDal_group_id())) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("你没有当前DataBase的操作权限.");
                 return status;
             }
 
             allDbDao.updateGroupDB(id, allinonename, dbaddress, dbport, dbuser, dbpassword, dbcatalog,
                     DatabaseType.valueOf(dbtype).getValue());
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -454,7 +454,7 @@ public class DatabaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("table_sps")
     public Status getTableSPNames(@QueryParam("db_name") String setName) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         TableSpNames tableSpNames = new TableSpNames();
         List<String> views;
         List<String> tables;
@@ -490,7 +490,7 @@ public class DatabaseResource {
             status.setInfo(mapper.writeValueAsString(tableSpNames));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -529,7 +529,7 @@ public class DatabaseResource {
     @Path("validation")
     public Status validationKey(@QueryParam("key") String key) throws Exception {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             Response res = WebUtil.getAllInOneResponse(key, null);
             String httpCode = res.getStatus();
             if (!httpCode.equals(WebUtil.HTTP_CODE)) {
@@ -537,7 +537,7 @@ public class DatabaseResource {
                 return status;
             }
 
-            status = status.OK;
+            status = Status.OK();
             ResponseData[] data = res.getData();
             if (data != null && data.length > 0) {
                 String error = data[0].getErrorMessage();
@@ -551,7 +551,7 @@ public class DatabaseResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

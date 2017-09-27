@@ -67,7 +67,7 @@ public class ConnectionStringProcessor {
     private static final int DEFAULT_TIMEOUT = 15 * 1000;
     private static final String EMPTY_ID = "999999";
 
-    private static final String TITAN_APP_ID = "123456"; // 100010061 123456
+    private static final String TITAN_APP_ID = "100010061"; // 100010061 123456
 
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
@@ -248,12 +248,12 @@ public class ConnectionStringProcessor {
     }
 
     public TypedConfig<String> getTitanTypedConfig(String name) {
-        TypedConfig<String> config =
-                TypedConfig.get(TITAN_APP_ID, name.toLowerCase(), null, new TypedConfig.Parser<String>() { // name.toUpperCase()
-                    public String parse(String connectionString) {
-                        return connectionString;
-                    }
-                });
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        TypedConfig<String> config = TypedConfig.get(TITAN_APP_ID, keyName, null, new TypedConfig.Parser<String>() {
+            public String parse(String connectionString) {
+                return connectionString;
+            }
+        });
 
         return config;
     }

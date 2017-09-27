@@ -30,16 +30,22 @@ import com.ctrip.platform.dal.dao.vi.ConfigBeanFactory;
 public class CtripTaskFactory implements DalTaskFactory {
     private DefaultTaskFactory defaultFactory;
     private static final String CALL_SP_BY_NAME = "callSpbyName";
+    private static final String CALL_SP_BY_SQLSEVER = "callSpbySqlServerSyntax";
     private static final String CALL_SPT = "callSpt";
     
     private static final String INSERT_SPT_TPL = "spT_%s_i";
     private static final String DELETE_SPT_TPL = "spT_%s_d";
     private static final String UPDATE_SPT_TPL = "spT_%s_u";
+    
+    private static final String INSERT_SP3_TPL = "sp3_%s_i";
+    private static final String DELETE_SP3_TPL = "sp3_%s_d";
+    private static final String UPDATE_SP3_TPL = "sp3_%s_u";
 
 
     // Default enabled, to compatible with current behavior
     static boolean callSpbyName = true;
     static boolean callSpt = false;
+    static boolean callSpbySqlServerSyntax = true;
 
     @Override
     public void initialize(Map<String, String> settings) {
@@ -54,6 +60,11 @@ public class CtripTaskFactory implements DalTaskFactory {
         String callSptOpt = defaultFactory.getProperty(CALL_SPT);
         if (callSptOpt != null && callSptOpt.length() > 0)
             callSpt = Boolean.parseBoolean(callSptOpt);
+        
+        
+        String callSptBySqlserver = defaultFactory.getProperty(CALL_SP_BY_SQLSEVER);
+        if (callSptBySqlserver != null && callSptBySqlserver.length() > 0)
+            callSpbySqlServerSyntax = Boolean.parseBoolean(callSptBySqlserver);
     }
 
     @Override
@@ -107,7 +118,10 @@ public class CtripTaskFactory implements DalTaskFactory {
 
         BulkTask<int[], T> bulkTask = null;
         if (!callSpt) {
-            bulkTask = new BatchInsertSp3Task<>();
+            if(callSpbySqlServerSyntax)
+                bulkTask = new BatchSp3Task<>(INSERT_SP3_TPL, parser.getColumnNames());
+            else
+                bulkTask = new BatchInsertSp3Task<>();
         } else {
             bulkTask = new CtripSptTask<>(INSERT_SPT_TPL);
         }
@@ -122,7 +136,10 @@ public class CtripTaskFactory implements DalTaskFactory {
 
         BulkTask<int[], T> bulkTask = null;
         if (!callSpt) {
-            bulkTask = new BatchDeleteSp3Task<>();
+            if(callSpbySqlServerSyntax)
+                bulkTask = new BatchSp3Task<>(DELETE_SP3_TPL, parser.getPrimaryKeyNames());
+            else
+                bulkTask = new BatchDeleteSp3Task<>();
         } else {
             bulkTask = new CtripSptTask<>(DELETE_SPT_TPL);
         }
@@ -137,7 +154,10 @@ public class CtripTaskFactory implements DalTaskFactory {
 
         BulkTask<int[], T> bulkTask = null;
         if (!callSpt) {
-            bulkTask = new BatchUpdateSp3Task<>();
+            if(callSpbySqlServerSyntax)
+                bulkTask = new BatchSp3Task<>(UPDATE_SP3_TPL, parser.getColumnNames());
+            else
+                bulkTask = new BatchUpdateSp3Task<>();
         } else {
             bulkTask = new CtripSptTask<>(UPDATE_SPT_TPL);
         }

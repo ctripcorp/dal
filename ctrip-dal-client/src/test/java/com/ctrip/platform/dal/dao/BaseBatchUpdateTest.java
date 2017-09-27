@@ -13,7 +13,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class SingleUpdateSpaTaskTest {
+import com.ctrip.platform.dal.dao.task.BulkTask;
+
+public abstract class BaseBatchUpdateTest {
+
 	private final static String DATABASE_NAME = "SimpleShard";
 	
 	private final static String TABLE_NAME = "People";
@@ -38,13 +41,19 @@ public class SingleUpdateSpaTaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String[] insertSqls = new String[4];
+        setOptionTest();
+		DalHints hints = new DalHints();
+		String[] insertSqls = null;
+		insertSqls = new String[6];
 		insertSqls[0] = "SET IDENTITY_INSERT "+ TABLE_NAME + " ON";
 		insertSqls[1] = "DELETE FROM " + TABLE_NAME;
-		insertSqls[2] = "INSERT INTO " + TABLE_NAME +" ([PeopleID], [Name], [CityID], [ProvinceID], [CountryID])"
-					+ " VALUES(" + 1 + ", " + "'test name' , 1, 1, 1)";
-		insertSqls[3] = "SET IDENTITY_INSERT "+ TABLE_NAME + " OFF";
-		client.batchUpdate(insertSqls, new DalHints().inShard(0));
+		for(int i = 0; i < 3; i ++) {
+			int id = i;
+			insertSqls[i+2] = "INSERT INTO " + TABLE_NAME +" ([PeopleID], [Name], [CityID], [ProvinceID], [CountryID])"
+					+ " VALUES(" + id + ", " + "'test name' , 1, 1, 1)";
+		}
+		insertSqls[5] = "SET IDENTITY_INSERT "+ TABLE_NAME + " OFF";
+		client.batchUpdate(insertSqls, hints.inShard(0));
 		setUpShard();
 	}
 
@@ -72,8 +81,8 @@ public class SingleUpdateSpaTaskTest {
 			e.printStackTrace();
 		}
 	}
-
-	@After
+	
+    @After
 	public void tearDown() throws Exception {
 		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
 		tearDownShard();
@@ -88,33 +97,89 @@ public class SingleUpdateSpaTaskTest {
 		}
 	}
 	
+    public abstract void setOptionTest();
+
+    private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
+        return (BulkTask<int[], T>)new CtripTaskFactory().createBatchUpdateTask(parser);
+    }
+
 	@Test
 	public void testExecute() {
-		SingleUpdateSpaTask<People> test = new SingleUpdateSpaTask<>();
 		PeopleParser parser = new PeopleParser();
-		test.initialize(parser);
+		BulkTask<int[], People> test = getTest(parser);
 		
-		People p1 = new People();
-	 	p1.setPeopleID((long)1);
-	 	p1.setName("test");
-	 	p1.setCityID(-1);
-	 	p1.setProvinceID(-1);
-	 	p1.setCountryID(-1);
-
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(-1);
+		 	p1.setProvinceID(-1);
+		 	p1.setCountryID(-1);
+		 	p.add(p1);
+		}
+		
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1);
+			DalHints hints = new DalHints();
+			test.execute(hints.inShard(0), getPojosFields(p, parser), null);
+			
+			DalTableDao<People> dao = new DalTableDao<>(parser);
+			p = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+			
+			for(People pe: p) {
+				Assert.assertTrue(-1==pe.getProvinceID());
+				Assert.assertTrue(-1==pe.getCityID());
+				Assert.assertTrue(-1==pe.getCountryID());
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
 		}
 	}
-
+	
+	@Test
+	public void testExecuteNullFields() {
+		PeopleParser parser = new PeopleParser();
+		BulkTask<int[], People> test = getTest(parser);
+		
+		List<People> p = new ArrayList<>();
+		
+		for(int i = 0; i < 3; i++) {
+			People p1 = new People();
+		 	p1.setPeopleID((long)i);
+		 	p1.setName("test");
+		 	p1.setCityID(null);
+		 	p1.setProvinceID(null);
+		 	p1.setCountryID(null);
+		 	p.add(p1);
+		}
+		
+		try {
+			DalHints hints = new DalHints();
+			test.execute(hints.inShard(0), getPojosFields(p, parser), null);
+			
+			DalTableDao<People> dao = new DalTableDao<>(parser);
+			p = dao.query("1=1", new StatementParameters(), new DalHints().inShard(0));
+			
+			for(People pe: p) {
+				Assert.assertTrue(1==pe.getProvinceID());
+				Assert.assertTrue(1==pe.getCityID());
+				Assert.assertTrue(1==pe.getCountryID());
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
 	@Test
 	public void testExecuteShard() {
-		SingleUpdateSpaTask<People> test = new SingleUpdateSpaTask<>();
 		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
 		DalTableDao<People> dao = new DalTableDao<>(parser);
-		test.initialize(parser);
+		BulkTask<int[], People> test = getTest(parser);
 		
 		try {
 			for(int i = 0; i < 2; i++) {
@@ -124,8 +189,10 @@ public class SingleUpdateSpaTaskTest {
 					for(People p1: p) {
 					 	p1.setName("test123");
 					 	p1.setProvinceID(-100);
-						test.execute(new DalHints(), parser.getFields(p1), p1);
 					}
+					
+					hints = new DalHints().inShard(i).inTableShard(j);
+					test.execute(hints, getPojosFields(p, parser), null);
 					
 					p = dao.query("1=1", new StatementParameters(), hints);
 					for(People p1: p) {
@@ -156,7 +223,7 @@ public class SingleUpdateSpaTaskTest {
 					}
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
-					dao.update(new DalHints(), p);
+					dao.batchUpdate(new DalHints(), p);
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
 					p = dao.query("1=1", new StatementParameters(), hints);
@@ -191,9 +258,9 @@ public class SingleUpdateSpaTaskTest {
 					pAll.addAll(p);
 				}
 			}
-			
-			dao.update(new DalHints(), pAll);
 					
+			dao.batchUpdate(new DalHints(), pAll);
+			
 			for(int i = 0; i < 2; i++) {
 				for(int j = 0; j < 2; j++) {
 					DalHints hints = new DalHints().inShard(i).inTableShard(j);

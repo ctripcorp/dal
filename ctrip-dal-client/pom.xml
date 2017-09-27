@@ -4,14 +4,14 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.5.4</version>
+        <version>1.5.6</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
     <version>dynamic-datasource-SNAPSHOT</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>0.8.35</framework-bom.version>
+        <framework-bom.version>1.5.1</framework-bom.version>
     </properties>
     <dependencyManagement>
         <dependencies>

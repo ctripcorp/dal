@@ -17,7 +17,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     private static final String TVP_EXEC = "exec %s %s";
 
     private String sptTpl;
-    
+
     public CtripSptTask(String sptTpl) {
         this.sptTpl = sptTpl;
     }
@@ -48,7 +48,9 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     private SQLServerDataTable getDataTable(Map<Integer, Map<String, ?>> daoPojos) throws SQLServerException {
         if (daoPojos == null || daoPojos.size() == 0)
             return null;
-        Map<String, Integer> map = new TreeMap<>(columnTypes);
+        Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // match with the case insensitive rule
+                                                                                 // of ctrip sql server
+        map.putAll(columnTypes);
         if (map == null || map.size() == 0)
             return null;
 

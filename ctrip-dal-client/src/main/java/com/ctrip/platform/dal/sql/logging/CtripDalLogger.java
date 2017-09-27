@@ -144,7 +144,7 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     private void recordSuccess(final LogEntry entry, final int count) {
         try {
-            DalCatLogger.catTransactionSuccess((CtripLogEntry) entry);
+            DalCatLogger.catTransactionSuccess((CtripLogEntry) entry, count);
             if (samplingLogging && !validate(entry))
                 return;
             DalCLogger.success((CtripLogEntry) entry, count);

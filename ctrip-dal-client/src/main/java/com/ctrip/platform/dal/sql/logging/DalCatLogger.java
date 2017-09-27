@@ -32,10 +32,10 @@ public class DalCatLogger {
 		}
 	}
 
-	public static void catTransactionSuccess(CtripLogEntry entry){
+	public static void catTransactionSuccess(CtripLogEntry entry, int count){
 		try {
 			Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
-			Cat.logSizeEvent(RECORD_COUNT, entry.getResultCount());
+			Cat.logSizeEvent(RECORD_COUNT, count);
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
 			entry.getCatTransaction().complete();
 		} catch (Throwable e) {

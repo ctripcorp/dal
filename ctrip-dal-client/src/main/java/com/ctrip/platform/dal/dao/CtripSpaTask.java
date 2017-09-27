@@ -1,11 +1,22 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.TaskAdapter;
 
+/**
+ * Using Sqlserver special syntax to speed up execution.
+ * 
+ * Example: exec spA_TestUnicode_u @id=?, @nvarchar1=?, @varchar1=?
+ * 
+ * @author jhhe
+ *
+ * @param <T>
+ */
 public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTask<T> {
 	public static final String RET_CODE = "retcode";
 	private DalScalarExtractor extractor = new DalScalarExtractor();
@@ -15,14 +26,20 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
         CallSpByIndexValidator.validate(parser, CtripTaskFactory.callSpbyName);        
     }
 	
-	public String prepareSpCall(String SpName, StatementParameters parameters, Map<String, ?> fields) {
-		if(CtripTaskFactory.callSpbyName)
-			addParametersByName(parameters, fields);
-		else
-			addParametersByIndex(parameters, fields);
-		
-		String callSql = buildCallSql(SpName, fields.size());
-		parameters.setResultsParameter(RET_CODE, extractor);
-		return callSql;
+	public String prepareSpCall(String spName, StatementParameters parameters, Map<String, ?> fields) {
+	    String callSql;
+	    if(CtripTaskFactory.callSpbySqlServerSyntax) {
+	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
+	        addParametersByIndex(parameters, fields);
+	    }else{
+	        callSql = buildCallSql(spName, fields.size());
+            if(CtripTaskFactory.callSpbyName)
+                addParametersByName(parameters, fields);
+            else
+                addParametersByIndex(parameters, fields);
+	    }        
+
+        parameters.setResultsParameter(RET_CODE, extractor);
+        return callSql;
 	}
 }

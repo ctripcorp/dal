@@ -13,7 +13,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BatchDeleteSp3TaskTest {
+import com.ctrip.platform.dal.dao.task.BulkTask;
+
+public abstract class BaseBatchDeleteTest {
 
 	private final static String DATABASE_NAME = "SimpleShard";
 	
@@ -39,6 +41,8 @@ public class BatchDeleteSp3TaskTest {
 
 	@Before
 	public void setUp() throws Exception {
+        setOptionTest();
+
 		DalHints hints = new DalHints();
 		String[] insertSqls = null;
 		insertSqls = new String[6];
@@ -95,11 +99,16 @@ public class BatchDeleteSp3TaskTest {
 		}
 	}
 	
-	@Test
+	public abstract void setOptionTest();
+	
+    private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
+        return (BulkTask<int[], T>)new CtripTaskFactory().createBatchDeleteTask(parser);
+    }
+        
+    @Test
 	public void testExecute() {
-		BatchDeleteSp3Task<People> test = new BatchDeleteSp3Task<>();
 		PeopleParser parser = new PeopleParser();
-		test.initialize(parser);
+		BulkTask<int[], People> test = getTest(parser);
 		
 		List<People> p = new ArrayList<>();
 		
@@ -121,13 +130,12 @@ public class BatchDeleteSp3TaskTest {
 			Assert.fail();
 		}
 	}
-	
+
 	@Test
 	public void testExecuteShard() {
-		BatchDeleteSp3Task<People> test = new BatchDeleteSp3Task<>();
 		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
 		DalTableDao<People> dao = new DalTableDao<>(parser);
-		test.initialize(parser);
+		BulkTask<int[], People> test = getTest(parser);
 		
 		try {
 			for(int i = 0; i < 2; i++) {

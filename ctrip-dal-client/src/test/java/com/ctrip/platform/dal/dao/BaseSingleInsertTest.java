@@ -1,10 +1,11 @@
 package com.ctrip.platform.dal.dao;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -13,7 +14,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BatchInsertSp3TaskTest {
+import com.ctrip.platform.dal.dao.task.SingleTask;
+
+public abstract class BaseSingleInsertTest {
+    public abstract void setOptionTest();
+    
+    private <T> SingleTask<T> getTest(DalParser<T> parser) {
+        return new CtripTaskFactory().createSingleInsertTask(parser);
+    }
 
 	private final static String DATABASE_NAME = "SimpleShard";
 	
@@ -39,11 +47,7 @@ public class BatchInsertSp3TaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
-	}
-
-	@After
-	public void tearDown() throws Exception {
+        setOptionTest();
 		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
 		tearDownShard();
 	}
@@ -56,70 +60,92 @@ public class BatchInsertSp3TaskTest {
 			}
 		}
 	}
+
+	@After
+	public void tearDown() throws Exception {
+		client.update("DELETE FROM " + TABLE_NAME, new StatementParameters(), new DalHints().inShard(0));
+	}
 	
 	@Test
 	public void testExecute() {
-		BatchInsertSp3Task<People> test = new BatchInsertSp3Task<>();
 		PeopleParser parser = new PeopleParser();
-		test.initialize(parser);
+		SingleTask<People> test = getTest(parser);
 		
-		List<People> p = new ArrayList<>();
-		
-		for(int i = 0; i < 3; i++) {
-			People p1 = new People();
-		 	p1.setPeopleID((long)i);
-		 	p1.setName("test");
-		 	p1.setCityID(-1);
-		 	p1.setProvinceID(-1);
-		 	p1.setCountryID(-1);
-		 	p.add(p1);
-		}
-		
+		People p1 = new People();
+	 	p1.setPeopleID((long)1);
+	 	p1.setName("test");
+	 	p1.setCityID(-1);
+	 	p1.setProvinceID(-1);
+	 	p1.setCountryID(-1);
+
 		try {
+			KeyHolder keyHolder = new KeyHolder();
 			DalHints hints = new DalHints();
-			test.execute(hints.inShard(0), getPojosFields(p, parser), null);
+			hints.setKeyHolder(keyHolder);
+			
+			test.execute(hints.inShard(0), parser.getFields(p1), p1);
+			Number id1 = keyHolder.getKey();
+			assertTrue(id1.intValue() > 0);
+			//----------
+			keyHolder = new KeyHolder();
+			hints = new DalHints();
+			hints.setKeyHolder(keyHolder);
+			
+			test.execute(hints.inShard(0), parser.getFields(p1), p1);
+			Number id2 = keyHolder.getKey();
+			assertTrue(id2.intValue() > 0);
+			assertTrue(id2.intValue() - id1.intValue() == 1);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
 	}
 	
 	@Test
 	public void testExecuteShard() {
-		BatchInsertSp3Task<People> test = new BatchInsertSp3Task<>();
 		PeopleParser parser = new PeopleParser("SimpleDbTableShard");
 		DalTableDao<People> dao = new DalTableDao<>(parser);
-		test.initialize(parser);
+		SingleTask<People> test = getTest(parser);
 
 		try {
 			for(int i = 0; i < 2; i++) {
 				for(int j = 0; j < 2; j++) {
 					DalHints hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
-					Assert.assertTrue(c == 0);
+					assertTrue(c == 0);
 					
-					List<People> p = new ArrayList<>();
-					for(int k = 0; k < 3; k++) {
-						People p1 = new People();
-					 	p1.setPeopleID((long)i);
-					 	p1.setName("test");
-					 	p1.setCityID(j);
-					 	p1.setProvinceID(-1);
-					 	p1.setCountryID(i);
-					 	p.add(p1);
-					}
+					People p1 = new People();
+				 	p1.setPeopleID((long)i);
+				 	p1.setName("test");
+				 	p1.setCityID(j);
+				 	p1.setProvinceID(-1);
+				 	p1.setCountryID(i);
+					
+					KeyHolder keyHolder = new KeyHolder();
+					hints = new DalHints();
+					hints.setKeyHolder(keyHolder);
+					
+					test.execute(hints, parser.getFields(p1), p1);
+					Number id1 = keyHolder.getKey();
+					assertTrue(id1.intValue() > 0);
+					//----------
+					keyHolder = new KeyHolder();
+					hints = new DalHints();
+					hints.setKeyHolder(keyHolder);
+					
+					test.execute(hints, parser.getFields(p1), p1);
+					Number id2 = keyHolder.getKey();
+					assertTrue(id2.intValue() > 0);
+					assertTrue(id2.intValue() - id1.intValue() == 1);
 
 					hints = new DalHints().inShard(i).inTableShard(j);
-					test.execute(hints, getPojosFields(p, parser), null);
-					
-					hints = new DalHints().inShard(i).inTableShard(j);
 					c = dao.count("1=1", new StatementParameters(), hints).intValue();
-					Assert.assertTrue(c == 3);
+					assertTrue(c == 2);
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
 	}
 	
@@ -133,29 +159,40 @@ public class BatchInsertSp3TaskTest {
 				for(int j = 0; j < 2; j++) {
 					DalHints hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
-					Assert.assertTrue(c == 0);
+					assertTrue(c == 0);
 					
-					List<People> p = new ArrayList<>();
-					for(int k = 0; k < 3; k++) {
-						People p1 = new People();
-					 	p1.setPeopleID((long)i);
-					 	p1.setName("test");
-					 	p1.setCityID(j);
-					 	p1.setProvinceID(-1);
-					 	p1.setCountryID(i);
-					 	p.add(p1);
-					}
+					People p1 = new People();
+				 	p1.setPeopleID((long)i);
+				 	p1.setName("test");
+				 	p1.setCityID(j);
+				 	p1.setProvinceID(-1);
+				 	p1.setCountryID(i);
+					
+					KeyHolder keyHolder = new KeyHolder();
+					hints = new DalHints();
+					hints.setKeyHolder(keyHolder);
+					
+					dao.insert(hints, p1);
+					Number id1 = keyHolder.getKey();
+					assertTrue(id1.intValue() > 0);
+					//----------
+					keyHolder = new KeyHolder();
+					hints = new DalHints();
+					hints.setKeyHolder(keyHolder);
+					
+					dao.insert(hints, p1);
+					Number id2 = keyHolder.getKey();
+					assertTrue(id2.intValue() > 0);
+					assertTrue(id2.intValue() - id1.intValue() == 1);
 
-					dao.batchInsert(new DalHints(), p);
-					
 					hints = new DalHints().inShard(i).inTableShard(j);
 					c = dao.count("1=1", new StatementParameters(), hints).intValue();
-					Assert.assertTrue(c == 3);
+					assertTrue(c == 2);
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
 	}
 	
@@ -165,12 +202,12 @@ public class BatchInsertSp3TaskTest {
 		DalTableDao<People> dao = new DalTableDao<>(parser);
 
 		try {
-			List<People> p = new ArrayList<>();
+			List<People> pAll = new ArrayList<>();
 			for(int i = 0; i < 2; i++) {
 				for(int j = 0; j < 2; j++) {
 					DalHints hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
-					Assert.assertTrue(c == 0);
+					assertTrue(c == 0);
 					
 					for(int k = 0; k < 3; k++) {
 						People p1 = new People();
@@ -179,35 +216,35 @@ public class BatchInsertSp3TaskTest {
 					 	p1.setCityID(j);
 					 	p1.setProvinceID(-1);
 					 	p1.setCountryID(i);
-					 	p.add(p1);
+					 	pAll.add(p1);
 					}
 				}
 			}
-			dao.batchInsert(new DalHints(), p);
+
+			KeyHolder keyHolder = new KeyHolder();
+			DalHints hints = new DalHints();
+			hints.setKeyHolder(keyHolder);
+			dao.insert(hints, pAll);
 			
+			assertTrue(keyHolder.size() == 12);
+
+			int prev = -1;
+			int index = 0;
 			for(int i = 0; i < 2; i++) {
 				for(int j = 0; j < 2; j++) {
-					DalHints hints = new DalHints().inShard(i).inTableShard(j);
+					hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();
 					Assert.assertTrue(c == 3);
+					
+					for(int k = 0; k < 3; k++) {
+//						assertTrue(keyHolder.getKey(index).intValue() > prev);
+						prev= keyHolder.getKey(index++).intValue();
+					}
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			Assert.fail();
+			fail();
 		}
-	}
-	
-	private <T> Map<Integer, Map<String, ?>> getPojosFields(List<T> daoPojos, DalParser<T> parser) {
-		Map<Integer, Map<String, ?>> pojoFields = new HashMap<>();
-		if (null == daoPojos || daoPojos.size() < 1)
-			return pojoFields;
-		
-		int i = 0;
-		for (T pojo: daoPojos){
-			pojoFields.put(i++, parser.getFields(pojo));
-		}
-		
-		return pojoFields;
 	}
 }

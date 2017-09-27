@@ -1,8 +1,8 @@
 <Datasources>
     <Datasource name="dao"
-                userName="root"
-                password="!QAZ@WSX1qaz2wsx"
-                connectionUrl="jdbc:mysql://DST56614:3306/dao_test"
+                userName="un_songs_dal"
+                password="1@unsongsdal"
+                connectionUrl="jdbc:mysql://dalservice2.mysql.db.lpt.qa.nt.ctripcorp.com:55444/dalservice2db"
                 driverClassName="com.mysql.jdbc.Driver"
                 testWhileIdle="false"
                 testOnBorrow="true"

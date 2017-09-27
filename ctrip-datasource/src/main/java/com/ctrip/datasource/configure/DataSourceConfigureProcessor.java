@@ -3,8 +3,9 @@ package com.ctrip.datasource.configure;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureHolder;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -23,7 +24,6 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
     private static final String DAL_APPNAME = "dal";
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
-    private static final String PROD_SUFFIX = "_SH";
 
     private static final String DAL_DATASOURCE = "DAL";
     private static final String DAL_GET_DATASOURCE = "DataSource::getRemoteDataSourceConfig";
@@ -45,7 +45,12 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         return mapConfigReference.get();
     }
 
-    public void refreshPoolSettingsConfig() {
+    public void refreshDataSourceConfigurePoolSettings() {
+        refreshPoolSettingsConfig();
+        setPoolSettings();
+    }
+
+    private void refreshPoolSettingsConfig() {
         if (!Foundation.app().isAppIdSet())
             return;
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE);
@@ -69,7 +74,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         return MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
     }
 
-    public synchronized void setPoolSettings() {
+    private synchronized void setPoolSettings() {
         MapConfig config = mapConfigReference.get();
         if (config == null)
             return;
@@ -113,7 +118,8 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         for (Map.Entry<String, Map<String, String>> entry : datasourceMap.entrySet()) {
             DataSourceConfigure config = new DataSourceConfigure();
             setDataSourceConfigure(config, entry.getValue());
-            configureMap.put(entry.getKey().toUpperCase(), config);
+            String keyName = ConnectionStringKeyNameHelper.getKeyName(entry.getKey());
+            configureMap.put(keyName, config);
         }
     }
 
@@ -182,7 +188,7 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
                 String name = configure.getName();
                 if (name != null) {
                     DataSourceConfigure dataSourceXml =
-                            DataSourceConfigureHolder.getInstance().getUserDataSourceConfigure(name);
+                            DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure(name);
                     if (dataSourceXml != null) {
                         overrideDataSourceConfigure(c, dataSourceXml);
                         String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());

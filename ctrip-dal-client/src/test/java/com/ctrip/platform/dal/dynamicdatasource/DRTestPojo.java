@@ -15,7 +15,7 @@ import java.sql.Types;
 public class DRTestPojo extends UpdatableEntity {
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "ID", length = 100)
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Type(value = Types.INTEGER)
     private Integer iD;

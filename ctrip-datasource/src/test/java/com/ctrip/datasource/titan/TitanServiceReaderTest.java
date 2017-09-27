@@ -6,8 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.datasource.configure.ConnectionStringProcessor;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureHolder;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -341,8 +340,8 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-            Assert.assertTrue(DataSourceConfigureHolder.getInstance().contains("SimpleShard_0"));
-            Assert.assertTrue(DataSourceConfigureHolder.getInstance().contains("SimpleShard_0_SH"));
+            Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("SimpleShard_0"));
+            Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("SimpleShard_0_SH"));
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Foundation.server().getEnvType());
@@ -362,8 +361,8 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-            Assert.assertFalse(DataSourceConfigureHolder.getInstance().contains("Not_Exist"));
-            Assert.assertTrue(DataSourceConfigureHolder.getInstance().contains("ha_test"));
+            Assert.assertFalse(DataSourceConfigureLocator.getInstance().contains("Not_Exist"));
+            Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("ha_test"));
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Foundation.server().getEnvType());

@@ -3,8 +3,7 @@ package com.ctrip.platform.dal.dynamicdatasource;
 import com.ctrip.datasource.configure.DataSourceConfigureProcessor;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureHolder;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.Test;
 
 public class DynamicDataSourcePoolSettingsTest {
@@ -13,7 +12,7 @@ public class DynamicDataSourcePoolSettingsTest {
         String name = "dalservice2db_w";
 
         // get user datasource.xml settings
-        DataSourceConfigure config = DataSourceConfigureHolder.getInstance().getDataSourceConfigure(name);
+        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name);
         int maxActiveBefore = config.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, -1);
         // int minIdleBefore = config.getIntProperty(DataSourceConfigureConstants.MINIDLE, -1);
         System.out.println(String.format("***** maxActive before:%s *****", maxActiveBefore));
@@ -22,9 +21,8 @@ public class DynamicDataSourcePoolSettingsTest {
         Thread.sleep(30 * 1000);
         System.out.println("*****Waked up.*****");
 
-        // **********change maxActive to 200**********
-
-        DataSourceConfigure config1 = DataSourceConfigureHolder.getInstance().getDataSourceConfigure(name);
+        // **********manual change maxActive to 200**********
+        DataSourceConfigure config1 = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name);
         config1 = DataSourceConfigureProcessor.getInstance().getDataSourceConfigure(config1);
         int maxActiveAfter = config1.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, -1);
         // int minIdleAfter = config1.getIntProperty(DataSourceConfigureConstants.MINIDLE, -1);

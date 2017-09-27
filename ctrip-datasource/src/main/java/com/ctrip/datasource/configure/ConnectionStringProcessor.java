@@ -6,6 +6,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
@@ -25,6 +26,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionStringProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProcessor.class);
+
     public static class LogEntry {
         public static final int INFO = 0;
         public static final int WARN = 1;
@@ -40,9 +43,10 @@ public class ConnectionStringProcessor {
     public static List<LogEntry> startUpLog = new ArrayList<>();
     public static Map<String, String> config = null;
 
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProcessor.class);
-
-    private static ConnectionStringProcessor processor = null;
+    /**
+     * Used to access local Database.config file fo dev environment
+     */
+    private AllInOneConfigureReader allInOneProvider = new AllInOneConfigureReader();
     private ConnectionStringParser parser = ConnectionStringParser.getInstance();
 
     public static final String USE_LOCAL_CONFIG = "useLocalConfig";
@@ -63,13 +67,15 @@ public class ConnectionStringProcessor {
     private static final int DEFAULT_TIMEOUT = 15 * 1000;
     private static final String EMPTY_ID = "999999";
 
-    private static final String TITAN_APP_ID = "123456"; // 100010061
+    private static final String TITAN_APP_ID = "123456"; // 100010061 123456
 
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
     private Map<String, TypedConfig<String>> configMap = new ConcurrentHashMap<>();
     private static final Map<String, String> titanMapping = new HashMap<>();
+
+    private static ConnectionStringProcessor processor = null;
 
     public synchronized static ConnectionStringProcessor getInstance() {
         if (processor == null) {
@@ -79,22 +85,24 @@ public class ConnectionStringProcessor {
     }
 
     public TypedConfig<String> getConfigMap(String name) {
-        return configMap.get(name.toUpperCase());
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        return configMap.get(keyName);
     }
 
-    public void addConfigMap(String name, TypedConfig<String> config) {
-        configMap.put(name.toUpperCase(), config);
+    private void addConfigMap(String name, TypedConfig<String> config) {
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        configMap.put(keyName, config);
     }
 
-    public String getSvcUrl() {
+    private String getSvcUrl() {
         return svcUrl;
     }
 
-    public boolean getUseLocal() {
+    private boolean getUseLocal() {
         return useLocal;
     }
 
-    public String getDatabaseConfigLocation() {
+    private String getDatabaseConfigLocation() {
         return databaseConfigLocation;
     }
 
@@ -145,13 +153,34 @@ public class ConnectionStringProcessor {
         isDebug = Boolean.parseBoolean(settings.get("isDebug"));
     }
 
+    public Map<String, DataSourceConfigure> initializeDataSourceConfigureConnectionSettings(Set<String> dbNames) {
+        Map<String, DataSourceConfigure> dataSourceConfigures = null;
+        String svcUrl = getSvcUrl();
+        boolean useLocal = getUseLocal();
+
+        // If it uses local Database.Config
+        if (svcUrl == null || svcUrl.isEmpty() || useLocal) {
+            dataSourceConfigures =
+                    allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
+        } else {
+            try {
+                dataSourceConfigures = getDataSourceConfigureConnectionSettings(dbNames);
+            } catch (Exception e) {
+                error("Fail to setup Titan Provider", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        return dataSourceConfigures;
+    }
+
     /**
      * Get titan service URL in order of 1. environment varaible 2. serviceAddress 3. local
      *
      * @param settings
      * @return
      */
-    public String discoverTitanServiceUrl(Map<String, String> settings) {
+    private String discoverTitanServiceUrl(Map<String, String> settings) {
         // First we use environment to determine titan service address
         Env env = Foundation.server().getEnv();
         if (titanMapping.containsKey(env.toString()))
@@ -172,7 +201,7 @@ public class ConnectionStringProcessor {
         return null;
     }
 
-    public String discoverAppId(Map<String, String> settings) throws DalException {
+    private String discoverAppId(Map<String, String> settings) throws DalException {
         // First try framework foundation
         String appId = Foundation.app().getAppId();
         if (!(appId == null || appId.trim().isEmpty()))
@@ -196,7 +225,13 @@ public class ConnectionStringProcessor {
         throw e;
     }
 
-    public void refreshConnectionSettingsMap(Set<String> dbNames) {
+    public Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings(Set<String> dbNames)
+            throws Exception {
+        refreshConnectionSettingsMap(dbNames);
+        return getConnectionSettings(dbNames);
+    }
+
+    private void refreshConnectionSettingsMap(Set<String> dbNames) {
         if (dbNames == null || dbNames.isEmpty())
             return;
         for (String name : dbNames) {
@@ -223,7 +258,7 @@ public class ConnectionStringProcessor {
         return config;
     }
 
-    public Map<String, DataSourceConfigure> getConnectionSettings(Set<String> dbNames) throws Exception {
+    private Map<String, DataSourceConfigure> getConnectionSettings(Set<String> dbNames) throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
         if (dbNames == null || dbNames.isEmpty())
             return configures;
@@ -243,7 +278,8 @@ public class ConnectionStringProcessor {
                 } catch (Throwable e) {
                     throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
                 }
-                configures.put(name.toUpperCase(), connectionSetting);
+                String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+                configures.put(keyName, connectionSetting);
             }
         }
 

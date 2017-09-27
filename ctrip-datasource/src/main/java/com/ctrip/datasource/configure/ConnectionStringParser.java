@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureHolder;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 
 public class ConnectionStringParser {
     private static ConnectionStringParser parser = null;
@@ -106,7 +106,8 @@ public class ConnectionStringParser {
             password = matcher.group(2);
         }
 
-        config.setName(name.toUpperCase());
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        config.setName(keyName);
         config.setConnectionUrl(url);
         config.setUserName(userName);
         config.setPassword(password);
@@ -119,7 +120,7 @@ public class ConnectionStringParser {
 
     private void applyDefaultCtripOptionsIfEmpty(String name, boolean isSqlServer) {
         String connectionProperties = DataSourceConfigureConstants.CONNECTIONPROPERTIES;
-        DataSourceConfigure dataSourceConfigure = DataSourceConfigureHolder.getInstance().getDataSourceConfigure(name);
+        DataSourceConfigure dataSourceConfigure = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name);
 
         // If connectionProperties is set, we will use what user specifies.
         if (dataSourceConfigure == null || dataSourceConfigure.getProperty(connectionProperties) != null)

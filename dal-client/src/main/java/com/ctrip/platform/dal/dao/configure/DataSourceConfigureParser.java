@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -35,7 +36,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     private String dataSourceXmlLocation = null;
     private boolean dataSourceXmlExist = false;
 
-    private DataSourceConfigureHolder dataSourceConfigureHolder = DataSourceConfigureHolder.getInstance();
+    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
 
     private DataSourceConfigureParser() {
         try {
@@ -98,7 +99,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
 
         map = getDuplicatedMap(map);
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
-            dataSourceConfigureHolder.addUserDataSourceConfigure(entry.getKey(), entry.getValue());
+            dataSourceConfigureLocator.addUserDataSourceConfigure(entry.getKey(), entry.getValue());
         }
     }
 
@@ -113,7 +114,8 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
 
             String possibleName = getPossibleName(name);
             if (!map.containsKey(possibleName)) {
-                result.put(possibleName.toUpperCase(), entry.getValue());
+                String keyName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
+                result.put(keyName, entry.getValue());
             }
         }
 

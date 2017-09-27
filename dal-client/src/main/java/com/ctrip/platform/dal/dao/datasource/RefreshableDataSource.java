@@ -13,7 +13,6 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
-
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {

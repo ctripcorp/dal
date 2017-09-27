@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -46,6 +47,8 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         PoolPropertiesHolder.getInstance().setPoolProperties(p);
         org.apache.tomcat.jdbc.pool.DataSource dataSource = new org.apache.tomcat.jdbc.pool.DataSource(p);
         dataSource.createPool();
+
+        testConnection(dataSource);
         logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
 
         this.name = name;
@@ -97,6 +100,26 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         properties.setJdbcInterceptors(DEFAULT_JDBCINTERCEPTORS);
 
         return properties;
+    }
+
+    private void testConnection(org.apache.tomcat.jdbc.pool.DataSource dataSource) throws SQLException {
+        if (dataSource == null)
+            return;
+
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+        } catch (Throwable e) {
+            logger.error(e.getMessage(), e);
+            // throw e;
+        } finally {
+            if (con != null)
+                try {
+                    con.close();
+                } catch (Throwable e) {
+                    logger.error(e.getMessage(), e);
+                }
+        }
     }
 
 }

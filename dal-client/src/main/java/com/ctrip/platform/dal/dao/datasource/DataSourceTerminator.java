@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,6 +20,9 @@ public class DataSourceTerminator {
     private static volatile DataSourceTerminator terminator = null;
     private static final int INIT_DELAY = 0;
     private static final int DELAY = 5 * 1000; // milliseconds
+    private static final int DEFAULT_INT_VALUE = 0;
+    private static final int MAX_RETRY_TIMES = 3;
+    private Map<String, Integer> retryTimesMap = new ConcurrentHashMap<>();
 
     public synchronized static DataSourceTerminator getInstance() {
         if (terminator == null) {
@@ -70,13 +75,17 @@ public class DataSourceTerminator {
                 // Tomcat DataSource
                 if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
                     org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
-                    String name = ds.getName();
                     ds.close();
 
+                    int retryTimes = getRetryTimes(singleDataSource.getName());
                     int abandonedTimeout = getAbandonedTimeout(singleDataSource);
                     int elapsedSeconds = getElapsedSeconds(singleDataSource.getEnqueueTime());
-                    if (ds.getActive() == 0 || elapsedSeconds >= abandonedTimeout) {
+
+                    if (ds.getActive() == 0 || retryTimes > MAX_RETRY_TIMES) {
+                        return success;
+                    } else if (elapsedSeconds >= abandonedTimeout) {
                         ds.close(true);
+                        String name = ds.getName();
                         logger.info(String.format("DataSource %s closed.", name));
                     } else {
                         success &= false;
@@ -84,10 +93,34 @@ public class DataSourceTerminator {
                 }
             } catch (Throwable e) {
                 logger.error(e.getMessage(), e);
+                addRetryTime(singleDataSource.getName());
                 success &= false;
             }
 
             return success;
+        }
+
+        private int getRetryTimes(String name) {
+            if (name == null || name.isEmpty())
+                return DEFAULT_INT_VALUE;
+
+            Integer retryTime = retryTimesMap.get(name);
+            if (retryTime == null)
+                return DEFAULT_INT_VALUE;
+
+            return retryTime.intValue();
+        }
+
+        private void addRetryTime(String name) {
+            if (name == null || name.isEmpty())
+                return;
+
+            if (!retryTimesMap.containsKey(name))
+                retryTimesMap.put(name, DEFAULT_INT_VALUE);
+
+            Integer value = retryTimesMap.get(name);
+            value++;
+            retryTimesMap.put(name, value);
         }
 
         private int getAbandonedTimeout(SingleDataSource singleDataSource) {

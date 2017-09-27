@@ -2,7 +2,7 @@ package test.com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureHolder;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import junit.framework.Assert;
 
@@ -26,7 +26,7 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test1() {
-        DataSourceConfigure config = DataSourceConfigureHolder.getInstance().getDataSourceConfigure("dao_test");
+        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dao_test");
         Assert.assertEquals("dao_test", config.getName());
         Assert.assertEquals(10000, config.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals(
@@ -36,7 +36,7 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test2() {
-        DataSourceConfigure config = DataSourceConfigureHolder.getInstance().getDataSourceConfigure("dao_test_select");
+        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dao_test_select");
         Assert.assertEquals("dao_test_select", config.getName());
         Assert.assertEquals(true, config.getBooleanProperty(DataSourceConfigureConstants.TESTWHILEIDLE, false));
         Assert.assertEquals(true, config.getBooleanProperty(DataSourceConfigureConstants.TESTONBORROW, false));
@@ -58,7 +58,7 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test3() {
-        DataSourceConfigure config = DataSourceConfigureHolder.getInstance().getDataSourceConfigure("dal_test_new");
+        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dal_test_new");
         Assert.assertEquals("dal_test_new", config.getName());
         Assert.assertEquals(10000, config.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals("sendTimeAsDateTime=false",
@@ -70,7 +70,7 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test4() {
-        DataSourceConfigure config = DataSourceConfigureHolder.getInstance().getDataSourceConfigure("dao_test_select");
+        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dao_test_select");
         Assert.assertEquals("dao_test_select", config.getName());
         Assert.assertEquals(1000, config.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true",

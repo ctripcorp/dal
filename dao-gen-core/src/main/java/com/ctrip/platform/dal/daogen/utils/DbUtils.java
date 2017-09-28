@@ -28,6 +28,8 @@ public class DbUtils {
     public static List<Integer> validMode = new ArrayList<>();
     private static Pattern inRegxPattern = Pattern.compile("in\\s(@\\w+)", Pattern.CASE_INSENSITIVE);
     private static Set<Integer> stringTypeSet = null;
+    private static final int UNIQUE_IDENTIFIER_TYPE = 10001;
+
 
     static {
         statementCreator = new DalStatementCreator(com.ctrip.platform.dal.common.enums.DatabaseCategory.MySql);
@@ -391,7 +393,7 @@ public class DbUtils {
                 String columnName = metaData.getColumnName(i);
                 Integer sqlType = metaData.getColumnType(i);
                 if ("uniqueidentifier".equals(metaData.getColumnTypeName(i)))
-                    sqlType = 10001;
+                    sqlType = UNIQUE_IDENTIFIER_TYPE;
                 if (!map.containsKey(columnName) && null != sqlType)
                     map.put(columnName, sqlType);
             }
@@ -494,7 +496,7 @@ public class DbUtils {
                 } catch (NumberFormatException ex) {
                     index++;
                 }
-                if (type == 10001) {
+                if (type == UNIQUE_IDENTIFIER_TYPE) {
                     preparedStatement.setObject(index, mockATest(type), Types.BINARY);
                 } else {
                     preparedStatement.setObject(index, mockATest(type), type);
@@ -559,7 +561,7 @@ public class DbUtils {
                 } catch (NumberFormatException ex) {
                     index++;
                 }
-                if (type == 10001) {
+                if (type == UNIQUE_IDENTIFIER_TYPE) {
                     preparedStatement.setObject(index, mockATest(type), Types.BINARY);
                 } else {
                     preparedStatement.setObject(index, mockATest(type), type);
@@ -632,7 +634,7 @@ public class DbUtils {
                 return "10:00:00";
             case Types.TIMESTAMP:
                 return "2012-01-01 10:00:00";
-            case 10001:// uniqueidentifier
+            case UNIQUE_IDENTIFIER_TYPE:// uniqueidentifier
                 return new byte[] {};
             default:
                 return "test";
@@ -713,6 +715,7 @@ public class DbUtils {
         set.add(Types.NCHAR);
         set.add(Types.NVARCHAR);
         set.add(Types.LONGNVARCHAR);
+        set.add(UNIQUE_IDENTIFIER_TYPE);
         return set;
     }
 

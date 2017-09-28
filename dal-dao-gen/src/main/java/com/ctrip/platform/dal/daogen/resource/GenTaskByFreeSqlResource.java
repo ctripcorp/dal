@@ -113,7 +113,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             Status status = Status.ERROR();
-            status.setInfo(e.getMessage());
+            status.setInfo(e.getCause().getMessage());
             return status;
         }
     }
@@ -136,7 +136,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             Status status = Status.ERROR();
-            status.setInfo(e.getMessage());
+            status.setInfo(e.getCause().getMessage());
             return status;
         }
     }
@@ -158,7 +158,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             Status status = Status.ERROR();
-            status.setInfo(e.getMessage());
+            status.setInfo(e.getCause().getMessage());
             return status;
         }
     }
@@ -306,7 +306,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             status = Status.ERROR();
-            status.setInfo(e.getMessage());
+            status.setInfo(e.getCause().getMessage());
         }
 
         return status;

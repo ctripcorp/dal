@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
-    <version>1.4.14</version>
+    <version>1.4.15</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <dal-client-version>1.10.0</dal-client-version>

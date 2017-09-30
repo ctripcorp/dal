@@ -32,13 +32,19 @@ public class WebUtil {
     private static final String APP_ID = Configuration.get("app_id");
     private static final int TIMEOUT = 15 * 1000;
     public static final String HTTP_CODE = "200";
+    public static final String NO_VALIDATION = "-1";
 
     public static Response getAllInOneResponse(String keyname, String environment) throws Exception {
         Response res = null;
         if (keyname == null || keyname.isEmpty())
             return res;
-        if (SERVICE_RUL == null || SERVICE_RUL.isEmpty())
+
+        if (SERVICE_RUL == null || SERVICE_RUL.isEmpty()) {
+            res = new Response();
+            res.setStatus(NO_VALIDATION);
             return res;
+        }
+
         if (APP_ID == null || APP_ID.isEmpty())
             return res;
 

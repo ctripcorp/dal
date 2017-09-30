@@ -27,7 +27,7 @@ import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 **/
 public class FreePersonDaoDaoUnitTest {
 
-	private static final String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
+	private static final String DATABASE_NAME_MYSQL = "MySqlSimpleShardForDB";
 	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
     private final static String TABLE_NAME = "person";
 
@@ -63,7 +63,7 @@ public class FreePersonDaoDaoUnitTest {
 
         client = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
         dao = new FreePersonDaoDao();
-        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, "MySqlSimpleShard", "PERSON");
+        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, DATABASE_NAME_MYSQL);
         pdao = new DalTableDao<>(parser);
     }
 

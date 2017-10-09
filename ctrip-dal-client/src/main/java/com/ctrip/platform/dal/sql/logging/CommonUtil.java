@@ -4,9 +4,8 @@ import java.security.Key;
 
 import javax.crypto.Cipher;
 
-import org.apache.commons.codec.binary.Base64;
-
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
+import com.ctrip.platform.dal.dao.helper.DalBase64;
 
 
 public class CommonUtil {
@@ -78,7 +77,7 @@ public class CommonUtil {
 		try {
 			byte[] inputByteArray = encryptString.getBytes("UTF-8");
 			byte[] encryptedByteArray = encryptCipher.doFinal(inputByteArray);
-			return new String(Base64.encodeBase64(encryptedByteArray));
+			return new String(DalBase64.encodeBase64(encryptedByteArray));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -102,7 +101,7 @@ public class CommonUtil {
 			decryptCipher = Cipher.getInstance("DES");
 			decryptCipher.init(Cipher.DECRYPT_MODE, key);
 
-			byte[] encryptedByteArray = Base64.decodeBase64(encryptString.getBytes());
+			byte[] encryptedByteArray = DalBase64.decodeBase64(encryptString.getBytes());
 			return new String(decryptCipher.doFinal(encryptedByteArray));
 		} catch (Exception e) {
 			e.printStackTrace();

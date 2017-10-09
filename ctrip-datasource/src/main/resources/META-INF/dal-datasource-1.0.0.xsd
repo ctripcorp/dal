@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.ctrip.com/schema/dal/datasource"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.ctrip.com/schema/dal/datasource"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:annotation>
+        <xsd:documentation><![CDATA[ Xml config support for Ctrip Dal Data Source. ]]></xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="mybatis">
+        <xsd:annotation>
+            <xsd:documentation>
+                <![CDATA[ Enable dal mybatis support ]]>
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:attribute name="tracing" type="xsd:boolean" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <![CDATA[
+                          Set to true to enable tracing, set to false to disable. Default to true.
+                        ]]>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="encrypt-parameters" type="xsd:boolean" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <![CDATA[
+                          Set to true to encrypt parameter values when logging to cat. Default to true.
+                        ]]>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="encryption-key" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        <![CDATA[
+                          Set a customized encryption key, please note that the key's length must be 8, e.g. abcd1234.
+                          In most cases, this option should not be configured, so that we will use dal default key instead.
+                        ]]>
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

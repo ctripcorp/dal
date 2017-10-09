@@ -10,6 +10,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.ctrip.datasource.configure.ConnectionStringProcessor;
+import com.ctrip.framework.foundation.Env;
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
@@ -115,6 +117,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (dbNames == null || dbNames.isEmpty())
             return;
 
+        Env env = Foundation.server().getEnv();
+
         for (final String name : dbNames) {
             TypedConfig<String> config = connectionStringProcessor.getConfigMap(name);
             if (config == null)
@@ -127,18 +131,19 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 }
             });
 
-            final String possibleName = dataSourceConfigureParser.getPossibleName(name);
-            // listen on possible name
-            TypedConfig<String> possibleConfig = connectionStringProcessor.getTitanTypedConfig(possibleName);
-            possibleConfig.addListener(new Configuration.ConfigListener<String>() {
-                @Override
-                public void onLoad(String connectionString) {
-                    // notify with actual name
-                    notifyConnectionStringChangeListener(name);
-                }
-            });
+            if (env.isPRO()) {
+                final String possibleName = dataSourceConfigureParser.getPossibleName(name);
+                // listen on possible name
+                TypedConfig<String> possibleConfig = connectionStringProcessor.getTitanTypedConfig(possibleName);
+                possibleConfig.addListener(new Configuration.ConfigListener<String>() {
+                    @Override
+                    public void onLoad(String connectionString) {
+                        // notify with actual name
+                        notifyConnectionStringChangeListener(name);
+                    }
+                });
+            }
         }
-
     }
 
     private void notifyConnectionStringChangeListener(String name) {

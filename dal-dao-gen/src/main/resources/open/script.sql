@@ -145,6 +145,7 @@ CREATE TABLE `task_auto` (
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
 	,`hints` VARCHAR(200) NULL DEFAULT NULL
+  ,`length` TINYINT(1) NOT NULL DEFAULT '0'
 	,PRIMARY KEY (`id`)
 	);
 
@@ -170,6 +171,7 @@ CREATE TABLE `task_sql` (
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
 	,`hints` VARCHAR(200) NULL DEFAULT NULL
+  ,`length` TINYINT(1) NOT NULL DEFAULT '0'
 	,PRIMARY KEY (`id`)
 	);
 
@@ -193,6 +195,7 @@ CREATE TABLE `task_table` (
 	,`api_list` TEXT NULL
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
+	,`length` TINYINT(1) NOT NULL DEFAULT '0'
 	,PRIMARY KEY (`id`)
 	);
 

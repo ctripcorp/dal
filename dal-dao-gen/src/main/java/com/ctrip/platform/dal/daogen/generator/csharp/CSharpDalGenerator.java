@@ -35,6 +35,7 @@ public class CSharpDalGenerator implements DalGenerator {
             }
             ctx.setDalConfigHost(dalConfigHost);
             ctx.setNamespace(project.getNamespace());
+            ctx.setProjectName(project.getName());
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;

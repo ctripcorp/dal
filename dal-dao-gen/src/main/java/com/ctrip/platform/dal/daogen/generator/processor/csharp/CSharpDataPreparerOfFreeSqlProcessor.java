@@ -37,8 +37,8 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
         TaskUtils.invokeBatch(tasks);
     }
 
-    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
-        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
+    private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext context) throws Exception {
+        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();
         final Progress progress = ctx.getProgress();
@@ -86,6 +86,7 @@ public class CSharpDataPreparerOfFreeSqlProcessor extends AbstractCSharpDataPrep
                                 .normalizeVariable(WordUtils.capitalize(currentTasks.get(0).getClass_name())));
                         host.setNameSpace(namespace);
                         host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
+                        host.setProjectName(ctx.getProjectName());
 
                         List<CSharpMethodHost> methods = new ArrayList<>();
                         // 每个Method可能就有一个Pojo

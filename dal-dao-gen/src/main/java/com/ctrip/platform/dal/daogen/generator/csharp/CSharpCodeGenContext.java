@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 public class CSharpCodeGenContext implements CodeGenContext {
     private int projectId;
+    private String projectName;
     private boolean regenerate;
     private boolean ignoreApproveStatus;
     private Progress progress;
@@ -141,6 +142,14 @@ public class CSharpCodeGenContext implements CodeGenContext {
 
     public void setProjectId(int projectId) {
         this.projectId = projectId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     public boolean isRegenerate() {

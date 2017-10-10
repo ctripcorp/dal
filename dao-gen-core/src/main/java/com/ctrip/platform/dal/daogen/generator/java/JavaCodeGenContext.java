@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class JavaCodeGenContext implements CodeGenContext {
     protected int projectId;
+    private String projectName;
     protected boolean regenerate;
     private boolean ignoreApproveStatus;
     protected Progress progress;
@@ -102,6 +103,14 @@ public class JavaCodeGenContext implements CodeGenContext {
 
     public void setProjectId(int projectId) {
         this.projectId = projectId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     public boolean isRegenerate() {

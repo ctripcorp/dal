@@ -66,6 +66,7 @@ public class AbstractJavaDataPreparer {
         tableHost.setSp(tableViewSp.getCud_by_sp());
         tableHost.setApi_list(tableViewSp.getApi_list());
         tableHost.setLength(tableViewSp.getLength());
+        tableHost.setProjectName(ctx.getProjectName());
 
         // 主键及所有列
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), tableName);

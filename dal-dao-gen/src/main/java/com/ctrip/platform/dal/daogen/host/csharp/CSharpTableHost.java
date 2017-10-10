@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class CSharpTableHost {
-
     private String nameSpace;
     private DatabaseCategory databaseCategory;
     private String dbSetName;
@@ -15,15 +14,13 @@ public class CSharpTableHost {
     private String className;
     private boolean isTable;
 
-    //spa/sp3 or cud by sql
+    // spa/sp3 or cud by sql
     private boolean isSpa;
     private CSharpSpaOperationHost spaInsert;
     private CSharpSpaOperationHost spaUpdate;
     private CSharpSpaOperationHost spaDelete;
     private List<CSharpMethodHost> extraMethods;
-
     private List<CSharpParameterHost> primaryKeys;
-
     private List<CSharpParameterHost> columns;
 
     private boolean hasPagination;
@@ -31,10 +28,9 @@ public class CSharpTableHost {
     private boolean hasSptI;
     private boolean hasSptD;
     private boolean hasSptU;
-
     private String spName;
-
     private String api_list;
+    private String projectName;
 
     public boolean generateAPI(Integer... apiID) {
         if (api_list == null || api_list.isEmpty()) {
@@ -221,6 +217,14 @@ public class CSharpTableHost {
         this.api_list = api_list;
     }
 
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
     @Override
     public int hashCode() {
         return super.hashCode();
@@ -246,7 +250,8 @@ public class CSharpTableHost {
     public boolean equals(Object obj) {
         if (obj instanceof CSharpTableHost) {
             CSharpTableHost castedObj = (CSharpTableHost) obj;
-            return castedObj.getDbSetName().equals(this.getDbSetName()) && castedObj.getTableName().equals(this.getTableName());
+            return castedObj.getDbSetName().equals(this.getDbSetName())
+                    && castedObj.getTableName().equals(this.getTableName());
         }
 
         return false;

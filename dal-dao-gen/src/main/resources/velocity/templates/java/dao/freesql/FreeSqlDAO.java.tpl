@@ -1,3 +1,4 @@
+//${host.getProjectName()}
 package ${host.getPackageName()}.dao;
 
 #foreach( $field in ${host.getDaoImports()} )

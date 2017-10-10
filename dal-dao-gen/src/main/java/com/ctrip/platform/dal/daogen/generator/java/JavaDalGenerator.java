@@ -16,9 +16,9 @@ public class JavaDalGenerator implements DalGenerator {
     @Override
     public CodeGenContext createContext(int projectId, boolean regenerate, Progress progress, boolean newPojo,
             boolean ignoreApproveStatus) throws Exception {
-        JavaCodeGenContext ctx = null;
+        JavaCodeGenContext context = null;
         try {
-            ctx = new JavaCodeGenContext(projectId, regenerate, progress);
+            context = new JavaCodeGenContext(projectId, regenerate, progress);
             Project project = BeanGetter.getDaoOfProject().getProjectByID(projectId);
             DalConfigHost dalConfigHost = null;
             if (project.getDal_config_name() != null && !project.getDal_config_name().isEmpty()) {
@@ -28,13 +28,14 @@ public class JavaDalGenerator implements DalGenerator {
             } else {
                 dalConfigHost = new DalConfigHost("");
             }
-            ctx.setDalConfigHost(dalConfigHost);
-            ctx.setNamespace(project.getNamespace());
+            context.setDalConfigHost(dalConfigHost);
+            context.setNamespace(project.getNamespace());
+            context.setProjectName(project.getName());
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
             throw e;
         }
-        return ctx;
+        return context;
     }
 
     @Override

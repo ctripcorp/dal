@@ -15,6 +15,7 @@ public class FreeSqlHost {
     private List<JavaParameterHost> fields;
     private DatabaseCategory databaseCategory;
     private boolean length;
+    private String projectName;
 
     public Set<String> getDaoImports() {
         Set<String> imports = new TreeSet<>();
@@ -129,6 +130,14 @@ public class FreeSqlHost {
 
     public void setLength(boolean length) {
         this.length = length;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
 }

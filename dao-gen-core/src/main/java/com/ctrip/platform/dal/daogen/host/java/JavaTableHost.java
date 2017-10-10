@@ -23,6 +23,7 @@ public class JavaTableHost {
     private List<JavaMethodHost> methods = new ArrayList<>();
     private String api_list;
     private boolean length;
+    private String projectName;
 
     public boolean generateAPI(Integer... apiID) {
         if (api_list == null || api_list.isEmpty()) {
@@ -340,6 +341,14 @@ public class JavaTableHost {
 
     public void setLength(boolean length) {
         this.length = length;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
 }

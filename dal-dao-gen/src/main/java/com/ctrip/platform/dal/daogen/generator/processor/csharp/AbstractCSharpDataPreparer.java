@@ -55,9 +55,9 @@ public class AbstractCSharpDataPreparer {
         }
     }
 
-    protected CSharpTableHost buildTableHost(CodeGenContext codeGenCtx, GenTaskByTableViewSp tableViewSp, String table,
+    protected CSharpTableHost buildTableHost(CodeGenContext context, GenTaskByTableViewSp tableViewSp, String table,
             DatabaseCategory dbCategory, List<StoredProcedure> allSpNames) throws Exception {
-        CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
+        CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
 
         if (!DbUtils.tableExists(tableViewSp.getAllInOneName(), table))
             throw new Exception(String.format("表 %s 不存在，请编辑DAO再生成", table));
@@ -123,6 +123,7 @@ public class AbstractCSharpDataPreparer {
         tableHost.setHasSptD(allSpNames.contains(expectSptD));
         tableHost.setHasSpt(tableHost.isHasSptI() || tableHost.isHasSptU() || tableHost.isHasSptD());
         tableHost.setApi_list(tableViewSp.getApi_list());
+        tableHost.setProjectName(ctx.getProjectName());
         return tableHost;
     }
 

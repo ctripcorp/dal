@@ -81,7 +81,7 @@ public class DataSourceTerminator {
                     int abandonedTimeout = getAbandonedTimeout(singleDataSource);
                     int elapsedSeconds = getElapsedSeconds(singleDataSource.getEnqueueTime());
 
-                    if (ds.getActive() == 0 || retryTimes > MAX_RETRY_TIMES) {
+                    if (retryTimes > MAX_RETRY_TIMES || ds.getActive() == 0) {
                         return success;
                     } else if (elapsedSeconds >= abandonedTimeout) {
                         ds.close(true);

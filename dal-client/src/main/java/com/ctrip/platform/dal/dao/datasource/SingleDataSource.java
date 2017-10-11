@@ -46,14 +46,17 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         PoolProperties p = convert(dataSourceConfigure);
         PoolPropertiesHolder.getInstance().setPoolProperties(p);
         org.apache.tomcat.jdbc.pool.DataSource dataSource = new org.apache.tomcat.jdbc.pool.DataSource(p);
-        dataSource.createPool();
-
-        testConnection(dataSource);
-        logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
 
         this.name = name;
         this.dataSourceConfigure = dataSourceConfigure;
         this.dataSource = dataSource;
+
+        try {
+            dataSource.createPool();
+            logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
+        } catch (Throwable e) {
+            logger.error(String.format("Error creating pool for data source %s", name), e);
+        }
     }
 
     private PoolProperties convert(DataSourceConfigure config) {
@@ -111,7 +114,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             con = dataSource.getConnection();
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
-            // throw e;
         } finally {
             if (con != null)
                 try {

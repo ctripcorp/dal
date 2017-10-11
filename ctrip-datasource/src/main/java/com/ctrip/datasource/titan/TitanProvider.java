@@ -212,21 +212,16 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (names == null || names.isEmpty())
             return;
 
-        if (dataSourceConfigureChangeListeners == null || dataSourceConfigureChangeListeners.isEmpty())
-            return;
-
         Map<String, DataSourceConfigure> configures =
                 connectionStringProcessor.getDataSourceConfigureConnectionSettings(names);
         dataSourceConfigureProcessor.refreshDataSourceConfigurePoolSettings();
         configures = mergeDataSourceConfigures(configures);
+
         Map<String, DataSourceConfigureChangeListener> listeners =
                 copyChangeListeners(dataSourceConfigureChangeListeners);
 
         for (String name : names) {
             String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-            DataSourceConfigureChangeListener listener = listeners.get(keyName);
-            if (listener == null)
-                continue;
 
             Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE);
             try {
@@ -267,10 +262,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     }
                 }
 
+                dataSourceConfigureLocator.addDataSourceConfigure(name, newConfigure);
+                DataSourceConfigureChangeListener listener = listeners.get(keyName);
+                if (listener == null)
+                    continue;
+
                 DataSourceConfigureChangeEvent event =
                         new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
                 listener.configChanged(event);
-                dataSourceConfigureLocator.addDataSourceConfigure(name, newConfigure);
             } catch (Throwable e) {
                 transaction.setStatus(e);
                 Cat.logError(e);

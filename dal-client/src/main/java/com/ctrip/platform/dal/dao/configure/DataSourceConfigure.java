@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -131,7 +133,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
 
     public String toConnectionUrl() {
         return String.format("{ConnectionUrl:%s,Version:%s,CRC:%s}", getConnectionUrl(),
-                (version == null ? "" : version), "");
+                (version == null ? "" : version), getCRC());
     }
 
     public Map<String, String> toMap() {
@@ -148,6 +150,19 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         }
 
         return m;
+    }
+
+    // Rule: username concat password,and then take 8 characters of md5 code from beginning
+    private String getCRC() {
+        String crc = "";
+        String userName = getUserName();
+        String pass = getPassword();
+        try {
+            userName.concat(pass);
+            crc = EncryptionHelper.getCRC(userName);
+        } catch (Throwable e) {
+        }
+        return crc;
     }
 
 }

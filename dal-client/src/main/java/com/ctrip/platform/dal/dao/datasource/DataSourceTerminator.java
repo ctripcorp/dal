@@ -92,7 +92,7 @@ public class DataSourceTerminator {
                     }
                 }
             } catch (Throwable e) {
-                logger.error(e.getMessage(), e);
+                logger.warn(e.getMessage(), e);
                 addRetryTime(singleDataSource.getName());
                 success &= false;
             }

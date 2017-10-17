@@ -194,12 +194,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
             @Override
             public void run() {
                 try {
+                    boolean connectionStringChanged = true;
                     // connection string changed
                     if (names != null && names.size() > 0) {
-                        executeNotifyTask(names);
+                        executeNotifyTask(names, connectionStringChanged);
                     } else { // datasource.properties changed
                         Set<String> keySet = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
-                        executeNotifyTask(keySet);
+                        connectionStringChanged &= false;
+                        executeNotifyTask(keySet, connectionStringChanged);
                     }
                 } catch (Throwable e) {
                     Cat.logError(e);
@@ -208,7 +210,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         });
     }
 
-    private void executeNotifyTask(Set<String> names) throws Exception {
+    private void executeNotifyTask(Set<String> names, boolean isConnectionStringChanged) throws Exception {
         if (names == null || names.isEmpty())
             return;
 
@@ -255,8 +257,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
                 transaction.setStatus(Transaction.SUCCESS);
 
-                // compare version
-                if (oldVersion != null && newVersion != null) {
+                // compare version of connection string
+                if (isConnectionStringChanged && oldVersion != null && newVersion != null) {
                     if (oldVersion.equals(newVersion)) {
                         continue;
                     }

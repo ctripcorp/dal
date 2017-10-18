@@ -10,9 +10,6 @@ import org.slf4j.LoggerFactory;
  * Created by lilj on 2017/7/6.
  */
 public class DRTest {
-    // private static final String DATA_BASE = "noShardTestOnMysql";
-
-    // private static DalClient client = null;
     private static DRTestDao dao = null;
     private static Logger log = LoggerFactory.getLogger(DRTest.class);
 
@@ -50,7 +47,7 @@ public class DRTest {
     @Test
     public void testDynamicDatasource() throws Exception {
         dao.selectDatabase(null);
-        new DynamicDataSourcePoolSettingsTest().testDynamicDataSourcePoolSettings();
+        new PoolSettingsTest().testDynamicDataSourcePoolSettings();
 
         // int i = 0;
         // // long startTime=System.currentTimeMillis();

@@ -37,6 +37,11 @@
                 <artifactId>qconfig-client</artifactId>
                 <version>1.3.9-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>qunar.tc.qconfig</groupId>
+                <artifactId>qconfig-common</artifactId>
+                <version>1.3.9-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

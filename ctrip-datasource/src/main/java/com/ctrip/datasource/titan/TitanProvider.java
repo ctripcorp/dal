@@ -260,6 +260,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 // compare version of connection string
                 if (isConnectionStringChanged && oldVersion != null && newVersion != null) {
                     if (oldVersion.equals(newVersion)) {
+                        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                                String.format("New version of %s equals to old version.", name));
                         continue;
                     }
                 }

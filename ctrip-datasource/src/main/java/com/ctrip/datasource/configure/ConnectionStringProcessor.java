@@ -12,6 +12,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.TypedConfig;
 
 import java.io.FileNotFoundException;
@@ -249,7 +250,8 @@ public class ConnectionStringProcessor {
 
     public TypedConfig<String> getTitanTypedConfig(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-        TypedConfig<String> config = TypedConfig.get(TITAN_APP_ID, keyName, null, new TypedConfig.Parser<String>() {
+        Feature feature = Feature.create().setHttpsEnable(true).build();
+        TypedConfig<String> config = TypedConfig.get(TITAN_APP_ID, keyName, feature, new TypedConfig.Parser<String>() {
             public String parse(String connectionString) {
                 return connectionString;
             }

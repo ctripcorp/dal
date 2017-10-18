@@ -98,6 +98,14 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         properties.setConnectionProperties(config.getProperty(CONNECTIONPROPERTIES, DEFAULT_CONNECTIONPROPERTIES));
         properties.setValidatorClassName(config.getProperty(VALIDATORCLASSNAME, DEFAULT_VALIDATORCLASSNAME));
 
+        String initSQL = config.getProperty(INIT_SQL);
+        if (initSQL != null && !initSQL.isEmpty())
+            properties.setInitSQL(initSQL);
+
+        String initSQL2 = config.getProperty(INIT_SQL2);
+        if (initSQL2 != null && !initSQL2.isEmpty())
+            properties.setInitSQL(initSQL2);
+
         // This are current hard coded as default value
         properties.setJmxEnabled(DEFAULT_JMXENABLED);
         properties.setJdbcInterceptors(DEFAULT_JDBCINTERCEPTORS);

@@ -1,4 +1,0 @@
-[NA]
-[test db]
-[port]
-[test sql]

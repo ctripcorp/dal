@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,8 @@ public class DataSourceConfigureLocator {
 
     private Map<String, DataSourceConfigure> dataSourceConfigures = new ConcurrentHashMap<>();
 
+    private Set<String> dataSourceConfigureKeySet = new HashSet<>();
+
     public DataSourceConfigure getUserDataSourceConfigure(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         return userDataSourceConfigures.get(keyName);
@@ -32,7 +35,7 @@ public class DataSourceConfigureLocator {
     }
 
     public Set<String> getDataSourceConfigureKeySet() {
-        return dataSourceConfigures.keySet();
+        return dataSourceConfigureKeySet;
     }
 
     public void addUserDataSourceConfigure(String name, DataSourceConfigure configure) {
@@ -43,6 +46,7 @@ public class DataSourceConfigureLocator {
     public void addDataSourceConfigure(String name, DataSourceConfigure configure) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         dataSourceConfigures.put(keyName, configure);
+        dataSourceConfigureKeySet.add(name);
     }
 
     public boolean contains(String name) {

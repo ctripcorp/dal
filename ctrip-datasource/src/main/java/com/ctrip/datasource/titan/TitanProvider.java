@@ -75,6 +75,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (dbNames == null || dbNames.isEmpty())
             return;
 
+        dataSourceConfigureLocator.addDataSourceConfigureKeySet(dbNames);
+
         if (dataSourceConfigureParser.isDataSourceXmlExist())
             ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, connectionStringProcessor.getAppId());
 

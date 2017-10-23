@@ -43,19 +43,20 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         if (dataSourceConfigure == null)
             throw new SQLException("Can not find any connection configure for " + name);
 
-        PoolProperties p = convert(dataSourceConfigure);
-        PoolPropertiesHolder.getInstance().setPoolProperties(p);
-        org.apache.tomcat.jdbc.pool.DataSource dataSource = new org.apache.tomcat.jdbc.pool.DataSource(p);
-
-        this.name = name;
-        this.dataSourceConfigure = dataSourceConfigure;
-        this.dataSource = dataSource;
-
         try {
+            this.name = name;
+            this.dataSourceConfigure = dataSourceConfigure;
+
+            PoolProperties p = convert(dataSourceConfigure);
+            PoolPropertiesHolder.getInstance().setPoolProperties(p);
+            org.apache.tomcat.jdbc.pool.DataSource dataSource = new org.apache.tomcat.jdbc.pool.DataSource(p);
+            this.dataSource = dataSource;
+
             dataSource.createPool();
             logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
         } catch (Throwable e) {
             logger.error(String.format("Error creating pool for data source %s", name), e);
+            // throw e;
         }
     }
 

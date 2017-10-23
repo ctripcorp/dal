@@ -48,12 +48,14 @@ public class PoolPropertiesHolder {
             }
         }
 
-        if (!map.containsKey(userName)) {
-            synchronized (LOCK2) {
-                if (!map.containsKey(userName)) {
-                    map.put(userName, poolProperties);
-                }
-            }
+        /*
+         * if (!map.containsKey(userName)) { synchronized (LOCK2) { if (!map.containsKey(userName)) { map.put(userName,
+         * poolProperties); } } }
+         */
+
+        // avoid caching for InitSQL
+        synchronized (LOCK2) {
+            map.put(userName, poolProperties);
         }
     }
 

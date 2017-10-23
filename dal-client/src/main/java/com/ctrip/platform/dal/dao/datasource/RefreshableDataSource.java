@@ -33,7 +33,10 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     private DataSource getDataSource() {
-        return dataSourceReference.get().getDataSource();
+        DataSource dataSource = dataSourceReference.get().getDataSource();
+        if (dataSource == null)
+            throw new IllegalStateException("DataSource cannot be null.");
+        return dataSource;
     }
 
     @Override

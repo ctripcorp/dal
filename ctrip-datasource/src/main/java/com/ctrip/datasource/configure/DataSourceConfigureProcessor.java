@@ -94,7 +94,8 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         setDataSourceConfigureMap(dataSourceConfigureMap, datasourceMap);
 
         // duplicate configure
-        dataSourceConfigureMap = DataSourceConfigureParser.getInstance().getDuplicatedMap(dataSourceConfigureMap);
+        // dataSourceConfigureMap = DataSourceConfigureParser.getInstance().getDuplicatedMap(dataSourceConfigureMap);
+        // dataSourceConfigureMap = DataSourceConfigureParser.getInstance().getDuplicatedMap(dataSourceConfigureMap);
 
         DataSourceConfigureWrapper wrapper =
                 new DataSourceConfigureWrapper(originalMap, dataSourceConfigure, dataSourceConfigureMap);
@@ -171,6 +172,15 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
                         overrideDataSourceConfigure(c, sourceConfigure);
                         String log = name + " 覆盖结果:" + mapToString(c.toMap());
                         LOGGER.info(log);
+                    } else {
+                        String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
+                        possibleName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
+                        DataSourceConfigure sc = dataSourceConfigureMap.get(possibleName);
+                        if (sc != null) {
+                            overrideDataSourceConfigure(c, sc);
+                            String log = possibleName + " 覆盖结果:" + mapToString(c.toMap());
+                            LOGGER.info(log);
+                        }
                     }
                 }
             }

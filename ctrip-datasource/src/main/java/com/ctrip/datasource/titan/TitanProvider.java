@@ -132,19 +132,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     notifyConnectionStringChangeListener(name);
                 }
             });
-
-            if (env.isPRO()) {
-                final String possibleName = dataSourceConfigureParser.getPossibleName(name);
-                // listen on possible name
-                TypedConfig<String> possibleConfig = connectionStringProcessor.getTitanTypedConfig(possibleName);
-                possibleConfig.addListener(new Configuration.ConfigListener<String>() {
-                    @Override
-                    public void onLoad(String connectionString) {
-                        // notify with actual name
-                        notifyConnectionStringChangeListener(name);
-                    }
-                });
-            }
         }
     }
 

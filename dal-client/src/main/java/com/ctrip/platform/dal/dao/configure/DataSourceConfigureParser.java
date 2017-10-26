@@ -97,7 +97,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
             map.put(dataSourceConfigure.getName(), dataSourceConfigure);
         }
 
-        map = getDuplicatedMap(map);
+        // map = getDuplicatedMap(map);
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
             dataSourceConfigureLocator.addUserDataSourceConfigure(entry.getKey(), entry.getValue());
         }

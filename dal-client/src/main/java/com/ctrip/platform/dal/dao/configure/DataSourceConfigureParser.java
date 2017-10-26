@@ -221,6 +221,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     }
 
     public String getPossibleName(String name) {
+        name = name.toUpperCase();
         return name.endsWith(PROD_SUFFIX) ? name.substring(0, name.length() - PROD_SUFFIX.length())
                 : name + PROD_SUFFIX;
     }

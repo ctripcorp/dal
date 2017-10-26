@@ -32,6 +32,8 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
     private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
     private AtomicReference<DataSourceConfigureWrapper> dataSourceConfigureWrapperReference = new AtomicReference<>();
 
+    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
+
     public synchronized static DataSourceConfigureProcessor getInstance() {
         if (instance == null) {
             instance = new DataSourceConfigureProcessor();
@@ -92,10 +94,6 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         // set datasource level map
         Map<String, DataSourceConfigure> dataSourceConfigureMap = new HashMap<>();
         setDataSourceConfigureMap(dataSourceConfigureMap, datasourceMap);
-
-        // duplicate configure
-        // dataSourceConfigureMap = DataSourceConfigureParser.getInstance().getDuplicatedMap(dataSourceConfigureMap);
-        // dataSourceConfigureMap = DataSourceConfigureParser.getInstance().getDuplicatedMap(dataSourceConfigureMap);
 
         DataSourceConfigureWrapper wrapper =
                 new DataSourceConfigureWrapper(originalMap, dataSourceConfigure, dataSourceConfigureMap);
@@ -197,12 +195,20 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
                 // override datasource.xml
                 String name = configure.getName();
                 if (name != null) {
-                    DataSourceConfigure dataSourceXml =
-                            DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure(name);
+                    DataSourceConfigure dataSourceXml = dataSourceConfigureLocator.getUserDataSourceConfigure(name);
                     if (dataSourceXml != null) {
                         overrideDataSourceConfigure(c, dataSourceXml);
                         String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
                         LOGGER.info(xmlLog);
+                    } else {
+                        String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
+                        possibleName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
+                        DataSourceConfigure sc = dataSourceConfigureLocator.getUserDataSourceConfigure(possibleName);
+                        if (sc != null) {
+                            overrideDataSourceConfigure(c, sc);
+                            String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
+                            LOGGER.info(xmlLog);
+                        }
                     }
                 }
             }

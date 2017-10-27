@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>1.4.0</version>
+    <version>1.13.0-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <framework-bom.version>1.5.1</framework-bom.version>

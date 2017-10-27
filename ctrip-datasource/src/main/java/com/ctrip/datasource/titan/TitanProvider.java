@@ -74,6 +74,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private String svcUrl;
     private String appid;
     private String subEnv;
+    private String idc;
     private int timeout;
     private boolean useLocal;
     private String databaseConfigLocation;
@@ -122,6 +123,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
         appid = discoverAppId(settings);
         subEnv = Foundation.server().getSubEnv();
         subEnv = subEnv == null ? null : subEnv.trim();
+        idc = Foundation.server().getDataCenter();
+        idc = (idc == null ? null : idc.trim());
 
         info("Titan Service Url: " + svcUrl);
         info("Appid: " + appid);
@@ -350,6 +353,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (!(subEnv == null || subEnv.isEmpty())) {
             builder.addParameter("envt", subEnv);
             info("Sub environment: " + subEnv);
+        }
+
+        if (!(idc == null || idc.isEmpty())) {
+            builder.addParameter("idc", idc);
+            info("IDC:" + idc);
         }
 
         URI uri = builder.build();

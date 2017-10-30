@@ -152,6 +152,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
+        // titanMapping.put("PRO", "http://10.32.20.154:8080/titanservice/query");
     }
 
     /**
@@ -215,24 +216,18 @@ public class TitanProvider implements DataSourceConfigureProvider {
             dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal, databaseConfigLocation);
         } else {
             // If it uses Titan service
-            boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
-
-            Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
+            // boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
+            // Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
 
             try {
-                Map<String, TitanData> rawConnStrings = new HashMap<>();
-                Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
-
-                if (isProdEnv) {
-                    for (String name : dbNames) {
-                        if (name.endsWith(PROD_SUFFIX))
-                            rawConnStrings.put(name, tmpRawConnStrings.get(name));
-                        else
-                            rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
-                    }
-                } else {
-                    rawConnStrings = tmpRawConnStrings;
-                }
+                Map<String, TitanData> rawConnStrings = getConnectionStrings(dbNames);
+                /*
+                 * Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(dbNames);
+                 * 
+                 * if (isProdEnv) { for (String name : dbNames) { if (name.endsWith(PROD_SUFFIX))
+                 * rawConnStrings.put(name, tmpRawConnStrings.get(name)); else rawConnStrings.put(name,
+                 * tmpRawConnStrings.get(name + PROD_SUFFIX)); } } else { rawConnStrings = tmpRawConnStrings; }
+                 */
                 dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);

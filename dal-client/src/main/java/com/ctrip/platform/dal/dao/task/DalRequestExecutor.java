@@ -29,9 +29,14 @@ public class DalRequestExecutor {
 	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
 	
 	public static final String MAX_POOL_SIZE = "maxPoolSize";
-	public static final int DEFAULT_MAX_POOL_SIZE = 50;
+	public static final String KEEP_ALIVE_TIME = "keepAliveTime";
+	
+	// To be consist with default connection max active size
+	public static final int DEFAULT_MAX_POOL_SIZE = 500;
 
-	public static void init(String maxPoolSizeStr){
+	public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
+	        
+	public static void init(String maxPoolSizeStr, String keepAliveTimeStr){
 		if(serviceRef.get() != null)
 			return;
 		
@@ -43,7 +48,14 @@ public class DalRequestExecutor {
 			if(maxPoolSizeStr != null)
 				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
 			
-			serviceRef.set(new ThreadPoolExecutor(5, maxPoolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>()));
+			int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
+            if(keepAliveTimeStr != null)
+                keepAliveTime = Integer.parseInt(keepAliveTimeStr);
+			
+            ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+            executer.allowCoreThreadTimeOut(true);
+            
+            serviceRef.set(executer);
 		}
 	} 
 	
@@ -173,5 +185,13 @@ public class DalRequestExecutor {
 		}
 		
 		return merger.merge();
+	}
+	
+	public int getPoolSize() {
+	    ThreadPoolExecutor executer = (ThreadPoolExecutor)serviceRef.get();
+	    if (serviceRef.get() == null)
+            return 0;
+	    
+	    return executer.getPoolSize();
 	}
 }

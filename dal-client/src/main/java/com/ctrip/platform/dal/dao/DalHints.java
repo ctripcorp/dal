@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -331,7 +332,7 @@ public class DalHints {
 		return !is(DalHintEnum.continueOnError);
 	}
 
-	public void handleError(String msg, Throwable e) throws DalException {
+	public void handleError(String msg, Throwable e) throws SQLException {
 		// Just make sure error is not swallowed by us
 		DalClientFactory.getDalLogger().error(msg, e);
 

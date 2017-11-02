@@ -2,16 +2,19 @@ package test.com.ctrip.platform.dal.dao.task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -23,7 +26,7 @@ import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 public class DalRequestExecutorTest {
 	private class TestDalRequest implements DalRequest<Integer> {
 		private SQLException e; 
-		private Integer[] values;
+		public Integer[] values;
 		
 		private TestDalRequest(SQLException e, Integer[] values) {
 			this.e = e;
@@ -43,11 +46,7 @@ public class DalRequestExecutorTest {
 
 		@Override
 		public Callable<Integer> createTask() throws SQLException {
-			return new Callable<Integer>() {
-				public Integer call() throws Exception {
-					return values[0];
-				}
-			};
+			return createInternalTask(values[0]);
 		}
 
 		@Override
@@ -56,14 +55,18 @@ public class DalRequestExecutorTest {
 			
 			for(int i = 0; i < values.length; i++) {
 				final int k = values[i];
-				tasks.put(String.valueOf(i), new Callable<Integer>() {
-					public Integer call() throws Exception {
-						return k;
-					}
-				});
+				tasks.put(String.valueOf(i), createInternalTask(k));
 			}
 				
 			return tasks;
+		}
+		
+		public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
+		    return new Callable<Integer>() {
+		        public Integer call() throws Exception {
+		            return k;
+		        }
+		    };
 		}
 
 		@Override
@@ -72,8 +75,37 @@ public class DalRequestExecutorTest {
 		}
 	}
 	
-	@AfterClass
-	public static void testShutdownAsyncTaskExecutor() {
+    static ConcurrentHashMap<String, Object> all = new ConcurrentHashMap<>();
+    
+    private class TestThreadPoolDalRequest extends TestDalRequest {
+        TestThreadPoolDalRequest(int size) {
+            super(null, null);
+            values = new Integer[size];
+            for(int i = 0; i < size; i++)
+                values[i] = i;
+            
+        }
+        public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
+            return new Callable<Integer>() {
+                public Integer call() throws Exception {
+                    all.put(Thread.currentThread().getName(), 1);
+                    return k;
+                }
+            };
+        }
+    }
+    
+    @Before
+    public void setUp() {
+        try{
+            DalRequestExecutor.init(null, null);
+        }catch(Throwable e) {
+            fail();
+        }
+    }
+
+    @After
+	public void teardown() {
 		try{
 			DalRequestExecutor.shutdown();
 		}catch(Throwable e) {
@@ -177,4 +209,110 @@ public class DalRequestExecutorTest {
 			fail();
 		}
 	}
+
+    @Test
+    public void testThreadPoolFeature() {
+        DalRequestExecutor.shutdown();
+        DalRequestExecutor.init("10", null);
+        DalRequestExecutor test = new DalRequestExecutor();
+        TestDalRequest request = new TestThreadPoolDalRequest(50);
+        DalHints hints = new DalHints();
+
+        try {
+            all.clear();
+            test.execute(hints, request, true);
+            assertEquals(10, all.keySet().size());
+        } catch (Exception e) {
+            fail();
+        }
+        
+        
+        all.clear();
+        DalRequestExecutor.shutdown();
+        DalRequestExecutor.init("200", null);
+        test = new DalRequestExecutor();
+        request = new TestThreadPoolDalRequest(1000);
+        hints = new DalHints();
+
+        try {
+            test.execute(hints, request, true);
+            assertEquals(200, all.keySet().size());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testThreadPoolFeatureCooldown() {
+        DalRequestExecutor.shutdown();
+        DalRequestExecutor.init("10", "10");
+        DalRequestExecutor test = new DalRequestExecutor();
+        System.out.println(test.getPoolSize());
+        TestDalRequest request = new TestThreadPoolDalRequest(50);
+        DalHints hints = new DalHints();
+
+        try {
+            all.clear();
+            test.execute(hints, request, true);
+            assertEquals(10, test.getPoolSize());
+            assertEquals(10, all.keySet().size());
+            assertEquals(10, test.getPoolSize());
+        } catch (Exception e) {
+            fail();
+        }
+        
+        try {
+            Thread.sleep(9*1000);
+            System.out.println(test.getPoolSize());
+            
+            Thread.sleep(1*1000);
+            System.out.println(test.getPoolSize());
+            
+            request = new TestThreadPoolDalRequest(5);
+            test.execute(hints, request, true);
+            System.out.println(test.getPoolSize());
+            assertTrue(test.getPoolSize() < 10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void testThreadPoolFeatureMax() {
+        DalRequestExecutor.shutdown();
+        DalRequestExecutor.init("1000", "10");
+        DalRequestExecutor test = new DalRequestExecutor();
+        System.out.println(test.getPoolSize());
+        TestDalRequest request = new TestThreadPoolDalRequest(20000);
+        DalHints hints = new DalHints();
+
+        try {
+            all.clear();
+            System.out.println("Start");
+            long start = System.currentTimeMillis();
+            test.execute(hints, request, true);
+            start = System.currentTimeMillis() - start;
+            System.out.println(start + "ms");
+            assertEquals(1000, all.keySet().size());
+            assertEquals(1000, test.getPoolSize());
+        } catch (Exception e) {
+            fail();
+        }
+        
+        try {
+            Thread.sleep(9*1000);
+            System.out.println("after 9s: " + test.getPoolSize());
+            
+            Thread.sleep(1*1000);
+            System.out.println("after 10s: " + test.getPoolSize());
+            
+            request = new TestThreadPoolDalRequest(5);
+            test.execute(hints, request, true);
+            System.out.println(test.getPoolSize());
+            assertTrue(test.getPoolSize() < 1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

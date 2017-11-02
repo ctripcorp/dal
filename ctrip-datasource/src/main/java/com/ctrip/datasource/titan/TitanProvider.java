@@ -291,11 +291,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
             throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
         for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
-            if (isDebug)
+            if (isDebug) {
                 configures.put(entry.getKey(), new DataSourceConfigure());
-            else
-                configures.put(entry.getKey(),
-                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
+            } else {
+                DataSourceConfigure configure =
+                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString()));
+                configures.put(entry.getKey(), configure);
+                info("Url:" + configure.getConnectionUrl());
+            }
         }
 
         return configures;

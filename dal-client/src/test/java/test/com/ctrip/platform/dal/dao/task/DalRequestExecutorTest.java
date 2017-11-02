@@ -85,10 +85,15 @@ public class DalRequestExecutorTest {
                 values[i] = i;
             
         }
+        
+        private boolean sleep;
+        
         public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
             return new Callable<Integer>() {
                 public Integer call() throws Exception {
                     all.put(Thread.currentThread().getName(), 1);
+                    if(sleep)
+                        Thread.sleep(1000);
                     return k;
                 }
             };
@@ -315,4 +320,44 @@ public class DalRequestExecutorTest {
         }
     }
 
+    @Test
+    public void testThreadPoolCheckCapacity() {
+        DalRequestExecutor.shutdown();
+        DalRequestExecutor.init("1000", "1");
+        DalRequestExecutor test = new DalRequestExecutor();
+        
+        testCapacity(test, 100, 1000);
+        testCapacity(test, 200, 1000);
+        testCapacity(test, 300, 1000);
+        
+        testCapacity(test, 500, 1000);
+        
+        testCapacity(test, 1000, 1000);
+        
+        testCapacity(test, 1500, 2000);
+        
+        testCapacity(test, 2000, 2000);
+        
+        testCapacity(test, 10000, 10000);
+    }
+    
+    public void testCapacity(DalRequestExecutor test, int size, int cost) {
+        int delta = 200;
+        TestThreadPoolDalRequest request = new TestThreadPoolDalRequest(size);
+        request.sleep = true;
+        DalHints hints = new DalHints();
+
+        try {
+            System.out.print("Size: " + size + " Cost: " + cost + " pool size: " + test.getPoolSize());
+            all.clear();
+            long start = System.currentTimeMillis();
+            test.execute(hints, request, true);
+            start = System.currentTimeMillis() - start;
+            System.out.println(" Actual cost: " + start + "ms");
+            assertTrue(start - cost < delta);
+            Thread.sleep(1500);
+        } catch (Exception e) {
+            fail();
+        }
+    }
 }

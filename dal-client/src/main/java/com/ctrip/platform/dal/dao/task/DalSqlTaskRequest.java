@@ -21,11 +21,13 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
 
 public class DalSqlTaskRequest<T> implements DalRequest<T>{
+    private String caller;
 	private DalLogger logger;
 	private String logicDbName;
 	private SqlBuilder builder;
@@ -46,9 +48,20 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		this.task = task;
 		this.merger = merger;
 		shards = getShards();
+		this.caller = LogContext.getRequestCaller();
 	}
 	
-	@Override
+    @Override
+    public String getCaller() {
+        return caller;
+    }
+
+    @Override
+    public boolean isAsynExecution() {
+        return hints.isAsyncExecution();
+    }
+
+    @Override
 	public void validate() throws SQLException {
 		detectDistributedTransaction(shards);
 	}

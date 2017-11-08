@@ -13,10 +13,12 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
+    private String caller;
 	private String logicDbName;
 	private String rawTableName;
 	private DalHints hints;
@@ -33,8 +35,19 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		this.hints = hints;
 		this.rawPojos = rawPojos;
 		this.task = task;
+		this.caller = LogContext.getRequestCaller();
 	}
 
+    @Override
+    public String getCaller() {
+        return caller;
+    }
+
+    @Override
+    public boolean isAsynExecution() {
+        return hints.isAsyncExecution();
+    }
+	
 	@Override
 	public void validate() throws SQLException {
 		if(null == rawPojos)

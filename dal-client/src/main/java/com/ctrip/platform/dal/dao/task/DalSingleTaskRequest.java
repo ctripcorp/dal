@@ -11,10 +11,12 @@ import java.util.concurrent.Callable;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
+    private String caller;
 	private String logicDbName;
 	private DalHints hints;
 	private boolean isList;
@@ -27,6 +29,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		this.logicDbName = logicDbName;
 		this.task = task;
 		this.hints = hints;
+		this.caller = LogContext.getRequestCaller();
 	}
 	
 	public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
@@ -42,6 +45,16 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		isList = true;
 	}
 	
+    @Override
+    public String getCaller() {
+        return caller;
+    }
+    
+    @Override
+    public boolean isAsynExecution() {
+        return hints.isAsyncExecution();
+    }
+
 	@Override
 	public void validate() throws SQLException {
 		if(isList && null == rawPojos)

@@ -23,6 +23,8 @@ public class LogEntry {
 	private String commandType;
 	private String userName;
 	private int resultCount;
+	private Integer affectedRows;
+	private int[] affectedRowsArray;
 	private String dao;
 	private String method;
 	private String source;
@@ -175,7 +177,25 @@ public class LogEntry {
 		this.resultCount = resultCount;
 	}
 
-	public String getCallString() {
+	public Integer getAffectedRows() {
+        return affectedRows;
+    }
+
+    public Integer setAffectedRows(Integer affectedRows) {
+        this.affectedRows = affectedRows;
+        return affectedRows;
+    }
+
+    public int[] getAffectedRowsArray() {
+        return affectedRowsArray;
+    }
+
+    public int[] setAffectedRowsArray(int[] affectedRowsArray) {
+        this.affectedRowsArray = affectedRowsArray;
+        return affectedRowsArray;
+    }
+
+    public String getCallString() {
 		return callString;
 	}
 

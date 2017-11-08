@@ -11,8 +11,10 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -35,11 +37,13 @@ public class DalDirectClient implements DalClient {
 	private DalStatementCreator stmtCreator;
 	private DalConnectionManager connManager;
 	private DalTransactionManager transManager;
+	private DalLogger logger;
 
 	public DalDirectClient(DalConfigure config, String logicDbName) {
 		connManager = new DalConnectionManager(logicDbName, config);
 		transManager = new DalTransactionManager(connManager);
 		stmtCreator = new DalStatementCreator(config.getDatabaseSet(logicDbName).getDatabaseCategory());
+		logger = DalClientFactory.getDalLogger();
 	}
 
 	@Override
@@ -52,7 +56,7 @@ public class DalDirectClient implements DalClient {
 				
 				preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
 				DalWatcher.beginExecute();
-				rs = preparedStatement.executeQuery();
+				rs = executeQuery(preparedStatement, entry);
 				DalWatcher.endExectue();
 				
 				T result;
@@ -83,7 +87,7 @@ public class DalDirectClient implements DalClient {
 				List<Object> result = new ArrayList<>();
 				DalWatcher.beginExecute();
 
-				preparedStatement.execute();
+				executeMultiple(preparedStatement, entry);
 				
 				int count = 0;
 				for(DalResultSetExtractor<?> extractor: extractors) {
@@ -128,7 +132,7 @@ public class DalDirectClient implements DalClient {
 					preparedStatement = createPreparedStatement(conn, sql, parameters, hints, generatedKeyHolder);
 				
 				DalWatcher.beginExecute();
-				int rows = preparedStatement.executeUpdate();
+				int rows = executeUpdate(preparedStatement, entry);
 				DalWatcher.endExectue();
 				
 				if(generatedKeyHolder == null)
@@ -162,7 +166,7 @@ public class DalDirectClient implements DalClient {
 					statement.addBatch(sql);
 				
 				DalWatcher.beginExecute();
-				int[] ret = statement.executeBatch();
+				int[] ret = executeBatch(statement, entry);
 				DalWatcher.endExectue();
 				
 				return ret;
@@ -184,7 +188,7 @@ public class DalDirectClient implements DalClient {
 				statement = createPreparedStatement(conn, sql, parametersList, hints);
 				
 				DalWatcher.beginExecute();
-				int[] ret =  statement.executeBatch();
+				int[] ret = executeBatch(statement, entry);
 				DalWatcher.endExectue();
 				
 				return ret;
@@ -255,7 +259,7 @@ public class DalDirectClient implements DalClient {
 				callableStatement = createCallableStatement(conn, callString, parameters, hints);
 				
 				DalWatcher.beginExecute();
-				boolean retVal = callableStatement.execute();
+				boolean retVal = executeCall(callableStatement, entry);
 				int updateCount = callableStatement.getUpdateCount();
 				
 				DalWatcher.endExectue();
@@ -285,7 +289,7 @@ public class DalDirectClient implements DalClient {
 				callableStatement = createCallableStatement(conn, callString, parametersList, hints);
 
 				DalWatcher.beginExecute();
-				int[] ret =  callableStatement.executeBatch();
+				int[] ret =  executeBatch(callableStatement, entry);
 				DalWatcher.endExectue();
 				
 				return ret;
@@ -446,5 +450,56 @@ public class DalDirectClient implements DalClient {
 	
 	private CallableStatement createCallableStatement(Connection conn,  String sql, StatementParameters[] parametersList, DalHints hints) throws Exception {
 		return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
+	}
+	
+	private ResultSet executeQuery(final PreparedStatement preparedStatement, final LogEntry entry) throws Exception {
+        return execute(new Callable<ResultSet>() { public ResultSet call() throws Exception {
+            return preparedStatement.executeQuery();
+        }}, entry);
+	}
+	
+	private void executeMultiple(final PreparedStatement preparedStatement, final LogEntry entry) throws Exception {
+        execute(new Callable<Object>() { public Object call() throws Exception {
+            preparedStatement.execute();
+            return null;
+        }}, entry);
+	}
+
+	private int executeUpdate(final PreparedStatement preparedStatement, final LogEntry entry) throws Exception {
+	    return execute(new Callable<Integer>() { public Integer call() throws Exception {
+                return entry.setAffectedRows(preparedStatement.executeUpdate());
+            }}, entry);
+	}
+	
+    private int[] executeBatch(final Statement statement, final LogEntry entry) throws Exception {
+        return execute(new Callable<int[]>() { public int[] call() throws Exception {
+                return entry.setAffectedRowsArray(statement.executeBatch());
+            }}, entry);
+    }
+    
+    private Boolean executeCall(final CallableStatement callableStatement, final LogEntry entry) throws Exception {
+        return execute(new Callable<Boolean>() { public Boolean call() throws Exception {
+                return callableStatement.execute();
+            }}, entry);
+    }
+    
+    private int[] executeBatch(final CallableStatement callableStatement, final LogEntry entry) throws Exception {
+        return execute(new Callable<int[]>() { public int[] call() throws Exception {
+                return entry.setAffectedRowsArray(callableStatement.executeBatch());
+            }}, entry);
+    }
+
+	private <T> T execute(Callable<T> statementTask, LogEntry entry) throws Exception {
+        Throwable error = null;
+        logger.startStatement(entry);
+        
+        try {
+            return statementTask.call();
+        } catch (Throwable e) {
+            error = e;
+            throw e;
+        }finally{
+            logger.endStatement(entry, error);
+        }
 	}
 }

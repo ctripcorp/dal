@@ -73,6 +73,18 @@ public class DalRequestExecutorTest {
 		public ResultMerger<Integer> getMerger() {
 			return new ResultMerger.IntSummary();
 		}
+
+        @Override
+        public String getCaller() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public boolean isAsynExecution() {
+            // TODO Auto-generated method stub
+            return false;
+        }
 	}
 	
     static ConcurrentHashMap<String, Object> all = new ConcurrentHashMap<>();

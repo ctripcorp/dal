@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
+import com.ctrip.platform.dal.dao.task.DalRequest;
 
 /**
  * Used when logger is disabled
@@ -65,4 +66,37 @@ public class NullLogger implements DalLogger {
 	public String getAppID() {
 		return "999999";
 	}
+
+    @Override
+    public <T> LogContext start(DalRequest<T> request) {
+        return new LogContext();
+    }
+
+    @Override
+    public void end(LogContext logContext, Throwable e) {
+    }
+
+    @Override
+    public void startCrossShardTasks(LogContext logContext, boolean isSequentialExecution) {
+    }
+
+    @Override
+    public void endCrossShards(LogContext logContext, Throwable e) {
+    }
+
+    @Override
+    public void startTask(LogContext logContext, String shard) {
+    }
+
+    @Override
+    public void endTask(LogContext logContext, String shard, Throwable e) {
+    }
+
+    @Override
+    public void startStatement(LogEntry entry) {
+    }
+
+    @Override
+    public void endStatement(LogEntry entry, Throwable e) {
+    }
 }

@@ -54,6 +54,18 @@ public abstract class LoggerAdapter implements DalLogger {
 	
 	protected static ExecutorService executor = null;
 
+    /**
+     * Helper method to unify asyn and sync invocation
+     * @param task
+     */
+	public void call(Runnable task) {
+        if (asyncLogging) {
+            executor.submit(task);
+        } else {
+            task.run();
+        }
+    }   
+    
 	@Override
 	public void initialize(Map<String, String> settings) {
 		if(settings == null)

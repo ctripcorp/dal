@@ -21,6 +21,7 @@ import org.w3c.dom.NodeList;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.DalSafeLogger;
 import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
@@ -78,6 +79,8 @@ public class DalConfigureFactory implements DalConfigConstants {
         String name = getAttribute(root, NAME);
 
         DalLogger logger = readComponent(root, LOG_LISTENER, new DefaultLogger(), LOGGER);
+        // To wrap with a sandbox logger
+//        logger = new DalSafeLogger(logger);
 
         DalTaskFactory factory = readComponent(root, TASK_FACTORY, new DefaultTaskFactory(), FACTORY);
 

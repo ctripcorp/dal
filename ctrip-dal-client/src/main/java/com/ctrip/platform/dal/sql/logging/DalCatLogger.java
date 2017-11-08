@@ -19,12 +19,12 @@ public class DalCatLogger {
 	private static final String RECORD_COUNT = "DAL.recordCount";
 	
 	private static final String AFFECTED_ROWS = "DAL.affectedRows";
-    private static final String TYPE_SQL_ASYN_EXECUTION = "SQL.executionMode";
     private static final String TYPE_SQL_REQUEST_EXECUTION = "SQL.dao";
     private static final String TYPE_SQL_CROSS_SHARD_TASK_EXECUTION = "SQL.crossShard";
     private static final String TYPE_SQL_TASK_EXECUTION = "SQL.task";
     private static final String TYPE_SQL_STATEMENT_EXECUTION = "SQL.statement";
     
+    private static final String TYPE_SQL_ASYN_EXECUTION = "DAL.executionMode";
     private static final String TYPE_SQL_CROSS_SHARD_EXECUTION_TYPE = "DAL.executionType";
     private static final String TYPE_SQL_TASK_COUNT = "DAL.shardCount";
     private static final String TYPE_SQL_SHARDS = "DAL.shards";

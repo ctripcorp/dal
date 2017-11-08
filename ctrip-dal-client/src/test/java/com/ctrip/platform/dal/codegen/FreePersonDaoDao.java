@@ -23,6 +23,20 @@ public class FreePersonDaoDao {
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
 
+    public List<String> findWithError(String name, List<Integer> cityIds, DalHints hints) throws SQLException { 
+        hints = DalHints.createIfAbsent(hints);
+
+        FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate("SELECT aaaname FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.setSensitive(i++, "name", Types.VARCHAR, name);
+        i = parameters.setSensitiveInParameter(i, "cityIds", Types.INTEGER, cityIds);
+        builder.simpleType();
+
+        return queryDao.query(builder, parameters, hints);
+    }
+
 	/**
 	 * find field list
 	**/

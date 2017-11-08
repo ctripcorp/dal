@@ -32,6 +32,7 @@ public class CtripLogEntry extends LogEntry {
 	
 	private Transaction catTransaction;
 	private ISpan urlSpan;
+	private Transaction statementTransaction;
 
 	public Transaction getCatTransaction() {
 		return catTransaction;
@@ -49,7 +50,15 @@ public class CtripLogEntry extends LogEntry {
 		this.urlSpan = urlSpan;
 	}
 
-	public Map<String, String> getTag() {
+	public Transaction getStatementTransaction() {
+        return statementTransaction;
+    }
+
+    public void setStatementTransaction(Transaction statementTransaction) {
+        this.statementTransaction = statementTransaction;
+    }
+
+    public Map<String, String> getTag() {
 		
 		String dbName = "";
 		if(null != this.getDataBaseKeyName()){

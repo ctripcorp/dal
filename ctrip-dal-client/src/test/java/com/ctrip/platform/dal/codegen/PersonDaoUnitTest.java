@@ -390,6 +390,22 @@ public class PersonDaoUnitTest {
 		assertArrayEquals(new int[]{1,1,1,1}, affected);
 	}
 	
+    @Test
+    public void testInsertAllShard() throws Exception {
+        DalHints hints = new DalHints();
+        List<Person> daoPojos = dao.queryAll(new DalHints().inAllShards().inTableShard(1));
+        daoPojos.addAll(dao.queryAll(new DalHints().inAllShards().inTableShard(2)));
+        daoPojos.addAll(dao.queryAll(new DalHints().inAllShards().inTableShard(3)));
+        daoPojos.addAll(dao.queryAll(new DalHints().inAllShards().inTableShard(0)));
+        int[] affected = dao.batchInsert(hints.sequentialExecute(), daoPojos);
+        assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,}, affected);
+        
+        // Async
+        affected = dao.batchInsert(hints.sequentialExecute().asyncExecution(), daoPojos);
+        assertNull(affected);
+        assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,}, hints.getIntArrayResult());
+    }
+    
 	@Test
 	public void testCombinedInsert1() throws Exception {
 		DalHints hints = new DalHints();
@@ -834,4 +850,15 @@ public class PersonDaoUnitTest {
 	    assertNull(ret);
 	    assertEquals(1, hints.getIntResult());
 	}
+	
+    @Test
+    public void testCatTransaction() throws Exception {
+        List<Integer> cityIds = new ArrayList<>();// Test value here
+        cityIds.add(1);
+        cityIds.add(2);
+        cityIds.add(3);
+        String name = "Test";// Test value here
+        Person ret = dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0));
+        Thread.sleep(35*1000);
+    }	
 }

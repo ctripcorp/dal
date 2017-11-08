@@ -38,7 +38,7 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
     }
     
     public static String getDalVersion() {
-        return version.get();
+        return "java-" + version.get();
     }
     
     private String initVersion(){

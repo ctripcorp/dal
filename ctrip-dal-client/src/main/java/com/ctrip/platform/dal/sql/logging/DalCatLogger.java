@@ -24,10 +24,11 @@ public class DalCatLogger {
     private static final String TYPE_SQL_TASK_EXECUTION = "SQL.task";
     private static final String TYPE_SQL_STATEMENT_EXECUTION = "SQL.statement";
     
-    private static final String TYPE_SQL_ASYN_EXECUTION = "DAL.executionMode";
+    private static final String TYPE_SQL_ASYN_EXECUTION = "DAL.isAsynchcronized";
     private static final String TYPE_SQL_CROSS_SHARD_EXECUTION_TYPE = "DAL.executionType";
     private static final String TYPE_SQL_TASK_COUNT = "DAL.shardCount";
     private static final String TYPE_SQL_SHARDS = "DAL.shards";
+    private static final String TYPE_SQL_GET_CONNECTION_COST = "DAL.getConnectionCost";
     private static final String TYPE_SQL_START_TASK_POOL_SIZE = "DAL.startTaskPoolSize";
     private static final String TYPE_SQL_END_TASK_POOL_SIZE = "DAL.endTaskPoolSize";
     
@@ -88,10 +89,11 @@ public class DalCatLogger {
 	
     public static <T> LogContext start(DalRequest<T> request) {
         CtripLogContext clc = new CtripLogContext();
-        clc.setCaller(request.getCaller());
+        String caller = request.isAsynExecution() ? request.getCaller() + "[asynchcronized]" : request.getCaller();
+        clc.setCaller(caller);
         clc.setRequestTransaction(Cat.newTransaction(TYPE_SQL_REQUEST_EXECUTION, clc.getCaller()));
         Cat.logEvent(CtripDalLogger.DAL_VERSION, CtripDalLogger.getDalVersion());
-        Cat.logEvent(TYPE_SQL_ASYN_EXECUTION, request.isAsynExecution() ? "sychronized":"asychronized");
+        Cat.logEvent(TYPE_SQL_ASYN_EXECUTION, String.valueOf(request.isAsynExecution()));
         return clc;
     }
 
@@ -102,10 +104,13 @@ public class DalCatLogger {
     public static void startCrossShardTasks(LogContext logContext, boolean isSequentialExecution) {
         CtripLogContext clc = (CtripLogContext)logContext;
         clc.setCorssShardTasksTransaction(Cat.newTransaction(TYPE_SQL_CROSS_SHARD_TASK_EXECUTION, clc.getCaller()));
-        Cat.logEvent(TYPE_SQL_CROSS_SHARD_EXECUTION_TYPE, isSequentialExecution ? "sequentioal" : "parallel");
+        Cat.logEvent(TYPE_SQL_CROSS_SHARD_EXECUTION_TYPE, isSequentialExecution ? "sequential" : "parallel");
         Cat.logEvent(TYPE_SQL_START_TASK_POOL_SIZE, String.valueOf(DalRequestExecutor.getPoolSize()));
         Cat.logEvent(TYPE_SQL_TASK_COUNT, String.valueOf(logContext.getShards().size()));
         Cat.logEvent(TYPE_SQL_SHARDS, logContext.getShards().toString());
+        
+        if(isSequentialExecution)
+            return;
         
         //Create ForkedTransaction
         Map<String, ForkedTransaction> taskTransactions = new ConcurrentHashMap<String, ForkedTransaction>();
@@ -123,7 +128,7 @@ public class DalCatLogger {
 
     public static void startTask(LogContext logContext, String shard) {
         CtripLogContext clc = (CtripLogContext)logContext;
-        if(logContext.isSingleTask())
+        if(logContext.isSingleTask() || logContext.isSeqencialExecution())
             clc.setSingleTaskTransaction(Cat.newTransaction(TYPE_SQL_TASK_EXECUTION, clc.getCaller()));
         else
             clc.getTaskTransactions().get(shard).fork();
@@ -131,7 +136,7 @@ public class DalCatLogger {
 
     public static void endTask(LogContext logContext, String shard, final Throwable e) {
         CtripLogContext clc = (CtripLogContext)logContext;
-        Transaction tran = logContext.isSingleTask() ? 
+        Transaction tran = logContext.isSingleTask() || logContext.isSeqencialExecution()? 
             clc.getSingleTaskTransaction():
             clc.getTaskTransactions().get(shard);
 
@@ -139,6 +144,7 @@ public class DalCatLogger {
     }
 
     public static void startStatement(CtripLogEntry entry) {
+        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST, String.valueOf(entry.getConnectionCost())+ " ms");
         String sqlType = getCaller(entry);
         entry.setStatementTransaction(Cat.newTransaction(TYPE_SQL_STATEMENT_EXECUTION, sqlType));
     }

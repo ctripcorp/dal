@@ -25,6 +25,7 @@ public class LogEntry {
 	private int resultCount;
 	private Integer affectedRows;
 	private int[] affectedRowsArray;
+	private long connectionCost;
 	private String dao;
 	private String method;
 	private String source;
@@ -193,6 +194,14 @@ public class LogEntry {
     public int[] setAffectedRowsArray(int[] affectedRowsArray) {
         this.affectedRowsArray = affectedRowsArray;
         return affectedRowsArray;
+    }
+
+    public long getConnectionCost() {
+        return connectionCost;
+    }
+
+    public void setConnectionCost(long connectionCost) {
+        this.connectionCost = connectionCost;
     }
 
     public String getCallString() {

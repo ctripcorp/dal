@@ -138,7 +138,7 @@ public class DalRequestExecutor {
         logContext.setShards(tasks.keySet());
 
         boolean isSequentialExecution = hints.is(DalHintEnum.sequentialExecution);
-        logContext.setSeqncialExecution(isSequentialExecution);
+        logContext.setSeqencialExecution(isSequentialExecution);
         
         ResultMerger<T> merger = request.getMerger();
         

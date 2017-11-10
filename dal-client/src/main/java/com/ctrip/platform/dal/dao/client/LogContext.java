@@ -11,7 +11,7 @@ import java.util.Set;
 public class LogContext {
     private static String execludedPackageSpace = "com.ctrip.platform.dal.dao.";
     private boolean singleTask;
-    private boolean seqncialExecution;
+    private boolean seqencialExecution;
     private Set<String> shards;
 
     public boolean isSingleTask() {
@@ -22,12 +22,12 @@ public class LogContext {
         this.singleTask = singleTask;
     }
 
-    public boolean isSeqncialExecution() {
-        return seqncialExecution;
+    public boolean isSeqencialExecution() {
+        return seqencialExecution;
     }
 
-    public void setSeqncialExecution(boolean seqncialExecution) {
-        this.seqncialExecution = seqncialExecution;
+    public void setSeqencialExecution(boolean seqencialExecution) {
+        this.seqencialExecution = seqencialExecution;
     }
 
     public Set<String> getShards() {

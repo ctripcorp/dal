@@ -421,8 +421,11 @@ public class DalDirectClient implements DalClient {
 	public Connection getConnection(DalHints hints, ConnectionAction<?> action) throws SQLException {
 		DalWatcher.beginConnect();
 
+		long connCost = System.currentTimeMillis();
 		action.connHolder = transManager.getConnection(hints, action.operation);
 		Connection conn = action.connHolder.getConn();
+		connCost = System.currentTimeMillis() - connCost;
+		action.entry.setConnectionCost(connCost);
 
 		DalWatcher.endConnect();
 		return conn;

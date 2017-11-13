@@ -282,7 +282,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private Map<String, DataSourceConfigureChangeListener> copyChangeListeners(
             Map<String, DataSourceConfigureChangeListener> map) {
         if (map == null || map.isEmpty()) {
-            return null;
+            return new ConcurrentHashMap<>();
         }
 
         Map<String, DataSourceConfigureChangeListener> listeners = new HashMap<>();

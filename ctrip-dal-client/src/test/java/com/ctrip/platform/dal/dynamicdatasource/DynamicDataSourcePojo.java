@@ -9,10 +9,10 @@ import java.sql.Timestamp;
 import java.sql.Types;
 
 @Entity
-@Database(name = "noShardTestOnMysql")
+@Database(name = "dynamicdatasource")
 @Table(name = "testTable")
 
-public class DRTestPojo extends UpdatableEntity {
+public class DynamicDataSourcePojo extends UpdatableEntity {
 
     @Id
     @Column(name = "ID", length = 100)

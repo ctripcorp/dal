@@ -83,7 +83,8 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
         properties.setTimeBetweenEvictionRunsMillis(
                 config.getIntProperty(TIMEBETWEENEVICTIONRUNSMILLIS, DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS));
-        properties.setMinEvictableIdleTimeMillis(DEFAULT_MINEVICTABLEIDLETIMEMILLIS);
+        properties.setMinEvictableIdleTimeMillis(
+                config.getIntProperty(MINEVICTABLEIDLETIMEMILLIS, DEFAULT_MINEVICTABLEIDLETIMEMILLIS));
 
         properties.setMaxAge(config.getIntProperty(MAX_AGE, DEFAULT_MAXAGE));
         properties.setMaxActive(config.getIntProperty(MAXACTIVE, DEFAULT_MAXACTIVE));

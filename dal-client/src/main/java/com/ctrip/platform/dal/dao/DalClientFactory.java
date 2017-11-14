@@ -4,12 +4,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.dao.configure.DalConfigLoader;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
@@ -156,6 +158,7 @@ public class DalClientFactory {
                 DalStatusManager.shutdown();
 
                 DalWatcher.destroy();
+                LogEntry.shutdown();
                 logger.info("DalWatcher has been destoryed");
             } catch (Throwable e) {
                 logger.error("Error during shutdown", e);

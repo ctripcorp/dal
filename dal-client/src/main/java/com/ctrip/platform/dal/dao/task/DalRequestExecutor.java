@@ -129,7 +129,7 @@ public class DalRequestExecutor {
 
 	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
         logContext.setSingleTask(true);
-	    Callable<T> task = new TaskWrapper<T>(NA, request.createTask(), logContext);
+	    Callable<T> task = new RequestTaskWrapper<T>(NA, request.createTask(), logContext);
 		return task.call();
 	}
 	
@@ -180,7 +180,7 @@ public class DalRequestExecutor {
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 		
 		for(final String shard: tasks.keySet())
-			resultFutures.put(shard, serviceRef.get().submit(new TaskWrapper<T>(shard, tasks.get(shard), logContext)));
+			resultFutures.put(shard, serviceRef.get().submit(new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext)));
 
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
 			try {
@@ -196,7 +196,7 @@ public class DalRequestExecutor {
 	private <T> T seqncialExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
 		for(final String shard: tasks.keySet()) {
 			try {
-				merger.addPartial(shard, new TaskWrapper<T>(shard, tasks.get(shard), logContext).call());
+				merger.addPartial(shard, new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call());
 			} catch (Throwable e) {
 				hints.handleError("There is error during sequential execution: ", e);
 			}
@@ -211,37 +211,5 @@ public class DalRequestExecutor {
             return 0;
 	    
 	    return executer.getPoolSize();
-	}
-	
-	private class TaskWrapper<T> implements Callable<T> {
-	    private String shard;
-	    private Callable<T> task;
-	    private LogContext logContext;
-	    
-	    public TaskWrapper(String shard, Callable<T> task, LogContext logContext) {
-	        this.shard = shard;
-	        this.task = task;
-	        this.logContext = logContext;
-	    }
-	    
-        @Override
-        public T call() throws Exception {
-            Throwable error = null;
-            T result = null;
-            logger.startTask(logContext, shard);
-            
-            try {
-                result = task.call();
-            } catch (Throwable e) {
-                error = e;
-            }
-
-            logger.endTask(logContext, shard, error);
-            
-            if(error != null)
-                throw DalException.wrap(error);
-            
-            return result;
-        }	    
 	}
 }

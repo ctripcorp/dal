@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.dianping.cat.Cat;
 
 /**
  * JUnit test of PersonDao class.
@@ -858,10 +859,11 @@ public class PersonDaoUnitTest {
         cityIds.add(2);
         cityIds.add(3);
         String name = "Test";// Test value here
-        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution().sequentialExecute());
-        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution());
+//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution());
+//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution().sequentialExecute());
+//
+//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0));
         dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).sequentialExecute());
-        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0));
-        Thread.sleep(35*1000);
+        Thread.sleep(60*1000);
     }	
 }

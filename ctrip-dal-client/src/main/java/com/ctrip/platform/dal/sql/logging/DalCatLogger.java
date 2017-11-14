@@ -34,7 +34,7 @@ public class DalCatLogger {
     
 	public static void start(CtripLogEntry entry) {
 		try {
-			String sqlType = getCaller(entry);
+			String sqlType = entry.getCaller();
 			Transaction catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
 			entry.setCatTransaction(catTransaction);
 			
@@ -45,9 +45,11 @@ public class DalCatLogger {
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, "");
 			}
 			
-			catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
+			
 			if (entry.getCallString() != null && entry.getCallString().length() > 0)
 				catTransaction.addData(entry.getCallString());
+			else
+			    catTransaction.addData(entry.getSqls() == null ? "" : StringUtils.join(entry.getSqls(), ";"));
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -64,8 +66,17 @@ public class DalCatLogger {
     			if(entry.getAffectedRows()!=null)
     			    Cat.logEvent(AFFECTED_ROWS, String.valueOf(entry.getAffectedRows()));
     			
-    			if(entry.getAffectedRowsArray()!=null)
-    			    Cat.logEvent(AFFECTED_ROWS, String.valueOf(entry.getAffectedRowsArray()));
+    			if(entry.getAffectedRowsArray()!=null) {
+    			    int[] rows = entry.getAffectedRowsArray();
+    			    StringBuffer sb = new StringBuffer().append('[');
+    			    for(int i = 0; i < rows.length; i++) {
+    			        sb.append(rows[i]);
+    			        if(i < rows.length - 1)
+    			            sb.append(", ");
+    			    }
+    			    sb.append(']');
+    			    Cat.logEvent(AFFECTED_ROWS, sb.toString());
+    			}
 			}
 			
 			entry.getCatTransaction().setStatus(Transaction.SUCCESS);
@@ -145,7 +156,7 @@ public class DalCatLogger {
 
     public static void startStatement(CtripLogEntry entry) {
         Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST, String.valueOf(entry.getConnectionCost())+ " ms");
-        String sqlType = getCaller(entry);
+        String sqlType = entry.getCaller();
         entry.setStatementTransaction(Cat.newTransaction(TYPE_SQL_STATEMENT_EXECUTION, sqlType));
     }
 
@@ -161,14 +172,5 @@ public class DalCatLogger {
             Cat.logError(e);
         }
         tran.complete();
-    }
-    
-    private static String getCaller(CtripLogEntry entry) {
-        String sqlType = entry.getDao() + "." + entry.getMethod();
-        
-        if("java.util.concurrent.FutureTask$Sync.innerRun".equals(sqlType))
-            return "dalAsyncAction";
-        
-        return sqlType;
     }
 }

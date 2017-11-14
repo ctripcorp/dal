@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
+import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 
 public class CtripLogEntry extends LogEntry {
@@ -33,6 +34,10 @@ public class CtripLogEntry extends LogEntry {
 	private Transaction catTransaction;
 	private ISpan urlSpan;
 	private Transaction statementTransaction;
+	
+    public String getCallerInShort() {
+        return String.format("%s[MSG_ID:%s]", super.getCallerInShort(), Cat.getCurrentMessageId());
+    }
 
 	public Transaction getCatTransaction() {
 		return catTransaction;

@@ -78,6 +78,7 @@ public class DalClientFactory {
             }
 
             DalWatcher.init();
+            LogEntry.init();
             DalRequestExecutor.init(
                     config.getFacory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
                     config.getFacory().getProperty(DalRequestExecutor.KEEP_ALIVE_TIME));

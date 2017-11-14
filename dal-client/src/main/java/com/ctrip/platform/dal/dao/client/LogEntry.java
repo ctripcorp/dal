@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
-    private static ThreadLocal<String> currentCaller = new ThreadLocal<>();
+    private static volatile ThreadLocal<String> currentCaller;
 
 	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao.";
 	
@@ -331,6 +331,13 @@ public class LogEntry {
      */
     public static void clearCurrentCaller() {
         currentCaller.remove();
+    }
+
+    public synchronized static void init(){
+        if(currentCaller != null)
+            return;
+        
+        currentCaller = new ThreadLocal<>();
     }
 
     public synchronized static void shutdown() {

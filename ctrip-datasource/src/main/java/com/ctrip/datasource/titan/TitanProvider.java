@@ -328,6 +328,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception {
         info("Start getting all in one connection string from titan service.");
+        
+        if(dbNames.isEmpty()) {
+            warn("There is no titan key provided!!!");
+            return new HashMap<>();
+        }
+            
         info("Database key names are " + dbNames);
 
         long start = System.currentTimeMillis();

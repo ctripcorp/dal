@@ -525,6 +525,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         LogEntry ent = new LogEntry();
         ent.type = LogEntry.ERROR2;
         ent.msg = msg;
+        ent.e = e;
         startUpLog.add(ent);
     }
 

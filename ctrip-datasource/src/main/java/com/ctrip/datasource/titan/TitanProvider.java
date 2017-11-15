@@ -119,8 +119,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (dbNames == null || dbNames.isEmpty())
             return;
 
-        Env env = Foundation.server().getEnv();
-
         for (final String name : dbNames) {
             TypedConfig<String> config = connectionStringProcessor.getConfigMap(name);
             if (config == null)
@@ -129,20 +127,22 @@ public class TitanProvider implements DataSourceConfigureProvider {
             config.addListener(new Configuration.ConfigListener<String>() {
                 @Override
                 public void onLoad(String connectionString) {
-                    notifyConnectionStringChangeListener(name);
+                    notifyConnectionStringChangeListener(name, connectionString);
                 }
             });
         }
     }
 
-    private void notifyConnectionStringChangeListener(String name) {
-        Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
-        transaction.addData(DAL_NOTIFY_LISTENER_START);
+    private void notifyConnectionStringChangeListener(String name, String connectionString) {
+        String transactionName = String.format("%s:%s", DAL_NOTIFY_LISTENER, name);
+        Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
+        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_START);
+        // transaction.addData(CommonUtil.desEncrypt(connectionString));
         Set<String> names = new HashSet<>();
         names.add(name);
         try {
             notifyListeners(names);
-            transaction.addData(DAL_NOTIFY_LISTENER_END);
+            Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_END);
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             DalConfigException exception = new DalConfigException(e);
@@ -213,8 +213,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         for (String name : names) {
             String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+            String transactionName = String.format("%s:%s", DAL_REFRESH_DATASOURCE, name);
 
-            Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE);
+            Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
             try {
                 // old configure
                 DataSourceConfigure oldConfigure = getDataSourceConfigure(name);
@@ -222,11 +223,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 String oldConnectionUrl = oldConfigure.toConnectionUrl();
                 // log
                 transaction.addData(DATASOURCE_OLD_CONNECTIONURL, String.format("%s:%s", name, oldConnectionUrl));
-                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCE_OLD_CONNECTIONURL, name, oldConnectionUrl));
                 transaction.addData(DATASOURCE_OLD_CONFIGURE,
                         String.format("%s:%s", name, dataSourceConfigureProcessor.mapToString(oldConfigure.toMap())));
-                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCE_OLD_CONFIGURE, name,
                                 dataSourceConfigureProcessor.mapToString(oldConfigure.toMap())));
 
@@ -236,11 +237,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 String newConnectionUrl = newConfigure.toConnectionUrl();
                 // log
                 transaction.addData(DATASOURCE_NEW_CONNECTIONURL, String.format("%s:%s", name, newConnectionUrl));
-                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCE_NEW_CONNECTIONURL, name, newConnectionUrl));
                 transaction.addData(DATASOURCE_NEW_CONFIGURE,
                         String.format("%s:%s", name, dataSourceConfigureProcessor.mapToString(newConfigure.toMap())));
-                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCE_NEW_CONFIGURE, name,
                                 dataSourceConfigureProcessor.mapToString(newConfigure.toMap())));
 
@@ -249,7 +250,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 // compare version of connection string
                 if (isConnectionStringChanged && oldVersion != null && newVersion != null) {
                     if (oldVersion.equals(newVersion)) {
-                        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DAL_REFRESH_DATASOURCE, Message.SUCCESS,
+                        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS,
                                 String.format("New version of %s equals to old version.", name));
                         continue;
                     }

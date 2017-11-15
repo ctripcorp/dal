@@ -10,8 +10,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.ctrip.datasource.configure.ConnectionStringProcessor;
-import com.ctrip.framework.foundation.Env;
-import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.datasource.util.DalEncrypter;
+import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
@@ -53,6 +53,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private ConnectionStringProcessor connectionStringProcessor = ConnectionStringProcessor.getInstance();
     private DataSourceConfigureProcessor dataSourceConfigureProcessor = DataSourceConfigureProcessor.getInstance();
 
+    private DalEncrypter encrypter = null;
+
     // DataSourceConfigure change listener
     private Map<String, DataSourceConfigureChangeListener> dataSourceConfigureChangeListeners =
             new ConcurrentHashMap<>();
@@ -63,6 +65,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     public void initialize(Map<String, String> settings) throws Exception {
         connectionStringProcessor.initialize(settings);
+        encrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECERET_KEY);
     }
 
     @Override
@@ -137,7 +140,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         String transactionName = String.format("%s:%s", DAL_NOTIFY_LISTENER, name);
         Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_START);
-        // transaction.addData(CommonUtil.desEncrypt(connectionString));
+        transaction.addData(encrypter.desEncrypt(connectionString));
         Set<String> names = new HashSet<>();
         names.add(name);
         try {

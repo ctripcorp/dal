@@ -510,15 +510,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         startUpLog.add(ent);
     }
 
-    private void error(String msg) {
-        logger.error(msg);
-
-        LogEntry ent = new LogEntry();
-        ent.type = LogEntry.ERROR;
-        ent.msg = msg;
-        startUpLog.add(ent);
-    }
-
     private void error(String msg, Throwable e) {
         logger.error(msg, e);
 

@@ -110,9 +110,9 @@ public abstract class ConnectionAction<T> {
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
-        entry.setCallString(callString);
 		
         wrapSql();
+        entry.setCallString(callString);
 		if(sqls != null)	
 			entry.setSqls(sqls);
 		else
@@ -143,6 +143,12 @@ public abstract class ConnectionAction<T> {
                 sqls[i] = wrapAPPID(sqls[i]);
             }
 	    }
+        
+        if(callString != null) {
+            // Call can not have comments at the begining
+            callString = callString + wrapAPPID("");
+        }
+        
 	}
 	
 	public void start() {

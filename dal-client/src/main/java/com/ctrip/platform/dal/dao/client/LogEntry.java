@@ -301,7 +301,8 @@ public class LogEntry {
 	public String getCaller() {
         String sqlType = getDao() + "." + getMethod();
         
-        if("java.util.concurrent.FutureTask$Sync.innerRun".equals(sqlType))
+        // If comes from internal executor
+        if(sqlType.startsWith("java.util.concurrent.FutureTask"))
             sqlType = currentCaller.get();
         
         return sqlType;

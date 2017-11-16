@@ -347,7 +347,9 @@ public class PersonDaoUnitTest {
 		DalHints hints = new DalHints();
 		List<Person> daoPojos = dao.queryAll(new DalHints().inShard(1).inTableShard(1));
 		int[] affected = dao.batchInsert(hints, daoPojos);
-		assertArrayEquals(new int[]{1,1,1,1}, affected);
+//		assertArrayEquals(new int[]{1,1,1,1}, affected);
+		// When using allow rewrite statement, it will be -2
+		assertArrayEquals(new int[]{-2,-2,-2,-2}, affected);
 	}
 	
 	@Test

@@ -19,6 +19,7 @@ public class DalCatLogger {
 	private static final String RECORD_COUNT = "DAL.recordCount";
 	
 	private static final String AFFECTED_ROWS = "DAL.affectedRows";
+	private static final String TYPE_SQL_TRANSACTION_EXECUTION = "SQL.transaction";
     private static final String TYPE_SQL_REQUEST_EXECUTION = "SQL.dao";
     private static final String TYPE_SQL_CROSS_SHARD_TASK_EXECUTION = "SQL.crossShard";
     private static final String TYPE_SQL_TASK_EXECUTION = "SQL.task";
@@ -35,10 +36,11 @@ public class DalCatLogger {
 	public static void start(CtripLogEntry entry) {
 		try {
 			String sqlType = entry.getCaller();
-			Transaction catTransaction = Cat.newTransaction(CatConstants.TYPE_SQL, sqlType);
+		    String tranType = DalEventEnum.EXECUTE.equals(entry.getEvent()) ? TYPE_SQL_TRANSACTION_EXECUTION : CatConstants.TYPE_SQL;
+			Transaction catTransaction = Cat.newTransaction(tranType, sqlType);
 			entry.setCatTransaction(catTransaction);
 			
-			String method = entry.getEvent() == null ? "dal_test" : CatInfo.getTypeSQLInfo(entry.getEvent());
+			String method = entry.getEvent() == null ? "dal_test" : DalEventEnum.EXECUTE.equals(entry.getEvent())? "TRANSACTION" : CatInfo.getTypeSQLInfo(entry.getEvent());
 			if(entry.getPramemters() != null){
 				Cat.logEvent(CatConstants.TYPE_SQL_METHOD, method, Message.SUCCESS, entry.getEncryptParameters(DalCLogger.isEncryptLogging(), entry).replaceAll(",", "&"));
 			} else {

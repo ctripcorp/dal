@@ -17,10 +17,9 @@ import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.KeyHolder;
-import com.ctrip.platform.dal.dao.StatementParameters;
-import com.dianping.cat.Cat;
 
 /**
  * JUnit test of PersonDao class.
@@ -859,11 +858,32 @@ public class PersonDaoUnitTest {
         cityIds.add(2);
         cityIds.add(3);
         String name = "Test";// Test value here
-//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution());
-//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution().sequentialExecute());
-//
-//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0));
-        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).sequentialExecute());
+        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution());
+        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).asyncExecution().sequentialExecute());
+
+        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0));
+//        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).sequentialExecute());
         Thread.sleep(60*1000);
-    }	
+    }
+    
+    @Test
+    public void testCatTransactionInDalCommand() throws Exception {
+        DalCommand command = new DalCommand() {
+
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                List<Integer> cityIds = new ArrayList<>();// Test value here
+                cityIds.add(1);
+                cityIds.add(2);
+                cityIds.add(3);
+                String name = "Test";// Test value here
+                dao.findFirst(cityIds, name, new DalHints().inShard(0).inTableShard(0).sequentialExecute());
+                return false;
+            }            
+        };
+        
+        DalClientFactory.getClient(DATABASE_NAME_MYSQL).execute(command, new DalHints().inShard(0));
+        Thread.sleep(60*1000);
+    }   
+
 }

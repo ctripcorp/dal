@@ -15,16 +15,6 @@
     </properties>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.microsoft.sqlserver</groupId>
-                <artifactId>mssql-jdbc</artifactId>
-                <version>6.2.2.jre7.ctrip</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ctrip.platform</groupId>
-                <artifactId>ctrip-datasource</artifactId>
-                <version>1.13.2-SNAPSHOT</version>
-            </dependency>
             <!-- framework -->
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
@@ -32,6 +22,11 @@
                 <version>${framework-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>ctrip-datasource</artifactId>
+                <version>1.13.2-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

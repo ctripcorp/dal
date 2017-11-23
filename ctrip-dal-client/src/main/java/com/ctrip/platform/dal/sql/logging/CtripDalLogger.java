@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,23 +14,31 @@ import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.clogging.domain.thrift.LogLevel;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
+import com.ctrip.platform.dal.dao.task.DalRequest;
 import com.dianping.cat.status.ProductVersionManager;
 
 public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     private Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
-    private static final String DAL_VERSION = "DAL.version";
+    public static final String DAL_VERSION = "DAL.version";
+    private static final AtomicReference<String> version = new AtomicReference<>();
 
     @Override
     public void initialize(Map<String, String> settings) {
         super.initialize(settings);
-        ProductVersionManager.getInstance().register(DAL_VERSION, "java-" + initVersion());
+        version.set(initVersion());
+        ProductVersionManager.getInstance().register(DAL_VERSION, "java-" + version.get());
         DalCLogger.setEncryptLogging(encryptLogging);
         DalCLogger.setSimplifyLogging(simplifyLogging);
+    }
+    
+    public static String getDalVersion() {
+        return "java-" + version.get();
     }
     
     private String initVersion(){
@@ -50,58 +59,30 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     @Override
     public void info(final String msg) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    DalCLogger.log(LogLevel.INFO, msg);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             DalCLogger.log(LogLevel.INFO, msg);
-        }
+        }});
     }
 
     @Override
     public void warn(final String msg) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    DalCLogger.log(LogLevel.WARN, msg);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             DalCLogger.log(LogLevel.WARN, msg);
-        }
+        }});
     }
 
     @Override
     public void error(final String msg, final Throwable e) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    DalCLogger.error(msg, e);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             DalCLogger.error(msg, e);
-        }
+        }});
     }
 
     @Override
     public void getConnectionFailed(final String dbName, final Throwable e) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    DalCLogger.getConnectionFailed(dbName, e);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             DalCLogger.getConnectionFailed(dbName, e);
-        }
+        }});
     }
 
     @Override
@@ -111,16 +92,9 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     @Override
     public void start(final LogEntry entry) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    recordStart((CtripLogEntry) entry);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             recordStart((CtripLogEntry) entry);
-        }
+        }});
     }
 
     private void recordStart(final LogEntry entry) {
@@ -130,16 +104,9 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     @Override
     public void success(final LogEntry entry, final int count) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    recordSuccess(entry, count);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             recordSuccess(entry, count);
-        }
+        }});
     }
 
     private void recordSuccess(final LogEntry entry, final int count) {
@@ -156,16 +123,9 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     @Override
     public void fail(final LogEntry entry, final Throwable e) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    recordFail(entry, e);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             recordFail(entry, e);
-        }
+        }});
     }
 
     private void recordFail(final LogEntry entry, final Throwable e) {
@@ -180,30 +140,16 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     @Override
     public void markdown(final MarkDownInfo markdown) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    Metrics.report(markdown);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             Metrics.report(markdown);
-        }
+        }});
     }
 
     @Override
     public void markup(final MarkupInfo markup) {
-        if (asyncLogging) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    Metrics.report(markup);
-                }
-            });
-        } else {
+        call(new Runnable() {public void run() {
             Metrics.report(markup);
-        }
+        }});
     }
 
     @Override
@@ -221,4 +167,43 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
         super.shutdown();
     }
 
+    @Override
+    public <T> LogContext start(DalRequest<T> request) {
+        return DalCatLogger.start(request);
+    }
+
+    @Override
+    public void end(LogContext logContext, final Throwable e) {
+        DalCatLogger.end(logContext, e);
+    }
+
+    @Override
+    public void startCrossShardTasks(LogContext logContext, boolean isSequentialExecution) {
+        DalCatLogger.startCrossShardTasks(logContext, isSequentialExecution);
+    }
+
+    @Override
+    public void endCrossShards(LogContext logContext, Throwable e) {
+        DalCatLogger.endCrossShards(logContext, e);
+    }
+
+    @Override
+    public void startTask(LogContext logContext, String shard) {
+        DalCatLogger.startTask(logContext, shard);
+    }
+
+    @Override
+    public void endTask(LogContext logContext, String shard, Throwable e) {
+        DalCatLogger.endTask(logContext, shard, e);
+    }
+
+    @Override
+    public void startStatement(LogEntry entry) {
+        DalCatLogger.startStatement((CtripLogEntry)entry);
+    }
+
+    @Override
+    public void endStatement(LogEntry entry, Throwable e) {
+        DalCatLogger.endStatement((CtripLogEntry)entry, e);
+    }
 }

@@ -63,6 +63,8 @@ public class DalCatLoggerTest {
 		for (int i = 0; i < sqls.length; i++) {
 			client.update(sqls[i], parameters, hints);
 		}
+		
+		DalClientFactory.shutdownFactory();
 	}
 
 	@Before

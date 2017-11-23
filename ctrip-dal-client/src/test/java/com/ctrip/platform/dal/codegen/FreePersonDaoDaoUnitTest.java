@@ -761,4 +761,22 @@ public class FreePersonDaoDaoUnitTest {
 		}
 	}
 
+    @Test
+    public void testfindErrorForCat() throws Exception {
+        String name = "Test";// Test value here
+        List<Integer> cityIds = new ArrayList<>();
+        cityIds.add(1);
+        cityIds.add(2);
+        cityIds.add(3);
+        DalHints hints = new DalHints();
+        
+        List<String> ret;
+        try {
+            hints = new DalHints();
+            ret = dao.findWithError(name, cityIds, hints.inShard(1));
+            fail();
+        } catch (Exception e) {
+            Thread.sleep(65*1000);
+        }
+    }    
 }

@@ -21,6 +21,7 @@
         <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
         <mysql-connector-version>5.1.41</mysql-connector-version>
         <javax-mail-version>1.4.7</javax-mail-version>
+        <cas-version>3.1.15-30Days-no-jsessionid</cas-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -39,7 +40,7 @@
             <dependency>
                 <groupId>org.jasig.cas.client</groupId>
                 <artifactId>cas-client-core-infosec-credis</artifactId>
-                <version>3.1.12</version>
+                <version>${cas-version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.ctrip.framework.clogging</groupId>

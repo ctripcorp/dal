@@ -44,7 +44,10 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
         try {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
-            configs.putAll(TitanProvider.config);
+            
+            if(TitanProvider.config != null)
+                configs.putAll(TitanProvider.config);
+            
             log(logger);
             logger.info("success initialized Dal Factory");
 

@@ -74,6 +74,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private String svcUrl;
     private String appid;
     private String subEnv;
+    private String idc;
     private int timeout;
     private boolean useLocal;
     private String databaseConfigLocation;
@@ -122,6 +123,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
         appid = discoverAppId(settings);
         subEnv = Foundation.server().getSubEnv();
         subEnv = subEnv == null ? null : subEnv.trim();
+        idc = Foundation.server().getDataCenter();
+        idc = (idc == null ? null : idc.trim());
 
         info("Titan Service Url: " + svcUrl);
         info("Appid: " + appid);
@@ -149,6 +152,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
         titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
+        // titanMapping.put("PRO", "http://10.32.20.154:8080/titanservice/query");
     }
 
     /**
@@ -212,24 +216,18 @@ public class TitanProvider implements DataSourceConfigureProvider {
             dataSourceConfigures = allinonProvider.getDataSourceConfigures(dbNames, useLocal, databaseConfigLocation);
         } else {
             // If it uses Titan service
-            boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
-
-            Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
+            // boolean isProdEnv = svcUrl.equals(titanMapping.get("PRO"));
+            // Set<String> queryNames = isProdEnv ? normalizedForProd(dbNames) : dbNames;
 
             try {
-                Map<String, TitanData> rawConnStrings = new HashMap<>();
-                Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(queryNames);
-
-                if (isProdEnv) {
-                    for (String name : dbNames) {
-                        if (name.endsWith(PROD_SUFFIX))
-                            rawConnStrings.put(name, tmpRawConnStrings.get(name));
-                        else
-                            rawConnStrings.put(name, tmpRawConnStrings.get(name + PROD_SUFFIX));
-                    }
-                } else {
-                    rawConnStrings = tmpRawConnStrings;
-                }
+                Map<String, TitanData> rawConnStrings = getConnectionStrings(dbNames);
+                /*
+                 * Map<String, TitanData> tmpRawConnStrings = getConnectionStrings(dbNames);
+                 * 
+                 * if (isProdEnv) { for (String name : dbNames) { if (name.endsWith(PROD_SUFFIX))
+                 * rawConnStrings.put(name, tmpRawConnStrings.get(name)); else rawConnStrings.put(name,
+                 * tmpRawConnStrings.get(name + PROD_SUFFIX)); } } else { rawConnStrings = tmpRawConnStrings; }
+                 */
                 dataSourceConfigures = getDataSourceConfigures(rawConnStrings);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
@@ -293,11 +291,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
             throws Exception {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
         for (Map.Entry<String, TitanData> entry : rawConnData.entrySet()) {
-            if (isDebug)
+            if (isDebug) {
                 configures.put(entry.getKey(), new DataSourceConfigure());
-            else
-                configures.put(entry.getKey(),
-                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString())));
+            } else {
+                DataSourceConfigure configure =
+                        parser.parse(entry.getKey(), decrypt(entry.getValue().getConnectionString()));
+                configures.put(entry.getKey(), configure);
+                info("Url:" + configure.getConnectionUrl());
+            }
         }
 
         return configures;
@@ -327,6 +328,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     private Map<String, TitanData> getConnectionStrings(Set<String> dbNames) throws Exception {
         info("Start getting all in one connection string from titan service.");
+        
+        if(dbNames.isEmpty()) {
+            warn("There is no titan key provided!!!");
+            return new HashMap<>();
+        }
+            
         info("Database key names are " + dbNames);
 
         long start = System.currentTimeMillis();
@@ -350,6 +357,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (!(subEnv == null || subEnv.isEmpty())) {
             builder.addParameter("envt", subEnv);
             info("Sub environment: " + subEnv);
+        }
+
+        if (!(idc == null || idc.isEmpty())) {
+            builder.addParameter("idc", idc);
+            info("IDC:" + idc);
         }
 
         URI uri = builder.build();
@@ -498,21 +510,13 @@ public class TitanProvider implements DataSourceConfigureProvider {
         startUpLog.add(ent);
     }
 
-    private void error(String msg) {
-        logger.error(msg);
-
-        LogEntry ent = new LogEntry();
-        ent.type = LogEntry.ERROR;
-        ent.msg = msg;
-        startUpLog.add(ent);
-    }
-
     private void error(String msg, Throwable e) {
         logger.error(msg, e);
 
         LogEntry ent = new LogEntry();
         ent.type = LogEntry.ERROR2;
         ent.msg = msg;
+        ent.e = e;
         startUpLog.add(ent);
     }
 

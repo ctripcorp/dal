@@ -23,7 +23,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -369,14 +369,21 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
-            HttpGet httpGet = new HttpGet();
-            httpGet.setURI(uri);
+            HttpPost httpPost = new HttpPost();
+            httpPost.setURI(uri);
 
-            HttpResponse response = sslClient.execute(httpGet);
+            HttpResponse response = sslClient.execute(httpPost);
+            
+            int code = response.getStatusLine().getStatusCode();
 
             HttpEntity entity = response.getEntity();
 
             String content = EntityUtils.toString(entity);
+            
+            if(code != 200)
+                throw new RuntimeException(
+                        String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                                code, content));
 
             TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
 

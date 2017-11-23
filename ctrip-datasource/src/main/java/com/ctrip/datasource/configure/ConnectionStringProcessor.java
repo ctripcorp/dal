@@ -13,7 +13,7 @@ import com.dianping.cat.status.ProductVersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Feature;
-import qunar.tc.qconfig.client.TypedConfig;
+import qunar.tc.qconfig.client.MapConfig;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -69,11 +69,13 @@ public class ConnectionStringProcessor {
     private static final String EMPTY_ID = "999999";
 
     private static final String TITAN_APP_ID = "100010061"; // 100010061 123456
+    public static final String TITAN_KEY_NORMAL = "normal";
+    public static final String TITAN_KEY_FAILOVER = "failover";
 
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
-    private Map<String, TypedConfig<String>> configMap = new ConcurrentHashMap<>();
+    private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private static final Map<String, String> titanMapping = new HashMap<>();
 
     private static ConnectionStringProcessor processor = null;
@@ -85,12 +87,12 @@ public class ConnectionStringProcessor {
         return processor;
     }
 
-    public TypedConfig<String> getConfigMap(String name) {
+    public MapConfig getConfigMap(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         return configMap.get(keyName);
     }
 
-    private void addConfigMap(String name, TypedConfig<String> config) {
+    private void addConfigMap(String name, MapConfig config) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         configMap.put(keyName, config);
     }
@@ -237,7 +239,7 @@ public class ConnectionStringProcessor {
             return;
         for (String name : dbNames) {
             try {
-                TypedConfig<String> config = getTitanTypedConfig(name);
+                MapConfig config = getTitanMapConfig(name);
                 if (config != null) {
                     addConfigMap(name, config);
                 }
@@ -248,16 +250,10 @@ public class ConnectionStringProcessor {
         }
     }
 
-    public TypedConfig<String> getTitanTypedConfig(String name) {
+    public MapConfig getTitanMapConfig(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         Feature feature = Feature.create().setHttpsEnable(true).build();
-        TypedConfig<String> config = TypedConfig.get(TITAN_APP_ID, keyName, feature, new TypedConfig.Parser<String>() {
-            public String parse(String connectionString) {
-                return connectionString;
-            }
-        });
-
-        return config;
+        return MapConfig.get(TITAN_APP_ID, keyName, feature);
     }
 
     private Map<String, DataSourceConfigure> getConnectionSettings(Set<String> dbNames) throws Exception {
@@ -271,9 +267,17 @@ public class ConnectionStringProcessor {
                 continue;
             }
 
-            TypedConfig<String> config = getConfigMap(name);
+            MapConfig config = getConfigMap(name);
             if (config != null) {
-                String connectionString = config.current();
+                String connectionString = null;
+                try {
+                    Map<String, String> map = config.asMap();
+                    connectionString = map.get(TITAN_KEY_NORMAL);
+                } catch (Throwable e) {
+                    throw new DalException(String.format("Error getting connection string from QConfig for %s", name),
+                            e);
+                }
+
                 DataSourceConfigure connectionSetting = null;
                 try {
                     connectionSetting = parser.parse(name, connectionString);

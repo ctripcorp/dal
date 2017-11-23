@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
-import qunar.tc.qconfig.client.TypedConfig;
 
 public class TitanProvider implements DataSourceConfigureProvider {
     private static final Logger logger = LoggerFactory.getLogger(TitanProvider.class);
@@ -123,24 +122,30 @@ public class TitanProvider implements DataSourceConfigureProvider {
             return;
 
         for (final String name : dbNames) {
-            TypedConfig<String> config = connectionStringProcessor.getConfigMap(name);
+            MapConfig config = connectionStringProcessor.getConfigMap(name);
             if (config == null)
                 continue;
 
-            config.addListener(new Configuration.ConfigListener<String>() {
+            config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
                 @Override
-                public void onLoad(String connectionString) {
-                    notifyConnectionStringChangeListener(name, connectionString);
+                public void onLoad(Map<String, String> map) {
+                    notifyConnectionStringChangeListener(name, map);
                 }
             });
         }
     }
 
-    private void notifyConnectionStringChangeListener(String name, String connectionString) {
+    private void notifyConnectionStringChangeListener(String name, Map<String, String> map) {
         String transactionName = String.format("%s:%s", DAL_NOTIFY_LISTENER, name);
         Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_START);
-        transaction.addData(encrypter.desEncrypt(connectionString));
+        if (map != null) {
+            String normalConnectionString = map.get(ConnectionStringProcessor.TITAN_KEY_NORMAL);
+            String failoverConnectionString = map.get(ConnectionStringProcessor.TITAN_KEY_FAILOVER);
+            transaction.addData(encrypter.desEncrypt(normalConnectionString));
+            transaction.addData(encrypter.desEncrypt(failoverConnectionString));
+        }
+
         Set<String> names = new HashSet<>();
         names.add(name);
         try {

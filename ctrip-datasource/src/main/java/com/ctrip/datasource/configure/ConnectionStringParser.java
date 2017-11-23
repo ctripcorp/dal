@@ -48,6 +48,8 @@ public class ConnectionStringParser {
      */
     public DataSourceConfigure parse(String name, String connectionString) {
         DataSourceConfigure config = new DataSourceConfigure();
+        if (connectionString == null)
+            return config;
 
         String version = null;
         Matcher matcher = versionPattern.matcher(connectionString);

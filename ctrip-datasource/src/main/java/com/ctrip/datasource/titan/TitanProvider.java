@@ -23,7 +23,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -369,7 +369,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
-            HttpPost httpPost = new HttpPost();
+            HttpGet httpPost = new HttpGet();
             httpPost.setURI(uri);
 
             HttpResponse response = sslClient.execute(httpPost);

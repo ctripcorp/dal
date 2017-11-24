@@ -33,6 +33,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
@@ -353,14 +355,18 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         info("Titan service URL: " + svcUrl);
 
-        URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
+        URIBuilder builder = new URIBuilder(svcUrl);
+        StringBuilder body = new StringBuilder();
+        body.append("ids=").append(ids);
+        body.append("&appid=").append(appid);
+        
         if (!(subEnv == null || subEnv.isEmpty())) {
-            builder.addParameter("envt", subEnv);
+            body.append("&envt=").append(subEnv);
             info("Sub environment: " + subEnv);
         }
 
         if (!(idc == null || idc.isEmpty())) {
-            builder.addParameter("idc", idc);
+            body.append("&idc=").append(idc);
             info("IDC:" + idc);
         }
 
@@ -371,6 +377,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (sslClient != null) {
             HttpPost httpPost = new HttpPost();
             httpPost.setURI(uri);
+            httpPost.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_FORM_URLENCODED));
 
             HttpResponse response = sslClient.execute(httpPost);
             

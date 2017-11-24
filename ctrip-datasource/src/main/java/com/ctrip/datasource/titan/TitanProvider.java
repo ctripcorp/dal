@@ -381,7 +381,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
             String content = EntityUtils.toString(entity);
             
             if(code != 200) {
-                throwError(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
+                throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
                         code, content));
             }
 
@@ -389,11 +389,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
             try {
                 resp = JSON.parseObject(content, TitanResponse.class);
             } catch (Throwable e) {
-                throwError("Fail to get ALL-IN-ONE from Titan service when parse result. Message: " + content);
+                throw new DalException("Fail to get ALL-IN-ONE from Titan service when parse result. Message: " + content);
             }
 
             if (!"200".equals(resp.getStatus())) {
-                throwError(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
                         resp.getStatus(), resp.getMessage()));
             }
 
@@ -401,7 +401,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 info("Parsing " + data.getName());
                 // Fail fast
                 if (data.getErrorCode() != null) {
-                    throwError(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
+                    throw new DalException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
                             data.getName(), data.getErrorCode(), data.getErrorMessage()));
                 }
 
@@ -524,12 +524,6 @@ public class TitanProvider implements DataSourceConfigureProvider {
         ent.msg = msg;
         ent.e = e;
         startUpLog.add(ent);
-    }
-
-    private void throwError(String msg) {
-        RuntimeException ex = new RuntimeException(msg);
-        error(msg, ex);
-        throw ex;
     }
 
     public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {

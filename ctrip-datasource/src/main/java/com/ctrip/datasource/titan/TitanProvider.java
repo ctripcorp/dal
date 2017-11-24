@@ -380,30 +380,29 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
             String content = EntityUtils.toString(entity);
             
-            if(code != 200)
-                throw new RuntimeException(
-                        String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
-                                code, content));
+            if(code != 200) {
+                throwError(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
+                        code, content));
+            }
 
-            TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
+            TitanResponse resp = null;
+            try {
+                resp = JSON.parseObject(content, TitanResponse.class);
+            } catch (Throwable e) {
+                throwError("Fail to get ALL-IN-ONE from Titan service when parse result. Message: " + content);
+            }
 
             if (!"200".equals(resp.getStatus())) {
-                logger.warn(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                throwError(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
                         resp.getStatus(), resp.getMessage()));
-                throw new RuntimeException(
-                        String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
-                                resp.getStatus(), resp.getMessage()));
             }
 
             for (TitanData data : resp.getData()) {
                 info("Parsing " + data.getName());
                 // Fail fast
                 if (data.getErrorCode() != null) {
-                    warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
+                    throwError(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
                             data.getName(), data.getErrorCode(), data.getErrorMessage()));
-                    throw new RuntimeException(
-                            String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
-                                    data.getName(), data.getErrorCode(), data.getErrorMessage()));
                 }
 
                 // Decrypt raw connection string
@@ -525,6 +524,12 @@ public class TitanProvider implements DataSourceConfigureProvider {
         ent.msg = msg;
         ent.e = e;
         startUpLog.add(ent);
+    }
+
+    private void throwError(String msg) {
+        RuntimeException ex = new RuntimeException(msg);
+        error(msg, ex);
+        throw ex;
     }
 
     public static void reportTitanAccessSunEnv(String subEnv, String allInOneKey) {

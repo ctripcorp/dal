@@ -44,21 +44,18 @@ public abstract class ConnectionAction<T> {
 	
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
-		this.sql = this.wrapAPPID(sql);
+		this.sql = sql;
 		this.parameters = parameters;
 	}
 
 	void populate(String[] sqls) {
 		this.operation = DalEventEnum.BATCH_UPDATE;
 		this.sqls = sqls;
-		for(int i = 0; i < this.sqls.length; i++){
-			this.sqls[i] = this.wrapAPPID(this.sqls[i]);
-		}
 	}
 	
 	void populate(String sql, StatementParameters[] parametersList) {
 		this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
-		this.sql = this.wrapAPPID(sql);
+		this.sql = sql;
 		this.parametersList = parametersList;
 	}
 	
@@ -113,8 +110,9 @@ public abstract class ConnectionAction<T> {
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
-		entry.setCallString(callString);
 		
+        wrapSql();
+        entry.setCallString(callString);
 		if(sqls != null)	
 			entry.setSqls(sqls);
 		else
@@ -130,6 +128,27 @@ public abstract class ConnectionAction<T> {
 			entry.setPramemters(parameters.toLogString());
 			hints.setParameters(parameters);
 		}
+	}
+	
+	private void wrapSql() {
+	    /**
+	     * You can not add comments before callString
+	     */
+	    if(sql != null) {
+	        sql = wrapAPPID(sql);
+	    }
+	    
+        if(sqls != null) {
+    	    for(int i = 0; i < sqls.length; i++){
+                sqls[i] = wrapAPPID(sqls[i]);
+            }
+	    }
+        
+        if(callString != null) {
+            // Call can not have comments at the begining
+            callString = callString + wrapAPPID("");
+        }
+        
 	}
 	
 	public void start() {
@@ -219,7 +238,7 @@ public abstract class ConnectionAction<T> {
 	}
 
 	private String wrapAPPID(String sql){
-		return "/*" + DalClientFactory.getDalLogger().getAppID() + "*/" + sql;
+		return "/*" + DalClientFactory.getDalLogger().getAppID() + "-" + entry.getCallerInShort() + "*/" + sql;
 	}
 	
 	public abstract T execute() throws Exception;

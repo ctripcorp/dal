@@ -1,7 +1,8 @@
 package test.com.ctrip.platform.dal.dao.client;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.client.LogEntry;
 

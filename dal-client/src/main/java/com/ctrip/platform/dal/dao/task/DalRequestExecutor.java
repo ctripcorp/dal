@@ -11,68 +11,50 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
-import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.LogContext;
+import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
- * Common reuqest executor that support execute request that is of pojo or
+ * Common reuqest executor that support execute request that is of pojo or 
  * sql in single, all or multiple shards
- *
+ * 
  * @author jhhe
  */
 public class DalRequestExecutor {
 	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
-
+	
 	public static final String MAX_POOL_SIZE = "maxPoolSize";
-	public static final String KEEP_ALIVE_TIME = "keepAliveTime";
+	public static final int DEFAULT_MAX_POOL_SIZE = 50;
 
-	// To be consist with default connection max active size
-	public static final int DEFAULT_MAX_POOL_SIZE = 500;
-
-	public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
-
-	private DalLogger logger = DalClientFactory.getDalLogger();
-
-	private final static String NA = "N/A";
-
-	public static void init(String maxPoolSizeStr, String keepAliveTimeStr){
+	public static void init(String maxPoolSizeStr){
 		if(serviceRef.get() != null)
 			return;
-
+		
 		synchronized (DalRequestExecutor.class) {
 			if(serviceRef.get() != null)
 				return;
-
+			
 			int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
 			if(maxPoolSizeStr != null)
 				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
-
-			int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
-			if(keepAliveTimeStr != null)
-				keepAliveTime = Integer.parseInt(keepAliveTimeStr);
-
-			ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-			executer.allowCoreThreadTimeOut(true);
-
-			serviceRef.set(executer);
+			
+			serviceRef.set(new ThreadPoolExecutor(5, maxPoolSize, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>()));
 		}
-	}
-
+	} 
+	
 	public static void shutdown() {
 		if (serviceRef.get() == null)
 			return;
-
+		
 		synchronized (DalRequestExecutor.class) {
 			if (serviceRef.get() == null)
 				return;
-
+			
 			serviceRef.get().shutdown();
 			serviceRef.set(null);
 		}
@@ -81,107 +63,93 @@ public class DalRequestExecutor {
 	public <T> T execute(final DalHints hints, final DalRequest<T> request) throws SQLException {
 		return execute(hints, request, false);
 	}
-
+	
 	public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable) throws SQLException {
+		// TODO add performance tracking DalWatcher.begin();
+
 		if (hints.isAsyncExecution()) {
 			Future<T> future = serviceRef.get().submit(new Callable<T>() {
 				public T call() throws Exception {
 					return internalExecute(hints, request, nullable);
 				}
 			});
-
+			
 			if(hints.isAsyncExecution())
-				hints.set(DalHintEnum.futureResult, future);
+				hints.set(DalHintEnum.futureResult, future); 
 			return null;
 		}
-
+		
 		return internalExecute(hints, request, nullable);
 	}
 
 	private <T> T internalExecute(DalHints hints, DalRequest<T> request, boolean nullable) throws SQLException {
 		T result = null;
 		Throwable error = null;
-
-		LogContext logContext = logger.start(request);
-
+		
 		try {
 			request.validate();
-
+			
+			/**
+			 * TODO make sure detect distributed transaction 
+			 */
 			if(request.isCrossShard())
-				result = crossShardExecute(logContext, hints, request);
+				result = crossShardExecute(hints, request);
 			else
-				result = nonCrossShardExecute(logContext, hints, request);
+				result = nonCrossShardExecute(hints, request);
 
 			if(result == null && !nullable)
 				throw new DalException(ErrorCode.AssertNull);
 		} catch (Throwable e) {
 			error = e;
 		}
-
-		logger.end(logContext, error);
-
+		
 		handleCallback(hints, result, error);
 		if(error != null)
 			throw DalException.wrap(error);
-
+		
 		return result;
 	}
 
-	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
-		logContext.setSingleTask(true);
-		Callable<T> task = new RequestTaskWrapper<T>(NA, request.createTask(), logContext);
-		return task.call();
-	}
-
-	private <T> T crossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
-		Map<String, Callable<T>> tasks = request.createTasks();
-		logContext.setShards(tasks.keySet());
-
-		boolean isSequentialExecution = hints.is(DalHintEnum.sequentialExecution);
-		logContext.setSeqencialExecution(isSequentialExecution);
-
-		ResultMerger<T> merger = request.getMerger();
-
-		logger.startCrossShardTasks(logContext, isSequentialExecution);
-
-		T result = null;
-		Throwable error = null;
-
+	private <T> T nonCrossShardExecute(DalHints hints, DalRequest<T> request) throws SQLException {
 		try {
-			result = isSequentialExecution?
-					seqncialExecute(hints, tasks, merger, logContext):
-					parallelExecute(hints, tasks, merger, logContext);
-
-		} catch (Throwable e) {
-			error = e;
+			return request.createTask().call();
+		} catch (Exception e) {
+			throw DalException.wrap(e);
 		}
-
-		logger.endCrossShards(logContext, error);
-
-		if(error != null)
-			throw DalException.wrap(error);
-
+	}
+	
+	private <T> T crossShardExecute(DalHints hints, DalRequest<T> request) throws SQLException {
+		DalWatcher.crossShardBegin();
+		
+		T result = hints.is(DalHintEnum.sequentialExecution)?
+				seqncialExecute(hints, request):
+				parallelExecute(hints, request);
+		
+		DalWatcher.crossShardEnd();
 		return result;
-
+			
 	}
 
 	private <T> void handleCallback(final DalHints hints, T result, Throwable error) {
 		DalResultCallback qc = (DalResultCallback)hints.get(DalHintEnum.resultCallback);
 		if (qc == null)
 			return;
-
+		
 		if(error == null)
 			qc.onResult(result);
 		else
 			qc.onError(error);
 	}
 
-	private <T> T parallelExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
+	private <T> T parallelExecute(DalHints hints, DalRequest<T> request) throws SQLException {
+		Map<String, Callable<T>> tasks = request.createTasks();
 		Map<String, Future<T>> resultFutures = new HashMap<>();
-
+		
 		for(final String shard: tasks.keySet())
-			resultFutures.put(shard, serviceRef.get().submit(new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext)));
+			resultFutures.put(shard, serviceRef.get().submit(tasks.get(shard)));
 
+		// TODO Handle timeout and execution exception
+		ResultMerger<T> merger = request.getMerger();
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
 			try {
 				merger.addPartial(entry.getKey(), entry.getValue().get());
@@ -189,27 +157,21 @@ public class DalRequestExecutor {
 				hints.handleError("There is error during parallel execution: ", e);
 			}
 		}
-
+		
 		return merger.merge();
 	}
 
-	private <T> T seqncialExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
+	private <T> T seqncialExecute(DalHints hints, DalRequest<T> request) throws SQLException {
+		Map<String, Callable<T>> tasks = request.createTasks();
+		ResultMerger<T> merger = request.getMerger();
 		for(final String shard: tasks.keySet()) {
 			try {
-				merger.addPartial(shard, new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call());
+				merger.addPartial(shard, tasks.get(shard).call());
 			} catch (Throwable e) {
 				hints.handleError("There is error during sequential execution: ", e);
 			}
 		}
-
+		
 		return merger.merge();
-	}
-
-	public static int getPoolSize() {
-		ThreadPoolExecutor executer = (ThreadPoolExecutor)serviceRef.get();
-		if (serviceRef.get() == null)
-			return 0;
-
-		return executer.getPoolSize();
 	}
 }

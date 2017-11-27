@@ -36,17 +36,17 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private static final String DESC = " DESC";
 	private static final String ORDER_BY_SEPARATOR = ", ";
 	private static final String QUERY_ALL_CRITERIA = "1=1";
-	
+
 	/**
 	 * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
 	 * @return
 	 */
 	private String tableName;
 	private DatabaseCategory dbCategory;
-	
+
 	private String[] selectedColumns;
 	private String customized;
-	
+
 	private String whereClause;
 	private Map<String, Boolean> orderBys = new LinkedHashMap<>();
 
@@ -54,7 +54,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private DalRowMapper mapper;
 	private ResultMerger merger;
 	private DalResultSetExtractor extractor;
-	
+
 	private boolean requireFirst = false;
 	private boolean requireSingle = false;
 	private boolean nullable = false;
@@ -65,20 +65,20 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	public BaseTableSelectBuilder() {
 		selectAll();
 	}
-	
+
 	public BaseTableSelectBuilder(String tableName, DatabaseCategory dbCategory) throws SQLException {
 		this();
 		from(tableName).setDatabaseCategory(dbCategory);
 	}
-	
+
 	public BaseTableSelectBuilder from(String tableName) throws SQLException {
 		if(tableName ==null || tableName.isEmpty())
 			throw new SQLException("table name is illegal.");
-		
+
 		this.tableName = tableName;
 		return this;
 	}
-	
+
 	public BaseTableSelectBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
 		Objects.requireNonNull(dbCategory, "DatabaseCategory can't be null.");
 		this.dbCategory = dbCategory;
@@ -90,13 +90,13 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		customized = null;
 		return this;
 	}
-	
+
 	public BaseTableSelectBuilder selectAll() {
 		this.customized = ALL_COLUMNS;
 		selectedColumns = null;
 		return this;
 	}
-	
+
 	public BaseTableSelectBuilder selectCount() {
 		this.customized = COUNT;
 		selectedColumns = null;
@@ -104,7 +104,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		requireSingle();
 		return this.simpleType();
 	}
-	
+
 	public BaseTableSelectBuilder where(String whereClause) {
 		whereClause = whereClause.trim();
 		this.whereClause = whereClause.length() == 0 ? QUERY_ALL_CRITERIA : whereClause;
@@ -115,21 +115,21 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		orderBys.put(orderBy, ascending);
 		return this;
 	}
-	
+
 	public BaseTableSelectBuilder with(StatementParameters parameters) {
 		this.parameters = parameters;
 		return this;
 	}
-	
+
 	public <T> BaseTableSelectBuilder mapWith(DalRowMapper<T> mapper) {
 		this.mapper = mapper;
 		return this;
 	}
-	
+
 	public <T> BaseTableSelectBuilder mapWith(Class<T> type) {
 		return mapWith(new DalObjectRowMapper(type));
 	}
-	
+
 	public BaseTableSelectBuilder simpleType() {
 		return mapWith(new DalObjectRowMapper());
 	}
@@ -145,23 +145,23 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 
 	private String internalBuild(String effectiveTableName) {
 		effectiveTableName = wrapField(effectiveTableName);
-		
+
 		if(requireFirst)
 			return buildFirst(effectiveTableName);
-		
+
 		if(start == 0 && count > 0)
 			return buildTop(effectiveTableName);
-		
+
 		if(start > 0 && count > 0)
 			return buildPage(effectiveTableName);
-		
+
 		return buildList(effectiveTableName);
 	}
 
 	private String getCompleteWhereExp() {
 		return orderBys.size() == 0 ? whereClause : whereClause + SPACE + buildOrderbyExp();
 	}
-	
+
 	private String buildOrderbyExp(){
 		StringBuilder orderbyExp = new StringBuilder();
 
@@ -188,7 +188,7 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	public String wrapField(String fieldName){
 		return AbstractSqlBuilder.wrapField(dbCategory, fieldName);
 	}
-	
+
 	@Override
 	public <T> BaseTableSelectBuilder mergerWith(ResultMerger<T> merger) {
 		this.merger = merger;
@@ -200,14 +200,14 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		this.extractor = extractor;
 		return this;
 	}
-	
+
 	public <T> ResultMerger<T> getResultMerger(DalHints hints){
 		if(hints.is(DalHintEnum.resultMerger))
 			return (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
-		
+
 		if(merger != null)
 			return merger;
-		
+
 		if(isRequireSingle() || isRequireFirst())
 			return isRequireSingle() ? new DalSingleResultMerger() : new DalFirstResultMerger((Comparator)hints.getSorter());
 
@@ -217,37 +217,37 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) throws SQLException {
 		if(extractor != null)
 			return extractor;
-		
+
 		DalRowMapper<T> mapper  = checkAllowPartial(hints);
 		if(isRequireSingle() || isRequireFirst())
 			return new DalSingleResultExtractor<>(mapper, isRequireSingle());
-			
+
 		return count > 0 ? new DalRowMapperExtractor(mapper, count): new DalRowMapperExtractor(mapper);
 	}
-	
+
 	private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
 		if(!(mapper instanceof CustomizableMapper))
 			return mapper;
-		
+
 		// If it is COUNT case, we do nothing here
 		if(customized == COUNT)
 			return mapper;
-		
+
 		if(customized == ALL_COLUMNS)
 			return mapper;
-		
+
 		if(hints.is(DalHintEnum.partialQuery))
-		    return mapper;
-		
+			return mapper;
+
 		// Use what user selected and customize mapper
 		return ((CustomizableMapper)mapper).mapWith(selectedColumns);
 	}
-	
+
 	private String buildFirst(String effectiveTableName){
 		count = 1;
 		return buildTop(effectiveTableName);
 	}
-	
+
 	private String buildTop(String effectiveTableName){
 		return dbCategory.buildTop(effectiveTableName, buildColumns(), getCompleteWhereExp(), count);
 	}
@@ -255,15 +255,15 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	private String buildPage(String effectiveTableName){
 		return dbCategory.buildPage(effectiveTableName, buildColumns(), getCompleteWhereExp(), start, count);
 	}
-	
+
 	private String buildList(String effectiveTableName){
 		return dbCategory.buildList(effectiveTableName, buildColumns(), getCompleteWhereExp());
 	}
-	
+
 	private String buildColumns() {
 		if(customized != null)
 			return customized;
-		
+
 		if(selectedColumns != null) {
 			StringBuilder fieldBuf = new StringBuilder();
 			for(int i=0, count= selectedColumns.length; i < count; i++){
@@ -272,14 +272,14 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 					fieldBuf.append(", ");
 				}
 			}
-			
+
 			return fieldBuf.toString();
 		}
-		
+
 		// This will be an exceptional case
 		return SPACE;
 	}
-	
+
 	@Override
 	public StatementParameters buildParameters() {
 		return parameters;
@@ -294,17 +294,17 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 		requireFirst = true;
 		return this;
 	}
-	
+
 	public BaseTableSelectBuilder requireSingle() {
 		requireSingle = true;
 		return this;
 	}
-	
+
 	public BaseTableSelectBuilder nullable() {
 		nullable = true;
 		return this;
 	}
-	
+
 	public boolean isRequireFirst () {
 		return requireFirst;
 	}
@@ -316,11 +316,11 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	public boolean isNullable() {
 		return nullable;
 	}
-	
+
 	public BaseTableSelectBuilder top(int count) {
 		this.count = count;
 		return this;
-	}	
+	}
 
 	public BaseTableSelectBuilder range(int start, int count) {
 		this.start = start;
@@ -333,11 +333,11 @@ public class BaseTableSelectBuilder implements TableSelectBuilder {
 	}
 
 	public BaseTableSelectBuilder atPage(int pageNo, int pageSize) throws SQLException {
-		if(pageNo < 1 || pageSize < 1) 
-			throw new SQLException("Illigal pagesize or pageNo, please check");	
+		if(pageNo < 1 || pageSize < 1)
+			throw new SQLException("Illigal pagesize or pageNo, please check");
 
 		range((pageNo - 1) * pageSize, pageSize);
-		
+
 		return this;
 	}
 

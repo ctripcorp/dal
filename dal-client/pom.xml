@@ -11,7 +11,7 @@
         <commons-codec-version>1.8</commons-codec-version>
         <sqljdbc-version>6.2.2.jre7.ctrip</sqljdbc-version>
         <mysql-connector-version>5.1.38</mysql-connector-version>
-        <oracle-jdbc-thin-version>10.2.0.4</oracle-jdbc-thin-version>
+        <oracle-jdbc-thin-version>11.2.0.4</oracle-jdbc-thin-version>
         <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>
         <dal-common-version>1.1.4</dal-common-version>
         <javax.servlet-api-version>3.1-b09</javax.servlet-api-version>
@@ -79,14 +79,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--
         <dependency>
             <groupId>com.oracle</groupId>
-            <artifactId>oracle-jdbc-thin</artifactId>
+            <artifactId>ojdbc6</artifactId>
             <version>${oracle-jdbc-thin-version}</version>
-            <scope>test</scope>
         </dependency>
-        -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

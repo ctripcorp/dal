@@ -3,10 +3,10 @@ package com.ctrip.platform.dal.dao.client;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
-    private static volatile ThreadLocal<String> currentCaller;
+	private static volatile ThreadLocal<String> currentCaller;
 
 	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao.";
-	
+
 	private boolean sensitive;
 	private String[] sqls;
 	private String[] pramemters;
@@ -25,35 +25,38 @@ public class LogEntry {
 	private String commandType;
 	private String userName;
 	private int resultCount;
+	private Integer affectedRows;
+	private int[] affectedRowsArray;
+	private long connectionCost;
 	private String dao;
 	private String method;
 	private String source;
 	private String clientVersion;
 
 	private Throwable exception;
-	
+
 	private long createTime = System.currentTimeMillis();
-	
+
 	public LogEntry(){
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 		for (int i = 4; i < callers.length; i++) {
 			StackTraceElement caller = callers[i];
 			if (caller.getClassName().startsWith(execludedPackageSpace))
 				continue;
-			
+
 			dao = caller.getClassName();
 			method = caller.getMethodName();
 			source = caller.toString();
 			break;
 		}
 	}
-	
+
 	public void setEvent(DalEventEnum event) {
 		this.event = event;
-		
+
 		String commandType;
-		
-		if(this.event == DalEventEnum.CALL || 
+
+		if(this.event == DalEventEnum.CALL ||
 				this.event == DalEventEnum.BATCH_CALL) {
 			commandType = "SP";
 		} else if(this.event == DalEventEnum.QUERY) {
@@ -61,7 +64,7 @@ public class LogEntry {
 		} else {
 			commandType = "Execute";
 		}
-		
+
 		setCommandType(commandType);
 	}
 
@@ -72,11 +75,11 @@ public class LogEntry {
 	public void setSensitive(boolean sensitive) {
 		this.sensitive = sensitive;
 	}
-	
+
 	public void setCallString(String callString) {
 		this.callString = callString;
 	}
-	
+
 	public String[] getSqls() {
 		return sqls;
 	}
@@ -108,7 +111,7 @@ public class LogEntry {
 	public void setException(Throwable exception) {
 		this.exception = exception;
 	}
-	
+
 	public boolean isSuccess() {
 		return success;
 	}
@@ -177,6 +180,32 @@ public class LogEntry {
 		this.resultCount = resultCount;
 	}
 
+	public Integer getAffectedRows() {
+		return affectedRows;
+	}
+
+	public Integer setAffectedRows(Integer affectedRows) {
+		this.affectedRows = affectedRows;
+		return affectedRows;
+	}
+
+	public int[] getAffectedRowsArray() {
+		return affectedRowsArray;
+	}
+
+	public int[] setAffectedRowsArray(int[] affectedRowsArray) {
+		this.affectedRowsArray = affectedRowsArray;
+		return affectedRowsArray;
+	}
+
+	public long getConnectionCost() {
+		return connectionCost;
+	}
+
+	public void setConnectionCost(long connectionCost) {
+		this.connectionCost = connectionCost;
+	}
+
 	public String getCallString() {
 		return callString;
 	}
@@ -184,7 +213,7 @@ public class LogEntry {
 	public DalEventEnum getEvent() {
 		return event;
 	}
-	
+
 	public String getDao() {
 		return dao;
 	}
@@ -216,11 +245,11 @@ public class LogEntry {
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}
-	
+
 	public void setShardId(String shardId) {
 		this.shardId = shardId;
 	}
-	
+
 	public String getShardId() {
 		return shardId;
 	}
@@ -236,7 +265,7 @@ public class LogEntry {
 	public void setClientVersion(String clientVersion) {
 		this.clientVersion = clientVersion;
 	}
-	
+
 	public long getCreateTime() {
 		return createTime;
 	}
@@ -266,57 +295,57 @@ public class LogEntry {
 		return size;
 	}
 
-    /**
-     * @return Current caller
-     */
+	/**
+	 * @return Current caller
+	 */
 	public String getCaller() {
-        String sqlType = getDao() + "." + getMethod();
-        
-        // If comes from internal executor
-        if(sqlType.startsWith("java.util.concurrent.FutureTask"))
-            sqlType = currentCaller.get();
-        
-        return sqlType;
-    }
-	
-	public String getCallerInShort() {
-	    try {
-            String caller = getCaller();
-            int lastIndex = caller.lastIndexOf('.');
-            
-            lastIndex = caller.lastIndexOf('.', lastIndex - 1);
-            return caller.substring(lastIndex + 1);
-        } catch (Throwable e) {
-            return "Error!! Can Not Locate Calller";
-        }
+		String sqlType = getDao() + "." + getMethod();
+
+		// If comes from internal executor
+		if(sqlType.startsWith("java.util.concurrent.FutureTask"))
+			sqlType = currentCaller.get();
+
+		return sqlType;
 	}
-	
-    /**
-     * Put curent caller into threadlocal to allow ConnectionAction get caller in later stage
-     */
-    public static void populateCurrentCaller(String caller) {
-        currentCaller.set(caller);
-    }
-    
-    /**
-     * Clear curent caller of threadlocal
-     */
-    public static void clearCurrentCaller() {
-        currentCaller.remove();
-    }
 
-    public synchronized static void init(){
-        if(currentCaller != null)
-            return;
-        
-        currentCaller = new ThreadLocal<>();
-    }
+	public String getCallerInShort() {
+		try {
+			String caller = getCaller();
+			int lastIndex = caller.lastIndexOf('.');
 
-    public synchronized static void shutdown() {
-        if(currentCaller == null)
-            return;
-        
-        currentCaller.remove();
-        currentCaller = null;
-    }
+			lastIndex = caller.lastIndexOf('.', lastIndex - 1);
+			return caller.substring(lastIndex + 1);
+		} catch (Throwable e) {
+			return "Error!! Can Not Locate Calller";
+		}
+	}
+
+	/**
+	 * Put curent caller into threadlocal to allow ConnectionAction get caller in later stage
+	 */
+	public static void populateCurrentCaller(String caller) {
+		currentCaller.set(caller);
+	}
+
+	/**
+	 * Clear curent caller of threadlocal
+	 */
+	public static void clearCurrentCaller() {
+		currentCaller.remove();
+	}
+
+	public synchronized static void init(){
+		if(currentCaller != null)
+			return;
+
+		currentCaller = new ThreadLocal<>();
+	}
+
+	public synchronized static void shutdown() {
+		if(currentCaller == null)
+			return;
+
+		currentCaller.remove();
+		currentCaller = null;
+	}
 }

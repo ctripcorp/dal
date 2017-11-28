@@ -1,12 +1,13 @@
 package com.ctrip.platform.dal.sqlserverjdbc;
 
-import com.ctrip.platform.dal.dao.annotation.Database;
-import com.ctrip.platform.dal.dao.annotation.Type;
+import java.sql.Types;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.sql.Types;
+
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.annotation.Type;
 
 @Entity
 @Database(name = "UnitTest_SqlServer")

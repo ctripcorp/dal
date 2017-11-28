@@ -1,13 +1,14 @@
 package com.ctrip.platform.dal.sqlserverjdbc;
 
+import java.sql.Types;
+import java.util.List;
+
+import org.junit.Test;
+
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import org.junit.Test;
-
-import java.sql.Types;
-import java.util.List;
 
 public class SqlServerJDBCDriverTest {
     private DalTableDao<SqlServerJDBCPojo> client;

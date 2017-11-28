@@ -36,11 +36,11 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
         DalCLogger.setEncryptLogging(encryptLogging);
         DalCLogger.setSimplifyLogging(simplifyLogging);
     }
-    
+
     public static String getDalVersion() {
         return "java-" + version.get();
     }
-    
+
     private String initVersion(){
         String path = "/CtripClientVersion.prop";
         InputStream stream = Version.class.getResourceAsStream(path);

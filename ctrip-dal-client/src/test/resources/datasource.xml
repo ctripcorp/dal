@@ -90,10 +90,6 @@
                 minEvictableIdleTimeMillis="30000"
                 option="sendTimeAsDateTime=false"/>
     <Datasource name="TVP"
-                userName="sa"
-                password="!QAZ@WSX1qaz2wsx"
-                connectionUrl="jdbc:sqlserver://DST56614/PerformanceTest"
-                driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
                 testWhileIdle="false"
                 testOnBorrow="false"
                 testOnReturn="false"

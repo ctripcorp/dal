@@ -26,18 +26,18 @@ public class CtripLogEntry extends LogEntry {
 	public static final String TAG_USER_NAME = "UserName";
 	public static final String TAG_DAO = "dao";
 	public static final String TAG_RECORD_COUNT = "RecordCount";
-	public static final int LOG_LIMIT = 32*1024;	
+	public static final int LOG_LIMIT = 32*1024;
 	public static final String SQLHIDDENString = "*";
 	private static final String JSON_PATTERN = "{\"HasSql\":\"%s\",\"Hash\":\"%s\",\"SqlTpl\":\"%s\",\"Param\":\"%s\",\"IsSuccess\":\"%s\",\"ErrorMsg\":\"%s\", \"CostDetail\":\"%s\"}";
 	private static final String ERRORCDE_PATTERN = "SYS%sL%s";
-	
+
 	private Transaction catTransaction;
 	private ISpan urlSpan;
 	private Transaction statementTransaction;
-	
-    public String getCallerInShort() {
-        return String.format("%s[MSG_ID:%s]", super.getCallerInShort(), Cat.getCurrentMessageId());
-    }
+
+	public String getCallerInShort() {
+		return String.format("%s[MSG_ID:%s]", super.getCallerInShort(), Cat.getCurrentMessageId());
+	}
 
 	public Transaction getCatTransaction() {
 		return catTransaction;
@@ -46,7 +46,7 @@ public class CtripLogEntry extends LogEntry {
 	public void setCatTransaction(Transaction catTransaction) {
 		this.catTransaction = catTransaction;
 	}
-	
+
 	public ISpan getUrlSpan() {
 		return urlSpan;
 	}
@@ -56,15 +56,15 @@ public class CtripLogEntry extends LogEntry {
 	}
 
 	public Transaction getStatementTransaction() {
-        return statementTransaction;
-    }
+		return statementTransaction;
+	}
 
-    public void setStatementTransaction(Transaction statementTransaction) {
-        this.statementTransaction = statementTransaction;
-    }
+	public void setStatementTransaction(Transaction statementTransaction) {
+		this.statementTransaction = statementTransaction;
+	}
 
-    public Map<String, String> getTag() {
-		
+	public Map<String, String> getTag() {
+
 		String dbName = "";
 		if(null != this.getDataBaseKeyName()){
 			String[] tokens = this.getDataBaseKeyName().split("_");
@@ -73,7 +73,7 @@ public class CtripLogEntry extends LogEntry {
 		dbName += isMaster() ? ".Master" : ".Slave";
 
 		dbName += this.getDatabaseName() != null ? "." + this.getDatabaseName() : "";
-		
+
 		Map<String, String> tag = new LinkedHashMap<String, String>();
 		tag.put(TAG_IN_TRANSACTION, this.isTransactional() ? "True" : "False");
 		tag.put(TAG_DURATION_TIME, Long.toString(this.getDuration()) + "ms");
@@ -86,10 +86,10 @@ public class CtripLogEntry extends LogEntry {
 
 		return tag;
 	}
-	
+
 	private String getErrorCode(){
 		Throwable exception = getException();
-		
+
 		if(exception == null)
 			return "NA";
 		else{
@@ -134,13 +134,13 @@ public class CtripLogEntry extends LogEntry {
 			setErrorMsg(getErrorMsg() + LoggerHelper.getExceptionStack(e));
 			params = "";
 		}
-		
-		return String.format(JSON_PATTERN, 
-				1, 
-				"", 
-				sqlTpl, 
+
+		return String.format(JSON_PATTERN,
+				1,
+				"",
+				sqlTpl,
 				params,
-				isSuccess() ? 1 : 0, 
+				isSuccess() ? 1 : 0,
 				CommonUtil.string2Json(getErrorMsg()),
 				DalWatcher.toJson());
 	}

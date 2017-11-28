@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -19,7 +20,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 
 public class AllInOneConfigureReader {
 
@@ -35,16 +35,12 @@ public class AllInOneConfigureReader {
     private static String DEV_FLAG = "dev";
 
     private static final String CLASSPATH_LOCATION = "$classpath";
-    private ConnectionStringParser parser = new ConnectionStringParser();
 
     public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal,
             String databaseConfigLocation) {
         String location = getAllInOneConfigLocation(databaseConfigLocation);
-
         Map<String, DataSourceConfigure> config = parseDBAllInOneConfig(location, dbNames, useLocal);
-
         validate(dbNames, config);
-
         return config;
     }
 
@@ -93,7 +89,7 @@ public class AllInOneConfigureReader {
     }
 
     private String getUserDefinedLocation(String databaseConfigLocation) {
-        String location = DatabasePoolConfigParser.getInstance().getDatabaseConfigLocation();
+        String location = DataSourceConfigureParser.getInstance().getDatabaseConfigLocation();
         if (location == null || location.length() == 0) {
             location = databaseConfigLocation;
         }
@@ -138,7 +134,7 @@ public class AllInOneConfigureReader {
                 String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
 
                 logger.info("Try to read config for " + name);
-                DataSourceConfigure config = parser.parse(name, connectionString);
+                DataSourceConfigure config = ConnectionStringParser.getInstance().parse(name, connectionString);
                 dataSourceConfigures.put(name, config);
             }
             in.close();

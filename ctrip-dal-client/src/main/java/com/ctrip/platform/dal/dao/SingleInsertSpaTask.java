@@ -13,9 +13,9 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 
 	private String outputIdName;
 	private int outputIdIndex;
-	
+
 	private static final String RET_CODE = "retcode";
-	
+
 	public SingleInsertSpaTask() {
 	}
 
@@ -24,61 +24,61 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
 		outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
 		outputIdIndex = 0;
 		for(String name: parser.getColumnNames()){
-		    if(name.equals(outputIdName))
-		        break;
-		    outputIdIndex++;
+			if(name.equals(outputIdName))
+				break;
+			outputIdIndex++;
 		}
 	}
-	
+
 	@Override
 	public int execute(DalHints hints, Map<String, ?> fields, T rawPojos) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String insertSPA = String.format(INSERT_SPA_TPL, getRawTableName(hints, fields));
-		
+
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(insertSPA, parameters, fields);
-		
+
 		register(parameters, fields);
 		Map<String, ?> results = client.call(callSql, parameters, hints.setFields(fields));
 		extract(parameters, hints.getKeyHolder());
 
 		return (Integer)results.get(RET_CODE);
 	}
-	
+
 	private void register(StatementParameters parameters, Map<String, ?> fields) {
-	    if(!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
-    	    if(outputIdName != null) {
-                parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
-    	    }
-	    }else {
-	        /**
-	         * Must to be first one
-	         */
-    		if(outputIdName != null) {
-    			parameters.get(outputIdIndex).setDirection(InputOutput);
-    		}
-	    }
+		if(!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
+			if(outputIdName != null) {
+				parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
+			}
+		}else {
+			/**
+			 * Must to be first one
+			 */
+			if(outputIdName != null) {
+				parameters.get(outputIdIndex).setDirection(InputOutput);
+			}
+		}
 	}
-	
+
 	private void extract(StatementParameters parameters, KeyHolder holder) {
 		if(holder == null) return;
-		
+
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		
+
 		if(!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
-		    if(outputIdName != null) {
-		        map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
-		    }
+			if(outputIdName != null) {
+				map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
+			}
 		}else{
-            /**
-             * Must to be first one
-             */
-	        if(outputIdName != null) {
-	            map.put(outputIdName, parameters.get(outputIdIndex).getValue());
-	        }
+			/**
+			 * Must to be first one
+			 */
+			if(outputIdName != null) {
+				map.put(outputIdName, parameters.get(outputIdIndex).getValue());
+			}
 		}
-		
+
 		holder.addKey(map);
 	}
 }

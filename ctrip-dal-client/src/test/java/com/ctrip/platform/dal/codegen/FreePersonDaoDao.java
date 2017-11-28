@@ -23,24 +23,24 @@ public class FreePersonDaoDao {
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
 
-    public List<String> findWithError(String name, List<Integer> cityIds, DalHints hints) throws SQLException { 
-        hints = DalHints.createIfAbsent(hints);
+	public List<String> findWithError(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
 
-        FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
-        builder.setTemplate("SELECT aaaname FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
-        StatementParameters parameters = new StatementParameters();
-        int i = 1;
-        parameters.setSensitive(i++, "name", Types.VARCHAR, name);
-        i = parameters.setSensitiveInParameter(i, "cityIds", Types.INTEGER, cityIds);
-        builder.simpleType();
+		FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		builder.setTemplate("SELECT aaaname FROM Person WHERE name LIKE ? and CityId in (?) ORDER BY name");
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+		parameters.setSensitive(i++, "name", Types.VARCHAR, name);
+		i = parameters.setSensitiveInParameter(i, "cityIds", Types.INTEGER, cityIds);
+		builder.simpleType();
 
-        return queryDao.query(builder, parameters, hints);
-    }
+		return queryDao.query(builder, parameters, hints);
+	}
 
 	/**
 	 * find field list
-	**/
-	public List<String> findFreeFieldList(String name, List<Integer> cityIds, DalHints hints) throws SQLException {	
+	 **/
+	public List<String> findFreeFieldList(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
@@ -56,8 +56,8 @@ public class FreePersonDaoDao {
 
 	/**
 	 * find free field list page
-	**/
-	public List<String> findFreeFieldListPage(String name, List<Integer> cityIds, int pageNo, int pageSize, DalHints hints) throws SQLException {	
+	 **/
+	public List<String> findFreeFieldListPage(String name, List<Integer> cityIds, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
@@ -73,7 +73,7 @@ public class FreePersonDaoDao {
 
 	/**
 	 * find free field single
-	**/
+	 **/
 	public String findFreeFieldSingle(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -90,7 +90,7 @@ public class FreePersonDaoDao {
 
 	/**
 	 * find free field first
-	**/
+	 **/
 	public String findFreeFieldFirst(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -107,7 +107,7 @@ public class FreePersonDaoDao {
 
 	/**
 	 * select free list
-	**/
+	 **/
 	public List<FreeEntityPojo> findFreeList(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -124,7 +124,7 @@ public class FreePersonDaoDao {
 
 	/**
 	 * e
-	**/
+	 **/
 	public List<FreeEntityPojo> findFreeListPage(String name, List<Integer> cityIds, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -141,7 +141,7 @@ public class FreePersonDaoDao {
 
 	/**
 	 * select free sinle
-	**/
+	 **/
 	public FreeEntityPojo findFreeSingle(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -158,7 +158,7 @@ public class FreePersonDaoDao {
 
 	/**
 	 * select free first
-	**/
+	 **/
 	public FreeEntityPojo findFreeFirst(String name, List<Integer> cityIds, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -169,13 +169,13 @@ public class FreePersonDaoDao {
 		parameters.setSensitive(i++, "name", Types.VARCHAR, name);
 		i = parameters.setSensitiveInParameter(i, "cityIds", Types.INTEGER, cityIds);
 		builder.mapWith(freeEntityPojoRowMapper).requireFirst().nullable();
-		
+
 		return (FreeEntityPojo)queryDao.query(builder, parameters, hints);
 	}
 
 	/**
 	 * free update
-	**/
+	 **/
 	public int update (String name, List<Integer> cityId, List<Integer> countryID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 

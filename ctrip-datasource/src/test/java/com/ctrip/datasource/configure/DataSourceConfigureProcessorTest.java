@@ -1,20 +1,17 @@
 package com.ctrip.datasource.configure;
 
-import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.clogging.agent.MessageManager;
-import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class DataSourceConfigureProcessorTest {
     @Test
-    public void testGetDatabasePoolConfig() {
+    public void testGetDataSourceConfigure() {
         // emulate datasource.xml
-        DatabasePoolConfig config = new DatabasePoolConfig();
+        DataSourceConfigure config = new DataSourceConfigure();
         config.setName("SimpleShard_0");
         Map<String, String> map = new HashMap<>();
         config.setMap(map);
@@ -34,7 +31,7 @@ public class DataSourceConfigureProcessorTest {
         map.put("logAbandoned", "true");
         map.put("minEvictableIdleTimeMillis", "30000");
         map.put("connectionProperties", "rewriteBatchedStatements=true;allowMultiQueries=true");
-        config = DataSourceConfigureProcessor.getDatabasePoolConfig(config);
+        config = DataSourceConfigureProcessor.getInstance().getDataSourceConfigure(config);
         MessageManager.getInstance().shutdown();
     }
 }

@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import qunar.tc.qconfig.client.TypedConfig;
-
 import com.ctrip.datasource.titan.TitanProvider;
-import com.ctrip.datasource.titan.TitanProvider.LogEntry;
+import qunar.tc.qconfig.client.TypedConfig;
+import com.ctrip.datasource.configure.ConnectionStringProcessor;
+import com.ctrip.datasource.configure.ConnectionStringProcessor.LogEntry;
+
 import com.ctrip.framework.vi.IgniteManager.SimpleLogger;
 import com.ctrip.framework.vi.annotation.Ignite;
 import com.ctrip.framework.vi.ignite.AbstractCtripIgnitePlugin;
@@ -33,21 +34,23 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
     @Override
     public boolean warmUP(SimpleLogger logger) {
-        if(!isDalConfigExist(logger)) {
+        if (!isDalConfigExist(logger)) {
             logger.warn("Can not find dal.config from either local or remote.");
             logger.warn("This maybe normal case for those who upgrade from older ctrip-dal-cleint.");
-            logger.warn("If app only use dal data source, please change dependecy from ctrip-dal-client to ctrip-datasource.");
-            logger.warn("Refer to http://conf.ctripcorp.com/pages/viewpage.action?pageId=136437942 for more infomation");
+            logger.warn(
+                    "If app only use dal data source, please change dependecy from ctrip-dal-client to ctrip-datasource.");
+            logger.warn(
+                    "Refer to http://conf.ctripcorp.com/pages/viewpage.action?pageId=136437942 for more infomation");
             return true;
         }
-            
+
         try {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
-            
-            if(TitanProvider.config != null)
-                configs.putAll(TitanProvider.config);
-            
+
+            if(ConnectionStringProcessor.config != null)
+                configs.putAll(ConnectionStringProcessor.config);
+
             log(logger);
             logger.info("success initialized Dal Factory");
 
@@ -57,10 +60,10 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
             return true;
         } catch (Throwable e) {
-            if (TitanProvider.config == null) {
+            if (ConnectionStringProcessor.config == null) {
                 logger.error("Can not load dal.config from neither local nor remote.");
             } else {
-                configs.putAll(TitanProvider.config);
+                configs.putAll(ConnectionStringProcessor.config);
             }
 
             log(logger);
@@ -69,26 +72,26 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             return false;
         }
     }
-    
+
     private boolean isDalConfigExist(SimpleLogger logger) {
         logger.info("Try to locate dal.config from local");
         URL dalLoc = DalConfigureFactory.getDalConfigUrl();
-        
-        if(dalLoc != null) {
+
+        if (dalLoc != null) {
             logger.info("Found dal.config at " + dalLoc);
             return true;
-        }else{
+        } else {
             logger.warn("Can not find dal.config from local");
         }
-        
+
         logger.info("Try to locate dal.config from qConfig");
-        
-        try{
+
+        try {
             TypedConfig<String> config = TypedConfig.get(CtripDalConfig.DAL_CONFIG, TypedConfig.STRING_PARSER);
             String content = config.current();
             logger.info("Found dal.config from qConfig");
             return true;
-        }catch(Throwable e) {
+        } catch (Throwable e) {
             logger.warn("Can not find dal.config from qConfig :" + e.getMessage());
             return false;
         }
@@ -100,7 +103,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
     }
 
     private void log(SimpleLogger logger) {
-        List<LogEntry> startUpLog = new ArrayList<>(TitanProvider.startUpLog);
+        List<LogEntry> startUpLog = new ArrayList<>(ConnectionStringProcessor.startUpLog);
         for (LogEntry e : startUpLog) {
             switch (e.type) {
                 case LogEntry.INFO:
@@ -120,4 +123,5 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             }
         }
     }
+
 }

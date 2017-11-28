@@ -41,8 +41,8 @@ public class AllInOneConfigureReaderTest {
     public void testGetAllInOneConfig() throws Exception {
         TitanProvider provider = new TitanProvider();
         Map<String, String> settings = new HashMap<>();
-        settings.put(TitanProvider.USE_LOCAL_CONFIG, "true");
-        settings.put(TitanProvider.DATABASE_CONFIG_LOCATION, "$classpath");
+        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "true");
+        settings.put(ConnectionStringProcessor.DATABASE_CONFIG_LOCATION, "$classpath");
         provider.initialize(settings);
         Set<String> names = new HashSet<>();
         names.add("SimpleShard_0");

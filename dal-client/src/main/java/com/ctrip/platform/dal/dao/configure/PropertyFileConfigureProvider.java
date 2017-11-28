@@ -25,6 +25,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
+        DataSourceConfigureParser.getInstance();
         location = settings.get(PATH);
         if (location != null) {
             properties.load(new FileReader(location));
@@ -48,7 +49,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(String dbName) {
-        DataSourceConfigure configure = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(dbName);
+        DataSourceConfigure configure = DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure(dbName);
         DataSourceConfigure dataSourceConfigure = configure == null ? new DataSourceConfigure(dbName)
                 : new DataSourceConfigure(dbName, configure.getMap());
 

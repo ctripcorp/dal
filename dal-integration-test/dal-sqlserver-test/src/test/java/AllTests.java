@@ -25,8 +25,8 @@ import org.junit.runners.Suite.SuiteClasses;
         noShardTest.QConfigTest1.class,
         noShardTest.NoShardTransactionTestOnSqlServerSpringTest.class,
         noShardTest.NoShardTransactionTestOnSqlServerNotSpringTest.class,
-        noShardTest.SpTestDaoUnitTest.class
-
+        noShardTest.SpTestDaoUnitTest.class,
+        noShardTest.TestFor414.class
 })
 public class AllTests {
   @BeforeClass

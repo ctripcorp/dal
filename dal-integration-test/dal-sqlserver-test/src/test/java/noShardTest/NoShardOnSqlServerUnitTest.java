@@ -112,11 +112,6 @@ public class NoShardOnSqlServerUnitTest {
 //		Thread.sleep(5000);
 	}
 
-	@Test
-	public void testBigReuqest() throws Exception {
-		DalClientFactory.initClientFactory("target\\test-classes\\DalConfig\\Dal.config");
-	}
-
 
 	@Test
 	public void testCount() throws Exception {

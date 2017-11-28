@@ -29,23 +29,27 @@
     </filter-mapping>
 
     <filter>
-        <filter-name>CASFilter</filter-name>
-        <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>
+        <filter-name>CAS Authentication Filter</filter-name>
+        <filter-class>org.jasig.cas.client.authentication.CustomAuthenticationFilter</filter-class>
         <init-param>
             <param-name>casServerLoginUrl</param-name>
             <param-value>http://cas.uat.qa.nt.ctripcorp.com/caso/login</param-value>
         </init-param>
         <init-param>
             <param-name>serverName</param-name>
-            <param-value>http://dal_codegen.dev.sh.ctripcorp.com</param-value>
+            <param-value>http://dalcodegen.uat.qa.nt.ctripcorp.com/</param-value>
         </init-param>
         <init-param>
             <param-name>redisClusterName</param-name>
             <param-value>casClientPrincipal</param-value>
         </init-param>
+        <init-param>
+            <param-name>exclusions</param-name>
+            <param-value>slbhealthcheck.html</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>CASFilter</filter-name>
+        <filter-name>CAS Authentication Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -95,20 +99,22 @@
         <filter-name>CAS Assertion Thread Local Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
     <filter>
-        <filter-name>cat-filter</filter-name>
+        <filter-name>Cat Filter</filter-name>
         <filter-class>com.dianping.cat.servlet.CatFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>cat-filter</filter-name>
+        <filter-name>Cat Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
     <filter>
-        <filter-name>UserLoginFilter</filter-name>
+        <filter-name>User Filter</filter-name>
         <filter-class>com.ctrip.platform.dal.daogen.filter.UserFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>UserLoginFilter</filter-name>
+        <filter-name>User Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
@@ -121,7 +127,6 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>DaoGenApplication</servlet-name>
         <url-pattern>/rest/*</url-pattern>
@@ -131,7 +136,6 @@
         <!-- Default to 60 minute session timeouts -->
         <session-timeout>60</session-timeout>
     </session-config>
-
 
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

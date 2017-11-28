@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ctrip.framework.dal.demo.mapper.AppMapper">
+  <select id="queryByIdList" resultType="com.ctrip.framework.dal.demo.entity.App">
+    select Id, AppId, Name, DataChange_CreatedBy, DataChange_CreatedTime, DataChange_LastModifiedBy, DataChange_LastTime
+    from App
+    <where>
+      <choose>
+        <when test="idList != null and idList.size() > 0">
+          id in
+          <foreach collection="idList" open="(" close=")" separator="," item="id" index="i">
+            #{id}
+          </foreach>
+        </when>
+        <otherwise>
+          1 = 2
+        </otherwise>
+      </choose>
+    </where>
+  </select>
+
+  <insert id="insertApp" useGeneratedKeys="true" keyProperty="id">
+    insert into App(
+    AppId, Name,
+    <if test="datachangeCreatedby != null and datachangeCreatedby.length() > 0">
+      DataChange_CreatedBy,
+    </if>
+    DataChange_CreatedTime,
+    <if test="datachangeLastmodifiedby != null and datachangeLastmodifiedby.length() > 0">
+      DataChange_LastModifiedBy,
+    </if>
+    DataChange_LastTime)
+    values(
+    #{appId}, #{name},
+    <if test="datachangeCreatedby != null and datachangeCreatedby.length() > 0">
+      #{datachangeCreatedby},
+    </if>
+    <choose>
+      <when test="datachangeCreatedtime != null">
+        #{datachangeCreatedtime},
+      </when>
+      <otherwise>
+        now(),
+      </otherwise>
+    </choose>
+    <if test="datachangeLastmodifiedby != null and datachangeLastmodifiedby.length() > 0">
+      #{datachangeLastmodifiedby},
+    </if>
+    now())
+  </insert>
+
+  <!-- useGeneratedKeys for batch insert is only available for mysql with mybatis 3.3.1+ -->
+  <insert id="insertAppList" useGeneratedKeys="true" keyProperty="id" parameterType="List">
+    insert into App(AppId, Name)
+    values
+    <foreach collection="list" item="app" separator=",">
+    (#{app.appId}, #{app.name})
+    </foreach>
+  </insert>
+</mapper>

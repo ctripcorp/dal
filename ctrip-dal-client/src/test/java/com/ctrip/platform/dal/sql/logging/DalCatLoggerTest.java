@@ -21,32 +21,32 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public class DalCatLoggerTest {
-	
+
 	private final static int SAMPLE = 10;
 
 	private final static String DATABASE_NAME = "HotelPubDB";
-	
+
 	private final static String TABLE_NAME = "dal_client_test";
-	
+
 	private final static String DROP_TABLE_SQL = "IF EXISTS ("
 			+ "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
 			+ "WHERE TABLE_NAME = '"+ TABLE_NAME + "') "
 			+ "DROP TABLE  "+ TABLE_NAME;
-	
+
 	//Create the the table
 	private final static String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME +"("
 			+ "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
 			+ "quantity int,type smallint, "
 			+ "address varchar(64) not null,"
 			+ "last_changed datetime default getdate())";
-	
+
 	private static DalClient client = null;
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		DalClientFactory.initClientFactory();
 		client = DalClientFactory.getClient(DATABASE_NAME);
-		
+
 		DalHints hints = new DalHints();
 		StatementParameters parameters = new StatementParameters();
 		String[] sqls = new String[] { DROP_TABLE_SQL, CREATE_TABLE_SQL};
@@ -63,6 +63,8 @@ public class DalCatLoggerTest {
 		for (int i = 0; i < sqls.length; i++) {
 			client.update(sqls[i], parameters, hints);
 		}
+
+		DalClientFactory.shutdownFactory();
 	}
 
 	@Before
@@ -95,7 +97,7 @@ public class DalCatLoggerTest {
 	private StatementParameters parameters = new StatementParameters();
 	private DalHints hints = new DalHints();
 	private String sqlList = "select * from " + TABLE_NAME;
-	
+
 	@Test
 	public void testCatSuccess1() throws Exception {
 		for( int i = 0; i < SAMPLE; i++) {
@@ -105,7 +107,7 @@ public class DalCatLoggerTest {
 		}
 		TimeUnit.SECONDS.sleep(10);
 	}
-	
+
 	@Test
 	public void testCatSuccess2() throws Exception {
 		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
@@ -120,7 +122,7 @@ public class DalCatLoggerTest {
 		}
 		TimeUnit.SECONDS.sleep(10);
 	}
-	
+
 	@Test
 	public void testCatFailure1() throws Exception {
 		for( int i = 0; i < SAMPLE; i++) {
@@ -130,7 +132,7 @@ public class DalCatLoggerTest {
 		}
 		TimeUnit.SECONDS.sleep(10);
 	}
-	
+
 	@Test
 	public void testCatFailure2() throws Exception {
 		DalQueryDao dao = new DalQueryDao(DATABASE_NAME);

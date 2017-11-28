@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.dal.sqlserver.test.control.WebContext;
 import com.xrosstools.xunit.Processor;
 import com.xrosstools.xunit.XunitFactory;
@@ -26,6 +27,7 @@ public class XunitPeoplePortal extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		try {
 			dao = new PeopleDao();
+            DalQueryDao qdao = new DalQueryDao("SqlServerSimpleShard");
 			demo = XunitFactory.load("dal_demo.xunit").getProcessor("main");
 		} catch (Exception e) {
 			throw new ServletException(e);

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.datasource.titan.TitanProvider;
 import qunar.tc.qconfig.client.TypedConfig;
 import com.ctrip.datasource.configure.ConnectionStringProcessor;
 import com.ctrip.datasource.configure.ConnectionStringProcessor.LogEntry;
@@ -46,7 +47,10 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
         try {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
-            configs.putAll(ConnectionStringProcessor.config);
+
+            if(ConnectionStringProcessor.config != null)
+                configs.putAll(ConnectionStringProcessor.config);
+
             log(logger);
             logger.info("success initialized Dal Factory");
 

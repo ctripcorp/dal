@@ -81,6 +81,8 @@ public class CtripDalConfig implements DalConfigLoader {
             });
 
             content = config.current();
+            LOGGER.info(content);
+            transaction.addData(content);
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);

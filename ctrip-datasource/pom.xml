@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>dynamic-datasource-SNAPSHOT</version>
+    <version>1.14.0-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <framework-bom.version>1.5.1</framework-bom.version>
@@ -30,7 +30,7 @@
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dal-client</artifactId>
-                <version>dynamic-datasource-SNAPSHOT</version>
+                <version>1.14.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>qunar.tc.qconfig</groupId>

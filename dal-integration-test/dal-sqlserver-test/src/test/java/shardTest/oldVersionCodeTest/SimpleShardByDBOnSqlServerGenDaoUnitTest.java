@@ -727,7 +727,7 @@ public class SimpleShardByDBOnSqlServerGenDaoUnitTest {
 		String ret = dao.test_build_query_fieldFirst(CityID,
 				new DalHints().inAllShards());
 		assertNotNull(ret);
-		assertEquals("Initial_Shard_10", ret);
+		assertEquals("Initial_Shard_00", ret);
 
 		Set<String> shards = new HashSet<>();
 		shards.add("0");
@@ -735,7 +735,7 @@ public class SimpleShardByDBOnSqlServerGenDaoUnitTest {
 
 		ret = dao.test_build_query_fieldFirst(CityID,
 				new DalHints().inShards(shards));
-		assertEquals("Initial_Shard_10", ret);
+		assertEquals("Initial_Shard_00", ret);
 	}
 
 	@Test
@@ -920,7 +920,7 @@ public class SimpleShardByDBOnSqlServerGenDaoUnitTest {
 		String ret = dao.test_def_query_fieldFirst(CityID,
 				new DalHints().inAllShards());
 		assertNotNull(ret);
-		assertEquals("Initial_Shard_10", ret);
+		assertEquals("Initial_Shard_00", ret);
 
 		Set<String> shards = new HashSet<>();
 		shards.add("0");
@@ -928,7 +928,7 @@ public class SimpleShardByDBOnSqlServerGenDaoUnitTest {
 
 		ret = dao.test_def_query_fieldFirst(CityID,
 				new DalHints().inShards(shards));
-		assertEquals("Initial_Shard_10", ret);
+		assertEquals("Initial_Shard_00", ret);
 	}
 
 	@Test

@@ -17,7 +17,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	private static final DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
 	private DalQueryDao queryDao = null;
 	private static final String DATA_BASE = "ShardColModByDBTableOnSqlServer";
-	
+
 	public PeopleShardColModByDBTableOnSqlServerDao() throws SQLException {
 //		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(PeopleShardColModByDBTableOnSqlServer.class));
 		this.client =new DalTableDao<>(PeopleShardColModByDBTableOnSqlServer.class);
@@ -27,7 +27,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	/**
 	 * Query PeopleGen by the specified ID
 	 * The ID must be a number
-	**/
+	 **/
 	public PeopleShardColModByDBTableOnSqlServer queryByPk(Number id, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -36,7 +36,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 
 	/**
 	 * Query PeopleGen by PeopleGen instance which the primary key is set
-	**/
+	 **/
 	public PeopleShardColModByDBTableOnSqlServer queryByPk(PeopleShardColModByDBTableOnSqlServer pk, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -46,7 +46,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	/**
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
-	**/
+	 **/
 	public List<PeopleShardColModByDBTableOnSqlServer> queryLike(PeopleShardColModByDBTableOnSqlServer sample, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -74,15 +74,15 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 
 		return client.query(builder, hints);
 	}
-	
+
 	/**
 	 * Get all records from table
 	 */
 	public List<PeopleShardColModByDBTableOnSqlServer> queryAll(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		
+
 		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("PeopleID", ASC);
-		
+
 		return client.query(builder, hints);
 	}
 
@@ -90,7 +90,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
 	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
-	 * 
+	 *
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojo
@@ -108,8 +108,8 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	/**
 	 * Insert pojos one by one. If you want to inert them in the batch mode,
 	 * user batchInsert instead. You can also use the combinedInsert.
-	 * 
-	 * @param hints 
+	 *
+	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
 	 *            DalHintEnum.continueOnError can be used
 	 *            to indicate that the inserting can be go on if there is any
@@ -129,7 +129,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	 * Insert pojo and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
 	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
-	 * 
+	 *
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
 	 * @param keyHolder
@@ -150,7 +150,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	 * Insert pojos and get the generated PK back in keyHolder. 
 	 * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
 	 * Please don't pass keyholder for MS SqlServer to avoid the failure.
-	 * 
+	 *
 	 * @param hints
 	 *            Additional parameters that instruct how DAL Client perform database operation.
 	 *            DalHintEnum.continueOnError can be used
@@ -173,7 +173,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	/**
 	 * Insert pojos in batch mode. 
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
-	 * 
+	 *
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be inserted
 	 * @return how many rows been affected for inserting each of the pojo
@@ -188,7 +188,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 
 	/**
 	 * Delete the given pojo.
-	 * 
+	 *
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojo pojo to be deleted
 	 * @return how many rows been affected
@@ -203,7 +203,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 
 	/**
 	 * Delete the given pojos list one by one.
-	 * 
+	 *
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected
@@ -219,7 +219,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	/**
 	 * Delete the given pojo list in batch. 
 	 * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
-	 * 
+	 *
 	 * @param hints Additional parameters that instruct how DAL Client perform database operation.
 	 * @param daoPojos list of pojos to be deleted
 	 * @return how many rows been affected for deleting each of the pojo
@@ -236,7 +236,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	 * Update the given pojo . By default, if a field of pojo is null value,
 	 * that field will be ignored, so that it will not be updated. You can
 	 * overwrite this by set updateNullField in hints.
-	 * 
+	 *
 	 * @param hints
 	 * 			Additional parameters that instruct how DAL Client perform database operation.
 	 *          DalHintEnum.updateNullField can be used
@@ -256,7 +256,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 	 * Update the given pojo list one by one. By default, if a field of pojo is null value,
 	 * that field will be ignored, so that it will not be updated. You can
 	 * overwrite this by set updateNullField in hints.
-	 * 
+	 *
 	 * @param hints
 	 * 			Additional parameters that instruct how DAL Client perform database operation.
 	 *          DalHintEnum.updateNullField can be used
@@ -274,7 +274,7 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 
 	/**
 	 * Update the given pojo list in batch. 
-	 * 
+	 *
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
@@ -284,10 +284,10 @@ public class PeopleShardColModByDBTableOnSqlServerDao {
 		hints = DalHints.createIfAbsent(hints);
 		return client.batchUpdate(hints, daoPojos);
 	}
-	
+
 	/**
 	 * truncate
-	**/
+	 **/
 	public int truncate (DalHints hints,String tableShardID) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 

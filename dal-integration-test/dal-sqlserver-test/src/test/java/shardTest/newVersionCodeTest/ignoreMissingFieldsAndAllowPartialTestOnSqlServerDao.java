@@ -10,19 +10,18 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
-//import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 
 public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 	private static final boolean ASC = true;
 	private DalTableDao<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> client;
 	private static final String DATA_BASE = "ShardColModShardByDBOnSqlServer";
-//	private static final String DATA_BASE = "SqlServerSimpleShard";
+	//	private static final String DATA_BASE = "SqlServerSimpleShard";
 	private static final DatabaseCategory dbCategory = DatabaseCategory.SqlServer;
 	private DalQueryDao queryDao = null;
 
 	private DalRowMapper<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> peopleShardColModShardByDBOnSqlServerRowMapper = null;
 
-    private static final String TABLE_NAME="People";
+	private static final String TABLE_NAME="People";
 
 	private String sqlList = "select * from " + TABLE_NAME;
 	private String sqlFieldList = "select Name from " + TABLE_NAME;
@@ -44,7 +43,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 	/**
 	 * Query ignoreMissingFieldsAndAllowPartialTestOnSqlServer by the specified ID
 	 * The ID must be a number
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer queryByPk(Number id, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -53,7 +52,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * Query ignoreMissingFieldsAndAllowPartialTestOnSqlServer by ignoreMissingFieldsAndAllowPartialTestOnSqlServer instance which the primary key is set
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer queryByPk(ignoreMissingFieldsAndAllowPartialTestOnSqlServer pk, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -63,7 +62,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 	/**
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> queryLike(ignoreMissingFieldsAndAllowPartialTestOnSqlServer sample, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -304,7 +303,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * testEqual
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test(Integer param1, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -319,7 +318,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public List<String> test_build_query_fieldList(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -332,7 +331,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public List<String> test_build_query_fieldListByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -347,7 +346,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public String test_build_query_fieldSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -361,7 +360,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public String test_build_query_fieldFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -375,7 +374,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_build_query_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -383,12 +382,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
 		builder.in("CityID", CityID, Types.INTEGER, false);
 
-		return client.query(builder, hints);
+		return client.query(builder, hints.sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_ClientQueryFromIgnoreMissingFields_list(List<Integer> CityID, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -402,7 +401,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询部分字段
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_build_queryPartial_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -415,7 +414,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_build_query_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -430,7 +429,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询部分字段
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_build_queryPartial_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -445,7 +444,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_build_query_single(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -459,7 +458,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询部分字段
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_build_queryPartial_single(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -473,35 +472,35 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_build_query_first(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
-	    builder.requireFirst();
+		builder.requireFirst();
 
 		return client.queryObject(builder, hints);
 	}
 
 	/**
 	 * 构建，查询部分字段
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_build_queryPartial_first(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select("CityID","Name");
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
-	    builder.requireFirst();
+		builder.requireFirst();
 
 		return client.queryObject(builder, hints);
 	}
 
 	/**
 	 * 构建，更新
-	**/
+	 **/
 	public int test_build_update(String Name, List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -513,7 +512,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 	}
 	/**
 	 * 构建，新增
-	**/
+	 **/
 	public int test_build_insert(Integer CityID, String Name, Integer ProvinceID, Integer CountryID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -528,7 +527,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 构建，删除
-	**/
+	 **/
 	public int test_build_delete(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -540,7 +539,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<String> test_def_query_fieldList(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -557,7 +556,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<String> test_def_query_fieldListByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -573,7 +572,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public String test_def_query_fieldSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -589,7 +588,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public String test_def_query_fieldFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -605,7 +604,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_query_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -621,7 +620,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryIgnoreMissingFields_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -632,12 +631,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, CityID);
 		builder.mapWith(peopleShardColModShardByDBOnSqlServerRowMapper);
 
-		return queryDao.query(builder, parameters, hints.partialQuery("PeopleID","CityID","Name","CountryID","ProvinceID"));
+		return queryDao.query(builder, parameters, hints.partialQuery("PeopleID","CityID","Name","CountryID","ProvinceID").sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryAllowPartial_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -648,12 +647,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, CityID);
 		builder.mapWith(peopleShardColModShardByDBOnSqlServerRowMapper);
 
-		return queryDao.query(builder, parameters, hints);
+		return queryDao.query(builder, parameters, hints.sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询部分字段
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryPartialSet_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -666,12 +665,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		Set<String> columns = new HashSet<>();
 		columns.add("CityID");
 		columns.add("Name");
-		return queryDao.query(builder, parameters, hints.partialQuery(columns));
+		return queryDao.query(builder, parameters, hints.partialQuery(columns).sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询部分字段
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryPartialStrings_list(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -684,12 +683,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 //		Set<String> columns = new HashSet<>();
 //		columns.add("CityID");
 //		columns.add("Name");
-		return queryDao.query(builder, parameters, hints.partialQuery("CityID","Name"));
+		return queryDao.query(builder, parameters, hints.partialQuery("CityID","Name").sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_query_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -705,7 +704,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryIgnoreMissingFields_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -716,12 +715,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		builder.mapWith(peopleShardColModShardByDBOnSqlServerRowMapper).atPage(pageNo, pageSize);
 
-		return queryDao.query(builder, parameters, hints.partialQuery("PeopleID","CityID","Name","CountryID","ProvinceID"));
+		return queryDao.query(builder, parameters, hints.partialQuery("PeopleID","CityID","Name","CountryID","ProvinceID").sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryAllowPartial_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -732,12 +731,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		builder.mapWith(peopleShardColModShardByDBOnSqlServerRowMapper).atPage(pageNo, pageSize);
 
-		return queryDao.query(builder, parameters, hints);
+		return queryDao.query(builder, parameters, hints.sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryPartialSet_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -756,7 +755,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> test_def_queryPartialStrings_listByPage(List<Integer> CityID, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -772,7 +771,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_query_listSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -788,7 +787,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryIgnoreMissingFields_listSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -804,7 +803,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryAllowPartial_listSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -820,7 +819,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryPartialSet_listSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -838,7 +837,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryPartialStrings_listSingle(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -854,7 +853,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_query_listFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -870,7 +869,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryIgnoreMissingFields_listFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -881,12 +880,12 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		builder.mapWith(peopleShardColModShardByDBOnSqlServerRowMapper).requireFirst().nullable();
 
-		return (ignoreMissingFieldsAndAllowPartialTestOnSqlServer)queryDao.query(builder, parameters, hints.partialQuery("PeopleID","CityID","Name","CountryID","ProvinceID"));
+		return (ignoreMissingFieldsAndAllowPartialTestOnSqlServer)queryDao.query(builder, parameters, hints.partialQuery("PeopleID","CityID","Name","CountryID","ProvinceID").sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryAllowPartial_listFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -902,7 +901,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryPartialSet_listFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -920,7 +919,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，查询
-	**/
+	 **/
 	public ignoreMissingFieldsAndAllowPartialTestOnSqlServer test_def_queryPartialStrings_listFirst(List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -936,7 +935,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，更新
-	**/
+	 **/
 	public int test_def_update (String Name, List<Integer> CityID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -952,7 +951,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * 自定义，删除
-	**/
+	 **/
 	public int test_def_truncate (DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -974,7 +973,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * count
-	**/
+	 **/
 	public Integer test_def_count(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -988,7 +987,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * max
-	**/
+	 **/
 	public Integer test_def_queryMax(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -1002,14 +1001,14 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 
 	/**
 	 * insert
-	**/
+	 **/
 	public int test_def_insert (Integer cityid) throws SQLException {
 		return test_def_insert(cityid, null);
 	}
 
 	/**
 	 * insert
-	**/
+	 **/
 	public int test_def_insert (Integer cityid, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
@@ -1022,7 +1021,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		return queryDao.update(builder, parameters, hints);
 	}
 
-	private class PeopleShardColModShardByDBOnSqlServerComparator implements Comparator<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>{
+	private class IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator implements Comparator<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>{
 		@Override
 		public int compare(ignoreMissingFieldsAndAllowPartialTestOnSqlServer o1, ignoreMissingFieldsAndAllowPartialTestOnSqlServer o2) {
 			return new Integer(o1.getCityID()).compareTo(o2.getCityID());
@@ -1067,88 +1066,88 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 	}
 
 
-public List queryListMultipleAllShards(DalHints hints) throws SQLException {
+	public List queryListMultipleAllShards(DalHints hints) throws SQLException {
 
-	    MultipleSqlBuilder builder = new MultipleSqlBuilder();
+		MultipleSqlBuilder builder = new MultipleSqlBuilder();
 
-	    builder.addQuery(sqlList, new StatementParameters(),peopleShardColModShardByDBOnSqlServerRowMapper);//ListMapper
-	    builder.addQuery(sqlList, new StatementParameters(),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());//ListMerger
-	    builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
-	    builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlList, new StatementParameters(),peopleShardColModShardByDBOnSqlServerRowMapper);//ListMapper
+		builder.addQuery(sqlList, new StatementParameters(),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());//ListMerger
+		builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
+		builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
 //	    builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new DalRangedResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>(1,2));
 //	    builder.addQuery(sqlList, new StatementParameters(), new DalRowMapperExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,1,1), new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlList, new StatementParameters(), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlList, new StatementParameters(), new TestDalRowCallback());
-	    builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new PeopleShardColModShardByDBOnSqlServerComparator());
-	    builder.addQuery(sqlList, new StatementParameters(), peopleShardColModShardByDBOnSqlServerRowMapper, new PeopleShardColModShardByDBOnSqlServerComparator());
+		builder.addQuery(sqlList, new StatementParameters(), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlList, new StatementParameters(), new TestDalRowCallback());
+		builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
+		builder.addQuery(sqlList, new StatementParameters(), peopleShardColModShardByDBOnSqlServerRowMapper, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
 
-	    builder.addQuery(sqlCount, new StatementParameters(),new IntegerRowMapper());
-	    builder.addQuery(sqlCount, new StatementParameters(),new IntegerRowMapper(),new DalListMerger<Integer>());//ListMerger
-	    builder.addQuery(sqlCount, new StatementParameters(), Integer.class);
-	    builder.addQuery(sqlCount, new StatementParameters(), Integer.class, new DalListMerger<Integer>());
-	    builder.addQuery(sqlCount, new StatementParameters(), new DalRowMapperExtractor(new IntegerRowMapper()), new DalListMerger<Integer>());
-	    builder.addQuery(sqlCount, new StatementParameters(), new TestDalRowCallback());
+		builder.addQuery(sqlCount, new StatementParameters(),new IntegerRowMapper());
+		builder.addQuery(sqlCount, new StatementParameters(),new IntegerRowMapper(),new DalListMerger<Integer>());//ListMerger
+		builder.addQuery(sqlCount, new StatementParameters(), Integer.class);
+		builder.addQuery(sqlCount, new StatementParameters(), Integer.class, new DalListMerger<Integer>());
+		builder.addQuery(sqlCount, new StatementParameters(), new DalRowMapperExtractor(new IntegerRowMapper()), new DalListMerger<Integer>());
+		builder.addQuery(sqlCount, new StatementParameters(), new TestDalRowCallback());
 //	    builder.addQuery(sqlCount, new StatementParameters(), Integer.class, new IntegerComparator());
-	    builder.addQuery(sqlCount, new StatementParameters(), new IntegerRowMapper(), new IntegerComparator());
+		builder.addQuery(sqlCount, new StatementParameters(), new IntegerRowMapper(), new IntegerComparator());
 
-	    builder.addQuery(sqlFieldList, new StatementParameters(), String.class);
-	    builder.addQuery(sqlFieldList, new StatementParameters(),String.class,new DalListMerger<String>());
-	    builder.addQuery(sqlFieldList, new StatementParameters(), new StringRowMapper());
-	    builder.addQuery(sqlFieldList, new StatementParameters(), new StringRowMapper(),new DalListMerger<String>());
-	    builder.addQuery(sqlFieldList, new StatementParameters(), new DalSingleResultExtractor(new StringRowMapper(),false), new DalFirstResultMerger<String>());
-	    builder.addQuery(sqlFieldList, new StatementParameters(), new TestDalRowCallback());
-	    builder.addQuery(sqlFieldList, new StatementParameters(), String.class, new StringComparator());
-	    builder.addQuery(sqlFieldList, new StatementParameters(), new StringRowMapper(), new StringComparator());
+		builder.addQuery(sqlFieldList, new StatementParameters(), String.class);
+		builder.addQuery(sqlFieldList, new StatementParameters(),String.class,new DalListMerger<String>());
+		builder.addQuery(sqlFieldList, new StatementParameters(), new StringRowMapper());
+		builder.addQuery(sqlFieldList, new StatementParameters(), new StringRowMapper(),new DalListMerger<String>());
+		builder.addQuery(sqlFieldList, new StatementParameters(), new DalSingleResultExtractor(new StringRowMapper(),false), new DalFirstResultMerger<String>());
+		builder.addQuery(sqlFieldList, new StatementParameters(), new TestDalRowCallback());
+		builder.addQuery(sqlFieldList, new StatementParameters(), String.class, new StringComparator());
+		builder.addQuery(sqlFieldList, new StatementParameters(), new StringRowMapper(), new StringComparator());
 
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1),peopleShardColModShardByDBOnSqlServerRowMapper);//ListMapper
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());//ListMerger
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1),peopleShardColModShardByDBOnSqlServerRowMapper);//ListMapper
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());//ListMerger
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
 //	    builder.addQuery(sqlList, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new DalRangedResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>(1,2));
 //	    builder.addQuery(sqlList, new StatementParameters(), new DalRowMapperExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,1,1), new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), new TestDalRowCallback());
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new PeopleShardColModShardByDBOnSqlServerComparator());
-	    builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), peopleShardColModShardByDBOnSqlServerRowMapper, new PeopleShardColModShardByDBOnSqlServerComparator());
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), new TestDalRowCallback());
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
+		builder.addQuery(sqlFirst, new StatementParameters().setSensitive(1, "PeopleID", Types.INTEGER, 1), peopleShardColModShardByDBOnSqlServerRowMapper, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
 
 
 //	    builder.addQuery(sqlObject, parameters, Integer.class);
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), peopleShardColModShardByDBOnSqlServerRowMapper);
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), new TestDalRowCallback());
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new PeopleShardColModShardByDBOnSqlServerComparator());
-	    builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), peopleShardColModShardByDBOnSqlServerRowMapper, new PeopleShardColModShardByDBOnSqlServerComparator());
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), peopleShardColModShardByDBOnSqlServerRowMapper);
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), new TestDalRowCallback());
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
+		builder.addQuery(sqlObject, new StatementParameters().set(1, "PeopleID", Types.INTEGER, 1), peopleShardColModShardByDBOnSqlServerRowMapper, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
 //	    builder.addQuery(sqlFieldList, new StatementParameters(),String.class, new DalListMerger<String>());//merger
-//	    builder.addQuery(sqlListCount,new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new PeopleShardColModShardByDBOnSqlServerComparator());//sorter
+//	    builder.addQuery(sqlListCount,new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());//sorter
 //	    builder.addQuery(sqlListCount, new StatementParameters(),Integer.class, new DalListMerger<Integer>());//merger
 //	    builder.addQuery(sqlObject, parameters,Integer.class, new InteregrComparator());//soter
 //	    builder.addQuery(sqlNoResult, new StatementParameters(),new TestDalRowCallback3());//callback
-	    StatementParameters parameters = new StatementParameters();
+		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, new ArrayList<Integer>(){{add(20); add(21);add(23);}});
 
-	    builder.addQuery(sqlInParam, parameters, peopleShardColModShardByDBOnSqlServerRowMapper);
-	    builder.addQuery(sqlInParam, parameters,peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlInParam, parameters, ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
-	    builder.addQuery(sqlInParam, parameters, ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlInParam, parameters, new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlInParam, parameters, new TestDalRowCallback());
-	    builder.addQuery(sqlInParam, parameters, ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new PeopleShardColModShardByDBOnSqlServerComparator());
-	    builder.addQuery(sqlInParam, parameters, peopleShardColModShardByDBOnSqlServerRowMapper, new PeopleShardColModShardByDBOnSqlServerComparator());
+		builder.addQuery(sqlInParam, parameters, peopleShardColModShardByDBOnSqlServerRowMapper);
+		builder.addQuery(sqlInParam, parameters,peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlInParam, parameters, ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
+		builder.addQuery(sqlInParam, parameters, ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlInParam, parameters, new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlInParam, parameters, new TestDalRowCallback());
+		builder.addQuery(sqlInParam, parameters, ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
+		builder.addQuery(sqlInParam, parameters, peopleShardColModShardByDBOnSqlServerRowMapper, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
 
-	    builder.addQuery(sqlNoResult, new StatementParameters(), peopleShardColModShardByDBOnSqlServerRowMapper);
-	    builder.addQuery(sqlNoResult, new StatementParameters(),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlNoResult, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
-	    builder.addQuery(sqlNoResult, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlNoResult, new StatementParameters(), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
-	    builder.addQuery(sqlNoResult, new StatementParameters(), new TestDalRowCallback());
-	    builder.addQuery(sqlNoResult, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new PeopleShardColModShardByDBOnSqlServerComparator());
-	    builder.addQuery(sqlNoResult, new StatementParameters(), peopleShardColModShardByDBOnSqlServerRowMapper, new PeopleShardColModShardByDBOnSqlServerComparator());
-	    	
-	    builder.addQuery(sqlCount, new StatementParameters(), Integer.class, new IntegerComparator());
-	    return queryDao.query(builder, hints);
+		builder.addQuery(sqlNoResult, new StatementParameters(), peopleShardColModShardByDBOnSqlServerRowMapper);
+		builder.addQuery(sqlNoResult, new StatementParameters(),peopleShardColModShardByDBOnSqlServerRowMapper,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlNoResult, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class);
+		builder.addQuery(sqlNoResult, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class,new DalListMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlNoResult, new StatementParameters(), new DalSingleResultExtractor(peopleShardColModShardByDBOnSqlServerRowMapper,false), new DalFirstResultMerger<ignoreMissingFieldsAndAllowPartialTestOnSqlServer>());
+		builder.addQuery(sqlNoResult, new StatementParameters(), new TestDalRowCallback());
+		builder.addQuery(sqlNoResult, new StatementParameters(), ignoreMissingFieldsAndAllowPartialTestOnSqlServer.class, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
+		builder.addQuery(sqlNoResult, new StatementParameters(), peopleShardColModShardByDBOnSqlServerRowMapper, new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator());
+
+		builder.addQuery(sqlCount, new StatementParameters(), Integer.class, new IntegerComparator());
+		return queryDao.query(builder, hints);
 	}
 }

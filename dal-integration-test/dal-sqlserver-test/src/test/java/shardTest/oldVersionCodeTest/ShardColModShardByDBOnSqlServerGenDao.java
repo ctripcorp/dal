@@ -3,20 +3,20 @@ package shardTest.oldVersionCodeTest;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
-import com.ctrip.platform.dal.dao.helper.*;
-import com.ctrip.platform.dal.dao.sqlbuilder.*;
-
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
+import com.ctrip.platform.dal.dao.helper.SQLParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-
-
-
-import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class ShardColModShardByDBOnSqlServerGenDao {
 	private static final String DATA_BASE = "ShardColModShardByDBOnSqlServer";
@@ -48,7 +48,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	 * be a number
 	 **/
 	public ShardColModShardByDBOnSqlServerGen queryByPk(Number id,
-			DalHints hints) throws SQLException {
+                                                        DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(id, hints);
 	}
@@ -58,7 +58,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	 * PeopleSimpleShardByDBOnSqlServerGen instance which the primary key is set
 	 **/
 	public ShardColModShardByDBOnSqlServerGen queryByPk(
-			ShardColModShardByDBOnSqlServerGen pk, DalHints hints)
+            ShardColModShardByDBOnSqlServerGen pk, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(pk, hints);
@@ -80,7 +80,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	 * pageSize and pageNo must be greater than zero.
 	 **/
 	public List<ShardColModShardByDBOnSqlServerGen> queryByPage(int pageSize,
-			int pageNo, DalHints hints) throws SQLException {
+                                                                int pageNo, DalHints hints) throws SQLException {
 		if (pageNo < 1 || pageSize < 1)
 			throw new SQLException("Illigal pagesize or pageNo, pls check");
 		StatementParameters parameters = new StatementParameters();
@@ -412,7 +412,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
-		return queryDao.query(sql, parameters, hints, String.class);
+		return queryDao.query(sql, parameters, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**
@@ -431,7 +431,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		int index = builder.getStatementParameterIndex();
 		parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
 		parameters.set(index++, Types.INTEGER, pageSize * pageNo);
-		return queryDao.query(sql, parameters, hints, String.class);
+		return queryDao.query(sql, parameters, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**
@@ -446,7 +446,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
 		String sql = builder.build();
 		return queryDao.queryForObjectNullable(sql, builder.buildParameters(),
-				hints, String.class);
+				hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**
@@ -461,7 +461,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
 		String sql = builder.buildFirst();
 		return queryDao.queryFirstNullable(sql, builder.buildParameters(),
-				hints, String.class);
+				hints.sortBy(new StringComparator()), String.class);
 	}
 	
 	/**
@@ -477,7 +477,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 //		return queryDao.query(sql, parameters, hints, parser);
-		return queryDao.queryFrom(sql, parameters, hints, parser, start, count);
+		return queryDao.queryFrom(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser, start, count);
 	}
 	
 	/**
@@ -493,7 +493,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 //		return queryDao.query(sql, parameters, hints, parser);
-		return queryDao.queryFrom(sql, parameters, hints.partialQuery("CityID", "PeopleID"), parser, start, count);
+		return queryDao.queryFrom(sql, parameters, hints.partialQuery("CityID", "PeopleID").sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser, start, count);
 	}
 	
 	/**
@@ -513,13 +513,13 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		columns.add("CityID");
 		columns.add("PeopleID");
 		
-		return queryDao.queryFrom(sql, parameters, hints.partialQuery(columns), parser, start, count);
+		return queryDao.queryFrom(sql, parameters, hints.partialQuery(columns).sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser, start, count);
 	}
 
 	/**
 	 * 构建，查询
 	**/
-	public List<ShardColModShardByDBOnSqlServerGen> test_ClientQueryFrom_list(List<Integer> CityID, DalHints hints,int start,int count) throws SQLException {
+	public List<ShardColModShardByDBOnSqlServerGen> test_ClientQueryFrom_list(List<Integer> CityID, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 //		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -529,7 +529,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		int i = 1;
 		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, CityID);
 		
-		return client.queryFrom("CityID in (?) order by CityID", parameters, hints, start, count);
+		return client.queryFrom("CityID in (?) order by CityID", parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()), start, count);
 //		return client.query(builder, hints);
 	}
 	
@@ -537,7 +537,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<ShardColModShardByDBOnSqlServerGen> test_ClientQueryFromPartialFieldsSet_list(List<Integer> CityID, DalHints hints,int start,int count) throws SQLException {
+	public List<ShardColModShardByDBOnSqlServerGen> test_ClientQueryFromPartialFieldsSet_list(List<Integer> CityID, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		StatementParameters parameters = new StatementParameters();
@@ -548,14 +548,14 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		columns.add("CityID");
 		columns.add("Name");
 		
-		return client.queryFrom("CityID in (?) order by CityID", parameters, hints.partialQuery(columns), start, count);
+		return client.queryFrom("CityID in (?) order by CityID", parameters, hints.partialQuery(columns).sortBy(new ShardColModShardByDBOnSqlServerComparator()), start, count);
 
 	}
 	
 	/**
 	 * 构建，查询
 	**/
-	public List<ShardColModShardByDBOnSqlServerGen> test_ClientQueryFromPartialFieldsStrings_list(List<Integer> CityID, DalHints hints,int start,int count) throws SQLException {
+	public List<ShardColModShardByDBOnSqlServerGen> test_ClientQueryFromPartialFieldsStrings_list(List<Integer> CityID, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		StatementParameters parameters = new StatementParameters();
@@ -566,7 +566,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 //		columns.add("CityID");
 //		columns.add("Name");
 		
-		return client.queryFrom("CityID in (?) order by CityID", parameters, hints.partialQuery("CityID","Name"), start, count);
+		return client.queryFrom("CityID in (?) order by CityID", parameters, hints.partialQuery("CityID","Name").sortBy(new ShardColModShardByDBOnSqlServerComparator()), start, count);
 
 	}
 
@@ -584,7 +584,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 //		return (List<ShardColModShardByDBOnSqlServerGen>) queryDao
 //				.query(sql, parameters, hints.partialQuery("CityID", "Name", "ProvinceID", "PeopleID", "CountryID"),
 //						PeopleSimpleShardByDBOnSqlServerGenRowMapper);
-		return queryDao.queryFrom(sql, parameters, hints, parser, start, count);
+		return queryDao.queryFrom(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser, start, count);
 	}
 	
 	/**
@@ -604,7 +604,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		Set<String> columns = new HashSet<>();
 		columns.add("CityID");
 		columns.add("PeopleID");
-		return queryDao.queryFrom(sql, parameters, hints.partialQuery(columns), parser, start, count);
+		return queryDao.queryFrom(sql, parameters, hints.partialQuery(columns).sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser, start, count);
 	}
 	
 	/**
@@ -624,7 +624,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 //		Set<String> columns = new HashSet<>();
 //		columns.add("CityID");
 //		columns.add("PeopleID");
-		return queryDao.queryFrom(sql, parameters, hints.partialQuery("CityID","PeopleID"), parser, start, count);
+		return queryDao.queryFrom(sql, parameters, hints.partialQuery("CityID","PeopleID").sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser, start, count);
 	}
 	
 	/**
@@ -639,7 +639,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
-		return queryDao.query(sql, parameters, hints, parser);
+		return queryDao.query(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser);
 	}
 
 	/**
@@ -659,7 +659,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		int index = builder.getStatementParameterIndex();
 		parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
 		parameters.set(index++, Types.INTEGER, pageSize * pageNo);
-		return queryDao.query(sql, parameters, hints, parser);
+		return queryDao.query(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser);
 	}
 
 	/**
@@ -689,7 +689,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
 		String sql = builder.buildFirst();
 		return queryDao.queryFirstNullable(sql, builder.buildParameters(),
-				hints, parser);
+				hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()), parser);
 	}
 
 	/**
@@ -746,7 +746,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		hints = DalHints.createIfAbsent(hints);
 		int i = 1;
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
-		return queryDao.query(sql, parameters, hints, String.class);
+		return queryDao.query(sql, parameters, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**
@@ -762,7 +762,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		parameters.set(i++, Types.INTEGER, (pageNo - 1) * pageSize);
 		parameters.set(i++, Types.INTEGER, pageSize);
-		return queryDao.query(sql, parameters, hints, String.class);
+		return queryDao.query(sql, parameters, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**
@@ -792,7 +792,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		return queryDao
-				.queryFirstNullable(sql, parameters, hints, String.class);
+				.queryFirstNullable(sql, parameters, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**
@@ -807,7 +807,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		return (List<ShardColModShardByDBOnSqlServerGen>) queryDao
-				.query(sql, parameters, hints,
+				.query(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()),
 						PeopleSimpleShardByDBOnSqlServerGenRowMapper);
 	}
 
@@ -826,7 +826,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		parameters.set(i++, Types.INTEGER, (pageNo - 1) * pageSize);
 		parameters.set(i++, Types.INTEGER, pageSize);
 		return (List<ShardColModShardByDBOnSqlServerGen>) queryDao
-				.query(sql, parameters, hints,
+				.query(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()),
 						PeopleSimpleShardByDBOnSqlServerGenRowMapper);
 	}
 
@@ -858,7 +858,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		return (ShardColModShardByDBOnSqlServerGen) queryDao
-				.queryFirstNullable(sql, parameters, hints,
+				.queryFirstNullable(sql, parameters, hints.sortBy(new ShardColModShardByDBOnSqlServerComparator()),
 						PeopleSimpleShardByDBOnSqlServerGenRowMapper);
 	}
 
@@ -886,5 +886,19 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 		parameters.set(i++, "Name", Types.VARCHAR, Name);
 		i = parameters.setInParameter(i, "CityID", Types.INTEGER, CityID);
 		return baseClient.update(sql, parameters, hints);
+	}
+
+	private class ShardColModShardByDBOnSqlServerComparator implements Comparator<ShardColModShardByDBOnSqlServerGen> {
+		@Override
+		public int compare(ShardColModShardByDBOnSqlServerGen o1, ShardColModShardByDBOnSqlServerGen o2) {
+			return new Integer(o1.getCityID()).compareTo(o2.getCityID());
+		}
+	}
+
+	private class StringComparator implements Comparator<String>{
+		@Override
+		public int compare(String o1, String o2) {
+			return new Integer( o1.compareTo(o2));
+		}
 	}
 }

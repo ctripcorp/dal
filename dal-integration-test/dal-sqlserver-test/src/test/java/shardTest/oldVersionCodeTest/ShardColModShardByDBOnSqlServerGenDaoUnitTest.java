@@ -320,7 +320,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 				3);
 		for (int i = 0; i < 3; i++) {
 			ShardColModShardByDBOnSqlServerGen daoPojo = new ShardColModShardByDBOnSqlServerGen();
-			 daoPojo.setPeopleID(Long.valueOf(i)+5);
+			daoPojo.setPeopleID(Long.valueOf(i)+5);
 			daoPojo.setName("Initial_Shard_1" + i);
 			daoPojo.setCityID(i + 20);
 			daoPojo.setProvinceID(i + 30);
@@ -611,62 +611,62 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		ret1 = dao.queryByPk(peopleID, new DalHints().inShard(1));
 		assertEquals("Initial_Shard_13", ret1.getName());
 	}
-	
+
 	@Test
 	public void testtest_ClientQueryFrom_list() throws Exception {
 		//Integer CityID = null;// Test value here
-	    //List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> ret = dao.test_build_query_list(CityID, new DalHints());
+		//List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> ret = dao.test_build_query_list(CityID, new DalHints());
 		List<Integer> CityID=new ArrayList<Integer>();
 		CityID.add(20);
 		CityID.add(23);
 		CityID.add(22);
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao.test_ClientQueryFrom_list(CityID, new DalHints().inAllShards(),1,1);
-	    assertEquals(1, ret.size());
-	    assertEquals(22, ret.get(0).getCityID().intValue());
-	    assertEquals(2, ret.get(0).getPeopleID().intValue());
-	    
-	    ret = dao.test_ClientQueryFrom_list(CityID, new DalHints().setShardColValue("CityID", 20),1,1);
-	    assertEquals(1, ret.size());
-	    assertEquals(22, ret.get(0).getCityID().intValue());
-	    assertEquals(2, ret.get(0).getPeopleID().intValue());
+		assertEquals(1, ret.size());
+		assertEquals(22, ret.get(0).getCityID().intValue());
+		assertEquals(2, ret.get(0).getPeopleID().intValue());
+
+		ret = dao.test_ClientQueryFrom_list(CityID, new DalHints().setShardColValue("CityID", 20),1,1);
+		assertEquals(1, ret.size());
+		assertEquals(22, ret.get(0).getCityID().intValue());
+		assertEquals(2, ret.get(0).getPeopleID().intValue());
 	}
 	@Test
 	public void testtest_ClientQueryFromPartialFieldsSet_list() throws Exception {
 		//Integer CityID = null;// Test value here
-	    //List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> ret = dao.test_build_query_list(CityID, new DalHints());
+		//List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> ret = dao.test_build_query_list(CityID, new DalHints());
 		List<Integer> CityID=new ArrayList<Integer>();
 		CityID.add(20);
 		CityID.add(23);
 		CityID.add(22);
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao.test_ClientQueryFromPartialFieldsSet_list(CityID, new DalHints().inAllShards(),1,1);
-	    assertEquals(1, ret.size());
-	    assertEquals(22, ret.get(0).getCityID().intValue());
-	    assertNull(ret.get(0).getPeopleID());
-	    
-	    ret = dao.test_ClientQueryFromPartialFieldsSet_list(CityID, new DalHints().setShardColValue("CityID", 20),1,1);
-	    assertEquals(1, ret.size());
-	    assertEquals(22, ret.get(0).getCityID().intValue());
-	    assertNull(ret.get(0).getPeopleID());
+		assertEquals(1, ret.size());
+		assertEquals(22, ret.get(0).getCityID().intValue());
+		assertNull(ret.get(0).getPeopleID());
+
+		ret = dao.test_ClientQueryFromPartialFieldsSet_list(CityID, new DalHints().setShardColValue("CityID", 20),1,1);
+		assertEquals(1, ret.size());
+		assertEquals(22, ret.get(0).getCityID().intValue());
+		assertNull(ret.get(0).getPeopleID());
 	}
 	@Test
 	public void testtest_ClientQueryFromPartialFieldsStrings_list() throws Exception {
 		//Integer CityID = null;// Test value here
-	    //List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> ret = dao.test_build_query_list(CityID, new DalHints());
+		//List<ignoreMissingFieldsAndAllowPartialTestOnSqlServer> ret = dao.test_build_query_list(CityID, new DalHints());
 		List<Integer> CityID=new ArrayList<Integer>();
 		CityID.add(20);
 		CityID.add(23);
 		CityID.add(22);
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao.test_ClientQueryFromPartialFieldsStrings_list(CityID, new DalHints().inAllShards(),1,1);
-	    assertEquals(1, ret.size());
-	    assertEquals(22, ret.get(0).getCityID().intValue());
-	    assertNull(ret.get(0).getPeopleID());
-	    
-	    ret = dao.test_ClientQueryFromPartialFieldsStrings_list(CityID, new DalHints().setShardColValue("CityID", 20),1,1);
-	    assertEquals(1, ret.size());
-	    assertEquals(22, ret.get(0).getCityID().intValue());
-	    assertNull(ret.get(0).getPeopleID());
+		assertEquals(1, ret.size());
+		assertEquals(22, ret.get(0).getCityID().intValue());
+		assertNull(ret.get(0).getPeopleID());
+
+		ret = dao.test_ClientQueryFromPartialFieldsStrings_list(CityID, new DalHints().setShardColValue("CityID", 20),1,1);
+		assertEquals(1, ret.size());
+		assertEquals(22, ret.get(0).getCityID().intValue());
+		assertNull(ret.get(0).getPeopleID());
 	}
-	
+
 	@Test
 	public void testtest_build_queryFrom_pojoList() throws Exception {
 		List<Integer> CityID = new ArrayList<Integer>(2);// Test value here
@@ -677,8 +677,8 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao
 				.test_build_queryFrom_pojoList(CityID, new DalHints().inAllShards(),0,3);
 		assertEquals(3, ret.size());
-		assertEquals(21, ret.get(0).getCityID().intValue());
-		assertEquals(20, ret.get(1).getCityID().intValue());
+		assertEquals(20, ret.get(0).getCityID().intValue());
+		assertEquals(21, ret.get(1).getCityID().intValue());
 		assertEquals(22, ret.get(2).getCityID().intValue());
 
 		ret = dao.test_build_queryFrom_pojoList(CityID,
@@ -686,7 +686,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		assertEquals(1, ret.size());
 		assertEquals(20, ret.get(0).getCityID().intValue());
 	}
-	
+
 	@Test
 	public void testtest_build_queryFromPartialFieldsStrings_pojoList() throws Exception {
 		List<Integer> CityID = new ArrayList<Integer>(2);// Test value here
@@ -697,12 +697,12 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao
 				.test_build_queryFromPartialFieldsStrings_pojoList(CityID, new DalHints().inAllShards(),0,3);
 		assertEquals(3, ret.size());
-		assertEquals(21, ret.get(0).getCityID().intValue());
+		assertEquals(20, ret.get(0).getCityID().intValue());
 		assertEquals(1,ret.get(0).getPeopleID().intValue());
 		assertNull(ret.get(0).getCountryID());
 		assertNull(ret.get(0).getProvinceID());
 		assertNull(ret.get(0).getName());
-		assertEquals(20, ret.get(1).getCityID().intValue());
+		assertEquals(21, ret.get(1).getCityID().intValue());
 		assertEquals(1,ret.get(1).getPeopleID().intValue());
 		assertNull(ret.get(1).getCountryID());
 		assertNull(ret.get(1).getProvinceID());
@@ -712,7 +712,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		assertNull(ret.get(2).getCountryID());
 		assertNull(ret.get(2).getProvinceID());
 		assertNull(ret.get(2).getName());
-		
+
 		ret = dao.test_build_queryFromPartialFieldsStrings_pojoList(CityID,
 				new DalHints().setShardColValue("CityID", 20),0,1);
 		assertEquals(1, ret.size());
@@ -722,7 +722,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		assertNull(ret.get(0).getProvinceID());
 		assertNull(ret.get(0).getName());
 	}
-	
+
 	@Test
 	public void testtest_build_queryFromPartialFieldsSet_pojoList() throws Exception {
 		List<Integer> CityID = new ArrayList<Integer>(2);// Test value here
@@ -733,13 +733,13 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao
 				.test_build_queryFromPartialFieldsSet_pojoList(CityID, new DalHints().inAllShards(),0,3);
 		assertEquals(3, ret.size());
-		assertEquals(21, ret.get(0).getCityID().intValue());
+		assertEquals(20, ret.get(0).getCityID().intValue());
 		assertEquals(1,ret.get(0).getPeopleID().intValue());
-		assertEquals(20, ret.get(1).getCityID().intValue());
+		assertEquals(21, ret.get(1).getCityID().intValue());
 		assertEquals(1,ret.get(1).getPeopleID().intValue());
 		assertEquals(22, ret.get(2).getCityID().intValue());
 		assertEquals(2,ret.get(2).getPeopleID().intValue());
-		
+
 		ret = dao.test_build_queryFromPartialFieldsSet_pojoList(CityID,
 				new DalHints().setShardColValue("CityID", 20),0,1);
 		assertEquals(1, ret.size());
@@ -757,7 +757,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		ShardColModShardByDBOnSqlServerGen ret = dao
 				.test_build_query_pojoFirst(CityID,
 						new DalHints().inAllShards());
-		assertEquals("Initial_Shard_11", ret.getName());
+		assertEquals("Initial_Shard_00", ret.getName());
 
 		ret = dao.test_build_query_pojoFirst(CityID,
 				new DalHints().setShardValue(2));
@@ -827,7 +827,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		String ret = dao.test_build_query_fieldFirst(CityID,
 				new DalHints().inAllShards());
 		assertNotNull(ret);
-		assertEquals("Initial_Shard_11", ret);
+		assertEquals("Initial_Shard_00", ret);
 
 		Set<String> shards = new HashSet<>();
 		shards.add("0");
@@ -835,7 +835,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 
 		ret = dao.test_build_query_fieldFirst(CityID,
 				new DalHints().inShards(shards));
-		assertEquals("Initial_Shard_11", ret);
+		assertEquals("Initial_Shard_00", ret);
 	}
 
 	@Test
@@ -930,8 +930,8 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		ret1 = dao.queryByPk(peopleID, new DalHints().inShard(1));
 		assertNull(ret1);
 	}
-	
-	
+
+
 	@Test
 	public void testtest_def_queryFrom_pojoList() throws Exception {
 		List<Integer> CityID = new ArrayList<Integer>(2);// Test value here
@@ -942,14 +942,14 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao
 				.test_def_queryFrom_pojoList(CityID, new DalHints().inAllShards(),1,1);
 		assertEquals(1, ret.size());
-		assertEquals(20, ret.get(0).getCityID().intValue());
+		assertEquals(21, ret.get(0).getCityID().intValue());
 		assertEquals(1, ret.get(0).getPeopleID().intValue());
 
 		ret = dao.test_def_queryFrom_pojoList(CityID,
 				new DalHints().setShardColValue("CityID", 21),1,1);
 		assertEquals(0, ret.size());
 	}
-	
+
 	@Test
 	public void testtest_def_queryFromPartialFieldsSet_pojoList() throws Exception {
 		List<Integer> CityID = new ArrayList<Integer>(2);// Test value here
@@ -960,7 +960,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao
 				.test_def_queryFromPartialFieldsSet_pojoList(CityID, new DalHints().inAllShards(),1,1);
 		assertEquals(1, ret.size());
-		assertEquals(20, ret.get(0).getCityID().intValue());
+		assertEquals(21, ret.get(0).getCityID().intValue());
 		assertEquals(1, ret.get(0).getPeopleID().intValue());
 		assertNull(ret.get(0).getName());
 
@@ -971,7 +971,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		assertEquals(1, ret.get(0).getPeopleID().intValue());
 		assertNull(ret.get(0).getName());
 	}
-	
+
 	@Test
 	public void testtest_def_queryFromPartialFieldsStrings_pojoList() throws Exception {
 		List<Integer> CityID = new ArrayList<Integer>(2);// Test value here
@@ -982,7 +982,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		List<ShardColModShardByDBOnSqlServerGen> ret = dao
 				.test_def_queryFromPartialFieldsStrings_pojoList(CityID, new DalHints().inAllShards(),1,1);
 		assertEquals(1, ret.size());
-		assertEquals(20, ret.get(0).getCityID().intValue());
+		assertEquals(21, ret.get(0).getCityID().intValue());
 		assertEquals(1, ret.get(0).getPeopleID().intValue());
 		assertNull(ret.get(0).getName());
 
@@ -1006,7 +1006,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 
 		ShardColModShardByDBOnSqlServerGen ret = dao
 				.test_def_query_pojoFirst(CityID, new DalHints().inAllShards());
-		assertEquals("Initial_Shard_11", ret.getName());
+		assertEquals("Initial_Shard_00", ret.getName());
 
 		ret = dao.test_def_query_pojoFirst(CityID,
 				new DalHints().setShardValue(2));
@@ -1075,7 +1075,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 		String ret = dao.test_def_query_fieldFirst(CityID,
 				new DalHints().inAllShards());
 		assertNotNull(ret);
-		assertEquals("Initial_Shard_11", ret);
+		assertEquals("Initial_Shard_00", ret);
 
 		Set<String> shards = new HashSet<>();
 		shards.add("0");
@@ -1083,7 +1083,7 @@ public class ShardColModShardByDBOnSqlServerGenDaoUnitTest {
 
 		ret = dao.test_def_query_fieldFirst(CityID,
 				new DalHints().inShards(shards));
-		assertEquals("Initial_Shard_11", ret);
+		assertEquals("Initial_Shard_00", ret);
 	}
 
 	@Test

@@ -25,27 +25,27 @@ public class DalTransactionManager {
 	public DalTransactionManager(DalConnectionManager connManager) {
 		this.connManager = connManager;
 	}
-	
+
 	private <T> int startTransaction(DalHints hints, ConnectionAction<T> action) throws SQLException {
 		DalTransaction transaction = transactionHolder.get();
 
 		if(transaction == null) {
-			transaction = new DalTransaction( 
-					getConnection(hints, true, action.operation), 
+			transaction = new DalTransaction(
+					getConnection(hints, true, action.operation),
 					connManager.getLogicDbName());
-			
+
 			transactionHolder.set(transaction);
 		}else{
-		    transaction.validate(connManager.getLogicDbName(), connManager.evaluateShard(hints));
+			transaction.validate(connManager.getLogicDbName(), connManager.evaluateShard(hints));
 		}
-		
-        action.connHolder = transaction.getConnection();
+
+		action.connHolder = transaction.getConnection();
 		return transaction.startTransaction();
 	}
 
 	private void endTransaction(int startLevel) throws SQLException {
 		DalTransaction transaction = transactionHolder.get();
-		
+
 		if(transaction == null)
 			throw new SQLException("calling endTransaction with empty ConnectionCache");
 
@@ -55,59 +55,59 @@ public class DalTransactionManager {
 	public static boolean isInTransaction() {
 		return transactionHolder.get() != null;
 	}
-	
+
 	private static void reqiresTransaction() throws DalException {
 		if(!isInTransaction())
 			throw new DalException(ErrorCode.TransactionNoFound);
 	}
-	
+
 	public static List<DalTransactionListener> getCurrentListeners() throws DalException {
-		reqiresTransaction();		
+		reqiresTransaction();
 		return transactionHolder.get().getListeners();
 	}
-	
+
 	public static void register(DalTransactionListener listener) throws DalException {
 		reqiresTransaction();
 		Objects.requireNonNull(listener, "The listener should not be null");
-		
+
 		transactionHolder.get().register(listener);
 	}
-	
+
 	private void rollbackTransaction() throws SQLException {
 		DalTransaction transaction = transactionHolder.get();
-		
+
 		// Already handled in deeper level
 		if(transaction == null)
 			return;
 
 		transaction.rollbackTransaction();
 	}
-	
+
 	public DalConnection getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
 		return getConnection(hints, false, operation);
 	}
-	
+
 	public static String getLogicDbName() {
 		return isInTransaction() ?
 				transactionHolder.get().getLogicDbName() :
-					null;
+				null;
 	}
-	
+
 	public static String getCurrentShardId() {
-        return isInTransaction() ?
-                transactionHolder.get().getConnection().getShardId() :
-                    null;
+		return isInTransaction() ?
+				transactionHolder.get().getConnection().getShardId() :
+				null;
 	}
 
 	public static DbMeta getCurrentDbMeta() {
 		return isInTransaction() ?
 				transactionHolder.get().getConnection().getMeta() :
-					null;
+				null;
 	}
-	
+
 	private DalConnection getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
 		DalTransaction transaction = transactionHolder.get();
-		
+
 		if(transaction == null) {
 			return connManager.getNewConnection(hints, useMaster, operation);
 		} else {
@@ -115,30 +115,30 @@ public class DalTransactionManager {
 			return transaction.getConnection();
 		}
 	}
-	
+
 	public static void clearCurrentTransaction() {
 		transactionHolder.set(null);
 	}
 
-    @SuppressWarnings("unchecked")
-    public static <T> T create(Class<T> targetClass) throws InstantiationException, IllegalAccessException {   
-        Enhancer enhancer = new Enhancer();  
-        enhancer.setSuperclass(targetClass);  
-        enhancer.setClassLoader(targetClass.getClassLoader());
-        enhancer.setCallbackFilter(new TransactionalCallbackFilter());
-        Callback[] callbacks = new Callback[]{new DalTransactionInterceptor(), NoOp.INSTANCE};
-        enhancer.setCallbacks(callbacks);
-        enhancer.setInterfaces(new Class[]{TransactionalIntercepted.class});
-        return (T)enhancer.create();
-    }
-    
-    private static class TransactionalCallbackFilter implements CallbackFilter {
-        @Override
-        public int accept(Method method) {
-            return method.isAnnotationPresent(Transactional.class) ? 0 : 1;
-        }
-    }
-    
+	@SuppressWarnings("unchecked")
+	public static <T> T create(Class<T> targetClass) throws InstantiationException, IllegalAccessException {
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(targetClass);
+		enhancer.setClassLoader(targetClass.getClassLoader());
+		enhancer.setCallbackFilter(new TransactionalCallbackFilter());
+		Callback[] callbacks = new Callback[]{new DalTransactionInterceptor(), NoOp.INSTANCE};
+		enhancer.setCallbacks(callbacks);
+		enhancer.setInterfaces(new Class[]{TransactionalIntercepted.class});
+		return (T)enhancer.create();
+	}
+
+	private static class TransactionalCallbackFilter implements CallbackFilter {
+		@Override
+		public int accept(Method method) {
+			return method.isAnnotationPresent(Transactional.class) ? 0 : 1;
+		}
+	}
+
 	public <T> T doInTransaction(ConnectionAction<T> action, DalHints hints)throws SQLException{
 		action.initLogEntry(connManager.getLogicDbName(), hints);
 		action.start();
@@ -154,7 +154,7 @@ public class DalTransactionManager {
 
 			endTransaction(level);
 		} catch (Throwable e) {
-		    action.error(e);
+			action.error(e);
 			rollbackTransaction();
 			MarkdownManager.detect(action.connHolder, action.start, e);
 		}finally{

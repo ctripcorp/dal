@@ -48,7 +48,7 @@ public class ConnectionActionTest {
 	public void tearDown() throws Exception {
 		SqlServerTestInitializer.tearDown();
 	}
-	
+
 	static{
 		try {
 			DalClientFactory.initClientFactory();
@@ -56,19 +56,19 @@ public class ConnectionActionTest {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static final String connectionString = "dao_test_sqlsvr";
-	
+
 	private DalConnection getDalConnection() throws Exception {
 		Connection conn = null;
 		conn = DalClientFactory.getDalConfigure().getLocator().getConnection(connectionString);
 		return new DalConnection(conn, true, null, DbMeta.createIfAbsent(connectionString, null, conn));
 	}
-	
+
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
 		return new DalConnectionManager(connectionString, DalConfigureFactory.load());
 	}
-	
+
 	@Test
 	public void testInitLogEntry() {
 		TestConnectionAction test = new TestConnectionAction();
@@ -91,7 +91,7 @@ public class ConnectionActionTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testPopulateDbMetaInTransaction() {
 		TestConnectionAction test = new TestConnectionAction();
@@ -154,91 +154,91 @@ public class ConnectionActionTest {
 			fail("There should be no exception here");
 		}
 	}
-	
-    @Test
-    public void testCleanupCloseConnection() {
-        SQLException e1 = new SQLException("test discard", "1234");
-        e1.setNextException(new SQLException("test discard", "08006"));
 
-        SQLException e2 = new SQLException("test discard", "1234");
-        e2.setNextException(new SQLException("test discard", "08S01"));
+	@Test
+	public void testCleanupCloseConnection() {
+		SQLException e1 = new SQLException("test discard", "1234");
+		e1.setNextException(new SQLException("test discard", "08006"));
 
-        Exception[] el = new Exception[]{
-                // Case 1 detect direct SQLException
-                new SQLException("test discard", "08006"),
-                // Case 2 detect embedded SQLException wrapped by DalException
-                new DalException("test discard", new SQLException("test discard", "08006")),
-                // Case 3 detect embedded SQLException wrapped by NullPinterException
-                new RuntimeException("test discard", new SQLException("test discard", "08006")),
-                // Case 4 detect embedded SQLException wrapped by NullPinterException
-                new RuntimeException("test discard", e1),
-                // Case 1 detect direct SQLException
-                new SQLException("test discard", "08006"),
-                // Case 2 detect embedded SQLException wrapped by DalException
-                new DalException("test discard", new SQLException("test discard", "08006")),
-                // Case 3 detect embedded SQLException wrapped by NullPinterException
-                new RuntimeException("test discard", new SQLException("test discard", "08006")),
-                // Case 4 detect embedded SQLException wrapped by NullPinterException
-                new RuntimeException("test discard", e2),}; 
-        
-        for(Exception e: el) {
-            try {
-                TestConnectionAction test = new TestConnectionAction();
-                DalConnection connHolder = getDalConnection();
-                test.connHolder = connHolder;
-                test.statement = test.connHolder.getConn().createStatement();
-                test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
-                test.rs.next();
-                PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
-                connHolder.error(e);
-                
-                test.cleanup();
-                assertTrue(c.isDiscarded());
-                assertTrue(c.isReleased());
-                assertNotNull(test);
-                assertTrue(test.conn == null);
-                assertTrue(test.statement == null);
-                assertTrue(test.rs == null);
-                assertTrue(test.connHolder == null);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                fail("There should be no exception here");
-            }
-        }
-    }
-    
-    @Test
-    public void testCleanupCloseConnectionNegative() {
-        try {
-            TestConnectionAction test = new TestConnectionAction();
-            DalConnection connHolder = getDalConnection();
-            test.connHolder = connHolder;
-            test.statement = test.connHolder.getConn().createStatement();
-            test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
-            test.rs.next();
-            PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
-            connHolder.error(new NullPointerException("0800"));
-            
-            test.cleanup();
-            assertTrue(!c.isDiscarded());
-            assertTrue(!c.isReleased());
-            assertNotNull(test);
-            assertTrue(test.conn == null);
-            assertTrue(test.statement == null);
-            assertTrue(test.rs == null);
-            assertTrue(test.connHolder == null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            fail("There should be no exception here");
-        }        
-    }
-    
+		SQLException e2 = new SQLException("test discard", "1234");
+		e2.setNextException(new SQLException("test discard", "08S01"));
+
+		Exception[] el = new Exception[]{
+				// Case 1 detect direct SQLException
+				new SQLException("test discard", "08006"),
+				// Case 2 detect embedded SQLException wrapped by DalException
+				new DalException("test discard", new SQLException("test discard", "08006")),
+				// Case 3 detect embedded SQLException wrapped by NullPinterException
+				new RuntimeException("test discard", new SQLException("test discard", "08006")),
+				// Case 4 detect embedded SQLException wrapped by NullPinterException
+				new RuntimeException("test discard", e1),
+				// Case 1 detect direct SQLException
+				new SQLException("test discard", "08006"),
+				// Case 2 detect embedded SQLException wrapped by DalException
+				new DalException("test discard", new SQLException("test discard", "08006")),
+				// Case 3 detect embedded SQLException wrapped by NullPinterException
+				new RuntimeException("test discard", new SQLException("test discard", "08006")),
+				// Case 4 detect embedded SQLException wrapped by NullPinterException
+				new RuntimeException("test discard", e2),};
+
+		for(Exception e: el) {
+			try {
+				TestConnectionAction test = new TestConnectionAction();
+				DalConnection connHolder = getDalConnection();
+				test.connHolder = connHolder;
+				test.statement = test.connHolder.getConn().createStatement();
+				test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
+				test.rs.next();
+				PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
+				connHolder.error(e);
+
+				test.cleanup();
+				assertTrue(c.isDiscarded());
+				assertTrue(c.isReleased());
+				assertNotNull(test);
+				assertTrue(test.conn == null);
+				assertTrue(test.statement == null);
+				assertTrue(test.rs == null);
+				assertTrue(test.connHolder == null);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				fail("There should be no exception here");
+			}
+		}
+	}
+
+	@Test
+	public void testCleanupCloseConnectionNegative() {
+		try {
+			TestConnectionAction test = new TestConnectionAction();
+			DalConnection connHolder = getDalConnection();
+			test.connHolder = connHolder;
+			test.statement = test.connHolder.getConn().createStatement();
+			test.rs = test.statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
+			test.rs.next();
+			PooledConnection c = (PooledConnection)connHolder.getConn().unwrap(PooledConnection.class);
+			connHolder.error(new NullPointerException("0800"));
+
+			test.cleanup();
+			assertTrue(!c.isDiscarded());
+			assertTrue(!c.isReleased());
+			assertNotNull(test);
+			assertTrue(test.conn == null);
+			assertTrue(test.statement == null);
+			assertTrue(test.rs == null);
+			assertTrue(test.connHolder == null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			fail("There should be no exception here");
+		}
+	}
+
 	private static class TestConnectionAction extends ConnectionAction<Object>{
-		
+
 		public TestConnectionAction() {
 			this.operation = DalEventEnum.EXECUTE;
 		}
-		
+
 		@Override
 		public Object execute() throws Exception {
 			return null;

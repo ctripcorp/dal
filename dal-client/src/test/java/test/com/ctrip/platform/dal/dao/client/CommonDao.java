@@ -19,7 +19,7 @@ public class CommonDao {
         DalTableDao<T> dao = (DalTableDao<T>) new DalTableDao<>(pojo.getClass());
         return dao.insert(hints, pojo);
     }
-    
+
     public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) throws SQLException {
         DalQueryDao dao = new DalQueryDao(EntityManager.getEntityManager(clazz).getDatabaseName());
         return dao.query(sql, parameters, hints, clazz);

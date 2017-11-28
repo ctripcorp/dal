@@ -21,11 +21,13 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
 
 public class DalSqlTaskRequest<T> implements DalRequest<T>{
+	private String caller;
 	private DalLogger logger;
 	private String logicDbName;
 	private SqlBuilder builder;
@@ -35,9 +37,9 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	private ResultMerger<T> merger;
 	private Set<String> shards;
 	private Map<String, List<?>> parametersByShard;
-	
+
 	public DalSqlTaskRequest(String logicDbName, SqlBuilder builder, DalHints hints, SqlTask<T> task, ResultMerger<T> merger)
-			 throws SQLException {
+			throws SQLException {
 		logger = DalClientFactory.getDalLogger();
 		this.logicDbName = logicDbName;
 		this.builder = builder;
@@ -46,8 +48,19 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		this.task = task;
 		this.merger = merger;
 		shards = getShards();
+		this.caller = LogContext.getRequestCaller();
 	}
-	
+
+	@Override
+	public String getCaller() {
+		return caller;
+	}
+
+	@Override
+	public boolean isAsynExecution() {
+		return hints.isAsyncExecution();
+	}
+
 	@Override
 	public void validate() throws SQLException {
 		detectDistributedTransaction(shards);
@@ -71,7 +84,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	@Override
 	public Map<String, Callable<T>> createTasks() throws SQLException {
 		Map<String, Callable<T>> tasks = new HashMap<>();
-		
+
 		if(parametersByShard == null) {
 			// Create by given shards
 			for(String shard: shards) {
@@ -84,10 +97,10 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 				tasks.put(shard.getKey(), create(tempParameters, hints.clone().inShard(shard.getKey())));
 			}
 		}
-		
+
 		return tasks;
 	}
-	
+
 	private Callable<T> create(StatementParameters parameters, DalHints hints) throws SQLException {
 		if(builder instanceof TableSqlBuilder && isTableShardingEnabled(logicDbName, ((TableSqlBuilder)builder).getTableName())){
 			String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, null));
@@ -101,12 +114,12 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	public ResultMerger<T> getMerger() {
 		return merger;
 	}
-	
+
 	private Set<String> getShards() throws SQLException {
 		Set<String> shards = null;
 		if(!DalShardingHelper.isShardingEnabled(logicDbName))
 			return null;
-		
+
 		if(hints.isAllShards()) {
 			shards = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getAllShards();
 		} else if(hints.isInShards()){
@@ -118,13 +131,13 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 			parametersByShard = DalShardingHelper.shuffle(logicDbName, (List)parameter.getValue());
 			shards = parametersByShard.keySet();
 		}
-		
+
 		if(shards != null && shards.size() > 1)
 			logger.warn("Execute on multiple shards detected: " + builder.build());
-		
+
 		return shards;
 	}
-	
+
 	private static class SqlTaskCallable<T> implements Callable<T> {
 		private DalClient client;
 		private String sql;
@@ -139,15 +152,15 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 			this.hints = hints;
 			this.task = task;
 			this.parameters = parameters;
-			
+
 			compile();
 		}
-		
+
 		private void compile() throws SQLException {
 			// If there is no in clause, just return
 			if(!parameters.containsInParameter())
 				return;
-			
+
 			sql = SQLCompiler.compile(sql, parameters.getAllInParameters());
 			parameters.compile();
 		}

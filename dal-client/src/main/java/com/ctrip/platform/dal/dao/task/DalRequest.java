@@ -8,6 +8,17 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 
 public interface DalRequest<T> {
 	/**
+	 * @return Caller's class.method name
+	 */
+	String getCaller();
+
+	/**
+	 * If the request is executed in asyn mode
+	 * @return
+	 */
+	boolean isAsynExecution();
+
+	/**
 	 * Validate request
 	 * @throws SQLException
 	 */
@@ -17,20 +28,20 @@ public interface DalRequest<T> {
 	 * @return true if it is cross shard
 	 */
 	boolean isCrossShard() throws SQLException;
-	
+
 	/**
 	 * Create single task for incoming request
 	 * @return
 	 * @throws SQLException
 	 */
 	Callable<T> createTask() throws SQLException;
-	
+
 	/**
 	 * To split by DB shard
 	 * @return map of shard id to callable
 	 */
 	Map<String, Callable<T>> createTasks() throws SQLException;
-	
+
 	/**
 	 * @return result merge in cross shard case
 	 */

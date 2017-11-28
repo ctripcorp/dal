@@ -38,68 +38,68 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 /**
  * JUnit test of PersonDao class.
  * Before run the unit test, you should initiate the test data and change all the asserts correspond to you case.
-**/
+ **/
 public class PartialQueryTableDaoUnitTest {
 
 	private static DalTableDao<Person> dao = null;
-	
+
 	private final static String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
-    private final static String TABLE_NAME = "person";
-    private final static int mod = 2;
-    private final static int tableMod = 4;
-    
-    //Create the the table
-    private final static String DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL = "DROP TABLE IF EXISTS " + TABLE_NAME;
-    private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
-    
-    //Create the the table
-    // Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
-    private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
-            + "PeopleID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
-            + "Name VARCHAR(64),"
-            + "CityID int,"
-            + "ProvinceID int,"
-            + "CountryID int, "
-            + "DataChange_LastTime timestamp default CURRENT_TIMESTAMP)";
-    
-    private static DalClient clientMySql;
+	private final static String TABLE_NAME = "person";
+	private final static int mod = 2;
+	private final static int tableMod = 4;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        DalClientFactory.initClientFactory();
-        clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
-        DalHints hints = new DalHints();
-        String[] sqls = null;
-        // For SQL server
-        hints = new DalHints();
-        for(int i = 0; i < mod; i++) {
-            clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
-            for(int j = 0; j < tableMod; j++) {
-                sqls = new String[] { 
-                        String.format(DROP_TABLE_SQL_MYSQL_TPL, j), 
-                        String.format(CREATE_TABLE_SQL_MYSQL_TPL, j)};
-                clientMySql.batchUpdate(sqls, hints.inShard(i));
-            }
-        }
-        
-        dao = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
-    }
+	//Create the the table
+	private final static String DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL = "DROP TABLE IF EXISTS " + TABLE_NAME;
+	private final static String DROP_TABLE_SQL_MYSQL_TPL = "DROP TABLE IF EXISTS " + TABLE_NAME + "_%d";
 
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-        DalHints hints = new DalHints();
-        String[] sqls = null;
-        //For Sql Server
-        hints = new DalHints();
-        for(int i = 0; i < mod; i++) {
-            clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
-            sqls = new String[tableMod];
-            for(int j = 0; j < tableMod; j++) {
-                sqls[j] = String.format(DROP_TABLE_SQL_MYSQL_TPL, j);
-            }
-            clientMySql.batchUpdate(sqls, hints.inShard(i));
-        }
-    }
+	//Create the the table
+	// Note that id is UNSIGNED int, which maps to Long in java when using rs.getObject()
+	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
+			+ "PeopleID int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			+ "Name VARCHAR(64),"
+			+ "CityID int,"
+			+ "ProvinceID int,"
+			+ "CountryID int, "
+			+ "DataChange_LastTime timestamp default CURRENT_TIMESTAMP)";
+
+	private static DalClient clientMySql;
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		DalClientFactory.initClientFactory();
+		clientMySql = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
+		DalHints hints = new DalHints();
+		String[] sqls = null;
+		// For SQL server
+		hints = new DalHints();
+		for(int i = 0; i < mod; i++) {
+			clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
+			for(int j = 0; j < tableMod; j++) {
+				sqls = new String[] {
+						String.format(DROP_TABLE_SQL_MYSQL_TPL, j),
+						String.format(CREATE_TABLE_SQL_MYSQL_TPL, j)};
+				clientMySql.batchUpdate(sqls, hints.inShard(i));
+			}
+		}
+
+		dao = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		DalHints hints = new DalHints();
+		String[] sqls = null;
+		//For Sql Server
+		hints = new DalHints();
+		for(int i = 0; i < mod; i++) {
+			clientMySql.update(DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL, new StatementParameters(), hints.inShard(i));
+			sqls = new String[tableMod];
+			for(int j = 0; j < tableMod; j++) {
+				sqls[j] = String.format(DROP_TABLE_SQL_MYSQL_TPL, j);
+			}
+			clientMySql.batchUpdate(sqls, hints.inShard(i));
+		}
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -107,7 +107,7 @@ public class PartialQueryTableDaoUnitTest {
 		for(int i = 0; i < 2; i++) {
 			for(int j = 0; j < 4; j++) {
 				List<Person> daoPojo = createPojos(i, j);
-	
+
 				try {
 					dao.insert(new DalHints().enableIdentityInsert(), daoPojo);
 				} catch (SQLException e) {
@@ -116,10 +116,10 @@ public class PartialQueryTableDaoUnitTest {
 			}
 		}
 	}
-	
+
 	private List<Person> createPojos(int countryID, int cityID) {
 		List<Person> pl = new ArrayList<>();
-		
+
 		Person daoPojo;
 
 		for (int i = 0; i < 4; i++) {
@@ -130,7 +130,7 @@ public class PartialQueryTableDaoUnitTest {
 			daoPojo.setPeopleID(i+1);
 			pl.add(daoPojo);
 		}
-		
+
 		return pl;
 	}
 
@@ -142,28 +142,28 @@ public class PartialQueryTableDaoUnitTest {
 		daoPojo.setCityID(cityID);
 		daoPojo.setName("Test");
 		daoPojo.setPeopleID(id);
-		
+
 		return daoPojo;
 	}
 
 	private void changePojo(Person daoPojo) {
 		daoPojo.setName(daoPojo.getName() + " changed");
 	}
-	
+
 	private void changePojos(List<Person> daoPojos) {
 		for(Person daoPojo: daoPojos)
 			changePojo(daoPojo);
 	}
-	
+
 	private void verifyPojo(Person daoPojo) {
 		assertEquals("Test changed", daoPojo.getName());
 	}
-	
+
 	private void verifyPojos(List<Person> daoPojos) {
 		for(Person daoPojo: daoPojos)
 			verifyPojo(daoPojo);
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		for(int i = 0; i < 2; i++) {
@@ -172,7 +172,7 @@ public class PartialQueryTableDaoUnitTest {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testDetectFieldNotExist() throws Exception {
 		DalTableDao<PersonWithoutName> client = new DalTableDao<>(new DalDefaultJpaParser<>(PersonWithoutName.class));
@@ -200,7 +200,7 @@ public class PartialQueryTableDaoUnitTest {
 			assertEquals(ErrorCode.FieldNotExists.getCode(), e.getErrorCode());
 		}
 	}
-	
+
 	@Test
 	public void testFindBySelectedField() throws Exception {
 		DalTableDao<Person> client = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
@@ -228,15 +228,15 @@ public class PartialQueryTableDaoUnitTest {
 			Assert.fail();
 		}
 	}
-	
+
 	@Test
 	public void testFindByPartial() throws Exception {
 		DalTableDao<Person> client = new DalTableDao<>(new DalDefaultJpaParser<>(Person.class));
 		List<Person> pl;
-		
+
 		pl = client.query("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
 		assertPersonList(pl);
-		
+
 		pl = client.queryFrom("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inAllShards().inTableShard(1), 1, 10);
 		assertPersonList(pl);
 
@@ -244,61 +244,61 @@ public class PartialQueryTableDaoUnitTest {
 		sample.setCountryID(1);
 		pl = client.queryLike(sample, new DalHints().partialQuery("Name","CountryID").inAllShards().inTableShard(1));
 		assertPersonList(pl);
-		
+
 		pl = client.queryTop("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inAllShards().inTableShard(1), 100);
 		assertPersonList(pl);
-		
+
 		Person test = client.queryByPk(1, new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
 		assertPerson(test);
-		
+
 		test.setPeopleID(1);
 		test = client.queryByPk(test, new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
 		assertPerson(test);
-		
+
 		test = client.queryFirst("1=1", new StatementParameters(), new DalHints().partialQuery("Name","CountryID").inShard(1).inTableShard(1));
 		assertPerson(test);
 	}
-	
+
 	private void assertPersonList(List<Person> pl) {
 		for(Person p : pl)
 			assertPerson(p);
 	}
-	
+
 	private void assertPerson(Person p) {
 		Assert.assertNotNull(p.getName());
 		Assert.assertNotNull(p.getCountryID());
-		
+
 		Assert.assertNull(p.getProvinceID());
 		Assert.assertNull(p.getPeopleID());
 		Assert.assertNull(p.getDataChange_LastTime());
 		Assert.assertNull(p.getCityID());
 	}
-	
+
 	@Entity
 	@Database(name="MySqlSimpleShard")
 	@Table(name="person")
 	public static class PersonWithoutName implements DalPojo {
-		
+
 		@Id
 		@Column(name="PeopleID")
 		@GeneratedValue(strategy = GenerationType.AUTO)
 		@Type(value=Types.INTEGER)
 		private Integer peopleID;
-		
+
 		private String name;
-		
+
 		@Column(name="CityID")
 		@Type(value=Types.INTEGER)
 		private Integer cityID;
-		
+
 		@Column(name="ProvinceID")
 		@Type(value=Types.INTEGER)
 		private Integer provinceID;
-		
+
 		@Column(name="CountryID")
 		@Type(value=Types.INTEGER)
 		private Integer countryID;
-		
+
 		@Column(name="DataChange_LastTime")
 		@Type(value=Types.TIMESTAMP)
 		private Timestamp dataChange_LastTime;

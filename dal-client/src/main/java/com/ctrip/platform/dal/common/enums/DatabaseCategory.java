@@ -16,13 +16,13 @@ public enum DatabaseCategory {
 	MySql(
 			"%s=IFNULL(?,%s) ",
 			"CURRENT_TIMESTAMP",
-			new int[]{1043,1159,1161}, 
+			new int[]{1043,1159,1161},
 			new int[]{1021,1037,1038,1039,1040,1041,1154,1158,1160,1189,1190,1205,1218,1219,1220}
-			){
+	){
 		public String quote(String fieldName){
 			return "`" + fieldName + "`";
 		}
-		
+
 		public boolean isTimeOutException(ErrorContext ctx){
 			return ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString());
 		}
@@ -34,11 +34,11 @@ public enum DatabaseCategory {
 		public String buildTop(String effectiveTableName, String columns, String whereExp, int count){
 			return String.format("SELECT %s FROM %s WHERE %s LIMIT %d", columns, effectiveTableName, whereExp, count);
 		}
-		
+
 		public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count){
 			return String.format("SELECT %s FROM %s WHERE %s LIMIT %d, %d", columns, effectiveTableName, whereExp, start, count);
 		}
-		
+
 		public String buildPage(String selectSqlTemplate, int start, int count){
 			return String.format(selectSqlTemplate + " limit %d, %d", start, count);
 		}
@@ -49,12 +49,12 @@ public enum DatabaseCategory {
 			"getDate()",
 			new int[]{-2,233,845,846,847,1421},
 			new int[]{2,53,701,802,945,1204,1222}
-			){
-	    
+	){
+
 		public String quote(String fieldName){
 			return "[" + fieldName + "]";
 		}
-		
+
 		public String buildList(String effectiveTableName, String columns, String whereExp){
 			return String.format("SELECT %s FROM %s WITH (NOLOCK) WHERE %s", columns, effectiveTableName, whereExp);
 		}
@@ -66,7 +66,7 @@ public enum DatabaseCategory {
 		public String buildTop(String effectiveTableName, String columns, String whereExp, int count){
 			return String.format("SELECT TOP %d %s FROM %s WITH (NOLOCK) WHERE %s", count, columns, effectiveTableName, whereExp);
 		}
-		
+
 		public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count){
 			return String.format("SELECT %s FROM %s WITH (NOLOCK) WHERE %s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", columns, effectiveTableName, whereExp, start, count);
 		}
@@ -75,26 +75,26 @@ public enum DatabaseCategory {
 			return String.format(selectSqlTemplate + " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", start, count);
 		}
 
-	    public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
-	        if(parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP){
-	            SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement)statement;
-                sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(), (SQLServerDataTable)parameter.getValue());
-	        }else{
-	            super.setObject(statement, parameter);
-	        }
-	    }
+		public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
+			if(parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP){
+				SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement)statement;
+				sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(), (SQLServerDataTable)parameter.getValue());
+			}else{
+				super.setObject(statement, parameter);
+			}
+		}
 	},
-	
+
 	Oracle(
 			"%s=NVL(?,%s) ",
 			"SYSTIMESTAMP",
-			new int[]{-1}, 
+			new int[]{-1},
 			new int[]{-1}
-			){
+	){
 		public String quote(String fieldName){
 			return fieldName;//"\"" + fieldName + "\"";
 		}
-		
+
 		public boolean isTimeOutException(ErrorContext ctx){
 			return false;
 		}
@@ -106,10 +106,10 @@ public enum DatabaseCategory {
 		public String buildTop(String effectiveTableName, String columns, String whereExp, int count){
 			return String.format("SELECT * FROM (SELECT %s FROM %s WHERE %s) WHERE ROWNUM <= %d", columns, effectiveTableName, whereExp, count);
 		}
-		
+
 		public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count){
 			return String.format(
-					"SELECT * FROM (SELECT ROWNUM RN, T1.* FROM (SELECT %s FROM %s WHERE %s)T1 WHERE ROWNUM <= %d)T2 WHERE T2.RN >=%d", 
+					"SELECT * FROM (SELECT ROWNUM RN, T1.* FROM (SELECT %s FROM %s WHERE %s)T1 WHERE ROWNUM <= %d)T2 WHERE T2.RN >=%d",
 					columns, effectiveTableName, whereExp, start+count, start);
 		}
 
@@ -119,35 +119,35 @@ public enum DatabaseCategory {
 					selectSqlTemplate, start+count, start);
 		}
 	};
-	
+
 	private String nullableUpdateTpl;
 	private String timestampExp;
 	private Set<Integer> retriableCodeSet;
 	private Set<Integer> failOverableCodeSet;
-	
+
 	public static final String SQL_PROVIDER = "sqlProvider";
 	public static final String MYSQL_PROVIDER = "mySqlProvider";
 	public static final String ORACLE_PROVIDER = "oracleProvider";
-	
+
 	public static final int SQL_SERVER_TYPE_TVP = -1000;
 
 	public static DatabaseCategory matchWith(String provider) {
 		if(provider == null || provider.trim().length() == 0)
 			throw new RuntimeException("The provider value can not be NULL or empty!");
-		
+
 		provider = provider.trim();
 		if(provider.equalsIgnoreCase(SQL_PROVIDER))
-		    return DatabaseCategory.SqlServer;
-		
+			return DatabaseCategory.SqlServer;
+
 		if(provider.equalsIgnoreCase(MYSQL_PROVIDER))
-            return DatabaseCategory.MySql;
-		
+			return DatabaseCategory.MySql;
+
 		if(provider.equalsIgnoreCase(ORACLE_PROVIDER))
-            return DatabaseCategory.Oracle;
-            
+			return DatabaseCategory.Oracle;
+
 		throw new RuntimeException("The provider: " + provider + " can not be recoganized");
 	}
-	
+
 	public Set<Integer> getDefaultRetriableErrorCodes() {
 		return new TreeSet<Integer>(retriableCodeSet);
 	}
@@ -155,38 +155,38 @@ public enum DatabaseCategory {
 	public Set<Integer> getDefaultFailOverableErrorCodes() {
 		return new TreeSet<Integer>(failOverableCodeSet);
 	}
-	
+
 	public Set<Integer> getDefaultErrorCodes() {
 		Set<Integer> errorCodes = getDefaultRetriableErrorCodes();
 		errorCodes.addAll(retriableCodeSet);
 		errorCodes.addAll(failOverableCodeSet);
 		return errorCodes;
 	}
-	
+
 	public boolean isDisconnectionError(String sqlState) {
-	    if (sqlState == null)
-	        return false;
-        
-	    switch (this) {
-        case MySql:
-            //SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
-            return sqlState.equals("08S01");
-        case SqlServer:
-            //SQLServerException.EXCEPTION_XOPEN_CONNECTION_FAILURE
-            return sqlState.equals("08S01") || sqlState.equals("08006");
-        default:
-            // The default connection related error codes are start with "08"
-            return sqlState.startsWith("08");
-        }	    
+		if (sqlState == null)
+			return false;
+
+		switch (this) {
+			case MySql:
+				//SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
+				return sqlState.equals("08S01");
+			case SqlServer:
+				//SQLServerException.EXCEPTION_XOPEN_CONNECTION_FAILURE
+				return sqlState.equals("08S01") || sqlState.equals("08006");
+			default:
+				// The default connection related error codes are start with "08"
+				return sqlState.startsWith("08");
+		}
 	}
-	
+
 	public String getTimestampExp() {
 		return timestampExp;
 	}
-	
+
 	/**
 	 * This is for compatible with code generated for dal 1.4.1 and previouse version. Such code is like:
-	 * 		
+	 *
 	 * 	SelectSqlBuilder builder = new SelectSqlBuilder("person", dbCategory, true);
 	 * 	...
 	 *	int index =  builder.getStatementParameterIndex();
@@ -196,61 +196,61 @@ public enum DatabaseCategory {
 	 */
 	public String getPageSuffixTpl() {
 		switch (this) {
-		case MySql:
-			return " limit ?, ?";
-		case SqlServer:
-			return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-		default:
-			return null;
+			case MySql:
+				return " limit ?, ?";
+			case SqlServer:
+				return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+			default:
+				return null;
 		}
 	}
 
 	public abstract boolean isTimeOutException(ErrorContext ctx);
-	
+
 	public abstract String quote(String fieldName);
-	
+
 	public abstract String buildList(String effectiveTableName, String columns, String whereExp);
-	
+
 	public abstract String buildTop(String effectiveTableName, String columns, String whereExp, int count);
-	
+
 	public abstract String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count);
-	
+
 	public abstract String buildPage(String selectSqlTemplate, int start, int count);
 
-    public void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException{
-        if(parameter.isDefaultType()){
-            statement.setObject(parameter.getIndex(), parameter.getValue());
-        }
-        else{
-            statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-        }
-    }
+	public void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException{
+		if(parameter.isDefaultType()){
+			statement.setObject(parameter.getIndex(), parameter.getValue());
+		}
+		else{
+			statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+		}
+	}
 
 	public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException{
-        if(parameter.getValue() == null) {
-            if(parameter.isDefaultType()){
-                statement.setObject(parameter.getIndex(), null);
-            }
-            else{
-                if(parameter.getName() == null)
-                    statement.setNull(parameter.getIndex(), parameter.getSqlType());
-                else
-                    statement.setNull(parameter.getName(), parameter.getSqlType());
-            }
-        } else {
-            if(parameter.isDefaultType()){
-                statement.setObject(parameter.getIndex(), parameter.getValue());
-            }
-            else{
-                if(parameter.getName() == null)
-                    statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-                else
-                    statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
-            }
-        }
-    }
+		if(parameter.getValue() == null) {
+			if(parameter.isDefaultType()){
+				statement.setObject(parameter.getIndex(), null);
+			}
+			else{
+				if(parameter.getName() == null)
+					statement.setNull(parameter.getIndex(), parameter.getSqlType());
+				else
+					statement.setNull(parameter.getName(), parameter.getSqlType());
+			}
+		} else {
+			if(parameter.isDefaultType()){
+				statement.setObject(parameter.getIndex(), parameter.getValue());
+			}
+			else{
+				if(parameter.getName() == null)
+					statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+				else
+					statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+			}
+		}
+	}
 
-    public String getNullableUpdateTpl() {
+	public String getNullableUpdateTpl() {
 		return nullableUpdateTpl;
 	}
 
@@ -260,7 +260,7 @@ public enum DatabaseCategory {
 		this.retriableCodeSet = parseErrorCodes(retriableCodes);
 		this.failOverableCodeSet = parseErrorCodes(failOverableCodes);
 	}
-	
+
 	private Set<Integer> parseErrorCodes(int[] codes){
 		Set<Integer> temp = new TreeSet<Integer>();
 		for(int value: codes)

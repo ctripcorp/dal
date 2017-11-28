@@ -39,10 +39,10 @@ public class DalException extends SQLException {
         return this.errorCode.getCode();
     }
 
-    public static DalException wrap(Throwable e) {
-        return e instanceof DalException ? (DalException) e
+    public static SQLException wrap(Throwable e) {
+        return e instanceof SQLException ? (SQLException)e : e instanceof DalException ? (DalException) e
                 : e.getCause() instanceof DalException ? (DalException) e.getCause()
-                        : new DalException(ErrorCode.Unknown, e, e.getMessage());
+                : new DalException(ErrorCode.Unknown, e, e.getMessage());
     }
 
     public static DalException wrap(ErrorCode defaultError, Throwable e) {

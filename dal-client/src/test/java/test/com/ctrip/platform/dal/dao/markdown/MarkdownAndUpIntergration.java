@@ -33,14 +33,14 @@ public class MarkdownAndUpIntergration {
 			Assert.fail();
 		}
 	}
-		
+
 	private void autoMarkdown(String key) {
 		MarkDownInfo info = new MarkDownInfo(key, "1", MarkDownPolicy.TIMEOUT, 0);
 		info.setReason(MarkDownReason.ERRORCOUNT);
-		
+
 		MarkdownManager.autoMarkdown(info);
 	}
-	
+
 	@Test
 	public void markdownSuccessTest() throws Exception {
 		String logicName = "dao_test";
@@ -51,52 +51,52 @@ public class MarkdownAndUpIntergration {
 			this.testQuery(logicName);
 			Assert.fail();
 		}catch(Exception e){
-		    e.printStackTrace();
-			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), 
+			e.printStackTrace();
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(),
 					((DalException)e).getErrorCode());
 		}
-		
+
 		//Mark up
 		Thread.sleep(1000 * 3);
-		
+
 		try{
-			this.testQuery(logicName);		
+			this.testQuery(logicName);
 		}catch(Exception e){
 			Assert.fail();
 		}
 	}
-	
+
 	@Test
 	public void markdownMulipleSlavesTest(){
 		String logicName = "HA_Test";
-		
+
 		DalStatusManager.getMarkdownStatus().setEnableAutoMarkdown(true);
-		
+
 		//Mark Down. It has 3 slaves
 		// We need to make it like oringal ha_test, ha_test_0, ha_test_1
 		autoMarkdown("MySqlShard_0");
 //		autoMarkdown("ha_test_2");
 		try{
-			this.testQuery(logicName);		
+			this.testQuery(logicName);
 		}catch(Exception e){
 			Assert.fail();
 		}
-		
+
 		autoMarkdown("MySqlShard_1");
 
 		try{
 			this.testQuery(logicName);
 			Assert.fail();
 		}catch(Exception e){
-			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(), 
+			Assert.assertEquals(ErrorCode.MarkdownConnection.getCode(),
 					((DalException)e).getErrorCode());
 		}
 	}
-	
-	
+
+
 	private void testQuery(String logicName) throws SQLException{
 		DalClient client = DalClientFactory.getClient(logicName);
-		client.query("SELECT 1", 
+		client.query("SELECT 1",
 				new StatementParameters(), new DalHints(), new DalResultSetExtractor<Integer>() {
 
 					@Override

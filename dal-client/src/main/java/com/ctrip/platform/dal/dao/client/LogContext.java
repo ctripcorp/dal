@@ -5,7 +5,7 @@ import java.util.Set;
 
 /**
  * You can provide your own request level context info by suclassing this class
- * 
+ *
  * @author jhhe
  */
 public class LogContext {
@@ -45,19 +45,19 @@ public class LogContext {
             StackTraceElement caller = callers[i];
             if (caller.getClassName().startsWith(execludedPackageSpace))
                 continue;
-            
-            return caller.getClassName() + "." + caller.getMethodName(); 
+
+            return caller.getClassName() + "." + caller.getMethodName();
         }
 
         return "unknow";
     }
-    
+
     private String caller;
 
     public void setCaller(String caller) {
         this.caller = caller;
     }
-    
+
     public String getCaller() {
         return caller;
     }

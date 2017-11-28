@@ -11,10 +11,12 @@ import java.util.concurrent.Callable;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
+	private String caller;
 	private String logicDbName;
 	private DalHints hints;
 	private boolean isList;
@@ -27,8 +29,9 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		this.logicDbName = logicDbName;
 		this.task = task;
 		this.hints = hints;
+		this.caller = LogContext.getRequestCaller();
 	}
-	
+
 	public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
 		this(logicDbName, hints, task);
 
@@ -41,7 +44,17 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		this.rawPojos = rawPojos;
 		isList = true;
 	}
-	
+
+	@Override
+	public String getCaller() {
+		return caller;
+	}
+
+	@Override
+	public boolean isAsynExecution() {
+		return hints.isAsyncExecution();
+	}
+
 	@Override
 	public void validate() throws SQLException {
 		if(isList && null == rawPojos)
@@ -49,20 +62,20 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 
 		if(isList == false && null == rawPojo)
 			throw new DalException(ErrorCode.ValidatePojo);
-		
+
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
-		
+
 		if(isList == false){
 			rawPojos = new ArrayList<>(1);
 			rawPojos.add(rawPojo);
 		}
 
 		daoPojos = task.getPojosFields(rawPojos);
-			
+
 		detectDistributedTransaction(logicDbName, hints, daoPojos);
 	}
-	
+
 	@Override
 	public boolean isCrossShard() {
 		// The single task request is always executed as if the pojos are not corss shard even they really are.
@@ -110,7 +123,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 					hints.handleError("Error when execute single pojo operation", e);
 				}
 			}
-			return counts;	
+			return counts;
 		}
 	}
 }

@@ -23,7 +23,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -33,6 +33,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
@@ -353,14 +355,18 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         info("Titan service URL: " + svcUrl);
 
-        URIBuilder builder = new URIBuilder(svcUrl).addParameter("ids", ids).addParameter("appid", appid);
+        URIBuilder builder = new URIBuilder(svcUrl);
+        StringBuilder body = new StringBuilder();
+        body.append("ids=").append(ids);
+        body.append("&appid=").append(appid);
+        
         if (!(subEnv == null || subEnv.isEmpty())) {
-            builder.addParameter("envt", subEnv);
+            body.append("&envt=").append(subEnv);
             info("Sub environment: " + subEnv);
         }
 
         if (!(idc == null || idc.isEmpty())) {
-            builder.addParameter("idc", idc);
+            body.append("&idc=").append(idc);
             info("IDC:" + idc);
         }
 
@@ -369,34 +375,41 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient != null) {
-            HttpGet httpGet = new HttpGet();
-            httpGet.setURI(uri);
+            HttpPost httpPost = new HttpPost();
+            httpPost.setURI(uri);
+            httpPost.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_FORM_URLENCODED));
 
-            HttpResponse response = sslClient.execute(httpGet);
+            HttpResponse response = sslClient.execute(httpPost);
+            
+            int code = response.getStatusLine().getStatusCode();
 
             HttpEntity entity = response.getEntity();
 
             String content = EntityUtils.toString(entity);
+            
+            if(code != 200) {
+                throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
+                        code, content));
+            }
 
-            TitanResponse resp = JSON.parseObject(content, TitanResponse.class);
+            TitanResponse resp = null;
+            try {
+                resp = JSON.parseObject(content, TitanResponse.class);
+            } catch (Throwable e) {
+                throw new DalException("Fail to get ALL-IN-ONE from Titan service when parse result. Message: " + content);
+            }
 
             if (!"200".equals(resp.getStatus())) {
-                logger.warn(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
                         resp.getStatus(), resp.getMessage()));
-                throw new RuntimeException(
-                        String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
-                                resp.getStatus(), resp.getMessage()));
             }
 
             for (TitanData data : resp.getData()) {
                 info("Parsing " + data.getName());
                 // Fail fast
                 if (data.getErrorCode() != null) {
-                    warn(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
+                    throw new DalException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
                             data.getName(), data.getErrorCode(), data.getErrorMessage()));
-                    throw new RuntimeException(
-                            String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
-                                    data.getName(), data.getErrorCode(), data.getErrorMessage()));
                 }
 
                 // Decrypt raw connection string

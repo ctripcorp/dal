@@ -885,5 +885,12 @@ public class PersonDaoUnitTest {
         DalClientFactory.getClient(DATABASE_NAME_MYSQL).execute(command, new DalHints().inShard(0));
         Thread.sleep(60*1000);
     }   
-
+    
+//    @Test
+//    public void testKKKK() throws Exception {
+//        DalClientFactory.shutdownFactory();
+//        DalClientFactory.initClientFactory("e:\\dal.config");
+//        DalClientFactory.shutdownFactory();
+//    }
+//
 }

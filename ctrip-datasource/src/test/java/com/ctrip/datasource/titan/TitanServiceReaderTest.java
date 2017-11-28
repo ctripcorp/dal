@@ -305,7 +305,7 @@ public class TitanServiceReaderTest {
         TitanProvider provider = new TitanProvider();
         Set<String> dbNames = new HashSet<>();
         dbNames.add("mysqldbatestshard01db_W");
-        dbNames.add("mysqldbatestshard01db_R");
+        dbNames.add("mysqldbatestshard02db_w");
 
         Map<String, String> settings = new HashMap<>();
         settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");

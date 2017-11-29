@@ -9,6 +9,8 @@ import org.junit.Test;
 public class TestFor414 {
     @Test
     public void testBigReuqest() throws Exception {
+        DalClientFactory.shutdownFactory();
         DalClientFactory.initClientFactory("target\\test-classes\\DalConfig\\Dal.config");
+        DalClientFactory.shutdownFactory();
     }
 }

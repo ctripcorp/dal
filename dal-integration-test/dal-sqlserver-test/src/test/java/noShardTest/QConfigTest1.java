@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+//import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
+import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -38,9 +40,8 @@ public class QConfigTest1 {
 
 
 
-			PoolProperties pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("DalServiceDB")
-					.getPoolProperties();
+			PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("DalServiceDB"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertTrue(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());
@@ -91,9 +92,8 @@ public class QConfigTest1 {
 			provider.initialize(settings);
 			provider.setup(dbNames);
 
-			PoolProperties pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("uiautomationtestdb_W")
-					.getPoolProperties();
+			PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("uiautomationtestdb_W"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertFalse(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());
@@ -116,9 +116,8 @@ public class QConfigTest1 {
 					"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 					pc.getValidatorClassName());
 
-			pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("DalServiceDB")
-					.getPoolProperties();
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("DalServiceDB"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertTrue(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());
@@ -174,9 +173,8 @@ public class QConfigTest1 {
 			provider.initialize(settings);
 			provider.setup(dbNames);
 
-			PoolProperties pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("CruiseBookingDB")
-					.getPoolProperties();
+			PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CruiseBookingDB"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertTrue(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());
@@ -200,9 +198,8 @@ public class QConfigTest1 {
 					"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 					pc.getValidatorClassName());
 
-			pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("DalServiceDB")
-					.getPoolProperties();
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("DalServiceDB"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertTrue(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());
@@ -258,9 +255,8 @@ public class QConfigTest1 {
 			provider.initialize(settings);
 			provider.setup(dbNames);
 
-			PoolProperties pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("ctripoaDB_W")
-					.getPoolProperties();
+			PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("ctripoaDB_W"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertFalse(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());
@@ -283,9 +279,8 @@ public class QConfigTest1 {
 					"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 					pc.getValidatorClassName());
 
-			pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("DalServiceDB")
-					.getPoolProperties();
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("DalServiceDB"));
+
 			assertFalse(pc.isTestWhileIdle());
 			assertTrue(pc.isTestOnBorrow());
 			assertFalse(pc.isTestOnReturn());

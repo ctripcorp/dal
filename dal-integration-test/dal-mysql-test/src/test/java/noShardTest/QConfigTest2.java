@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -31,9 +32,8 @@ public class QConfigTest2 {
 				provider.initialize(settings);
 				provider.setup(dbNames);
 
-				PoolProperties pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("CorpPerformanceManagementDB_W")
-						.getPoolProperties();
+				PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CorpPerformanceManagementDB_W"));
+
 				assertFalse(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
 				assertFalse(pc.isTestOnReturn());
@@ -86,9 +86,8 @@ public class QConfigTest2 {
 				provider.initialize(settings);
 				provider.setup(dbNames);
 
-				PoolProperties pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("CorpPerformanceManagementDB_W")
-						.getPoolProperties();
+				PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CorpPerformanceManagementDB_W"));
+
 				assertFalse(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
 				assertFalse(pc.isTestOnReturn());
@@ -112,9 +111,8 @@ public class QConfigTest2 {
 						"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 						pc.getValidatorClassName());
 
-				pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("CruiseInterfaceDB")
-						.getPoolProperties();
+				pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CruiseInterfaceDB"));
+
 				assertFalse(pc.isTestWhileIdle());
 				assertFalse(pc.isTestOnBorrow());
 				assertFalse(pc.isTestOnReturn());
@@ -169,9 +167,8 @@ public class QConfigTest2 {
 				provider.initialize(settings);
 				provider.setup(dbNames);
 
-				PoolProperties pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("CorpPerformanceManagementDB_W")
-						.getPoolProperties();
+				PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CorpPerformanceManagementDB_W"));
+
 				assertFalse(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
 				assertFalse(pc.isTestOnReturn());
@@ -195,9 +192,8 @@ public class QConfigTest2 {
 						"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 						pc.getValidatorClassName());
 
-				pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("mysqldbatestshard01db_W")
-						.getPoolProperties();
+				pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("mysqldbatestshard01db_W"));
+
 				assertFalse(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
 				assertFalse(pc.isTestOnReturn());
@@ -251,9 +247,8 @@ public class QConfigTest2 {
 				provider.initialize(settings);
 				provider.setup(dbNames);
 
-				PoolProperties pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("CorpPerformanceManagementDB_W")
-						.getPoolProperties();
+				PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CorpPerformanceManagementDB_W"));
+
 				assertFalse(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
 				assertFalse(pc.isTestOnReturn());
@@ -277,8 +272,8 @@ public class QConfigTest2 {
 						"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 						pc.getValidatorClassName());
 
-				pc = DatabasePoolConfigParser.getInstance()
-						.getDatabasePoolConifg("YouSearchDB").getPoolProperties();
+				pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("YouSearchDB"));
+
 				assertTrue(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
 				assertTrue(pc.isTestOnReturn());
@@ -330,26 +325,25 @@ public class QConfigTest2 {
 			provider.initialize(settings);
 			provider.setup(dbNames);
 
-			PoolProperties pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("abtestdb")
-					.getPoolProperties();
+			PoolProperties pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("abtestdb"));
+
 			assertEquals(
 					"rewriteBatchedStatements=true",
 					pc.getConnectionProperties());
 
 
-			pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("AccFltLogDB_W").getPoolProperties();
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("AccFltLogDB_W"));
+
 			assertEquals("rewriteBatchedStatements=true",
 					pc.getConnectionProperties());
 
-			pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("uiautomationtestdb_W").getPoolProperties();
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("uiautomationtestdb_W"));
+
 			assertEquals("rewriteBatchedStatements=true",
 					pc.getConnectionProperties());
 
-			pc = DatabasePoolConfigParser.getInstance()
-					.getDatabasePoolConifg("ACTCkvDB_W").getPoolProperties();
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("ACTCkvDB_W"));
+
 			assertEquals("rewriteBatchedStatements=true",
 					pc.getConnectionProperties());
 

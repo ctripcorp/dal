@@ -380,7 +380,7 @@ public class PeopleShardColModShardByDBOnSqlServerDao {
 		builder.in("CityID", CityID, Types.INTEGER, false);
 		builder.requireFirst();
 
-		return client.queryObject(builder, hints, String.class);
+		return client.queryObject(builder, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	/**

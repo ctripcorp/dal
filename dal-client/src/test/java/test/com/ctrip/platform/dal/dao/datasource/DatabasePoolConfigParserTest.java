@@ -13,7 +13,9 @@ import org.junit.Test;
 public class DatabasePoolConfigParserTest {
 
     @Before
-    public void setUp() throws Exception {}
+    public void setUp() throws Exception {
+        DataSourceConfigureParser.getInstance();
+    }
 
     @After
     public void tearDown() throws Exception {}
@@ -26,17 +28,18 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test1() {
-        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dao_test");
+        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure("dao_test");
         Assert.assertEquals("dao_test", config.getName());
         Assert.assertEquals(10000, config.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals(
                 "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8",
-                config.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
+                config.getProperty(DataSourceConfigureConstants.OPTION));
     }
 
     @Test
     public void test2() {
-        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dao_test_select");
+        DataSourceConfigure config =
+                DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure("dao_test_select");
         Assert.assertEquals("dao_test_select", config.getName());
         Assert.assertEquals(true, config.getBooleanProperty(DataSourceConfigureConstants.TESTWHILEIDLE, false));
         Assert.assertEquals(true, config.getBooleanProperty(DataSourceConfigureConstants.TESTONBORROW, false));
@@ -58,19 +61,20 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test3() {
-        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dal_test_new");
+        DataSourceConfigure config =
+                DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure("dal_test_new");
         Assert.assertEquals("dal_test_new", config.getName());
         Assert.assertEquals(10000, config.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
-        Assert.assertEquals("sendTimeAsDateTime=false",
-                config.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
+        Assert.assertEquals("sendTimeAsDateTime=false", config.getProperty(DataSourceConfigureConstants.OPTION));
 
-        // Test default settings
-        Assert.assertEquals(30000, config.getIntProperty(DataSourceConfigureConstants.MAX_AGE, 0));
+        // Test default settings,now default value is zero
+        Assert.assertEquals(0, config.getIntProperty(DataSourceConfigureConstants.MAX_AGE, 0));
     }
 
     @Test
     public void test4() {
-        DataSourceConfigure config = DataSourceConfigureLocator.getInstance().getDataSourceConfigure("dao_test_select");
+        DataSourceConfigure config =
+                DataSourceConfigureLocator.getInstance().getUserDataSourceConfigure("dao_test_select");
         Assert.assertEquals("dao_test_select", config.getName());
         Assert.assertEquals(1000, config.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true",

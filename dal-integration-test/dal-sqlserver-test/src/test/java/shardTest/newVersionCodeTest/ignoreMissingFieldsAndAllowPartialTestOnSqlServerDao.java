@@ -481,7 +481,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerDao {
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
 		builder.requireFirst();
 
-		return client.queryObject(builder, hints);
+		return client.queryObject(builder, hints.sortBy(new IgnoreMissingFieldsAndAllowPartialTestOnSqlServerComparator()));
 	}
 
 	/**

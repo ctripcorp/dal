@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
@@ -16,6 +17,8 @@ public class LogEntry {
 	private boolean success;
 	private boolean transactional;
 	private long duration;
+	private String logicDbName;
+	private DatabaseCategory dbCategory;
 	private String databaseName;
 	private String dataBaseKeyName;
 	private boolean isMaster;
@@ -136,7 +139,23 @@ public class LogEntry {
 		this.duration = duration;
 	}
 
-	public String getDatabaseName() {
+	public String getLogicDbName() {
+        return logicDbName;
+    }
+
+    public void setLogicDbName(String logicDbName) {
+        this.logicDbName = logicDbName;
+    }
+
+    public DatabaseCategory getDbCategory() {
+        return dbCategory;
+    }
+
+    public void setDbCategory(DatabaseCategory dbCategory) {
+        this.dbCategory = dbCategory;
+    }
+
+    public String getDatabaseName() {
 		return databaseName;
 	}
 

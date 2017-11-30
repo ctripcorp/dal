@@ -107,6 +107,9 @@ public abstract class ConnectionAction<T> {
 	public void initLogEntry(String logicDbName, DalHints hints) {
 		this.entry = logger.createLogEntry();
 		
+		entry.setLogicDbName(logicDbName);
+		entry.setDbCategory(DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory());
+		
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
@@ -238,7 +241,7 @@ public abstract class ConnectionAction<T> {
 	}
 
 	private String wrapAPPID(String sql){
-		return "/*" + DalClientFactory.getDalLogger().getAppID() + "-" + entry.getCallerInShort() + "*/" + sql;
+		return "/*" + logger.getAppID() + "-" + entry.getCallerInShort() + "*/" + sql;
 	}
 	
 	public abstract T execute() throws Exception;

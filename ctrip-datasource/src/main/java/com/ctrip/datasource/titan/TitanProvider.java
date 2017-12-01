@@ -133,7 +133,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 }
             });
 
-            logger.info("Added ConnectionStringChangeListener for" + name);
+            logger.info("Added ConnectionStringChangeListener for " + name);
         }
     }
 

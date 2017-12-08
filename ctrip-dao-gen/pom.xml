@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.4.15-SNAPSHOT</version>
+    <version>1.4.15</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>

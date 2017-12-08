@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.4.15</version>
+    <version>1.4.15-SNAPSHOT</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
@@ -25,6 +25,11 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>ctrip-dal-client</artifactId>
+                <version>1.14.0-SNAPSHOT</version>
+            </dependency>
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>

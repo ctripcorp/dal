@@ -29,8 +29,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static oracle.net.aso.C07.s;
-
 @Resource
 @Singleton
 @Path("project")

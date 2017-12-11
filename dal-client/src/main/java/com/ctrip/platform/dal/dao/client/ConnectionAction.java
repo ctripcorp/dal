@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,7 +105,8 @@ public abstract class ConnectionAction<T> {
 
 	public void initLogEntry(String logicDbName, DalHints hints) {
 		this.entry = logger.createLogEntry();
-
+		entry.setLogicDbName(logicDbName);
+		entry.setDbCategory(DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory());
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
@@ -238,7 +238,7 @@ public abstract class ConnectionAction<T> {
 	}
 
 	private String wrapAPPID(String sql){
-		return "/*" + DalClientFactory.getDalLogger().getAppID() + "-" + entry.getCallerInShort() + "*/" + sql;
+		return "/*" + logger.getAppID() + "-" + entry.getCallerInShort() + "*/" + sql;
 	}
 
 	public abstract T execute() throws Exception;

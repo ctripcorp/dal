@@ -26,11 +26,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.ctrip.platform</groupId>
-                <artifactId>ctrip-dal-client</artifactId>
-                <version>1.14.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
                 <version>${framework-bom.version}</version>
@@ -73,6 +68,10 @@
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
+            <artifactId>ctrip-dal-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
             <version>${dao-gen-core-version}</version>
         </dependency>
@@ -81,10 +80,6 @@
             <artifactId>dal-dao-gen</artifactId>
             <version>${dal-dao-gen-version}</version>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.platform</groupId>
-            <artifactId>ctrip-dal-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>

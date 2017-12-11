@@ -72,14 +72,14 @@ public class ConnectionActionTest {
 	@Test
 	public void testInitLogEntry() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry("Test", new DalHints());
+		test.initLogEntry("dao_test", new DalHints());
 		assertNotNull(test.entry);
 	}
 
 	@Test
 	public void testPopulateDbMetaOutofTransaction() {
 		TestConnectionAction test = new TestConnectionAction();
-		test.initLogEntry("Test", new DalHints());
+		test.initLogEntry("dao_test", new DalHints());
 		try {
 			test.connHolder = getDalConnection();
 			test.populateDbMeta();

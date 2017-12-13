@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.framework.clogging.agent.trace.ISpan;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -34,10 +35,14 @@ public class CtripLogEntry extends LogEntry {
 	private Transaction catTransaction;
 	private ISpan urlSpan;
 	private Transaction statementTransaction;
-
-	public String getCallerInShort() {
-		return String.format("%s[MSG_ID:%s]", super.getCallerInShort(), Cat.getCurrentMessageId());
-	}
+	
+    public String getCallerInShort() {
+        // The stupid sqlserver cannot recognize same sql when the trace info if different
+        if(this.getDbCategory() == DatabaseCategory.SqlServer)
+            return super.getCallerInShort();
+        
+        return String.format("%s[MSG_ID:%s]", super.getCallerInShort(), Cat.getCurrentMessageId());
+    }
 
 	public Transaction getCatTransaction() {
 		return catTransaction;

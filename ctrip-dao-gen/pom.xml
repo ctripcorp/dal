@@ -68,6 +68,10 @@
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
+            <artifactId>ctrip-dal-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
             <version>${dao-gen-core-version}</version>
         </dependency>
@@ -76,10 +80,6 @@
             <artifactId>dal-dao-gen</artifactId>
             <version>${dal-dao-gen-version}</version>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.platform</groupId>
-            <artifactId>ctrip-dal-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>

@@ -132,6 +132,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     notifyConnectionStringChangeListener(name, map);
                 }
             });
+
+            logger.info("Added ConnectionStringChangeListener for " + name);
         }
     }
 
@@ -184,6 +186,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
                 }
             }
         });
+
+        logger.info("Added DataSourceConfigureChangeListener");
     }
 
     private void notifyListeners(final Set<String> names) {

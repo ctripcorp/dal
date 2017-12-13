@@ -11,7 +11,7 @@
     <version>1.14.0-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>1.11.1</framework-bom.version>
+        <framework-bom.version>1.15.2-SNAPSHOT</framework-bom.version>
         <!-- Support Spring 3.1.1+ -->
         <spring.version>3.1.1.RELEASE</spring.version>
         <!-- Support mybatis 3.0.1+ -->
@@ -31,16 +31,6 @@
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dal-client</artifactId>
                 <version>1.14.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.tc.qconfig</groupId>
-                <artifactId>qconfig-client</artifactId>
-                <version>1.3.9-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.tc.qconfig</groupId>
-                <artifactId>qconfig-common</artifactId>
-                <version>1.3.9-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

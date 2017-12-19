@@ -19,7 +19,7 @@ public class ConnectionStringTest {
     @Test
     public void testConnectionString() throws Exception {
         DataSourceConfigure configBefore =
-                DataSourceConfigureLocator.getInstance().getDataSourceConfigure(databaseName);
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigureCollection(databaseName).getConfigure();
         String urlBefore = configBefore.getConnectionUrl();
         String userNameBefore = configBefore.getUserName();
         String passwordBefore = configBefore.getPassword();
@@ -33,7 +33,8 @@ public class ConnectionStringTest {
         Thread.sleep(30 * 1000);
         System.out.println("*****Time's up.*****");
 
-        DataSourceConfigure configAfter = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(databaseName);
+        DataSourceConfigure configAfter =
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigureCollection(databaseName).getConfigure();
         String urlAfter = configAfter.getConnectionUrl();
         String userNameAfter = configAfter.getUserName();
         String passwordAfter = configAfter.getPassword();
@@ -47,7 +48,7 @@ public class ConnectionStringTest {
     @Test
     public void testConnectionStringVersion() throws Exception {
         DataSourceConfigure configBefore =
-                DataSourceConfigureLocator.getInstance().getDataSourceConfigure(databaseName);
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigureCollection(databaseName).getConfigure();
         String versionBefore = configBefore.getVersion();
         System.out.println("*****Before editing*****");
         System.out.println(String.format("Version:%s", versionBefore));
@@ -56,7 +57,8 @@ public class ConnectionStringTest {
         Thread.sleep(30 * 1000);
         System.out.println("*****Time's up.*****");
 
-        DataSourceConfigure configAfter = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(databaseName);
+        DataSourceConfigure configAfter =
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigureCollection(databaseName).getConfigure();
         String versionAfter = configAfter.getVersion();
         System.out.println("*****After editing*****");
         System.out.println(String.format("Version:%s", versionAfter));

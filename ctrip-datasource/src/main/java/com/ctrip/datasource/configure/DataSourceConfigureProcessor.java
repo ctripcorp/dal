@@ -261,9 +261,6 @@ public class DataSourceConfigureProcessor implements DataSourceConfigureConstant
         for (Map.Entry<String, String> entry : highlevelMap.entrySet()) {
             lowlevelMap.put(entry.getKey(), entry.getValue()); // override entry of map
         }
-
-        // Properties prop = lowlevel.getProperties();
-        // setProperties(lowlevelMap, prop); // set properties from map
     }
 
     private void setProperties(Map<String, String> datasource, Properties prop) {

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dynamicdatasource;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureCollection;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.Assert;
@@ -20,11 +21,13 @@ public class DataSourcePoolSettingsTest {
     @Test
     public void testDataSourcePoolSettings() throws Exception {
         DataSourceConfigure configure1 = getDefaultDataSourceConfigure();
-        DataSourceConfigureLocator.getInstance().addDataSourceConfigure(databaseName, configure1);
+        DataSourceConfigureCollection collection1 = new DataSourceConfigureCollection(configure1, configure1);
+        DataSourceConfigureLocator.getInstance().addDataSourceConfigureCollection(databaseName, collection1);
 
         // mock QConfig modifying
         modifyDataSourceConfigure(configure1);
-        DataSourceConfigure configure2 = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(databaseName);
+        DataSourceConfigure configure2 =
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigureCollection(databaseName).getConfigure();
 
         boolean testWhileIdle = configure2.getBooleanProperty(DataSourceConfigureConstants.TESTWHILEIDLE,
                 DataSourceConfigureConstants.DEFAULT_TESTWHILEIDLE);

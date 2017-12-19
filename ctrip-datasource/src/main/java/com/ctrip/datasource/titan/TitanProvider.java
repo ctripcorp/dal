@@ -14,6 +14,7 @@ import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureCollection;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 
@@ -69,7 +70,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(String dbName) {
-        return dataSourceConfigureLocator.getDataSourceConfigure(dbName);
+        return dataSourceConfigureLocator.getDataSourceConfigureCollection(dbName).getConfigure();
+    }
+
+    private DataSourceConfigure getFailoverDataSourceConfigure(String dbName) {
+        return dataSourceConfigureLocator.getDataSourceConfigureCollection(dbName).getFailoverConfigure();
     }
 
     @Override
@@ -82,7 +87,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (dataSourceConfigureParser.isDataSourceXmlExist())
             ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, connectionStringProcessor.getAppId());
 
-        Map<String, DataSourceConfigure> dataSourceConfigures =
+        Map<String, DataSourceConfigureCollection> dataSourceConfigures =
                 connectionStringProcessor.initializeDataSourceConfigureConnectionSettings(dbNames);
         dataSourceConfigures = mergeDataSourceConfigures(dataSourceConfigures);
         addDataSourceConfigures(dataSourceConfigures);
@@ -92,28 +97,33 @@ public class TitanProvider implements DataSourceConfigureProvider {
         connectionStringProcessor.info("--- End datasource config  ---");
     }
 
-    private Map<String, DataSourceConfigure> mergeDataSourceConfigures(Map<String, DataSourceConfigure> map) {
+    private Map<String, DataSourceConfigureCollection> mergeDataSourceConfigures(
+            Map<String, DataSourceConfigureCollection> map) {
         if (map == null || map.isEmpty())
             return null;
 
-        Map<String, DataSourceConfigure> configures = new HashMap<>();
-        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
-            // TODO log active connection number for each titan keyname
+        Map<String, DataSourceConfigureCollection> configures = new HashMap<>();
+        for (Map.Entry<String, DataSourceConfigureCollection> entry : map.entrySet()) {
+            // TODO: log active connection number for each titan keyname
             String key = entry.getKey();
+            DataSourceConfigureCollection value = entry.getValue();
             connectionStringProcessor.info("--- Key datasource config for " + key + " ---");
-            DataSourceConfigure configure = dataSourceConfigureProcessor.getDataSourceConfigure(entry.getValue());
-            configures.put(key, configure);
+            DataSourceConfigure configure = dataSourceConfigureProcessor.getDataSourceConfigure(value.getConfigure());
+            DataSourceConfigure failoverConfigure =
+                    dataSourceConfigureProcessor.getDataSourceConfigure(value.getFailoverConfigure());
+            DataSourceConfigureCollection collection = new DataSourceConfigureCollection(configure, failoverConfigure);
+            configures.put(key, collection);
         }
 
         return configures;
     }
 
-    private void addDataSourceConfigures(Map<String, DataSourceConfigure> map) {
+    private void addDataSourceConfigures(Map<String, DataSourceConfigureCollection> map) {
         if (map == null || map.isEmpty())
             return;
 
-        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
-            dataSourceConfigureLocator.addDataSourceConfigure(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, DataSourceConfigureCollection> entry : map.entrySet()) {
+            dataSourceConfigureLocator.addDataSourceConfigureCollection(entry.getKey(), entry.getValue());
         }
     }
 
@@ -215,8 +225,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (names == null || names.isEmpty())
             return;
 
-        Map<String, DataSourceConfigure> configures =
-                connectionStringProcessor.getDataSourceConfigureConnectionSettings(names);
+        Map<String, DataSourceConfigureCollection> configures =
+                connectionStringProcessor.refreshAndGetDataSourceConfigureConnectionSettings(names);
         dataSourceConfigureProcessor.refreshDataSourceConfigurePoolSettings();
         configures = mergeDataSourceConfigures(configures);
 
@@ -244,7 +254,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
                                 dataSourceConfigureProcessor.mapToString(oldConfigure.toMap())));
 
                 // new configure
-                DataSourceConfigure newConfigure = configures.get(keyName);
+                DataSourceConfigureCollection newCollection = configures.get(keyName);
+                DataSourceConfigure newConfigure = newCollection.getConfigure();
                 String newVersion = newConfigure.getVersion();
                 String newConnectionUrl = newConfigure.toConnectionUrl();
                 // log
@@ -268,7 +279,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     }
                 }
 
-                dataSourceConfigureLocator.addDataSourceConfigure(name, newConfigure);
+                dataSourceConfigureLocator.addDataSourceConfigureCollection(name, newCollection);
                 DataSourceConfigureChangeListener listener = listeners.get(keyName);
                 if (listener == null)
                     continue;
@@ -290,6 +301,8 @@ public class TitanProvider implements DataSourceConfigureProvider {
     public void register(String dbName, DataSourceConfigureChangeListener listener) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(dbName);
         dataSourceConfigureChangeListeners.put(keyName, listener);
+
+        // QConfig Switch Listener
     }
 
     private Map<String, DataSourceConfigureChangeListener> copyChangeListeners(

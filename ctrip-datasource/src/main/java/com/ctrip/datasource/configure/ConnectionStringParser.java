@@ -122,7 +122,8 @@ public class ConnectionStringParser {
 
     private void applyDefaultCtripOptionsIfEmpty(String name, boolean isSqlServer) {
         String connectionProperties = DataSourceConfigureConstants.CONNECTIONPROPERTIES;
-        DataSourceConfigure dataSourceConfigure = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name);
+        DataSourceConfigure dataSourceConfigure =
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigureCollection(name).getConfigure();
 
         // If connectionProperties is set, we will use what user specifies.
         if (dataSourceConfigure == null || dataSourceConfigure.getProperty(connectionProperties) != null)

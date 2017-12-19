@@ -5,6 +5,7 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureCollection;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -156,8 +157,9 @@ public class ConnectionStringProcessor {
         isDebug = Boolean.parseBoolean(settings.get("isDebug"));
     }
 
-    public Map<String, DataSourceConfigure> initializeDataSourceConfigureConnectionSettings(Set<String> dbNames) {
-        Map<String, DataSourceConfigure> dataSourceConfigures = null;
+    public Map<String, DataSourceConfigureCollection> initializeDataSourceConfigureConnectionSettings(
+            Set<String> dbNames) {
+        Map<String, DataSourceConfigureCollection> dataSourceConfigures = null;
         String svcUrl = getSvcUrl();
         boolean useLocal = getUseLocal();
 
@@ -167,7 +169,7 @@ public class ConnectionStringProcessor {
                     allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
         } else {
             try {
-                dataSourceConfigures = getDataSourceConfigureConnectionSettings(dbNames);
+                dataSourceConfigures = refreshAndGetDataSourceConfigureConnectionSettings(dbNames);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
                 throw new RuntimeException(e);
@@ -228,8 +230,8 @@ public class ConnectionStringProcessor {
         throw e;
     }
 
-    public Map<String, DataSourceConfigure> getDataSourceConfigureConnectionSettings(Set<String> dbNames)
-            throws Exception {
+    public Map<String, DataSourceConfigureCollection> refreshAndGetDataSourceConfigureConnectionSettings(
+            Set<String> dbNames) throws Exception {
         refreshConnectionSettingsMap(dbNames);
         return getConnectionSettings(dbNames);
     }
@@ -256,36 +258,43 @@ public class ConnectionStringProcessor {
         return MapConfig.get(TITAN_APP_ID, keyName, feature);
     }
 
-    private Map<String, DataSourceConfigure> getConnectionSettings(Set<String> dbNames) throws Exception {
-        Map<String, DataSourceConfigure> configures = new HashMap<>();
+    private Map<String, DataSourceConfigureCollection> getConnectionSettings(Set<String> dbNames) throws Exception {
+        Map<String, DataSourceConfigureCollection> configures = new HashMap<>();
         if (dbNames == null || dbNames.isEmpty())
             return configures;
 
         for (String name : dbNames) {
             if (isDebug) {
-                configures.put(name, new DataSourceConfigure());
+                configures.put(name, new DataSourceConfigureCollection());
                 continue;
             }
 
             MapConfig config = getConfigMap(name);
             if (config != null) {
                 String connectionString = null;
+                String failoverConnectionString = null;
                 try {
                     Map<String, String> map = config.asMap();
                     connectionString = map.get(TITAN_KEY_NORMAL);
+                    failoverConnectionString = map.get(TITAN_KEY_FAILOVER);
                 } catch (Throwable e) {
                     throw new DalException(String.format("Error getting connection string from QConfig for %s", name),
                             e);
                 }
 
                 DataSourceConfigure connectionSetting = null;
+                DataSourceConfigure failoverConnectionSetting = null;
                 try {
                     connectionSetting = parser.parse(name, connectionString);
+                    failoverConnectionSetting = parser.parse(name, failoverConnectionString);
                 } catch (Throwable e) {
                     throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
                 }
+
                 String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-                configures.put(keyName, connectionSetting);
+                DataSourceConfigureCollection collection =
+                        new DataSourceConfigureCollection(connectionSetting, failoverConnectionSetting);
+                configures.put(keyName, collection);
             }
         }
 

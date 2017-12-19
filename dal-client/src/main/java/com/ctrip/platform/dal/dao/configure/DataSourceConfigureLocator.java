@@ -20,7 +20,7 @@ public class DataSourceConfigureLocator {
     // user datasource.xml configure
     private Map<String, DataSourceConfigure> userDataSourceConfigures = new ConcurrentHashMap<>();
 
-    private Map<String, DataSourceConfigure> dataSourceConfigures = new ConcurrentHashMap<>();
+    private Map<String, DataSourceConfigureCollection> dataSourceConfigures = new ConcurrentHashMap<>();
 
     private Set<String> dataSourceConfigureKeySet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
@@ -29,7 +29,7 @@ public class DataSourceConfigureLocator {
         return userDataSourceConfigures.get(keyName);
     }
 
-    public DataSourceConfigure getDataSourceConfigure(String name) {
+    public DataSourceConfigureCollection getDataSourceConfigureCollection(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         return dataSourceConfigures.get(keyName);
     }
@@ -59,9 +59,9 @@ public class DataSourceConfigureLocator {
         userDataSourceConfigures.put(keyName, configure);
     }
 
-    public void addDataSourceConfigure(String name, DataSourceConfigure configure) {
+    public void addDataSourceConfigureCollection(String name, DataSourceConfigureCollection collection) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-        dataSourceConfigures.put(keyName, configure);
+        dataSourceConfigures.put(keyName, collection);
     }
 
     public boolean contains(String name) {

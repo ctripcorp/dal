@@ -22,6 +22,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -270,11 +271,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
                 dataSourceConfigureLocator.addDataSourceConfigure(name, newConfigure);
                 DataSourceConfigureChangeListener listener = listeners.get(keyName);
-                if (listener == null)
-                    continue;
+                if (listener == null) {
+                    Cat.logError(String.format("Listener for %s is null", keyName), "Listener error");
+                    throw new DalException(String.format("Listener for %s is null", keyName));
+                }
 
                 DataSourceConfigureChangeEvent event =
                         new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
+                logger.info("DataSourceConfigureChangeEvent for %s created.", name);
                 listener.configChanged(event);
             } catch (Throwable e) {
                 transaction.setStatus(e);

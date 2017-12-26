@@ -44,6 +44,8 @@ public class DataSourceLocator {
         DataSource ds = cache.get(name);
 
         if (ds != null) {
+            String url = ds.getConnection().getMetaData().getURL();
+            logger.debug("**********" + name + ":" + url);
             return ds;
         }
 
@@ -61,6 +63,9 @@ public class DataSourceLocator {
                 throw new RuntimeException(msg, e);
             }
         }
+
+        String url = ds.getConnection().getMetaData().getURL();
+        logger.debug("**********" + name + ":" + url);
         return ds;
     }
 

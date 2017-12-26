@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.datasource.configure.ConnectionStringProcessor;
+import com.ctrip.datasource.configure.ConnectionStringProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,8 +24,8 @@ public class TitanKeyIDCTest {
     public void testTitanKeyIDC() throws Exception {
         TitanProvider provider = new TitanProvider();
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
-        settings.put(ConnectionStringProcessor.DATABASE_CONFIG_LOCATION, "$classpath");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.DATABASE_CONFIG_LOCATION, "$classpath");
         provider.initialize(settings);
         Set<String> names = new HashSet<>();
         names.add("mysqldaltest01db_R_SH");

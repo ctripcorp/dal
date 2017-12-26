@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.datasource.configure.ConnectionStringProcessor;
+import com.ctrip.datasource.configure.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,8 +24,8 @@ public class TitanServiceReaderTest {
         dbNames.add("CrawlerResultMDB");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, fws);
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, fws);
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -53,8 +53,8 @@ public class TitanServiceReaderTest {
         dbNames.add("test");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, fws);
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, fws);
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -72,8 +72,8 @@ public class TitanServiceReaderTest {
         dbNames.add("test2");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, fws);
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, fws);
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -92,7 +92,7 @@ public class TitanServiceReaderTest {
         dbNames.add("dao_test_mysql");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "true");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "true");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -127,7 +127,7 @@ public class TitanServiceReaderTest {
         dbNames.add("test");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "true");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "true");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -198,9 +198,9 @@ public class TitanServiceReaderTest {
         dbNames.add("PkgWorkflowDB_W");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, fws);
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "100");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, fws);
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.TIMEOUT, "100");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -224,9 +224,9 @@ public class TitanServiceReaderTest {
         dbNames.add(name);
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, fws);
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "100");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, fws);
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.TIMEOUT, "100");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -251,9 +251,9 @@ public class TitanServiceReaderTest {
         dbNames.add("GSDestDB_SELECT_1");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, uat);
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "1000");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, uat);
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.TIMEOUT, "1000");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -281,8 +281,8 @@ public class TitanServiceReaderTest {
         dbNames.add("GSDestDB_SELECT_1");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "1000");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.TIMEOUT, "1000");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -308,8 +308,8 @@ public class TitanServiceReaderTest {
         dbNames.add("mysqldbatestshard02db_w");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "false");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "1000");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "false");
+        settings.put(ConnectionStringProvider.TIMEOUT, "1000");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -335,8 +335,8 @@ public class TitanServiceReaderTest {
         dbNames.add("SimpleShard_0_SH");// has no config, but name may be match
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "true");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "1000");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "true");
+        settings.put(ConnectionStringProvider.TIMEOUT, "1000");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -356,8 +356,8 @@ public class TitanServiceReaderTest {
         dbNames.add("ha_test");// has no config
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.USE_LOCAL_CONFIG, "true");
-        settings.put(ConnectionStringProcessor.TIMEOUT, "1000");
+        settings.put(ConnectionStringProvider.USE_LOCAL_CONFIG, "true");
+        settings.put(ConnectionStringProvider.TIMEOUT, "1000");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -380,8 +380,8 @@ public class TitanServiceReaderTest {
         dbNames.add("mysqldbatestshard01db_R");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.TIMEOUT, "1000");
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, fws);
+        settings.put(ConnectionStringProvider.TIMEOUT, "1000");
+        settings.put(ConnectionStringProvider.SERVICE_ADDRESS, fws);
         settings.put("isDebug", "true");
 
 
@@ -419,7 +419,7 @@ public class TitanServiceReaderTest {
     //
     // DataSourceConfigure result = null;
     //
-    // result = provider.getDataSourceConfigure("PkgWorkflowDB");
+    // result = provider.mergeDataSourceConfigure("PkgWorkflowDB");
     // Assert.assertNotNull(result);
     // } catch (Exception e) {
     // e.printStackTrace();

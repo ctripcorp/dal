@@ -3,16 +3,18 @@ package com.ctrip.datasource.configure;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.platform.dal.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureCollection;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
 
@@ -27,8 +29,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConnectionStringProcessor {
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProcessor.class);
+public class ConnectionStringProvider {
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProvider.class);
 
     public static class LogEntry {
         public static final int INFO = 0;
@@ -79,16 +81,16 @@ public class ConnectionStringProcessor {
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private static final Map<String, String> titanMapping = new HashMap<>();
 
-    private static ConnectionStringProcessor processor = null;
+    private volatile static ConnectionStringProvider processor = null;
 
-    public synchronized static ConnectionStringProcessor getInstance() {
+    public synchronized static ConnectionStringProvider getInstance() {
         if (processor == null) {
-            processor = new ConnectionStringProcessor();
+            processor = new ConnectionStringProvider();
         }
         return processor;
     }
 
-    public MapConfig getConfigMap(String name) {
+    private MapConfig getConfigMap(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         return configMap.get(keyName);
     }
@@ -157,19 +159,18 @@ public class ConnectionStringProcessor {
         isDebug = Boolean.parseBoolean(settings.get("isDebug"));
     }
 
-    public Map<String, DataSourceConfigureCollection> initializeDataSourceConfigureConnectionSettings(
-            Set<String> dbNames) {
-        Map<String, DataSourceConfigureCollection> dataSourceConfigures = null;
+    public Map<String, DataSourceConfigure> initializeConnectionStrings(Set<String> dbNames, SourceType sourceType) {
+        Map<String, DataSourceConfigure> dataSourceConfigures = null;
         String svcUrl = getSvcUrl();
         boolean useLocal = getUseLocal();
 
         // If it uses local Database.Config
-        if (svcUrl == null || svcUrl.isEmpty() || useLocal) {
+        if (sourceType == SourceType.Local) {
             dataSourceConfigures =
                     allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
         } else {
             try {
-                dataSourceConfigures = refreshAndGetDataSourceConfigureConnectionSettings(dbNames);
+                dataSourceConfigures = getConnectionStrings(dbNames);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
                 throw new RuntimeException(e);
@@ -230,13 +231,12 @@ public class ConnectionStringProcessor {
         throw e;
     }
 
-    public Map<String, DataSourceConfigureCollection> refreshAndGetDataSourceConfigureConnectionSettings(
-            Set<String> dbNames) throws Exception {
-        refreshConnectionSettingsMap(dbNames);
-        return getConnectionSettings(dbNames);
+    public Map<String, DataSourceConfigure> getConnectionStrings(Set<String> dbNames) throws Exception {
+        refreshConnectionStringMapConfig(dbNames);
+        return _getConnectionStrings(dbNames);
     }
 
-    private void refreshConnectionSettingsMap(Set<String> dbNames) {
+    private void refreshConnectionStringMapConfig(Set<String> dbNames) {
         if (dbNames == null || dbNames.isEmpty())
             return;
         for (String name : dbNames) {
@@ -252,53 +252,59 @@ public class ConnectionStringProcessor {
         }
     }
 
-    public MapConfig getTitanMapConfig(String name) {
+    private MapConfig getTitanMapConfig(String name) {
         String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         Feature feature = Feature.create().setHttpsEnable(true).build();
         return MapConfig.get(TITAN_APP_ID, keyName, feature);
     }
 
-    private Map<String, DataSourceConfigureCollection> getConnectionSettings(Set<String> dbNames) throws Exception {
-        Map<String, DataSourceConfigureCollection> configures = new HashMap<>();
+    private Map<String, DataSourceConfigure> _getConnectionStrings(Set<String> dbNames) throws Exception {
+        Map<String, DataSourceConfigure> configures = new HashMap<>();
         if (dbNames == null || dbNames.isEmpty())
             return configures;
 
         for (String name : dbNames) {
             if (isDebug) {
-                configures.put(name, new DataSourceConfigureCollection());
+                configures.put(name, new DataSourceConfigure());
                 continue;
             }
 
             MapConfig config = getConfigMap(name);
             if (config != null) {
                 String connectionString = null;
-                String failoverConnectionString = null;
                 try {
                     Map<String, String> map = config.asMap();
                     connectionString = map.get(TITAN_KEY_NORMAL);
-                    failoverConnectionString = map.get(TITAN_KEY_FAILOVER);
                 } catch (Throwable e) {
                     throw new DalException(String.format("Error getting connection string from QConfig for %s", name),
                             e);
                 }
 
-                DataSourceConfigure connectionSetting = null;
-                DataSourceConfigure failoverConnectionSetting = null;
+                DataSourceConfigure connectionStrings = null;
                 try {
-                    connectionSetting = parser.parse(name, connectionString);
-                    failoverConnectionSetting = parser.parse(name, failoverConnectionString);
+                    connectionStrings = parser.parse(name, connectionString);
                 } catch (Throwable e) {
                     throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
                 }
-
                 String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-                DataSourceConfigureCollection collection =
-                        new DataSourceConfigureCollection(connectionSetting, failoverConnectionSetting);
-                configures.put(keyName, collection);
+                configures.put(keyName, connectionStrings);
             }
         }
 
         return configures;
+    }
+
+    public void addConnectionStringChangedListener(final String name, final ConnectionStringChanged callback) {
+        MapConfig config = getConfigMap(name);
+        if (config == null)
+            return;
+
+        config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
+            @Override
+            public void onLoad(Map<String, String> map) {
+                callback.onChanged(map);
+            }
+        });
     }
 
     public void info(String msg) {

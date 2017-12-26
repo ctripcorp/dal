@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureCollection;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,7 @@ import org.w3c.dom.NodeList;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 public class AllInOneConfigureReader {
+
     private static final Logger logger = LoggerFactory.getLogger(AllInOneConfigureReader.class);
     private static final String CONFIG_FILE = "Database.Config";
     private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/" + CONFIG_FILE;
@@ -36,13 +36,12 @@ public class AllInOneConfigureReader {
 
     private static final String CLASSPATH_LOCATION = "$classpath";
 
-    public Map<String, DataSourceConfigureCollection> getDataSourceConfigures(Set<String> dbNames, boolean useLocal,
+    public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal,
             String databaseConfigLocation) {
         String location = getAllInOneConfigLocation(databaseConfigLocation);
         Map<String, DataSourceConfigure> config = parseDBAllInOneConfig(location, dbNames, useLocal);
         validate(dbNames, config);
-        Map<String, DataSourceConfigureCollection> map = wrapDataSourceConfigure(config);
-        return map;
+        return config;
     }
 
     private void validate(Set<String> dbNames, Map<String, DataSourceConfigure> config) {
@@ -154,21 +153,6 @@ public class AllInOneConfigureReader {
                 }
             }
         }
-    }
-
-    private Map<String, DataSourceConfigureCollection> wrapDataSourceConfigure(
-            Map<String, DataSourceConfigure> config) {
-        if (config == null || config.isEmpty())
-            return null;
-
-        Map<String, DataSourceConfigureCollection> map = new HashMap<>();
-        for (Map.Entry<String, DataSourceConfigure> entry : config.entrySet()) {
-            DataSourceConfigureCollection collection =
-                    new DataSourceConfigureCollection(entry.getValue(), entry.getValue());
-            map.put(entry.getKey(), collection);
-        }
-
-        return map;
     }
 
     private List<Node> getChildNodes(Node node, String name) {

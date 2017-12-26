@@ -1,8 +1,6 @@
 package com.ctrip.datasource.configure;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -48,15 +46,9 @@ public class DalDataSourceFactory {
      * @throws Exception
      */
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid) throws Exception {
-        Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProcessor.SERVICE_ADDRESS, svcUrl);
-        settings.put(ConnectionStringProcessor.APPID, appid);
-
-        provider.initialize(settings);
-
-        Set<String> dbNames = new HashSet<>();
-        dbNames.add(allInOneKey);
-        provider.setup(dbNames);
+        Set<String> names = new HashSet<>();
+        names.add(allInOneKey);
+        provider.setup(names);
 
         DataSourceLocator loc = new DataSourceLocator(provider);
         return loc.getDataSource(allInOneKey);

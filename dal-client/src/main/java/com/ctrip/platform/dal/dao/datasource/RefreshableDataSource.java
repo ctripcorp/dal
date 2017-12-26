@@ -29,10 +29,12 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
         SingleDataSource newDataSource = new SingleDataSource(name, newConfigure);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        logger.info(String.format("Datasource %s refreshed.", name));
+        logger.debug("old datasource:" + oldDataSource.getDataSourceConfigure().getConnectionUrl());
+        logger.debug("new datasource:" + newDataSource.getDataSourceConfigure().getConnectionUrl());
+        logger.debug(String.format("Datasource %s refreshed.", name));
 
         close(oldDataSource);
-        logger.info(String.format("Datasource %s added to destroy queue.", name));
+        logger.debug(String.format("Datasource %s added to destroy queue.", name));
     }
 
     private void close(SingleDataSource dataSource) {

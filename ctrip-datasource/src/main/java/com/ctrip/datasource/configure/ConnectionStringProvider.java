@@ -157,6 +157,7 @@ public class ConnectionStringProvider {
         info("Titan connection timeout: " + timeOut);
 
         isDebug = Boolean.parseBoolean(settings.get("isDebug"));
+        info("isDebug: " + isDebug);
     }
 
     public Map<String, DataSourceConfigure> initializeConnectionStrings(Set<String> dbNames, SourceType sourceType) {
@@ -264,8 +265,10 @@ public class ConnectionStringProvider {
             return configures;
 
         for (String name : dbNames) {
+            String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+
             if (isDebug) {
-                configures.put(name, new DataSourceConfigure());
+                configures.put(keyName, new DataSourceConfigure());
                 continue;
             }
 
@@ -286,7 +289,7 @@ public class ConnectionStringProvider {
                 } catch (Throwable e) {
                     throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
                 }
-                String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+
                 configures.put(keyName, connectionStrings);
             }
         }
@@ -340,6 +343,20 @@ public class ConnectionStringProvider {
         } catch (IOException e) {
             return "UNKNOWN";
         }
+    }
+
+    // for unit test only
+    public void clear() {
+        isDebug = false;
+        String subEnv = null;
+        int timeOut = 0;
+        String svcUrl = null;
+        String appId = null;
+        boolean useLocal = false;
+        String databaseConfigLocation = null;
+        config = null;
+        startUpLog.clear();
+        configMap = new ConcurrentHashMap<>();
     }
 
 }

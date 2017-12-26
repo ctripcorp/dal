@@ -7,13 +7,26 @@ import java.util.Set;
 
 import com.ctrip.datasource.configure.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 public class TitanServiceReaderTest {
+    @Before
+    public void setUp() throws Exception {
+        TitanProvider provider = new TitanProvider();
+        provider.clear();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        TitanProvider provider = new TitanProvider();
+        provider.clear();
+    }
 
     @Test
     public void testGetFromTitanServiceSuccess() {

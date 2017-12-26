@@ -44,4 +44,9 @@ public class TitanProvider implements DataSourceConfigureProvider {
         dataSourceConfigureManager.register(name, listener);
     }
 
+    // for unit test only
+    public void clear() {
+        dataSourceConfigureManager.clear();
+    }
+
 }

@@ -348,4 +348,13 @@ public class DataSourceConfigureManager {
         return new ConcurrentHashMap<>(map);
     }
 
+    // for unit test only
+    public void clear() {
+        isInitialized = false;
+        dataSourceConfigureChangeListeners = new ConcurrentHashMap<>();
+        keyNameMap = new ConcurrentHashMap<>();
+        listenerKeyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+        connectionStringProvider.clear();
+    }
+
 }

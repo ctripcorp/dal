@@ -62,6 +62,7 @@ public class DataSourceConfigureManager {
     private PoolPropertiesProvider poolPropertiesProvider = PoolPropertiesProvider.getInstance();
     private DalEncrypter encrypter = null;
     private volatile boolean isInitialized = false;
+    private volatile boolean isFirstLoaded = true;
 
     private Map<String, DataSourceConfigureChangeListener> dataSourceConfigureChangeListeners =
             new ConcurrentHashMap<>();
@@ -164,7 +165,7 @@ public class DataSourceConfigureManager {
         }
     }
 
-    private void addConnectionStringChangedListeners(Set<String> names) {
+    private synchronized void addConnectionStringChangedListeners(Set<String> names) {
         if (names == null || names.isEmpty())
             return;
 
@@ -176,6 +177,11 @@ public class DataSourceConfigureManager {
             connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
                 @Override
                 public void onChanged(Map<String, String> map) {
+                    if (isFirstLoaded) {
+                        isFirstLoaded &= false;
+                        return;
+                    }
+
                     addConnectionStringNotifyTask(name, map);
                 }
             });
@@ -211,10 +217,15 @@ public class DataSourceConfigureManager {
         }
     }
 
-    private void addDataSourceConfigureChangeListeners() {
+    private synchronized void addDataSourceConfigureChangeListeners() {
         poolPropertiesProvider.addPoolPropertiesChangedListener(new PoolPropertiesChanged() {
             @Override
             public void onChanged(Map<String, String> map) {
+                if (isFirstLoaded) {
+                    isFirstLoaded &= false;
+                    return;
+                }
+
                 Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
                 t.addData(DAL_NOTIFY_LISTENER_START);
                 try {

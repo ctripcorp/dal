@@ -265,6 +265,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
                     if (oldVersion.equals(newVersion)) {
                         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS,
                                 String.format("New version of %s equals to old version.", name));
+                        logger.info(String.format("New version of %s equals to old version.", name));
                         continue;
                     }
                 }

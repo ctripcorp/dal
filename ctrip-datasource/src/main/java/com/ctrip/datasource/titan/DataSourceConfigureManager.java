@@ -161,6 +161,7 @@ public class DataSourceConfigureManager {
             return;
 
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
+            logger.debug("**********:addDataSourceConfigures" + entry.getKey() + ":" + entry.getValue());
             dataSourceConfigureLocator.addDataSourceConfigure(entry.getKey(), entry.getValue());
         }
     }

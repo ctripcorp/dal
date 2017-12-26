@@ -171,14 +171,14 @@ public class ConnectionStringProvider {
                     allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
 
             for (String name : dbNames) {
-                logger.debug("**********Local:" + name);
+                logger.info("**********Local:" + name);
             }
         } else {
             try {
                 dataSourceConfigures = getConnectionStrings(dbNames);
 
                 for (String name : dbNames) {
-                    logger.debug("**********Remote:" + name);
+                    logger.info("**********Remote:" + name);
                 }
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);

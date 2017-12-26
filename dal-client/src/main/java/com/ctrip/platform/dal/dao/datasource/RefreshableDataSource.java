@@ -11,8 +11,11 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
+    private static final Logger logger = LoggerFactory.getLogger(RefreshableDataSource.class);
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
@@ -22,10 +25,14 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     @Override
     public synchronized void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
+        String name = event.getName();
         DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
-        SingleDataSource newDataSource = new SingleDataSource(event.getName(), newConfigure);
+        SingleDataSource newDataSource = new SingleDataSource(name, newConfigure);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
+        logger.info(String.format("Datasource %s refreshed.", name));
+
         close(oldDataSource);
+        logger.info(String.format("Datasource %s added to destroy queue.", name));
     }
 
     private void close(SingleDataSource dataSource) {

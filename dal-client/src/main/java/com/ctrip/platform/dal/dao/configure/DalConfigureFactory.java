@@ -21,7 +21,6 @@ import org.w3c.dom.NodeList;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.DalSafeLogger;
 import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
@@ -80,7 +79,7 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         DalLogger logger = readComponent(root, LOG_LISTENER, new DefaultLogger(), LOGGER);
         // To wrap with a sandbox logger
-//        logger = new DalSafeLogger(logger);
+        // logger = new DalSafeLogger(logger);
 
         DalTaskFactory factory = readComponent(root, TASK_FACTORY, new DefaultTaskFactory(), FACTORY);
 
@@ -105,7 +104,7 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl,
-                                                     String implNodeName) throws Exception {
+            String implNodeName) throws Exception {
         Node node = getChildNode(root, componentName);
         T component = defaultImpl;
 

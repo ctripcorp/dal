@@ -45,7 +45,7 @@ public class DataSourceLocator {
 
         if (ds != null) {
             String url = ds.getConnection().getMetaData().getURL();
-            logger.info("**********" + name + ":" + url);
+            logger.debug("**********" + name + ":" + url);
             return ds;
         }
 
@@ -65,7 +65,7 @@ public class DataSourceLocator {
         }
 
         String url = ds.getConnection().getMetaData().getURL();
-        logger.info("**********" + name + ":" + url);
+        logger.debug("**********" + name + ":" + url);
         return ds;
     }
 

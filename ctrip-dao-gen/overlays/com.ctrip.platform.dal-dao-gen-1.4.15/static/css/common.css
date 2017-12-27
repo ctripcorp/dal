@@ -1,0 +1,104 @@
+body {
+    padding-top: 53px;
+}
+
+/* .dal-navbar {
+    background-color: #205081;
+}
+
+.navbar-inverse .navbar-nav>.active>a,
+.navbar-inverse .navbar-nav>.active>a:hover,
+.navbar-inverse .navbar-nav>.active>a:focus,
+.navbar-inverse .navbar-nav>.open>a,
+.navbar-inverse .navbar-nav>.open>a:hover,
+.navbar-inverse .navbar-nav>.open>a:focus{
+    background-color: #3b73af;
+} */
+#main_layout {
+    height: 100%;
+    /* padding-top: 19px; */
+}
+
+.logo {
+    padding: 5px;
+    float: left;
+}
+
+.popup_text {
+    float: right !important;
+    padding-top: 1px;
+}
+
+.popup_label {
+    float: left;
+    min-height: 30px;
+    line-height: 30px;
+}
+
+label.btn {
+    height: 30px;
+}
+
+.w2ui-reset * {
+    font-size: 12px;
+}
+
+.selectize-dropdown {
+    margin-left: 0 !important;
+}
+
+.jstree-anchor {
+    font-family: Verdana, Arial;
+    color: #34495E !important;
+    font-size: 14px;
+}
+
+.code-fullscreen {
+    position: relative;
+    float: right;
+    top: 15px;
+    right: 25px;
+    z-index: 999999;
+    height: 30px;
+    width: 30px;
+    cursor: pointer
+}
+
+.modal-body div {
+    /*margin-bottom: 3px;*/
+}
+
+ul.navbar-nav li {
+    margin-right: 1px;
+}
+
+ul.navbar-nav li:last-child {
+    margin-bottom: 1px;
+}
+
+.ctip {
+    margin: 0px 9px 0px 0px;
+}
+
+.helpicon {
+    border: 0px;
+    width: 30px;
+    height: 30px;
+}
+
+.margin-bottom-20{
+    margin-bottom: 20px;
+}
+
+.height-340{
+    height: 340px;
+}
+
+div[class*='tooltip'] {
+    text-align: left;
+}
+
+div[class*='tooltip-inner'] {
+    width: 95% !important;
+    min-width: 200px;
+}

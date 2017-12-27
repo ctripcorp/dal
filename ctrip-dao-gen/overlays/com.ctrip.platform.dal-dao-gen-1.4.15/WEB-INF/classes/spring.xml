@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="daoByTableViewSp" class="com.ctrip.platform.dal.daogen.dao.DaoByTableViewSp">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="autoTaskDao" class="com.ctrip.platform.dal.daogen.dao.DaoBySqlBuilder">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="sqlTaskDao" class="com.ctrip.platform.dal.daogen.dao.DaoByFreeSql">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="projectDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfProject">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="loginUserDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfLoginUser">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="userProjectDao" class="com.ctrip.platform.dal.daogen.dao.DaoOfUserProject">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dalGroup" class="com.ctrip.platform.dal.daogen.dao.DalGroupDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dalGroupDB" class="com.ctrip.platform.dal.daogen.dao.DalGroupDBDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dalDatabaseSet" class="com.ctrip.platform.dal.daogen.dao.DaoOfDatabaseSet">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dalApiDao" class="com.ctrip.platform.dal.daogen.dao.DalApiDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dalUserGroupDao" class="com.ctrip.platform.dal.daogen.dao.UserGroupDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="groupRelationDao" class="com.ctrip.platform.dal.daogen.dao.GroupRelationDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="approveTaskDao" class="com.ctrip.platform.dal.daogen.dao.ApproveTaskDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="setupDBDao" class="com.ctrip.platform.dal.daogen.dao.SetupDBDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="configTemplateDao" class="com.ctrip.platform.dal.daogen.dao.ConfigTemplateDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+		destroy-method="close">
+		<property name="poolProperties">
+			<bean class="org.apache.tomcat.jdbc.pool.PoolProperties">
+				<property name="driverClassName" value="${jdbc.driverClassName}" />
+				<property name="url" value="${jdbc.url}" />
+				<property name="username" value="${jdbc.username}" />
+				<property name="password" value="${jdbc.password}" />
+				<property name="jmxEnabled" value="false" />
+				<property name="testWhileIdle" value="true" />
+				<property name="testOnBorrow" value="true" />
+				<property name="testOnReturn" value="false" />
+				<property name="validationInterval" value="30000" />
+				<property name="validationQuery" value="SELECT 1" />
+				<property name="timeBetweenEvictionRunsMillis" value="30000" />
+				<property name="maxActive" value="100" />
+				<property name="initialSize" value="10" />
+				<property name="maxWait" value="10000" />
+				<property name="minEvictableIdleTimeMillis" value="30000" />
+				<property name="minIdle" value="10" />
+				<property name="logAbandoned" value="false" />
+				<property name="removeAbandoned" value="true" />
+				<property name="removeAbandonedTimeout" value="60" />
+				<property name="jdbcInterceptors"
+					value="org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer" />
+			</bean>
+		</property>
+	</bean>
+
+	<context:property-placeholder location="jdbc.properties" />
+
+</beans>

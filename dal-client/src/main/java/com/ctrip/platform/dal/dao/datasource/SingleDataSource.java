@@ -42,8 +42,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     }
 
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) throws SQLException {
-        logger.info("SingleDataSource constructor.");
-
         if (dataSourceConfigure == null)
             throw new SQLException("Can not find any connection configure for " + name);
 

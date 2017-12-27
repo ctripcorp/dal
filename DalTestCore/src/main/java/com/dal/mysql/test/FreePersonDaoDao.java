@@ -160,6 +160,22 @@ public class FreePersonDaoDao {
 	}
 
 	/**
+	 * max
+	 **/
+	public Integer selectMaxCityID(Integer id, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeSelectSqlBuilder<Integer> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		builder.setTemplate("select max(CityID) from Person where PeopleID>?");
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+		parameters.set(i++, "PeopleID", Types.INTEGER, id);
+		builder.simpleType().requireSingle().nullable();
+
+		return queryDao.query(builder, parameters, hints);
+	}
+
+	/**
 	 * free update
 	**/
 	public int update (String name, List<Integer> cityId, List<Integer> countryID, DalHints hints) throws SQLException {

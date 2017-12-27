@@ -503,7 +503,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 		builder.orderBy("ID", true);
 		builder.atPage(pageNo, pageSize);
 
-		return client.query(builder, hints.sortBy(new PersonShardColModShardByDBOnMysqlComparator()), String.class);
+		return client.query(builder, hints.sortBy(new StringComparator()), String.class);
 	}
 
 	public String testBuildQueryFieldSingle(List<Integer> age) throws SQLException {

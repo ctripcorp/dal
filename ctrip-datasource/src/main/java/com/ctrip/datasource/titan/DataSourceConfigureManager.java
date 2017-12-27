@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DataSourceConfigureManager {
     private volatile static DataSourceConfigureManager manager = null;
@@ -67,6 +68,7 @@ public class DataSourceConfigureManager {
             new ConcurrentHashMap<>();
     private Map<String, SourceType> keyNameMap = new ConcurrentHashMap<>();
     private Set<String> listenerKeyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    private AtomicReference<Boolean> isPoolPropertiesListenerAdded = new AtomicReference<>(false);
 
     // Single-thread thread pool,used as queue.
     private ThreadPoolExecutor executor =
@@ -115,7 +117,12 @@ public class DataSourceConfigureManager {
             }
 
             addConnectionStringChangedListeners(names);
-            addPoolPropertiesChangedListeners();
+
+            Boolean isAdded = isPoolPropertiesListenerAdded.get().booleanValue();
+            if (!isAdded) {
+                addPoolPropertiesChangedListeners();
+                isPoolPropertiesListenerAdded.compareAndSet(false, true);
+            }
         }
 
         connectionStringProvider.info("--- End datasource config  ---");

@@ -45,7 +45,7 @@ public class DataSourceLocator {
 
         if (ds != null) {
             String url = ds.getConnection().getMetaData().getURL();
-            logger.debug("**********" + name + ":" + url);
+            logger.debug(String.format("DAL debug:(getDataSource)name:%s,url:%s", name, url));
             return ds;
         }
 
@@ -57,6 +57,9 @@ public class DataSourceLocator {
             try {
                 ds = createDataSource(name);
                 cache.put(name, ds);
+
+                String url = ds.getConnection().getMetaData().getURL();
+                logger.debug(String.format("DAL debug:(getDataSource)first created:name:%s,url:%s", name, url));
             } catch (Throwable e) {
                 String msg = "Creating DataSource " + name + " error:" + e.getMessage();
                 logger.error(msg, e);
@@ -64,8 +67,6 @@ public class DataSourceLocator {
             }
         }
 
-        String url = ds.getConnection().getMetaData().getURL();
-        logger.debug("**********" + name + ":" + url);
         return ds;
     }
 

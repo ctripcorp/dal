@@ -62,8 +62,6 @@ public class DataSourceConfigureManager {
 
     private DalEncrypter encrypter = null;
     private volatile boolean isInitialized = false;
-    private volatile boolean connectionStringListenerFirstLoaded = true;
-    private volatile boolean poolPropertiesListenerFirstLoaded = true;
 
     private Map<String, DataSourceConfigureChangeListener> dataSourceConfigureChangeListeners =
             new ConcurrentHashMap<>();
@@ -175,7 +173,7 @@ public class DataSourceConfigureManager {
         }
     }
 
-    private synchronized void addConnectionStringChangedListeners(Set<String> names) {
+    private void addConnectionStringChangedListeners(Set<String> names) {
         if (names == null || names.isEmpty())
             return;
 
@@ -187,12 +185,6 @@ public class DataSourceConfigureManager {
             connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
                 @Override
                 public void onChanged(Map<String, String> map) {
-                    if (connectionStringListenerFirstLoaded) {
-                        logger.debug(String.format("DAL debug:(addConnectionStringChangedListeners)first loaded"));
-                        connectionStringListenerFirstLoaded &= false;
-                        return;
-                    }
-
                     addConnectionStringNotifyTask(name, map);
                 }
             });
@@ -228,16 +220,10 @@ public class DataSourceConfigureManager {
         }
     }
 
-    private synchronized void addPoolPropertiesChangedListeners() {
+    private void addPoolPropertiesChangedListeners() {
         poolPropertiesProvider.addPoolPropertiesChangedListener(new PoolPropertiesChanged() {
             @Override
             public void onChanged(Map<String, String> map) {
-                if (poolPropertiesListenerFirstLoaded) {
-                    logger.debug(String.format("DAL debug:(addPoolPropertiesChangedListeners)first loaded"));
-                    poolPropertiesListenerFirstLoaded &= false;
-                    return;
-                }
-
                 Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
                 t.addData(DAL_NOTIFY_LISTENER_START);
                 try {

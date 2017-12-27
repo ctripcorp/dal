@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ConnectionStringProvider {
     private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProvider.class);
@@ -80,6 +81,7 @@ public class ConnectionStringProvider {
 
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private static final Map<String, String> titanMapping = new HashMap<>();
+    private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
 
     private volatile static ConnectionStringProvider processor = null;
 
@@ -315,6 +317,13 @@ public class ConnectionStringProvider {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
+                Boolean firstTime = isFirstTime.get().booleanValue();
+                if (firstTime) {
+                    isFirstTime.compareAndSet(true, false);
+                    logger.debug(String.format("DAL debug:(addConnectionStringChangedListener)first time onLoad"));
+                    return;
+                }
+
                 callback.onChanged(map);
             }
         });

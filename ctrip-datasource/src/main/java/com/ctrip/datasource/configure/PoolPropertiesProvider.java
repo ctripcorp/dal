@@ -21,7 +21,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PoolPropertiesProvider implements DataSourceConfigureConstants {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PoolPropertiesProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(PoolPropertiesProvider.class);
     private static final String DAL_APPNAME = "dal";
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
@@ -32,6 +32,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
 
     private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
     private AtomicReference<DataSourceConfigureWrapper> dataSourceConfigureWrapperReference = new AtomicReference<>();
+    private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
 
     private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
 
@@ -69,7 +70,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
             String msg = "从QConfig读取DataSource配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
             transaction.setStatus(Transaction.SUCCESS);
             transaction.addData(DAL_GET_DATASOURCE, msg);
-            LOGGER.warn(msg, e);
+            logger.warn(msg, e);
         } finally {
             transaction.complete();
         }
@@ -104,7 +105,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
 
         String log = "DataSource配置:" + mapToString(map);
         Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
-        LOGGER.info(log);
+        logger.info(log);
     }
 
     private void setDataSourceConfigure(DataSourceConfigure configure, Map<String, String> datasource) {
@@ -160,7 +161,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
             if (dataSourceConfigure != null) {
                 overrideDataSourceConfigure(c, dataSourceConfigure);
                 String log = "App 覆盖结果:" + mapToString(c.toMap());
-                LOGGER.info(log);
+                logger.info(log);
             }
 
             // override datasource-level config from QConfig
@@ -172,7 +173,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                     if (sourceConfigure != null) {
                         overrideDataSourceConfigure(c, sourceConfigure);
                         String log = name + " 覆盖结果:" + mapToString(c.toMap());
-                        LOGGER.info(log);
+                        logger.info(log);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
                         possibleName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
@@ -180,7 +181,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                         if (sc != null) {
                             overrideDataSourceConfigure(c, sc);
                             String log = possibleName + " 覆盖结果:" + mapToString(c.toMap());
-                            LOGGER.info(log);
+                            logger.info(log);
                         }
                     }
                 }
@@ -193,7 +194,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                 c.setName(configure.getName());
                 c.setVersion(configure.getVersion());
                 String log = "connection settings 覆盖结果:" + mapToString(c.toMap());
-                LOGGER.info(log);
+                logger.info(log);
 
                 // override datasource.xml
                 String name = configure.getName();
@@ -202,7 +203,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                     if (dataSourceXml != null) {
                         overrideDataSourceConfigure(c, dataSourceXml);
                         String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
-                        LOGGER.info(xmlLog);
+                        logger.info(xmlLog);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
                         possibleName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
@@ -210,7 +211,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                         if (sc != null) {
                             overrideDataSourceConfigure(c, sc);
                             String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
-                            LOGGER.info(xmlLog);
+                            logger.info(xmlLog);
                         }
                     }
                 }
@@ -223,7 +224,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);
-            LOGGER.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         } finally {
             transaction.complete();
         }
@@ -298,6 +299,13 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
+                Boolean firstTime = isFirstTime.get().booleanValue();
+                if (firstTime) {
+                    isFirstTime.compareAndSet(true, false);
+                    logger.debug(String.format("DAL debug:(addPoolPropertiesChangedListener)first time onLoad"));
+                    return;
+                }
+
                 callback.onChanged(map);
             }
         });

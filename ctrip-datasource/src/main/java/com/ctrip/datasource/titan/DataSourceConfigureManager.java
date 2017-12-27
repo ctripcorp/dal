@@ -4,6 +4,7 @@ import com.ctrip.datasource.configure.ConnectionStringProvider;
 import com.ctrip.datasource.configure.PoolPropertiesProvider;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.common.enums.SourceType;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
@@ -123,6 +124,8 @@ public class DataSourceConfigureManager {
                 addPoolPropertiesChangedListeners();
                 isPoolPropertiesListenerAdded.compareAndSet(false, true);
             }
+
+            DalClientFactory.warmUpConnections();
         }
 
         connectionStringProvider.info("--- End datasource config  ---");

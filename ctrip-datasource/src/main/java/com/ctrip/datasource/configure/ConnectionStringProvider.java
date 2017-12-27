@@ -317,10 +317,11 @@ public class ConnectionStringProvider {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
-                if (!keyNames.contains(name)) {
-                    keyNames.add(name);
+                String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+                if (!keyNames.contains(keyName)) {
+                    keyNames.add(keyName);
                     logger.debug(String.format("DAL debug:(addConnectionStringChangedListener)key %s first time onLoad",
-                            name));
+                            keyName));
                     return;
                 }
 

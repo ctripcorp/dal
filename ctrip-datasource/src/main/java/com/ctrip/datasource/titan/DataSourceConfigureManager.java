@@ -137,11 +137,12 @@ public class DataSourceConfigureManager {
             return set;
 
         for (String name : names) {
-            if (keyNameMap.containsKey(name)) {
-                SourceType st = keyNameMap.get(name);
+            String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+            if (keyNameMap.containsKey(keyName)) {
+                SourceType st = keyNameMap.get(keyName);
                 if (st != sourceType) {
                     String msg =
-                            String.format("Key %s is used in both local and remote mode which is prohibited.", name);
+                            String.format("Key %s is used in both local and remote mode which is prohibited.", keyName);
                     Exception e = new RuntimeException(msg);
                     Cat.logError(e);
                     logger.error(msg, e);
@@ -150,8 +151,8 @@ public class DataSourceConfigureManager {
                 continue;
             }
 
-            keyNameMap.put(name, sourceType);
-            set.add(name);
+            keyNameMap.put(keyName, sourceType);
+            set.add(keyName);
         }
 
         return set;
@@ -189,17 +190,18 @@ public class DataSourceConfigureManager {
 
         for (final String name : names) {
             // double check to avoid adding listener multiple times
-            if (listenerKeyNames.contains(name))
+            final String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+            if (listenerKeyNames.contains(keyName))
                 continue;
 
-            connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
+            connectionStringProvider.addConnectionStringChangedListener(keyName, new ConnectionStringChanged() {
                 @Override
                 public void onChanged(Map<String, String> map) {
-                    addConnectionStringNotifyTask(name, map);
+                    addConnectionStringNotifyTask(keyName, map);
                 }
             });
 
-            listenerKeyNames.add(name);
+            listenerKeyNames.add(keyName);
         }
     }
 

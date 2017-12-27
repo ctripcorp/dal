@@ -41,8 +41,11 @@ Ctrip DAL与一般数据库框架最大的不同是从企业跨部门的角度�
 # 开发团队
 ## 发起人
 为了支持携程前CTO叶亚明先生（现首席科学家）主导的10X提速战略规划，由前携程系统研发部总监陈绍明先生（Simon Chen）提出该框架最初的构想，陈绍明同时组建了开发团队并决定了该框架的路线图和重大设计决策。
+## 产品经理
+孟文超。主要负责DAL产品的总体需求
+
 ## 当前开发人员
-* 赫杰辉。主要负责DAL产品的总体需求。Java客户端总体设计与开发，代码生成器Java模板
+* 赫杰辉。Java客户端总体设计与开发，代码生成器Java模板
 * 王晔楠。主要负责代码生成器，C#客户端
 * 李龙娇。测试负责人，自动化测试开发
 
@@ -75,3 +78,12 @@ Ctrip DAL与一般数据库框架最大的不同是从企业跨部门的角度�
 [携程框架DAL团队](mailto:rdfxdal@Ctrip.com)
 
 ![](https://github.com/ctripcorp/dal/blob/master/doc/Tech_Support_QQ.png)
+
+## 已接入公司
+请在[这里](https://github.com/ctripcorp/dal/issues/22)提供您的公司名称和网址
+
+![ctrip](https://github.com/ctripcorp/dal/blob/master/doc/known-users/ctrip.png)
+![1hai](https://github.com/ctripcorp/dal/blob/master/doc/known-users/1hai.png)
+![dj](https://github.com/ctripcorp/dal/blob/master/doc/known-users/dj.png)
+![imedmaster](https://github.com/ctripcorp/dal/blob/master/doc/known-users/imedmaster.png)
+![yiguo](https://github.com/ctripcorp/dal/blob/master/doc/known-users/yiguo.png)

@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -128,14 +129,15 @@ public class AllInOneConfigureReader {
                 }
 
                 String name = getAttribute(databaseEntry, DATABASE_ENTRY_NAME);
-                if (!dbNames.contains(name))
+                String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+                if (!dbNames.contains(keyName))
                     continue;
 
                 String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
 
                 logger.info("Try to read config for " + name);
                 DataSourceConfigure config = ConnectionStringParser.getInstance().parse(name, connectionString);
-                dataSourceConfigures.put(name, config);
+                dataSourceConfigures.put(keyName, config);
             }
             in.close();
 

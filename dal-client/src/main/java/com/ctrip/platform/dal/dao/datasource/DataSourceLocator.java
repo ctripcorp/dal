@@ -42,8 +42,7 @@ public class DataSourceLocator {
      * @throws NamingException
      */
     public DataSource getDataSource(String name) throws Exception {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-        DataSource ds = cache.get(keyName);
+        DataSource ds = cache.get(name);
 
         if (ds != null) {
             // String url = ds.getConnection().getMetaData().getURL();
@@ -52,18 +51,18 @@ public class DataSourceLocator {
         }
 
         synchronized (this.getClass()) {
-            ds = cache.get(keyName);
+            ds = cache.get(name);
             if (ds != null) {
                 return ds;
             }
             try {
-                ds = createDataSource(keyName);
-                cache.put(keyName, ds);
+                ds = createDataSource(name);
+                cache.put(name, ds);
 
                 // String url = ds.getConnection().getMetaData().getURL();
                 // logger.debug(String.format("DAL debug:(getDataSource)first created:name:%s,url:%s", name, url));
             } catch (Throwable e) {
-                String msg = "Creating DataSource " + keyName + " error:" + e.getMessage();
+                String msg = "Creating DataSource " + name + " error:" + e.getMessage();
                 logger.error(msg, e);
                 throw new RuntimeException(msg, e);
             }

@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,8 @@ public class DataSourceLocator {
      * @throws NamingException
      */
     public DataSource getDataSource(String name) throws Exception {
-        DataSource ds = cache.get(name);
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        DataSource ds = cache.get(keyName);
 
         if (ds != null) {
             // String url = ds.getConnection().getMetaData().getURL();
@@ -50,18 +52,18 @@ public class DataSourceLocator {
         }
 
         synchronized (this.getClass()) {
-            ds = cache.get(name);
+            ds = cache.get(keyName);
             if (ds != null) {
                 return ds;
             }
             try {
-                ds = createDataSource(name);
-                cache.put(name, ds);
+                ds = createDataSource(keyName);
+                cache.put(keyName, ds);
 
                 // String url = ds.getConnection().getMetaData().getURL();
                 // logger.debug(String.format("DAL debug:(getDataSource)first created:name:%s,url:%s", name, url));
             } catch (Throwable e) {
-                String msg = "Creating DataSource " + name + " error:" + e.getMessage();
+                String msg = "Creating DataSource " + keyName + " error:" + e.getMessage();
                 logger.error(msg, e);
                 throw new RuntimeException(msg, e);
             }

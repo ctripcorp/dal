@@ -171,14 +171,16 @@ public class ConnectionStringProvider {
                     allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
 
             for (Map.Entry<String, DataSourceConfigure> name : dataSourceConfigures.entrySet()) {
-                logger.debug("**********Local:" + name.getKey() + ":" + name.getValue().getConnectionUrl());
+                logger.debug(String.format("DAL debug:(initializeConnectionStrings)local:name:%s,url:%s", name.getKey(),
+                        name.getValue().getConnectionUrl()));
             }
         } else {
             try {
                 dataSourceConfigures = getConnectionStrings(dbNames);
 
                 for (Map.Entry<String, DataSourceConfigure> name : dataSourceConfigures.entrySet()) {
-                    logger.debug("**********Remote:" + name.getKey() + ":" + name.getValue().getConnectionUrl());
+                    logger.debug(String.format("DAL debug:(initializeConnectionStrings)remote:name:%s,url:%s",
+                            name.getKey(), name.getValue().getConnectionUrl()));
                 }
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);

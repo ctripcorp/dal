@@ -57,16 +57,16 @@ public class DataSourceConfigureManager {
 
     private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
     private DataSourceConfigureParser dataSourceConfigureParser = DataSourceConfigureParser.getInstance();
-
     private ConnectionStringProvider connectionStringProvider = ConnectionStringProvider.getInstance();
     private PoolPropertiesProvider poolPropertiesProvider = PoolPropertiesProvider.getInstance();
+
     private DalEncrypter encrypter = null;
     private volatile boolean isInitialized = false;
-    private volatile boolean isFirstLoaded = true;
+    private volatile boolean connectionStringListenerFirstLoaded = true;
+    private volatile boolean poolPropertiesListenerFirstLoaded = true;
 
     private Map<String, DataSourceConfigureChangeListener> dataSourceConfigureChangeListeners =
             new ConcurrentHashMap<>();
-
     private Map<String, SourceType> keyNameMap = new ConcurrentHashMap<>();
     private Set<String> listenerKeyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
@@ -98,6 +98,10 @@ public class DataSourceConfigureManager {
         if (names == null || names.isEmpty())
             return;
 
+        for (String name : names) {
+            logger.debug(String.format("DAL debug:(setup)dbname:%s,sourcetype:%s", name, sourceType.toString()));
+        }
+
         if (dataSourceConfigureParser.isDataSourceXmlExist())
             ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, connectionStringProvider.getAppId());
 
@@ -108,8 +112,12 @@ public class DataSourceConfigureManager {
         addDataSourceConfigures(configures);
 
         if (sourceType == SourceType.Remote) {
+            for (String name : names) {
+                logger.debug(String.format("DAL debug:(setup)add connection string changed listener for %s", name));
+            }
+
             addConnectionStringChangedListeners(names);
-            addDataSourceConfigureChangeListeners();
+            addPoolPropertiesChangedListeners();
         }
 
         connectionStringProvider.info("--- End datasource config  ---");
@@ -161,9 +169,9 @@ public class DataSourceConfigureManager {
             return;
 
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
-            logger.debug(
-                    "**********:addDataSourceConfigures" + entry.getKey() + ":" + entry.getValue().getConnectionUrl());
             dataSourceConfigureLocator.addDataSourceConfigure(entry.getKey(), entry.getValue());
+            logger.debug(String.format("DAL debug:(addDataSourceConfigures)key:%s,url:%s", entry.getKey(),
+                    entry.getValue().getConnectionUrl()));
         }
     }
 
@@ -179,8 +187,9 @@ public class DataSourceConfigureManager {
             connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
                 @Override
                 public void onChanged(Map<String, String> map) {
-                    if (isFirstLoaded) {
-                        isFirstLoaded &= false;
+                    if (connectionStringListenerFirstLoaded) {
+                        logger.debug(String.format("DAL debug:(addConnectionStringChangedListeners)first loaded"));
+                        connectionStringListenerFirstLoaded &= false;
                         return;
                     }
 
@@ -219,12 +228,13 @@ public class DataSourceConfigureManager {
         }
     }
 
-    private synchronized void addDataSourceConfigureChangeListeners() {
+    private synchronized void addPoolPropertiesChangedListeners() {
         poolPropertiesProvider.addPoolPropertiesChangedListener(new PoolPropertiesChanged() {
             @Override
             public void onChanged(Map<String, String> map) {
-                if (isFirstLoaded) {
-                    isFirstLoaded &= false;
+                if (poolPropertiesListenerFirstLoaded) {
+                    logger.debug(String.format("DAL debug:(addPoolPropertiesChangedListeners)first loaded"));
+                    poolPropertiesListenerFirstLoaded &= false;
                     return;
                 }
 
@@ -254,10 +264,12 @@ public class DataSourceConfigureManager {
                     // connection string changed
                     if (names != null && names.size() > 0) {
                         executeNotifyTask(names, connectionStringChanged);
+                        logger.debug(String.format("DAL debug:(addNotifyTask)executeNotifyTask for connection string"));
                     } else { // datasource.properties changed
                         Set<String> keySet = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
                         connectionStringChanged &= false;
                         executeNotifyTask(keySet, connectionStringChanged);
+                        logger.debug(String.format("DAL debug:(addNotifyTask)executeNotifyTask for pool properties"));
                     }
                 } catch (Throwable e) {
                     Cat.logError(e);
@@ -348,9 +360,10 @@ public class DataSourceConfigureManager {
         }
     }
 
-    public void register(String dbName, DataSourceConfigureChangeListener listener) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(dbName);
+    public void register(String name, DataSourceConfigureChangeListener listener) {
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
         dataSourceConfigureChangeListeners.put(keyName, listener);
+        logger.debug(String.format("DAL debug:(register)add listener for %s", name));
     }
 
     private Map<String, DataSourceConfigureChangeListener> copyChangeListeners(

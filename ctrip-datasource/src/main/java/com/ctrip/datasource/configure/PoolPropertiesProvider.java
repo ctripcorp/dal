@@ -35,7 +35,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
 
     private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
 
-    private static PoolPropertiesProvider instance = null;
+    private volatile static PoolPropertiesProvider instance = null;
 
     public synchronized static PoolPropertiesProvider getInstance() {
         if (instance == null) {

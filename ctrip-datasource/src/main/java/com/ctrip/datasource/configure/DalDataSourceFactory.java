@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 
 public class DalDataSourceFactory {
     private TitanProvider provider = new TitanProvider();
@@ -51,6 +52,7 @@ public class DalDataSourceFactory {
         provider.setup(names);
 
         DataSourceLocator loc = new DataSourceLocator(provider);
-        return loc.getDataSource(allInOneKey);
+        String keyName = ConnectionStringKeyNameHelper.getKeyName(allInOneKey);
+        return loc.getDataSource(keyName);
     }
 }

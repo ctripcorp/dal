@@ -190,18 +190,17 @@ public class DataSourceConfigureManager {
 
         for (final String name : names) {
             // double check to avoid adding listener multiple times
-            final String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
-            if (listenerKeyNames.contains(keyName))
+            if (listenerKeyNames.contains(name))
                 continue;
 
-            connectionStringProvider.addConnectionStringChangedListener(keyName, new ConnectionStringChanged() {
+            connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
                 @Override
                 public void onChanged(Map<String, String> map) {
-                    addConnectionStringNotifyTask(keyName, map);
+                    addConnectionStringNotifyTask(name, map);
                 }
             });
 
-            listenerKeyNames.add(keyName);
+            listenerKeyNames.add(name);
         }
     }
 

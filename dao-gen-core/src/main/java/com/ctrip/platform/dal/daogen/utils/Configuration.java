@@ -147,11 +147,11 @@ public class Configuration {
         }
     }
 
-    public final static String[] emptyStringArray = {};
+    private final static String[] emptyStringArray = {};
 
     public static String[] getTrimmedStrings(String str) {
         if (null == str || "".equals(str.trim()))
-            return emptyStringArray;
+            return emptyStringArray.clone();
 
         return str.trim().split("\\s*,\\s*");
     }

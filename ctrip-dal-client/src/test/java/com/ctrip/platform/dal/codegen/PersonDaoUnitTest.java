@@ -372,6 +372,23 @@ public class PersonDaoUnitTest {
 		assertEquals(1, keyHolder.size());
 	}
 	
+    @Test
+    public void testInsert3PkInsertBack() throws Exception {
+        DalHints hints;
+        Person daoPojo;
+        int affected;
+        KeyHolder keyHolder;
+        
+        keyHolder = new KeyHolder();
+        daoPojo = createPojos(1, 1).get(0);
+        hints = new DalHints();
+        affected = dao.insert(hints, keyHolder, daoPojo);
+        assertEquals(1, affected);
+        assertEquals(1, keyHolder.size());
+        Person p2 = dao.queryByPk(daoPojo, hints);
+        assertEquals(daoPojo.getName(), p2.getName());
+    }
+    
 	@Test
 	public void testInsert4() throws Exception {
 		DalHints hints = new DalHints();
@@ -381,6 +398,24 @@ public class PersonDaoUnitTest {
 		assertArrayEquals(new int[]{1,1,1,1,},  affected);
 		assertEquals(4, keyHolder.size());
 	}
+	
+    @Test
+    public void testInsert4PkInsertBack() throws Exception {
+        DalHints hints = new DalHints();
+        KeyHolder keyHolder = new KeyHolder();
+        List<Person> daoPojos = createPojos(1, 1);
+        int i = 0;
+        for(Person p: daoPojos)
+            p.setName("test" + i++);
+
+        int[] affected = dao.insert(hints.insertIdentityBack(), keyHolder, daoPojos);
+        assertArrayEquals(new int[]{1,1,1,1,},  affected);
+        assertEquals(4, keyHolder.size());
+        for(Person p: daoPojos) {
+            Person p2 = dao.queryByPk(p, hints);
+            assertEquals(p.getName(), p2.getName());
+        }
+    }
 	
 	@Test
 	public void testInsert5() throws Exception {
@@ -414,6 +449,22 @@ public class PersonDaoUnitTest {
 		assertEquals(4, affected);
 	}
 	
+    @Test
+    public void testCombinedInsert1PkInsertBack() throws Exception {
+        DalHints hints = new DalHints();
+        List<Person> daoPojos = dao.queryAll(new DalHints().inShard(1).inTableShard(1));
+        KeyHolder keyHolder = new KeyHolder();
+        int i = 0;
+        for(Person p: daoPojos)
+            p.setName("test" + i++);
+        int affected = dao.combinedInsert(hints.insertIdentityBack(), keyHolder, daoPojos);
+        assertEquals(4, affected);
+        for(Person p: daoPojos) {
+            Person p2 = dao.queryByPk(p, hints.inShard(1).inTableShard(1));
+            assertEquals(p.getName(), p2.getName());
+        }
+    }
+    
 	@Test
 	public void testCombinedInsert2() throws Exception {
 		DalHints hints = new DalHints();

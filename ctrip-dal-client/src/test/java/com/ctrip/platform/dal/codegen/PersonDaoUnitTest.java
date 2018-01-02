@@ -476,6 +476,21 @@ public class PersonDaoUnitTest {
 		assertEquals(8, dao.count(new DalHints().inShard(1).inTableShard(1)));
 	}
 	
+    @Test
+    public void testCombinedInsert2PkInsertBack() throws Exception {
+        DalHints hints = new DalHints();
+        KeyHolder keyHolder = new KeyHolder();
+        List<Person> daoPojos = dao.queryAll(new DalHints().inAllShards().inTableShard(1));
+        int i = 0;
+        for(Person p: daoPojos)
+            p.setName("test" + i++);
+        dao.combinedInsert(hints.insertIdentityBack(), keyHolder, daoPojos);
+        for(Person p: daoPojos) {
+            Person p2 = dao.queryByPk(p, hints.inTableShard(1));
+            assertEquals(p.getName(), p2.getName());
+        }
+    }
+    
 	@Test
 	public void testQueryAllByPage() throws Exception {
 		DalHints hints = new DalHints();

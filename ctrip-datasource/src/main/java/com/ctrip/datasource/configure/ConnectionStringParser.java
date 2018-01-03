@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class ConnectionStringParser {
     private static ConnectionStringParser parser = null;
@@ -108,7 +108,7 @@ public class ConnectionStringParser {
             password = matcher.group(2);
         }
 
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         config.setName(keyName);
         config.setConnectionUrl(url);
         config.setUserName(userName);

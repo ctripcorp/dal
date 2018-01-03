@@ -6,7 +6,9 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
+import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -20,8 +22,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PoolPropertiesProvider implements DataSourceConfigureConstants {
-    private static final Logger logger = LoggerFactory.getLogger(PoolPropertiesProvider.class);
+public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataSourceConfigureConstants {
+    private static final Logger logger = LoggerFactory.getLogger(PoolPropertiesProviderImpl.class);
     private static final String DAL_APPNAME = "dal";
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String SEPARATOR = "\\.";
@@ -35,19 +37,20 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
     private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
 
     private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
+    private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
-    private volatile static PoolPropertiesProvider instance = null;
+    private volatile static PoolPropertiesProviderImpl instance = null;
 
-    public synchronized static PoolPropertiesProvider getInstance() {
+    public synchronized static PoolPropertiesProviderImpl getInstance() {
         if (instance == null) {
-            instance = new PoolPropertiesProvider();
+            instance = new PoolPropertiesProviderImpl();
             instance.refreshPoolPropertiesMapConfig();
             instance.setPoolProperties();
         }
         return instance;
     }
 
-    public MapConfig getConfig() {
+    private MapConfig getConfig() {
         return mapConfigReference.get();
     }
 
@@ -103,7 +106,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                 new DataSourceConfigureWrapper(originalMap, dataSourceConfigure, dataSourceConfigureMap);
         dataSourceConfigureWrapperReference.set(wrapper);
 
-        String log = "DataSource配置:" + mapToString(map);
+        String log = "DataSource配置:" + poolPropertiesHelper.mapToString(map);
         Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
         logger.info(log);
     }
@@ -121,7 +124,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
         for (Map.Entry<String, Map<String, String>> entry : datasourceMap.entrySet()) {
             DataSourceConfigure config = new DataSourceConfigure();
             setDataSourceConfigure(config, entry.getValue());
-            String keyName = ConnectionStringKeyNameHelper.getKeyName(entry.getKey());
+            String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
             configureMap.put(keyName, config);
         }
     }
@@ -160,7 +163,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
             DataSourceConfigure dataSourceConfigure = wrapper.getDataSourceConfigure();
             if (dataSourceConfigure != null) {
                 overrideDataSourceConfigure(c, dataSourceConfigure);
-                String log = "App 覆盖结果:" + mapToString(c.toMap());
+                String log = "App 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                 logger.info(log);
             }
 
@@ -172,15 +175,15 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                     DataSourceConfigure sourceConfigure = dataSourceConfigureMap.get(name);
                     if (sourceConfigure != null) {
                         overrideDataSourceConfigure(c, sourceConfigure);
-                        String log = name + " 覆盖结果:" + mapToString(c.toMap());
+                        String log = name + " 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                         logger.info(log);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
-                        possibleName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
+                        possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
                         DataSourceConfigure sc = dataSourceConfigureMap.get(possibleName);
                         if (sc != null) {
                             overrideDataSourceConfigure(c, sc);
-                            String log = possibleName + " 覆盖结果:" + mapToString(c.toMap());
+                            String log = possibleName + " 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                             logger.info(log);
                         }
                     }
@@ -193,7 +196,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                 overrideDataSourceConfigure(c, configure);
                 c.setName(configure.getName());
                 c.setVersion(configure.getVersion());
-                String log = "connection settings 覆盖结果:" + mapToString(c.toMap());
+                String log = "connection settings 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                 logger.info(log);
 
                 // override datasource.xml
@@ -202,22 +205,23 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
                     DataSourceConfigure dataSourceXml = dataSourceConfigureLocator.getUserDataSourceConfigure(name);
                     if (dataSourceXml != null) {
                         overrideDataSourceConfigure(c, dataSourceXml);
-                        String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
+                        String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                         logger.info(xmlLog);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
-                        possibleName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
+                        possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
                         DataSourceConfigure sc = dataSourceConfigureLocator.getUserDataSourceConfigure(possibleName);
                         if (sc != null) {
                             overrideDataSourceConfigure(c, sc);
-                            String xmlLog = "datasource.xml 覆盖结果:" + mapToString(c.toMap());
+                            String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                             logger.info(xmlLog);
                         }
                     }
                 }
             }
 
-            Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS, mapToString(c.toMap()));
+            Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS,
+                    poolPropertiesHelper.mapToString(c.toMap()));
             Map<String, String> datasource = c.getMap();
             Properties prop = c.getProperties();
             setProperties(datasource, prop); // set properties from map
@@ -243,7 +247,7 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
         return dataSourceConfigure;
     }
 
-    public Properties deepCopyProperties(Properties properties) {
+    private Properties deepCopyProperties(Properties properties) {
         if (properties == null)
             return null;
 
@@ -274,21 +278,6 @@ public class PoolPropertiesProvider implements DataSourceConfigureConstants {
         for (Map.Entry<String, String> entry : datasource.entrySet()) {
             prop.setProperty(entry.getKey(), entry.getValue());
         }
-    }
-
-    public String mapToString(Map<String, String> map) {
-        String result = "";
-        try {
-            if (map != null && map.size() > 0) {
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<String, String> entry : map.entrySet()) {
-                    sb.append(entry.getKey() + "=" + entry.getValue() + ",");
-                }
-                result = sb.substring(0, sb.length() - 1);
-            }
-        } catch (Throwable e) {
-        }
-        return result;
     }
 
     public void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback) {

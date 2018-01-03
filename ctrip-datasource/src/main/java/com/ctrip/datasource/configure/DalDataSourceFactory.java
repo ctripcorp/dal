@@ -7,10 +7,9 @@ import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class DalDataSourceFactory {
-    private TitanProvider provider = new TitanProvider();
 
     /**
      * Create DataSource for given name. The appid and titan url will be discoved by framework foundation
@@ -49,10 +48,12 @@ public class DalDataSourceFactory {
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid) throws Exception {
         Set<String> names = new HashSet<>();
         names.add(allInOneKey);
+
+        TitanProvider provider = new TitanProvider();
         provider.setup(names);
 
         DataSourceLocator loc = new DataSourceLocator(provider);
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(allInOneKey);
+        String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
         return loc.getDataSource(keyName);
     }
 }

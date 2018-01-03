@@ -6,10 +6,13 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
+import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.log.LogEntry;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
 import org.slf4j.Logger;
@@ -30,19 +33,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConnectionStringProvider {
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProvider.class);
-
-    public static class LogEntry {
-        public static final int INFO = 0;
-        public static final int WARN = 1;
-        public static final int ERROR = 2;
-        public static final int ERROR2 = 3;
-
-        public int type;
-        public String msg;
-        public Throwable e;
-    }
+public class ConnectionStringProviderImpl implements ConnectionStringProvider, DataSourceConfigureConstants {
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionStringProviderImpl.class);
 
     // For dal ignite
     public static List<LogEntry> startUpLog = new ArrayList<>();
@@ -53,12 +45,7 @@ public class ConnectionStringProvider {
      */
     private AllInOneConfigureReader allInOneProvider = new AllInOneConfigureReader();
     private ConnectionStringParser parser = ConnectionStringParser.getInstance();
-
-    public static final String USE_LOCAL_CONFIG = "useLocalConfig";
-    public static final String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
-    public static final String SERVICE_ADDRESS = "serviceAddress";
-    public static final String TIMEOUT = "timeout";
-    public static final String APPID = "appid";
+    private DataSourceConfigureParser dataSourceConfigureParser = DataSourceConfigureParser.getInstance();
 
     // used for simulate prod environemnt
     private boolean isDebug;
@@ -72,33 +59,31 @@ public class ConnectionStringProvider {
     private static final int DEFAULT_TIMEOUT = 15 * 1000;
     private static final String EMPTY_ID = "999999";
 
-    private static final String TITAN_APP_ID = "100010061"; // 100010061 123456
-    public static final String TITAN_KEY_NORMAL = "normal";
-    public static final String TITAN_KEY_FAILOVER = "failover";
-
+    private static final String TITAN_APP_ID = "100010061";
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
+    private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private static final Map<String, String> titanMapping = new HashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
-    private volatile static ConnectionStringProvider processor = null;
+    private volatile static ConnectionStringProviderImpl processor = null;
 
-    public synchronized static ConnectionStringProvider getInstance() {
+    public synchronized static ConnectionStringProviderImpl getInstance() {
         if (processor == null) {
-            processor = new ConnectionStringProvider();
+            processor = new ConnectionStringProviderImpl();
         }
         return processor;
     }
 
     private MapConfig getConfigMap(String name) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return configMap.get(keyName);
     }
 
     private void addConfigMap(String name, MapConfig config) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         configMap.put(keyName, config);
     }
 
@@ -114,7 +99,7 @@ public class ConnectionStringProvider {
         return databaseConfigLocation;
     }
 
-    public String getAppId() {
+    private String getAppId() {
         return appId;
     }
 
@@ -128,13 +113,6 @@ public class ConnectionStringProvider {
     }
 
     public void initialize(Map<String, String> settings) throws DalException {
-        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
-
-        if (DataSourceConfigureParser.getInstance().isDataSourceXmlExist()) {
-            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCELOCATION,
-                    DataSourceConfigureParser.getInstance().getDataSourceXmlLocation());
-        }
-
         startUpLog.clear();
         config = new HashMap<>(settings);
 
@@ -160,11 +138,19 @@ public class ConnectionStringProvider {
 
         isDebug = Boolean.parseBoolean(settings.get("isDebug"));
         info("isDebug: " + isDebug);
+
+        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
+
+        if (dataSourceConfigureParser.isDataSourceXmlExist()) {
+            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, getAppId());
+
+            ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCELOCATION,
+                    DataSourceConfigureParser.getInstance().getDataSourceXmlLocation());
+        }
     }
 
     public Map<String, DataSourceConfigure> initializeConnectionStrings(Set<String> dbNames, SourceType sourceType) {
         Map<String, DataSourceConfigure> dataSourceConfigures = null;
-        String svcUrl = getSvcUrl();
         boolean useLocal = getUseLocal();
 
         // If it uses local Database.Config
@@ -266,7 +252,7 @@ public class ConnectionStringProvider {
     }
 
     private MapConfig getTitanMapConfig(String name) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         Feature feature = Feature.create().setHttpsEnable(true).build();
         return MapConfig.get(TITAN_APP_ID, keyName, feature);
     }
@@ -277,7 +263,7 @@ public class ConnectionStringProvider {
             return configures;
 
         for (String name : dbNames) {
-            String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+            String keyName = ConnectionStringKeyHelper.getKeyName(name);
 
             if (isDebug) {
                 configures.put(keyName, new DataSourceConfigure());
@@ -317,7 +303,7 @@ public class ConnectionStringProvider {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
-                String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+                String keyName = ConnectionStringKeyHelper.getKeyName(name);
                 if (!keyNames.contains(keyName)) {
                     keyNames.add(keyName);
                     logger.debug(String.format("DAL debug:(addConnectionStringChangedListener)key %s first time onLoad",
@@ -330,7 +316,7 @@ public class ConnectionStringProvider {
         });
     }
 
-    public void info(String msg) {
+    private void info(String msg) {
         logger.info(msg);
 
         LogEntry ent = new LogEntry();
@@ -339,7 +325,7 @@ public class ConnectionStringProvider {
         startUpLog.add(ent);
     }
 
-    public void error(String msg, Throwable e) {
+    private void error(String msg, Throwable e) {
         logger.error(msg, e);
 
         LogEntry ent = new LogEntry();

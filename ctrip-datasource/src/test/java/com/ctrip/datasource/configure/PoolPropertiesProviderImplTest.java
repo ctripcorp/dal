@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PoolPropertiesProviderTest {
+public class PoolPropertiesProviderImplTest {
     @Test
     public void testGetDataSourceConfigure() {
         // emulate datasource.xml
@@ -31,7 +31,7 @@ public class PoolPropertiesProviderTest {
         map.put("logAbandoned", "true");
         map.put("minEvictableIdleTimeMillis", "30000");
         map.put("connectionProperties", "rewriteBatchedStatements=true;allowMultiQueries=true");
-        config = PoolPropertiesProvider.getInstance().mergeDataSourceConfigure(config);
+        config = PoolPropertiesProviderImpl.getInstance().mergeDataSourceConfigure(config);
         MessageManager.getInstance().shutdown();
     }
 }

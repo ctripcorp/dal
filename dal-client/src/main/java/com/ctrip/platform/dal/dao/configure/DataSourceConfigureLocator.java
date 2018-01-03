@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,12 +25,12 @@ public class DataSourceConfigureLocator {
     private Set<String> dataSourceConfigureKeySet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     public DataSourceConfigure getUserDataSourceConfigure(String name) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return userDataSourceConfigures.get(keyName);
     }
 
     public DataSourceConfigure getDataSourceConfigure(String name) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return dataSourceConfigures.get(keyName);
     }
 
@@ -55,17 +55,17 @@ public class DataSourceConfigureLocator {
     }
 
     public void addUserDataSourceConfigure(String name, DataSourceConfigure configure) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         userDataSourceConfigures.put(keyName, configure);
     }
 
     public void addDataSourceConfigure(String name, DataSourceConfigure configure) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         dataSourceConfigures.put(keyName, configure);
     }
 
     public boolean contains(String name) {
-        String keyName = ConnectionStringKeyNameHelper.getKeyName(name);
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return dataSourceConfigures.containsKey(keyName);
     }
 

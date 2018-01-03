@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -114,7 +114,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
 
             String possibleName = getPossibleName(name);
             if (!map.containsKey(possibleName)) {
-                String keyName = ConnectionStringKeyNameHelper.getKeyName(possibleName);
+                String keyName = ConnectionStringKeyHelper.getKeyName(possibleName);
                 result.put(keyName, entry.getValue());
             }
         }

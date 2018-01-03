@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyNameHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

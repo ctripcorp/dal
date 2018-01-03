@@ -33,7 +33,6 @@ public interface DataSourceConfigureConstants {
     String OPTION = "option";
     String VALIDATORCLASSNAME = "validatorClassName";
 
-
     boolean DEFAULT_TESTWHILEIDLE = false;
     boolean DEFAULT_TESTONBORROW = true;
     boolean DEFAULT_TESTONRETURN = false;
@@ -55,5 +54,14 @@ public interface DataSourceConfigureConstants {
     boolean DEFAULT_JMXENABLED = true;
     String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
+
+    String USE_LOCAL_CONFIG = "useLocalConfig";
+    String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
+    String SERVICE_ADDRESS = "serviceAddress";
+    String TIMEOUT = "timeout";
+    String APPID = "appid";
+
+    String TITAN_KEY_NORMAL = "normal";
+    String TITAN_KEY_FAILOVER = "failover";
 
 }

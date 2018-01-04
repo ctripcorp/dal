@@ -152,6 +152,17 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         return m;
     }
 
+    public boolean dynamicPoolPropertiesEnabled() {
+        if (map == null || map.isEmpty())
+            return false;
+
+        String value = map.get(ENABLE_DYNAMIC_POOL_PROPERTIES);
+        if (value == null)
+            return false;
+
+        return Boolean.parseBoolean(value);
+    }
+
     // Rule: username concat password,and then take 8 characters of md5 code from beginning
     private String getCRC() {
         String crc = "";

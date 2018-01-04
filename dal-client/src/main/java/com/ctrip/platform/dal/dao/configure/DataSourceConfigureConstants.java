@@ -62,6 +62,7 @@ public interface DataSourceConfigureConstants {
     String SERVICE_ADDRESS = "serviceAddress";
     String TIMEOUT = "timeout";
     String APPID = "appid";
+    String IS_DEBUG = "isDebug";
 
     String TITAN_KEY_NORMAL = "normal";
     String TITAN_KEY_FAILOVER = "failover";

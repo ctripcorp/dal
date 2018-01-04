@@ -39,6 +39,8 @@ public class DataSourceTerminator {
         if (dataSource != null) {
             dataSource.setEnqueueTime(new Date());
             dataSourceQueue.offer(dataSource);
+            logger.info(String.format("DataSource %s offered to DataSource destroy queue first time.",
+                    dataSource.getName()));
         }
     }
 
@@ -52,23 +54,34 @@ public class DataSourceTerminator {
         @Override
         public void run() {
             SingleDataSource dataSource = null;
+            String name = "";
             try {
                 dataSource = dataSourceQueue.take();
+                name = dataSource.getName();
+                logger.info(String.format("DataSource %s taken from DataSource destroy queue.", name));
+
                 boolean success = closeDataSource(dataSource);
                 if (!success) {
                     if (dataSource != null) {
                         dataSourceQueue.offer(dataSource);
+                        logger.info(String.format(
+                                "DataSource %s offered to DataSource destroy queue again due to failure.", name));
                     }
                 }
             } catch (Throwable e) {
+                logger.warn(String.format("Error occured while closing DataSource %s", name), e);
                 if (dataSource != null) {
                     dataSourceQueue.offer(dataSource);
+                    logger.info(String
+                            .format("DataSource %s offered to DataSource destroy queue again due to exception.", name));
                 }
             }
         }
 
         private boolean closeDataSource(SingleDataSource singleDataSource) throws Exception {
             DataSource dataSource = singleDataSource.getDataSource();
+            String name = singleDataSource.getName();
+            logger.info(String.format("Trying to close DataSource %s", name));
             boolean success = true;
 
             try {
@@ -80,13 +93,19 @@ public class DataSourceTerminator {
                     int retryTimes = getRetryTimes(singleDataSource.getName());
                     int abandonedTimeout = getAbandonedTimeout(singleDataSource);
                     int elapsedSeconds = getElapsedSeconds(singleDataSource.getEnqueueTime());
+                    logger.info(String.format("Retry times for DataSource %s:%s", name, retryTimes));
+                    logger.info(String.format("Abandoned timeout for DataSource %s:%s", name, abandonedTimeout));
+                    logger.info(String.format("Elapsed seconds for DataSource %s:%s", name, elapsedSeconds));
 
                     if (retryTimes > MAX_RETRY_TIMES || ds.getActive() == 0) {
+                        logger.info(String.format("Abandoned closing DataSource %s,retry times:%s,max retry times:%s.",
+                                name, retryTimes, MAX_RETRY_TIMES));
                         return success;
                     } else if (elapsedSeconds >= abandonedTimeout) {
                         ds.close(true);
-                        String name = ds.getName();
-                        logger.info(String.format("DataSource %s closed.", name));
+                        logger.info(
+                                String.format("Force closing DataSource %s,elapsed seconds:%s,abandoned timeout:%s.",
+                                        name, elapsedSeconds, abandonedTimeout));
                     } else {
                         success &= false;
                     }

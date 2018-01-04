@@ -99,10 +99,6 @@ public class DataSourceConfigureManager {
         if (names == null || names.isEmpty())
             return;
 
-        for (String name : names) {
-            logger.debug(String.format("DAL debug:(setup)dbname:%s,sourcetype:%s", name, sourceType.toString()));
-        }
-
         dataSourceConfigureLocator.addDataSourceConfigureKeySet(names);
         Map<String, DataSourceConfigure> configures =
                 connectionStringProvider.initializeConnectionStrings(names, sourceType);
@@ -110,14 +106,11 @@ public class DataSourceConfigureManager {
         addDataSourceConfigures(configures);
 
         if (sourceType == SourceType.Remote) {
-            for (String name : names) {
-                logger.debug(String.format("DAL debug:(setup)add connection string changed listener for %s", name));
-            }
-
             addConnectionStringChangedListeners(names);
 
-            Boolean isAdded = isPoolPropertiesListenerAdded.get().booleanValue();
-            if (!isAdded) {
+            boolean isAdded = isPoolPropertiesListenerAdded.get().booleanValue();
+            boolean dynamicEnabled = dynamicPoolPropertiesEnabled(configures);
+            if (!isAdded && dynamicEnabled) {
                 addPoolPropertiesChangedListeners();
                 isPoolPropertiesListenerAdded.compareAndSet(false, true);
             }
@@ -176,8 +169,6 @@ public class DataSourceConfigureManager {
 
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
             dataSourceConfigureLocator.addDataSourceConfigure(entry.getKey(), entry.getValue());
-            logger.debug(String.format("DAL debug:(addDataSourceConfigures)key:%s,url:%s", entry.getKey(),
-                    entry.getValue().getConnectionUrl()));
         }
     }
 
@@ -375,6 +366,14 @@ public class DataSourceConfigureManager {
         keyNameMap = new ConcurrentHashMap<>();
         listenerKeyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
         connectionStringProvider.clear();
+    }
+
+    private boolean dynamicPoolPropertiesEnabled(Map<String, DataSourceConfigure> map) {
+        if (map == null || map.isEmpty())
+            return false;
+
+        DataSourceConfigure configure = map.entrySet().iterator().next().getValue();
+        return configure.dynamicPoolPropertiesEnabled();
     }
 
 }

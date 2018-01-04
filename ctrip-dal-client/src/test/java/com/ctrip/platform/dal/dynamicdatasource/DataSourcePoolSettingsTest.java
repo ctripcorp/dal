@@ -9,12 +9,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DataSourcePoolSettingsTest {
-    private static final String databaseName = "mysqldaltest01db_W";
+    private static final String databaseName = "mysqldaltest01db_w";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         DalClientFactory.initClientFactory();
-        DalClientFactory.warmUpConnections();
     }
 
     @Test

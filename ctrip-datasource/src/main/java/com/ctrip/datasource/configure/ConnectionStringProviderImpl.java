@@ -1,7 +1,6 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.framework.clogging.agent.config.LogConfig;
-import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.Version;
@@ -49,9 +48,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
 
     // used for simulate prod environemnt
     private boolean isDebug;
-    private String subEnv;
     private int timeOut;
-    private String svcUrl;
     private String appId;
     private boolean useLocal;
     private String databaseConfigLocation;
@@ -65,7 +62,6 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
-    private static final Map<String, String> titanMapping = new HashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     private volatile static ConnectionStringProviderImpl processor = null;
@@ -87,10 +83,6 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         configMap.put(keyName, config);
     }
 
-    private String getSvcUrl() {
-        return svcUrl;
-    }
-
     private boolean getUseLocal() {
         return useLocal;
     }
@@ -103,28 +95,14 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         return appId;
     }
 
-    static {
-        // LPT,FAT/FWS,UAT,PRO
-        titanMapping.put("FAT", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("FWS", "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("LPT", "https://ws.titan.lpt.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("UAT", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
-        titanMapping.put("PRO", "https://ws.titan.ctripcorp.com/titanservice/query");
-    }
-
     public void initialize(Map<String, String> settings) throws DalException {
         startUpLog.clear();
         config = new HashMap<>(settings);
 
         info("Initialize Titan provider");
-        svcUrl = discoverTitanServiceUrl(settings);
-        appId = discoverAppId(settings);
-        subEnv = Foundation.server().getSubEnv();
-        subEnv = subEnv == null ? null : subEnv.trim();
 
-        info("Titan Service Url: " + svcUrl);
+        appId = discoverAppId(settings);
         info("Appid: " + appId);
-        info("Sub-environment: " + (subEnv == null ? "N/A" : subEnv));
 
         useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
         info("Use local: " + useLocal);
@@ -136,7 +114,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         timeOut = timeoutStr == null || timeoutStr.isEmpty() ? DEFAULT_TIMEOUT : Integer.parseInt(timeoutStr);
         info("Titan connection timeout: " + timeOut);
 
-        isDebug = Boolean.parseBoolean(settings.get("isDebug"));
+        isDebug = Boolean.parseBoolean(settings.get(IS_DEBUG));
         info("isDebug: " + isDebug);
 
         ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
@@ -177,33 +155,6 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         }
 
         return dataSourceConfigures;
-    }
-
-    /**
-     * Get titan service URL in order of 1. environment varaible 2. serviceAddress 3. local
-     *
-     * @param settings
-     * @return
-     */
-    private String discoverTitanServiceUrl(Map<String, String> settings) {
-        // First we use environment to determine titan service address
-        Env env = Foundation.server().getEnv();
-        if (titanMapping.containsKey(env.toString()))
-            return titanMapping.get(env.toString());
-
-        // Then we check serviceAddress
-        String svcUrl = settings.get(SERVICE_ADDRESS);
-
-        // A little clean up
-        if (svcUrl != null && svcUrl.trim().length() != 0) {
-            svcUrl = svcUrl.trim();
-            if (svcUrl.endsWith("/"))
-                svcUrl = svcUrl.substring(0, svcUrl.length() - 1);
-            return svcUrl;
-        }
-
-        // Indicate local database.config should be used
-        return null;
     }
 
     private String discoverAppId(Map<String, String> settings) throws DalException {

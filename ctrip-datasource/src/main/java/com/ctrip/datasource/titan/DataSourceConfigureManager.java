@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
@@ -197,8 +198,8 @@ public class DataSourceConfigureManager {
         Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_START);
         if (map != null) {
-            String normalConnectionString = map.get(ConnectionStringProviderImpl.TITAN_KEY_NORMAL);
-            String failoverConnectionString = map.get(ConnectionStringProviderImpl.TITAN_KEY_FAILOVER);
+            String normalConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_NORMAL);
+            String failoverConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_FAILOVER);
             transaction.addData(encrypter.desEncrypt(normalConnectionString));
             transaction.addData(encrypter.desEncrypt(failoverConnectionString));
         }

@@ -97,7 +97,10 @@ public class DataSourceTerminator {
                     logger.info(String.format("Abandoned timeout for DataSource %s:%s", name, abandonedTimeout));
                     logger.info(String.format("Elapsed seconds for DataSource %s:%s", name, elapsedSeconds));
 
-                    if (retryTimes > MAX_RETRY_TIMES || ds.getActive() == 0) {
+                    if (ds.getActive() == 0) {
+                        logger.info(String.format("Active connections of DataSource %s is zero.", name));
+                        return success;
+                    } else if (retryTimes > MAX_RETRY_TIMES) {
                         logger.info(String.format("Abandoned closing DataSource %s,retry times:%s,max retry times:%s.",
                                 name, retryTimes, MAX_RETRY_TIMES));
                         return success;

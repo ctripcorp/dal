@@ -110,8 +110,7 @@ public class DataSourceConfigureManager {
             addConnectionStringChangedListeners(names);
 
             boolean isAdded = isPoolPropertiesListenerAdded.get().booleanValue();
-            boolean dynamicEnabled = dynamicPoolPropertiesEnabled(configures);
-            if (!isAdded && dynamicEnabled) {
+            if (!isAdded) {
                 addPoolPropertiesChangedListeners();
                 isPoolPropertiesListenerAdded.compareAndSet(false, true);
             }
@@ -271,6 +270,14 @@ public class DataSourceConfigureManager {
         Map<String, DataSourceConfigure> configures = connectionStringProvider.getConnectionStrings(names);
         poolPropertiesProvider.refreshPoolProperties();
         configures = mergeDataSourceConfigures(configures);
+
+        if (!isConnectionStringChanged) {
+            boolean dynamicEnabled = dynamicPoolPropertiesEnabled(configures);
+            if (!dynamicEnabled) {
+                logger.info(String.format("DAL DataSource DynamicPoolProperties does not enabled."));
+                return;
+            }
+        }
 
         Map<String, DataSourceConfigureChangeListener> listeners =
                 copyChangeListeners(dataSourceConfigureChangeListeners);

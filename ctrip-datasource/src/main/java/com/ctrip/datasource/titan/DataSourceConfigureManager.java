@@ -80,7 +80,6 @@ public class DataSourceConfigureManager {
         if (isInitialized)
             return;
 
-        encrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECERET_KEY);
         connectionStringProvider.initialize(settings);
         isInitialized |= true;
     }
@@ -107,6 +106,13 @@ public class DataSourceConfigureManager {
         addDataSourceConfigures(configures);
 
         if (sourceType == SourceType.Remote) {
+            try {
+                if (encrypter == null) {
+                    encrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECERET_KEY);
+                }
+            } catch (Throwable e) {
+            }
+
             addConnectionStringChangedListeners(names);
 
             boolean isAdded = isPoolPropertiesListenerAdded.get().booleanValue();

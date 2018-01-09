@@ -26,6 +26,11 @@ public class DataSourceLocator {
         this.provider = provider;
     }
 
+    // to be refactored
+    public static boolean containsKey(String name) {
+        return cache.containsKey(name);
+    }
+
     /**
      * This is used for initialize datasource for thirdparty framework
      */

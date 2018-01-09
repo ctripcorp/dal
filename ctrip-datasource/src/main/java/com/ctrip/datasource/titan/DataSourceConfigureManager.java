@@ -249,12 +249,12 @@ public class DataSourceConfigureManager {
                     // connection string changed
                     if (names != null && names.size() > 0) {
                         executeNotifyTask(names, connectionStringChanged);
-                        logger.debug(String.format("DAL debug:(addNotifyTask)executeNotifyTask for connection string"));
+                        logger.debug("DAL debug:(addNotifyTask)executeNotifyTask for connection string");
                     } else { // datasource.properties changed
                         Set<String> keySet = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
                         connectionStringChanged &= false;
                         executeNotifyTask(keySet, connectionStringChanged);
-                        logger.debug(String.format("DAL debug:(addNotifyTask)executeNotifyTask for pool properties"));
+                        logger.debug("DAL debug:(addNotifyTask)executeNotifyTask for pool properties");
                     }
                 } catch (Throwable e) {
                     Cat.logError(e);
@@ -356,7 +356,7 @@ public class DataSourceConfigureManager {
     public void register(String name, DataSourceConfigureChangeListener listener) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         dataSourceConfigureChangeListeners.put(keyName, listener);
-        logger.debug(String.format("DAL debug:(register)add listener for %s", name));
+        logger.debug("DAL debug:(register)add listener for {}", name);
     }
 
     private Map<String, DataSourceConfigureChangeListener> copyChangeListeners(

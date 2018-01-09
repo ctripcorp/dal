@@ -291,7 +291,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
                 Boolean firstTime = isFirstTime.get().booleanValue();
                 if (firstTime) {
                     isFirstTime.compareAndSet(true, false);
-                    logger.debug(String.format("DAL debug:(addPoolPropertiesChangedListener)first time onLoad"));
+                    logger.debug("DAL debug:(addPoolPropertiesChangedListener)first time onLoad");
                     return;
                 }
 

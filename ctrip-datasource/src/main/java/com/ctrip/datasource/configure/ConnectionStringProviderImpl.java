@@ -137,16 +137,16 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
 
             for (Map.Entry<String, DataSourceConfigure> name : dataSourceConfigures.entrySet()) {
-                logger.debug(String.format("DAL debug:(initializeConnectionStrings)local:name:%s,url:%s", name.getKey(),
-                        name.getValue().getConnectionUrl()));
+                logger.debug("DAL debug:(initializeConnectionStrings)local:name:{},url:{}", name.getKey(),
+                        name.getValue().getConnectionUrl());
             }
         } else {
             try {
                 dataSourceConfigures = getConnectionStrings(dbNames);
 
                 for (Map.Entry<String, DataSourceConfigure> name : dataSourceConfigures.entrySet()) {
-                    logger.debug(String.format("DAL debug:(initializeConnectionStrings)remote:name:%s,url:%s",
-                            name.getKey(), name.getValue().getConnectionUrl()));
+                    logger.debug("DAL debug:(initializeConnectionStrings)remote:name:{},url:{}", name.getKey(),
+                            name.getValue().getConnectionUrl());
                 }
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
@@ -257,8 +257,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                 String keyName = ConnectionStringKeyHelper.getKeyName(name);
                 if (!keyNames.contains(keyName)) {
                     keyNames.add(keyName);
-                    logger.debug(String.format("DAL debug:(addConnectionStringChangedListener)key %s first time onLoad",
-                            keyName));
+                    logger.debug("DAL debug:(addConnectionStringChangedListener)key {} first time onLoad", keyName);
                     return;
                 }
 

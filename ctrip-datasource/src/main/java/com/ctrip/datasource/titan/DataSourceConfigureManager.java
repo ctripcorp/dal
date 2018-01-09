@@ -4,7 +4,6 @@ import com.ctrip.datasource.configure.ConnectionStringProviderImpl;
 import com.ctrip.datasource.configure.PoolPropertiesProviderImpl;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.common.enums.SourceType;
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
@@ -13,6 +12,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
@@ -114,8 +114,6 @@ public class DataSourceConfigureManager {
                 addPoolPropertiesChangedListeners();
                 isPoolPropertiesListenerAdded.compareAndSet(false, true);
             }
-
-            DalClientFactory.warmUpConnections();
         }
 
         logger.info("--- End datasource config  ---");
@@ -332,11 +330,14 @@ public class DataSourceConfigureManager {
 
                 DataSourceConfigureChangeListener listener = listeners.get(keyName);
                 if (listener == null) {
-                    String msg = String.format("Listener of %s is null.", keyName);
-                    Exception exception = new RuntimeException(msg);
-                    Cat.logError(exception);
-                    logger.error(msg, exception);
-                    throw exception;
+                    boolean containsKey = DataSourceLocator.containsKey(keyName);
+                    if (containsKey) {
+                        String msg = String.format("Listener of %s is null.", keyName);
+                        Exception exception = new RuntimeException(msg);
+                        Cat.logError(exception);
+                        logger.error(msg, exception);
+                        throw exception;
+                    }
                 }
 
                 DataSourceConfigureChangeEvent event =

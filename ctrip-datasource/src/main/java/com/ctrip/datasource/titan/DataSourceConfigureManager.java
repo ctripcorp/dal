@@ -337,13 +337,14 @@ public class DataSourceConfigureManager {
                 DataSourceConfigureChangeListener listener = listeners.get(keyName);
                 if (listener == null) {
                     boolean containsKey = DataSourceLocator.containsKey(keyName);
-                    if (containsKey) {
-                        String msg = String.format("Listener of %s is null.", keyName);
-                        Exception exception = new RuntimeException(msg);
-                        Cat.logError(exception);
-                        logger.error(msg, exception);
-                        throw exception;
-                    }
+                    if (!containsKey)
+                        continue;
+
+                    String msg = String.format("Listener of %s is null.", keyName);
+                    Exception exception = new RuntimeException(msg);
+                    Cat.logError(exception);
+                    logger.error(msg, exception);
+                    throw exception;
                 }
 
                 DataSourceConfigureChangeEvent event =

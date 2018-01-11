@@ -25,13 +25,15 @@ public class DalDataSourceFactoryTest {
         try {
             DalDataSourceFactory factory = new DalDataSourceFactory();
             factory.createDataSource(name);
+            DataSourceLocator locator = new DataSourceLocator();
+            DataSource dataSource = locator.getDataSource(name);
+            Connection connection = dataSource.getConnection();
+            DatabaseMetaData metaData = connection.getMetaData();
+            String url = metaData.getURL();
+            Assert.assertTrue(url != null);
         } catch (Throwable e) {
             Assert.assertTrue(false);
         }
-
-        DataSourceLocator locator = new DataSourceLocator();
-        DataSource dataSource = locator.getDataSource(name);
-        Assert.assertTrue(dataSource != null);
     }
 
     @Test

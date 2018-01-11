@@ -14,6 +14,10 @@ public interface ConnectionStringProvider {
 
     Map<String, DataSourceConfigure> getConnectionStrings(Set<String> dbNames) throws Exception;
 
+    DataSourceConfigure parseConnectionString(String name, String connectionString);
+
+    DataSourceConfigure getConnectionStringProperties(DataSourceConfigure configure);
+
     void addConnectionStringChangedListener(final String name, final ConnectionStringChanged callback);
 
     void clear();

@@ -110,13 +110,13 @@ public class DataSourceTerminator {
                                 String.format("Force closing DataSource %s,elapsed seconds:%s,abandoned timeout:%s.",
                                         name, elapsedSeconds, abandonedTimeout));
                     } else {
-                        success &= false;
+                        success = false;
                     }
                 }
             } catch (Throwable e) {
                 logger.warn(e.getMessage(), e);
                 addRetryTime(singleDataSource.getName());
-                success &= false;
+                success = false;
             }
 
             return success;

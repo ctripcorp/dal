@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
@@ -13,6 +14,7 @@ import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.log.LogEntry;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.status.ProductVersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,11 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
 
+    private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
+    private static final String DAL_NOTIFY_LISTENER = "DataSource::notifyListener";
+
+    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
+
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
@@ -95,6 +102,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         return appId;
     }
 
+    @Override
     public void initialize(Map<String, String> settings) throws DalException {
         startUpLog.clear();
         config = new HashMap<>(settings);
@@ -127,6 +135,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         }
     }
 
+    @Override
     public Map<String, DataSourceConfigure> initializeConnectionStrings(Set<String> dbNames, SourceType sourceType) {
         Map<String, DataSourceConfigure> dataSourceConfigures = null;
         boolean useLocal = getUseLocal();
@@ -181,9 +190,30 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         throw e;
     }
 
+    @Override
     public Map<String, DataSourceConfigure> getConnectionStrings(Set<String> dbNames) throws Exception {
         refreshConnectionStringMapConfig(dbNames);
         return _getConnectionStrings(dbNames);
+    }
+
+    @Override
+    public DataSourceConfigure parseConnectionString(String name, String connectionString) {
+        return parser.parse(name, connectionString);
+    }
+
+    @Override
+    public DataSourceConfigure getConnectionStringProperties(DataSourceConfigure configure) {
+        if (configure == null)
+            return null;
+
+        DataSourceConfigure c = new DataSourceConfigure();
+        c.setName(configure.getName());
+        c.setConnectionUrl(configure.getConnectionUrl());
+        c.setUserName(configure.getUserName());
+        c.setPassword(configure.getPassword());
+        c.setDriverClass(configure.getDriverClass());
+        c.setVersion(configure.getVersion());
+        return c;
     }
 
     private void refreshConnectionStringMapConfig(Set<String> dbNames) {
@@ -246,6 +276,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         return configures;
     }
 
+    @Override
     public void addConnectionStringChangedListener(final String name, final ConnectionStringChanged callback) {
         MapConfig config = getConfigMap(name);
         if (config == null)
@@ -254,11 +285,37 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
+                if (map == null || map.isEmpty())
+                    throw new RuntimeException("Parameter for onLoad event is null.");
+
                 String keyName = ConnectionStringKeyHelper.getKeyName(name);
                 if (!keyNames.contains(keyName)) {
                     keyNames.add(keyName);
                     logger.debug("DAL debug:(addConnectionStringChangedListener)key {} first time onLoad", keyName);
                     return;
+                }
+
+                String normalConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_NORMAL);
+                if (normalConnectionString == null || normalConnectionString.isEmpty())
+                    throw new RuntimeException("Normal connection string is null.");
+
+                String failoverConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_FAILOVER);
+                if (failoverConnectionString == null || failoverConnectionString.isEmpty())
+                    throw new RuntimeException("Failover connection string is null.");
+
+                DataSourceConfigure configure = parseConnectionString(name, normalConnectionString);
+                String newVersion = configure.getVersion();
+                DataSourceConfigure oldConfigure = dataSourceConfigureLocator.getDataSourceConfigure(name);
+                String oldVersion = oldConfigure.getVersion();
+
+                if (newVersion != null && oldVersion != null) {
+                    if (newVersion.equals(oldVersion)) {
+                        String msg = String.format("New version of %s equals to old version.", name);
+                        String transactionName = String.format("%s:%s", DAL_NOTIFY_LISTENER, name);
+                        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, msg);
+                        logger.info(msg);
+                        return;
+                    }
                 }
 
                 callback.onChanged(map);
@@ -302,6 +359,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     }
 
     // for unit test only
+    @Override
     public void clear() {
         isDebug = false;
         String subEnv = null;

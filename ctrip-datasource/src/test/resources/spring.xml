@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
+
+    <context:component-scan base-package="com.ctrip.framework.dal.demo"/>
+
+    <context:annotation-config/>
+
+    <bean id="dalDataSourceFactory" class="com.ctrip.datasource.configure.DalDataSourceFactory"/>
+
+    <bean id="dataSource" factory-bean="dalDataSourceFactory" factory-method="createDataSource">
+        <constructor-arg value="mysqldaltest01db_W"/>
+    </bean>
+
+    <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+    <!--<property name="dataSource" ref="dataSource"/>-->
+    <!--<property name="configLocation" value="classpath:mybatis-config.xml"/>-->
+    <!--</bean>-->
+
+</beans>

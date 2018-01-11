@@ -8,8 +8,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class DataSourcePoolSettingsTest {
-    private static final String databaseName = "mysqldaltest01db_w";
+public class DataSourcePoolPropertiesTest {
+    private static final String name = "mysqldaltest01db_w";
+    private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -17,13 +18,51 @@ public class DataSourcePoolSettingsTest {
     }
 
     @Test
+    public void testPoolPropertiesDynamicEnabledFunction() throws Exception {
+        DataSourceConfigure configure1 = locator.getDataSourceConfigure(name);
+        boolean dynamicEnabled1 = configure1.dynamicPoolPropertiesEnabled();
+        System.out.println(String.format("dynamicEnabled:%s", dynamicEnabled1));
+        int maxActive1 = configure1.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, 200);
+        System.out.println(String.format("maxActive:%s", maxActive1));
+        String userName1 = configure1.getUserName();
+        System.out.println(String.format("UserName:%s", userName1));
+        String password1 = configure1.getPassword();
+        System.out.println(String.format("Password:%s", password1));
+        String url1 = configure1.getConnectionUrl();
+        System.out.println(String.format("Url:%s", url1));
+        String driver1 = configure1.getDriverClass();
+        System.out.println(String.format("Driver:%s", driver1));
+        String version1 = configure1.getVersion();
+        System.out.println(String.format("Version:%s", version1));
+
+        System.out.println("Sleep for 30 seconds.");
+        Thread.sleep(30 * 1000);
+
+        DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
+        boolean dynamicEnabled2 = configure2.dynamicPoolPropertiesEnabled();
+        System.out.println(String.format("dynamicEnabled:%s", dynamicEnabled2));
+        int maxActive2 = configure2.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, 200);
+        System.out.println(String.format("maxActive:%s", maxActive2));
+        String userName2 = configure1.getUserName();
+        System.out.println(String.format("UserName:%s", userName2));
+        String password2 = configure1.getPassword();
+        System.out.println(String.format("Password:%s", password2));
+        String url2 = configure1.getConnectionUrl();
+        System.out.println(String.format("Url:%s", url2));
+        String driver2 = configure1.getDriverClass();
+        System.out.println(String.format("Driver:%s", driver2));
+        String version2 = configure1.getVersion();
+        System.out.println(String.format("Version:%s", version2));
+    }
+
+    @Test
     public void testDataSourcePoolSettings() throws Exception {
         DataSourceConfigure configure1 = getDefaultDataSourceConfigure();
-        DataSourceConfigureLocator.getInstance().addDataSourceConfigure(databaseName, configure1);
+        locator.addDataSourceConfigure(name, configure1);
 
         // mock QConfig modifying
         modifyDataSourceConfigure(configure1);
-        DataSourceConfigure configure2 = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(databaseName);
+        DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
 
         boolean testWhileIdle = configure2.getBooleanProperty(DataSourceConfigureConstants.TESTWHILEIDLE,
                 DataSourceConfigureConstants.DEFAULT_TESTWHILEIDLE);
@@ -154,5 +193,4 @@ public class DataSourcePoolSettingsTest {
         configure.setProperty(DataSourceConfigureConstants.INIT_SQL, "");
         configure.setProperty(DataSourceConfigureConstants.INIT_SQL2, "");
     }
-
 }

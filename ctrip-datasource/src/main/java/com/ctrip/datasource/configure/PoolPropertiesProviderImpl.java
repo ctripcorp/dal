@@ -44,8 +44,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     public synchronized static PoolPropertiesProviderImpl getInstance() {
         if (instance == null) {
             instance = new PoolPropertiesProviderImpl();
-            instance.refreshPoolPropertiesMapConfig();
-            instance.setPoolProperties();
+            instance.initializePoolProperties();
         }
         return instance;
     }
@@ -54,14 +53,16 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         return mapConfigReference.get();
     }
 
-    public void refreshPoolProperties() {
+    @Override
+    public void initializePoolProperties() {
         refreshPoolPropertiesMapConfig();
-        setPoolProperties();
+        refreshPoolProperties();
     }
 
     private void refreshPoolPropertiesMapConfig() {
         if (!Foundation.app().isAppIdSet())
             return;
+
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE);
         try {
             MapConfig config = getMapConfig();
@@ -83,12 +84,17 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         return MapConfig.get(DAL_APPNAME, DAL_DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
     }
 
-    private synchronized void setPoolProperties() {
+    private void refreshPoolProperties() {
         MapConfig config = mapConfigReference.get();
         if (config == null)
             return;
 
         Map<String, String> map = config.asMap();
+        setPoolProperties(map);
+    }
+
+    @Override
+    public void setPoolProperties(Map<String, String> map) {
         Map<String, String> originalMap = new HashMap<>(map);
         Map<String, String> datasource = new HashMap<>(); // app level
         Map<String, Map<String, String>> datasourceMap = new HashMap<>(); // datasource level
@@ -152,6 +158,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
      * datasource.xml ***Override order: global datasource <-- app level setting <-- datasource level setting <--
      * datasource.xml datasource
      */
+    @Override
     public DataSourceConfigure mergeDataSourceConfigure(DataSourceConfigure configure) {
         DataSourceConfigure c = cloneDataSourceConfigure(null);
         Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_MERGE_DATASOURCE);
@@ -280,6 +287,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         }
     }
 
+    @Override
     public void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback) {
         MapConfig config = getConfig();
         if (config == null)
@@ -288,6 +296,9 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
+                if (map == null || map.isEmpty())
+                    throw new RuntimeException("Parameter for onLoad event is null.");
+
                 Boolean firstTime = isFirstTime.get().booleanValue();
                 if (firstTime) {
                     isFirstTime.compareAndSet(true, false);
@@ -295,9 +306,26 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
                     return;
                 }
 
+                boolean dynamicEnabled = dynamicPoolPropertiesEnabled(map);
+                if (!dynamicEnabled) {
+                    logger.info(String.format("DAL DataSource DynamicPoolProperties does not enabled."));
+                    return;
+                }
+
                 callback.onChanged(map);
             }
         });
+    }
+
+    private boolean dynamicPoolPropertiesEnabled(Map<String, String> map) {
+        if (map == null || map.isEmpty())
+            return false;
+
+        String value = map.get(DataSourceConfigureConstants.ENABLE_DYNAMIC_POOL_PROPERTIES);
+        if (value == null)
+            return false;
+
+        return Boolean.parseBoolean(value);
     }
 
 }

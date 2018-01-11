@@ -63,7 +63,7 @@ public class DataSourceConfigureManager {
     private PoolPropertiesProvider poolPropertiesProvider = PoolPropertiesProviderImpl.getInstance();
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
-    private DalEncrypter encrypter = null;
+    private DalEncrypter dalEncrypter = null;
     private volatile boolean isInitialized = false;
 
     private Map<String, DataSourceConfigureChangeListener> dataSourceConfigureChangeListeners =
@@ -81,7 +81,7 @@ public class DataSourceConfigureManager {
             return;
 
         connectionStringProvider.initialize(settings);
-        isInitialized |= true;
+        isInitialized = true;
     }
 
     public DataSourceConfigure getDataSourceConfigure(String name) {
@@ -106,13 +106,6 @@ public class DataSourceConfigureManager {
         addDataSourceConfigures(configures);
 
         if (sourceType == SourceType.Remote) {
-            try {
-                if (encrypter == null) {
-                    encrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECERET_KEY);
-                }
-            } catch (Throwable e) {
-            }
-
             addConnectionStringChangedListeners(names);
 
             boolean isAdded = isPoolPropertiesListenerAdded.get().booleanValue();
@@ -121,8 +114,6 @@ public class DataSourceConfigureManager {
                 isPoolPropertiesListenerAdded.compareAndSet(false, true);
             }
         }
-
-        logger.info("--- End datasource config  ---");
     }
 
     private Set<String> getFilteredNames(Set<String> names, SourceType sourceType) throws Exception {
@@ -159,7 +150,6 @@ public class DataSourceConfigureManager {
         Map<String, DataSourceConfigure> configures = new HashMap<>();
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
             String key = entry.getKey();
-            logger.info("--- Key datasource config for " + key + " ---");
             DataSourceConfigure configure = poolPropertiesProvider.mergeDataSourceConfigure(entry.getValue());
             configures.put(key, configure);
         }
@@ -198,28 +188,34 @@ public class DataSourceConfigureManager {
 
     private void addConnectionStringNotifyTask(String name, Map<String, String> map) {
         String transactionName = String.format("%s:%s", DAL_NOTIFY_LISTENER, name);
-        Transaction transaction = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
+        Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, transactionName);
         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_START);
-        if (map != null) {
-            String normalConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_NORMAL);
-            String failoverConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_FAILOVER);
-            transaction.addData(encrypter.desEncrypt(normalConnectionString));
-            transaction.addData(encrypter.desEncrypt(failoverConnectionString));
-        }
+
+        String normalConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_NORMAL);
+        String failoverConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_FAILOVER);
+        DalEncrypter encrypter = getEncrypter();
+        t.addData(encrypter.desEncrypt(normalConnectionString));
+        t.addData(encrypter.desEncrypt(failoverConnectionString));
+
+        DataSourceConfigure configure = connectionStringProvider.parseConnectionString(name, normalConnectionString);
+        Map<String, DataSourceConfigure> configures = new HashMap<>();
+        configures.put(name, configure);
+        configures = mergeDataSourceConfigures(configures);
 
         Set<String> names = new HashSet<>();
         names.add(name);
+
         try {
-            addNotifyTask(names);
+            addNotifyTask(names, configures);
             Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, DAL_NOTIFY_LISTENER_END);
-            transaction.setStatus(Transaction.SUCCESS);
+            t.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             DalConfigException exception = new DalConfigException(e);
-            transaction.setStatus(exception);
+            t.setStatus(exception);
             Cat.logError(exception);
             logger.error(String.format("DalConfigException:%s", e.getMessage()), exception);
         } finally {
-            transaction.complete();
+            t.complete();
         }
     }
 
@@ -227,39 +223,43 @@ public class DataSourceConfigureManager {
         poolPropertiesProvider.addPoolPropertiesChangedListener(new PoolPropertiesChanged() {
             @Override
             public void onChanged(Map<String, String> map) {
-                Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
-                t.addData(DAL_NOTIFY_LISTENER_START);
-                try {
-                    addNotifyTask(null);
-                    t.addData(DAL_NOTIFY_LISTENER_END);
-                    t.setStatus(Transaction.SUCCESS);
-                } catch (Throwable e) {
-                    String msg = "DataSourceConfigureProcessor addChangeListener warn:" + e.getMessage();
-                    logger.warn(msg, e);
-                } finally {
-                    t.complete();
-                }
+                addPoolPropertiesNotifyTask(map);
             }
         });
     }
 
-    private void addNotifyTask(final Set<String> names) {
+    private void addPoolPropertiesNotifyTask(Map<String, String> map) {
+        Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DAL_NOTIFY_LISTENER);
+        t.addData(DAL_NOTIFY_LISTENER_START);
+
+        try {
+            poolPropertiesProvider.setPoolProperties(map);
+            Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
+            Map<String, DataSourceConfigure> configures = new HashMap<>();
+            for (String name : names) {
+                DataSourceConfigure configure = getDataSourceConfigure(name);
+                configure = connectionStringProvider.getConnectionStringProperties(configure);
+                configures.put(name, configure);
+            }
+
+            configures = mergeDataSourceConfigures(configures);
+            addNotifyTask(names, configures);
+            t.addData(DAL_NOTIFY_LISTENER_END);
+            t.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            String msg = "DataSourceConfigureProcessor addChangeListener warn:" + e.getMessage();
+            logger.warn(msg, e);
+        } finally {
+            t.complete();
+        }
+    }
+
+    private void addNotifyTask(final Set<String> names, final Map<String, DataSourceConfigure> configures) {
         executor.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    boolean connectionStringChanged = true;
-
-                    // connection string changed
-                    if (names != null && names.size() > 0) {
-                        executeNotifyTask(names, connectionStringChanged);
-                        logger.debug("DAL debug:(addNotifyTask)executeNotifyTask for connection string");
-                    } else { // datasource.properties changed
-                        Set<String> keySet = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
-                        connectionStringChanged &= false;
-                        executeNotifyTask(keySet, connectionStringChanged);
-                        logger.debug("DAL debug:(addNotifyTask)executeNotifyTask for pool properties");
-                    }
+                    executeNotifyTask(names, configures);
                 } catch (Throwable e) {
                     Cat.logError(e);
                 }
@@ -267,21 +267,12 @@ public class DataSourceConfigureManager {
         });
     }
 
-    private void executeNotifyTask(Set<String> names, boolean isConnectionStringChanged) throws Exception {
+    private void executeNotifyTask(Set<String> names, Map<String, DataSourceConfigure> configures) throws Exception {
         if (names == null || names.isEmpty())
             return;
 
-        Map<String, DataSourceConfigure> configures = connectionStringProvider.getConnectionStrings(names);
-        poolPropertiesProvider.refreshPoolProperties();
-        configures = mergeDataSourceConfigures(configures);
-
-        if (!isConnectionStringChanged) {
-            boolean dynamicEnabled = dynamicPoolPropertiesEnabled(configures);
-            if (!dynamicEnabled) {
-                logger.info(String.format("DAL DataSource DynamicPoolProperties does not enabled."));
-                return;
-            }
-        }
+        if (configures == null || configures.isEmpty())
+            return;
 
         Map<String, DataSourceConfigureChangeListener> listeners =
                 copyChangeListeners(dataSourceConfigureChangeListeners);
@@ -294,7 +285,6 @@ public class DataSourceConfigureManager {
             try {
                 // old configure
                 DataSourceConfigure oldConfigure = getDataSourceConfigure(name);
-                String oldVersion = oldConfigure.getVersion();
                 String oldConnectionUrl = oldConfigure.toConnectionUrl();
 
                 // log
@@ -308,7 +298,6 @@ public class DataSourceConfigureManager {
 
                 // new configure
                 DataSourceConfigure newConfigure = configures.get(keyName);
-                String newVersion = newConfigure.getVersion();
                 String newConnectionUrl = newConfigure.toConnectionUrl();
 
                 // log
@@ -321,16 +310,6 @@ public class DataSourceConfigureManager {
                         DATASOURCE_NEW_CONFIGURE, name, poolPropertiesHelper.mapToString(newConfigure.toMap())));
 
                 transaction.setStatus(Transaction.SUCCESS);
-
-                // compare version of connection string
-                if (isConnectionStringChanged && oldVersion != null && newVersion != null) {
-                    if (oldVersion.equals(newVersion)) {
-                        String msg = String.format("New version of %s equals to old version.", name);
-                        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, msg);
-                        logger.info(msg);
-                        continue;
-                    }
-                }
 
                 dataSourceConfigureLocator.addDataSourceConfigure(name, newConfigure);
 
@@ -375,6 +354,18 @@ public class DataSourceConfigureManager {
         return new ConcurrentHashMap<>(map);
     }
 
+    private synchronized DalEncrypter getEncrypter() {
+        if (dalEncrypter == null) {
+            try {
+                dalEncrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECERET_KEY);
+            } catch (Throwable e) {
+                logger.warn("DalEncrypter initialization failed.");
+            }
+        }
+
+        return dalEncrypter;
+    }
+
     // for unit test only
     public void clear() {
         isInitialized = false;
@@ -382,14 +373,6 @@ public class DataSourceConfigureManager {
         keyNameMap = new ConcurrentHashMap<>();
         listenerKeyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
         connectionStringProvider.clear();
-    }
-
-    private boolean dynamicPoolPropertiesEnabled(Map<String, DataSourceConfigure> map) {
-        if (map == null || map.isEmpty())
-            return false;
-
-        DataSourceConfigure configure = map.entrySet().iterator().next().getValue();
-        return configure.dynamicPoolPropertiesEnabled();
     }
 
 }

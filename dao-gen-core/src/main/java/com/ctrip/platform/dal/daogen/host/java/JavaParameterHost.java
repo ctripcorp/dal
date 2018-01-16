@@ -320,8 +320,8 @@ public class JavaParameterHost extends AbstractParameterHost {
         return defaultValue != null;
     }
 
-    public boolean isStringType() {
-        return DbUtils.isStringType(sqlType);
-    }
+    // public boolean isStringType() {
+    // return DbUtils.isStringType(sqlType);
+    // }
 
 }

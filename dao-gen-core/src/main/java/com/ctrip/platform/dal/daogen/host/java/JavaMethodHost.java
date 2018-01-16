@@ -48,7 +48,7 @@ public class JavaMethodHost {
     private String shards = "shards";
     private String async = "async";
     private String callback = "callback";
-    private boolean length;
+    // private boolean length;
 
     public String getOrderByExp() {
         return orderByExp;
@@ -565,12 +565,12 @@ public class JavaMethodHost {
         return result;
     }
 
-    public boolean getLength() {
-        return length;
-    }
-
-    public void setLength(boolean length) {
-        this.length = length;
-    }
+    // public boolean getLength() {
+    // return length;
+    // }
+    //
+    // public void setLength(boolean length) {
+    // this.length = length;
+    // }
 
 }

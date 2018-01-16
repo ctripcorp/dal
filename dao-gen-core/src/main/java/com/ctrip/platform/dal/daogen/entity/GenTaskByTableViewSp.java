@@ -95,9 +95,9 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
     @Type(value = Types.LONGVARCHAR)
     private String approveMsg;
 
-    @Column(name = "length")
-    @Type(value = Types.TINYINT)
-    private Boolean length;
+    // @Column(name = "length")
+    // @Type(value = Types.TINYINT)
+    // private Boolean length;
 
     private String allInOneName;
 
@@ -292,13 +292,13 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
         return str;
     }
 
-    public Boolean getLength() {
-        return length;
-    }
-
-    public void setLength(Boolean length) {
-        this.length = length;
-    }
+    // public Boolean getLength() {
+    // return length;
+    // }
+    //
+    // public void setLength(Boolean length) {
+    // this.length = length;
+    // }
 
     @Override
     public int compareTo(GenTaskByTableViewSp o) {

@@ -39,9 +39,9 @@ public class GenTaskByTableViewResource extends ApproveResource {
             @FormParam("table_names") String table_names, @FormParam("view_names") String view_names,
             @FormParam("sp_names") String sp_names, @FormParam("prefix") String prefix,
             @FormParam("suffix") String suffix, @FormParam("cud_by_sp") boolean cud_by_sp,
-            @FormParam("pagination") boolean pagination, @FormParam("length") boolean length,
-            @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
-            @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+            @FormParam("pagination") boolean pagination, @FormParam("version") int version,
+            @FormParam("action") String action, @FormParam("comment") String comment,
+            @FormParam("sql_style") String sql_style, // C#风格或者Java风格 @FormParam("length") boolean length,
             @FormParam("api_list") String api_list) throws Exception {
         try {
             GenTaskByTableViewSp task = new GenTaskByTableViewSp();
@@ -64,7 +64,7 @@ public class GenTaskByTableViewResource extends ApproveResource {
                 task.setSuffix(suffix);
                 task.setCud_by_sp(cud_by_sp);
                 task.setPagination(pagination);
-                task.setLength(length);
+                // task.setLength(length);
                 task.setUpdate_user_no(user.getUserName() + "(" + userNo + ")");
                 task.setUpdate_time(new Timestamp(System.currentTimeMillis()));
                 task.setComment(comment);

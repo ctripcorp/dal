@@ -231,7 +231,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         vhost.setDbSetName(tableViewSp.getDatabaseSetName());
         vhost.setPojoClassName(className);
         vhost.setViewName(viewName);
-        vhost.setLength(tableViewSp.getLength());
+        // vhost.setLength(tableViewSp.getLength());
 
         List<String> primaryKeyNames = DbUtils.getPrimaryKeyNames(tableViewSp.getAllInOneName(), viewName);
         List<AbstractParameterHost> params = DbUtils.getAllColumnNames(tableViewSp.getAllInOneName(), viewName,
@@ -282,7 +282,7 @@ public class JavaDataPreparerOfTableViewSpProcessor extends AbstractJavaDataPrep
         host.setDbName(tableViewSp.getDatabaseSetName());
         host.setPojoClassName(className);
         host.setSpName(spName);
-        host.setLength(tableViewSp.getLength());
+        // host.setLength(tableViewSp.getLength());
 
         List<AbstractParameterHost> params = DbUtils.getSpParams(tableViewSp.getAllInOneName(), sp,
                 new JavaSpParamResultSetExtractor(tableViewSp.getAllInOneName(), sp.getName()));

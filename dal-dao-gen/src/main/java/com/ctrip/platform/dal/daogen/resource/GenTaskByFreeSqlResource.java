@@ -46,7 +46,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
             @FormParam("sql_content") String sql_content, @FormParam("params") String params,
             @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
             @FormParam("scalarType") String scalarType, @FormParam("pagination") boolean pagination,
-            @FormParam("length") boolean length, @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+            @FormParam("sql_style") String sql_style, // C#风格或者Java风格 @FormParam("length") boolean length,
             @FormParam("hints") String hints) throws Exception {
         try {
             GenTaskByFreeSql task = new GenTaskByFreeSql();
@@ -73,7 +73,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
                 task.setComment(comment);
                 task.setScalarType(scalarType);
                 task.setPagination(pagination);
-                task.setLength(length);
+                // task.setLength(length);
                 task.setSql_style(sql_style);
 
                 if ("简单类型".equals(pojo_name)) {

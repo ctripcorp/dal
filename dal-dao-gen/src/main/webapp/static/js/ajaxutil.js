@@ -19,7 +19,7 @@
         postData["suffix"] = $("#suffix").val();
         postData["cud_by_sp"] = $("#cud_by_sp").is(":checked");
         postData["pagination"] = $("#pagination").is(":checked");
-        postData["length"] = $("#standard_length_property").is(":checked");
+        // postData["length"] = $("#standard_length_property").is(":checked");
         var api_list = new Array();
         $.each($(".step2-1-2 input:checked"), function (index, value) {
             api_list.push($(value).attr("id"));
@@ -60,7 +60,7 @@
 
         postData["fields"] = $("#fields").multipleSelect("getSelects").join(",");
         postData["sql_content"] = ace.edit("sql_builder").getValue();
-        postData["length"] = $("#build_length_property").is(":checked");
+        // postData["length"] = $("#build_length_property").is(":checked");
 
         var paramList = [];
         var paramValues = [];
@@ -189,7 +189,7 @@
 
         $("#error_msg").text("");
 
-        postData["length"] = $("#free_length_property").is(":checked");
+        // postData["length"] = $("#free_length_property").is(":checked");
         postData["crud_type"] = $("#free_sql_crud_option").val();
         postData["sql_content"] = ace.edit("sql_editor").getValue();
         var paramList = [];

@@ -87,9 +87,9 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
     @Type(value = Types.BIT)
     private Boolean pagination;
 
-    @Column(name = "length")
-    @Type(value = Types.TINYINT)
-    private Boolean length;
+//    @Column(name = "length")
+//    @Type(value = Types.TINYINT)
+//    private Boolean length;
 
     @Column(name = "sql_style")
     @Type(value = Types.VARCHAR)
@@ -249,13 +249,13 @@ public class GenTaskByFreeSql implements Comparable<GenTaskByFreeSql>, DalPojo {
         this.pagination = pagination;
     }
 
-    public Boolean getLength() {
-        return length;
-    }
-
-    public void setLength(Boolean length) {
-        this.length = length;
-    }
+    // public Boolean getLength() {
+    // return length;
+    // }
+    //
+    // public void setLength(Boolean length) {
+    // this.length = length;
+    // }
 
     public String getSql_style() {
         return sql_style;

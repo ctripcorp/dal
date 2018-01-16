@@ -60,7 +60,7 @@ public class JavaColumnNameResultSetExtractor implements DalResultSetExtractor<L
                     }
 
                     int columnSize = rs.getInt(COLUMN_SIZE);
-                    host.setLength(columnSize);
+                    // host.setLength(columnSize);
                     if (javaClass == null) {
                         if (typeName != null && typeName.equalsIgnoreCase("sql_variant")) {
                             return null;

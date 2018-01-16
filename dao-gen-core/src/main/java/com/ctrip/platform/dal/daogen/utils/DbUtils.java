@@ -716,8 +716,8 @@ public class DbUtils {
         return set;
     }
 
-    public static boolean isStringType(int sqlType) {
-        return stringTypeSet.contains(sqlType);
-    }
+    // public static boolean isStringType(int sqlType) {
+    // return stringTypeSet.contains(sqlType);
+    // }
 
 }

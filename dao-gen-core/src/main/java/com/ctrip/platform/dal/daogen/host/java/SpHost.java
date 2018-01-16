@@ -16,7 +16,7 @@ public class SpHost {
     private String callParameters;
     private List<JavaParameterHost> fields = new ArrayList<>();
     private String dbSetName;
-    private boolean length;
+//    private boolean length;
 
     public Set<String> getDaoImports() {
         Set<String> imports = new TreeSet<>();
@@ -119,12 +119,12 @@ public class SpHost {
         this.dbSetName = dbSetName;
     }
 
-    public boolean isLength() {
-        return length;
-    }
-
-    public void setLength(boolean length) {
-        this.length = length;
-    }
+    // public boolean isLength() {
+    // return length;
+    // }
+    //
+    // public void setLength(boolean length) {
+    // this.length = length;
+    // }
 
 }

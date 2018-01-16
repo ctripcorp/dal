@@ -50,9 +50,10 @@ public class GenTaskBySqlBuilderResource extends ApproveResource {
             @FormParam("condition") String condition, @FormParam("sql_content") String sql_content,
             @FormParam("version") int version, @FormParam("action") String action, @FormParam("params") String params,
             @FormParam("comment") String comment, @FormParam("scalarType") String scalarType,
-            @FormParam("pagination") boolean pagination, @FormParam("length") boolean length,
-            @FormParam("orderby") String orderby, @FormParam("hints") String hints,
-            @FormParam("sql_style") String sql_style // C#风格或者Java风格
+            @FormParam("pagination") boolean pagination, @FormParam("orderby") String orderby,
+            @FormParam("hints") String hints, @FormParam("sql_style") String sql_style // C#风格或者Java风格
+                                                                                       // @FormParam("length") boolean
+                                                                                       // length,
     ) throws Exception {
         try {
             Status status = Status.OK();
@@ -82,7 +83,7 @@ public class GenTaskBySqlBuilderResource extends ApproveResource {
                 task.setPagination(pagination);
                 task.setOrderby(orderby);
                 task.setHints(hints);
-                task.setLength(length);
+                // task.setLength(length);
 
                 if (needApproveTask(project_id, user.getId())) {
                     task.setApproved(1);

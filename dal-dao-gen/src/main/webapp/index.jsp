@@ -285,10 +285,10 @@
                     <div class="row-fluid margin-bottom-20">
                         <label class="popup_label"><input id="pagination" type="checkbox" checked="true">增加分页方法</label>
                     </div>
-                    <div class="row-fluid margin-bottom-20" id="divStandardLength">
-                        <label class="popup_label"><input id="standard_length_property" type="checkbox">增加Column
-                            length属性</label>
-                    </div>
+                    <%--<div class="row-fluid margin-bottom-20" id="divStandardLength">--%>
+                    <%--<label class="popup_label"><input id="standard_length_property" type="checkbox">增加Column--%>
+                    <%--length属性</label>--%>
+                    <%--</div>--%>
                 </div>
                 <div class="steps step2-1-2 row-fluid">
                     <div class="panel-group" id="accordion">
@@ -452,13 +452,13 @@
                             </label>
                         </div>
                     </div>
-                    <div class="row-fluid" id="divBuildLength">
-                        <div class="control-group">
-                            <label class="popup_label">
-                                <input id="build_length_property" type="checkbox"> 增加Column length属性
-                            </label>
-                        </div>
-                    </div>
+                    <%--<div class="row-fluid" id="divBuildLength">--%>
+                    <%--<div class="control-group">--%>
+                    <%--<label class="popup_label">--%>
+                    <%--<input id="build_length_property" type="checkbox"> 增加Column length属性--%>
+                    <%--</label>--%>
+                    <%--</div>--%>
+                    <%--</div>--%>
                     <div class="row-fluid" style="margin-top: 16px;">
                         <div id="sql_builder" class="span12" style="height: 100px;">
                         </div>
@@ -593,13 +593,13 @@
                             </label>
                         </div>
                     </div>
-                    <div class="row-fluid" id="divFreeLength">
-                        <div class="control-group">
-                            <label class="popup_label">
-                                <input id="free_length_property" type="checkbox"> 增加Column length属性
-                            </label>
-                        </div>
-                    </div>
+                    <%--<div class="row-fluid" id="divFreeLength">--%>
+                    <%--<div class="control-group">--%>
+                    <%--<label class="popup_label">--%>
+                    <%--<input id="free_length_property" type="checkbox"> 增加Column length属性--%>
+                    <%--</label>--%>
+                    <%--</div>--%>
+                    <%--</div>--%>
                     <label class="control-label popup_label">输入SQL，占位符：Java请使用?，c#请使用@Name形式</label>
                     <div class="row-fluid">
                         <div id="sql_editor" class="span12" style="height: 200px;">

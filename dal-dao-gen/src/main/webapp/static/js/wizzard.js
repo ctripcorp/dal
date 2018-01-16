@@ -209,18 +209,18 @@
                 if (record.pagination != undefined) {
                     $("#pagination").prop("checked", record.pagination);
                 }
-                if (record.length != undefined) {
-                    $("#standard_length_property").prop("checked", record.length);
-                }
+                // if (record.length != undefined) {
+                //     $("#standard_length_property").prop("checked", record.length);
+                // }
             }
 
-            var divLength = $("#divStandardLength");
-            if ($("#sql_style").val() == "csharp") {
-                divLength.hide();
-            }
-            else {
-                divLength.show();
-            }
+            // var divLength = $("#divStandardLength");
+            // if ($("#sql_style").val() == "csharp") {
+            //     divLength.hide();
+            // }
+            // else {
+            //     divLength.show();
+            // }
 
             current.hide();
             step.show();
@@ -388,7 +388,7 @@
                 }
 
                 $("#free_sql_pagination").prop("checked", record.pagination);
-                $("#free_length_property").prop("checked", record.length);
+                // $("#free_length_property").prop("checked", record.length);
                 $("#free_sql_crud_option").val(record.crud_type);
                 $("#free_sql_crud_option").trigger("change");
 
@@ -397,13 +397,13 @@
                 }
             }
 
-            var divLength = $("#divFreeLength");
-            if ($("#sql_style").val() == "csharp") {
-                divLength.hide();
-            }
-            else {
-                divLength.show();
-            }
+            // var divLength = $("#divFreeLength");
+            // if ($("#sql_style").val() == "csharp") {
+            //     divLength.hide();
+            // }
+            // else {
+            //     divLength.show();
+            // }
 
         }).fail(function (data) {
             $("#error_msg").text("获取历史记录失败");
@@ -693,7 +693,7 @@
                 }
 
                 $("#auto_sql_pagination").prop("checked", record.pagination);
-                $("#build_length_property").prop("chcked", record.length);
+                // $("#build_length_property").prop("chcked", record.length);
                 $("#fields").multipleSelect("setSelects", record.fields.split(","));
 
                 if (record.condition != undefined && record.condition.length > 0) {
@@ -721,13 +721,13 @@
                 window.sql_builder.build();
             }
 
-            var divLength = $("#divBuildLength");
-            if ($("#sql_style").val() == "csharp") {
-                divLength.hide();
-            }
-            else {
-                divLength.show();
-            }
+            // var divLength = $("#divBuildLength");
+            // if ($("#sql_style").val() == "csharp") {
+            //     divLength.hide();
+            // }
+            // else {
+            //     divLength.show();
+            // }
 
             current.hide();
             $(".step2-2-1").show();

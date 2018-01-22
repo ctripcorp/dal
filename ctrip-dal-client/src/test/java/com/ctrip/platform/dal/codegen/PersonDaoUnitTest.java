@@ -408,7 +408,7 @@ public class PersonDaoUnitTest {
         for(Person p: daoPojos)
             p.setName("test" + i++);
 
-        int[] affected = dao.insert(hints.insertIdentityBack(), keyHolder, daoPojos);
+        int[] affected = dao.insert(hints.setIdentityBack(), keyHolder, daoPojos);
         assertArrayEquals(new int[]{1,1,1,1,},  affected);
         assertEquals(4, keyHolder.size());
         for(Person p: daoPojos) {
@@ -457,7 +457,7 @@ public class PersonDaoUnitTest {
         int i = 0;
         for(Person p: daoPojos)
             p.setName("test" + i++);
-        int affected = dao.combinedInsert(hints.insertIdentityBack(), keyHolder, daoPojos);
+        int affected = dao.combinedInsert(hints.setIdentityBack(), keyHolder, daoPojos);
         assertEquals(4, affected);
         for(Person p: daoPojos) {
             Person p2 = dao.queryByPk(p, hints.inShard(1).inTableShard(1));
@@ -484,7 +484,7 @@ public class PersonDaoUnitTest {
         int i = 0;
         for(Person p: daoPojos)
             p.setName("test" + i++);
-        dao.combinedInsert(hints.insertIdentityBack(), keyHolder, daoPojos);
+        dao.combinedInsert(hints.setIdentityBack(), keyHolder, daoPojos);
         for(Person p: daoPojos) {
             Person p2 = dao.queryByPk(p, hints.inTableShard(1));
             assertEquals(p.getName(), p2.getName());

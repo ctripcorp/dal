@@ -8,7 +8,7 @@ import org.apache.tomcat.jdbc.pool.PooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CtripConnectionState extends JdbcInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(CtripConnectionState.class);
@@ -16,7 +16,7 @@ public class CtripConnectionState extends JdbcInterceptor {
     private static final String DAL_CREATE_CONNECTION = "DataSource::createConnection";
     private static final String DAL_DESTROY_CONNECTION = "DataSource::destroyConnection";
 
-    private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
+    private AtomicBoolean isFirstTime = new AtomicBoolean(true);
 
     @Override
     public void reset(ConnectionPool parent, PooledConnection con) {
@@ -24,7 +24,7 @@ public class CtripConnectionState extends JdbcInterceptor {
             return;
 
         try {
-            boolean firstTime = isFirstTime.get().booleanValue();
+            boolean firstTime = isFirstTime.get();
             if (!firstTime)
                 return;
 

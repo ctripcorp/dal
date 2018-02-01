@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
 public interface DataSourceConfigureConstants {
+
+    // **********Pool properties key**********
     String USER_NAME = "userName";
     String PASSWORD = "password";
     String CONNECTION_URL = "connectionUrl";
@@ -33,7 +35,12 @@ public interface DataSourceConfigureConstants {
     String OPTION = "option";
     String VALIDATORCLASSNAME = "validatorClassName";
 
+    // JDBC interceptors
+    String JDBC_INTERCEPTORS = "jdbcInterceptors";
 
+
+
+    // **********Pool properties default value**********
     boolean DEFAULT_TESTWHILEIDLE = false;
     boolean DEFAULT_TESTONBORROW = true;
     boolean DEFAULT_TESTONRETURN = false;
@@ -55,9 +62,14 @@ public interface DataSourceConfigureConstants {
             "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8";
     boolean DEFAULT_JMXENABLED = true;
     String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-            + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer";
+            + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;"
+            + "com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState";
+    // com.ctrip.datasource.interceptor.CtripConnectionState
+    // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
 
 
+
+    // **********Constants**********
     String USE_LOCAL_CONFIG = "useLocalConfig";
     String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
     String SERVICE_ADDRESS = "serviceAddress";

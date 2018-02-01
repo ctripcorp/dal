@@ -66,7 +66,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
 
         // This are current hard coded as default value
         properties.setJmxEnabled(DEFAULT_JMXENABLED);
-        properties.setJdbcInterceptors(DEFAULT_JDBCINTERCEPTORS);
+        properties.setJdbcInterceptors(config.getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS));
 
         return properties;
     }

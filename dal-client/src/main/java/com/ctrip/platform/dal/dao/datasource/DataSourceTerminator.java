@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +34,13 @@ public class DataSourceTerminator {
         return terminator;
     }
 
-    private BlockingQueue<SingleDataSource> dataSourceQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<SingleDataSourceTask> taskQueue = new LinkedBlockingQueue<>();
 
     public synchronized void close(SingleDataSource dataSource) {
         if (dataSource != null) {
-            dataSource.setEnqueueTime(new Date());
-            dataSourceQueue.offer(dataSource);
-            logger.info(String.format("DataSource %s offered to DataSource destroy queue first time.",
+            SingleDataSourceTask task = new SingleDataSourceTask(dataSource, new Date());
+            taskQueue.offer(task);
+            logger.info(String.format("DataSource %s offered to DataSource destroy queue for the first time.",
                     dataSource.getName()));
         }
     }
@@ -53,32 +54,37 @@ public class DataSourceTerminator {
     class DataSourceTerminateTask implements Runnable {
         @Override
         public void run() {
+            SingleDataSourceTask task = null;
             SingleDataSource dataSource = null;
             String name = "";
             try {
-                dataSource = dataSourceQueue.take();
-                name = dataSource.getName();
-                logger.info(String.format("DataSource %s taken from DataSource destroy queue.", name));
+                task = taskQueue.take();
+                if (task == null)
+                    return;
 
-                boolean success = closeDataSource(dataSource);
+                dataSource = task.getSingleDataSource();
+                if (dataSource == null)
+                    return;
+
+                name = dataSource.getName();
+                logger.info(String.format("DataSource %s has been taken from DataSource destroy queue.", name));
+
+                boolean success = closeDataSource(task);
                 if (!success) {
-                    if (dataSource != null) {
-                        dataSourceQueue.offer(dataSource);
-                        logger.info(String.format(
-                                "DataSource %s offered to DataSource destroy queue again due to failure.", name));
-                    }
+                    taskQueue.offer(task);
+                    logger.info(
+                            String.format("DataSource %s has been offered to DataSource destroy queue again.", name));
                 }
             } catch (Throwable e) {
                 logger.warn(String.format("Error occured while closing DataSource %s", name), e);
-                if (dataSource != null) {
-                    dataSourceQueue.offer(dataSource);
-                    logger.info(String
-                            .format("DataSource %s offered to DataSource destroy queue again due to exception.", name));
-                }
+                taskQueue.offer(task);
+                logger.info(String.format(
+                        "DataSource %s has been offered to DataSource destroy queue again due to exception.", name));
             }
         }
 
-        private boolean closeDataSource(SingleDataSource singleDataSource) throws Exception {
+        private boolean closeDataSource(SingleDataSourceTask task) throws Exception {
+            SingleDataSource singleDataSource = task.getSingleDataSource();
             DataSource dataSource = singleDataSource.getDataSource();
             String name = singleDataSource.getName();
             logger.info(String.format("Trying to close DataSource %s", name));
@@ -87,62 +93,60 @@ public class DataSourceTerminator {
             try {
                 // Tomcat DataSource
                 if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-                    org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
-                    ds.close();
+                    int retryTimes = task.getRetryTimes();
+                    logger.info(String.format("Error retry times for DataSource %s:%s", name, retryTimes));
 
-                    int retryTimes = getRetryTimes(singleDataSource.getName());
                     int abandonedTimeout = getAbandonedTimeout(singleDataSource);
-                    int elapsedSeconds = getElapsedSeconds(singleDataSource.getEnqueueTime());
-                    logger.info(String.format("Retry times for DataSource %s:%s", name, retryTimes));
                     logger.info(String.format("Abandoned timeout for DataSource %s:%s", name, abandonedTimeout));
+
+                    int elapsedSeconds = getElapsedSeconds(task.getEnqueueTime());
                     logger.info(String.format("Elapsed seconds for DataSource %s:%s", name, elapsedSeconds));
 
-                    if (ds.getActive() == 0) {
-                        logger.info(String.format("Active connections of DataSource %s is zero.", name));
-                        return success;
-                    } else if (retryTimes > MAX_RETRY_TIMES) {
-                        logger.info(String.format("Abandoned closing DataSource %s,retry times:%s,max retry times:%s.",
+                    org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
+                    if (retryTimes > MAX_RETRY_TIMES) {
+                        logger.info(String.format("Force closing DataSource %s,retry times:%s,max retry times:%s.",
                                 name, retryTimes, MAX_RETRY_TIMES));
+                        ds.close(true);
                         return success;
                     } else if (elapsedSeconds >= abandonedTimeout) {
-                        ds.close(true);
                         logger.info(
                                 String.format("Force closing DataSource %s,elapsed seconds:%s,abandoned timeout:%s.",
                                         name, elapsedSeconds, abandonedTimeout));
-                    } else {
+                        ds.close(true);
+                        return success;
+                    }
+
+                    ConnectionPool pool = ds.getPool();
+                    if (pool == null)
+                        return success;
+
+                    int idle = pool.getIdle();
+                    if (idle > 0) {
+                        pool.checkIdle();
+                    }
+
+                    int active = pool.getActive();
+                    if (active == 0) {
+                        ds.close();
+                        logger.info(String.format("DataSource %s has been closed,idle connections are zero.", name));
+                    } else if (active > 0) {
+                        logger.info(String.format("Active connections of DataSource %s:%s.", name, active));
                         success = false;
                     }
                 }
             } catch (Throwable e) {
                 logger.warn(e.getMessage(), e);
-                addRetryTime(singleDataSource.getName());
+                addRetryTimes(task);
                 success = false;
             }
 
             return success;
         }
 
-        private int getRetryTimes(String name) {
-            if (name == null || name.isEmpty())
-                return DEFAULT_INT_VALUE;
-
-            Integer retryTime = retryTimesMap.get(name);
-            if (retryTime == null)
-                return DEFAULT_INT_VALUE;
-
-            return retryTime.intValue();
-        }
-
-        private void addRetryTime(String name) {
-            if (name == null || name.isEmpty())
-                return;
-
-            if (!retryTimesMap.containsKey(name))
-                retryTimesMap.put(name, DEFAULT_INT_VALUE);
-
-            Integer value = retryTimesMap.get(name);
-            value++;
-            retryTimesMap.put(name, value);
+        private void addRetryTimes(SingleDataSourceTask task) {
+            int retryTimes = task.getRetryTimes();
+            retryTimes++;
+            task.setRetryTimes(retryTimes);
         }
 
         private int getAbandonedTimeout(SingleDataSource singleDataSource) {

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
 
 public class SingleDataSource implements DataSourceConfigureConstants {
     private static final Logger logger = LoggerFactory.getLogger(SingleDataSource.class);
@@ -19,7 +18,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private String name;
     private DataSourceConfigure dataSourceConfigure;
     private DataSource dataSource;
-    private Date enqueueTime;
 
     public String getName() {
         return name;
@@ -31,14 +29,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
     public DataSource getDataSource() {
         return dataSource;
-    }
-
-    public void setEnqueueTime(Date enqueueTime) {
-        this.enqueueTime = enqueueTime;
-    }
-
-    public Date getEnqueueTime() {
-        return enqueueTime;
     }
 
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) throws SQLException {

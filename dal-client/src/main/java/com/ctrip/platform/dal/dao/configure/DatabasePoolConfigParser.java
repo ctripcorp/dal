@@ -46,7 +46,7 @@ public class DatabasePoolConfigParser implements DataSourceConfigureConstants {
         poolProperties.setValidatorClassName(configure.getProperty(VALIDATORCLASSNAME, DEFAULT_VALIDATORCLASSNAME));
 
         poolProperties.setJmxEnabled(DEFAULT_JMXENABLED);
-        poolProperties.setJdbcInterceptors(DEFAULT_JDBCINTERCEPTORS);
+        poolProperties.setJdbcInterceptors(configure.getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS));
 
         return new DatabasePoolConfig(poolProperties);
     }

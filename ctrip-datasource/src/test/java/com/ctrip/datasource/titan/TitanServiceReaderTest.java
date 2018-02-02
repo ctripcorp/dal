@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.datasource.configure.ConnectionStringProviderImpl;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.After;
 import org.junit.Assert;
@@ -18,6 +19,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 public class TitanServiceReaderTest {
     @Before
     public void setUp() throws Exception {
+        DalClientFactory.shutdownFactory();
         TitanProvider provider = new TitanProvider();
         provider.clear();
     }

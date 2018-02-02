@@ -9,7 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.ctrip.platform.dal.dao.callByIndex.AllTests.class,
     com.ctrip.platform.dal.dao.callByName.AllTests.class,
     com.ctrip.platform.dal.dao.callByNativeSyntax.AllTests.class,
-//    com.ctrip.platform.dal.dao.callBySpt.AllTests.class,
+    com.ctrip.platform.dal.dao.callBySpt.AllTests.class,
     
 	CallSpByIndexValidatorTest.class,
 	

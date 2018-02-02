@@ -3,14 +3,13 @@ package com.ctrip.platform.dal.dao.configure;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
-import com.ctrip.platform.dal.exceptions.DalException;
 
 public class DatabaseSet {
 	private static final String CLASS = "class";
@@ -114,7 +113,7 @@ public class DatabaseSet {
 	}
 
 	public Map<String, DataBase> getDatabases() {
-		return databases;
+		return new HashMap<>(databases);
 	}
 	
 	public void validate(String shard) throws SQLException {
@@ -123,7 +122,7 @@ public class DatabaseSet {
 	}
 	
 	public Set<String> getAllShards() {
-		return masterDbByShard.keySet();
+		return new HashSet<>(masterDbByShard.keySet());
 	}
 
 	public DalShardingStrategy getStrategy() throws SQLException {
@@ -132,23 +131,19 @@ public class DatabaseSet {
 		return strategy;
 	}
 	
+    public List<DataBase> getMasterDbs() {
+        return masterDbs == null ? null : new ArrayList<>(masterDbs);
+    }
+
+    public List<DataBase> getSlaveDbs() {
+        return slaveDbs == null ? null : new ArrayList<>(slaveDbs);
+    }
+    
 	public List<DataBase> getMasterDbs(String shard) {
-		return masterDbByShard.get(shard);
+		return masterDbByShard.containsKey(shard) ? new ArrayList<>(masterDbByShard.get(shard)) : null;
 	}
 
 	public List<DataBase> getSlaveDbs(String shard) {
-		return slaveDbByShard.get(shard);
-	}
-	
-	public String getRandomRealDbName(DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
-		return getRandomRealDbName(hints, isMaster, isSelect, getMasterDbs(shard), getSlaveDbs(shard));
-	}
-	
-	public String getRandomRealDbName(DalHints hints, boolean isMaster, boolean isSelect) throws DalException {
-		return getRandomRealDbName(hints, isMaster, isSelect, masterDbs, slaveDbs);
-	}
-	
-	private String getRandomRealDbName(DalHints hints, boolean isMaster, boolean isSelect, List<DataBase> masterCandidates, List<DataBase> slaveCandidates) throws DalException {
-		return new DatabaseSelector(hints, masterCandidates, slaveCandidates, isMaster, isSelect).select();
+	    return slaveDbByShard.containsKey(shard) ? new ArrayList<>(slaveDbByShard.get(shard)) : null;
 	}
 }

@@ -97,29 +97,9 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
             map.put(dataSourceConfigure.getName(), dataSourceConfigure);
         }
 
-        // map = getDuplicatedMap(map);
         for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
             dataSourceConfigureLocator.addUserDataSourceConfigure(entry.getKey(), entry.getValue());
         }
-    }
-
-    public Map<String, DataSourceConfigure> getDuplicatedMap(Map<String, DataSourceConfigure> map) {
-        Map<String, DataSourceConfigure> result = new HashMap<>();
-        if (map == null || map.isEmpty())
-            return result;
-
-        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
-            String name = entry.getKey();
-            result.put(name, entry.getValue());
-
-            String possibleName = getPossibleName(name);
-            if (!map.containsKey(possibleName)) {
-                String keyName = ConnectionStringKeyHelper.getKeyName(possibleName);
-                result.put(keyName, entry.getValue());
-            }
-        }
-
-        return result;
     }
 
     private DataSourceConfigure parseResource(Node resource) {
@@ -169,6 +149,8 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         properties.add(VALIDATORCLASSNAME);
         properties.add(INIT_SQL);
         properties.add(INIT_SQL2);
+
+        properties.add(JDBC_INTERCEPTORS);
         processProperties(dataSourceConfigure, map, resource, properties);
 
         /**

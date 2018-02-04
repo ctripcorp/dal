@@ -34,7 +34,7 @@ public class DataSourceConnectionStringTest {
         System.out.println(String.format("maxActive:%s", maxActive1));
 
         System.out.println("Sleep for 30 seconds.");
-        Thread.sleep(50 * 1000);
+        Thread.sleep(120 * 1000);
 
         DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
         String userName2 = configure2.getUserName();

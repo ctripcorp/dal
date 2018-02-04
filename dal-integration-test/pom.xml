@@ -20,7 +20,6 @@
     <ctrip-datasource.version>1.14.2</ctrip-datasource.version>-->
     <dal.version>1.14.3</dal.version>
     <ctrip-datasource.version>1.14.3</ctrip-datasource.version>
-
   </properties>
 
   <modules>

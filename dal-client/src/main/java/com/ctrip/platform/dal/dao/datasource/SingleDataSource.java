@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
             PoolProperties p = poolPropertiesHelper.convert(dataSourceConfigure);
             PoolPropertiesHolder.getInstance().setPoolProperties(p);
-            org.apache.tomcat.jdbc.pool.DataSource dataSource = new org.apache.tomcat.jdbc.pool.DataSource(p);
+            org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(p);
             this.dataSource = dataSource;
 
             dataSource.createPool();

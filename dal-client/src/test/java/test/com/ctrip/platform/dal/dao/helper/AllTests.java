@@ -13,6 +13,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalColumnMapRowMapperTest.class,
 	DalCustomRowMapperTest.class,
 	SQLCompilerTest.class,
+	ServiceLoaderHelperTest.class
 	
 })
 public class AllTests {}

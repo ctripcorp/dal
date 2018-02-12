@@ -2,6 +2,7 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.framework.clogging.agent.MessageManager;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class PoolPropertiesProviderImplTest {
         map.put("logAbandoned", "true");
         map.put("minEvictableIdleTimeMillis", "30000");
         map.put("connectionProperties", "rewriteBatchedStatements=true;allowMultiQueries=true");
-        config = PoolPropertiesProviderImpl.getInstance().mergeDataSourceConfigure(config);
+        config = DataSourceConfigureLocator.getInstance().mergeDataSourceConfigure(config);
         MessageManager.getInstance().shutdown();
     }
 }

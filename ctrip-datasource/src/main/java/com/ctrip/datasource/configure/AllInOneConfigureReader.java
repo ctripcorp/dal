@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.slf4j.Logger;

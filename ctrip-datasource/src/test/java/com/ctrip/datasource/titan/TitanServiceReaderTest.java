@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.ctrip.datasource.configure.ConnectionStringProviderImpl;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.After;
 import org.junit.Assert;
@@ -395,10 +396,9 @@ public class TitanServiceReaderTest {
         dbNames.add("mysqldbatestshard01db_R");
 
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProviderImpl.TIMEOUT, "1000");
-        settings.put(ConnectionStringProviderImpl.SERVICE_ADDRESS, fws);
+        settings.put(DataSourceConfigureConstants.TIMEOUT, "1000");
+        settings.put(DataSourceConfigureConstants.SERVICE_ADDRESS, fws);
         settings.put("isDebug", "true");
-
 
         try {
             provider.initialize(settings);

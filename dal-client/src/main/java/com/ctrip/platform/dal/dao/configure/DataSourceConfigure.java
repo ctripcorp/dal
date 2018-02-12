@@ -13,6 +13,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
     private Properties properties = new Properties();
     private Map<String, String> map = new HashMap<>();
     private String version;
+    private ConnectionString connectionString;
 
     public DataSourceConfigure() {}
 
@@ -88,6 +89,22 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public ConnectionString getConnectionString() {
+        return connectionString;
+    }
+
+    public void setConnectionString(ConnectionString connectionString) {
+        this.connectionString = connectionString;
+    }
+
+    public String getNormalConnectionString() {
+        return connectionString.getNormalConnectionString();
+    }
+
+    public String getFailoverConnectionString() {
+        return connectionString.getFailoverConnectionString();
     }
 
     public Properties getProperties() {

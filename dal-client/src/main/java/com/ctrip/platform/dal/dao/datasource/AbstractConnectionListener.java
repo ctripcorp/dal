@@ -3,11 +3,6 @@ package com.ctrip.platform.dal.dao.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * @author wenchao.meng
- *         <p>
- *         Feb 08, 2018
- */
 public abstract class AbstractConnectionListener implements ConnectionListener {
 
 

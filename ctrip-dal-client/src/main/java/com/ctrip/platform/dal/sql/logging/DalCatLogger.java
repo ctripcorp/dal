@@ -33,6 +33,14 @@ public class DalCatLogger {
     private static final String TYPE_SQL_START_TASK_POOL_SIZE = "DAL.startTaskPoolSize";
     private static final String TYPE_SQL_END_TASK_POOL_SIZE = "DAL.endTaskPoolSize";
     
+    public static void logEvent(String type, String name) {
+        try{
+            Cat.logEvent(type, name);            
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+    
 	public static void start(CtripLogEntry entry) {
 		try {
 			String sqlType = entry.getCaller();

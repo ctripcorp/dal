@@ -41,6 +41,14 @@ public class DalCatLogger {
         }
     }
     
+    public static void logError(Throwable cause) {
+        try{
+            Cat.logError(cause);            
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }        
+    }
+    
 	public static void start(CtripLogEntry entry) {
 		try {
 			String sqlType = entry.getCaller();

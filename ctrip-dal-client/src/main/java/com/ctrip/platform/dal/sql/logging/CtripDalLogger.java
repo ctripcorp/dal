@@ -75,6 +75,7 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
     public void error(final String msg, final Throwable e) {
         call(new Runnable() {public void run() {
             DalCLogger.error(msg, e);
+            DalCatLogger.logError(e);
         }});
     }
 

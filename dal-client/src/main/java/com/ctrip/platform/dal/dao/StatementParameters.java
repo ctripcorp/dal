@@ -1,11 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
 public class StatementParameters {
 	private static final String SQLHIDDENString = "*";
@@ -76,10 +78,38 @@ public class StatementParameters {
 		return add(StatementParameter.registerOut(name, sqlType).setSensitive(true));
 	}
 	
+	/**
+	 * Register result parameter for update count. It is used to get the update count for 
+	 * update statement executed in the store procedure.
+	 * 
+	 * When executed, you can use getValue() to get the update count. E.g.
+	 * 
+	 * StatementParameters parameters = new StatementParameters();
+	 * parameters.setResultsParameter("count");
+	 * DalClientFactory.getClient(logicDbName).call(YOUR_SP, parameters, hints);
+	 * Object value = parameters.get("count", null).getValue());
+	 * 
+	 * @param name user defined name represents update count
+	 * @return
+	 */
 	public StatementParameters setResultsParameter(String name) {
 		return add(new StatementParameter().setResultsParameter(true).setName(name));
 	}
 	
+    /**
+     * Register result parameter for result set. It is used to get the result set for 
+     * select statement executed in the store procedure.
+     * 
+     * When executed, you can use getValue() to get the extracted value from result set. E.g
+     * 
+     * StatementParameters parameters = new StatementParameters();
+     * parameters.setResultsParameter("result", new DalScalarExtractor());
+     * DalClientFactory.getClient(logicDbName).call(YOUR_SP, parameters, hints);
+     * Object value = parameters.get("result", null).getValue());
+     * 
+     * @param name user defined name represents result set
+     * @return
+     */
 	public StatementParameters setResultsParameter(String name, DalResultSetExtractor<?> extractor) {
 		return add(new StatementParameter().setResultsParameter(true).setResultSetExtractor(extractor).setName(name));
 	}

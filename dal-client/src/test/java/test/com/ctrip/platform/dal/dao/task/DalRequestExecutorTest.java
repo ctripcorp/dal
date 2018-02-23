@@ -287,6 +287,8 @@ public class DalRequestExecutorTest {
             
             request = new TestThreadPoolDalRequest(5);
             test.execute(hints, request, true);
+            
+            Thread.sleep(10*1000);
             System.out.println(test.getPoolSize());
             assertTrue(test.getPoolSize() < 10);
         } catch (Exception e) {

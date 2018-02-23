@@ -77,6 +77,23 @@ public class SlaveFreshnessScannerSqlSvrTest {
         DalQueryDao dao = new DalQueryDao(NO_FRESHNESS_DATABASE_NAME);
         String id = dao.queryForObject(GET_DB_NAME, new StatementParameters(), new DalHints().freshness(10), String.class);
         Assert.assertEquals(NO_FRESHNESS_MASTER, id);        
+        
+        try {
+            dao = new DalQueryDao(NO_FRESHNESS_DATABASE_NAME);
+            id = dao.queryForObject(GET_DB_NAME, new StatementParameters(), new DalHints().freshness(10).slaveOnly(), String.class);
+            Assert.fail();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testSlaveOnlyAndFreshness() throws SQLException {
+        int freshness = 9;
+        DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+        for(int i = 0; i < 100; i++){
+            String id = dao.queryForObject(GET_DB_NAME, new StatementParameters(), new DalHints().freshness(freshness).slaveOnly(), String.class);
+            Assert.assertTrue(freshnessMap.get(id) <= freshness);
+        }
     }
     
     @Test

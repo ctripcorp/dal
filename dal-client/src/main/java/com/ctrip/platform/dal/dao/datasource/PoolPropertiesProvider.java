@@ -3,10 +3,7 @@ package com.ctrip.platform.dal.dao.datasource;
 import java.util.Map;
 
 public interface PoolPropertiesProvider {
-    void initializePoolProperties();
-
-    void setPoolProperties(Map<String, String> map);
+    Map<String, String> getPoolProperties();
 
     void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback);
-
 }

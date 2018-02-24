@@ -6,10 +6,12 @@ public class SingleDataSourceTask {
     private SingleDataSource singleDataSource;
     private Date enqueueTime;
     private int retryTimes;
+    private boolean executeResult;
 
-    public SingleDataSourceTask(SingleDataSource singleDataSource, Date enqueueTime) {
+    public SingleDataSourceTask(SingleDataSource singleDataSource, Date enqueueTime, int retryTimes) {
         this.singleDataSource = singleDataSource;
         this.enqueueTime = enqueueTime;
+        this.retryTimes = retryTimes;
     }
 
     public SingleDataSource getSingleDataSource() {
@@ -34,6 +36,14 @@ public class SingleDataSourceTask {
 
     public void setRetryTimes(int retryTimes) {
         this.retryTimes = retryTimes;
+    }
+
+    public boolean getExecuteResult() {
+        return executeResult;
+    }
+
+    public void setExecuteResult(boolean executeResult) {
+        this.executeResult = executeResult;
     }
 
 }

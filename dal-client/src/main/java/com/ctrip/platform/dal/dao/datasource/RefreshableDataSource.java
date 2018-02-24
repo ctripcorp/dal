@@ -28,14 +28,8 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         String name = event.getName();
         DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
         SingleDataSource newDataSource = new SingleDataSource(name, newConfigure);
-        logger.debug("DAL debug:(configChanged)new datasource url:{}",
-                newDataSource.getDataSourceConfigure().getConnectionUrl());
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        logger.debug("DAL debug:(configChanged)old datasource url:{}",
-                oldDataSource.getDataSourceConfigure().getConnectionUrl());
-
         close(oldDataSource);
-        logger.debug("DAL debug:(configChanged)datasource {} added to destroy queue.", name);
     }
 
     private void close(SingleDataSource dataSource) {

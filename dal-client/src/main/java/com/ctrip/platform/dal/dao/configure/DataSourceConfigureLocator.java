@@ -29,6 +29,7 @@ public class DataSourceConfigureLocator {
     private static AtomicReference<IPDomainStatus> ipDomainStatusReference = new AtomicReference<>(IPDomainStatus.IP);
     private AtomicReference<DataSourceConfigureWrapper> dataSourceConfigureWrapperReference = new AtomicReference<>();
 
+    private static final String SEPARATOR = "\\.";
     private static final String DAL_MERGE_DATASOURCE = "DataSource::mergeDataSourceConfig";
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
     private ConnectionStringParser parser = ConnectionStringParser.getInstance();
@@ -48,10 +49,6 @@ public class DataSourceConfigureLocator {
         return ipDomainStatusReference.get();
     }
 
-    public void setDataSourceConfigureWrapperReference(DataSourceConfigureWrapper wrapper) {
-        dataSourceConfigureWrapperReference.set(wrapper);
-    }
-
     public DataSourceConfigure parseConnectionString(String name, String connectionString) {
         return parser.parse(name, connectionString);
     }
@@ -69,6 +66,70 @@ public class DataSourceConfigureLocator {
         c.setVersion(configure.getVersion());
         c.setConnectionString(configure.getConnectionString());
         return c;
+    }
+
+    // TODO CAT log
+    public void setPoolProperties(Map<String, String> map) {
+        Map<String, String> originalMap = new HashMap<>(map);
+        Map<String, String> datasource = new HashMap<>(); // app level
+        Map<String, Map<String, String>> datasourceMap = new HashMap<>(); // datasource level
+        processDataSourceConfigure(map, datasource, datasourceMap);
+
+        // set app level map
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
+        setDataSourceConfigure(dataSourceConfigure, datasource);
+
+        // set datasource level map
+        Map<String, DataSourceConfigure> dataSourceConfigureMap = new HashMap<>();
+        setDataSourceConfigureMap(dataSourceConfigureMap, datasourceMap);
+
+        DataSourceConfigureWrapper wrapper =
+                new DataSourceConfigureWrapper(originalMap, dataSourceConfigure, dataSourceConfigureMap);
+        setDataSourceConfigureWrapperReference(wrapper);
+
+        String log = "DataSource配置:" + poolPropertiesHelper.mapToString(map);
+        // Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
+        logger.info(log);
+    }
+
+    private void processDataSourceConfigure(Map<String, String> map, Map<String, String> datasource,
+            Map<String, Map<String, String>> datasourceMap) {
+        if (map == null || map.isEmpty())
+            return;
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String[] array = entry.getKey().split(SEPARATOR);
+            if (array.length == 1) { // app level
+                datasource.put(array[0], entry.getValue());
+            } else if (array.length == 2) { // datasource level
+                String datasourceName = array[0];
+                if (!datasourceMap.containsKey(datasourceName))
+                    datasourceMap.put(datasourceName, new HashMap<String, String>());
+                Map<String, String> temp = datasourceMap.get(datasourceName);
+                temp.put(array[1], entry.getValue());
+            }
+        }
+    }
+
+    private void setDataSourceConfigure(DataSourceConfigure configure, Map<String, String> datasource) {
+        if (configure == null || datasource.isEmpty())
+            return;
+        configure.setMap(datasource);
+    }
+
+    private void setDataSourceConfigureMap(Map<String, DataSourceConfigure> configureMap,
+            Map<String, Map<String, String>> datasourceMap) {
+        if (configureMap == null || datasourceMap.isEmpty())
+            return;
+        for (Map.Entry<String, Map<String, String>> entry : datasourceMap.entrySet()) {
+            DataSourceConfigure config = new DataSourceConfigure();
+            setDataSourceConfigure(config, entry.getValue());
+            String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
+            configureMap.put(keyName, config);
+        }
+    }
+
+    private void setDataSourceConfigureWrapperReference(DataSourceConfigureWrapper wrapper) {
+        dataSourceConfigureWrapperReference.set(wrapper);
     }
 
     // TODO CAT log
@@ -116,6 +177,7 @@ public class DataSourceConfigureLocator {
                 overrideDataSourceConfigure(c, configure);
                 c.setName(configure.getName());
                 c.setVersion(configure.getVersion());
+                c.setConnectionString(configure.getConnectionString());
                 String log = "connection settings 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                 logger.info(log);
 

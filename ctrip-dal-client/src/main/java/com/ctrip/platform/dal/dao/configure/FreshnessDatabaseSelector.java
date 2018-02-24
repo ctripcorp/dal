@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jboss.netty.util.internal.ConcurrentHashMap;
@@ -54,7 +56,13 @@ public class FreshnessDatabaseSelector extends DefaultDatabaseSelector {
             }
             
             //Init task
-            ScheduledExecutorService executer = Executors.newScheduledThreadPool(1);        
+            ScheduledExecutorService executer = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+                AtomicInteger atomic = new AtomicInteger();
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "Dal-FreshnessScanner" + this.atomic.getAndIncrement());
+                }
+            });
             executer.scheduleWithFixedDelay(new FreshnessScanner(freshnessCache), 0, 5, TimeUnit.SECONDS);
             freshnessUpdatorRef.set(executer);
         }

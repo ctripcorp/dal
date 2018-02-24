@@ -7,8 +7,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -58,7 +60,13 @@ public class DalRequestExecutor {
             if(keepAliveTimeStr != null)
                 keepAliveTime = Integer.parseInt(keepAliveTimeStr);
 			
-            ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+            ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+                AtomicInteger atomic = new AtomicInteger();
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "DalRequestExecutor-Worker-" + this.atomic.getAndIncrement());
+                }
+            });
             executer.allowCoreThreadTimeOut(true);
             
             serviceRef.set(executer);

@@ -1,9 +1,9 @@
 package com.ctrip.datasource.titan;
 
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
-import com.ctrip.datasource.configure.ConnectionStringProviderImpl;
-import com.ctrip.datasource.configure.IPDomainStatusProviderImpl;
-import com.ctrip.datasource.configure.PoolPropertiesProviderImpl;
+import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
+import com.ctrip.datasource.configure.qconfig.IPDomainStatusProviderImpl;
+import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.foundation.Foundation;
@@ -96,10 +96,10 @@ public class DataSourceConfigureManager implements DataSourceConfigureConstants 
 
     private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
     private DataSourceConfigureParser dataSourceConfigureParser = DataSourceConfigureParser.getInstance();
-    private ConnectionStringProvider connectionStringProvider = ConnectionStringProviderImpl.getInstance();
-    private PoolPropertiesProvider poolPropertiesProvider = PoolPropertiesProviderImpl.getInstance();
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
-    private IPDomainStatusProvider ipDomainStatusProvider = IPDomainStatusProviderImpl.getInstance();
+    private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
+    private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
+    private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
 
     private DalEncrypter dalEncrypter = null;
     private volatile boolean isInitialized = false;
@@ -198,6 +198,8 @@ public class DataSourceConfigureManager implements DataSourceConfigureConstants 
             return;
 
         Map<String, DataSourceConfigure> configures = getConnectionStrings(names, sourceType);
+        Map<String, String> poolProperties = poolPropertiesProvider.getPoolProperties();
+        dataSourceConfigureLocator.setPoolProperties(poolProperties);
         configures = mergeDataSourceConfigures(configures);
         addDataSourceConfigures(configures);
 
@@ -346,6 +348,31 @@ public class DataSourceConfigureManager implements DataSourceConfigureConstants 
             connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
                 @Override
                 public void onChanged(Map<String, String> map) {
+                    String normalConnectionString = map.get(TITAN_KEY_NORMAL);
+                    if (normalConnectionString == null || normalConnectionString.isEmpty())
+                        throw new RuntimeException("Normal connection string is null.");
+
+                    String failoverConnectionString = map.get(TITAN_KEY_FAILOVER);
+                    if (failoverConnectionString == null || failoverConnectionString.isEmpty())
+                        throw new RuntimeException("Failover connection string is null.");
+
+                    // validate version
+                    DataSourceConfigure configure =
+                            dataSourceConfigureLocator.parseConnectionString(name, normalConnectionString);
+                    String newVersion = configure.getVersion();
+                    DataSourceConfigure oldConfigure = dataSourceConfigureLocator.getDataSourceConfigure(name);
+                    String oldVersion = oldConfigure.getVersion();
+
+                    if (newVersion != null && oldVersion != null) {
+                        if (newVersion.equals(oldVersion)) {
+                            String msg = String.format("New version of %s equals to old version.", name);
+                            String transactionName = String.format("%s:%s", DAL_NOTIFY_LISTENER, name);
+                            Cat.logEvent(DAL_DYNAMIC_DATASOURCE, transactionName, Message.SUCCESS, msg);
+                            logger.info(msg);
+                            return;
+                        }
+                    }
+
                     addConnectionStringNotifyTask(name, map);
                 }
             });
@@ -405,7 +432,7 @@ public class DataSourceConfigureManager implements DataSourceConfigureConstants 
         t.addData(DAL_NOTIFY_LISTENER_START);
 
         try {
-            poolPropertiesProvider.setPoolProperties(map);
+            dataSourceConfigureLocator.setPoolProperties(map);
             Set<String> names = getDataSourceConfigureKeySet();
             Map<String, DataSourceConfigureChangeEvent> events = new HashMap<>();
             for (String name : names) {
@@ -433,6 +460,11 @@ public class DataSourceConfigureManager implements DataSourceConfigureConstants 
         ipDomainStatusProvider.addIPDomainStatusChangedListener(new IPDomainStatusChanged() {
             @Override
             public void onChanged(IPDomainStatus status) {
+                IPDomainStatus currentStatus = dataSourceConfigureLocator.getIPDomainStatus();
+                if (currentStatus.equals(status))
+                    return;
+
+                dataSourceConfigureLocator.setIPDomainStatus(status);
                 addIPDomainStatusNotifyTask(status);
             }
         });
@@ -615,6 +647,18 @@ public class DataSourceConfigureManager implements DataSourceConfigureConstants 
         } catch (IOException e) {
             return "UNKNOWN";
         }
+    }
+
+    public void setConnectionStringProvider(ConnectionStringProvider provider) {
+        this.connectionStringProvider = provider;
+    }
+
+    public void setPoolPropertiesProvider(PoolPropertiesProvider provider) {
+        this.poolPropertiesProvider = provider;
+    }
+
+    public void setIPDomainStatusProvider(IPDomainStatusProvider provider) {
+        this.ipDomainStatusProvider = provider;
     }
 
     // for unit test only

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.datasource;
+package com.ctrip.datasource.datasource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

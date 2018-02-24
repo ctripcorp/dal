@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dynamicdatasource;
+package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;

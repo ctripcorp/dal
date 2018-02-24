@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,8 +42,8 @@ public class AllInOneConfigureReaderTest {
     public void testGetAllInOneConfig() throws Exception {
         TitanProvider provider = new TitanProvider();
         Map<String, String> settings = new HashMap<>();
-        settings.put(ConnectionStringProviderImpl.USE_LOCAL_CONFIG, "true");
-        settings.put(ConnectionStringProviderImpl.DATABASE_CONFIG_LOCATION, "$classpath");
+        settings.put(DataSourceConfigureConstants.USE_LOCAL_CONFIG, "true");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         provider.initialize(settings);
         Set<String> names = new HashSet<>();
         names.add("SimpleShard_0");

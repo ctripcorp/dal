@@ -1,22 +1,30 @@
-package com.ctrip.platform.dal.dynamicdatasource;
+package com.ctrip.datasource.dynamicdatasource;
 
+import com.ctrip.datasource.dynamicdatasource.provider.AbstractIPDomainStatusProvider;
+import com.ctrip.datasource.dynamicdatasource.provider.AbstractPoolPropertiesProvider;
+import com.ctrip.datasource.dynamicdatasource.provider.LocalConnectionStringProvider;
+import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class DataSourceIPDomainStatusTest {
+public class DataSourceConnectionStringTest {
     private static final String name = "mysqldaltest01db_W";
     private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        DataSourceConfigureManager.getInstance().setConnectionStringProvider(new LocalConnectionStringProvider());
+        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new AbstractPoolPropertiesProvider());
+        DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new AbstractIPDomainStatusProvider());
+
         DalClientFactory.initClientFactory();
     }
 
     @Test
-    public void testDataSourceIPDomainStatusTest() throws Exception {
+    public void testConnectionStringDynamicEnabledFunction() throws Exception {
         DataSourceConfigure configure1 = locator.getDataSourceConfigure(name);
         String userName1 = configure1.getUserName();
         System.out.println(String.format("UserName:%s", userName1));
@@ -29,8 +37,8 @@ public class DataSourceIPDomainStatusTest {
         String version1 = configure1.getVersion();
         System.out.println(String.format("Version:%s", version1));
 
-        System.out.println("Sleep for 30 seconds.");
-        Thread.sleep(60 * 1000);
+        System.out.println("Sleep for 10 seconds.");
+        Thread.sleep(10 * 1000);
 
         DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
         String userName2 = configure2.getUserName();

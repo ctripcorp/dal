@@ -1,5 +1,9 @@
-package com.ctrip.platform.dal.dynamicdatasource;
+package com.ctrip.datasource.dynamicdatasource;
 
+import com.ctrip.datasource.dynamicdatasource.provider.AbstractConnectionStringProvider;
+import com.ctrip.datasource.dynamicdatasource.provider.AbstractIPDomainStatusProvider;
+import com.ctrip.datasource.dynamicdatasource.provider.LocalPoolPropertiesProvider;
+import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
@@ -14,6 +18,10 @@ public class DataSourcePoolPropertiesTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        DataSourceConfigureManager.getInstance().setConnectionStringProvider(new AbstractConnectionStringProvider());
+        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new LocalPoolPropertiesProvider());
+        DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new AbstractIPDomainStatusProvider());
+
         DalClientFactory.initClientFactory();
     }
 
@@ -22,37 +30,17 @@ public class DataSourcePoolPropertiesTest {
         DataSourceConfigure configure1 = locator.getDataSourceConfigure(name);
         boolean dynamicEnabled1 = configure1.dynamicPoolPropertiesEnabled();
         System.out.println(String.format("dynamicEnabled:%s", dynamicEnabled1));
-        int maxActive1 = configure1.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, 200);
-        System.out.println(String.format("maxActive:%s", maxActive1));
-        String userName1 = configure1.getUserName();
-        System.out.println(String.format("UserName:%s", userName1));
-        String password1 = configure1.getPassword();
-        System.out.println(String.format("Password:%s", password1));
-        String url1 = configure1.getConnectionUrl();
-        System.out.println(String.format("Url:%s", url1));
-        String driver1 = configure1.getDriverClass();
-        System.out.println(String.format("Driver:%s", driver1));
-        String version1 = configure1.getVersion();
-        System.out.println(String.format("Version:%s", version1));
+        int minIdle1 = configure1.getIntProperty(DataSourceConfigureConstants.MINIDLE, -1);
+        System.out.println(String.format("minIdle:%s", minIdle1));
 
-        System.out.println("Sleep for 30 seconds.");
-        Thread.sleep(30 * 1000);
+        System.out.println("Sleep for 10 seconds.");
+        Thread.sleep(10 * 1000);
 
         DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
         boolean dynamicEnabled2 = configure2.dynamicPoolPropertiesEnabled();
         System.out.println(String.format("dynamicEnabled:%s", dynamicEnabled2));
-        int maxActive2 = configure2.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, 200);
-        System.out.println(String.format("maxActive:%s", maxActive2));
-        String userName2 = configure1.getUserName();
-        System.out.println(String.format("UserName:%s", userName2));
-        String password2 = configure1.getPassword();
-        System.out.println(String.format("Password:%s", password2));
-        String url2 = configure1.getConnectionUrl();
-        System.out.println(String.format("Url:%s", url2));
-        String driver2 = configure1.getDriverClass();
-        System.out.println(String.format("Driver:%s", driver2));
-        String version2 = configure1.getVersion();
-        System.out.println(String.format("Version:%s", version2));
+        int minIdle2 = configure2.getIntProperty(DataSourceConfigureConstants.MINIDLE, -1);
+        System.out.println(String.format("minIdle:%s", minIdle2));
     }
 
     @Test

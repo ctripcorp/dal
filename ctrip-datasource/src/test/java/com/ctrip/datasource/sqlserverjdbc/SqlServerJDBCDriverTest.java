@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.sqlserverjdbc;
+package com.ctrip.datasource.sqlserverjdbc;
 
 import java.sql.Types;
 import java.util.List;

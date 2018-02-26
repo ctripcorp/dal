@@ -13,21 +13,26 @@ import org.junit.Test;
 public class DataSourceIPDomainStatusTest {
     private static final String name = "mysqldaltest01db_W";
     private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
+    private static LocalIPDomainStatusProvider provider = new LocalIPDomainStatusProvider();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         DataSourceConfigureManager.getInstance().setConnectionStringProvider(new AbstractConnectionStringProvider());
         DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new AbstractPoolPropertiesProvider());
-        DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new LocalIPDomainStatusProvider());
+        DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(provider);
 
         DalClientFactory.initClientFactory();
     }
 
     @Test
     public void testDataSourceIPDomainStatusTest() throws Exception {
-        while (true) {
+        displayConnectionStringProperties();
+
+        for (int i = 0; i < 10; i++) {
+            System.out.println("**********Trigger ip domain status changed callback**********");
+            provider.triggerIPDomainStatusChanged();
+            Thread.sleep(1 * 1000);
             displayConnectionStringProperties();
-            Thread.sleep(5 * 1000);
         }
     }
 

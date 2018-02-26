@@ -1,10 +1,12 @@
 package com.ctrip.datasource.dynamicdatasource;
 
+import com.ctrip.datasource.datasource.CtripDataSourceTerminateTask;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.datasource.DataSourceTerminator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.datasource.SingleDataSourceTask;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -39,7 +41,8 @@ public class TomcatDataSourcePoolTest {
         });
 
         Thread.sleep(2 * 1000);
-        DataSourceTerminator.getInstance().close(dataSource);
+        SingleDataSourceTask task = new SingleDataSourceTask(dataSource, new CtripDataSourceTerminateTask());
+        DataSourceTerminator.getInstance().close(task);
         Thread.sleep(30000 * 1000);
     }
 }

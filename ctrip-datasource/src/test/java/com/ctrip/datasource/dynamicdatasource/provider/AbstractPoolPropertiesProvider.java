@@ -34,7 +34,7 @@ public class AbstractPoolPropertiesProvider implements PoolPropertiesProvider, D
         map.put(CONNECTIONPROPERTIES,
                 "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false");
         map.put(JDBC_INTERCEPTORS,
-                "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;com.ctrip.datasource.interceptor.CtripConnectionState");
+                "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
         return map;
     }
 

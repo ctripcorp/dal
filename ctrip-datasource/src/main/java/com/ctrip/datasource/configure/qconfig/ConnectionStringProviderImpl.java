@@ -8,6 +8,9 @@ import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
@@ -21,6 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionStringProviderImpl implements ConnectionStringProvider, DataSourceConfigureConstants {
     private static final String TITAN_APP_ID = "100010061";
+    private static final String DAL = "DAL";
+    private static final String CONNECTIONSTRING_GET_CONNECTIONURL = "ConnectionString::getConnectionUrl";
+    private static final String CONNECTIONSTRING_NORMAL_CONNECTIONURL = "ConnectionString::normalConnectionUrl";
+    private static final String CONNECTIONSTRING_FAILOVER_CONNECTIONURL = "ConnectionString::failoverConnectionUrl";
 
     private ConnectionStringParser connectionStringParser = ConnectionStringParser.getInstance();
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
@@ -76,6 +83,9 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
             if (config != null) {
                 String normalConnectionString;
                 String failoverConnectionString;
+                String transactionName = String.format("%s:%s", CONNECTIONSTRING_GET_CONNECTIONURL, name);
+                Transaction transaction = Cat.newTransaction(DAL, transactionName);
+
                 try {
                     Map<String, String> map = config.asMap();
                     normalConnectionString = map.get(TITAN_KEY_NORMAL);
@@ -85,11 +95,23 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                             e);
                 }
 
-                DataSourceConfigure configure = null;
+                DataSourceConfigure configure;
+                DataSourceConfigure failoverConfigure;
                 try {
                     configure = connectionStringParser.parse(name, normalConnectionString);
+                    failoverConfigure = connectionStringParser.parse(name, failoverConnectionString);
+
+                    String msg = String.format("Normal connection url=%s,Failover connection url=%s",
+                            configure.getConnectionUrl(), failoverConfigure.getConnectionUrl());
+                    transaction.addData(CONNECTIONSTRING_NORMAL_CONNECTIONURL, configure.getConnectionUrl());
+                    transaction.addData(CONNECTIONSTRING_FAILOVER_CONNECTIONURL, failoverConfigure.getConnectionUrl());
+                    transaction.setStatus(Transaction.SUCCESS);
+                    Cat.logEvent(DAL, transactionName, Message.SUCCESS, msg);
                 } catch (Throwable e) {
+                    transaction.setStatus(e);
                     throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
+                } finally {
+                    transaction.complete();
                 }
 
                 ConnectionString connectionString =

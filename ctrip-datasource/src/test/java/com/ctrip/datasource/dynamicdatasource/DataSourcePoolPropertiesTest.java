@@ -15,11 +15,12 @@ import org.junit.Test;
 public class DataSourcePoolPropertiesTest {
     private static final String name = "mysqldaltest01db_w";
     private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
+    private static LocalPoolPropertiesProvider provider = new LocalPoolPropertiesProvider();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         DataSourceConfigureManager.getInstance().setConnectionStringProvider(new AbstractConnectionStringProvider());
-        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new LocalPoolPropertiesProvider());
+        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(provider);
         DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new AbstractIPDomainStatusProvider());
 
         DalClientFactory.initClientFactory();
@@ -33,8 +34,9 @@ public class DataSourcePoolPropertiesTest {
         int minIdle1 = configure1.getIntProperty(DataSourceConfigureConstants.MINIDLE, -1);
         System.out.println(String.format("minIdle:%s", minIdle1));
 
-        System.out.println("Sleep for 10 seconds.");
-        Thread.sleep(10 * 1000);
+        System.out.println("**********Trigger pool properties changed callback**********");
+        provider.triggerPoolPropertiesChanged();
+        Thread.sleep(1 * 1000);
 
         DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
         boolean dynamicEnabled2 = configure2.dynamicPoolPropertiesEnabled();

@@ -10,6 +10,8 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceValidator;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,6 +19,7 @@ import org.junit.Test;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.datasource.DataSourceValidator;
+import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 
 public class DataSourceValidatorTest {
     private static final String mySqlName = "mysqldaltest01db_W";
@@ -47,7 +50,6 @@ public class DataSourceValidatorTest {
         boolean result = false;
 
         try {
-            // emulate connection pool to validate the connection.
             DataSourceValidator validator = new DataSourceValidator();
             result = validator.validate(connection, PooledConnection.VALIDATE_BORROW);
         } catch (Throwable e) {
@@ -60,6 +62,7 @@ public class DataSourceValidatorTest {
         try {
             Statement statement2 = connection.createStatement();
             statement2.execute("select SLEEP(1)");
+//            statement2.execute("select SLEEP(60)");
         } catch (Throwable e) {
             System.out.println("Statement2 exception captured.");
         }

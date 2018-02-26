@@ -1,10 +1,10 @@
 package com.ctrip.platform.dal;
 
-import com.ctrip.platform.dal.dao.configure.CtripDalConfigLoaderTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.ctrip.platform.dal.dao.configure.CtripDalConfigLoaderTest;
 import com.ctrip.platform.dal.dao.helper.SQLParserTests;
 import com.ctrip.platform.dal.sql.logging.CommonUtilTest;
 import com.ctrip.platform.dal.sql.logging.DalCatLoggerTest;
@@ -16,7 +16,9 @@ import com.ctrip.platform.dal.sql.logging.DalCatLoggerTest;
     CtripDalConfigLoaderTest.class, 
     SQLParserTests.class,
     CommonUtilTest.class,
-    DalCatLoggerTest.class,})
+    DalCatLoggerTest.class,
+    com.ctrip.platform.dal.dao.configure.AllTests.class,
+    })
 public class AllTests {
 
 }

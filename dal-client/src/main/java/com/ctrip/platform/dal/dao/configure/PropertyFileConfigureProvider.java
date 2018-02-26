@@ -3,11 +3,13 @@ package com.ctrip.platform.dal.dao.configure;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class PropertyFileConfigureProvider implements DataSourceConfigureProvider {
     private final String CONFIG_NAME = "database.properties";
@@ -22,6 +24,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
     private String location;
     private Properties properties = new Properties();
+    private Map<String, String> map = new HashMap<>();
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
@@ -29,6 +32,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
         location = settings.get(PATH);
         if (location != null) {
             properties.load(new FileReader(location));
+            convertPropertiesToMap(properties);
             return;
         }
 
@@ -45,6 +49,20 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
                     "Can not find " + CONFIG_NAME + " to initilize database configure provider");
 
         properties.load(new FileReader(new File(configUrl.toURI())));
+        convertPropertiesToMap(properties);
+    }
+
+    private void convertPropertiesToMap(Properties properties) {
+        map.clear();
+
+        if (properties == null)
+            return;
+
+        Set<String> names = properties.stringPropertyNames();
+        for (String temp : names) {
+            String name = ConnectionStringKeyHelper.getKeyName(temp);
+            map.put(name, properties.getProperty(temp));
+        }
     }
 
     @Override
@@ -53,10 +71,14 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
         DataSourceConfigure dataSourceConfigure = configure == null ? new DataSourceConfigure(dbName)
                 : new DataSourceConfigure(dbName, configure.getMap());
 
-        dataSourceConfigure.setUserName(properties.getProperty(dbName + USER_NAME));
-        dataSourceConfigure.setPassword(properties.getProperty(dbName + PASSWORD));
-        dataSourceConfigure.setConnectionUrl(properties.getProperty(dbName + CONNECTION_URL));
-        dataSourceConfigure.setDriverClass(properties.getProperty(dbName + DRIVER));
+        String userName = ConnectionStringKeyHelper.getKeyName(dbName + USER_NAME);
+        String password = ConnectionStringKeyHelper.getKeyName(dbName + PASSWORD);
+        String connectionUrl = ConnectionStringKeyHelper.getKeyName(dbName + CONNECTION_URL);
+        String driver = ConnectionStringKeyHelper.getKeyName(dbName + DRIVER);
+        dataSourceConfigure.setUserName(map.get(userName));
+        dataSourceConfigure.setPassword(map.get(password));
+        dataSourceConfigure.setConnectionUrl(map.get(connectionUrl));
+        dataSourceConfigure.setDriverClass(map.get(driver));
 
         return dataSourceConfigure;
     }

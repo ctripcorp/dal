@@ -3,7 +3,7 @@ package com.ctrip.datasource.datasource;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DefaultConnectionListener;
 import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 
 import java.sql.Connection;
 
@@ -16,22 +16,34 @@ public class CtripConnectionListener extends DefaultConnectionListener implement
     @Override
     public void doOnCreateConnection(String poolDesc, Connection connection) {
         super.doOnCreateConnection(poolDesc, connection);
-        Cat.logEvent(DAL, DAL_DATASOURCE_CREATE_CONNECTION, Message.SUCCESS,
-                String.format("[onCreateConnection]%s, %s", poolDesc, connection));
+        String transactionName = String.format("%s:%s", DAL_DATASOURCE_CREATE_CONNECTION, connection);
+        logCatTransaction(transactionName);
     }
 
     @Override
     public void doOnReleaseConnection(String poolDesc, Connection connection) {
         super.doOnReleaseConnection(poolDesc, connection);
-        Cat.logEvent(DAL, DAL_DATASOURCE_RELEASE_CONNECTION, Message.SUCCESS,
-                String.format("[onReleaseConnection]%s, %s", poolDesc, connection));
+        String transactionName = String.format("%s:%s", DAL_DATASOURCE_RELEASE_CONNECTION, connection);
+        logCatTransaction(transactionName);
     }
 
     @Override
     protected void doOnAbandonConnection(String poolDesc, Connection connection) {
         super.doOnAbandonConnection(poolDesc, connection);
-        Cat.logEvent(DAL, DAL_DATASOURCE_ABANDON_CONNECTION, Message.SUCCESS,
-                String.format("[onAbandonConnection]%s, %s", poolDesc, connection));
+        String transactionName = String.format("%s:%s", DAL_DATASOURCE_ABANDON_CONNECTION, connection);
+        logCatTransaction(transactionName);
+    }
+
+    private void logCatTransaction(String transactionName) {
+        Transaction transaction = Cat.newTransaction(DAL, transactionName);
+        try {
+            transaction.addData(transactionName);
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+        } finally {
+            transaction.complete();
+        }
     }
 
     @Override

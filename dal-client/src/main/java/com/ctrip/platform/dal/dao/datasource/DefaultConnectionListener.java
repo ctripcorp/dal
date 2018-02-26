@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 
-public class DefaultConnectionListener extends AbstractConnectionListener implements ConnectionListener{
+public class DefaultConnectionListener extends AbstractConnectionListener implements ConnectionListener {
 
     private static Logger logger = LoggerFactory.getLogger(DefaultConnectionListener.class);
 
@@ -20,7 +20,13 @@ public class DefaultConnectionListener extends AbstractConnectionListener implem
     }
 
     @Override
+    protected void doOnAbandonConnection(String poolDesc, Connection connection) {
+        logger.info("[onAbandonConnection]{}, {}", poolDesc, connection);
+    }
+
+    @Override
     public int getOrder() {
         return LOWEST_PRECEDENCE;
     }
+
 }

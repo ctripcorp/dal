@@ -1,17 +1,12 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import java.util.Date;
-
 public class SingleDataSourceTask {
     private SingleDataSource singleDataSource;
-    private Date enqueueTime;
-    private int retryTimes;
-    private boolean executeResult;
+    private DataSourceTerminateTask dataSourceTerminateTask;
 
-    public SingleDataSourceTask(SingleDataSource singleDataSource, Date enqueueTime, int retryTimes) {
+    public SingleDataSourceTask(SingleDataSource singleDataSource, DataSourceTerminateTask dataSourceTerminateTask) {
         this.singleDataSource = singleDataSource;
-        this.enqueueTime = enqueueTime;
-        this.retryTimes = retryTimes;
+        this.dataSourceTerminateTask = dataSourceTerminateTask;
     }
 
     public SingleDataSource getSingleDataSource() {
@@ -22,28 +17,12 @@ public class SingleDataSourceTask {
         this.singleDataSource = singleDataSource;
     }
 
-    public Date getEnqueueTime() {
-        return enqueueTime;
+    public DataSourceTerminateTask getDataSourceTerminateTask() {
+        return dataSourceTerminateTask;
     }
 
-    public void setEnqueueTime(Date enqueueTime) {
-        this.enqueueTime = enqueueTime;
-    }
-
-    public int getRetryTimes() {
-        return retryTimes;
-    }
-
-    public void setRetryTimes(int retryTimes) {
-        this.retryTimes = retryTimes;
-    }
-
-    public boolean getExecuteResult() {
-        return executeResult;
-    }
-
-    public void setExecuteResult(boolean executeResult) {
-        this.executeResult = executeResult;
+    public void setDataSourceTerminateTask(DataSourceTerminateTask dataSourceTerminateTask) {
+        this.dataSourceTerminateTask = dataSourceTerminateTask;
     }
 
 }

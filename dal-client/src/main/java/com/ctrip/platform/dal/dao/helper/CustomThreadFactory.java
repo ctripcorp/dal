@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.factory;
+package com.ctrip.platform.dal.dao.helper;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

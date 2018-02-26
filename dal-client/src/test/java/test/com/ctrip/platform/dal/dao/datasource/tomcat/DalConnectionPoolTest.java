@@ -20,6 +20,7 @@ public class DalConnectionPoolTest {
 
     /**
      * need local mysql
+     * 
      * @throws SQLException
      */
     @Test
@@ -35,6 +36,7 @@ public class DalConnectionPoolTest {
 
         final AtomicInteger create = new AtomicInteger();
         final AtomicInteger release = new AtomicInteger();
+        final AtomicInteger abandon = new AtomicInteger();
 
         DalConnectionPool.setConnectionListener(new AbstractConnectionListener() {
 
@@ -46,6 +48,11 @@ public class DalConnectionPoolTest {
             @Override
             public void doOnReleaseConnection(String poolDesc, Connection connection) {
                 release.incrementAndGet();
+            }
+
+            @Override
+            protected void doOnAbandonConnection(String poolDesc, Connection connection) {
+                abandon.incrementAndGet();
             }
 
             @Override
@@ -69,7 +76,7 @@ public class DalConnectionPoolTest {
         }
         Assert.assertEquals(initSize * 2, create.get());
 
-        for(Connection connection : connections){
+        for (Connection connection : connections) {
             connection.close();
         }
 

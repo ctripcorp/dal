@@ -62,8 +62,7 @@ public interface DataSourceConfigureConstants {
             "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8";
     boolean DEFAULT_JMXENABLED = true;
     String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-            + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;"
-            + "com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState";
+            + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;";
     // com.ctrip.datasource.interceptor.CtripConnectionState
     // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
 

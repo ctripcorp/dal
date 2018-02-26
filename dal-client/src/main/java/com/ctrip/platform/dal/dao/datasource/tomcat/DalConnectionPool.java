@@ -21,12 +21,14 @@ public class DalConnectionPool extends ConnectionPool {
     }
 
     @Override
-    protected PooledConnection createConnection(long now, PooledConnection notUsed, String username, String password) throws SQLException {
+    protected PooledConnection createConnection(long now, PooledConnection notUsed, String username, String password)
+            throws SQLException {
 
         PooledConnection pooledConnection = super.createConnection(now, notUsed, username, password);
-        try{
-            connectionListener.onCreateConnection(getName(), pooledConnection == null ? null : pooledConnection.getConnection());
-        }catch (Exception e){
+        try {
+            connectionListener.onCreateConnection(getName(),
+                    pooledConnection == null ? null : pooledConnection.getConnection());
+        } catch (Exception e) {
             logger.error("[createConnection]" + this, e);
 
         }
@@ -36,15 +38,27 @@ public class DalConnectionPool extends ConnectionPool {
     @Override
     protected void release(PooledConnection con) {
 
-        try{
+        try {
             connectionListener.onReleaseConnection(getName(), con == null ? null : con.getConnection());
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("[release]" + this, e);
         }
         super.release(con);
     }
 
+    @Override
+    protected void abandon(PooledConnection con) {
+        try {
+            connectionListener.onAbandonConnection(getName(), con == null ? null : con.getConnection());
+        } catch (Exception e) {
+            logger.error("[abandon]" + this, e);
+        }
+
+        super.abandon(con);
+    }
+
     public static void setConnectionListener(ConnectionListener connectionListener) {
         DalConnectionPool.connectionListener = connectionListener;
     }
+
 }

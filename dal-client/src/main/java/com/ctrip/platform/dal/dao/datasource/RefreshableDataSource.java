@@ -11,11 +11,8 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
-    private static final Logger logger = LoggerFactory.getLogger(RefreshableDataSource.class);
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
@@ -29,11 +26,12 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
         SingleDataSource newDataSource = new SingleDataSource(name, newConfigure);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        close(oldDataSource);
+        SingleDataSourceTask task = new SingleDataSourceTask(oldDataSource, event.getDataSourceTerminateTask());
+        close(task);
     }
 
-    private void close(SingleDataSource dataSource) {
-        DataSourceTerminator.getInstance().close(dataSource);
+    private void close(SingleDataSourceTask task) {
+        DataSourceTerminator.getInstance().close(task);
     }
 
     private DataSource getDataSource() {

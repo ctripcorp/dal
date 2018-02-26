@@ -22,4 +22,6 @@ public interface DalConfigConstants {
     String SETTINGS = "settings";
     String CONNECTION_LOCATOR = "ConnectionLocator";
     String LOCATOR = "locator";
+    String DATABASE_SELECTOR = "DatabaseSelector";
+    String SELECTOR = "selector";
 }

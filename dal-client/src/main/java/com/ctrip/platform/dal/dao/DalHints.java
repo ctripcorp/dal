@@ -265,14 +265,16 @@ public class DalHints {
 
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
+		hints.remove(DalHintEnum.slaveOnly);
 		return this;
 	}
 
-	//	public DalHints slaveOnly() {
-//		set(DalHintEnum.masterOnly, false);
-//		return this;
-//	}
-//
+    public DalHints slaveOnly() {
+        set(DalHintEnum.slaveOnly, true);
+        hints.remove(DalHintEnum.masterOnly);
+        return this;
+    }
+
 	public DalHints continueOnError() {
 		set(DalHintEnum.continueOnError);
 		return this;
@@ -354,7 +356,12 @@ public class DalHints {
 		set(DalHintEnum.timeout, seconds);
 		return this;
 	}
-
+	
+	public DalHints freshness(int seconds) {
+        set(DalHintEnum.freshness, seconds);
+        return this;
+	}
+	
 	public DalHints enableIdentityInsert() {
 		set(DalHintEnum.enableIdentityInsert);
 		return this;

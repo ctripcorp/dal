@@ -347,10 +347,12 @@ public class DalDirectClient implements DalClient {
 		do {
 			// If resultParameters is not the same as what exactly returned, there will be exception. You just
 			// need to add enough result parameter to avoid this or you can set skipResultsProcessing
-			String key = resultParameters.get(index).getName();
+		    StatementParameter resultParameter = resultParameters.get(index);
+			String key = resultParameter.getName();
 			Object value = updateCount == -1?
-					resultParameters.get(index).getResultSetExtractor().extract(statement.getResultSet()) :
-					updateCount;
+				resultParameters.get(index).getResultSetExtractor().extract(statement.getResultSet()) :
+				updateCount;
+			resultParameter.setValue(value);
 			moreResults = statement.getMoreResults();
 			updateCount = statement.getUpdateCount();
 			index++;

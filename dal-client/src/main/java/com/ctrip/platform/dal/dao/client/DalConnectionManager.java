@@ -8,6 +8,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.configure.SelectionContext;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -110,13 +111,11 @@ public class DalConnectionManager {
 			if(shardId == null)
 				throw new DalException(ErrorCode.ShardLocated, logicDbName);
 			dbSet.validate(shardId);
-
-			allInOneKey = dbSet.getRandomRealDbName(hints, shardId, isMaster, isSelect);
-		} else {
-			allInOneKey = dbSet.getRandomRealDbName(hints, isMaster, isSelect);
 		}
 
-		try {
+		allInOneKey = select(logicDbName, dbSet, hints, shardId, isMaster, isSelect);
+		
+		try {	
 			conn = locator.getConnection(allInOneKey);
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
 			return new DalConnection(conn, isMaster, shardId, meta);
@@ -124,7 +123,21 @@ public class DalConnectionManager {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}
 	}
-
+	
+	private String select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
+	    SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
+	    
+	    if(shard == null) {
+	        context.setMasters(dbSet.getMasterDbs());
+	        context.setSlaves(dbSet.getSlaveDbs());
+	    }else{
+            context.setMasters(dbSet.getMasterDbs(shard));
+            context.setSlaves(dbSet.getSlaveDbs(shard));	        
+	    }
+	    
+	    return config.getSelector().select(context);
+	}
+	
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
 		// If HA disabled or not query, we just directly call _doInConnnection

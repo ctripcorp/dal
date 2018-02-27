@@ -20,198 +20,204 @@ import com.ctrip.platform.dal.dao.DalResultCallback;
 import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogContext;
+import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
- * Common reuqest executor that support execute request that is of pojo or
- * sql in single, all or multiple shards
+ * Common reuqest executor that support execute request that is of pojo or sql in single, all or multiple shards
  *
  * @author jhhe
  */
 public class DalRequestExecutor {
-	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
+    private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
 
-	public static final String MAX_POOL_SIZE = "maxPoolSize";
-	public static final String KEEP_ALIVE_TIME = "keepAliveTime";
+    public static final String MAX_POOL_SIZE = "maxPoolSize";
+    public static final String KEEP_ALIVE_TIME = "keepAliveTime";
 
-	// To be consist with default connection max active size
-	public static final int DEFAULT_MAX_POOL_SIZE = 500;
+    // To be consist with default connection max active size
+    public static final int DEFAULT_MAX_POOL_SIZE = 500;
 
-	public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
+    public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
 
-	private DalLogger logger = DalClientFactory.getDalLogger();
+    private static final String THREAD_NAME = "DalRequestExecutor";
 
-	private final static String NA = "N/A";
+    private DalLogger logger = DalClientFactory.getDalLogger();
 
-	public static void init(String maxPoolSizeStr, String keepAliveTimeStr){
-		if(serviceRef.get() != null)
-			return;
+    private final static String NA = "N/A";
 
-		synchronized (DalRequestExecutor.class) {
-			if(serviceRef.get() != null)
-				return;
+    public static void init(String maxPoolSizeStr, String keepAliveTimeStr) {
+        if (serviceRef.get() != null)
+            return;
 
-			int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
-			if(maxPoolSizeStr != null)
-				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
+        synchronized (DalRequestExecutor.class) {
+            if (serviceRef.get() != null)
+                return;
 
-			int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
-			if(keepAliveTimeStr != null)
-				keepAliveTime = Integer.parseInt(keepAliveTimeStr);
+            int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
+            if (maxPoolSizeStr != null)
+                maxPoolSize = Integer.parseInt(maxPoolSizeStr);
 
-			ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-			executer.allowCoreThreadTimeOut(true);
+            int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
+            if (keepAliveTimeStr != null)
+                keepAliveTime = Integer.parseInt(keepAliveTimeStr);
 
-			serviceRef.set(executer);
-		}
-	}
+            ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime,
+                    TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory(THREAD_NAME));
+            executer.allowCoreThreadTimeOut(true);
 
-	public static void shutdown() {
-		if (serviceRef.get() == null)
-			return;
+            serviceRef.set(executer);
+        }
+    }
 
-		synchronized (DalRequestExecutor.class) {
-			if (serviceRef.get() == null)
-				return;
+    public static void shutdown() {
+        if (serviceRef.get() == null)
+            return;
 
-			serviceRef.get().shutdown();
-			serviceRef.set(null);
-		}
-	}
+        synchronized (DalRequestExecutor.class) {
+            if (serviceRef.get() == null)
+                return;
 
-	public <T> T execute(final DalHints hints, final DalRequest<T> request) throws SQLException {
-		return execute(hints, request, false);
-	}
+            serviceRef.get().shutdown();
+            serviceRef.set(null);
+        }
+    }
 
-	public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable) throws SQLException {
-		if (hints.isAsyncExecution()) {
-			Future<T> future = serviceRef.get().submit(new Callable<T>() {
-				public T call() throws Exception {
-					return internalExecute(hints, request, nullable);
-				}
-			});
+    public <T> T execute(final DalHints hints, final DalRequest<T> request) throws SQLException {
+        return execute(hints, request, false);
+    }
 
-			if(hints.isAsyncExecution())
-				hints.set(DalHintEnum.futureResult, future);
-			return null;
-		}
+    public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable)
+            throws SQLException {
+        if (hints.isAsyncExecution()) {
+            Future<T> future = serviceRef.get().submit(new Callable<T>() {
+                public T call() throws Exception {
+                    return internalExecute(hints, request, nullable);
+                }
+            });
 
-		return internalExecute(hints, request, nullable);
-	}
+            if (hints.isAsyncExecution())
+                hints.set(DalHintEnum.futureResult, future);
+            return null;
+        }
 
-	private <T> T internalExecute(DalHints hints, DalRequest<T> request, boolean nullable) throws SQLException {
-		T result = null;
-		Throwable error = null;
+        return internalExecute(hints, request, nullable);
+    }
 
-		LogContext logContext = logger.start(request);
+    private <T> T internalExecute(DalHints hints, DalRequest<T> request, boolean nullable) throws SQLException {
+        T result = null;
+        Throwable error = null;
 
-		try {
-			request.validate();
+        LogContext logContext = logger.start(request);
 
-			if(request.isCrossShard())
-				result = crossShardExecute(logContext, hints, request);
-			else
-				result = nonCrossShardExecute(logContext, hints, request);
+        try {
+            request.validate();
 
-			if(result == null && !nullable)
-				throw new DalException(ErrorCode.AssertNull);
-		} catch (Throwable e) {
-			error = e;
-		}
+            if (request.isCrossShard())
+                result = crossShardExecute(logContext, hints, request);
+            else
+                result = nonCrossShardExecute(logContext, hints, request);
 
-		logger.end(logContext, error);
+            if (result == null && !nullable)
+                throw new DalException(ErrorCode.AssertNull);
+        } catch (Throwable e) {
+            error = e;
+        }
 
-		handleCallback(hints, result, error);
-		if(error != null)
-			throw DalException.wrap(error);
+        logger.end(logContext, error);
 
-		return result;
-	}
+        handleCallback(hints, result, error);
+        if (error != null)
+            throw DalException.wrap(error);
 
-	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
-		logContext.setSingleTask(true);
-		Callable<T> task = new RequestTaskWrapper<T>(NA, request.createTask(), logContext);
-		return task.call();
-	}
+        return result;
+    }
 
-	private <T> T crossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
-		Map<String, Callable<T>> tasks = request.createTasks();
-		logContext.setShards(tasks.keySet());
+    private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
+        logContext.setSingleTask(true);
+        Callable<T> task = new RequestTaskWrapper<T>(NA, request.createTask(), logContext);
+        return task.call();
+    }
 
-		boolean isSequentialExecution = hints.is(DalHintEnum.sequentialExecution);
-		logContext.setSeqencialExecution(isSequentialExecution);
+    private <T> T crossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
+        Map<String, Callable<T>> tasks = request.createTasks();
+        logContext.setShards(tasks.keySet());
 
-		ResultMerger<T> merger = request.getMerger();
+        boolean isSequentialExecution = hints.is(DalHintEnum.sequentialExecution);
+        logContext.setSeqencialExecution(isSequentialExecution);
 
-		logger.startCrossShardTasks(logContext, isSequentialExecution);
+        ResultMerger<T> merger = request.getMerger();
 
-		T result = null;
-		Throwable error = null;
+        logger.startCrossShardTasks(logContext, isSequentialExecution);
 
-		try {
-			result = isSequentialExecution?
-					seqncialExecute(hints, tasks, merger, logContext):
-					parallelExecute(hints, tasks, merger, logContext);
+        T result = null;
+        Throwable error = null;
 
-		} catch (Throwable e) {
-			error = e;
-		}
+        try {
+            result = isSequentialExecution ? seqncialExecute(hints, tasks, merger, logContext)
+                    : parallelExecute(hints, tasks, merger, logContext);
 
-		logger.endCrossShards(logContext, error);
+        } catch (Throwable e) {
+            error = e;
+        }
 
-		if(error != null)
-			throw DalException.wrap(error);
+        logger.endCrossShards(logContext, error);
 
-		return result;
+        if (error != null)
+            throw DalException.wrap(error);
 
-	}
+        return result;
 
-	private <T> void handleCallback(final DalHints hints, T result, Throwable error) {
-		DalResultCallback qc = (DalResultCallback)hints.get(DalHintEnum.resultCallback);
-		if (qc == null)
-			return;
+    }
 
-		if(error == null)
-			qc.onResult(result);
-		else
-			qc.onError(error);
-	}
+    private <T> void handleCallback(final DalHints hints, T result, Throwable error) {
+        DalResultCallback qc = (DalResultCallback) hints.get(DalHintEnum.resultCallback);
+        if (qc == null)
+            return;
 
-	private <T> T parallelExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
-		Map<String, Future<T>> resultFutures = new HashMap<>();
+        if (error == null)
+            qc.onResult(result);
+        else
+            qc.onError(error);
+    }
 
-		for(final String shard: tasks.keySet())
-			resultFutures.put(shard, serviceRef.get().submit(new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext)));
+    private <T> T parallelExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger,
+            LogContext logContext) throws SQLException {
+        Map<String, Future<T>> resultFutures = new HashMap<>();
 
-		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
-			try {
-				merger.addPartial(entry.getKey(), entry.getValue().get());
-			} catch (Throwable e) {
-				hints.handleError("There is error during parallel execution: ", e);
-			}
-		}
+        for (final String shard : tasks.keySet())
+            resultFutures.put(shard,
+                    serviceRef.get().submit(new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext)));
 
-		return merger.merge();
-	}
+        for (Map.Entry<String, Future<T>> entry : resultFutures.entrySet()) {
+            try {
+                merger.addPartial(entry.getKey(), entry.getValue().get());
+            } catch (Throwable e) {
+                hints.handleError("There is error during parallel execution: ", e);
+            }
+        }
 
-	private <T> T seqncialExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
-		for(final String shard: tasks.keySet()) {
-			try {
-				merger.addPartial(shard, new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call());
-			} catch (Throwable e) {
-				hints.handleError("There is error during sequential execution: ", e);
-			}
-		}
+        return merger.merge();
+    }
 
-		return merger.merge();
-	}
+    private <T> T seqncialExecute(DalHints hints, Map<String, Callable<T>> tasks, ResultMerger<T> merger,
+            LogContext logContext) throws SQLException {
+        for (final String shard : tasks.keySet()) {
+            try {
+                merger.addPartial(shard, new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call());
+            } catch (Throwable e) {
+                hints.handleError("There is error during sequential execution: ", e);
+            }
+        }
 
-	public static int getPoolSize() {
-		ThreadPoolExecutor executer = (ThreadPoolExecutor)serviceRef.get();
-		if (serviceRef.get() == null)
-			return 0;
+        return merger.merge();
+    }
 
-		return executer.getPoolSize();
-	}
+    public static int getPoolSize() {
+        ThreadPoolExecutor executer = (ThreadPoolExecutor) serviceRef.get();
+        if (serviceRef.get() == null)
+            return 0;
+
+        return executer.getPoolSize();
+    }
 }

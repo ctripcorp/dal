@@ -90,7 +90,10 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         locator.setup(getAllDbNames(databaseSets));
 
-        return new DalConfigure(name, databaseSets, logger, locator, factory);
+        DatabaseSelector selector =
+                readComponent(root, DATABASE_SELECTOR, new DefaultDatabaseSelector(), SELECTOR);
+
+        return new DalConfigure(name, databaseSets, logger, locator, factory, selector);
     }
 
     private Set<String> getAllDbNames(Map<String, DatabaseSet> databaseSets) {

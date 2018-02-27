@@ -14,7 +14,8 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.configure.DataBase;
-import com.ctrip.platform.dal.dao.configure.DatabaseSelector;
+import com.ctrip.platform.dal.dao.configure.DefaultDatabaseSelector;
+import com.ctrip.platform.dal.dao.configure.SelectionContext;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkDownPolicy;
 import com.ctrip.platform.dal.dao.markdown.MarkDownReason;
@@ -36,7 +37,7 @@ public class DatabaseSelectorTest {
 	private static final String S1 = "OracleShard_0";
 	private static final String S2 = "dao_test_sqlsvr_0";
 	private static final String S3 = "dao_test_sqlsvr_1";
-
+	private DefaultDatabaseSelector selector = new DefaultDatabaseSelector();
 	static {
 		try {
 			DalClientFactory.initClientFactory();
@@ -65,18 +66,18 @@ public class DatabaseSelectorTest {
 		autoMarkup(S3);
 	}
 	
-	private void assertSelector(DatabaseSelector selector, ErrorCode code) {
+	private void assertSelector(SelectionContext context, ErrorCode code) {
 		try {
-			selector.select();
+			selector.select(context);
 			Assert.fail();
 		} catch (DalException e) {
 			Assert.assertEquals(code.getCode(), e.getErrorCode());
 		}
 	}
 	
-	private String assertSelector(DatabaseSelector selector, String... matched) {
+	private String assertSelector(SelectionContext context, String... matched) {
 		try {
-			String selected = selector.select();
+			String selected = selector.select(context);
 			Assert.assertNotNull(selected);
 				
 			for(String v: matched)
@@ -90,9 +91,9 @@ public class DatabaseSelectorTest {
 		return null;
 	}
 	
-	private String assertSelector(DatabaseSelector selector, Set<String> matched) {
+	private String assertSelector(SelectionContext context, Set<String> matched) {
 		try {
-			String selected = selector.select();
+			String selected = selector.select(context);
 			Assert.assertNotNull(selected);
 				
 				if(matched.contains(selected)) {
@@ -107,6 +108,13 @@ public class DatabaseSelectorTest {
 		return null;
 	}
 	
+	private SelectionContext getContext(DalHints hints, List<DataBase> ms, List<DataBase> ss, boolean masterOnly, boolean isSelect) {
+	    SelectionContext ctx = new SelectionContext("", hints == null ? new DalHints():hints, null, masterOnly, isSelect);
+	    ctx.setMasters(ms);
+	    ctx.setSlaves(ss);
+	    return ctx;
+	}
+	
 	@Test
 	public void validDesigantedDbTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
@@ -116,31 +124,31 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+        SelectionContext context;
+        
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
+		Assert.assertEquals(M1, selector.select(context));
+
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
+		Assert.assertEquals(M2, selector.select(context));
+
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
+		Assert.assertEquals(S1, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, false, true);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
+		Assert.assertEquals(S2, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, false, true);
-		Assert.assertEquals(M2, selector.select());
-
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, false, true);
-		Assert.assertEquals(S1, selector.select());
-		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, false, true);
-		Assert.assertEquals(S2, selector.select());
-
-		selector = new DatabaseSelector(new DalHints().inDatabase(S3), ms, ss, false, true);
-		Assert.assertEquals(S3, selector.select());
+		context = getContext(new DalHints().inDatabase(S3), ms, ss, false, true);
+		Assert.assertEquals(S3, selector.select(context));
 
 		autoMarkdown(M1);
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, false, true);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
+		Assert.assertEquals(M2, selector.select(context));
 		
 		autoMarkdown(S1);
 		autoMarkdown(S2);
-		selector = new DatabaseSelector(new DalHints().inDatabase(S3), ms, ss, false, true);
-		Assert.assertEquals(S3, selector.select());
+		context = getContext(new DalHints().inDatabase(S3), ms, ss, false, true);
+		Assert.assertEquals(S3, selector.select(context));
 	}
 
 	@Test
@@ -152,19 +160,19 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1 + M2), ms, ss, false, false);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(M1 + M2), ms, ss, false, false);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1 + M2), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(M1 + M2), ms, ss, true, true);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1 + M2), ms, ss, true, false);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(M1 + M2), ms, ss, true, false);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1 + M2), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(M1 + M2), ms, ss, false, true);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 	}
 
 	@Test
@@ -176,7 +184,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		autoMarkdown(M1);
 		autoMarkdown(M2);
@@ -184,20 +192,20 @@ public class DatabaseSelectorTest {
 		autoMarkdown(S2);
 		autoMarkdown(S3);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 	}
 	
 	@Test
@@ -209,13 +217,13 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)).inDatabase(M1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)).inDatabase(M1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(S1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(S1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 	
 	@Test
@@ -227,32 +235,32 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		// make sure no slave is qualified
 		autoMarkdown(S1);
 		autoMarkdown(S2);
 		autoMarkdown(S3);
 		
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, true, true);
+		assertSelector(context, M1, M2);
 
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, M1, M2);
 
 		autoMarkdown(M1);
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		assertSelector(selector, M2);
+		context = getContext(null, ms, ss, true, true);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, M2);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, M2);
 
 		autoMarkdown(M2);
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, true, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 	}
 	
 	@Test
@@ -264,52 +272,52 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		// make sure no slave is qualified
 		autoMarkdown(S1);
 		autoMarkdown(S2);
 		autoMarkdown(S3);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
+		assertSelector(context, M2);
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
-		assertSelector(selector, M1);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
+		assertSelector(context, M1);
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, false);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, false);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, false);
-		assertSelector(selector, M1);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, false);
+		assertSelector(context, M1);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1).addDB(M2)), ms, ss, true, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1).addDB(M2)), ms, ss, true, false);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 		
 		autoMarkdown(M1);
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
+		assertSelector(context, M2);
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
+		assertSelector(context, M2);
 		autoMarkup(M1);
 		
 		autoMarkdown(M2);
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
-		assertSelector(selector, M1);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
+		assertSelector(context, M1);
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
-		assertSelector(selector, M1);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
+		assertSelector(context, M1);
 		
 		autoMarkdown(M1);
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)), ms, ss, true, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M2)), ms, ss, true, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M1).addDB(M2)), ms, ss, true, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M1).addDB(M2)), ms, ss, true, false);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 	
 	@Test
@@ -321,13 +329,13 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, S1, S2, S3);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, S1, S2, S3);
 
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, false, false);
+		assertSelector(context, M1, M2);
 	}
 	
 	@Test
@@ -339,28 +347,28 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		autoMarkdown(S1);
 		autoMarkdown(S2);
 		autoMarkdown(S3);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, M1, M2);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, false, false);
+		assertSelector(context, M1, M2);
 
 		setUp();
 		
 		autoMarkdown(M1);
 		autoMarkdown(M2);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, S1, S2, S3);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, S1, S2, S3);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, false, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		autoMarkdown(M1);
 		autoMarkdown(M2);
@@ -368,11 +376,11 @@ public class DatabaseSelectorTest {
 		autoMarkdown(S2);
 		autoMarkdown(S3);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, false, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 	}
 	
 	private Set<String> newHashSet(String... v) {
@@ -393,28 +401,28 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		Set<String> matched = newHashSet(S1, S2, S3);
 		
 		DalHints hints = new DalHints().setHA(new DalHA());
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
 		matched = newHashSet(M1, M2);
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 	
 	@Test
@@ -426,25 +434,25 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		Set<String> matched;
 		
 		autoMarkdown(S1);
 		matched = newHashSet(S2, S3);
 		DalHints hints = new DalHints().setHA(new DalHA());
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
 		autoMarkdown(M1);
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, M2);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, M2);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, M2);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, M2);
 	}
 
 	@Test
@@ -455,33 +463,34 @@ public class DatabaseSelectorTest {
 		List<DataBase> ss = new ArrayList<DataBase>();
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
+        SelectionContext context;
 
-		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
-		String dbName = selector.select();
+		context = getContext(null, ms, ss, false, true);
+		String dbName = selector.select(context);
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, false, true);
-		Assert.assertTrue(selector.select().equals(S1));
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
+		Assert.assertTrue(selector.select(context).equals(S1));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, false, true);
-		Assert.assertTrue(selector.select().equals(S2));
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
+		Assert.assertTrue(selector.select(context).equals(S2));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, false, true);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
+		assertSelector(context, M2);
 		
 		// masterOnly
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		dbName = selector.select();
-		assertSelector(selector, M2, M1);
+		context = getContext(null, ms, ss, true, true);
+		dbName = selector.select(context);
+		assertSelector(context, M2, M1);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, true, true);
-		assertSelector(selector, M1);
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, true);
+		assertSelector(context, M1);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, true, true);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, true, true);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, true, true);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 	}
 
 	@Test
@@ -492,33 +501,34 @@ public class DatabaseSelectorTest {
 		List<DataBase> ss = new ArrayList<DataBase>();
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
+        SelectionContext context;
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints(), ms, ss, false, false);
-		String dbName = selector.select();
+		context = getContext(new DalHints(), ms, ss, false, false);
+		String dbName = selector.select(context);
 		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, false, false);
-		Assert.assertTrue(selector.select().equals(M1));
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, false);
+		Assert.assertTrue(selector.select(context).equals(M1));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, false, false);
-		Assert.assertTrue(selector.select().equals(M2));
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, false);
+		Assert.assertTrue(selector.select(context).equals(M2));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, false, false);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, false);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 		
 		// masterOnly
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		dbName = selector.select();
+		context = getContext(null, ms, ss, true, false);
+		dbName = selector.select(context);
 		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, true, false);
-		Assert.assertTrue(selector.select().equals(M1));
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, false);
+		Assert.assertTrue(selector.select(context).equals(M1));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), ms, ss, true, false);
-		Assert.assertTrue(selector.select().equals(M2));
+		context = getContext(new DalHints().inDatabase(M2), ms, ss, true, false);
+		Assert.assertTrue(selector.select(context).equals(M2));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, true, false);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, true, false);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 	}
 	
 	@Test
@@ -527,28 +537,28 @@ public class DatabaseSelectorTest {
 		ms.add(new DataBase(M1, true, "", M1));
 		ms.add(new DataBase(M2, true, "", M2));
 		List<DataBase> ss = null;
-		DatabaseSelector selector;
+		SelectionContext context;
 		
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, M1, M2);
 
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, false, false);
+		assertSelector(context, M1, M2);
 		
 		// Master only
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, true, true);
+		assertSelector(context, M1, M2);
 
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, M1, M2);
 		
 		autoMarkdown(M1);
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, M2);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, M2);
 		
 		autoMarkdown(M2);
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 	}
 
 	@Test
@@ -557,44 +567,44 @@ public class DatabaseSelectorTest {
 		ms.add(new DataBase(M1, true, "", M1));
 		ms.add(new DataBase(M2, true, "", M2));
 		List<DataBase> ss = null;
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		Set<String> matched;
 		
 		matched = newHashSet(M1, M2);
 		DalHints hints = new DalHints().setHA(new DalHA());
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
 		// reset
 		matched = newHashSet(M1, M2);
 		hints = new DalHints().setHA(new DalHA());
-		selector = new DatabaseSelector(hints, ms, ss, false, false);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, false);
+		assertSelector(context, matched);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, false);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, false);
+		assertSelector(context, matched);
 		
 		// Master only
 		matched = newHashSet(M1, M2);
 		hints = new DalHints().setHA(new DalHA());
-		selector = new DatabaseSelector(hints, ms, ss, true, true);
-		assertSelector(selector, M1, M2);
+		context = getContext(hints, ms, ss, true, true);
+		assertSelector(context, M1, M2);
 
-		selector = new DatabaseSelector(hints, ms, ss, true, true);
-		assertSelector(selector, M1, M2);
+		context = getContext(hints, ms, ss, true, true);
+		assertSelector(context, M1, M2);
 
 		// reset
 		matched = newHashSet(M1, M2);
 		hints = new DalHints().setHA(new DalHA());
-		selector = new DatabaseSelector(hints, ms, ss, true, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(hints, ms, ss, true, false);
+		assertSelector(context, M1, M2);
 		
-		selector = new DatabaseSelector(hints, ms, ss, true, false);
-		assertSelector(selector, M1, M2);
+		context = getContext(hints, ms, ss, true, false);
+		assertSelector(context, M1, M2);
 	}
 	
 	@Test
@@ -603,22 +613,22 @@ public class DatabaseSelectorTest {
 		ms.add(new DataBase(M1, true, "", M1));
 		ms.add(new DataBase(M2, true, "", M2));
 		List<DataBase> ss = null;
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		// with markdown
 		autoMarkdown(M1);
 		DalHints hints = new DalHints().setHA(new DalHA());
-		selector = new DatabaseSelector(hints, ms, ss, true, false);
-		assertSelector(selector, M2);
+		context = getContext(hints, ms, ss, true, false);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(hints, ms, ss, true, false);
-		assertSelector(selector, M2);
+		context = getContext(hints, ms, ss, true, false);
+		assertSelector(context, M2);
 		
 		// reset
 		hints = new DalHints().setHA(new DalHA());
 		autoMarkdown(M2);
-		selector = new DatabaseSelector(hints, ms, ss, true, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(hints, ms, ss, true, false);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 
 	@Test
@@ -628,31 +638,31 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, ms, ss, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, ms, ss, false, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, S1, S2, S3);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, S1, S2, S3);
 
 		autoMarkdown(S1);
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, S2, S3);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, S2, S3);
 		
 		autoMarkdown(S2);
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, S3);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, S3);
 		
 		autoMarkdown(S3);
-		selector = new DatabaseSelector(null, ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 	}
 
 	@Test
@@ -662,24 +672,24 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		Set<String> matched;
 		matched = newHashSet(S1, S2, S3);
 
 		DalHints hints = new DalHints().setHA(new DalHA());
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 
 	@Test
@@ -689,7 +699,7 @@ public class DatabaseSelectorTest {
 		ss.add(new DataBase(S1, false, "", S1));
 		ss.add(new DataBase(S2, false, "", S2));
 		ss.add(new DataBase(S3, false, "", S3));
-		DatabaseSelector selector;
+		SelectionContext context;
 		
 		Set<String> matched;
 
@@ -697,14 +707,14 @@ public class DatabaseSelectorTest {
 		DalHints hints = new DalHints().setHA(new DalHA());
 		matched = newHashSet(S2, S3);
 
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, matched);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, matched);
 		
-		selector = new DatabaseSelector(hints, ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(hints, ms, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 
 	@Test
@@ -712,19 +722,20 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null,
-				false, false);
-		Assert.assertEquals(M1, selector.select());
 
-		selector = new DatabaseSelector(null, dbs, null, false, true);
-		Assert.assertEquals(M1, selector.select());
+		SelectionContext context = getContext(null, dbs, null,
+				false, false);
+		Assert.assertEquals(M1, selector.select(context));
+
+		context = getContext(null, dbs, null, false, true);
+		Assert.assertEquals(M1, selector.select(context));
 
 		// masterOnly
-		selector = new DatabaseSelector(null, dbs, null, true, false);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(null, dbs, null, true, false);
+		Assert.assertEquals(M1, selector.select(context));
 
-		selector = new DatabaseSelector(null, dbs, null, true, true);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(null, dbs, null, true, true);
+		Assert.assertEquals(M1, selector.select(context));
 	}
 
 	// The rest tests are all original tests, that I don't think well organized
@@ -735,18 +746,18 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		SelectionContext context = getContext(null, dbs, null, false, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(null, dbs, null, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, dbs, null, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		// masterOnly
-		selector = new DatabaseSelector(null, dbs, null, true, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, dbs, null, true, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(null, dbs, null, true, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, dbs, null, true, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 	}
 	
 	@Test
@@ -756,31 +767,31 @@ public class DatabaseSelectorTest {
 		dbs.add(new DataBase(M2, true, "", M2));
 
 		autoMarkdown(M1);
-		DatabaseSelector selector = new DatabaseSelector(null, dbs, null, false, false);
-		assertSelector(selector, M2);
+		SelectionContext context = getContext(null, dbs, null, false, false);
+		assertSelector(context, M2);
 
-		selector = new DatabaseSelector(null, dbs, null, false, true);
-		assertSelector(selector, M2);
+		context = getContext(null, dbs, null, false, true);
+		assertSelector(context, M2);
 
 		// masterOnly
-		selector = new DatabaseSelector(null, dbs, null, true, false);
-		assertSelector(selector, M2);
+		context = getContext(null, dbs, null, true, false);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), dbs, null, true, false);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().inDatabase(M2), dbs, null, true, false);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(null, dbs, null, true, true);
-		assertSelector(selector, M2);
+		context = getContext(null, dbs, null, true, true);
+		assertSelector(context, M2);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M2), dbs, null, true, true);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().inDatabase(M2), dbs, null, true, true);
+		assertSelector(context, M2);
 		
 		// test pointed db
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), dbs, null, true, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(M1), dbs, null, true, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(M2)), dbs, null, true, false);
-		assertSelector(selector, M2);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(M2)), dbs, null, true, false);
+		assertSelector(context, M2);
 	}
 
 	@Test
@@ -788,30 +799,30 @@ public class DatabaseSelectorTest {
 		DataBase db = new DataBase(S1, false, "", S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
-		DatabaseSelector selector = new DatabaseSelector(null, null, dbs,
+		SelectionContext context = getContext(null, null, dbs,
 				false, true);
-		Assert.assertEquals(S1, selector.select());
+		Assert.assertEquals(S1, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), null, dbs, 
+		context = getContext(new DalHints().inDatabase(S1), null, dbs, 
 				false, true);
-		Assert.assertEquals(S1, selector.select());
+		Assert.assertEquals(S1, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), null, dbs, false, true);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(M1), null, dbs, false, true);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 
 		// masterOnly
-		selector = new DatabaseSelector(null, null, dbs, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, null, dbs, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
-		selector = new DatabaseSelector(null, null, dbs, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, null, dbs, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
 		// test pointed
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), null, dbs, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().inDatabase(S1), null, dbs, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), null, dbs, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().inDatabase(S1), null, dbs, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 
 	@Test
@@ -821,30 +832,30 @@ public class DatabaseSelectorTest {
 		dbs.add(db);
 
 		autoMarkdown(S1);
-		DatabaseSelector selector = new DatabaseSelector(new DalHints(), null, dbs,
+		SelectionContext context = getContext(new DalHints(), null, dbs,
 				false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), null, dbs,
+		context = getContext(new DalHints().inDatabase(S1), null, dbs,
 				false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), null, dbs,
+		context = getContext(new DalHints().inDatabase(S2), null, dbs,
 				false, true);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 		
 		// masterOnly
-		selector = new DatabaseSelector(null, null, dbs, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, null, dbs, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), null, dbs, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().inDatabase(S2), null, dbs, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
-		selector = new DatabaseSelector(null, null, dbs, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, null, dbs, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), null, dbs, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().inDatabase(S2), null, dbs, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 
 	@Test
@@ -854,27 +865,27 @@ public class DatabaseSelectorTest {
 		dbs.add(new DataBase(S1, false, "", S1));
 		dbs.add(new DataBase(S2, false, "", S2));
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints(), null, dbs,
+		SelectionContext context = getContext(new DalHints(), null, dbs,
 				false, true);
-		Assert.assertEquals(S2, selector.select());
+		Assert.assertEquals(S2, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), null, dbs,
+		context = getContext(new DalHints().inDatabase(S2), null, dbs,
 				false, true);
-		Assert.assertEquals(S2, selector.select());
+		Assert.assertEquals(S2, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), null, dbs,
+		context = getContext(new DalHints().inDatabase(S1), null, dbs,
 				false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
 		// masterOnly
-		selector = new DatabaseSelector(null, null, dbs, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, null, dbs, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
-		selector = new DatabaseSelector(null, null, dbs, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(null, null, dbs, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), null, dbs, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().inDatabase(S1), null, dbs, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 
 	@Test
@@ -889,33 +900,33 @@ public class DatabaseSelectorTest {
 		autoMarkdown(S1);
 		autoMarkdown(S2);
 
-		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
-		Assert.assertEquals(M1, selector.select());
+		SelectionContext context = getContext(null, ms, ss, false, true);
+		Assert.assertEquals(M1, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, false, true);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
+		Assert.assertEquals(M1, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		// masterOnly
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(null, ms, ss, true, true);
+		Assert.assertEquals(M1, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, true, true);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, true);
+		Assert.assertEquals(M1, selector.select(context));
 
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(null, ms, ss, true, false);
+		Assert.assertEquals(M1, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, true, false);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, false);
+		Assert.assertEquals(M1, selector.select(context));
 
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(null, ms, ss, false, false);
+		Assert.assertEquals(M1, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, false, false);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, false);
+		Assert.assertEquals(M1, selector.select(context));
 	}
 
 	@Test
@@ -929,31 +940,31 @@ public class DatabaseSelectorTest {
 
 		autoMarkdown(M1);
 
-		DatabaseSelector selector = new DatabaseSelector(null, ms, ss, false, true);
-		String dbName = selector.select();
+		SelectionContext context = getContext(null, ms, ss, false, true);
+		String dbName = selector.select(context);
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(M1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, false, true);
-		Assert.assertEquals(S1, selector.select());
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
+		Assert.assertEquals(S1, selector.select(context));
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S2), ms, ss, false, true);
-		Assert.assertEquals(S2, selector.select());
+		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
+		Assert.assertEquals(S2, selector.select(context));
 		
 		// masterOnly
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, true, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(null, ms, ss, true, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, true, true);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 
-		selector = new DatabaseSelector(new DalHints().inDatabase(S1), ms, ss, true, false);
-		assertSelector(selector, ErrorCode.InvalidDatabaseKeyName);
+		context = getContext(new DalHints().inDatabase(S1), ms, ss, true, false);
+		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 	}
 
 	@Test
@@ -968,20 +979,20 @@ public class DatabaseSelectorTest {
 
 		autoMarkdown(M1);
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints(), ms, ss, false,
+		SelectionContext context = getContext(new DalHints(), ms, ss, false,
 				true);
-		String dbName = selector.select();
+		String dbName = selector.select(context);
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 
 		// masterOnly
-		selector = new DatabaseSelector(null, ms, ss, true, true);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(null, ms, ss, true, true);
+		Assert.assertEquals(M2, selector.select(context));
 
-		selector = new DatabaseSelector(null, ms, ss, true, false);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(null, ms, ss, true, false);
+		Assert.assertEquals(M2, selector.select(context));
 
-		selector = new DatabaseSelector(null, ms, ss, false, false);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(null, ms, ss, false, false);
+		Assert.assertEquals(M2, selector.select(context));
 	}
 
 	@Test
@@ -996,31 +1007,31 @@ public class DatabaseSelectorTest {
 
 		autoMarkdown(M1);
 		
-		DatabaseSelector selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, true);
-		Assert.assertEquals(S2, selector.select());
+		SelectionContext context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, true);
+		Assert.assertEquals(S2, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(S1), ms, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(S1), ms, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 		
 		// masterOnly
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, true, true);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, true, true);
+		Assert.assertEquals(M2, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(M1), ms, ss, true, true);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(M1), ms, ss, true, true);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, true, false);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, true, false);
+		Assert.assertEquals(M2, selector.select(context));
 
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(M1), ms, ss, true, false);
-		assertSelector(selector, ErrorCode.MarkdownConnection);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(M1), ms, ss, true, false);
+		assertSelector(context, ErrorCode.MarkdownConnection);
 		
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, false);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, false);
+		Assert.assertEquals(M2, selector.select(context));
 
 		autoMarkdown(M2);
-		selector = new DatabaseSelector(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, false);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 	}
 
 	@Test
@@ -1037,38 +1048,38 @@ public class DatabaseSelectorTest {
 		DalHA ha = new DalHA();
 		ha.addDB(M1);
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints().setHA(ha), ms, ss, false,
+		SelectionContext context = getContext(new DalHints().setHA(ha), ms, ss, false,
 				true);
-		String dbName = selector.select();
+		String dbName = selector.select(context);
 		Assert.assertTrue(dbName.equals(S2));
 
 		// masterOnly
 		ha = new DalHA();
 		ha.addDB(M1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), ms, ss, true, true);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().setHA(ha), ms, ss, true, true);
+		Assert.assertEquals(M2, selector.select(context));
 
 		ha = new DalHA();
 		ha.addDB(M1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), ms, ss, true, false);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().setHA(ha), ms, ss, true, false);
+		Assert.assertEquals(M2, selector.select(context));
 
 		ha = new DalHA();
 		ha.addDB(M1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), ms, ss, false, false);
-		Assert.assertEquals(M2, selector.select());
+		context = getContext(new DalHints().setHA(ha), ms, ss, false, false);
+		Assert.assertEquals(M2, selector.select(context));
 		
 		ha = new DalHA();
 		ha.addDB(M1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha).inDatabase(M1), ms, ss, false, false);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		context = getContext(new DalHints().setHA(ha).inDatabase(M1), ms, ss, false, false);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 
 
 		ha = new DalHA();
 		ha.addDB(M1);
 		autoMarkdown(M2);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), ms, ss, false, false);
-		Assert.assertEquals(M1, selector.select());
+		context = getContext(new DalHints().setHA(ha), ms, ss, false, false);
+		Assert.assertEquals(M1, selector.select(context));
 	}
 
 	@Test
@@ -1080,20 +1091,20 @@ public class DatabaseSelectorTest {
 		DalHA ha = new DalHA();
 		ha.addDB(S1);
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, false,
+		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false,
 				true);
-		Assert.assertEquals(S2, selector.select());
+		Assert.assertEquals(S2, selector.select(context));
 
 		// masterOnly
 		ha = new DalHA();
 		ha.addDB(S1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
 		ha = new DalHA();
 		ha.addDB(S1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 
 	@Test
@@ -1106,22 +1117,22 @@ public class DatabaseSelectorTest {
 		ha.addDB(S1);
 		ha.addDB(S2);
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, false, true);
-		assertSelector(selector, ErrorCode.NoMoreConnectionToFailOver);
+		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false, true);
+		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 
 		// masterOnly
 		ha = new DalHA();
 		ha.addDB(S1);
 		ha.addDB(S2);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
 
 		ha = new DalHA();
 		ha.addDB(S1);
 		ha.addDB(S2);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 
 	@Test
@@ -1133,18 +1144,18 @@ public class DatabaseSelectorTest {
 		DalHA ha = new DalHA();
 		autoMarkdown(S2);
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, false,
+		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false,
 				true);
-		Assert.assertEquals(S1, selector.select());
+		Assert.assertEquals(S1, selector.select(context));
 
 		// masterOnly
 		ha = new DalHA();
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
 		ha = new DalHA();
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 
 	@Test
@@ -1158,19 +1169,19 @@ public class DatabaseSelectorTest {
 		ha.addDB(S1);
 		autoMarkdown(S2);
 
-		DatabaseSelector selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, false,
+		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false,
 				true);
-		Assert.assertEquals(S3, selector.select());
+		Assert.assertEquals(S3, selector.select(context));
 
 		// masterOnly
 		ha = new DalHA();
 		ha.addDB(S1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, true);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, true);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 
 		ha = new DalHA();
 		ha.addDB(S1);
-		selector = new DatabaseSelector(new DalHints().setHA(ha), null, ss, true, false);
-		assertSelector(selector, ErrorCode.NullLogicDbName);
+		context = getContext(new DalHints().setHA(ha), null, ss, true, false);
+		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
 }

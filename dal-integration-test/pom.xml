@@ -16,11 +16,10 @@
 
   <properties>
     <framework-bom.version>2.3.0</framework-bom.version>
-    <dal.version>1.14.2</dal.version>
-    <ctrip-datasource.version>1.14.2</ctrip-datasource.version>
-    <!--<dal.version>1.14.3-SNAPSHOT</dal.version>
-    <ctrip-datasource.version>1.14.3-SNAPSHOT</ctrip-datasource.version>-->
-
+    <!--<dal.version>1.14.2</dal.version>
+    <ctrip-datasource.version>1.14.2</ctrip-datasource.version>-->
+    <dal.version>1.14.3</dal.version>
+    <ctrip-datasource.version>1.14.3</ctrip-datasource.version>
   </properties>
 
   <modules>

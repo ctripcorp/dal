@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 public interface DataSourceTerminateTask extends Runnable {
-    void init(SingleDataSource singleDataSource);
+    void setScheduledExecutorService(ScheduledExecutorService service);
 }

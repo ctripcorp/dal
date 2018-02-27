@@ -13,7 +13,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SingleDataSource implements DataSourceConfigureConstants {
-    private static final Logger logger = LoggerFactory.getLogger(SingleDataSource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleDataSource.class);
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
     private String name;
@@ -46,9 +46,9 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             this.dataSource = dataSource;
 
             dataSource.createPool();
-            logger.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
+            LOGGER.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
         } catch (Throwable e) {
-            logger.error(String.format("Error creating pool for data source %s", name), e);
+            LOGGER.error(String.format("Error creating pool for data source %s", name), e);
             // throw e;
         }
     }
@@ -61,13 +61,13 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         try {
             con = dataSource.getConnection();
         } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             if (con != null)
                 try {
                     con.close();
                 } catch (Throwable e) {
-                    logger.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
         }
     }

@@ -26,12 +26,13 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
         SingleDataSource newDataSource = new SingleDataSource(name, newConfigure);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        SingleDataSourceTask task = new SingleDataSourceTask(oldDataSource, event.getDataSourceTerminateTask());
-        close(task);
+        close(oldDataSource);
     }
 
-    private void close(SingleDataSourceTask task) {
-        DataSourceTerminator.getInstance().close(task);
+    private void close(SingleDataSource oldDataSource) {
+
+
+        DataSourceTerminator.getInstance().close(oldDataSource);
     }
 
     private DataSource getDataSource() {

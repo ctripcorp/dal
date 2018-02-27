@@ -16,28 +16,27 @@ public class CtripConnectionListener extends DefaultConnectionListener implement
     @Override
     public void doOnCreateConnection(String poolDesc, Connection connection) {
         super.doOnCreateConnection(poolDesc, connection);
-        String transactionName = String.format("%s:%s", DAL_DATASOURCE_CREATE_CONNECTION, connection);
-        logCatTransaction(transactionName);
+        logCatTransaction(DAL_DATASOURCE_CREATE_CONNECTION, poolDesc, connection);
     }
 
     @Override
     public void doOnReleaseConnection(String poolDesc, Connection connection) {
         super.doOnReleaseConnection(poolDesc, connection);
-        String transactionName = String.format("%s:%s", DAL_DATASOURCE_RELEASE_CONNECTION, connection);
-        logCatTransaction(transactionName);
+        logCatTransaction(DAL_DATASOURCE_RELEASE_CONNECTION, poolDesc, connection);
     }
 
     @Override
     protected void doOnAbandonConnection(String poolDesc, Connection connection) {
         super.doOnAbandonConnection(poolDesc, connection);
-        String transactionName = String.format("%s:%s", DAL_DATASOURCE_ABANDON_CONNECTION, connection);
-        logCatTransaction(transactionName);
+        logCatTransaction(DAL_DATASOURCE_ABANDON_CONNECTION, poolDesc, connection);
     }
 
-    private void logCatTransaction(String transactionName) {
+    private void logCatTransaction(String typeName, String poolDesc, Connection connection) {
+        String connDesc = connectionDesc(connection);
+        String transactionName = String.format("%s:%s", typeName, connDesc);
         Transaction transaction = Cat.newTransaction(DAL, transactionName);
         try {
-            transaction.addData(transactionName);
+            transaction.addData(String.format("%s,%s", poolDesc, connDesc));
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);

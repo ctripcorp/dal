@@ -1,13 +1,10 @@
 package com.ctrip.datasource.dynamicdatasource;
 
-import com.ctrip.datasource.datasource.CtripDataSourceTerminateTask;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.datasource.DataSourceTerminator;
-import com.ctrip.platform.dal.dao.datasource.DefaultDataSourceTerminateTask;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSourceTask;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,8 +16,7 @@ public class DataSourceTerminatorTest {
     private static final String name1 = "mysqldaltest01db_W";
     private static final String name2 = "mysqldaltest02db_W";
     private static ExecutorService executorService1 = Executors.newSingleThreadExecutor();
-    private static ExecutorService executorService2 = Executors.newSingleThreadExecutor();
-    private static ExecutorService executorService3 = Executors.newSingleThreadExecutor();
+    private static ExecutorService executorService2 = Executors.newFixedThreadPool(4);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -28,14 +24,34 @@ public class DataSourceTerminatorTest {
     }
 
     @Test
-    public void testDataSourceTerminator() throws Exception {
-        testAbandonedConnection();
-        testBusyConnection();
+    public void testAbandonedConnection() throws Exception {
+        _testAbandonedConnection();
         System.out.println("Sleep for 300 seconds...");
         Thread.sleep(300 * 1000);
     }
 
-    private void testAbandonedConnection() throws Exception {
+    @Test
+    public void testBusyConnection() throws Exception {
+        _testBusyConnection();
+        System.out.println("Sleep for 300 seconds...");
+        Thread.sleep(300 * 1000);
+    }
+
+    @Test
+    public void testHangConnection() throws Exception {
+        _testHangConnection();
+        System.out.println("Sleep for 300 seconds...");
+        Thread.sleep(300 * 1000);
+    }
+
+    @Test
+    public void testMutipleConnections() throws Exception {
+        _testMultipleConnections();
+        System.out.println("Sleep for 300 seconds...");
+        Thread.sleep(300 * 1000);
+    }
+
+    private void _testAbandonedConnection() throws Exception {
         DataSourceConfigure dataSourceConfigure =
                 DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name1);
         final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
@@ -54,7 +70,7 @@ public class DataSourceTerminatorTest {
         });
 
         // idle connection
-        executorService2.submit(new Runnable() {
+        executorService1.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -71,18 +87,16 @@ public class DataSourceTerminatorTest {
 
         System.out.println("Sleep for 2 seconds...");
         Thread.sleep(2 * 1000);
-
-        SingleDataSourceTask task = new SingleDataSourceTask(dataSource, new CtripDataSourceTerminateTask());
-        DataSourceTerminator.getInstance().close(task);
+        DataSourceTerminator.getInstance().close(dataSource);
     }
 
-    private void testBusyConnection() throws Exception {
+    private void _testBusyConnection() throws Exception {
         DataSourceConfigure dataSourceConfigure =
                 DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name2);
         final SingleDataSource dataSource = new SingleDataSource(name2.toLowerCase(), dataSourceConfigure);
 
         // busy connection
-        executorService3.submit(new Runnable() {
+        executorService1.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -96,9 +110,53 @@ public class DataSourceTerminatorTest {
 
         System.out.println("Sleep for 2 seconds...");
         Thread.sleep(2 * 1000);
+        DataSourceTerminator.getInstance().close(dataSource);
+    }
 
-        SingleDataSourceTask task = new SingleDataSourceTask(dataSource, new CtripDataSourceTerminateTask());
-        DataSourceTerminator.getInstance().close(task);
+    private void _testHangConnection() throws Exception {
+        DataSourceConfigure dataSourceConfigure =
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name1);
+
+        for (int i = 0; i < 5; i++) {
+            final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
+            executorService2.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Connection connection = dataSource.getDataSource().getConnection();
+                        connection.createStatement().execute("select sleep(15)");
+                        connection.close();
+                    } catch (Throwable e) {
+                    }
+                }
+            });
+
+            Thread.sleep(5 * 100);
+            DataSourceTerminator.getInstance().close(dataSource);
+        }
+    }
+
+    private void _testMultipleConnections() throws Exception {
+        DataSourceConfigure dataSourceConfigure =
+                DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name1);
+
+        for (int i = 0; i < 100; i++) {
+            final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
+            executorService2.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Connection connection = dataSource.getDataSource().getConnection();
+                        connection.createStatement().execute("select sleep(1)");
+                        connection.close();
+                    } catch (Throwable e) {
+                    }
+                }
+            });
+
+            Thread.sleep(5 * 100);
+            DataSourceTerminator.getInstance().close(dataSource);
+        }
     }
 
 }

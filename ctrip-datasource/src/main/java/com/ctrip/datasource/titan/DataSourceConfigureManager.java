@@ -428,7 +428,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
                     throw exception;
                 }
 
-                event.setDataSourceTerminateTask(new CtripDataSourceTerminateTask());
                 listener.configChanged(event);
             } catch (Throwable e) {
                 transaction.setStatus(e);

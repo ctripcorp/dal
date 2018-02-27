@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -20,7 +21,7 @@ public class FreshnessDatabaseSelector extends DefaultDatabaseSelector {
     private static final Map<String, Map<String, Integer>> freshnessCache = new ConcurrentHashMap<>();
     private static AtomicReference<ScheduledExecutorService> freshnessUpdatorRef = new AtomicReference<>();
     private static final int INVALID = FreshnessHelper.INVALID;
-    
+
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
@@ -35,86 +36,83 @@ public class FreshnessDatabaseSelector extends DefaultDatabaseSelector {
      * @param configure
      */
     public static void initialize() {
-        if(freshnessUpdatorRef.get() != null)
+        if (freshnessUpdatorRef.get() != null)
             return;
-        
+
         synchronized (FreshnessScanner.class) {
-            if(freshnessUpdatorRef.get() != null)
+            if (freshnessUpdatorRef.get() != null)
                 return;
-            
+
             freshnessCache.clear();
             DalConfigure configure = DalClientFactory.getDalConfigure();
-            for(String logicDbName: configure.getDatabaseSetNames()) {
+            for (String logicDbName : configure.getDatabaseSetNames()) {
                 Map<String, Integer> logicDbFreshnessMap = new ConcurrentHashMap<>();
                 freshnessCache.put(logicDbName, logicDbFreshnessMap);
-                
+
                 DatabaseSet dbSet = configure.getDatabaseSet(logicDbName);
-                for(Map.Entry<String, DataBase> dbEntry: dbSet.getDatabases().entrySet()) {
-                    if(!dbEntry.getValue().isMaster())
+                for (Map.Entry<String, DataBase> dbEntry : dbSet.getDatabases().entrySet()) {
+                    if (!dbEntry.getValue().isMaster())
                         logicDbFreshnessMap.put(dbEntry.getValue().getConnectionString(), INVALID);
                 }
             }
-            
-            //Init task
-            ScheduledExecutorService executer = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-                AtomicInteger atomic = new AtomicInteger();
-                @Override
-                public Thread newThread(Runnable r) {
-                    return new Thread(r, "Dal-FreshnessScanner" + this.atomic.getAndIncrement());
-                }
-            });
+
+            // Init task
+            ScheduledExecutorService executer =
+                    Executors.newScheduledThreadPool(1, new CustomThreadFactory("FreshnessScanner"));
             executer.scheduleWithFixedDelay(new FreshnessScanner(freshnessCache), 0, 5, TimeUnit.SECONDS);
             freshnessUpdatorRef.set(executer);
         }
     }
-    
+
     public static void shutdown() {
         if (freshnessUpdatorRef.get() == null)
             return;
-        
+
         synchronized (FreshnessScanner.class) {
             if (freshnessUpdatorRef.get() == null)
                 return;
-            
+
             freshnessUpdatorRef.get().shutdown();
             freshnessUpdatorRef.set(null);
         }
     }
-    
+
     /**
      * only called from ctrip own strategy
+     * 
      * @param logicDbName
      * @param freshness
      * @return
      */
-    public static List<DataBase> filterQualifiedSlaves(String logicDbName, List<DataBase> slaves, int qualifiedFreshness) {        
+    public static List<DataBase> filterQualifiedSlaves(String logicDbName, List<DataBase> slaves,
+            int qualifiedFreshness) {
         List<DataBase> qualifiedSlaves = new ArrayList<>();
-        if(!freshnessCache.containsKey(logicDbName))
+        if (!freshnessCache.containsKey(logicDbName))
             return qualifiedSlaves;
-        
+
         Map<String, Integer> logicDbFreshnessMap = freshnessCache.get(logicDbName);
-        for(DataBase slaveDb: slaves) {
+        for (DataBase slaveDb : slaves) {
             Integer freshness = logicDbFreshnessMap.get(slaveDb.getConnectionString());
-            if(freshness == null || freshness.equals(INVALID))
+            if (freshness == null || freshness.equals(INVALID))
                 continue;
-            
-            if(freshness <= qualifiedFreshness)
+
+            if (freshness <= qualifiedFreshness)
                 qualifiedSlaves.add(slaveDb);
         }
-        
+
         return qualifiedSlaves;
     }
-        
+
     @Override
     public String select(SelectionContext context) throws DalException {
-        //Will check if already initialized
+        // Will check if already initialized
         initialize();
-        
+
         Integer freshness = context.getHints().getInt(DalHintEnum.freshness);
         List<DataBase> slaves = context.getSlaves();
-        
-        // Not specified 
-        if(freshness == null || slaves == null || slaves.isEmpty())
+
+        // Not specified
+        if (freshness == null || slaves == null || slaves.isEmpty())
             return super.select(context);
 
         context.setSlaves(filterQualifiedSlaves(context.getLogicDbName(), slaves, freshness));

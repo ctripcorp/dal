@@ -17,21 +17,27 @@ public class DataSourceTerminator {
     private static final int POOL_SIZE = 4;
     private static final String THREAD_NAME = "DataSourceTerminator";
 
+    private DataSourceTerminateTaskFactory factory = null;
+
     public synchronized static DataSourceTerminator getInstance() {
         if (terminator == null) {
             terminator = new DataSourceTerminator();
+            terminator.initDataSourceTerminateTaskFactory();
         }
 
         return terminator;
     }
 
+    private void initDataSourceTerminateTaskFactory() {
+        factory = ServiceLoaderHelper.getInstance(DataSourceTerminateTaskFactory.class);
+    }
+
     public void close(final SingleDataSource oldDataSource) {
-        DataSourceTerminateTaskFactory factory = ServiceLoaderHelper.getInstance(DataSourceTerminateTaskFactory.class);
         DataSourceTerminateTask task;
-        if (factory == null) {
-            task = new DefaultDataSourceTerminateTask(oldDataSource);
-        } else {
+        if (factory != null) {
             task = factory.createTask(oldDataSource);
+        } else {
+            task = new DefaultDataSourceTerminateTask(oldDataSource);
         }
 
         task.setScheduledExecutorService(service);

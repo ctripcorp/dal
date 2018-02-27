@@ -18,13 +18,13 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
     private static final int FIXED_DELAY = 5 * 1000; // milliseconds
     private ScheduledExecutorService service = null;
 
-    protected String name;
+    private String name;
     private DataSource dataSource;
     private DataSourceConfigure dataSourceConfigure;
-    protected Date enqueueTime;
+    private Date enqueueTime;
     private int retryTimes;
 
-    protected boolean isForceClosing = false;
+    private boolean isForceClosing = false;
 
     public DefaultDataSourceTerminateTask(SingleDataSource oldDataSource) {
         this.name = oldDataSource.getName();
@@ -43,7 +43,7 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
     public void run() {
         boolean success = closeDataSource(dataSource);
         if (success) {
-            log();
+            log(name, isForceClosing, enqueueTime.getTime());
             return;
         }
 
@@ -51,12 +51,12 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
     }
 
     @Override
-    public void log() {
+    public void log(String dataSourceName, boolean isForceClosing, long startTimeMilliseconds) {
         long cost = getElapsedMilliSeconds();
         LOGGER.info(String.format("**********DataSource %s has been closed,cost:%s ms.**********", name, cost));
     }
 
-    protected boolean closeDataSource(DataSource dataSource) {
+    private boolean closeDataSource(DataSource dataSource) {
         LOGGER.info(String.format("**********Trying to close datasource %s.**********", name));
         boolean success = true;
 

@@ -7,7 +7,7 @@ import qunar.tc.qconfig.client.staticswitch.StaticSwitch;
 import qunar.tc.qconfig.client.staticswitch.StatusChangeListener;
 
 public class IPDomainStatusProviderImpl implements IPDomainStatusProvider {
-    private static final String SWITCH_KEYNAME = "dal";
+    private static final String SWITCH_KEYNAME = "dal_ip_status";
     private StaticSwitch statusSwitch = StaticSwitch.getSwitch(SWITCH_KEYNAME);
 
     @Override

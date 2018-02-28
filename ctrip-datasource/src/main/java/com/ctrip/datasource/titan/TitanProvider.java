@@ -3,6 +3,8 @@ package com.ctrip.datasource.titan;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.framework.foundation.Env;
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
@@ -24,8 +26,15 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
         if (settings.containsKey(USE_LOCAL_CONFIG)) {
             boolean result = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
-            if (result)
+            if (result) {
                 sourceType = SourceType.Local;
+                return;
+            }
+        }
+
+        Env env = Foundation.server().getEnv();
+        if (env.equals(Env.UNKNOWN) || env.equals(Env.DEV)) {
+            sourceType = SourceType.Local;
         }
     }
 

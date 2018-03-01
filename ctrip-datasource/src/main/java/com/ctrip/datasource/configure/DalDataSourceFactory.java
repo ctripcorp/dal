@@ -8,9 +8,6 @@ import javax.sql.DataSource;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
 
 public class DalDataSourceFactory {
     private static final String DAL = "DAL";
@@ -59,21 +56,17 @@ public class DalDataSourceFactory {
 
         DataSourceLocator loc = new DataSourceLocator(provider);
         String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
+        return loc.getDataSource(keyName);
 
-        String transactionName = String.format("%s:%s", DATASOURCE_GET_DATASOURCE, allInOneKey);
-        Transaction transaction = Cat.newTransaction(DAL, transactionName);
-        DataSource dataSource = loc.getDataSource(keyName);
-
-        try {
-            transaction.addData(transactionName);
-            transaction.setStatus(Transaction.SUCCESS);
-            Cat.logEvent(DAL, transactionName, Message.SUCCESS, "");
-        } catch (Throwable e) {
-            transaction.setStatus(e);
-        } finally {
-            transaction.complete();
-        }
-
-        return dataSource;
+        /*
+         * String transactionName = String.format("%s:%s", DATASOURCE_GET_DATASOURCE, allInOneKey); Transaction
+         * transaction = Cat.newTransaction(DAL, transactionName); DataSource dataSource = loc.getDataSource(keyName);
+         * 
+         * try { transaction.addData(transactionName); transaction.setStatus(Transaction.SUCCESS); Cat.logEvent(DAL,
+         * transactionName, Message.SUCCESS, ""); } catch (Throwable e) { transaction.setStatus(e); } finally {
+         * transaction.complete(); }
+         * 
+         * return dataSource;
+         */
     }
 }

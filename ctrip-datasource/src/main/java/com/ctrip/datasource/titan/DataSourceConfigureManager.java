@@ -164,10 +164,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             return dataSourceConfigures;
         }
 
-        boolean useLocal = getUseLocal();
-
         // If it uses local Database.Config
         if (sourceType == SourceType.Local) {
+            boolean useLocal = getUseLocal();
             dataSourceConfigures =
                     allInOneProvider.getDataSourceConfigures(dbNames, useLocal, getDatabaseConfigLocation());
         } else {

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,16 +58,11 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
             return "null";
         }
 
-        String url = "";
-        try {
-            url = connection.getMetaData().getURL();
-            url = simpleUrl(url);
-        } catch (SQLException e) {
-            url = getConnectionUrlFromCache(connection);
-            if (url == null)
-                return "null";
-        }
-        return url;
+        return getConnectionUrlFromCache(connection);
+        /*
+         * try { url = connection.getMetaData().getURL(); url = simpleUrl(url); } catch (SQLException e) { url =
+         * getConnectionUrlFromCache(connection); if (url == null) return "null"; }
+         */
     }
 
     private String simpleUrl(String url) {
@@ -114,7 +108,7 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
 
     private String getConnectionUrlFromCache(Connection connection) {
         if (connection == null)
-            return "";
+            return "null";
 
         String connectionId = connection.toString();
         return connectionUrlCache.get(connectionId);

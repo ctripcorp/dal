@@ -325,9 +325,10 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     private void addIPDomainStatusNotifyTask(IPDomainStatus status) {
         Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED);
-        t.addData(status.toString());
+        String switchStatus = String.format("Switch status:%s", status.toString());
+        t.addData(switchStatus);
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
-        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED, Message.SUCCESS, status.toString());
+        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED, Message.SUCCESS, switchStatus);
         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED, Message.SUCCESS,
                 DATASOURCE_NOTIFY_LISTENER_START);
 

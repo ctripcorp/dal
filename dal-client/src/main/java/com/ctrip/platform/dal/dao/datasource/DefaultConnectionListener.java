@@ -11,22 +11,27 @@ public class DefaultConnectionListener extends AbstractConnectionListener implem
 
     @Override
     public void doOnCreateConnection(String poolDesc, Connection connection) {
-        logger.info("[onCreateConnection]{}, {}", poolDesc, connection);
+        logInfo("[onCreateConnection]{}, {}", poolDesc, connection);
     }
 
     @Override
     public void doOnReleaseConnection(String poolDesc, Connection connection) {
-        logger.info("[onReleaseConnection]{}, {}", poolDesc, connection);
+        logInfo("[onReleaseConnection]{}, {}", poolDesc, connection);
     }
 
     @Override
     protected void doOnAbandonConnection(String poolDesc, Connection connection) {
-        logger.info("[onAbandonConnection]{}, {}", poolDesc, connection);
+        logInfo("[onAbandonConnection]{}, {}", poolDesc, connection);
     }
 
     @Override
     public int getOrder() {
         return LOWEST_PRECEDENCE;
+    }
+
+    private void logInfo(String format, String poolDesc, Connection connection) {
+        String connDesc = connectionDesc(connection);
+        logger.info(format, poolDesc, connDesc);
     }
 
 }

@@ -319,10 +319,6 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
         DataSourceConfigureWrapper wrapper =
                 new DataSourceConfigureWrapper(originalMap, dataSourceConfigure, dataSourceConfigureMap);
         setDataSourceConfigureWrapperReference(wrapper);
-
-        String log = "DataSource配置:" + poolPropertiesHelper.mapToString(map);
-        Cat.logEvent(DAL_DATASOURCE, DAL_GET_DATASOURCE, Message.SUCCESS, log);
-        LOGGER.info(log);
     }
 
     private void processDataSourceConfigure(Map<String, String> map, Map<String, String> datasource,

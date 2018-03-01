@@ -4,7 +4,9 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
+import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,8 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     private static final String DAL_APPNAME = "dal";
     private static final String DAL_DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String DAL_DATASOURCE = "DAL";
-    private static final String DAL_GET_DATASOURCE = "DataSource::getRemoteDataSourceConfig";
+    private static final String DAL_GET_DATASOURCE_PROPERTIES = "DataSource::getDataSourceProperties";
+    private static final String DAL_GET_REMOTE_DATASOURCE = "DataSource::getRemoteDataSourceConfig";
 
     private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
     private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
@@ -39,7 +42,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         if (!Foundation.app().isAppIdSet())
             return;
 
-        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE);
+        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_DATASOURCE_PROPERTIES);
         try {
             MapConfig config = getMapConfig();
             if (config != null) {
@@ -49,7 +52,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         } catch (Throwable e) {
             String msg = "从QConfig读取DataSource配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
             transaction.setStatus(Transaction.SUCCESS);
-            transaction.addData(DAL_GET_DATASOURCE, msg);
+            transaction.addData(DAL_GET_DATASOURCE_PROPERTIES, msg);
             LOGGER.warn(msg, e);
         } finally {
             transaction.complete();
@@ -66,7 +69,19 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         if (config == null)
             return map;
 
-        map = config.asMap();
+        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_GET_REMOTE_DATASOURCE);
+        try {
+            map = config.asMap();
+            String log = "DataSource配置:" + PoolPropertiesHelper.getInstance().mapToString(map);
+            LOGGER.info(log);
+            Cat.logEvent(DAL_DATASOURCE, DAL_GET_REMOTE_DATASOURCE, Message.SUCCESS, log);
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+        } finally {
+            transaction.complete();
+        }
+
         return map;
     }
 

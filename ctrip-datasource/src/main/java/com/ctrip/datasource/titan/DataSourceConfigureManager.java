@@ -327,6 +327,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         Transaction t = Cat.newTransaction(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED);
         t.addData(status.toString());
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
+        Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED, Message.SUCCESS, status.toString());
         Cat.logEvent(DAL_DYNAMIC_DATASOURCE, DATASOURCE_IPDOMAINSTATUS_CHANGED, Message.SUCCESS,
                 DATASOURCE_NOTIFY_LISTENER_START);
 

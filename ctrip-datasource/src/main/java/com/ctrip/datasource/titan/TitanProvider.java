@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.platform.dal.common.enums.SourceType;
+import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;

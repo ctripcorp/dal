@@ -1,7 +1,7 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
-import com.ctrip.platform.dal.dao.datasource.IPDomainStatusChanged;
+import com.ctrip.datasource.datasource.IPDomainStatusChanged;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

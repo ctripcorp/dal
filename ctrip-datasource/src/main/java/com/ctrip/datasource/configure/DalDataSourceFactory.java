@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
@@ -68,5 +69,17 @@ public class DalDataSourceFactory {
          * 
          * return dataSource;
          */
+    }
+    
+    /**
+     * This is only for cross environment usage
+     * 
+     * @param allInOneKey
+     * @param svcUrl
+     * @return
+     * @throws Exception
+     */
+    public DataSource createTitanDataSource(String allInOneKey, String svcUrl) throws Exception {
+        return new TitanDataSourceLocator().getDataSource(svcUrl, allInOneKey);
     }
 }

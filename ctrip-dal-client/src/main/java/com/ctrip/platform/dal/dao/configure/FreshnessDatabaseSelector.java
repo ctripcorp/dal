@@ -21,10 +21,12 @@ public class FreshnessDatabaseSelector extends DefaultDatabaseSelector {
     private static final Map<String, Map<String, Integer>> freshnessCache = new ConcurrentHashMap<>();
     private static AtomicReference<ScheduledExecutorService> freshnessUpdatorRef = new AtomicReference<>();
     private static final int INVALID = FreshnessHelper.INVALID;
+    private static final String THREAD_NAME = "FreshnessScanner";
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
+                Thread.currentThread().setName(THREAD_NAME);
                 shutdown();
             }
         }));
@@ -58,7 +60,7 @@ public class FreshnessDatabaseSelector extends DefaultDatabaseSelector {
 
             // Init task
             ScheduledExecutorService executer =
-                    Executors.newScheduledThreadPool(1, new CustomThreadFactory("FreshnessScanner"));
+                    Executors.newScheduledThreadPool(1, new CustomThreadFactory(THREAD_NAME));
             executer.scheduleWithFixedDelay(new FreshnessScanner(freshnessCache), 0, 5, TimeUnit.SECONDS);
             freshnessUpdatorRef.set(executer);
         }

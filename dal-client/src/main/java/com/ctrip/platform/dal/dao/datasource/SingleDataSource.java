@@ -23,7 +23,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private DataSource dataSource;
 
     private static final String DAL = "DAL";
-    private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource";
+    private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:";
     private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
 
     public String getName() {
@@ -52,7 +52,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             this.dataSource = dataSource;
 
             String message = "Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.";
-            ilogger.logTransaction(DAL, DATASOURCE_CREATE_DATASOURCE, message, new Callback() {
+            ilogger.logTransaction(DAL, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, new Callback() {
                 @Override
                 public void execute() throws Exception {
                     dataSource.createPool();

@@ -53,9 +53,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private static final String DATASOURCE_CONNECTIONSTRING_CHANGED = "ConnectionString::connectionStringChanged";
     private static final String DATASOURCE_POOLPROPERTIES_CHANGED = "PoolProperties::poolPropertiesChanged";
     private static final String DATASOURCE_IPDOMAINSTATUS_CHANGED = "IPDomainStatus::ipDomainStatusChanged";
-    private static final String DATASOURCE_REFRESH_DATASOURCECONFIG = "DataSource::refreshDataSourceConfig";
-    private static final String DATASOURCE_OLD_CONFIGURE = "DataSource::oldConfigure";
-    private static final String DATASOURCE_NEW_CONFIGURE = "DataSource::newConfigure";
+    private static final String DATASOURCE_REFRESH_DATASOURCECONFIG = "DataSourceConfig::refreshDataSourceConfig";
+    private static final String DATASOURCE_OLD_CONFIGURE = "DataSourceConfig::oldConfigure";
+    private static final String DATASOURCE_NEW_CONFIGURE = "DataSourceConfig::newConfigure";
     private static final String CONNECTIONSTRING_OLD_CONNECTIONURL = "ConnectionString::oldConnectionUrl";
     private static final String CONNECTIONSTRING_NEW_CONNECTIONURL = "ConnectionString::newConnectionUrl";
 
@@ -182,6 +182,10 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         }
 
         return dataSourceConfigures;
+    }
+
+    public DataSourceConfigure mergeDataSourceConfig(DataSourceConfigure configure) {
+        return mergeDataSourceConfigure(configure);
     }
 
     private void addConnectionStringChangedListeners(Set<String> names) {

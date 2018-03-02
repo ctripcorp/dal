@@ -23,9 +23,12 @@ public class DalClientFactory {
 
     private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
 
+    private static final String THREAD_NAME = "DAL-DalClientFactory-ShutdownHook";
+
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
+                Thread.currentThread().setName(THREAD_NAME);
                 shutdownFactory();
             }
         }));
@@ -79,8 +82,7 @@ public class DalClientFactory {
 
             DalWatcher.init();
             LogEntry.init();
-            DalRequestExecutor.init(
-                    config.getFacory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
+            DalRequestExecutor.init(config.getFacory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
                     config.getFacory().getProperty(DalRequestExecutor.KEEP_ALIVE_TIME));
 
             DalStatusManager.initialize(config);

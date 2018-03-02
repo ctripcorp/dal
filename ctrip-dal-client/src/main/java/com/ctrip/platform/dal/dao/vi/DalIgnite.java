@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
-import com.ctrip.platform.dal.log.LogEntry;
+import com.ctrip.datasource.titan.LogEntry;
 import qunar.tc.qconfig.client.TypedConfig;
 
 import com.ctrip.framework.vi.IgniteManager.SimpleLogger;

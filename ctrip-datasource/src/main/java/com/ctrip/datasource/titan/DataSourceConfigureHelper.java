@@ -15,7 +15,6 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureWrapper;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
-import com.ctrip.platform.dal.log.LogEntry;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -41,9 +40,8 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
     private static final String DAL_DATASOURCE = "DAL";
-    private static final String DAL_GET_DATASOURCE = "DataSource::getRemoteDataSourceConfig";
     private static final String SEPARATOR = "\\.";
-    private static final String DAL_MERGE_DATASOURCE = "DataSource::mergeDataSourceConfig";
+    private static final String POOLPROPERTIES_MERGE_DATASOURCE_CONFIG = "PoolProperties::mergeDataSourceConfig";
 
     // For dal ignite
     public static List<LogEntry> startUpLog = new ArrayList<>();
@@ -149,7 +147,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
 
     protected DataSourceConfigure mergeDataSourceConfigure(DataSourceConfigure configure) {
         DataSourceConfigure c = cloneDataSourceConfigure(null);
-        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, DAL_MERGE_DATASOURCE);
+        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, POOLPROPERTIES_MERGE_DATASOURCE_CONFIG);
 
         try {
             DataSourceConfigureWrapper wrapper = dataSourceConfigureWrapperReference.get();
@@ -216,7 +214,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
                 }
             }
 
-            Cat.logEvent(DAL_DATASOURCE, DAL_MERGE_DATASOURCE, Message.SUCCESS,
+            Cat.logEvent(DAL_DATASOURCE, POOLPROPERTIES_MERGE_DATASOURCE_CONFIG, Message.SUCCESS,
                     poolPropertiesHelper.mapToString(c.toMap()));
             Map<String, String> datasource = c.getMap();
             Properties prop = c.getProperties();

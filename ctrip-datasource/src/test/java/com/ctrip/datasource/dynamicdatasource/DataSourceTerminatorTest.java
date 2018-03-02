@@ -16,7 +16,8 @@ public class DataSourceTerminatorTest {
     private static final String name1 = "mysqldaltest01db_W";
     private static final String name2 = "mysqldaltest02db_W";
     private static ExecutorService executorService1 = Executors.newSingleThreadExecutor();
-    private static ExecutorService executorService2 = Executors.newFixedThreadPool(4);
+    private static ExecutorService executorService2 = Executors.newSingleThreadExecutor();
+    private static ExecutorService executorService3 = Executors.newFixedThreadPool(4);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -70,7 +71,7 @@ public class DataSourceTerminatorTest {
         });
 
         // idle connection
-        executorService1.submit(new Runnable() {
+        executorService2.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -119,7 +120,7 @@ public class DataSourceTerminatorTest {
 
         for (int i = 0; i < 5; i++) {
             final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
-            executorService2.submit(new Runnable() {
+            executorService3.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -142,7 +143,7 @@ public class DataSourceTerminatorTest {
 
         for (int i = 0; i < 100; i++) {
             final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
-            executorService2.submit(new Runnable() {
+            executorService3.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {

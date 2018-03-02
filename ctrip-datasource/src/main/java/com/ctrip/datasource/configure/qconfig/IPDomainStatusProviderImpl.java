@@ -1,8 +1,8 @@
 package com.ctrip.datasource.configure.qconfig;
 
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
-import com.ctrip.platform.dal.dao.datasource.IPDomainStatusChanged;
-import com.ctrip.platform.dal.dao.datasource.IPDomainStatusProvider;
+import com.ctrip.datasource.datasource.IPDomainStatusChanged;
+import com.ctrip.datasource.datasource.IPDomainStatusProvider;
 import qunar.tc.qconfig.client.staticswitch.StaticSwitch;
 import qunar.tc.qconfig.client.staticswitch.StatusChangeListener;
 

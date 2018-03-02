@@ -1,17 +1,17 @@
 package com.ctrip.datasource.datasource;
 
+import com.ctrip.platform.dal.dao.datasource.AbstractConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
-import com.ctrip.platform.dal.dao.datasource.DefaultConnectionListener;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 
 import java.sql.Connection;
 
-public class CtripConnectionListener extends DefaultConnectionListener implements ConnectionListener {
+public class CtripConnectionListener extends AbstractConnectionListener implements ConnectionListener {
     private static final String DAL = "DAL";
-    private static final String DAL_DATASOURCE_CREATE_CONNECTION = "DataSource::createConnection";
-    private static final String DAL_DATASOURCE_RELEASE_CONNECTION = "DataSource::releaseConnection";
-    private static final String DAL_DATASOURCE_ABANDON_CONNECTION = "DataSource::abandonConnection";
+    private static final String DAL_DATASOURCE_CREATE_CONNECTION = "Connection::createConnection";
+    private static final String DAL_DATASOURCE_RELEASE_CONNECTION = "Connection::releaseConnection";
+    private static final String DAL_DATASOURCE_ABANDON_CONNECTION = "Connection::abandonConnection";
 
     @Override
     public void doOnCreateConnection(String poolDesc, Connection connection) {

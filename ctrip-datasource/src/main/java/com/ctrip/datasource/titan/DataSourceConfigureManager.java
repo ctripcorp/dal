@@ -19,6 +19,7 @@ import com.ctrip.datasource.datasource.IPDomainStatusProvider;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -58,6 +59,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private static final String CONNECTIONSTRING_OLD_CONNECTIONURL = "ConnectionString::oldConnectionUrl";
     private static final String CONNECTIONSTRING_NEW_CONNECTIONURL = "ConnectionString::newConnectionUrl";
 
+    private static final String THREAD_NAME = "DataSourceConfigureManager";
+
     /**
      * Used to access local Database.config file fo dev environment
      */
@@ -77,8 +80,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private Set<String> listenerKeyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     // Single-thread thread pool,used as queue.
-    private ExecutorService executor =
-            new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private ExecutorService executor = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory(THREAD_NAME));
 
     public synchronized void initialize(Map<String, String> settings) throws Exception {
         if (isInitialized)

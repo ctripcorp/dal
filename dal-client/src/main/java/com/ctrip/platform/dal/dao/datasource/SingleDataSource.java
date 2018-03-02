@@ -4,6 +4,9 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
+import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.log.Callback;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +18,13 @@ import java.sql.SQLException;
 public class SingleDataSource implements DataSourceConfigureConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleDataSource.class);
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
-
     private String name;
     private DataSourceConfigure dataSourceConfigure;
     private DataSource dataSource;
+
+    private static final String DAL = "DAL";
+    private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource";
+    private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
 
     public String getName() {
         return name;
@@ -42,14 +48,18 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
             PoolProperties p = poolPropertiesHelper.convert(dataSourceConfigure);
             PoolPropertiesHolder.getInstance().setPoolProperties(p);
-            org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(p);
+            final org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(p);
             this.dataSource = dataSource;
 
-            dataSource.createPool();
-            LOGGER.info("Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.");
+            String message = "Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.";
+            ilogger.logTransaction(DAL, DATASOURCE_CREATE_DATASOURCE, message, new Callback() {
+                @Override
+                public void execute() throws Exception {
+                    dataSource.createPool();
+                }
+            });
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
-            // throw e;
         }
     }
 

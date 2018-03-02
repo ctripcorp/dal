@@ -23,7 +23,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private DataSource dataSource;
 
     private static final String DAL = "DAL";
-    private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:";
+    private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
     private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
 
     public String getName() {

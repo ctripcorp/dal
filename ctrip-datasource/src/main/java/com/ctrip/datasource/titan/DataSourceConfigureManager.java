@@ -49,9 +49,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private static final String DAL_DYNAMIC_DATASOURCE = "DAL";
     private static final String DATASOURCE_NOTIFY_LISTENER_START = "DataSource.notifyListener.start";
     private static final String DATASOURCE_NOTIFY_LISTENER_END = "DataSource.notifyListener.end";
-    private static final String DATASOURCE_CONNECTIONSTRING_CHANGED = "DataSource::connectionStringChanged";
-    private static final String DATASOURCE_POOLPROPERTIES_CHANGED = "DataSource::poolPropertiesChanged";
-    private static final String DATASOURCE_IPDOMAINSTATUS_CHANGED = "DataSource::ipDomainStatusChanged";
+    private static final String DATASOURCE_CONNECTIONSTRING_CHANGED = "ConnectionString::connectionStringChanged";
+    private static final String DATASOURCE_POOLPROPERTIES_CHANGED = "PoolProperties::poolPropertiesChanged";
+    private static final String DATASOURCE_IPDOMAINSTATUS_CHANGED = "IPDomainStatus::ipDomainStatusChanged";
     private static final String DATASOURCE_REFRESH_DATASOURCECONFIG = "DataSource::refreshDataSourceConfig";
     private static final String DATASOURCE_OLD_CONFIGURE = "DataSource::oldConfigure";
     private static final String DATASOURCE_NEW_CONFIGURE = "DataSource::newConfigure";

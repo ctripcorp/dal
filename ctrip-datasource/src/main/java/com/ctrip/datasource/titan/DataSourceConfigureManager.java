@@ -61,7 +61,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private static final String ENCRYPTED_NEW_NORMAL_CONNECTIONSTRING = "Encrypted new normal connectionString";
     private static final String ENCRYPTED_NEW_FAILOVER_CONNECTIONSTRING = "Encrypted new failover connectionString";
 
-    private static final String GET_POOLPROPERTIES = "PoolProperties::getPoolProperties";
+    private static final String POOLPROPERTIES_GET_POOLPROPERTIES = "PoolProperties::getPoolProperties";
     private static final String POOLPROPERTIES_REFRESH_POOLPROPERTIES = "PoolProperties::refreshPoolProperties";
     private static final String IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS = "IPDomainStatus::refreshIPDomainStatus";
 
@@ -82,7 +82,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
-    //private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
+    // private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
     private IPDomainStatusProvider ipDomainStatusProvider = new TempIPDomainStatusProviderImpl();
 
     private AtomicReference<Boolean> isPoolPropertiesListenerAdded = new AtomicReference<>(false);
@@ -120,7 +120,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         // set ip domain status
         IPDomainStatus status = ipDomainStatusProvider.getStatus();
         setIPDomainStatus(status);
-        setDataSourceConfigures(dbNames, sourceType);
+        Map<String, DataSourceConfigure> configures = getConnectionStrings(names, sourceType);
+        setDataSourceConfigures(configures);
 
         if (sourceType == SourceType.Remote) {
             addDataSourceConfigureKeySet(names);
@@ -198,14 +199,13 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return dataSourceConfigures;
     }
 
-    private void setDataSourceConfigures(Set<String> names, SourceType sourceType) {
-        Transaction t = Cat.newTransaction(DAL, GET_POOLPROPERTIES);
+    private void setDataSourceConfigures(Map<String, DataSourceConfigure> configures) {
+        Transaction t = Cat.newTransaction(DAL, POOLPROPERTIES_GET_POOLPROPERTIES);
         try {
-            Map<String, DataSourceConfigure> configures = getConnectionStrings(names, sourceType);
             Map<String, String> poolProperties = poolPropertiesProvider.getPoolProperties();
             setPoolProperties(poolProperties);
-            configures = mergeDataSourceConfigures(configures);
-            addDataSourceConfigures(configures);
+            Map<String, DataSourceConfigure> newConfigures = mergeDataSourceConfigures(configures);
+            addDataSourceConfigures(newConfigures);
             t.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             t.setStatus(e);

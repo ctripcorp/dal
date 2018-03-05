@@ -268,7 +268,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         String transactionName = String.format("%s:%s", CONNECTIONSTRING_REFRESHCONNECTIONSTRING, name);
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         Transaction t = Cat.newTransaction(DAL, transactionName);
-        Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         String newNormalConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_NORMAL);
         String newFailoverConnectionString = map.get(DataSourceConfigureConstants.TITAN_KEY_FAILOVER);
@@ -296,6 +295,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
                 encryptedNewFailoverConnectionString);
         t.setStatus(Transaction.SUCCESS);
 
+        Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
         DataSourceConfigure newConfigure =
                 getDataSourceConfigure(keyName, newNormalConnectionString, newFailoverConnectionString);
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);

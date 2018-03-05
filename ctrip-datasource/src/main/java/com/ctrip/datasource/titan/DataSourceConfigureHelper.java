@@ -193,7 +193,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
                 c.setName(configure.getName());
                 c.setVersion(configure.getVersion());
                 c.setConnectionString(configure.getConnectionString());
-                String log = "connection url:" + c.getConnectionUrl();
+                String log = "connection url:" + configure.getConnectionUrl();
                 LOGGER.info(log);
 
                 // override datasource.xml

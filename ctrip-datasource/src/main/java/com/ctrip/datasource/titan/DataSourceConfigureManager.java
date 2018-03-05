@@ -285,19 +285,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         Cat.logEvent(DAL, OLD_NORMAL_CONNECTIONURL, Message.SUCCESS, tempOldNormalConfigure.getConnectionUrl());
         Cat.logEvent(DAL, OLD_FAILOVER_CONNECTIONURL, Message.SUCCESS, temoOldFailoverConfigure.getConnectionUrl());
 
-        DataSourceConfigure newConfigure =
-                getDataSourceConfigure(keyName, newNormalConnectionString, newFailoverConnectionString);
-        ConnectionString newConnectionString = newConfigure.getConnectionString();
         DataSourceConfigure tempNewNormalConfigure =
-                dataSourceConfigureLocator.parseConnectionString(name, newConnectionString.getNormalConnectionString());
-        DataSourceConfigure tempNewFailoverConfigure = dataSourceConfigureLocator.parseConnectionString(name,
-                newConnectionString.getFailoverConnectionString());
+                dataSourceConfigureLocator.parseConnectionString(name, newNormalConnectionString);
+        DataSourceConfigure tempNewFailoverConfigure =
+                dataSourceConfigureLocator.parseConnectionString(name, newFailoverConnectionString);
         Cat.logEvent(DAL, NEW_NORMAL_CONNECTIONURL, Message.SUCCESS, tempNewNormalConfigure.getConnectionUrl());
         Cat.logEvent(DAL, NEW_FAILOVER_CONNECTIONURL, Message.SUCCESS, tempNewFailoverConfigure.getConnectionUrl());
         Cat.logEvent(DAL, ENCRYPTED_NEW_NORMAL_CONNECTIONSTRING, Message.SUCCESS, encryptedNewNormalConnectionString);
         Cat.logEvent(DAL, ENCRYPTED_NEW_FAILOVER_CONNECTIONSTRING, Message.SUCCESS,
                 encryptedNewFailoverConnectionString);
+        t.setStatus(Transaction.SUCCESS);
 
+        DataSourceConfigure newConfigure =
+                getDataSourceConfigure(keyName, newNormalConnectionString, newFailoverConnectionString);
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);
 
         Map<String, DataSourceConfigureChangeEvent> events = new HashMap<>();
@@ -305,11 +305,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         Set<String> names = new HashSet<>();
         names.add(keyName);
-
         try {
             addNotifyTask(names, events);
             Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
-            t.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             DalConfigException exception = new DalConfigException(e);
             t.setStatus(exception);

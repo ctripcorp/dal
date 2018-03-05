@@ -51,7 +51,9 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             final org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(p);
             this.dataSource = dataSource;
 
-            String message = "Datasource[name=" + name + ", Driver=" + p.getDriverClassName() + "] created.";
+            String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
+                    p.getDriverClassName(), dataSourceConfigure.getConnectionUrl());
+            LOGGER.info(message);
             ilogger.logTransaction(DAL, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, new Callback() {
                 @Override
                 public void execute() throws Exception {

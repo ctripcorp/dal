@@ -295,7 +295,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
                 encryptedNewFailoverConnectionString);
         t.setStatus(Transaction.SUCCESS);
 
-        Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
+        // Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
         DataSourceConfigure newConfigure =
                 getDataSourceConfigure(keyName, newNormalConnectionString, newFailoverConnectionString);
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);
@@ -307,7 +307,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         names.add(keyName);
         try {
             addNotifyTask(names, events);
-            Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
+            // Cat.logEvent(DAL, transactionName, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
         } catch (Throwable e) {
             DalConfigException exception = new DalConfigException(e);
             t.setStatus(exception);

@@ -7,16 +7,18 @@ import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DataSourceConnectionStringTest {
     private static final String name = "mysqldaltest01db_W";
     private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
+    private static LocalConnectionStringProvider provider = new LocalConnectionStringProvider();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        DataSourceConfigureManager.getInstance().setConnectionStringProvider(new LocalConnectionStringProvider());
+        DataSourceConfigureManager.getInstance().setConnectionStringProvider(provider);
         DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new AbstractPoolPropertiesProvider());
         DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new AbstractIPDomainStatusProvider());
 
@@ -37,8 +39,7 @@ public class DataSourceConnectionStringTest {
         String version1 = configure1.getVersion();
         System.out.println(String.format("Version:%s", version1));
 
-        System.out.println("Sleep for 10 seconds.");
-        Thread.sleep(10 * 1000);
+        provider.triggerConnectionStringChanged();
 
         DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
         String userName2 = configure2.getUserName();

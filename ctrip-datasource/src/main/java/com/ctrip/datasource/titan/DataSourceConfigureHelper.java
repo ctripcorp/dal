@@ -39,9 +39,9 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
     private static final String DAL_LOCAL_DATASOURCE = "DAL.local.datasource";
     private static final String DAL_LOCAL_DATASOURCELOCATION = "DAL.local.datasourcelocation";
-    private static final String DAL_DATASOURCE = "DAL";
+    private static final String DAL = "DAL";
     private static final String SEPARATOR = "\\.";
-    private static final String POOLPROPERTIES_MERGE_DATASOURCE_CONFIG = "PoolProperties::mergeDataSourceConfig";
+    private static final String POOLPROPERTIES_MERGEPOOLPROPERTIES = "PoolProperties::mergePoolProperties";
 
     // For dal ignite
     public static List<LogEntry> startUpLog = new ArrayList<>();
@@ -147,7 +147,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
 
     protected DataSourceConfigure mergeDataSourceConfigure(DataSourceConfigure configure) {
         DataSourceConfigure c = cloneDataSourceConfigure(null);
-        Transaction transaction = Cat.newTransaction(DAL_DATASOURCE, POOLPROPERTIES_MERGE_DATASOURCE_CONFIG);
+        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES);
 
         try {
             DataSourceConfigureWrapper wrapper = dataSourceConfigureWrapperReference.get();
@@ -158,6 +158,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
                 overrideDataSourceConfigure(c, dataSourceConfigure);
                 String log = "App 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                 LOGGER.info(log);
+                Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, log);
             }
 
             // override datasource-level config from QConfig
@@ -170,14 +171,16 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
                         overrideDataSourceConfigure(c, sourceConfigure);
                         String log = name + " 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
                         LOGGER.info(log);
+                        Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, log);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
                         possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
                         DataSourceConfigure sc = dataSourceConfigureMap.get(possibleName);
                         if (sc != null) {
                             overrideDataSourceConfigure(c, sc);
-                            String log = possibleName + " 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
+                            String log = possibleName + " 覆盖结果：" + poolPropertiesHelper.mapToString(c.toMap());
                             LOGGER.info(log);
+                            Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, log);
                         }
                     }
                 }
@@ -190,7 +193,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
                 c.setName(configure.getName());
                 c.setVersion(configure.getVersion());
                 c.setConnectionString(configure.getConnectionString());
-                String log = "connection settings 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
+                String log = "connection url:" + configure.getConnectionUrl();
                 LOGGER.info(log);
 
                 // override datasource.xml
@@ -198,24 +201,20 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
                 if (name != null) {
                     DataSourceConfigure dataSourceXml = dataSourceConfigureLocator.getUserDataSourceConfigure(name);
                     if (dataSourceXml != null) {
-                        overrideDataSourceConfigure(c, dataSourceXml);
-                        String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
-                        LOGGER.info(xmlLog);
+                        overrideDataSourceXml(c, dataSourceXml);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
                         possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
                         DataSourceConfigure sc = dataSourceConfigureLocator.getUserDataSourceConfigure(possibleName);
                         if (sc != null) {
-                            overrideDataSourceConfigure(c, sc);
-                            String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
-                            LOGGER.info(xmlLog);
+                            overrideDataSourceXml(c, sc);
                         }
                     }
                 }
             }
 
-            Cat.logEvent(DAL_DATASOURCE, POOLPROPERTIES_MERGE_DATASOURCE_CONFIG, Message.SUCCESS,
-                    poolPropertiesHelper.mapToString(c.toMap()));
+            Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS,
+                    String.format("最终覆盖结果：%s", poolPropertiesHelper.mapToString(c.toMap())));
             Map<String, String> datasource = c.getMap();
             Properties prop = c.getProperties();
             setProperties(datasource, prop); // set properties from map
@@ -227,6 +226,17 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
             transaction.complete();
         }
         return c;
+    }
+
+    private void overrideDataSourceXml(DataSourceConfigure c, DataSourceConfigure dataSourceXml) {
+        String originalXml =
+                String.format("datasource.xml 属性：%s", poolPropertiesHelper.mapToString(dataSourceXml.toMap()));
+        Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, originalXml);
+
+        overrideDataSourceConfigure(c, dataSourceXml);
+        String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.mapToString(c.toMap());
+        LOGGER.info(xmlLog);
+        Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, xmlLog);
     }
 
     private DataSourceConfigure cloneDataSourceConfigure(DataSourceConfigure configure) {

@@ -25,9 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionStringProviderImpl implements ConnectionStringProvider, DataSourceConfigureConstants {
     private static final String TITAN_APP_ID = "100010061";
     private static final String DAL = "DAL";
-    private static final String CONNECTIONSTRING_GET_CONNECTIONURL = "ConnectionString::getConnectionUrl";
-    private static final String CONNECTIONSTRING_NORMAL_CONNECTIONURL = "ConnectionString::normalConnectionUrl";
-    private static final String CONNECTIONSTRING_FAILOVER_CONNECTIONURL = "ConnectionString::failoverConnectionUrl";
+    private static final String GET_CONNECTIONSTRING = "ConnectionString::getConnectionString";
+    private static final String NORMAL_CONNECTIONSTRING = "Normal ConnectionString";
+    private static final String FAILOVER_CONNECTIONSTRING = "Failover ConnectionString";
 
     private ConnectionStringParser connectionStringParser = ConnectionStringParser.getInstance();
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
@@ -83,7 +83,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
             if (config != null) {
                 String normalConnectionString;
                 String failoverConnectionString;
-                String transactionName = String.format("%s:%s", CONNECTIONSTRING_GET_CONNECTIONURL, name);
+                String transactionName = String.format("%s:%s", GET_CONNECTIONSTRING, name);
                 Transaction transaction = Cat.newTransaction(DAL, transactionName);
 
                 try {
@@ -101,10 +101,10 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     configure = connectionStringParser.parse(name, normalConnectionString);
                     failoverConfigure = connectionStringParser.parse(name, failoverConnectionString);
 
-                    String msg = String.format("Normal connection url=%s,Failover connection url=%s",
-                            configure.getConnectionUrl(), failoverConfigure.getConnectionUrl());
-                    transaction.addData(CONNECTIONSTRING_NORMAL_CONNECTIONURL, configure.getConnectionUrl());
-                    transaction.addData(CONNECTIONSTRING_FAILOVER_CONNECTIONURL, failoverConfigure.getConnectionUrl());
+                    String msg = String.format("%s=%s,%s=%s", NORMAL_CONNECTIONSTRING, configure.getConnectionUrl(),
+                            FAILOVER_CONNECTIONSTRING, failoverConfigure.getConnectionUrl());
+                    transaction.addData(NORMAL_CONNECTIONSTRING, configure.getConnectionUrl());
+                    transaction.addData(FAILOVER_CONNECTIONSTRING, failoverConfigure.getConnectionUrl());
                     transaction.setStatus(Transaction.SUCCESS);
                     Cat.logEvent(DAL, transactionName, Message.SUCCESS, msg);
                 } catch (Throwable e) {

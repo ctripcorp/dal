@@ -32,36 +32,6 @@
                 <artifactId>dal-client</artifactId>
                 <version>1.14.5-SNAPSHOT</version>
             </dependency>
-            <dependency>
-                <groupId>qunar.tc.qconfig</groupId>
-                <artifactId>qconfig-client</artifactId>
-                <version>1.3.9-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.tc.qconfig</groupId>
-                <artifactId>qconfig-common</artifactId>
-                <version>1.3.9-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.common</groupId>
-                <artifactId>common-core</artifactId>
-                <version>9.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.common</groupId>
-                <artifactId>common-api</artifactId>
-                <version>9.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.common</groupId>
-                <artifactId>common-concurrent</artifactId>
-                <version>9.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>qunar.common</groupId>
-                <artifactId>common-lang</artifactId>
-                <version>9.2.1</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

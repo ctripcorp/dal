@@ -7,11 +7,11 @@
         <version>1.5.6</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.14.3</version>
+    <version>1.14.5</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>1.15.2</framework-bom.version>
+        <framework-bom.version>2.5.0</framework-bom.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -26,7 +26,7 @@
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.14.3</version>
+                <version>1.14.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

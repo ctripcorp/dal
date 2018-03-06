@@ -108,7 +108,8 @@ public abstract class BaseBatchInsertTest {
 					List<People> p = new ArrayList<>();
 					for(int k = 0; k < 3; k++) {
 						People p1 = new People();
-					 	p1.setPeopleID((long)i);
+						// for SPT case, PK can not be same for TVP value
+						p1.setPeopleID((long)k);//p1.setPeopleID((long)i);
 					 	p1.setName("test");
 					 	p1.setCityID(j);
 					 	p1.setProvinceID(-1);
@@ -145,7 +146,8 @@ public abstract class BaseBatchInsertTest {
 					List<People> p = new ArrayList<>();
 					for(int k = 0; k < 3; k++) {
 						People p1 = new People();
-					 	p1.setPeopleID((long)i);
+                        // for SPT case, PK can not be same for TVP value
+                        p1.setPeopleID((long)k);//p1.setPeopleID((long)i);
 					 	p1.setName("test");
 					 	p1.setCityID(j);
 					 	p1.setProvinceID(-1);
@@ -181,7 +183,8 @@ public abstract class BaseBatchInsertTest {
 					
 					for(int k = 0; k < 3; k++) {
 						People p1 = new People();
-					 	p1.setPeopleID((long)i);
+                        // for SPT case, PK can not be same for TVP value
+                        p1.setPeopleID((long)k);//p1.setPeopleID((long)i);
 					 	p1.setName("test");
 					 	p1.setCityID(j);
 					 	p1.setProvinceID(-1);

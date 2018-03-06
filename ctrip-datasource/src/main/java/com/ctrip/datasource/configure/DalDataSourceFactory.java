@@ -10,6 +10,8 @@ import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class DalDataSourceFactory {
+    private static final String DAL = "DAL";
+    private static final String DATASOURCE_GET_DATASOURCE = "DataSource::getDataSource";
 
     /**
      * Create DataSource for given name. The appid and titan url will be discoved by framework foundation
@@ -55,5 +57,16 @@ public class DalDataSourceFactory {
         DataSourceLocator loc = new DataSourceLocator(provider);
         String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
         return loc.getDataSource(keyName);
+
+        /*
+         * String transactionName = String.format("%s:%s", DATASOURCE_GET_DATASOURCE, allInOneKey); Transaction
+         * transaction = Cat.newTransaction(DAL, transactionName); DataSource dataSource = loc.getDataSource(keyName);
+         * 
+         * try { transaction.addData(transactionName); transaction.setStatus(Transaction.SUCCESS); Cat.logEvent(DAL,
+         * transactionName, Message.SUCCESS, ""); } catch (Throwable e) { transaction.setStatus(e); } finally {
+         * transaction.complete(); }
+         * 
+         * return dataSource;
+         */
     }
 }

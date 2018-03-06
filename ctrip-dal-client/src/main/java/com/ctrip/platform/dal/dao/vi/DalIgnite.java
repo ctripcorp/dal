@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dal.log.LogEntry;
+import com.ctrip.datasource.titan.DataSourceConfigureManager;
+import com.ctrip.datasource.titan.LogEntry;
 import qunar.tc.qconfig.client.TypedConfig;
-import com.ctrip.datasource.configure.ConnectionStringProviderImpl;
 
 import com.ctrip.framework.vi.IgniteManager.SimpleLogger;
 import com.ctrip.framework.vi.annotation.Ignite;
@@ -47,8 +47,8 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
 
-            if (ConnectionStringProviderImpl.config != null)
-                configs.putAll(ConnectionStringProviderImpl.config);
+            if (DataSourceConfigureManager.config != null)
+                configs.putAll(DataSourceConfigureManager.config);
 
             log(logger);
             logger.info("success initialized Dal Factory");
@@ -59,10 +59,10 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
             return true;
         } catch (Throwable e) {
-            if (ConnectionStringProviderImpl.config == null) {
+            if (DataSourceConfigureManager.config == null) {
                 logger.error("Can not load dal.config from neither local nor remote.");
             } else {
-                configs.putAll(ConnectionStringProviderImpl.config);
+                configs.putAll(DataSourceConfigureManager.config);
             }
 
             log(logger);
@@ -102,7 +102,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
     }
 
     private void log(SimpleLogger logger) {
-        List<LogEntry> startUpLog = new ArrayList<>(ConnectionStringProviderImpl.startUpLog);
+        List<LogEntry> startUpLog = new ArrayList<>(DataSourceConfigureManager.startUpLog);
         for (LogEntry e : startUpLog) {
             switch (e.type) {
                 case LogEntry.INFO:

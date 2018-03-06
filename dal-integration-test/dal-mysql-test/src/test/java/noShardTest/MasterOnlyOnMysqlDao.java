@@ -27,6 +27,12 @@ public class MasterOnlyOnMysqlDao {
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
 
+	public MasterOnlyOnMysqlDao(String DATA_BASE) throws SQLException {
+		this.client = new DalTableDao<>(MasterOnlyOnMysql.class,DATA_BASE);
+		this.personMasterOnlyOnMysqlRowMapper = new DalDefaultJpaMapper<>(MasterOnlyOnMysql.class);
+		this.queryDao = new DalQueryDao(DATA_BASE);
+	}
+
 	/**
 	 * Query PersonMasterOnlyOnMysql by the specified ID
 	 * The ID must be a number
@@ -413,6 +419,35 @@ public class MasterOnlyOnMysqlDao {
 	}
 
 	/**
+	 * 构建，查询，first
+	 **/
+	public MasterOnlyOnMysql test_build_queryByPK(Integer ID, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+		builder.equal("ID", ID, Types.INTEGER, false);
+		builder.orderBy("ID", true);
+		builder.requireFirst();
+
+		return client.queryObject(builder, hints);
+	}
+
+	/**
+	 * 构建，查询，first
+	 **/
+	public List<MasterOnlyOnMysql> test_build_queryByName(String name, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+		builder.equal("Name", name, Types.VARCHAR, false);
+		builder.orderBy("ID", true);
+
+		return client.query(builder, hints);
+	}
+
+	/**
 	 * 构建，更新
 	**/
 	public int test_build_update(String Name, List<Integer> Age, DalHints hints) throws SQLException {
@@ -476,6 +511,37 @@ public class MasterOnlyOnMysqlDao {
 		builder.mapWith(personMasterOnlyOnMysqlRowMapper);
 
 		return queryDao.query(builder, parameters, hints);
+	}
+
+	/**
+	 * 自定义，查询
+	 **/
+	public List<MasterOnlyOnMysql> test_def_queryByPK(Integer ID, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeSelectSqlBuilder<List<MasterOnlyOnMysql>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		builder.setTemplate("select * from person where ID = ?");
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+		parameters.set(i, "ID", Types.INTEGER, ID);
+		builder.mapWith(personMasterOnlyOnMysqlRowMapper);
+
+		return queryDao.query(builder, parameters, hints);
+	}
+
+	/**
+	 * test def insert
+	 **/
+	public int testDefInsert (String name, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		builder.setTemplate("insert into person (name) values (?)");
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+		parameters.setSensitive(i++, "name", Types.VARCHAR, name);
+
+		return queryDao.update(builder, parameters, hints);
 	}
 
 	/**

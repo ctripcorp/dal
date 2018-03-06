@@ -26,7 +26,10 @@ import org.junit.runners.Suite.SuiteClasses;
         noShardTest.NoShardTransactionTestOnSqlServerSpringTest.class,
         noShardTest.NoShardTransactionTestOnSqlServerNotSpringTest.class,
         noShardTest.SpTestDaoUnitTest.class,
-        noShardTest.TestFor414.class
+        noShardTest.TestFor414.class,
+
+        shardTest.newVersionCodeTest.RWShardTestOnSqlServer.class,
+        noShardTest.RWTestOnSQLServer.class
 })
 public class AllTests {
   @BeforeClass

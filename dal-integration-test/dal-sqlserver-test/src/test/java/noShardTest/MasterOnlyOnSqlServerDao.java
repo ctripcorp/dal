@@ -11,6 +11,8 @@ import java.util.List;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
+import javax.xml.crypto.Data;
+
 public class MasterOnlyOnSqlServerDao {
 	private static final boolean ASC = true;
 	private DalTableDao<MasterOnlyOnSqlServer> client;
@@ -22,6 +24,12 @@ public class MasterOnlyOnSqlServerDao {
 	
 	public MasterOnlyOnSqlServerDao() throws SQLException {
 		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(MasterOnlyOnSqlServer.class));
+		this.peopleMasterOnlyOnSqlServerRowMapper = new DalDefaultJpaMapper<>(MasterOnlyOnSqlServer.class);
+		this.queryDao = new DalQueryDao(DATA_BASE);
+	}
+
+	public MasterOnlyOnSqlServerDao(String DATA_BASE) throws SQLException {
+		this.client = new DalTableDao<>(MasterOnlyOnSqlServer.class, DATA_BASE);
 		this.peopleMasterOnlyOnSqlServerRowMapper = new DalDefaultJpaMapper<>(MasterOnlyOnSqlServer.class);
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
@@ -287,6 +295,36 @@ public class MasterOnlyOnSqlServerDao {
 		return client.batchUpdate(hints, daoPojos);
 	}
 
+
+	/**
+	 * 构建，查询，first
+	 **/
+	public MasterOnlyOnSqlServer test_build_queryByPK(Integer PeopleID, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
+		builder.equal("PeopleID", PeopleID, Types.INTEGER, false);
+		builder.orderBy("PeopleID", true);
+		builder.requireFirst();
+
+		return client.queryObject(builder, hints);
+	}
+
+	/**
+	 * 构建，查询，first
+	 **/
+	public List<MasterOnlyOnSqlServer> test_build_queryByName(String name, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
+		builder.equal("Name", name, Types.VARCHAR, false);
+		builder.orderBy("PeopleID", true);
+
+		return client.query(builder, hints);
+	}
+
 	/**
 	 * 构建，查询
 	**/
@@ -421,6 +459,22 @@ public class MasterOnlyOnSqlServerDao {
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, CityID);
+		builder.mapWith(peopleMasterOnlyOnSqlServerRowMapper);
+
+		return queryDao.query(builder, parameters, hints);
+	}
+
+	/**
+	 * 自定义，查询
+	 **/
+	public List<MasterOnlyOnSqlServer> test_def_queryByPK(Integer ID, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeSelectSqlBuilder<List<MasterOnlyOnSqlServer>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		builder.setTemplate("select * from people where PeopleID = ?");
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+		parameters.set(i, "PeopleID", Types.INTEGER, ID);
 		builder.mapWith(peopleMasterOnlyOnSqlServerRowMapper);
 
 		return queryDao.query(builder, parameters, hints);

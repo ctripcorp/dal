@@ -74,8 +74,7 @@ public class TitanDataSourceLocator {
             
             TitanData data = getConnectionStrings(titanSvcUrl, name);
             DataSourceConfigure configure = parse(name, decrypt(data.getConnectionString()));
-            // TODO merge poolproperties
-//            PoolPropertiesProvider
+            configure = DataSourceConfigureManager.getInstance().mergeDataSourceConfig(configure);
 
             return new SingleDataSource(name, configure).getDataSource();
         } catch (Throwable e) {

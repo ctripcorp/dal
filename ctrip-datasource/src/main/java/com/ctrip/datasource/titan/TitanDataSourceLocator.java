@@ -6,6 +6,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
+import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
@@ -71,8 +74,13 @@ public class TitanDataSourceLocator {
         try {
             titanSvcUrl = validate("Titan service URL", titanSvcUrl);
             name = validate("All in one name", name);
-            
-            TitanData data = getConnectionStrings(titanSvcUrl, name);
+            String appid = validate("App ID", Foundation.app().getAppId());
+
+            Set<String> dbNames = new HashSet<>();
+            dbNames.add(name);
+            DataSourceConfigureManager.getInstance().setup(dbNames, SourceType.Remote);
+
+            TitanData data = getConnectionStrings(titanSvcUrl, name, appid);
             DataSourceConfigure configure = parse(name, decrypt(data.getConnectionString()));
             configure = DataSourceConfigureManager.getInstance().mergeDataSourceConfig(configure);
 
@@ -95,9 +103,7 @@ public class TitanDataSourceLocator {
         return originalValue;
     }
 
-    private TitanData getConnectionStrings(String svcUrl, String name) throws Exception {
-        String appid = validate("App ID", Foundation.app().getAppId());
-
+    private TitanData getConnectionStrings(String svcUrl, String name, String appid) throws Exception {
         long start = System.currentTimeMillis();
 
         StringBuilder sb = new StringBuilder();

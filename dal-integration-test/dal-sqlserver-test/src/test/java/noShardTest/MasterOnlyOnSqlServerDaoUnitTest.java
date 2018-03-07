@@ -2,10 +2,6 @@ package noShardTest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
-import com.qunar.corp.weather.api.City;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import org.junit.*;
 
 import shardTest.newVersionCodeTest.PeopleShardColModShardByDBOnSqlServer;

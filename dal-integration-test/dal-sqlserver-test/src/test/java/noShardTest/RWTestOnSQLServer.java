@@ -1,8 +1,7 @@
 package noShardTest;
 
-import com.ctrip.platform.dal.dao.DalClientFactory;
+
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.configure.FreshnessHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

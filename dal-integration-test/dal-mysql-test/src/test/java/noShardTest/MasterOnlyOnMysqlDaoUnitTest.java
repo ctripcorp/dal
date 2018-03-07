@@ -12,7 +12,6 @@ import static org.junit.Assert.*;
 
 import com.ctrip.platform.dal.dao.*;
 
-import javax.sound.sampled.DataLine;
 
 /**
  * JUnit test of PersonMasterOnlyOnMysqlDao class.

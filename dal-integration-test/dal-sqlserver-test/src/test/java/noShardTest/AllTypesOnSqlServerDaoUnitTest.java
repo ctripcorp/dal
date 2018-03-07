@@ -1,23 +1,11 @@
 package noShardTest;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.sql.SQLException;
-
-import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
 import org.junit.*;
-
-import static java.lang.System.in;
 import static org.junit.Assert.*;
-
-
-
-
 import com.ctrip.platform.dal.dao.*;
 
 /**

@@ -3,15 +3,12 @@ package noShardTest;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.sqlbuilder.*;
-//import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
-
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
-import javax.xml.crypto.Data;
 
 public class MasterOnlyOnSqlServerDao {
 	private static final boolean ASC = true;

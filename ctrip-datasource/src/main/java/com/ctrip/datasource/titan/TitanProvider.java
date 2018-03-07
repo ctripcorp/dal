@@ -16,11 +16,11 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private SourceType sourceType = SourceType.Remote;
 
     public void initialize(Map<String, String> settings) throws Exception {
-        getSourceType(settings);
+        setSourceType(settings);
         dataSourceConfigureManager.initialize(settings);
     }
 
-    private void getSourceType(Map<String, String> settings) {
+    private void setSourceType(Map<String, String> settings) {
         if (settings == null || settings.isEmpty())
             return;
 
@@ -32,6 +32,10 @@ public class TitanProvider implements DataSourceConfigureProvider {
             }
         }
 
+        setSourceTypeByEnv();
+    }
+
+    public void setSourceTypeByEnv() {
         Env env = Foundation.server().getEnv();
         if (env.equals(Env.UNKNOWN) || env.equals(Env.DEV)) {
             sourceType = SourceType.Local;

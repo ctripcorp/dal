@@ -1,13 +1,10 @@
 package noShardTest;
 
-import java.sql.Connection;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.sql.SQLException;
-
-import com.ctrip.platform.dal.dao.client.ConnectionAction;
-import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import org.junit.*;
 import static org.junit.Assert.*;
 

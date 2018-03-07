@@ -111,10 +111,10 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 	
 	@After
 	public void tearDown() throws Exception {
-		dao.test_def_truncate(new DalHints());
-		dao1.test_def_truncate(new DalHints().inShard(1));
-	} 
-	
+//		dao.test_def_truncate(new DalHints());
+//		dao1.test_def_truncate(new DalHints().inShard(1));
+	}
+
 	
 	@Test
 	public void testCount() throws Exception {
@@ -123,6 +123,23 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(3, affected);
+
+		affected=dao.count(new DalHints().slaveOnly());
+		assertEquals(6,affected);
+
+		Thread.sleep(5000);
+
+		affected=dao.count(new DalHints().freshness(3));
+		assertEquals(6,affected);
+
+		affected=dao.count(new DalHints().freshness(2));
+		assertEquals(6,affected);
+
+		affected=dao.count(new DalHints().freshness(1));
+		assertEquals(3,affected);
+
+		affected=dao.count(new DalHints().freshness(3).masterOnly());
+		assertEquals(3,affected);
 	}
 	
 	@Test
@@ -137,6 +154,13 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(2, affected);
+
+		dao.delete(new DalHints().slaveOnly(),daoPojo);
+		affected=dao.count(new DalHints());
+		assertEquals(5,affected);
+
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(2,affected);
 	}
 	
 	@Test
@@ -163,6 +187,14 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(1, affected);
+
+		dao.delete(new DalHints().slaveOnly(),daoPojos);
+
+		affected=dao.count(new DalHints());
+		assertEquals(4,affected);
+
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(1,affected);
 	}
 	
 	@Test
@@ -182,6 +214,14 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(1, affected);
+
+		dao.batchDelete(new DalHints().slaveOnly(),daoPojos);
+
+		affected=dao.count(new DalHints());
+		assertEquals(4,affected);
+
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(1,affected);
 	}
 	
 	@Test
@@ -191,6 +231,21 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		list = dao.queryAll(new DalHints().masterOnly());
 		assertEquals(3, list.size());
+
+		list=dao.queryAll(new DalHints().slaveOnly());
+		assertEquals(6,list.size());
+
+		list=dao.queryAll(new DalHints().freshness(3));
+		assertEquals(6,list.size());
+
+		list=dao.queryAll(new DalHints().freshness(2));
+		assertEquals(6,list.size());
+
+		list=dao.queryAll(new DalHints().freshness(1));
+		assertEquals(3,list.size());
+
+		list=dao.queryAll(new DalHints().freshness(3).masterOnly());
+		assertEquals(3,list.size());
 	}
 	
 	@Test
@@ -211,6 +266,14 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(4, affected);
+
+		dao.insert(new DalHints().slaveOnly(),daoPojo);
+
+		affected=dao.count(new DalHints());
+		assertEquals(7,affected);
+
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(4,affected);
 	}
 	
 	@Test
@@ -229,7 +292,15 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		assertEquals(6, affected);
 		
 		affected = dao.count(new DalHints().masterOnly());
-		assertEquals(9, affected);		
+		assertEquals(9, affected);
+
+		dao.insert(new DalHints().slaveOnly(),daoPojos);
+
+		affected=dao.count(new DalHints().slaveOnly());
+		assertEquals(12,affected);
+
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(9,affected);
 	}
 	
 	@Test
@@ -246,6 +317,16 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(4, affected);
+
+		KeyHolder keyHolder2=new KeyHolder();
+		dao.insert(new DalHints().slaveOnly(),keyHolder2,daoPojo);
+		assertEquals(1,keyHolder2.size());
+
+		affected=dao.count(new DalHints().slaveOnly());
+		assertEquals(7, affected);
+
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(4,affected);
 	}
 	
 	@Test
@@ -259,7 +340,15 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		assertEquals(6, affected);
 		
 		affected = dao.count(new DalHints().masterOnly());
-		assertEquals(9, affected);	
+		assertEquals(9, affected);
+
+		KeyHolder keyHolder2=new KeyHolder();
+		dao.insert(new DalHints().slaveOnly(),keyHolder2,daoPojos);
+		assertEquals(6,keyHolder2.size());
+		affected=dao.count(new DalHints().slaveOnly());
+		assertEquals(12,affected);
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(9,affected);
 	}
 	
 	@Test
@@ -272,7 +361,14 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		assertEquals(6, affected);
 		
 		affected = dao.count(new DalHints().masterOnly());
-		assertEquals(9, affected);	
+		assertEquals(9, affected);
+
+		dao.batchInsert(new DalHints().slaveOnly(),daoPojos);
+		affected=dao.count(new DalHints().slaveOnly());
+		assertEquals(12,affected);
+		affected=dao.count(new DalHints().masterOnly());
+		assertEquals(9,affected);
+
 	}
 	
 	@Test
@@ -282,9 +378,24 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		int pageNo = 1;
 		List<MasterOnlyOnSqlServer> list = dao.queryAllByPage(pageNo, pageSize, hints);
 		assertEquals(6, list.size());
-		
+
+		list=dao.queryAllByPage(pageNo,pageSize,new DalHints().slaveOnly());
+		assertEquals(6,list.size());
+
 		list = dao.queryAllByPage(pageNo, pageSize, hints.masterOnly());
 		assertEquals(3, list.size());
+
+		list=dao.queryAllByPage(pageNo,pageSize,new DalHints().freshness(3));
+		assertEquals(6,list.size());
+
+		list=dao.queryAllByPage(pageNo,pageSize,new DalHints().freshness(2));
+		assertEquals(6,list.size());
+
+		list=dao.queryAllByPage(pageNo,pageSize,new DalHints().freshness(1));
+		assertEquals(3,list.size());
+
+		list=dao.queryAllByPage(pageNo,pageSize,new DalHints().freshness(3).masterOnly());
+		assertEquals(3,list.size());
 	}
 	
 	@Test
@@ -294,11 +405,25 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		MasterOnlyOnSqlServer affected = dao.queryByPk(id, hints);
 		assertNotNull(affected);
 		assertEquals("Slave_0", affected.getName());
-		
+
+		affected=dao.queryByPk(id,new DalHints().slaveOnly());
+		assertEquals("Slave_0",affected.getName());
+
 		affected = dao.queryByPk(id, hints.masterOnly());
 		assertNotNull(affected);
 		assertEquals("Master_0", affected.getName());
-		
+
+		affected=dao.queryByPk(id,new DalHints().freshness(3));
+		assertEquals("Slave_0",affected.getName());
+
+		affected=dao.queryByPk(id,new DalHints().freshness(2));
+		assertEquals("Slave_0",affected.getName());
+
+		affected=dao.queryByPk(id,new DalHints().freshness(1));
+		assertEquals("Master_0",affected.getName());
+
+		affected=dao.queryByPk(id,new DalHints().freshness(3).masterOnly());
+		assertEquals("Master_0",affected.getName());
 	}
 	
 	@Test
@@ -309,9 +434,24 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		MasterOnlyOnSqlServer affected = dao.queryByPk(pk, hints);
 		assertNotNull(affected);
 		assertEquals("Slave_0", affected.getName());
-		
+
+		affected=dao.queryByPk(pk,new DalHints().slaveOnly());
+		assertEquals("Slave_0",affected.getName());
+
 		affected = dao.queryByPk(pk, hints.masterOnly());
 		assertEquals("Master_0", affected.getName());
+
+		affected=dao.queryByPk(pk,new DalHints().freshness(3));
+		assertEquals("Slave_0",affected.getName());
+
+		affected=dao.queryByPk(pk,new DalHints().freshness(2));
+		assertEquals("Slave_0",affected.getName());
+
+		affected=dao.queryByPk(pk,new DalHints().freshness(1));
+		assertEquals("Master_0",affected.getName());
+
+		affected=dao.queryByPk(pk,new DalHints().freshness(3).masterOnly());
+		assertEquals("Master_0",affected.getName());
 	}
 	
 	@Test
@@ -335,6 +475,14 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		daoPojo = dao.queryByPk(2,hints.masterOnly());
 		assertEquals("update", daoPojo.getName());
+
+		daoPojo.setName("updateSlave");
+		dao.update(new DalHints().slaveOnly(),daoPojo);
+
+		daoPojo=dao.queryByPk(2l,new DalHints().slaveOnly());
+		assertEquals("updateSlave",daoPojo.getName());
+		daoPojo=dao.queryByPk(2l,new DalHints().masterOnly());
+		assertEquals("update",daoPojo.getName());
 	}
 	
 	@Test
@@ -370,6 +518,20 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		daoPojo=dao.queryByPk(3l, hints.masterOnly());
 		assertEquals("update3", daoPojo.getName());
+
+		daoPojos.get(0).setName("updateSlave");
+		daoPojos.get(1).setName("updateSlave");
+
+		dao.update(new DalHints().slaveOnly(),daoPojos);
+		daoPojo=dao.queryByPk(2,new DalHints().slaveOnly());
+		assertEquals("updateSlave",daoPojo.getName());
+		daoPojo=dao.queryByPk(3,new DalHints().slaveOnly());
+		assertEquals("updateSlave",daoPojo.getName());
+
+		daoPojo=dao.queryByPk(2,new DalHints().masterOnly());
+		assertEquals("update2",daoPojo.getName());
+		daoPojo=dao.queryByPk(3,new DalHints().masterOnly());
+		assertEquals("update3",daoPojo.getName());
 	}
 	
 	@Test
@@ -404,6 +566,20 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		
 		daoPojo=dao.queryByPk(3l, hints.masterOnly());
 		assertEquals("update3", daoPojo.getName());
+
+		daoPojos.get(0).setName("batchUpdateSlave");
+		daoPojos.get(1).setName("batchUpdateSlave");
+
+		dao.batchUpdate(new DalHints().slaveOnly(),daoPojos);
+		daoPojo=dao.queryByPk(2,new DalHints().slaveOnly());
+		assertEquals("batchUpdateSlave",daoPojo.getName());
+		daoPojo=dao.queryByPk(3,new DalHints().slaveOnly());
+		assertEquals("batchUpdateSlave",daoPojo.getName());
+
+		daoPojo=dao.queryByPk(2,new DalHints().masterOnly());
+		assertEquals("update2",daoPojo.getName());
+		daoPojo=dao.queryByPk(3,new DalHints().masterOnly());
+		assertEquals("update3",daoPojo.getName());
 	}
 	
 	@Test
@@ -462,8 +638,23 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(30);
 	    MasterOnlyOnSqlServer ret = dao.test_build_queryFirst(CityID, new DalHints());
 	    assertEquals("Slave_0",ret.getName());
+
+		ret = dao.test_build_queryFirst(CityID, new DalHints().slaveOnly());
+		assertEquals("Slave_0",ret.getName());
 	   
 	    ret = dao.test_build_queryFirst(CityID, new DalHints().masterOnly());
+	    assertEquals("Master_0",ret.getName());
+
+	    ret=dao.test_build_queryFirst(CityID,new DalHints().freshness(3));
+	    assertEquals("Slave_0",ret.getName());
+
+	    ret=dao.test_build_queryFirst(CityID,new DalHints().freshness(2));
+	    assertEquals("Slave_0",ret.getName());
+
+	    ret=dao.test_build_queryFirst(CityID,new DalHints().freshness(1));
+	    assertEquals("Master_0",ret.getName());
+
+	    ret=dao.test_build_queryFirst(CityID,new DalHints().freshness(3).masterOnly());
 	    assertEquals("Master_0",ret.getName());
 	}
 
@@ -475,6 +666,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(30);
 	    List<MasterOnlyOnSqlServer> ret = dao.test_build_queryList(CityID, new DalHints());
 	    assertEquals(1, ret.size());
+
+		ret = dao.test_build_queryList(CityID, new DalHints().slaveOnly());
+		assertEquals(1, ret.size());
 	    
 	    ret = dao.test_build_queryList(CityID, new DalHints().masterOnly());
 	    assertEquals(2, ret.size());
@@ -488,6 +682,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(30);
 	    MasterOnlyOnSqlServer ret = dao.test_build_querySingle(CityID, new DalHints());
 	    assertEquals("Slave_0",ret.getName());
+
+		ret = dao.test_build_querySingle(CityID, new DalHints().slaveOnly());
+		assertEquals("Slave_0",ret.getName());
 	    
 	    ret = dao.test_build_querySingle(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0",ret.getName());
@@ -501,6 +698,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(30);
 	    String ret = dao.test_build_queryFieldFirst(CityID, new DalHints());
 	    assertEquals("Slave_0",ret);
+
+		ret = dao.test_build_queryFieldFirst(CityID, new DalHints().slaveOnly());
+		assertEquals("Slave_0",ret);
 	    
 	    ret = dao.test_build_queryFieldFirst(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0",ret);
@@ -514,6 +714,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(30);
 	    List<String> ret = dao.test_build_queryFieldList(CityID, new DalHints());
 	    assertEquals(1, ret.size());
+
+		ret = dao.test_build_queryFieldList(CityID, new DalHints().slaveOnly());
+		assertEquals(1, ret.size());
 	    
 	    ret = dao.test_build_queryFieldList(CityID, new DalHints().masterOnly());
 	    assertEquals(2, ret.size());    
@@ -528,6 +731,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(30);
 	    String ret = dao.test_build_queryFieldSingle(CityID, new DalHints());
 	    assertEquals("Slave_0", ret);
+
+		ret = dao.test_build_queryFieldSingle(CityID, new DalHints().slaveOnly());
+		assertEquals("Slave_0", ret);
 	    
 	    ret = dao.test_build_queryFieldSingle(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0", ret);
@@ -537,6 +743,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 	public void testtest_def_truncate() throws Exception {
 	    dao.test_def_truncate(new DalHints());
 	    int affected = dao.count(new DalHints());
+		assertEquals(6, affected);
+
+		affected = dao.count(new DalHints().slaveOnly());
 		assertEquals(6, affected);
 		
 		affected = dao.count(new DalHints().masterOnly());
@@ -550,6 +759,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(22);
 		CityID.add(30);
 		List<MasterOnlyOnSqlServer> ret = dao.test_def_queryList(CityID, new DalHints());
+		assertEquals(1, ret.size());
+
+		ret = dao.test_def_queryList(CityID, new DalHints().slaveOnly());
 		assertEquals(1, ret.size());
 		
 		ret = dao.test_def_queryList(CityID, new DalHints().masterOnly());

@@ -1,20 +1,11 @@
 package noShardTest;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
-import java.sql.SQLException;
-
-
 import org.junit.*;
-
 import static org.junit.Assert.*;
-
-
 import com.ctrip.platform.dal.dao.*;
-import com.ctrip.platform.dal.dao.client.DalHA;
-import com.ctrip.platform.dal.dao.helper.DalListMerger;
+
 
 /**
  * JUnit test ofDesignatedDatabaseNoShardingOnSqlServerDao class.

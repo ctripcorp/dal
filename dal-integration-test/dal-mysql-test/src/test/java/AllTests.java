@@ -14,6 +14,7 @@ import org.junit.runners.Suite.SuiteClasses;
         noShardTest.NoShardTransactionTestOnMysqlSpringTest.class,
         noShardTest.NoShardTransactionTestOnMysqlNotSpringTest.class,
 
+
         shardTest.newVersionCode.ignoreMissingFieldsAndAllowPartialTestOnMysqlDaoUnitTest.class,
         shardTest.newVersionCode.NewHintsOfCodeGenOnMysqlDaoUnitTest.class,
         shardTest.newVersionCode.PeopleShardColModShardByDBTableOnMysqlDaoUnitTest.class,
@@ -29,7 +30,8 @@ import org.junit.runners.Suite.SuiteClasses;
         shardTest.oldVersionCode.SimpleShardByDBOnMysqlGenDaoUnitTest.class,
         shardTest.oldVersionCode.SimpleShardByDBTableOnMysqlGenDaoUnitTest.class,
         shardTest.oldVersionCode.SimpleShardByTableOnMysqlGenDaoUnitTest.class,
-
+        noShardTest.RWTestOnMysql.class,
+        shardTest.newVersionCode.RWShardTestOnMysql.class,
         QmqApiTest.class,
 
 })

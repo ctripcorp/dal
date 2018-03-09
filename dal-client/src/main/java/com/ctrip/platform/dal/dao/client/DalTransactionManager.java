@@ -12,6 +12,7 @@ import net.sf.cglib.proxy.NoOp;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -135,7 +136,7 @@ public class DalTransactionManager {
     private static class TransactionalCallbackFilter implements CallbackFilter {
         @Override
         public int accept(Method method) {
-            return method.isAnnotationPresent(Transactional.class) ? 0 : 1;
+            return method.isAnnotationPresent(DalTransactional.class) || method.isAnnotationPresent(Transactional.class) ? 0 : 1;
         }
     }
     

@@ -85,6 +85,12 @@ public class DalRequestExecutorTest {
             // TODO Auto-generated method stub
             return false;
         }
+
+        @Override
+        public void endExecution() throws SQLException {
+            // TODO Auto-generated method stub
+            
+        }
 	}
 	
     static ConcurrentHashMap<String, Object> all = new ConcurrentHashMap<>();

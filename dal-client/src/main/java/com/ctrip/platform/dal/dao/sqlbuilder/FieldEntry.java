@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
-import java.util.List;
 
 class FieldEntry {
 

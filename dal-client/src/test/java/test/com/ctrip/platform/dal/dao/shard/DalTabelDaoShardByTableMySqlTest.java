@@ -38,6 +38,7 @@ public class DalTabelDaoShardByTableMySqlTest extends BaseDalTabelDaoShardByTabl
 	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
+            + "dbIndex int,"
 			+ "tableIndex int,"
 			+ "type smallint, "
 			+ "address VARCHAR(64) not null, "
@@ -80,7 +81,7 @@ public class DalTabelDaoShardByTableMySqlTest extends BaseDalTabelDaoShardByTabl
 				int id = j + 1;
 				int quantity = 10 + j;
 				insertSqls[j] = "INSERT INTO " + TABLE_NAME + "_"+ i
-						+ " VALUES(" + id + ", " + quantity + ", " + i + ",1, 'SH INFO', NULL)";
+						+ " VALUES(" + id + ", " + quantity + ", 1, " + i + ", 1, 'SH INFO', NULL)";
 			}
 			clientMySql.batchUpdate(insertSqls, hints);
 		}

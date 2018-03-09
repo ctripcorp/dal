@@ -1,13 +1,11 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.util.Set;
-
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.dao.helper.DalBase64;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
@@ -122,7 +120,7 @@ public class DefaultLogger extends LoggerAdapter implements DalLogger {
 			} else {
 				msg.append("\t").append("parameters : ").append(LINESEPARATOR);
 			}
-			msg.append("\t").append("CostDetail : ").append(DalWatcher.toJson()).append(LINESEPARATOR);
+			msg.append("\t").append("CostDetail : ").append(entry.getCostDetail()).append(LINESEPARATOR);
 			msg.append("\t").append("SQL.database : ").append(entry.getDbUrl()).append(LINESEPARATOR);
 			logger.info(msg.toString());
 		} catch (Throwable e) {
@@ -134,7 +132,7 @@ public class DefaultLogger extends LoggerAdapter implements DalLogger {
 		String params = "";
 		if(encryptLogging){
 			try {
-				params = new String(Base64.encodeBase64(LoggerHelper.getParams(entry).getBytes()));
+				params = new String(DalBase64.encodeBase64(LoggerHelper.getParams(entry).getBytes()));
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}

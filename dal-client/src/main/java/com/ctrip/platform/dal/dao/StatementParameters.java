@@ -135,14 +135,46 @@ public class StatementParameters {
 		return setInParameter(index, name, sqlType, values, true);
 	}
 	
+	/**
+	 * Set multiple parameters to sensitive by parameter index.
+	 * @param indexList
+	 * @return
+	 */
+	public StatementParameters setSensitiveByIndex(List<Integer> indexList) {
+	    for(StatementParameter p: parameters)
+	        if(indexList.contains(p.getIndex()))
+	            p.setSensitive(true);
+	    return this;
+	}
+	
+    /**
+     * Set multiple parameters to sensitive by parameter name.
+     * @param nameList
+     * @return
+     */
+	public StatementParameters setSensitiveByName(List<String> nameList) {
+        for(StatementParameter p: parameters)
+            if(nameList.contains(p.getName()))
+                p.setSensitive(true);
+        return this;
+    }
+    
 	public int size() {
 		return parameters.size();
 	}
+	
+    public int nextIndex() {
+        return parameters.size() + 1;
+    }
 	
 	public StatementParameter get(int i) {
 		return parameters.get(i);
 	}
 	
+    public StatementParameter getLast() {
+        return parameters.get(parameters.size() -1);
+    }
+    
 	public StatementParameter get(String name, ParameterDirection direction) {
 		if(name == null)
 			return null;
@@ -153,6 +185,20 @@ public class StatementParameters {
 		}
 		return null;
 	}
+	
+    /**
+     * Set the parameter to be nullable, if it is , the parameter maybe ignored
+     */
+    public void nullable() {
+        getLast().nullable();
+    }
+
+    /**
+     * Set if the parameter is valid or not by the condition
+     */
+    public void when(boolean condition) {
+        getLast().when(condition);
+    }
 
 	public List<StatementParameter> values() {
 		return parameters;
@@ -238,4 +284,22 @@ public class StatementParameters {
 			}
 		}
 	}
+	
+    /**
+     * Remove invalid parameter and reorder index
+     */
+	public StatementParameters buildParameters() {
+	    List<StatementParameter> newParameters = new LinkedList<StatementParameter>();
+
+        int i = 1;
+        for(StatementParameter parameter: parameters) {
+            if(parameter.isValid()) {
+                parameter.setIndex(i++);
+                newParameters.add(parameter);
+            }
+        }
+        
+        parameters = newParameters;
+        return this;
+    }
 }

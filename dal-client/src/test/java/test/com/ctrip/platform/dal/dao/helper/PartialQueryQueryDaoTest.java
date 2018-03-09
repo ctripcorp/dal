@@ -42,16 +42,16 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  **/
 public class PartialQueryQueryDaoTest {
 	private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
-	private static final String DATA_BASE = "MySqlSimpleShard";
+
+	private static final String DATA_BASE = "MySqlSimpleShardForDB";
 	// ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
 
 	private static DalTableDao<Person> pdao;
-    private final static String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
+    private final static String DATABASE_NAME_MYSQL = DATA_BASE;
     private final static String TABLE_NAME = "person";
     private final static int mod = 2;
-    private final static int tableMod = 4;
     
-    //Create the the table
+    //Drop the the table
     private final static String DROP_TABLE_SQL_MYSQL_TPL_ORIGINAL = "DROP TABLE IF EXISTS " + TABLE_NAME;
     
     //Create the the table
@@ -81,8 +81,7 @@ public class PartialQueryQueryDaoTest {
             clientMySql.batchUpdate(sqls, hints.inShard(i));
         }
         
-        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class,
-                "MySqlSimpleShard", "PERSON");
+        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, DATA_BASE, TABLE_NAME);
         pdao = new DalTableDao<>(parser);
     }
 

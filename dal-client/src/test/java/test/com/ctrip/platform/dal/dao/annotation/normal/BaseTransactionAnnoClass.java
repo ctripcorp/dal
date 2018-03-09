@@ -14,7 +14,6 @@ import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.annotation.Shard;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 
 public class BaseTransactionAnnoClass {
@@ -99,21 +98,21 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
 
-    public String perform(@Shard String id) {
+    public String perform(String id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(shardDb, DalTransactionManager.getLogicDbName());
         assertEquals(id, DalTransactionManager.getCurrentShardId());
         return DONE;
     }
 
-    public String perform(@Shard Integer id) {
+    public String perform(Integer id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(shardDb, DalTransactionManager.getLogicDbName());
         assertEquals(id.toString(), DalTransactionManager.getCurrentShardId());
         return DONE;
     }
 
-    public String perform(@Shard int id) {
+    public String perform(int id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(String.valueOf(id), DalTransactionManager.getCurrentShardId());
         testQuery(shardDb);
@@ -134,7 +133,7 @@ public class BaseTransactionAnnoClass {
         throw new RuntimeException();
     }
     
-    public String performWitShard(@Shard String id, DalHints hints) {
+    public String performWitShard(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         if(id != null)
             assertEquals(id, DalTransactionManager.getCurrentShardId());
@@ -144,7 +143,7 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
     
-    public String performWitShardNest(@Shard String id, DalHints hints) {
+    public String performWitShardNest(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         if(id != null)
             assertEquals(id, DalTransactionManager.getCurrentShardId());
@@ -154,7 +153,7 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
     
-    public String performWitShardNestConflict(@Shard String id, DalHints hints) {
+    public String performWitShardNestConflict(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(id, DalTransactionManager.getCurrentShardId());
         performWitShard(id+id, hints);
@@ -162,7 +161,7 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
     
-    public String performWitShardNestFail(@Shard String id, DalHints hints) {
+    public String performWitShardNestFail(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         if(id != null)
             assertEquals(id, DalTransactionManager.getCurrentShardId());
@@ -172,7 +171,7 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
     
-    public String performCommandWitShardNest(final @Shard String id, DalHints hints) throws SQLException {
+    public String performCommandWitShardNest(final String id, DalHints hints) throws SQLException {
         DalClientFactory.getClient(shardDb).execute(new DalCommand() {
             
             @Override
@@ -189,7 +188,7 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
     
-    public String performCommandWitShardNestFail(final @Shard String id, DalHints hints) throws SQLException {
+    public String performCommandWitShardNestFail(final String id, DalHints hints) throws SQLException {
         DalClientFactory.getClient(shardDb).execute(new DalCommand() {
             
             @Override
@@ -207,7 +206,7 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
     
-    public String performDetectDistributedTransaction(final @Shard String id, DalHints hints) throws SQLException {
+    public String performDetectDistributedTransaction(final String id, DalHints hints) throws SQLException {
         DalClientFactory.getClient(shardDb).execute(new DalCommand() {
             
             @Override

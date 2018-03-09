@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Deprecated 
 public @interface Transactional {
     /**
      * @return logic database name defined in dal.config/xml

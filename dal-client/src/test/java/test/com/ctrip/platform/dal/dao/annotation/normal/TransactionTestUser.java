@@ -5,4 +5,6 @@ public interface TransactionTestUser {
     String perform();
 
     String performNest();
+    
+    BaseTransactionAnnoClass getTransactionAnnoTest();
 }

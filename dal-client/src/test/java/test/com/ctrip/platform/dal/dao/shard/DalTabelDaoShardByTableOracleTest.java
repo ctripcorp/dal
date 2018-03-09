@@ -61,6 +61,7 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 	public final static String CREATE_TABLE_SQL_TPL = "CREATE TABLE DAL_CLIENT_TEST_%d"
 			   			+ "(ID NUMBER(5) NOT NULL ENABLE, " 
 						+ "QUANTITY NUMBER(5)," 
+			            + "dbIndex NUMBER(10),"
 						+ "tableIndex NUMBER(10),"
 						+ "TYPE NUMBER(2),"
 						+ "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
@@ -124,8 +125,8 @@ public class DalTabelDaoShardByTableOracleTest extends BaseDalTabelDaoShardByTab
 			for(int j = 0; j < i + 1; j ++) {
 				int id = j + 1;
 				int quantity = 10 + j;
-				insertSqls[j+2] = "INSERT INTO " + TABLE_NAME + "_"+ i  + "(quantity,tableIndex,type,address)"
-						+ " VALUES(" + quantity + ", " + i + ",1, 'SH INFO')";
+				insertSqls[j+2] = "INSERT INTO " + TABLE_NAME + "_"+ i  + "(quantity, dbIndex, tableIndex, type, address)"
+						+ " VALUES(" + quantity + ", 1, " + i + ",1 , 'SH INFO')";
 			}
 			clientMySql.batchUpdate(insertSqls, hints);
 		}

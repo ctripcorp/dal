@@ -36,6 +36,19 @@ public interface ResultMerger<T> {
 		}
 	}
 
+    static class LongNumberSummary implements ResultMerger<Number>{
+        private long total;
+        @Override
+        public void addPartial(String shard, Number partial) {
+            total += partial.longValue();
+        }
+
+        @Override
+        public Long merge() {
+            return total;
+        }
+    }
+
 	static class DoubleSummary implements ResultMerger<Double>{
 		private double total;
 		@Override

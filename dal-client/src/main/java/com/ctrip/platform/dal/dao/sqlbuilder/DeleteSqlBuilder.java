@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class DeleteSqlBuilder extends AbstractSqlBuilder {
+public class DeleteSqlBuilder extends AbstractTableSqlBuilder {
 	private static final String DELETE_TPL = "DELETE FROM %s WHERE %s";
 
 	private String whereClause;

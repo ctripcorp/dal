@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -171,6 +170,22 @@ public abstract class ConnectionAction<T> {
 		log(result, e);	
 		handleException(e);
 	}
+
+    public void beginExecute() {
+        entry.beginExecute();
+    }
+    
+    public void endExectue() {
+        entry.endExectue();
+    }
+    
+    public void beginConnect() {
+        entry.beginConnect();
+    }
+    
+    public void endConnect() {
+        entry.endConnect();
+    }
 
 	private void log(Object result, Throwable e) {
 		try {

@@ -172,7 +172,7 @@ public class DalConnectionManager {
 			MarkdownManager.detect(action.connHolder, action.start, e);
 			action.error(e);
 		} finally {
-			DalWatcher.endExectue();
+		    action.endExectue();
 			action.populateDbMeta();
 			action.cleanup();
 		}

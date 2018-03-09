@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import com.ctrip.platform.dal.dao.annotation.Shard;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -47,10 +48,8 @@ public class DalTransactionInterceptor implements MethodInterceptor {
         }
         
         final AtomicReference<Object> result = new AtomicReference<>();
-        Transactional tran = method.getAnnotation(Transactional.class);
         
-        
-        DalClientFactory.getClient(tran.logicDbName()).execute(new DalCommand() {
+        DalClientFactory.getClient(getLogicDbName(method)).execute(new DalCommand() {
             
             @Override
             public boolean execute(DalClient client) throws SQLException {
@@ -63,5 +62,13 @@ public class DalTransactionInterceptor implements MethodInterceptor {
             }
         }, hints);
         return result.get();
+    }
+    
+    private String getLogicDbName(Method method) {
+        DalTransactional tran = method.getAnnotation(DalTransactional.class);
+        if(tran != null)
+            return tran.logicDbName();
+
+        return method.getAnnotation(Transactional.class).logicDbName();
     }
 }

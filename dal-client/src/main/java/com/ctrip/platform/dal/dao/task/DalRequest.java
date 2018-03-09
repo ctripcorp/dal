@@ -46,4 +46,9 @@ public interface DalRequest<T> {
 	 * @return result merge in cross shard case
 	 */
     ResultMerger<T> getMerger();
+    
+    /**
+     * Doing some cleaning up here
+     */
+    void endExecution() throws SQLException;
 }

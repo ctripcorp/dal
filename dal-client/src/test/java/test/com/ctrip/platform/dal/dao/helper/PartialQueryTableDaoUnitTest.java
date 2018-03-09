@@ -42,7 +42,7 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 public class PartialQueryTableDaoUnitTest {
 
 	private static DalTableDao<Person> dao = null;
-	
+
 	private final static String DATABASE_NAME_MYSQL = "MySqlSimpleShard";
     private final static String TABLE_NAME = "person";
     private final static int mod = 2;
@@ -100,7 +100,7 @@ public class PartialQueryTableDaoUnitTest {
             clientMySql.batchUpdate(sqls, hints.inShard(i));
         }
     }
-
+   
 	@Before
 	public void setUp() throws Exception {
 		tearDown();

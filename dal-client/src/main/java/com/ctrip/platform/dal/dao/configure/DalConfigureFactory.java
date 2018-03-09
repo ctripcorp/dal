@@ -15,13 +15,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.DalSafeLogger;
 import com.ctrip.platform.dal.dao.client.DefaultLogger;
 import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
@@ -167,27 +167,36 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
+        checkAttribte(databaseSetNode, NAME, PROVIDER, SHARD_STRATEGY, SHARDING_STRATEGY);
+        String shardingStrategy = "";
+        
+        if(hasAttribute(databaseSetNode, SHARD_STRATEGY))
+            shardingStrategy = getAttribute(databaseSetNode, SHARD_STRATEGY);
+        else if(hasAttribute(databaseSetNode, SHARDING_STRATEGY))
+                shardingStrategy = getAttribute(databaseSetNode, SHARDING_STRATEGY);
+        
+        shardingStrategy = shardingStrategy.trim();
+        
         List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
         Map<String, DataBase> databases = new HashMap<>();
         for (int i = 0; i < databaseList.size(); i++) {
-            DataBase database = readDataBase(databaseList.get(i));
+            DataBase database = readDataBase(databaseList.get(i), !shardingStrategy.isEmpty());
             databases.put(database.getName(), database);
         }
 
-        if (hasAttribute(databaseSetNode, SHARD_STRATEGY))
-            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    getAttribute(databaseSetNode, SHARD_STRATEGY), databases);
-        else if (hasAttribute(databaseSetNode, SHARDING_STRATEGY))
-            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    getAttribute(databaseSetNode, SHARDING_STRATEGY), databases);
-        else
+        if (shardingStrategy.isEmpty())
             return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
                     databases);
+        else
+            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
+                    shardingStrategy, databases);
     }
 
-    private DataBase readDataBase(Node dataBaseNode) {
+    private DataBase readDataBase(Node dataBaseNode, boolean isSharded) {
+        checkAttribte(dataBaseNode, NAME, DATABASE_TYPE, SHARDING, CONNECTION_STRING);
+        String sharding = isSharded ? getAttribute(dataBaseNode, SHARDING) : "";
         return new DataBase(getAttribute(dataBaseNode, NAME), getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
-                getAttribute(dataBaseNode, SHARDING), getAttribute(dataBaseNode, CONNECTION_STRING));
+                sharding, getAttribute(dataBaseNode, CONNECTION_STRING));
     }
 
     private List<Node> getChildNodes(Node node, String name) {
@@ -217,4 +226,22 @@ public class DalConfigureFactory implements DalConfigConstants {
         return dalconfigUrl;
     }
 
+    private void checkAttribte(Node node, String... validNames) {
+        NamedNodeMap map = node.getAttributes();
+        if(map == null)
+            return;
+        
+        for(int i = 0 ; i <map.getLength(); i++) {
+            String name = map.item(i).getNodeName();
+            boolean found = false;
+            for(String candidate: validNames)
+                if(name.equals(candidate)){
+                    found = true;
+                    break;
+                }
+            
+            if(!found)
+                throw new IllegalStateException("");
+        }
+    }
 }

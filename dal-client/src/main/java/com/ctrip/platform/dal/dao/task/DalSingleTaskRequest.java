@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao.task;
 
+import static com.ctrip.platform.dal.dao.KeyHolder.mergePartial;
+import static com.ctrip.platform.dal.dao.KeyHolder.prepareLocalHints;
+import static com.ctrip.platform.dal.dao.KeyHolder.setGeneratedKeyBack;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
 
 import java.sql.SQLException;
@@ -10,7 +13,6 @@ import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.ResultMerger;
-import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -98,6 +100,11 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		return null;
 	}
 
+    @Override
+    public void endExecution() throws SQLException {
+        setGeneratedKeyBack(task, hints, rawPojos);            
+    }
+    
 	private static class SingleTaskCallable<T> implements Callable<int[]> {
 		private DalHints hints;
 		private List<Map<String, ?>> daoPojos;
@@ -114,15 +121,20 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		@Override
 		public int[] call() throws Exception {
 			int[] counts = new int[daoPojos.size()];
-			DalHints localHints = hints.clone();// To avoid shard id being polluted by each pojos
 			for (int i = 0; i < daoPojos.size(); i++) {
-				DalWatcher.begin();// TODO check if we needed
+			    Throwable error = null;
+			    DalHints localHints = prepareLocalHints(task, hints);
+			    
 				try {
 					counts[i] = task.execute(localHints, daoPojos.get(i), rawPojos.get(i));
-				} catch (SQLException e) {
-					hints.handleError("Error when execute single pojo operation", e);
+				} catch (Throwable e) {
+				    error = e;
 				}
+				
+				mergePartial(task, hints.getKeyHolder(), localHints.getKeyHolder(), error);
+                hints.handleError("Error when execute single pojo operation", error);
 			}
+
 			return counts;	
 		}
 	}

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.util.Set;
-
 import com.ctrip.platform.dal.dao.configure.DalComponent;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;

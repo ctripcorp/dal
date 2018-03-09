@@ -335,6 +335,9 @@ public class DalHints {
 	}
 
 	public void handleError(String msg, Throwable e) throws SQLException {
+	    if(e == null)
+	        return;
+	    
 		// Just make sure error is not swallowed by us
 		DalClientFactory.getDalLogger().error(msg, e);
 
@@ -366,6 +369,11 @@ public class DalHints {
 		set(DalHintEnum.enableIdentityInsert);
 		return this;
 	}
+	
+    public DalHints setIdentityBack() {
+        set(DalHintEnum.setIdentityBack);
+        return this;
+    }
 
 	public boolean isIdentityInsertDisabled() {
 		return !is(DalHintEnum.enableIdentityInsert);

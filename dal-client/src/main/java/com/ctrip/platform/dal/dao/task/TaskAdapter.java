@@ -163,7 +163,7 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			return rawTableName;
 		
 		hints.cleanUp();
-		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, fields));
+		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, rawTableName, hints, parameters, fields));
 	}
 	
 	/**

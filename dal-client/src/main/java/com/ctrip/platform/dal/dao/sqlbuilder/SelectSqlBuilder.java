@@ -1,16 +1,62 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
 import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
+import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.CustomizableMapper;
+import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
+import com.ctrip.platform.dal.dao.helper.DalListMerger;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
+import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
+import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 
-public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectBuilder {
-	private BaseTableSelectBuilder queryBuilder;
-	
+public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectBuilder {
+    private static final String ALL = "*";
+    private static final String ALL_COLUMNS = "***";
+    private static final String COUNT = "COUNT(1)";
+    private static final String SPACE = " ";
+    private static final String ORDER_BY = "ORDER BY ";
+    private static final String ASC = " ASC";
+    private static final String DESC = " DESC";
+    private static final String ORDER_BY_SEPARATOR = ", ";
+    private static final String QUERY_ALL_CRITERIA = "1=1";
+    
+    private String[] selectedColumns;
+    private String customized;
+    
+    private StatementParameters parameters;
+    private String whereClause;
+    
+    private Map<String, Boolean> orderBys = new LinkedHashMap<>();
+
+    @SuppressWarnings("rawtypes")
+    private DalRowMapper mapper;
+    
+    @SuppressWarnings("rawtypes")
+    private ResultMerger merger;
+    
+    @SuppressWarnings("rawtypes")
+    private DalResultSetExtractor extractor;
+    
+    private boolean requireFirst = false;
+    private boolean requireSingle = false;
+    private boolean nullable = false;
+
+    private int count;
+    private int start;
+    
 	private boolean isPagination = false;
 	
 	/**
@@ -33,19 +79,33 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	}
 	
 	public SelectSqlBuilder() {
-		queryBuilder = new BaseTableSelectBuilder();
-		queryBuilder.nullable();
+		selectAll();
+		nullable();
 	}
+	
+    /**
+     * Which means user provide parameters and where clause
+     * 
+     * @param parameters
+     * @return
+     */
+	public SelectSqlBuilder with(StatementParameters parameters) {
+        this.parameters = parameters;
+        return this;
+    }
+    
+    @Override
+    public StatementParameters buildParameters() {
+        return  parameters == null ? super.buildParameters() : parameters;
+    }
 
 	public SelectSqlBuilder from(String tableName) throws SQLException {
 		super.from(tableName);
-		queryBuilder.from(tableName);
 		return this;
 	}
 	
 	public SelectSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
 		super.setDatabaseCategory(dbCategory);
-		queryBuilder.setDatabaseCategory(dbCategory);
 		return this;
 	}
 
@@ -55,20 +115,45 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	 * @return
 	 */
 	public SelectSqlBuilder select(String ...fieldName){
-		queryBuilder.select(fieldName);
+        selectedColumns = fieldName;
+        customized = null;
 		return this;
 	}
 	
 	public SelectSqlBuilder selectAll() {
-		queryBuilder.selectAll();
+        this.customized = ALL;
+        selectedColumns = null;
 		return this;
 	}
 	
+    public SelectSqlBuilder selectAllColumns() {
+        this.customized = ALL_COLUMNS;
+        selectedColumns = null;
+        return this;
+    }
+    
 	public SelectSqlBuilder selectCount() {
-		queryBuilder.selectCount();
+        this.customized = COUNT;
+        selectedColumns = null;
+        mergerWith(new ResultMerger.LongNumberSummary());
+        requireSingle();
+        simpleType();
+
 		return this;
 	}
-	
+	   
+    /**
+     * Set where clause directly
+     * 
+     * @param whereClause
+     * @return
+     */
+	public SelectSqlBuilder where(String whereClause) {
+        whereClause = whereClause.trim();
+        this.whereClause = whereClause.length() == 0 ? QUERY_ALL_CRITERIA : whereClause;
+        return this;
+    }
+    
 	/**
 	 * 追加order by字段
 	 * @param fieldName 字段名
@@ -76,10 +161,15 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	 * @return
 	 */
 	public SelectSqlBuilder orderBy(String fieldName, boolean ascending){
-		queryBuilder.orderBy(fieldName, ascending);
+        orderBys.put(fieldName, ascending);
 		return this;
 	}
-	
+
+    public SelectSqlBuilder top(int count) {
+        this.count = count;
+        return this;
+    }   
+
 	/**
 	 * Construct with pagenation
 	 * @param pageNo
@@ -88,83 +178,129 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	 */
 	public SelectSqlBuilder atPage(int pageNo, int pageSize)
 			throws SQLException {
-		queryBuilder.atPage(pageNo, pageSize);
-		return this;
+        if(pageNo < 1 || pageSize < 1) 
+            throw new SQLException("Illigal pagesize or pageNo, please check"); 
+
+        range((pageNo - 1) * pageSize, pageSize);
+
+        return this;
 	}
 
 	@Override
 	public SelectSqlBuilder range(int start, int count) {
-		queryBuilder.range(start, count);
+        this.start = start;
+        this.count = count;
 		return this;
 	}
 	
 	public SelectSqlBuilder requireFirst() {
-		queryBuilder.requireFirst();
+        requireFirst = true;
 		return this;
 	}
 	
 	public SelectSqlBuilder requireSingle() {
-		queryBuilder.requireSingle();
+        requireSingle = true;
 		return this;
 	}
 	
 	public SelectSqlBuilder nullable() {
-		queryBuilder.nullable();
+        nullable = true;
 		return this;
 	}
 	
 	public boolean isRequireFirst () {
-		return queryBuilder.isRequireFirst();
+        return requireFirst;
 	}
 
 	public boolean isRequireSingle() {
-		return queryBuilder.isRequireSingle();
+		return requireSingle;
 	}
 
 	public boolean isNullable() {
-		return queryBuilder.isNullable();
+        return nullable;
 	}
 
 	@Override
 	public <T> SelectSqlBuilder mergerWith(ResultMerger<T> merger) {
-		queryBuilder.mergerWith(merger);
+        this.merger = merger;
 		return this;
 	}
 
 	@Override
 	public <T> SelectSqlBuilder extractorWith(DalResultSetExtractor<T> extractor) {
-		queryBuilder.extractorWith(extractor);
+        this.extractor = extractor;
 		return this;
 	}
 
-	@Override
+	@SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
 	public <T> ResultMerger<T> getResultMerger(DalHints hints) {
-		return queryBuilder.getResultMerger(hints);
+        if(hints.is(DalHintEnum.resultMerger))
+            return (ResultMerger<T>)hints.get(DalHintEnum.resultMerger);
+        
+        if(merger != null)
+            return merger;
+        
+        if(isRequireSingle() || isRequireFirst())
+            return isRequireSingle() ? new DalSingleResultMerger() : new DalFirstResultMerger((Comparator)hints.getSorter());
+
+        return count > 0 ? new DalRangedResultMerger((Comparator)hints.getSorter(), count): new DalListMerger((Comparator)hints.getSorter());
 	}
 
 	@Override
 	public <T> SelectSqlBuilder mapWith(DalRowMapper<T> mapper) {
-		queryBuilder.mapWith(mapper);
+        this.mapper = mapper;
 		return this;
 	}
 	
-	@Override
+	@SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
 	public <T> SelectBuilder mapWith(Class<T> type) {
-		queryBuilder.mapWith(type);
-		return this;
+        return mapWith(new DalObjectRowMapper(type));
 	}
 	
-	public SelectSqlBuilder simpleType() {
-		queryBuilder.simpleType();
-		return this;
+	@SuppressWarnings({"unchecked", "rawtypes"})
+    public SelectSqlBuilder simpleType() {
+        return mapWith(new DalObjectRowMapper());
 	}
 	
+    @SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public <T> DalResultSetExtractor<T> getResultExtractor(DalHints hints) throws SQLException {
-		return queryBuilder.getResultExtractor(hints);
+        if(extractor != null)
+            return extractor;
+        
+        DalRowMapper<T> mapper  = checkAllowPartial(hints);
+        if(isRequireSingle() || isRequireFirst())
+            return new DalSingleResultExtractor<>(mapper, isRequireSingle());
+            
+        return count > 0 ? new DalRowMapperExtractor(mapper, count): new DalRowMapperExtractor(mapper);
 	}
 	
-	/**
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private <T> DalRowMapper<T> checkAllowPartial(DalHints hints) throws SQLException {
+        if(!(mapper instanceof CustomizableMapper))
+            return mapper;
+        
+        // If it is COUNT case, we do nothing here
+        if(customized == COUNT)
+            return mapper;
+        
+        if(customized == ALL)
+            return mapper;
+        
+        if(customized == ALL_COLUMNS) {
+            return mapper;
+        }
+        
+        if(hints.is(DalHintEnum.partialQuery))
+            return mapper;
+        
+        // Use what user selected and customize mapper
+        return ((CustomizableMapper)mapper).mapWith(selectedColumns);
+    }
+
+    /**
 	 * This method has to be backward compatible. The old generator will generated like
 	 *      String sql = builder.build();
 	 *      
@@ -185,8 +321,8 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	public String build(){
 		preBuild();
 
-		String sql = queryBuilder.build();
-		String suffix = queryBuilder.getDbCategory().getPageSuffixTpl();
+		String sql = internalBuild(getTableName());
+		String suffix = getDbCategory().getPageSuffixTpl();
 	
 		// If it is the old code gen case, we need to append page suffix
 		return isPagination ? sql + suffix : sql;
@@ -198,7 +334,7 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	 * @return
 	 */
 	public String buildFirst(){
-		queryBuilder.requireFirst();
+        requireFirst = true;
 		return build();
 	}
 	
@@ -207,10 +343,103 @@ public class SelectSqlBuilder extends AbstractSqlBuilder implements TableSelectB
 	 */
 	public String build(String shardStr) {
 		preBuild();
-		return queryBuilder.build(shardStr);
+		return internalBuild(getTableName() + shardStr);
 	}
 	
 	private void preBuild() {
-		queryBuilder.where(getWhereExp());
+	    /**
+	     * If the template is already set
+	     */
+	    if(whereClause == null)
+	        where(getWhereExp());
 	}
+	
+    private String internalBuild(String effectiveTableName) {
+        effectiveTableName = wrapField(effectiveTableName);
+        
+        if(requireFirst)
+            return buildFirst(effectiveTableName);
+        
+        if(start == 0 && count > 0)
+            return buildTop(effectiveTableName);
+        
+        if(start > 0 && count > 0)
+            return buildPage(effectiveTableName);
+        
+        return buildList(effectiveTableName);
+    }
+
+    private String getCompleteWhereExp() {
+        return orderBys.size() == 0 ? whereClause : whereClause + SPACE + buildOrderbyExp();
+    }
+    
+    private String buildOrderbyExp(){
+        StringBuilder orderbyExp = new StringBuilder();
+
+        orderbyExp.append(ORDER_BY);
+        boolean first = true;
+        for(String orderBy: orderBys.keySet()) {
+            if(first)
+                first = false;
+            else
+                orderbyExp.append(ORDER_BY_SEPARATOR);
+
+            orderbyExp.append(wrapField(orderBy));
+            orderbyExp.append(orderBys.get(orderBy) ? ASC: DESC);
+        }
+
+        return orderbyExp.toString();
+    }
+
+    /**
+     * 对字段进行包裹，数据库是MySQL则用 `进行包裹，数据库是SqlServer则用[]进行包裹
+     * @param fieldName
+     * @return
+     */
+    public String wrapField(String fieldName){
+        return AbstractTableSqlBuilder.wrapField(getDbCategory(), fieldName);
+    }
+    
+    private String buildFirst(String effectiveTableName){
+        count = 1;
+        return buildTop(effectiveTableName);
+    }
+    
+    private String buildTop(String effectiveTableName){
+        return getDbCategory().buildTop(effectiveTableName, buildColumns(), getCompleteWhereExp(), count);
+    }
+
+    private String buildPage(String effectiveTableName){
+        return getDbCategory().buildPage(effectiveTableName, buildColumns(), getCompleteWhereExp(), start, count);
+    }
+    
+    private String buildList(String effectiveTableName){
+        return getDbCategory().buildList(effectiveTableName, buildColumns(), getCompleteWhereExp());
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private String buildColumns() {
+        if(customized == ALL_COLUMNS) {
+            selectedColumns = ((DalParser)mapper).getColumnNames();
+            customized = null;
+        }
+        
+        if(customized != null)
+            return customized;
+        
+        if(selectedColumns != null) {
+            StringBuilder fieldBuf = new StringBuilder();
+            for(int i=0, count= selectedColumns.length; i < count; i++){
+                fieldBuf.append(this.wrapField(selectedColumns[i]));
+                if(i<count-1){
+                    fieldBuf.append(", ");
+                }
+            }
+            
+            return fieldBuf.toString();
+        }
+        
+        // This will be an exceptional case
+        return SPACE;
+    }
 }

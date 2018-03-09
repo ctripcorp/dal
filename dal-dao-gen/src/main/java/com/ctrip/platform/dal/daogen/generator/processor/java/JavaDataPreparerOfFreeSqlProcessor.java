@@ -76,7 +76,6 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     host.setPackageName(namespace);
                     host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
                     host.setLength(currentTasks.get(0).getLength());
-                    host.setProjectName(ctx.getProjectName());
 
                     List<JavaMethodHost> methods = new ArrayList<>();
                     for (GenTaskByFreeSql task : currentTasks) {

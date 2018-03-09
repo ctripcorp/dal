@@ -561,7 +561,7 @@ public class DbUtils {
                 } catch (NumberFormatException ex) {
                     index++;
                 }
-                if (type == UNIQUE_IDENTIFIER_TYPE) {
+                if (type == 10001) {
                     preparedStatement.setObject(index, mockATest(type), Types.BINARY);
                 } else {
                     preparedStatement.setObject(index, mockATest(type), type);

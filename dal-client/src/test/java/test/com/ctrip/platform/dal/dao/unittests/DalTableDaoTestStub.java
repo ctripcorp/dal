@@ -1,5 +1,7 @@
 package test.com.ctrip.platform.dal.dao.unittests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -14,8 +16,10 @@ import test.com.ctrip.platform.dal.dao.unitbase.ClientTestModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 
 public class DalTableDaoTestStub extends BaseTestStub {
@@ -222,6 +226,30 @@ public class DalTableDaoTestStub extends BaseTestStub {
     }
     
     @Test
+    public void testQueryListAllColumns() throws SQLException{
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAllColumns();
+        
+        builder.equal("type", 1, Types.SMALLINT);
+        
+        List<ClientTestModel> models = dao.query(builder, new DalHints());
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(3, models.size());
+        
+        
+        builder = new SelectSqlBuilder().selectAllColumns();
+        builder.equal("type", 1, Types.SMALLINT);
+        models = dao.query(builder.atPage(1, 1), new DalHints());
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(1, models.size());
+        
+        builder = new SelectSqlBuilder().selectAllColumns();
+        builder.equal("type", 10, Types.SMALLINT);
+        models = dao.query(builder.atPage(1, 10), new DalHints());
+        Assert.assertTrue(null != models);
+        Assert.assertEquals(0, models.size());        
+    }
+    
+    @Test
     public void testQueryObjectList() throws SQLException{
         SelectSqlBuilder builder = new SelectSqlBuilder();
         builder.equal("type", 1, Types.SMALLINT);
@@ -261,6 +289,27 @@ public class DalTableDaoTestStub extends BaseTestStub {
         builder.equal("type", 10, Types.SMALLINT);
         builder.requireFirst();
         models = dao.queryObject(builder.atPage(1, 10), new DalHints(), Short.class);
+        Assert.assertNull(models);
+    }
+    
+    @Test
+    public void testQueryObjectAllColumns() throws SQLException{
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAllColumns();
+        builder.equal("type", 1, Types.SMALLINT);
+        builder.requireFirst();
+        ClientTestModel models = dao.queryObject(builder, new DalHints());
+        Assert.assertNotNull(models);
+        
+        builder = new SelectSqlBuilder().selectAllColumns();
+        builder.equal("type", 1, Types.SMALLINT);
+        builder.requireFirst();
+        models = dao.queryObject(builder.atPage(1, 1), new DalHints());
+        Assert.assertNotNull(models);
+        
+        builder = new SelectSqlBuilder().selectAllColumns();
+        builder.equal("type", 10, Types.SMALLINT);
+        builder.requireFirst();
+        models = dao.queryObject(builder.atPage(1, 10), new DalHints());
         Assert.assertNull(models);
     }
     
@@ -348,6 +397,37 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		assertEquals(new int[]{1,0,1}, res, 4+2);
 	}
 	
+    @Test
+    public void testInsertMultipleAsListWithContinueOnErrorHintsWithKeholder() throws SQLException{
+        if(!diff.supportGetGeneratedKeys)
+            return;
+        
+        DalTableDao<ClientTestModelJpa> dao = new DalTableDao(new DalDefaultJpaParser<>(ClientTestModelJpa.class, dbName));
+        List<ClientTestModelJpa> entities = new ArrayList<ClientTestModelJpa>();
+        for (int i = 0; i < 3; i++) {
+            ClientTestModelJpa model = new ClientTestModelJpa();
+            model.setQuantity(10 + 1%3);
+            model.setType(((Number)(1%3)).shortValue());
+            if(i==1){
+                model.setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+                        + "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+                        + "CTRIPCTRIPCTRIPCTRIP");
+            }
+            else{
+                model.setAddress("CTRIP");
+            }
+            entities.add(model);
+        }
+        
+        DalHints hints = new DalHints(DalHintEnum.continueOnError).setKeyHolder(new KeyHolder()).setIdentityBack();
+        int[] res = dao.insert(hints, entities);
+        assertEquals(new int[]{1,0,1}, res, 4+2);
+        for(ClientTestModelJpa model: entities) {
+            if(model.getId()!=null)
+                Assert.assertEquals(dao.queryByPk(model, new DalHints()).getAddress(), model.getAddress());    
+        }        
+    }
+    
 	/**
 	 * Test Insert multiple entities with key-holder
 	 * @throws SQLException
@@ -372,6 +452,37 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		}
 	}
 	
+    /**
+     * Test Insert multiple entities with key-holder
+     * @throws SQLException
+     */
+    @Test
+    public void testInsertMultipleAsListWithKeyInsertBack() throws SQLException{
+        if(!diff.supportGetGeneratedKeys)
+            return;
+        
+        DalTableDao<ClientTestModelJpa> dao = new DalTableDao(new DalDefaultJpaParser<>(ClientTestModelJpa.class, dbName));
+        
+        List<ClientTestModelJpa> entities = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            ClientTestModelJpa model = new ClientTestModelJpa();
+            model.setQuantity(10 + 1%3);
+            model.setType(((Number)(1%3)).shortValue());
+            model.setAddress("CTRIP");
+            entities.add(model);
+        }
+        KeyHolder holder = new KeyHolder();
+        int[] res = dao.insert(new DalHints().setIdentityBack(), holder, entities);
+        assertEquals(new int[]{1, 1, 1}, res, 4+3);
+        Assert.assertEquals(3, holder.size());
+        Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));
+        
+        int i = 0;
+        for(ClientTestModelJpa pojo: entities)
+            Assert.assertEquals(holder.getKey(i++).intValue(), pojo.getId().intValue());
+
+    }
+    
 	@Test
 	public void testCombinedInsertCheckForData() throws SQLException{
 		int res;
@@ -418,6 +529,37 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		}
 	}
 	
+    /**
+     * Test Insert multiple entities with one SQL Statement
+     * @throws SQLException
+     */
+    @Test
+    public void testCombinedInsertWithKeyInsertBack() throws SQLException{
+        if(!diff.supportInsertValues || !diff.supportGetGeneratedKeys)
+            return;
+        
+        DalTableDao<ClientTestModelJpa> dao = new DalTableDao(new DalDefaultJpaParser<>(ClientTestModelJpa.class, dbName));
+        
+        List<ClientTestModelJpa> entities = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            ClientTestModelJpa model = new ClientTestModelJpa();
+            model.setQuantity(10 + 1%3);
+            model.setType(((Number)(1%3)).shortValue());
+            model.setAddress("CTRIP");
+            entities.add(model);
+        }
+        KeyHolder holder = diff.supportGetGeneratedKeys ? new KeyHolder() : null;
+        DalHints hints = new DalHints();
+        int res = dao.combinedInsert(hints.setIdentityBack(), holder, entities);
+        assertEquals(3, res, 4+3);
+        Assert.assertEquals(3, holder.size());
+        Assert.assertTrue(holder.getKeyList().get(0).containsKey("GENERATED_KEY"));
+
+        int i = 0;
+        for(ClientTestModelJpa pojo: entities)
+            Assert.assertEquals(holder.getKey(i++).intValue(), pojo.getId().intValue());
+    }
+    
 	@Test
 	public void testBatchInsertCheckForData() throws SQLException{
 		int[] res;

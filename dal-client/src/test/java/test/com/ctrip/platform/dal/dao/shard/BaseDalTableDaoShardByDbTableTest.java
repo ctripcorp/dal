@@ -1,18 +1,20 @@
 package test.com.ctrip.platform.dal.dao.shard;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static test.com.ctrip.platform.dal.dao.unittests.DalTestHelper.deleteAllShardsByDbTable;
 import static test.com.ctrip.platform.dal.dao.unittests.DalTestHelper.getCountByDbTable;
-import static org.junit.Assert.*;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,11 +29,11 @@ import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.AbstractDalParser;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
 public abstract class BaseDalTableDaoShardByDbTableTest {
+    private boolean INSERT_PK_BACK_ALLOWED = false;
 	public final static String TABLE_NAME = "dal_client_test";
 	public final static int mod = 2;
 	public final static int tableMod = 4;
@@ -46,6 +48,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
 			dao = new DalTableDao<ClientTestModel>(clientTestParser);
 			ASSERT_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;
+            INSERT_PK_BACK_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;;
 		} catch (Exception e) {
 			
 		}
@@ -1530,6 +1533,85 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		}
 	}
 
+    public void testMultipleHints(MultipleHintsTester tester) throws SQLException{
+        List<List<Map.Entry<DalHintEnum, Object>>> testHints = new ArrayList<>();
+                
+        for(Map<DalHintEnum, Object> hints: tester.getTestableHints()) {
+            List<Map.Entry<DalHintEnum, Object>> ll = new ArrayList<>();
+            for(Map.Entry<DalHintEnum, Object> e: hints.entrySet())
+                ll.add(e);
+            testHints.add(ll);
+        }
+
+        int[] curPos = new int[testHints.size()]; 
+        
+        // Append first one as null
+        for(List<Map.Entry<DalHintEnum, Object>> testHint: testHints)
+            testHint.add(0, null);
+        
+        while(curPos[0] < testHints.get(0).size()) {
+            DalHints hints = new DalHints();
+            
+            for (int i = 0; i < curPos.length; i++) {
+                Map.Entry<DalHintEnum, Object> testHint = testHints.get(i).get(curPos[i]);
+
+                if(testHint != null)
+                    hints.set(testHint.getKey(), testHint.getValue());
+            }
+            
+            // test callback
+            tester.test(hints);
+            
+            // refresh position
+            curPos[curPos.length - 1]++;
+            for(int j = curPos.length - 1; j>0; j--){
+                if(curPos[j] == testHints.get(j).size()) {
+                    curPos[j] = 0;
+                    curPos[j-1]++;
+                }
+            }
+        }
+    }
+    
+    private interface MultipleHintsTester {
+        List<Map<DalHintEnum, Object>> getTestableHints();
+        void test(DalHints hints) throws SQLException;
+    }
+
+    //TODO refine test
+    public void testInsertMultiple() throws SQLException{
+        testMultipleHints(new MultipleHintsTester(){
+            @Override
+            public List<Map<DalHintEnum, Object>> getTestableHints() {
+                List<Map<DalHintEnum, Object>> allHints = new ArrayList<>();
+                Map<DalHintEnum, Object> hints = new HashMap<>();
+                //Make first normal case
+                hints.put(DalHintEnum.userDefined1, null);
+                hints.put(DalHintEnum.asyncExecution, null);
+                hints.put(DalHintEnum.resultCallback, new IntCallback());
+                
+                allHints.add(hints);
+                
+                hints = new HashMap<>();
+                for(int i = 0; i < mod; i++) {
+                    hints.put(DalHintEnum.shard, i);
+                    hints.put(DalHintEnum.shardValue, i);
+                    Map<String, Object> shardColValues = new HashMap<String, Object>();
+                    shardColValues.put("dbIndex", i);
+                    hints.put(DalHintEnum.shardValue, shardColValues);
+                }
+                allHints.add(hints);
+                
+                return allHints;
+            }
+
+            @Override
+            public void test(DalHints hints) throws SQLException {
+                reset();
+                hints.continueOnError();
+            }
+        });
+    }
 	@Test
 	public void testInsertMultipleAsListWithContinueOnErrorHints() throws SQLException{
 		testInsertMultipleAsListWithContinueOnErrorHints(new DalHints());
@@ -1673,6 +1755,19 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			res = assertIntArray(res, hints);
 			assertResEquals(2, res);
 			Assert.assertEquals((i + 1) + j++ * 2, getCount(shardId, i));
+			
+			if(INSERT_PK_BACK_ALLOWED) {
+	            hints = copy(oldhints).setKeyHolder(new KeyHolder()).setIdentityBack();
+	            IdentitySetBackHelper.clearId(entities);
+	            entities.get(1).setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+	                    + "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+	                    + "CTRIPCTRIPCTRIPCTRIP");
+	            res = dao.insert(hints.continueOnError(), entities);
+	            res = assertIntArray(res, hints);
+	            assertResEquals(2, res);
+	            Assert.assertEquals((i + 1) + j++ * 2, getCount(shardId, i));
+	            IdentitySetBackHelper.assertIdentityWithError(dao, copy(oldhints), entities);
+			}
 		}
 		
 		deleteAllShards(shardId);
@@ -1693,6 +1788,66 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		Assert.assertEquals(1, getCount(shardId, 0));
 		Assert.assertEquals(0, getCount(shardId, 1));
 		Assert.assertEquals(1, getCount(shardId, 2));
+		
+		if(INSERT_PK_BACK_ALLOWED) {
+		    IdentitySetBackHelper.clearId(entities);
+	        entities.get(0).setTableIndex(0);
+	        entities.get(0).setDbIndex(0);
+
+	        entities.get(1).setTableIndex(1);
+	        entities.get(1).setDbIndex(1);
+	        entities.get(1).setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+	                + "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+	                + "CTRIPCTRIPCTRIPCTRIP");
+	        
+	        entities.get(2).setTableIndex(2);
+	        entities.get(2).setDbIndex(2);
+	        hints = copy(oldhints).setKeyHolder(new KeyHolder()).setIdentityBack();
+	        res = dao.insert(hints.continueOnError(), entities);
+	        res = assertIntArray(res, hints);
+	        assertResEquals(2, res);
+	        Assert.assertEquals(1+1, getCount(shardId, 0));
+	        Assert.assertEquals(0, getCount(shardId, 1));
+	        Assert.assertEquals(1+1, getCount(shardId, 2));
+	        IdentitySetBackHelper.assertIdentityWithError(dao, entities, shardId);
+		}
+	}
+	
+	@Test
+    public void testKeyHolderWithSetIdentityBack() throws SQLException{
+       if(!INSERT_PK_BACK_ALLOWED) return;
+       
+       int shardId = 0;
+       deleteAllShards(shardId);
+       DalHints hints = new DalHints().inShard(shardId);
+
+       List<ClientTestModel> entities = createListNoId(3);
+       entities.get(1).setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+               + "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+               + "CTRIPCTRIPCTRIPCTRIP");
+       
+       int[] res;
+
+       IdentitySetBackHelper.clearId(entities);
+       entities.get(0).setTableIndex(0);
+       entities.get(0).setDbIndex(0);
+
+       entities.get(1).setTableIndex(1);
+       entities.get(1).setDbIndex(1);
+       entities.get(1).setAddress("CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+               + "CTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIPCTRIP"
+               + "CTRIPCTRIPCTRIPCTRIP");
+       
+       entities.get(2).setTableIndex(2);
+       entities.get(2).setDbIndex(2);
+       hints = hints.setKeyHolder(new KeyHolder()).setIdentityBack();
+       res = dao.insert(hints.continueOnError(), entities);
+       res = assertIntArray(res, hints);
+       assertResEquals(2, res);
+       Assert.assertEquals(1, getCount(shardId, 0));
+       Assert.assertEquals(0, getCount(shardId, 1));
+       Assert.assertEquals(1, getCount(shardId, 2));
+       IdentitySetBackHelper.assertIdentityWithError(dao, entities);
 	}
 	
 	/**
@@ -1772,6 +1927,13 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		testInsertMultipleAsListWithKeyHolderByFields(new DalHints());
 		testInsertMultipleAsListWithKeyHolderByFields(asyncHints());
 		testInsertMultipleAsListWithKeyHolderByFields(intHints());
+		
+		if(!INSERT_PK_BACK_ALLOWED)
+		    return;
+
+		testInsertMultipleAsListWithKeyHolderByFieldsSetPkBack(new DalHints());
+		testInsertMultipleAsListWithKeyHolderByFieldsSetPkBack(asyncHints());
+		testInsertMultipleAsListWithKeyHolderByFieldsSetPkBack(intHints());
 	}
 
 	private void testInsertMultipleAsListWithKeyHolderByFields(DalHints hints) throws SQLException{
@@ -1803,6 +1965,37 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		assertKeyHolder(holder);
 	}
 
+    private void testInsertMultipleAsListWithKeyHolderByFieldsSetPkBack(DalHints hints) throws SQLException{
+        reset();
+        List<ClientTestModel> entities = createListNoId(3);
+        int[] res;
+        KeyHolder holder = createKeyHolder();
+
+        deleteAllShardsByDbTable(dao, mod, tableMod);
+        
+        // By fields not same shard
+        holder = createKeyHolder();
+        entities.get(0).setTableIndex(0);
+        entities.get(0).setDbIndex(0);
+
+        entities.get(1).setTableIndex(1);
+        entities.get(1).setDbIndex(1);
+        
+        entities.get(2).setTableIndex(2);
+        entities.get(2).setDbIndex(2);
+        
+        hints = copy(hints);
+        IdentitySetBackHelper.clearId(entities);
+        res = dao.insert(hints.setIdentityBack(), holder, entities);
+        res = assertIntArray(res, hints);
+        assertResEquals(3, res);
+        Assert.assertEquals(1, getCount(0, 0));
+        Assert.assertEquals(1, getCount(1, 1));
+        Assert.assertEquals(1, getCount(0, 2));
+        assertKeyHolder(holder);
+        IdentitySetBackHelper.assertIdentity(dao, hints, entities);
+    }
+
 	/**
 	 * Test Insert multiple entities with key-holder
 	 * @throws SQLException
@@ -1831,6 +2024,18 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			assertResEquals(3, res);
 			Assert.assertEquals((i + 1) + j++ * 3, getCount(shardId, i));
 			assertKeyHolder(holder);
+			
+			if(INSERT_PK_BACK_ALLOWED) {
+    			// check ID set back
+                holder = createKeyHolder();
+                IdentitySetBackHelper.clearId(entities);
+                hints = copy(oldhints);
+                res = dao.insert(hints.inTableShard(i).setIdentityBack(), holder, entities);
+                res = assertIntArray(res, hints);
+                assertResEquals(3, res);
+                Assert.assertEquals((i + 1) + j++ * 3, getCount(shardId, i));
+                IdentitySetBackHelper.assertIdentity(dao, copy(oldhints).inTableShard(i), entities);
+			}
 
 			// By tableShardValue
 			holder = createKeyHolder();
@@ -1887,6 +2092,25 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		Assert.assertEquals(1, getCount(shardId, 2));
 		assertResEquals(3, res);
 		assertKeyHolder(holder);
+        deleteAllShards(shardId);
+        
+        // Check set ID back
+        if(INSERT_PK_BACK_ALLOWED) {
+            holder = createKeyHolder();
+            entities.get(0).setTableIndex(0);
+            entities.get(1).setTableIndex(1);
+            entities.get(2).setTableIndex(2);
+            IdentitySetBackHelper.clearId(entities);
+            hints = copy(oldhints);
+            res = dao.insert(hints.setIdentityBack(), holder, entities);
+            res = assertIntArray(res, hints);
+            Assert.assertEquals(1, getCount(shardId, 0));
+            Assert.assertEquals(1, getCount(shardId, 1));
+            Assert.assertEquals(1, getCount(shardId, 2));
+            assertResEquals(3, res);
+            assertKeyHolder(holder);
+            IdentitySetBackHelper.assertIdentity(dao, copy(oldhints), entities);
+        }
 	}
 	
 	/**
@@ -1997,6 +2221,19 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 			assertResEquals(3, res);
 			Assert.assertEquals((i + 1) + j++ * 3, getCount(shardId, i));
 			assertKeyHolder(holder);
+			
+            //Check set ID back
+			if(INSERT_PK_BACK_ALLOWED){
+    			holder = createKeyHolder();
+                hints = copy(oldhints);
+                IdentitySetBackHelper.clearId(entities);
+                res = dao.combinedInsert(hints.inTableShard(i).setIdentityBack(), holder, entities);
+                res = assertInt(res, hints);
+                assertResEquals(3, res);
+                Assert.assertEquals((i + 1) + j++ * 3, getCount(shardId, i));
+                assertKeyHolder(holder);
+                IdentitySetBackHelper.assertIdentity(dao, copy(oldhints).inTableShard(i), entities);
+			}
 			
 			// By tableShardValue
 			holder = createKeyHolder();
@@ -3124,6 +3361,13 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		testCrossShardCombinedInsert(new DalHints());
 		testCrossShardCombinedInsert(asyncHints());
 		testCrossShardCombinedInsert(intHints());
+		
+		if(!INSERT_PK_BACK_ALLOWED)
+		    return;
+
+		testCrossShardCombinedInsertSetPkBack(new DalHints());
+		testCrossShardCombinedInsertSetPkBack(asyncHints());
+		testCrossShardCombinedInsertSetPkBack(intHints());
 	}
 	
 	private void testCrossShardCombinedInsert(DalHints oldhints) throws SQLException{
@@ -3165,6 +3409,46 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
 		}
 	}
 
+    private void testCrossShardCombinedInsertSetPkBack(DalHints oldhints) throws SQLException{
+        try {
+            deleteAllShardsByDbTable(dao, mod, tableMod);
+            
+            ClientTestModel[] pList = new ClientTestModel[mod * (1 + tableMod)*tableMod/2];
+            int x = 0;
+            for(int i = 0; i < mod; i++) {
+                for(int j = 0; j < tableMod; j++) {
+                    for(int k = 0; k < j + 1; k ++) {
+                        ClientTestModel p = new ClientTestModel();
+                    
+                        p = new ClientTestModel();
+                        p.setId(1 + k);
+                        p.setAddress("aaa");
+                        p.setDbIndex(i);
+                        p.setTableIndex(j);
+                        
+                        pList[x++] = p;
+                    }
+                }
+            }
+            
+            KeyHolder keyHolder = createKeyHolder();
+            DalHints hints = copy(oldhints);
+            IdentitySetBackHelper.clearId(Arrays.asList(pList));
+            int res = dao.combinedInsert(hints.setIdentityBack(), keyHolder, Arrays.asList(pList));
+            assertInt(res, hints);
+            assertKeyHolderCrossShard(keyHolder);
+            for(int i = 0; i < mod; i++) {
+                for(int j = 0; j < tableMod; j++) {
+                    Assert.assertEquals(j + 1, getCount(i, j));
+                }
+            }
+            IdentitySetBackHelper.assertIdentity(dao, copy(oldhints), Arrays.asList(pList));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
 	public void assertKeyHolderCrossShard(KeyHolder holder) throws SQLException {
 		if(!ASSERT_ALLOWED)
 			return;
@@ -3205,8 +3489,7 @@ Shard 1
 			ClientTestModel[] pList = new ClientTestModel[mod * (1 + tableMod)*tableMod/2];
 			int x = 0;
 			for(int i = 0; i < mod; i++) {
-				for(int j = 0; j < tableMod; j++) {
-					for(int k = 0; k < j + 1; k ++) {
+				for(int j = 0; j < tableMod; j++) {					for(int k = 0; k < j + 1; k ++) {
 						ClientTestModel p = new ClientTestModel();
 					
 						p = new ClientTestModel();
@@ -3281,133 +3564,6 @@ Shard 1
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
-		}
-	}
-
-	static private class ClientTestDalParser extends AbstractDalParser<ClientTestModel>{
-		private String databaseName;
-		private static final String tableName= "dal_client_test";
-		private static final String[] columnNames = new String[]{
-			"id","quantity","dbIndex","tableIndex","type","address","last_changed"
-		};
-		private static final String[] primaryKeyNames = new String[]{"id"};
-		private static final int[] columnTypes = new int[]{
-			Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.VARCHAR, Types.TIMESTAMP
-		};
-		
-		public ClientTestDalParser(String databaseName) {
-			super(databaseName, tableName, columnNames, primaryKeyNames, columnTypes);
-		}
-		
-		@Override
-		public ClientTestModel map(ResultSet rs, int rowNum)
-				throws SQLException {
-			ClientTestModel model = new ClientTestModel();
-			model.setId(rs.getInt(1));
-			model.setQuantity(rs.getInt(2));
-			model.setDbIndex(rs.getInt(3));
-			model.setTableIndex(rs.getInt(4));
-			model.setType(rs.getShort(5));
-			model.setAddress(rs.getString(6));
-			model.setLastChanged(rs.getTimestamp(7));
-			return model;
-		}
-
-		@Override
-		public boolean isAutoIncrement() {
-			return true;
-		}
-
-		@Override
-		public Number getIdentityValue(ClientTestModel pojo) {
-			return pojo.getId();
-		}
-
-		@Override
-		public Map<String, ?> getPrimaryKeys(ClientTestModel pojo) {
-			Map<String, Object> keys = new LinkedHashMap<String, Object>();
-			keys.put("id", pojo.getId());
-			return keys;
-		}
-
-		@Override
-		public Map<String, ?> getFields(ClientTestModel pojo) {
-			Map<String, Object> map = new LinkedHashMap<String, Object>();
-			map.put("id", pojo.getId());
-			map.put("quantity", pojo.getQuantity());
-			map.put("dbIndex", pojo.getDbIndex());
-			map.put("tableIndex", pojo.getTableIndex());
-			map.put("type", pojo.getType());
-			map.put("address", pojo.getAddress());
-			map.put("last_changed", pojo.getLastChanged());
-			return map;
-		}
-		
-	}
-	
-	private static class ClientTestModel {
-		private Integer id;
-		private Integer quantity;
-		private Integer dbIndex;
-		private Integer tableIndex;
-		private Short type;
-		private String address;
-		private Timestamp lastChanged;
-
-		public Integer getId() {
-			return id;
-		}
-
-		public void setId(Integer id) {
-			this.id = id;
-		}
-
-		public Integer getQuantity() {
-			return quantity;
-		}
-
-		public void setQuantity(Integer quantity) {
-			this.quantity = quantity;
-		}
-
-		public Integer getDbIndex() {
-			return dbIndex;
-		}
-
-		public void setDbIndex(Integer dbIndex) {
-			this.dbIndex = dbIndex;
-		}
-
-		public Integer getTableIndex() {
-			return tableIndex;
-		}
-
-		public void setTableIndex(Integer tableIndex) {
-			this.tableIndex = tableIndex;
-		}
-		
-		public Short getType() {
-			return type;
-		}
-
-		public void setType(short type) {
-			this.type = type;
-		}
-
-		public String getAddress() {
-			return address;
-		}
-
-		public void setAddress(String address) {
-			this.address = address;
-		}
-
-		public Timestamp getLastChanged() {
-			return lastChanged;
-		}
-
-		public void setLastChanged(Timestamp lastChanged) {
-			this.lastChanged = lastChanged;
 		}
 	}
 }

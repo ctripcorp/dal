@@ -139,5 +139,4 @@ public class FreeSqlHost {
     public void setProjectName(String projectName) {
         this.projectName = projectName;
     }
-
 }

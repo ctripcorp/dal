@@ -7,8 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.dao.task.KeyHolderAwaredTask;
 
-public class SingleInsertSpaTask<T> extends CtripSpaTask<T> {
+public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolderAwaredTask {
 	private static final String INSERT_SPA_TPL = "spA_%s_i";
 
 	private String outputIdName;

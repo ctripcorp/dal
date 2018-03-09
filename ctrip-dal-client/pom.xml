@@ -4,10 +4,10 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.5.6</version>
+        <version>1.6.0</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.13.6</version>
+	<version>1.13.7-SNAPSHOT</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
@@ -26,8 +26,8 @@
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.13.6</version>
-            </dependency>
+				<version>1.13.7-SNAPSHOT</version>
+			</dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

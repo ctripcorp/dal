@@ -12,7 +12,7 @@ import com.ctrip.platform.dal.dao.helper.*;
 
 public class FreePersonDaoDao {
 
-	private static final String DATA_BASE = "MySqlSimpleShard";
+	private static final String DATA_BASE = "MySqlSimpleShardForDB";
 	private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
 	private DalQueryDao queryDao = null;
 

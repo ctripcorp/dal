@@ -65,6 +65,7 @@ public class Metrics {
 	}
 	
 	public static void fail(CtripLogEntry entry, long duration) {
+        report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
 		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), FAIL);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());

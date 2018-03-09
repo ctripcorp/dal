@@ -13,7 +13,8 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
 
 public class TitanServiceReaderTest {
-	
+
+
 	@Test
 	public void testGetFromTitanServiceSuccess() {
 		String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query/";

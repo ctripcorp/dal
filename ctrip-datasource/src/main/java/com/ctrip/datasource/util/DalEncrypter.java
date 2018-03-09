@@ -4,9 +4,11 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
-import org.apache.commons.codec.binary.Base64;
+
+import com.ctrip.platform.dal.dao.helper.DalBase64;
 
 public class DalEncrypter {
 

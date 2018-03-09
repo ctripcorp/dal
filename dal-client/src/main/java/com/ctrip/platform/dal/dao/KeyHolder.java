@@ -38,7 +38,6 @@ public class KeyHolder {
     
 	public KeyHolder() {
 	    logger = DalClientFactory.getDalLogger();
-	    currentPos.set(0);
 	}
 	
 	/**
@@ -46,10 +45,11 @@ public class KeyHolder {
 	 * @param size
 	 */
 	public void initialize(int size) {
+        currentPos.set(0);
 		remainSize.set(size);
 		
 		if(allKeys.size() > 0)
-		    logger.error("Reuse of KeyHolder detected!", new IllegalStateException("Reuse of KeyHolder detected!"));
+		    logger.warn("Reuse of KeyHolder detected!");
 
 		allKeys.clear();
 		

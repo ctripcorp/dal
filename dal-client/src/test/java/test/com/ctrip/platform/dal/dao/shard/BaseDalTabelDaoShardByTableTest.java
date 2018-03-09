@@ -1585,27 +1585,31 @@ public abstract class BaseDalTabelDaoShardByTableTest {
         }
 
 
+        KeyHolder holder = new KeyHolder();
         for(int i = 0; i < mod; i++) {
             int j = 1;
-            KeyHolder holder = new KeyHolder();
             IdentitySetBackHelper.clearId(entities);
             dao.insert(new DalHints().inTableShard(i).setIdentityBack(), holder, entities);
+            assertEquals(3, holder.size());
             IdentitySetBackHelper.assertIdentityTableShard(dao, entities, i);
         }
         
         deleteAllShards();
         
         // By fields not same shard
-        KeyHolder holder = new KeyHolder();
+//        holder = new KeyHolder();
         entities.get(0).setTableIndex(0);
         entities.get(1).setTableIndex(1);
         entities.get(2).setTableIndex(2);
         IdentitySetBackHelper.clearId(entities);
         dao.insert(new DalHints().setIdentityBack(), holder, entities);
+        assertEquals(3, holder.size());
         assertEquals(1, getCount(0));
         assertEquals(1, getCount(1));
         assertEquals(1, getCount(2));
         IdentitySetBackHelper.assertIdentity(dao, entities);
+        dao.insert(new DalHints().setIdentityBack(), holder, entities);
+        assertEquals(3, holder.size());
     }
     
 	@Test

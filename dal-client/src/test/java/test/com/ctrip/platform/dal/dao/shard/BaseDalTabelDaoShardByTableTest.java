@@ -1151,6 +1151,28 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 			model.setTableIndex(i);
 			res = dao.insert(new DalHints(), model);
 			assertEquals((i + 1) + j++ * 1, getCount(i));
+			
+	        if(!INSERT_PK_BACK_ALLOWED)
+	            continue;
+
+	        // Test insert with keyholder or keyholder is null
+	        KeyHolder holder = new KeyHolder();
+	        res = dao.insert(new DalHints().inTableShard(i).setIdentityBack(), holder, model);
+            assertEquals((i + 1) + j++ * 1, getCount(i));
+            assertNotNull(holder.getKey());
+            assertNotNull(model.getId());
+            assertEquals(holder.getKey().intValue(), model.getId().intValue());
+            
+            // Test insert without keyholder or keyholder is null
+            holder = null;
+            res = dao.insert(new DalHints().inTableShard(i).setIdentityBack(), holder, model);
+            assertEquals((i + 1) + j++ * 1, getCount(i));
+            assertNotNull(model.getId());
+            
+            // Test insert without keyholder
+            res = dao.insert(new DalHints().inTableShard(i).setIdentityBack(), model);
+            assertEquals((i + 1) + j++ * 1, getCount(i));
+            assertNotNull(model.getId());
 		}
 	}
 	
@@ -1593,9 +1615,29 @@ public abstract class BaseDalTabelDaoShardByTableTest {
             assertEquals(3, holder.size());
             IdentitySetBackHelper.assertIdentityTableShard(dao, entities, i);
         }
+        deleteAllShards();
+        
+        // Test without keyholder 1
+        for(int i = 0; i < mod; i++) {
+            int j = 1;
+            IdentitySetBackHelper.clearId(entities);
+            dao.insert(new DalHints().inTableShard(i).setIdentityBack(), null, entities);
+            assertEquals(3, holder.size());
+            IdentitySetBackHelper.assertIdentityTableShard(dao, entities, i);
+        }
         
         deleteAllShards();
         
+        // Test without keyholder 2
+        for(int i = 0; i < mod; i++) {
+            int j = 1;
+            IdentitySetBackHelper.clearId(entities);
+            dao.insert(new DalHints().inTableShard(i).setIdentityBack(), entities);
+            assertEquals(3, holder.size());
+            IdentitySetBackHelper.assertIdentityTableShard(dao, entities, i);
+        }
+        
+        deleteAllShards();
         // By fields not same shard
 //        holder = new KeyHolder();
         entities.get(0).setTableIndex(0);
@@ -1835,6 +1877,26 @@ public abstract class BaseDalTabelDaoShardByTableTest {
                 assertEquals(dao.queryByPk(model, new DalHints().inTableShard(i)).getAddress(), model.getAddress());    
             }            
         }
+
+        // Test holder reuse case
+        KeyHolder holder = new KeyHolder();
+        for(int i = 0; i < mod; i++) {
+            dao.combinedInsert(new DalHints().inTableShard(i).setIdentityBack(), holder, Arrays.asList(entities));
+            
+            for(ClientTestModel model: entities) {
+                assertEquals(dao.queryByPk(model, new DalHints().inTableShard(i)).getAddress(), model.getAddress());    
+            }            
+        }
+
+        // Test with out kh
+        for(int i = 0; i < mod; i++) {
+            dao.combinedInsert(new DalHints().inTableShard(i).setIdentityBack(), Arrays.asList(entities));
+            
+            for(ClientTestModel model: entities) {
+                assertEquals(dao.queryByPk(model, new DalHints().inTableShard(i)).getAddress(), model.getAddress());    
+            }            
+        }
+
     }
 
     @Test

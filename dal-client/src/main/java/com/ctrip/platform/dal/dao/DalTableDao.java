@@ -586,8 +586,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 	
 	private DalHints setSize(DalHints hints, KeyHolder keyHolder, List<T> pojos) {
-	    if(hints.is(DalHintEnum.setIdentityBack))
-	        keyHolder = keyHolder == null ? new KeyHolder() : keyHolder;
+	    keyHolder = vaidateKeyHolder(hints, keyHolder);
 
         if(keyHolder != null && pojos != null)
 			keyHolder.initialize(pojos.size());
@@ -596,12 +595,17 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 	}
 
 	private DalHints setSize(DalHints hints, KeyHolder keyHolder, T pojo) {
-        if(hints.is(DalHintEnum.setIdentityBack))
-            keyHolder = keyHolder == null ? new KeyHolder() : keyHolder;
+        keyHolder = vaidateKeyHolder(hints, keyHolder);
 
 		if(keyHolder != null && pojo != null)
 			keyHolder.initialize(1);
 		
 		return hints.setKeyHolder(keyHolder);
 	}
+	
+    private KeyHolder vaidateKeyHolder(DalHints hints, KeyHolder keyHolder) {
+        if(hints.is(DalHintEnum.setIdentityBack))
+            keyHolder = keyHolder == null ? new KeyHolder() : keyHolder;
+        return keyHolder;
+    }
 }

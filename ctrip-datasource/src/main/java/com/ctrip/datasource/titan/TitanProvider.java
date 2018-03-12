@@ -18,7 +18,6 @@ import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -55,6 +54,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfig;
 import com.ctrip.platform.dal.dao.configure.DatabasePoolConfigParser;
+import com.ctrip.platform.dal.dao.helper.DalBase64;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
@@ -484,7 +484,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
         if (dataSource == null || dataSource.length() == 0) {
             return "";
         }
-        byte[] sources = Base64.decodeBase64(dataSource);
+        byte[] sources = DalBase64.decodeBase64(dataSource);
         int dataLen = sources.length;
         int keyLen = (int) sources[0];
         int len = dataLen - keyLen - 1;

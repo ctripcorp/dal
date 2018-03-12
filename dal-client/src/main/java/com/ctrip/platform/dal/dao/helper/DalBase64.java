@@ -50,6 +50,10 @@ public class DalBase64 extends Base64 {
     public static byte[] decodeBase64(final byte[] base64Data) {
         return new DalBase64().decode(base64Data);
     }
+    
+    public static byte[] decodeBase64(final String base64String) {
+        return new DalBase64().decode(base64String);
+    }
 
     @Override
     protected int getDefaultBufferSize() {

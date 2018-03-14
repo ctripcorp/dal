@@ -51,6 +51,23 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		Assert.assertEquals(10, model.getQuantity().intValue());
 	}
 	
+    /**
+     * Query by Entity with Primary key
+     * @throws SQLException
+     */
+    @Test
+    public void testQueryByPkWithEntityByColumnNames() throws SQLException{
+        ClientTestModel pk = new ClientTestModel();
+        pk.setId(1);
+        ClientTestModel model = dao.queryByPk(pk, new DalHints().selectByNames());
+        Assert.assertTrue(null != model);
+        Assert.assertEquals(10, model.getQuantity().intValue());
+        
+        model = dao.queryByPk(pk, new DalHints(DalHintEnum.selectByNames));
+        Assert.assertTrue(null != model);
+        Assert.assertEquals(10, model.getQuantity().intValue());
+    }
+    
 	/**
 	 * Query by Entity without Primary key
 	 * @throws SQLException

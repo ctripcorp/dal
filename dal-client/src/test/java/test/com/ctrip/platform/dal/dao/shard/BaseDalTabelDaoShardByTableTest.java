@@ -25,6 +25,7 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
 
 public abstract class BaseDalTabelDaoShardByTableTest {
@@ -239,6 +240,31 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 		}
 	}
 
+	   /**
+     * Query by Entity with Primary key
+     * @throws SQLException
+     */
+    @Test
+    public void testQueryByColumnNames() throws SQLException{
+        ClientTestModel pk = null;
+        ClientTestModel model = null;
+        
+        for(int i = 0; i < mod; i++) {
+            pk = new ClientTestModel();
+            pk.setId(1);
+
+            // By tabelShard
+            DalTableDao<ClientTestModel> dao = new DalTableDao(ClientTestModel.class, databaseName, "dal_client_test");
+            model = dao.queryByPk(pk, new DalHints().inTableShard(i).selectByNames());
+            assertEquals(1, model.getId().intValue());
+            assertEquals(i, model.getTableIndex().intValue());
+            
+            dao.queryLike(model, new DalHints().inTableShard(i).selectByNames());
+            dao.count("id > 0", new StatementParameters(), new DalHints().inTableShard(i).selectByNames());
+            Long L = dao.queryObject(new SelectSqlBuilder().select("id").requireFirst().where("id > 0"), new DalHints().inTableShard(i).selectByNames(), Long.class);
+        }
+    }
+    
 	/**
 	 * Query by Entity with Primary key
 	 * @throws SQLException

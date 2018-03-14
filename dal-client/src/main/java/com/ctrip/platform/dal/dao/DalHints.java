@@ -453,5 +453,8 @@ public class DalHints {
 	public DalHints allowPartial() {
 	    return set(DalHintEnum.allowPartial);
     }
-
+	
+    public DalHints selectByNames() {
+        return set(DalHintEnum.selectByNames);
+    }
 }

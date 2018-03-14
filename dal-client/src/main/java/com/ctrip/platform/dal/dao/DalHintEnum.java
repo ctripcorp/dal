@@ -253,4 +253,9 @@ public enum DalHintEnum {
      * It request extractor or mapper to be HintsAwareExtractor or HintsAareMapper to do the required work
      */
     allowPartial,
+    
+    /**
+     * when select all columns, use column names instead of *
+     */
+    selectByNames,
 }

@@ -286,8 +286,12 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
         if(customized == COUNT)
             return mapper;
         
-        if(customized == ALL)
-            return mapper;
+        if(customized == ALL) {
+            if(hints.is(DalHintEnum.selectByNames))
+                customized = ALL_COLUMNS;
+            else
+                return mapper;
+        }
         
         if(customized == ALL_COLUMNS) {
             return mapper;

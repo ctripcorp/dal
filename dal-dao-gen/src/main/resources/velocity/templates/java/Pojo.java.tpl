@@ -23,7 +23,7 @@ public class ${host.getPojoClassName()} implements DalPojo {
 #foreach( $field in ${host.getFields()} )
 
 #if($field.getComment() != "")
-    //$field.getComment()
+    // $field.getComment()
 #end
 #if(${field.isPrimary()})
 	@Id

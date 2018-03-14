@@ -198,7 +198,7 @@ public class JavaParameterHost extends AbstractParameterHost {
     }
 
     public String getComment() {
-        return comment == null ? "" : comment;
+        return comment == null ? "" : comment.trim();
     }
 
     public void setComment(String comment) {

@@ -20,6 +20,7 @@ public class FreshnessHelperTest {
     private static final Map<String, Integer> sqlserverFreshnessMap = new HashMap<>();
 
     private static final Map<String, Integer> mysqlFreshnessMap = new HashMap<>();
+    private FreshnessHelper reader = new FreshnessHelper();
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -36,44 +37,44 @@ public class FreshnessHelperTest {
     
     @Test
     public void testSqlServerNoFreshness() throws InterruptedException {
-        assertEquals(FreshnessHelper.INVALID, FreshnessHelper.getSlaveFreshness("SqlServerNoFreshness", "dao_test_sqlsvr"));
+        assertEquals(FreshnessHelper.INVALID, reader.getSlaveFreshness("SqlServerNoFreshness", "dao_test_sqlsvr"));
     }
     
     @Test
     public void testSqlServer() throws InterruptedException {
         for(String slaveName: sqlserverFreshnessMap.keySet()) {
-            Integer value = FreshnessHelper.getSlaveFreshness(SQLSERVER_DATABASE_NAME, slaveName);
+            Integer value = reader.getSlaveFreshness(SQLSERVER_DATABASE_NAME, slaveName);
             assertEquals(sqlserverFreshnessMap.get(slaveName), value);
         }
     }
     
     @Test
     public void testSqlServerShard() throws InterruptedException {
-        assertEquals(3, FreshnessHelper.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SqlSvrShard_0"));
-        assertEquals(5, FreshnessHelper.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SqlSvrShard_1"));
-        assertEquals(7, FreshnessHelper.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SimpleShard_0"));
-        assertEquals(9, FreshnessHelper.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SimpleShard_1"));
+        assertEquals(3, reader.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SqlSvrShard_0"));
+        assertEquals(5, reader.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SqlSvrShard_1"));
+        assertEquals(7, reader.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SimpleShard_0"));
+        assertEquals(9, reader.getSlaveFreshness(SQLSERVER_SHARD_DATABASE_NAME, "SimpleShard_1"));
     }
     
     @Test
     public void testMySqlNoFreshness() throws InterruptedException {
-        assertEquals(FreshnessHelper.INVALID, FreshnessHelper.getSlaveFreshness("MysqlNoFreshness", "dao_test_mysql"));
+        assertEquals(FreshnessHelper.INVALID, reader.getSlaveFreshness("MysqlNoFreshness", "dao_test_mysql"));
     }
     
     @Test
     public void testMySql() {
         for(String slaveName: mysqlFreshnessMap.keySet()) {
-            Integer value = FreshnessHelper.getSlaveFreshness(MYSQL_DATABASE_NAME, slaveName);
+            Integer value = reader.getSlaveFreshness(MYSQL_DATABASE_NAME, slaveName);
             assertEquals(mysqlFreshnessMap.get(slaveName), value);
         }
     }
 
     @Test
     public void testMysqlShard() throws InterruptedException {
-        assertEquals(3, FreshnessHelper.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_0"));
-        assertEquals(5, FreshnessHelper.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_1"));
-        assertEquals(7, FreshnessHelper.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_2"));
-        assertEquals(9, FreshnessHelper.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_3"));
+        assertEquals(3, reader.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_0"));
+        assertEquals(5, reader.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_1"));
+        assertEquals(7, reader.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_2"));
+        assertEquals(9, reader.getSlaveFreshness(MYSQL_SHARD_DATABASE_NAME, "MySqlShard_3"));
     }
     
 }

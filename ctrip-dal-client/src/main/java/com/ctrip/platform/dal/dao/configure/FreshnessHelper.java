@@ -18,7 +18,7 @@ import com.ctrip.platform.dal.sql.logging.DalCatLogger;
  * @author jhhe
  *
  */
-public class FreshnessHelper {
+public class FreshnessHelper implements FreshnessReader {
     public static final int INVALID = -1;
     private static final int READ_TIMEOUT = 3;
 
@@ -31,67 +31,67 @@ public class FreshnessHelper {
     // read the select column MaxDelayTime
     private static final String SQLSVR_LATERNCY_SP = "{ ? = call Spb_ReplDelay}";
     
-    public static int getSlaveFreshness(String logicDbName, String slaveDbName) {
+    public int getSlaveFreshness(String logicDbName, String slaveConnectionString) {
         DatabaseCategory category = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory();
         
         if(category == DatabaseCategory.MySql)
-            return getFromMysqlSlave(logicDbName, slaveDbName);
+            return getFromMysqlSlave(logicDbName, slaveConnectionString);
         
         if(category == DatabaseCategory.SqlServer)
-            return getFromSqlserverSlave(logicDbName, slaveDbName);
+            return getFromSqlserverSlave(logicDbName, slaveConnectionString);
         
         return INVALID;
     }
     
     
-    private static int getFromMysqlSlave(String logicDbName, String slaveDbName) {
+    private int getFromMysqlSlave(String logicDbName, String slaveConnectionString) {
         int freshness = INVALID;
         try {
-            DalHints hints = new DalHints().inDatabase(slaveDbName).slaveOnly().timeout(READ_TIMEOUT);
+            DalHints hints = new DalHints().inDatabase(slaveConnectionString).slaveOnly().timeout(READ_TIMEOUT);
             if(DalShardingHelper.isShardingEnabled(logicDbName))
-                hints.inShard(getShardId(logicDbName, slaveDbName));
+                hints.inShard(getShardId(logicDbName, slaveConnectionString));
             
             StatementParameters parameters = new StatementParameters();
             parameters.setResultsParameter("Freshness", new DalScalarExtractor());
             parameters.setResultsParameter(COUNT);
                         
             DalClientFactory.getClient(logicDbName).call(MYSQL_LATERNCY_SP, parameters, hints.timeout(READ_TIMEOUT));
-            freshness = parseFreshness(slaveDbName, parameters.get("Freshness", null).getValue());
+            freshness = parseFreshness(slaveConnectionString, parameters.get("Freshness", null).getValue());
         } catch (Throwable e) {
-            DalClientFactory.getDalConfigure().getDalLogger().error(String.format("Can not get freshness from slave %s for logic db %s. Error message: %s", logicDbName, slaveDbName, e.getMessage()), e);
+            DalClientFactory.getDalConfigure().getDalLogger().error(String.format("Can not get freshness from slave %s for logic db %s. Error message: %s", logicDbName, slaveConnectionString, e.getMessage()), e);
         }
         return freshness;
     }
     
-    private static int getFromSqlserverSlave(String logicDbName, String slaveDbName) {
+    private int getFromSqlserverSlave(String logicDbName, String slaveConnectionString) {
         int freshness = INVALID;
         try {
-            DalHints hints = new DalHints().inDatabase(slaveDbName).slaveOnly().timeout(READ_TIMEOUT);
+            DalHints hints = new DalHints().inDatabase(slaveConnectionString).slaveOnly().timeout(READ_TIMEOUT);
             if(DalShardingHelper.isShardingEnabled(logicDbName))
-                hints.inShard(getShardId(logicDbName, slaveDbName));
+                hints.inShard(getShardId(logicDbName, slaveConnectionString));
 
             StatementParameters parameters = new StatementParameters();
             parameters.registerOut(1, Types.INTEGER);
             parameters.setResultsParameter(FRESHNESS, new DalScalarExtractor());
             
             DalClientFactory.getClient(logicDbName).call(SQLSVR_LATERNCY_SP, parameters, hints);
-            freshness = parseFreshness(slaveDbName, parameters.get(FRESHNESS, null).getValue());
+            freshness = parseFreshness(slaveConnectionString, parameters.get(FRESHNESS, null).getValue());
         } catch (Throwable e) {
-            DalClientFactory.getDalConfigure().getDalLogger().error(String.format("Can not get freshness from slave %s for logic db %s. Error message: %s", logicDbName, slaveDbName, e.getMessage()), e);
+            DalClientFactory.getDalConfigure().getDalLogger().error(String.format("Can not get freshness from slave %s for logic db %s. Error message: %s", logicDbName, slaveConnectionString, e.getMessage()), e);
         }
         return freshness;
     }
     
-    private static int parseFreshness(String slaveDbName, Object ret) {
+    private int parseFreshness(String slaveConnectionString, Object ret) {
         Integer freshness = ((Number)ret).intValue();
 
-        DalCLogger.log(LogLevel.INFO, String.format("ReadWriteSplitting delay,titan key:%s,delay:%ds", slaveDbName, freshness));
-        DalCatLogger.logEvent(String.format("DAL.ReadWriteSplittingDelay:%s", slaveDbName), freshness.toString());
+        DalCLogger.log(LogLevel.INFO, String.format("ReadWriteSplitting delay,titan key:%s,delay:%ds", slaveConnectionString, freshness));
+        DalCatLogger.logEvent(String.format("DAL.ReadWriteSplittingDelay:%s", slaveConnectionString), freshness.toString());
 
         return freshness;
     }
     
-    private static String getShardId(String logicDbName, String slaveConnectionString) {
+    private String getShardId(String logicDbName, String slaveConnectionString) {
         for(DataBase slave: DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabases().values()) {
             if(slave.getConnectionString().equalsIgnoreCase(slaveConnectionString))
                 return slave.getSharding();

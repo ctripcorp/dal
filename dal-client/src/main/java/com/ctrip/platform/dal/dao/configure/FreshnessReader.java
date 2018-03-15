@@ -4,10 +4,11 @@ public interface FreshnessReader {
     int INVALID = -1;
     
     /**
-     * get freshness for given slave db
+     * get freshness for given slave db.
+     * 
      * @param logicDbName
-     * @param slaveDbName
+     * @param slaveConnectionString
      * @return
      */
-    int getSlaveFreshness(String logicDbName, String slaveDbName);
+    int getSlaveFreshness(String logicDbName, String slaveConnectionString);
 }

@@ -349,7 +349,7 @@ public class Expressions {
                 return;
             
             StatementParameters parameters = getParameters();
-            upperParameter = new StatementParameter(parameters.nextIndex(), sqlType, value).setName(columnName);
+            upperParameter = new StatementParameter(parameters.nextIndex(), sqlType, upperValue).setName(columnName);
             parameters.add(upperParameter);
             upperParameter.when(isValid());            
         }

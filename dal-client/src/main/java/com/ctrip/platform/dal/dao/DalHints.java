@@ -140,6 +140,12 @@ public class DalHints {
 		return this;
 	}
 	
+	/**
+	 * Specify which db to execute the operation
+	 * 
+	 * @param databaseName the connectionString part of the dal.xml/config
+	 * @return
+	 */
 	public DalHints inDatabase(String databaseName) {
 		hints.put(DalHintEnum.designatedDatabase, databaseName);
 		return this;

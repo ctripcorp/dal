@@ -284,7 +284,7 @@ public class Expressions {
 
         public ColumnExpression set(Object value, int sqlType) {
             if(parameter != null)
-                throw new IllegalStateException("An expression can not be set twice!");
+                throw new IllegalStateException("An expression can not be set twice! Name: " + columnName);
             
             this.sqlType = sqlType;
             this.value = value;
@@ -303,7 +303,7 @@ public class Expressions {
         
         public ColumnExpression ignoreNull() {
             if(sqlType == null)
-                throw new IllegalStateException("This operation is only avaliable when set(sqlType, value) is called!");
+                throw new IllegalStateException("This operation is only avaliable when set(sqlType, value) is called! Name: " + columnName);
             
             ignoreNull(value);
             return this;
@@ -337,7 +337,7 @@ public class Expressions {
         
         public BetweenExpression setUpperValue(Object upperValue) {
             if(upperParameter != null)
-                throw new IllegalStateException("An expression can not be set twice!");
+                throw new IllegalStateException("An expression can not be set twice! Name: " + columnName);
 
             this.upperValue = upperValue;
             return this;

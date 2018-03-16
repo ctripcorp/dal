@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
+import static com.ctrip.platform.dal.dao.helper.EntityManager.getMapper;
+
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -21,6 +23,7 @@ import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
+import com.ctrip.platform.dal.dao.helper.EntityManager;
 
 public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectBuilder {
     private static final String ALL = "*";
@@ -256,7 +259,7 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
 	@SuppressWarnings({"unchecked", "rawtypes"})
     @Override
 	public <T> SelectBuilder mapWith(Class<T> type) {
-        return mapWith(new DalObjectRowMapper(type));
+        return mapWith(EntityManager.getMapper(type));
 	}
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})

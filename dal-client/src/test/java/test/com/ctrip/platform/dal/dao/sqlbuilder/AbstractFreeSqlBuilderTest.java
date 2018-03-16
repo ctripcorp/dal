@@ -1225,4 +1225,40 @@ public class AbstractFreeSqlBuilderTest {
         test.append(expression(template), AND).bracket(AND, OR, AND, expression(template)).appendTable(template).append(AND).append(expression(template)).when(Boolean.FALSE == null);
         assertEquals("template AND (template) [template]", test.build());
     }
+    
+    @Test
+    public void testSelectCount() throws SQLException {
+        AbstractFreeSqlBuilder test = new AbstractFreeSqlBuilder();
+        test.append("select count(*) AS abc");
+        String a = test.build();
+    }
+    
+    @Test
+    public void testIgnorNull() throws SQLException {
+        AbstractFreeSqlBuilder test = new AbstractFreeSqlBuilder();
+        test.setLogicDbName(logicDbName);
+        test.append(template);
+        
+        test.setNullable("", null, Types.VARCHAR);
+        test.equal(template, null, Types.VARCHAR).ignoreNull().and();
+        
+        test.notEqual(template, null, Types.VARCHAR).ignoreNull().and();
+        test.greaterThan(template, null, Types.VARCHAR).ignoreNull().and();
+        test.greaterThanEquals(template, null, Types.VARCHAR).ignoreNull().and();
+        test.lessThan(template, null, Types.VARCHAR).ignoreNull().and();
+        test.lessThanEquals(template, null, Types.VARCHAR).ignoreNull().and();
+        test.between(template, null, null, Types.VARCHAR).ignoreNull().and();
+        test.like(template, null, Types.VARCHAR).ignoreNull().and();
+        test.like(template, null, MatchPattern.BEGIN_WITH, Types.VARCHAR).ignoreNull().and();
+        test.notLike(template, null, Types.VARCHAR).ignoreNull().and();
+        test.notLike(template, null, MatchPattern.BEGIN_WITH, Types.VARCHAR).ignoreNull().and();
+        test.in(template, null, Types.VARCHAR).ignoreNull().and();
+        test.in(template, new ArrayList<>(), Types.VARCHAR).ignoreNull().and();
+        test.notIn(template, null, Types.VARCHAR).ignoreNull().and();
+        test.notIn(template, new ArrayList<>(), Types.VARCHAR).ignoreNull().and();
+        
+        assertEquals(template, test.build());
+        assertEquals(0, test.buildParameters().size());
+    }
+
 }

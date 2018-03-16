@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
+import com.ctrip.platform.dal.dao.helper.EntityManager;
 
 /**
  * A very flexible SQL builder that can build complete SQL alone with parameters for query purpose.
@@ -80,9 +81,8 @@ public class FreeSelectSqlBuilder<K> extends AbstractFreeSqlBuilder implements S
 		return this;
 	}
 	
-	@SuppressWarnings({"unchecked", "rawtypes"})
     public <T> FreeSelectSqlBuilder<K> mapWith(Class<T> type) {
-		return mapWith(new DalObjectRowMapper(type));
+		return mapWith(EntityManager.getMapper(type));
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

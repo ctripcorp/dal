@@ -184,13 +184,13 @@ public class AbstractFreeSqlBuilderMeltdownWithSpaceSkipDisabledTest {
                     builder.equal("a");
                     break;
                 case "equalNull":
-                    builder.equal("a").nullable(null);
+                    builder.equal("a").ignoreNull(null);
                     break;
                 case "like":
                     builder.like("a");
                     break;
                 case "likeNull":
-                    builder.like("a").nullable(null);
+                    builder.like("a").ignoreNull(null);
                     break;
                 case "isNull":
                     builder.isNull("a");
@@ -205,16 +205,16 @@ public class AbstractFreeSqlBuilderMeltdownWithSpaceSkipDisabledTest {
                     builder.notIn("a");
                     break;
                 case "inNull":
-                    builder.in("a").nullable(null);
+                    builder.in("a").ignoreNull(null);
                     break;
                 case "notInNull":
-                    builder.notIn("a").nullable(null);
+                    builder.notIn("a").ignoreNull(null);
                     break;
                 case "between":
                     builder.between("a");
                     break;
                 case "betweenNull":
-                    builder.between("a").nullable(null);
+                    builder.between("a").ignoreNull(null);
                     break;
                 case "AND":
                     builder.and();

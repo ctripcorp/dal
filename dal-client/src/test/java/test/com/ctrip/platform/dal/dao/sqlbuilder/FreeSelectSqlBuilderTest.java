@@ -134,11 +134,11 @@ public class FreeSelectSqlBuilderTest {
     @Test
     public void testBuildMeltdownAtEnd() throws SQLException {
         FreeSelectSqlBuilder test = createTest();
-        test.where(text(template), AND, expression(template).nullable(null)).groupBy(template);
+        test.where(text(template), AND, expression(template).ignoreNull(null)).groupBy(template);
         assertEquals("WHERE template GROUP BY [template]", test.build());
         
         test = createTest();
-        test.where(text(template)).and().appendExpression(template).nullable(null).groupBy(template);
+        test.where(text(template)).and().appendExpression(template).ignoreNull(null).groupBy(template);
         assertEquals("WHERE template GROUP BY [template]", test.build());
     }
     
@@ -147,7 +147,7 @@ public class FreeSelectSqlBuilderTest {
         FreeSelectSqlBuilder test = createTest();
 
         test = createTest();
-        test.where(template).nullable(null).and().appendExpression(template).or().appendExpression(template).nullable(null).groupBy(template);
+        test.where(template).ignoreNull(null).and().appendExpression(template).or().appendExpression(template).ignoreNull(null).groupBy(template);
         assertEquals("WHERE template GROUP BY [template]", test.build());
 
     }

@@ -220,7 +220,7 @@ public class Expressions {
             this.template = template;
         }
         
-        public Expression nullable(Object o) {
+        public Expression ignoreNull(Object o) {
             when(o != null);
             return this;
         }
@@ -251,7 +251,7 @@ public class Expressions {
         public ImmutableExpression(String template) {
             super(template);
         }
-        public Expression nullable(Object o) {
+        public Expression ignoreNull(Object o) {
             return this;
         }
         
@@ -301,11 +301,11 @@ public class Expressions {
             parameters.add(parameter);            
         }
         
-        public ColumnExpression nullable() {
+        public ColumnExpression ignoreNull() {
             if(sqlType == null)
                 throw new IllegalStateException("This operation is only avaliable when set(sqlType, value) is called!");
             
-            nullable(value);
+            ignoreNull(value);
             return this;
         }
         
@@ -330,7 +330,7 @@ public class Expressions {
             super("%s BETWEEN ? AND ?", name);
         }
         
-        public ColumnExpression nullable() {
+        public ColumnExpression ignoreNull() {
             when(value != null && upperValue != null);
             return this;
         }
@@ -374,7 +374,7 @@ public class Expressions {
             super("%s IN ( ? )", name);
         }
         
-        public ColumnExpression nullable() {
+        public ColumnExpression ignoreNull() {
             when(!StatementParameter.isNullInParams((List<?>)value));
             return this;
         }

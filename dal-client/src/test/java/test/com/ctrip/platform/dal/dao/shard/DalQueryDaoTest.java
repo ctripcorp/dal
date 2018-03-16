@@ -137,7 +137,7 @@ public abstract class DalQueryDaoTest {
         
         FreeSelectSqlBuilder<List<ClientTestModel>> query = new FreeSelectSqlBuilder<>();
 
-        query.selectAll().from(TABLE_NAME).where(like("address ").nullable(address), AND, equal("id").nullable(id));
+        query.selectAll().from(TABLE_NAME).where(like("address ").ignoreNull(address), AND, equal("id").ignoreNull(id));
 
         
         query.mapWith(ClientTestModel.class);

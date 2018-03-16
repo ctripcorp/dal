@@ -168,7 +168,7 @@ public class AbstractFreeSqlBuilderTest {
         test.setLogicDbName(logicDbName);
         StatementParameters p = new StatementParameters();
         test.with(p);
-        test.select(template).from(template).where(equal(template)).setNullable("abc", null, Types.VARCHAR).nullable(null);
+        test.select(template).from(template).where(equal(template)).setNullable("abc", null, Types.VARCHAR).ignoreNull(null);
         assertEquals("SELECT [template] FROM [template] WITH (NOLOCK) WHERE", test.build());
         StatementParameters parameters = test.buildParameters();
         assertEquals(0, parameters.size());
@@ -491,7 +491,7 @@ public class AbstractFreeSqlBuilderTest {
         
         test = new AbstractFreeSqlBuilder();
         test.setLogicDbName(logicDbName);
-        test.select(template).from(template).where(AbstractFreeSqlBuilder.includeAll()).equal(template).nullable(null);
+        test.select(template).from(template).where(AbstractFreeSqlBuilder.includeAll()).equal(template).ignoreNull(null);
         assertEquals("SELECT [template] FROM [template] WITH (NOLOCK) WHERE 1=1", test.build());
     }
     
@@ -504,7 +504,7 @@ public class AbstractFreeSqlBuilderTest {
         
         test = new AbstractFreeSqlBuilder();
         test.setLogicDbName(logicDbName);
-        test.select(template).from(template).where(AbstractFreeSqlBuilder.excludeAll()).equal(template).nullable(null);
+        test.select(template).from(template).where(AbstractFreeSqlBuilder.excludeAll()).equal(template).ignoreNull(null);
         assertEquals("SELECT [template] FROM [template] WITH (NOLOCK) WHERE 1<>1", test.build());
     }    
     
@@ -655,34 +655,34 @@ public class AbstractFreeSqlBuilderTest {
         AbstractFreeSqlBuilder test = create();
         Expression exp;
         try {
-            test.nullable(null);
+            test.ignoreNull(null);
             fail();
         } catch (Exception e) {
         }
         
         test = create();
         try {
-            test.append(template).nullable(null);
+            test.append(template).ignoreNull(null);
             fail();
         } catch (Exception e) {
         }
 
         test = create();
         try {
-            test.append(template).nullable(new Object());
+            test.append(template).ignoreNull(new Object());
             fail();
         } catch (Exception e) {
         }
 
         test = create();
         exp = new Expression(expression);
-        test.append(template).append(exp).nullable(null);
+        test.append(template).append(exp).ignoreNull(null);
         assertTrue(exp.isInvalid());
         assertEquals(template, test.build());
 
         test = create();
         exp = new Expression(expression);
-        test.append(template).append(exp).nullable(new Object());
+        test.append(template).append(exp).ignoreNull(new Object());
         assertTrue(exp.isValid());
         assertEquals(template + " " + expression, test.build());        
     }
@@ -738,19 +738,19 @@ public class AbstractFreeSqlBuilderTest {
         testExpr(result, 0, provider.createExp());
         testExpr(result, count, provider.createExpWithParameter());
         
-        testExpr(result, 0, provider.createExp().nullable(new Object()));        
-        testExpr(result, count, provider.createExpWithParameter().nullable(new Object()));        
+        testExpr(result, 0, provider.createExp().ignoreNull(new Object()));        
+        testExpr(result, count, provider.createExpWithParameter().ignoreNull(new Object()));        
 
         testExpr(result, 0, provider.createExp().when(true));
         testExpr(result, count, provider.createExpWithParameter().when(true));
         
         testNullError(provider.createExp());
-        testNull(provider.createExpWithNullParameter().nullable());
-        testExpr(result, count, provider.createExpWithParameter().nullable());
+        testNull(provider.createExpWithNullParameter().ignoreNull());
+        testExpr(result, count, provider.createExpWithParameter().ignoreNull());
         
         
-        testNull(provider.createExp().nullable(null));
-        testNull(provider.createExpWithParameter().nullable(null));
+        testNull(provider.createExp().ignoreNull(null));
+        testNull(provider.createExpWithParameter().ignoreNull(null));
         
         testNull(provider.createExp().when(false));
         testNull(provider.createExpWithParameter().when(false));
@@ -782,7 +782,7 @@ public class AbstractFreeSqlBuilderTest {
     
     private void testNullError(AbstractFreeSqlBuilder builder) {
         try {
-            builder.nullable();
+            builder.ignoreNull();
             fail();
         } catch (Throwable e) {
         }
@@ -1176,17 +1176,17 @@ public class AbstractFreeSqlBuilderTest {
         
         test = new AbstractFreeSqlBuilder();
         test.setLogicDbName(logicDbName);
-        test.append(expression(template)).nullable(null).append(AND).bracket(AND, OR, AND).appendTable(template);
+        test.append(expression(template)).ignoreNull(null).append(AND).bracket(AND, OR, AND).appendTable(template);
         assertEquals(wrappedTemplate, test.build());
         
         test = new AbstractFreeSqlBuilder();
         test.setLogicDbName(logicDbName);
-        test.append(expression(template), AND).bracket(AND, OR, AND).appendTable(template).append(AND).append(expression(template)).nullable(null);
+        test.append(expression(template), AND).bracket(AND, OR, AND).appendTable(template).append(AND).append(expression(template)).ignoreNull(null);
         assertEquals(template+ " " + wrappedTemplate, test.build());
         
         test = new AbstractFreeSqlBuilder();
         test.setLogicDbName(logicDbName);
-        test.append(expression(template), AND).bracket(AND, OR, AND, expression(template)).appendTable(template).append(AND).append(expression(template)).nullable(null);
+        test.append(expression(template), AND).bracket(AND, OR, AND, expression(template)).appendTable(template).append(AND).append(expression(template)).ignoreNull(null);
         assertEquals("template AND (template) [template]", test.build());
     }
 

@@ -632,29 +632,29 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     }
     
     /**
-     * Mark last expression as valid expression if given value is not null.
+     * Ignore last expression if given value is null.
      * 
      * @param value
      * @return
      */
-    public AbstractFreeSqlBuilder nullable(Object value) {
-        getLastExpression().nullable(value);
+    public AbstractFreeSqlBuilder ignoreNull(Object value) {
+        getLastExpression().ignoreNull(value);
         return this;
     }
     
     /**
-     * Mark last ColumnExpression as valid expression if expression's value is not null.
+     * Ignore last expression if iy's value is null.
      * 
      * @param value
      * @return
      */
-    public AbstractFreeSqlBuilder nullable() {
+    public AbstractFreeSqlBuilder ignoreNull() {
         Expression last = getLastExpression();
 
         if(!(last instanceof ColumnExpression))
             throw new IllegalStateException("The last sql segement is not an ColumnExpression.");
         
-        ((ColumnExpression)last).nullable();
+        ((ColumnExpression)last).ignoreNull();
         return this;    
     }
 

@@ -93,6 +93,10 @@
             <artifactId>qconfig-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>qunar.common</groupId>
+            <artifactId>common-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.3.2</version>

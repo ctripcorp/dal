@@ -4,33 +4,94 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.5.6</version>
+        <version>1.6.0</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.14.6</version>
+    <version>1.14.7-SNAPSHOT</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>2.5.0</framework-bom.version>
+        <ctrip-datasource.version>1.14.7-SNAPSHOT</ctrip-datasource.version>
+        <vi.version>0.11.5</vi.version>
+        <framework-foundation.version>1.8.2</framework-foundation.version>
+        <clogging-agent.version>4.2.9</clogging-agent.version>
+        <cat-client.version>2.17.0</cat-client.version>
+        <qconfig-client.version>1.5.4</qconfig-client.version>
+        <qunar.common.version>9.2.4</qunar.common.version>
+        <qtracer.version>1.3.9</qtracer.version>
     </properties>
     <dependencyManagement>
         <dependencies>
-            <!-- framework -->
-            <dependency>
-                <groupId>com.ctrip.framework</groupId>
-                <artifactId>framework-bom</artifactId>
-                <version>${framework-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.14.6</version>
+                <version>${ctrip-datasource.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework</groupId>
+                <artifactId>vi</artifactId>
+                <version>${vi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework</groupId>
+                <artifactId>framework-foundation</artifactId>
+                <version>${framework-foundation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.clogging</groupId>
+                <artifactId>clogging-agent</artifactId>
+                <version>${clogging-agent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dianping.cat</groupId>
+                <artifactId>cat-client</artifactId>
+                <version>${cat-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.tc.qconfig</groupId>
+                <artifactId>qconfig-client</artifactId>
+                <version>${qconfig-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-core</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-api</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-lang</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-concurrent</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.tc.qtracer</groupId>
+                <artifactId>qtracer-instrument-asm</artifactId>
+                <version>${qtracer.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>com.ctrip.platform</groupId>
+            <artifactId>ctrip-datasource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework</groupId>
+            <artifactId>vi</artifactId>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.ctrip.framework</groupId>-->
+        <!--<artifactId>framework-foundation</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -41,21 +102,9 @@
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.ctrip.framework</groupId>
-            <artifactId>vi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.framework</groupId>
-            <artifactId>framework-foundation</artifactId>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.platform</groupId>
-            <artifactId>ctrip-datasource</artifactId>
         </dependency>
     </dependencies>
     <distributionManagement>

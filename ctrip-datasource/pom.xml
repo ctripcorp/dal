@@ -4,14 +4,19 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.5.6</version>
+        <version>1.6.0</version>
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>1.14.6</version>
+    <version>1.14.7-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <framework-bom.version>2.5.0</framework-bom.version>
+        <dal-client.version>1.14.7-SNAPSHOT</dal-client.version>
+        <framework-foundation.version>1.8.2</framework-foundation.version>
+        <clogging-agent.version>4.2.9</clogging-agent.version>
+        <cat-client.version>2.17.0</cat-client.version>
+        <qconfig-client.version>1.5.4</qconfig-client.version>
+        <qunar.common.version>9.2.4</qunar.common.version>
         <!-- Support Spring 3.1.1+ -->
         <spring.version>3.1.1.RELEASE</spring.version>
         <!-- Support mybatis 3.0.1+ -->
@@ -19,18 +24,50 @@
     </properties>
     <dependencyManagement>
         <dependencies>
-            <!-- framework -->
-            <dependency>
-                <groupId>com.ctrip.framework</groupId>
-                <artifactId>framework-bom</artifactId>
-                <version>${framework-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dal-client</artifactId>
-                <version>1.14.6</version>
+                <version>${dal-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework</groupId>
+                <artifactId>framework-foundation</artifactId>
+                <version>${framework-foundation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.clogging</groupId>
+                <artifactId>clogging-agent</artifactId>
+                <version>${clogging-agent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dianping.cat</groupId>
+                <artifactId>cat-client</artifactId>
+                <version>${cat-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.tc.qconfig</groupId>
+                <artifactId>qconfig-client</artifactId>
+                <version>${qconfig-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-core</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-api</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-lang</artifactId>
+                <version>${qunar.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>qunar.common</groupId>
+                <artifactId>common-concurrent</artifactId>
+                <version>${qunar.common.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -40,9 +77,8 @@
             <artifactId>dal-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.3.2</version>
+            <groupId>com.ctrip.framework</groupId>
+            <artifactId>framework-foundation</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework.clogging</groupId>
@@ -51,6 +87,15 @@
         <dependency>
             <groupId>com.dianping.cat</groupId>
             <artifactId>cat-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>qunar.tc.qconfig</groupId>
+            <artifactId>qconfig-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -70,18 +115,6 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.framework</groupId>
-            <artifactId>framework-foundation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>qunar.common</groupId>
-            <artifactId>common-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>qunar.tc.qconfig</groupId>
-            <artifactId>qconfig-client</artifactId>
         </dependency>
         <!-- Optional mybatis dependency -->
         <dependency>

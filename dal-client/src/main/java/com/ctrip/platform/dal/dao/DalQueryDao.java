@@ -374,7 +374,7 @@ public final class DalQueryDao {
 	 * @throws SQLException
 	 */
 	public int update(FreeUpdateSqlBuilder builder, StatementParameters parameters, DalHints hints) throws SQLException {
-		return getSafeResult((Integer)executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, builder.with(parameters), hints, new FreeSqlUpdateTask(), new ResultMerger.IntSummary())));
+		return update((FreeUpdateSqlBuilder)builder.with(parameters), hints);
 	}
 	
     /**
@@ -388,7 +388,7 @@ public final class DalQueryDao {
      * @throws SQLException
      */
     public int update(FreeUpdateSqlBuilder builder, DalHints hints) throws SQLException {
-        return getSafeResult((Integer)executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, builder.setHints(hints), hints, new FreeSqlUpdateTask(), new ResultMerger.IntSummary())));
+        return getSafeResult((Integer)executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, builder.setLogicDbName(logicDbName).setHints(hints), hints, new FreeSqlUpdateTask(), new ResultMerger.IntSummary())));
     }
     
 	private int getSafeResult(Integer value) {

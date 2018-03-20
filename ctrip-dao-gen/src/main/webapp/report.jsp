@@ -76,7 +76,7 @@
         <li role="presentation" class="active">
             <a href="#dalVersion" aria-controls="dalVersion" role="tab" data-toggle="tab">DAL.version</a>
         </li>
-        <li role="presentation">
+        <li role="presentation" style="display: none;">
             <a id="anchorLocalDatasource" href="#dalLocalDatasource" aria-controls="dalLocalDatasource" role="tab"
                data-toggle="tab">DAL.local.datasource</a>
         </li>

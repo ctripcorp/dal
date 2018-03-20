@@ -51,7 +51,7 @@ public class DalReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getRaw")
     public RawInfo getRaw() throws Exception {
-        return reportDao.getRawInfo();
+        return reportDao.getNewRawInfo();
     }
 
     @GET

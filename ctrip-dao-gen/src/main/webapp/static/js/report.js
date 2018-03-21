@@ -8,12 +8,21 @@
     });
 
     function getPieByDept(obj) {
+        var checkResult = checkDatabaseCategory();
+        if (!checkResult)
+            return false;
         var pie = echarts.init(document.getElementById("divPie"));
         pie.showLoading();
         var table = $("#divTable");
         table.hide();
+        var sqlServerChecked = $("#chkSqlServer").is(":checked");
+        var mySqlChecked = $("#chkMySql").is(":checked");
 
-        $.getJSON("/rest/report/getReportByDept", {dept: obj}, function (data) {
+        $.getJSON("/rest/report/getReportByDept", {
+            dept: obj,
+            sqlServerChecked: sqlServerChecked,
+            mySqlChecked: mySqlChecked
+        }, function (data) {
             if (data == undefined || data == null) {
                 pie.hideLoading();
                 pie.clear();
@@ -99,12 +108,21 @@
     };
 
     function getPieByVersion(obj) {
+        var checkResult = checkDatabaseCategory();
+        if (!checkResult)
+            return false;
         var pie = echarts.init(document.getElementById("divPie"));
         pie.showLoading();
         var table = $("#divTable");
         table.hide();
+        var sqlServerChecked = $("#chkSqlServer").is(":checked");
+        var mySqlChecked = $("#chkMySql").is(":checked");
 
-        $.getJSON("/rest/report/getReportByVersion", {version: obj}, function (data) {
+        $.getJSON("/rest/report/getReportByVersion", {
+            version: obj,
+            sqlServerChecked: sqlServerChecked,
+            mySqlChecked: mySqlChecked
+        }, function (data) {
             if (data == undefined || data == null) {
                 pie.hideLoading();
                 pie.clear();
@@ -227,11 +245,18 @@
 
     function bindExportExcel() {
         $(document.body).on("click", "#spanExport", function () {
+            var checkResult = checkDatabaseCategory();
+            if (!checkResult)
+                return false;
+
+            var sqlServerChecked = $("#chkSqlServer").is(":checked");
+            var mySqlChecked = $("#chkMySql").is(":checked");
             var form = $("<form>");
             form.attr("style", "display:none");
             form.attr("target", "");
-            form.attr("method", "get");
-            form.attr("action", "/rest/report/exportExcel");
+            form.attr("method", "post");
+            var url = "/rest/report/exportExcel?sqlServerChecked=" + sqlServerChecked + "&mySqlChecked=" + mySqlChecked;
+            form.attr("action", url);
 
             $(document.body).append(form);
             form.submit();
@@ -247,13 +272,13 @@
                 alert(data);
             });
         });
-    }
+    };
 
     function bindLocalDatasourceAppList() {
         $(document.body).on("click", "#anchorLocalDatasource,#spanRefresh", function () {
             getLocalDatasourceAppList();
         });
-    }
+    };
 
     function getLocalDatasourceAppList() {
         var divLoading = $("#divLoading2");
@@ -273,7 +298,7 @@
             $("#tableLocal tbody").html(tableBody);
             $("#divTable2").show();
         });
-    }
+    };
 
     function bindExportExcel2() {
         $(document.body).on("click", "#spanExport2", function () {
@@ -286,6 +311,18 @@
             $(document.body).append(form);
             form.submit();
         });
+    };
+
+    function checkDatabaseCategory() {
+        var sqlServerChecked = $("#chkSqlServer").is(":checked");
+        var mySqlChecked = $("#chkMySql").is(":checked");
+
+        if (!sqlServerChecked && !mySqlChecked) {
+            alert("请选择数据库类型!");
+            return false;
+        }
+
+        return true;
     };
 
 })(jQuery, window, document);

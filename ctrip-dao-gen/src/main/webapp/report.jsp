@@ -54,6 +54,10 @@
             font-size: 90% !important;
         }
 
+        .margin-left {
+            margin-left: 5px;
+        }
+
         .padding-left-right {
             padding-left: 5px;
             padding-right: 5px;
@@ -89,6 +93,18 @@
                     <div id="divDept" class="container-fluid bg-info">
                     </div>
                     <div id="divVersion" class="container-fluid bg-info">
+                    </div>
+                    <div id="divCategory" class="container-fluid bg-info">
+                        <div class="checkbox" class="margin-left">
+                            数据库类型：
+                            <label>
+                                <input type="checkbox" id="chkSqlServer" checked="checked">SqlServer
+                            </label>
+                            &nbsp;
+                            <label>
+                                <input type="checkbox" id="chkMySql" checked="checked">MySql
+                            </label>
+                        </div>
                     </div>
                     <div id="divExport" class="container-fluid bg-info">
                         <span id="spanExport" class="label label-success span-margin cursor font-size">导出Excel</span>

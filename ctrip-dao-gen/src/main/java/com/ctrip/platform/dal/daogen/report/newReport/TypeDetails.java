@@ -6,6 +6,9 @@ public class TypeDetails {
     @JSONField(name = "DAL.version")
     private NewDALversion daLVersion;
 
+    @JSONField(name = "SQL.database")
+    private SQLdatabase sqlDatabase;
+
     public NewDALversion getDaLVersion() {
         return daLVersion;
     }
@@ -13,4 +16,13 @@ public class TypeDetails {
     public void setDaLVersion(NewDALversion daLVersion) {
         this.daLVersion = daLVersion;
     }
+
+    public SQLdatabase getSqlDatabase() {
+        return sqlDatabase;
+    }
+
+    public void setSqlDatabase(SQLdatabase sqlDatabase) {
+        this.sqlDatabase = sqlDatabase;
+    }
+
 }

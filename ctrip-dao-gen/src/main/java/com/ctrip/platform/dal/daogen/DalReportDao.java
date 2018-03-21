@@ -15,9 +15,11 @@ import com.ctrip.platform.dal.daogen.report.Types;
 import com.ctrip.platform.dal.daogen.report.Version;
 import com.ctrip.platform.dal.daogen.report.newReport.NewApp;
 import com.ctrip.platform.dal.daogen.report.newReport.NewDALversion;
+import com.ctrip.platform.dal.daogen.report.newReport.NewDatabaseCategory;
 import com.ctrip.platform.dal.daogen.report.newReport.NewName;
 import com.ctrip.platform.dal.daogen.report.newReport.NewReport;
 import com.ctrip.platform.dal.daogen.report.newReport.NewRoot;
+import com.ctrip.platform.dal.daogen.report.newReport.SQLdatabase;
 import com.ctrip.platform.dal.daogen.report.newReport.TypeDetails;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -52,8 +54,11 @@ public class DalReportDao {
     private static final String DAL_LOCAL_DATASOURCE =
             "http://cat.ctripcorp.com/cat/r/e?domain=All&ip=All&type=DAL.local.datasource&min=-1&max=-1&forceDownload=json";
 
-    private static final String NEW_DAL_VERSION_URL =
+    private static final String DAL_VERSION_URL =
             "http://cat.ctripcorp.com/cat/r/globalEvent?type=DAL.version&op=appDetail&forceDownload=json";
+
+    private static final String SQL_DATABASE_URL =
+            "http://cat.ctripcorp.com/cat/r/globalEvent?type=SQL.database&op=appDetail&forceDownload=json";
 
     private static final String CMS_ALL_APPS_URL = "http://osg.ops.ctripcorp.com/api/11209";
     private static final String CMS_TOKEN = "70c152d9c4980f8843c497ed9b6b5386";
@@ -63,10 +68,12 @@ public class DalReportDao {
     private static final String LOCAL_DATASOURCE = "DAL.local.datasource";
 
     private static final String ALL = "All";
+    private static final String MYSQL = "mysql";
 
     private List<DalReport> reportList = null;
     private ConcurrentHashMap<String, CMSApp> appInfoMap = null;
     private Date lastUpdate = null;
+    private Map<String, List<NewDatabaseCategory>> databaseCategoryMap = null;
 
     public boolean isTaskRunning = false;
 
@@ -140,7 +147,7 @@ public class DalReportDao {
 
     public RawInfo getNewRawInfo() throws Exception {
         RawInfo raw = new RawInfo();
-        NewRoot root = HttpUtil.getJSONEntity(NewRoot.class, NEW_DAL_VERSION_URL, null, HttpMethod.HttpGet);
+        NewRoot root = HttpUtil.getJSONEntity(NewRoot.class, DAL_VERSION_URL, null, HttpMethod.HttpGet);
         if (root == null)
             return raw;
 
@@ -180,7 +187,7 @@ public class DalReportDao {
         return raw;
     }
 
-    public Map<String, List<String>> getMapByDept(String dept) {
+    public Map<String, List<String>> getMapByDept(String dept, NewDatabaseCategory databaseCategory) {
         Map<String, List<String>> map = new LinkedHashMap<>();
         List<DalReport> list = getDalReport(dept, null); // filter by dept
         if (list.isEmpty())
@@ -189,6 +196,8 @@ public class DalReportDao {
             List<String> appIds = report.getAppIds();
             if (appIds == null || appIds.isEmpty())
                 continue;
+
+            appIds = filterAppIds(appIds, databaseCategory); // filter by databasecategory
             String version = report.getVersion();
             if (!map.containsKey(version))
                 map.put(version, new ArrayList<String>());
@@ -197,7 +206,7 @@ public class DalReportDao {
         return map;
     }
 
-    public Map<String, List<String>> getMapByVersion(String version) {
+    public Map<String, List<String>> getMapByVersion(String version, NewDatabaseCategory databaseCategory) {
         Map<String, List<String>> map = new LinkedHashMap<>();
         List<DalReport> list = getDalReport(null, version); // filter by version
         if (list.isEmpty())
@@ -206,6 +215,8 @@ public class DalReportDao {
             List<String> appIds = report.getAppIds();
             if (appIds == null || appIds.isEmpty())
                 continue;
+
+            appIds = filterAppIds(appIds, databaseCategory); // filter by databasecategory
             String dept = report.getDept();
             if (!map.containsKey(dept))
                 map.put(dept, new ArrayList<String>());
@@ -213,6 +224,62 @@ public class DalReportDao {
         }
 
         return map;
+    }
+
+    private List<DalReport> getDalReport(String dept, String version) {
+        List<DalReport> list = new ArrayList<>();
+        if (reportList == null || reportList.isEmpty())
+            return list;
+
+        for (DalReport report : reportList) {
+            boolean flag = getFlag(report, dept, version);
+            if (flag)
+                list.add(report);
+        }
+
+        return list;
+    }
+
+    private boolean getFlag(DalReport report, String dept, String version) {
+        boolean flag = false;
+        if (dept != null && dept.length() > 0) {
+            if (report.getDept().equals(dept))
+                flag |= true;
+            if (dept.equals(ALL))
+                flag |= true;
+        }
+        if (version != null && version.length() > 0) {
+            if (report.getVersion().equals(version))
+                flag |= true;
+            if (version.equals(ALL))
+                flag |= true;
+        }
+        return flag;
+    }
+
+    private List<String> filterAppIds(List<String> appIds, NewDatabaseCategory databaseCategory) {
+        if (appIds == null || appIds.isEmpty())
+            return appIds;
+
+        if (databaseCategory.equals(NewDatabaseCategory.All))
+            return appIds;
+
+        List<String> result = filterAppIdsByDatabaseCategory(appIds, databaseCategory);
+        return result;
+    }
+
+    private List<String> filterAppIdsByDatabaseCategory(List<String> appIds, NewDatabaseCategory databaseCategory) {
+        List<String> result = new ArrayList<>();
+        for (String appId : appIds) {
+            List<NewDatabaseCategory> temp = databaseCategoryMap.get(appId);
+            if (temp == null || temp.isEmpty())
+                continue;
+
+            if (temp.contains(databaseCategory))
+                result.add(appId);
+        }
+
+        return result;
     }
 
     public Date getLastUpdate() {
@@ -245,7 +312,7 @@ public class DalReportDao {
         }
     }
 
-    public Workbook getWorkbook() throws Exception {
+    public Workbook getWorkbook(NewDatabaseCategory databaseCategory) throws Exception {
         if (reportList == null || reportList.isEmpty())
             return null;
 
@@ -254,7 +321,7 @@ public class DalReportDao {
         try {
             Map<String, CMSApp> cmsAppMap = getAllCMSAppInfo();
             for (DalReport report : reportList) {
-                processReport(report, cmsAppMap, deptMap, versionMap);
+                processReport(report, cmsAppMap, deptMap, versionMap, databaseCategory);
             }
         } catch (Exception e) {
             throw e;
@@ -268,11 +335,13 @@ public class DalReportDao {
     }
 
     private void processReport(DalReport report, Map<String, CMSApp> cmsAppMap, Map<String, List<List<String>>> deptMap,
-            Map<String, List<List<String>>> versionMap) {
+            Map<String, List<List<String>>> versionMap, NewDatabaseCategory databaseCategory) {
         List<String> appIds = report.getAppIds();
         if (appIds == null || appIds.isEmpty())
             return;
+
         Map<String, CMSApp> appMap = new LinkedHashMap<>();
+        appIds = filterAppIds(appIds, databaseCategory);
         for (String appId : appIds) {
             CMSApp app = cmsAppMap.get(appId);
             if (app != null)
@@ -443,37 +512,6 @@ public class DalReportDao {
         }
     }
 
-    private List<DalReport> getDalReport(String dept, String version) {
-        List<DalReport> list = new ArrayList<>();
-        if (reportList == null || reportList.isEmpty())
-            return list;
-
-        for (DalReport report : reportList) {
-            boolean flag = getFlag(report, dept, version);
-            if (flag)
-                list.add(report);
-        }
-
-        return list;
-    }
-
-    private boolean getFlag(DalReport report, String dept, String version) {
-        boolean flag = false;
-        if (dept != null && dept.length() > 0) {
-            if (report.getDept().equals(dept))
-                flag |= true;
-            if (dept.equals(ALL))
-                flag |= true;
-        }
-        if (version != null && version.length() > 0) {
-            if (report.getVersion().equals(version))
-                flag |= true;
-            if (version.equals(ALL))
-                flag |= true;
-        }
-        return flag;
-    }
-
     private Map<String, DalReport> convertListToMap(List<DalReport> list) {
         Map<String, DalReport> map = new HashMap<>();
         if (list == null || list.isEmpty())
@@ -497,10 +535,55 @@ public class DalReportDao {
     public void runTask() throws Exception {
         getAllAppInfoMap();
         getNewAllDalReportVector();
+        getNewDatabaseCategoryMap();
+    }
+
+    private void getAllAppInfoMap() throws Exception {
+        ConcurrentHashMap<String, CMSApp> map = new ConcurrentHashMap<>();
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(ACCESS_TOKEN, CMS_TOKEN);
+        parameters.put(REQUEST_BODY, "{}");
+        CMSAppInfo info = HttpUtil.getJSONEntity(CMSAppInfo.class, CMS_ALL_APPS_URL, parameters, HttpMethod.HttpPost);
+        if (info != null) {
+            List<CMSApp> list = info.getData();
+            if (list != null && !list.isEmpty()) {
+                for (CMSApp app : list) {
+                    map.put(app.getAppId(), app);
+                }
+            }
+        }
+
+        appInfoMap = map;
+        lastUpdate = new Date();
+    }
+
+    private void getNewDatabaseCategoryMap() throws Exception {
+        NewRoot root = HttpUtil.getJSONEntity(NewRoot.class, SQL_DATABASE_URL, null, HttpMethod.HttpGet);
+        if (root == null)
+            return;
+
+        NewReport report = root.getReport();
+        if (report == null)
+            return;
+
+        TypeDetails typeDetails = report.getTypeDetails();
+        if (typeDetails == null)
+            return;
+
+        SQLdatabase sqlDatabase = typeDetails.getSqlDatabase();
+        if (sqlDatabase == null)
+            return;
+
+        Map<String, List<NewDatabaseCategory>> map = getDatabaseCategoryMap(sqlDatabase.getNameDetails());
+        if (map == null || map.isEmpty())
+            return;
+
+        databaseCategoryMap = map;
+        lastUpdate = new Date();
     }
 
     private void getNewAllDalReportVector() throws Exception {
-        NewRoot root = HttpUtil.getJSONEntity(NewRoot.class, NEW_DAL_VERSION_URL, null, HttpMethod.HttpGet);
+        NewRoot root = HttpUtil.getJSONEntity(NewRoot.class, DAL_VERSION_URL, null, HttpMethod.HttpGet);
         if (root == null)
             return;
 
@@ -536,11 +619,11 @@ public class DalReportDao {
             if (newName == null)
                 continue;
 
-            String version = nameDetail.getKey();
             Map<String, NewApp> appDetails = newName.getAppDetails();
             if (appDetails == null || appDetails.isEmpty())
                 continue;
 
+            String version = nameDetail.getKey();
             for (Map.Entry<String, NewApp> appDetail : appDetails.entrySet()) {
                 String appId = appDetail.getKey();
                 CMSApp appInfo = appInfoMap.get(appId);
@@ -592,23 +675,42 @@ public class DalReportDao {
         return list;
     }
 
-    private void getAllAppInfoMap() throws Exception {
-        ConcurrentHashMap<String, CMSApp> map = new ConcurrentHashMap<>();
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(ACCESS_TOKEN, CMS_TOKEN);
-        parameters.put(REQUEST_BODY, "{}");
-        CMSAppInfo info = HttpUtil.getJSONEntity(CMSAppInfo.class, CMS_ALL_APPS_URL, parameters, HttpMethod.HttpPost);
-        if (info != null) {
-            List<CMSApp> list = info.getData();
-            if (list != null && !list.isEmpty()) {
-                for (CMSApp app : list) {
-                    map.put(app.getAppId(), app);
-                }
+    // key:AppId
+    private Map<String, List<NewDatabaseCategory>> getDatabaseCategoryMap(Map<String, NewName> nameDetails) {
+        Map<String, List<NewDatabaseCategory>> map = new HashMap<>();
+        if (nameDetails == null || nameDetails.isEmpty())
+            return map;
+
+        for (Map.Entry<String, NewName> nameDetail : nameDetails.entrySet()) {
+            NewName newName = nameDetail.getValue();
+            if (newName == null)
+                continue;
+
+            Map<String, NewApp> appDetails = newName.getAppDetails();
+            if (appDetails == null || appDetails.isEmpty())
+                continue;
+
+            String sqlDatabase = nameDetail.getKey();
+            NewDatabaseCategory category = getDatabaseCategoryBySqlDatabase(sqlDatabase);
+            for (Map.Entry<String, NewApp> appDetail : appDetails.entrySet()) {
+                String appId = appDetail.getKey();
+                if (!map.containsKey(appId))
+                    map.put(appId, new ArrayList<NewDatabaseCategory>());
+
+                List<NewDatabaseCategory> list = map.get(appId);
+                list.add(category);
             }
         }
 
-        appInfoMap = map;
-        lastUpdate = new Date();
+        return map;
+    }
+
+    private NewDatabaseCategory getDatabaseCategoryBySqlDatabase(String sqlDatabase) {
+        NewDatabaseCategory category = NewDatabaseCategory.SqlServer;
+        if (sqlDatabase.toLowerCase().indexOf(MYSQL) > -1)
+            category = NewDatabaseCategory.MySql;
+
+        return category;
     }
 
     private class ReportTask implements Runnable {

@@ -20,18 +20,13 @@
         }
 
         .pie {
-            width: 600px;
+            width: 100%;
             height: 480px;
         }
 
         .table-size {
-            width: 1000px;
-            height: 640px;
-        }
-
-        .table-size-2 {
-            width: 1500px;
-            height: 800px;
+            width: 100%;
+            height: 480px;
         }
 
         .display-none {
@@ -113,9 +108,11 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <div id="divPie" class="pie float-left">
+                    <div id="divPie" class="pie">
                     </div>
-                    <div id="divTable" class="float-left display-none">
+                </div>
+                <div class="panel-body">
+                    <div id="divTable" class="display-none">
                         <p class="bg-success padding-left-right">
                             <span id="spanCount"></span>
                             <span id="spanLastUpdate" class="float-right"></span>

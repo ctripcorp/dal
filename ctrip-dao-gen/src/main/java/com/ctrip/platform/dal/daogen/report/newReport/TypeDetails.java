@@ -9,6 +9,9 @@ public class TypeDetails {
     @JSONField(name = "SQL.database")
     private SQLdatabase sqlDatabase;
 
+    @JSONField(name = "Ctrip.datasource.version")
+    private CtripDatasourceVersion ctripDatasourceVersion;
+
     public NewDALversion getDaLVersion() {
         return daLVersion;
     }
@@ -23,6 +26,14 @@ public class TypeDetails {
 
     public void setSqlDatabase(SQLdatabase sqlDatabase) {
         this.sqlDatabase = sqlDatabase;
+    }
+
+    public CtripDatasourceVersion getCtripDatasourceVersion() {
+        return ctripDatasourceVersion;
+    }
+
+    public void setCtripDatasourceVersion(CtripDatasourceVersion ctripDatasourceVersion) {
+        this.ctripDatasourceVersion = ctripDatasourceVersion;
     }
 
 }

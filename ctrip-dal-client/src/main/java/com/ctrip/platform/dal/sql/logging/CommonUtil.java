@@ -4,9 +4,9 @@ import java.security.Key;
 
 import javax.crypto.Cipher;
 
-import org.apache.commons.codec.binary.Base64;
-
+import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
+import com.ctrip.platform.dal.dao.helper.DalBase64;
 
 
 public class CommonUtil {
@@ -54,14 +54,11 @@ public class CommonUtil {
         return sb.toString();     
 	}
 	
-	private static Cipher encryptCipher;
+	private static DalEncrypter encryptCipher;
 	
 	static {
 		try {
-			byte[] keyBytes = key.substring(0, 8).getBytes("UTF-8");
-			Key key = new javax.crypto.spec.SecretKeySpec(keyBytes, "DES");
-			encryptCipher = Cipher.getInstance("DES");
-			encryptCipher.init(Cipher.ENCRYPT_MODE, key);
+		    encryptCipher = new DalEncrypter(LoggerAdapter.secretKey);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -73,17 +70,7 @@ public class CommonUtil {
      * @return encrypted value
      */
 	public static String desEncrypt(String encryptString) {
-		if (encryptString == null)
-			return null;
-		try {
-			byte[] inputByteArray = encryptString.getBytes("UTF-8");
-			byte[] encryptedByteArray = encryptCipher.doFinal(inputByteArray);
-			return new String(Base64.encodeBase64(encryptedByteArray));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-        
+	    return encryptCipher.desEncrypt(encryptString);
     }
 	
 	/**
@@ -92,22 +79,6 @@ public class CommonUtil {
      * @return dcrypted value
      */
 	public static String desDecrypt(String encryptString) {
-		if (encryptString == null)
-			return null;
-		try {
-			byte[] keyBytes = key.substring(0, 8).getBytes("UTF-8");
-			Key key = new javax.crypto.spec.SecretKeySpec(keyBytes, "DES");
-			Cipher decryptCipher;
-
-			decryptCipher = Cipher.getInstance("DES");
-			decryptCipher.init(Cipher.DECRYPT_MODE, key);
-
-			byte[] encryptedByteArray = Base64.decodeBase64(encryptString.getBytes());
-			return new String(decryptCipher.doFinal(encryptedByteArray));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return encryptString;
-    }
-
+	    return encryptCipher.desDecrypt(encryptString);
+	}
 }

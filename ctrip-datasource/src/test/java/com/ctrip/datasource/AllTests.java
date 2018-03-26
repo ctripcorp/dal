@@ -1,12 +1,5 @@
 package com.ctrip.datasource;
 
-import com.ctrip.datasource.mybatis.interceptor.ExecutorInterceptorTest;
-import com.ctrip.datasource.mybatis.interceptor.StatementHandlerInterceptorTest;
-import com.ctrip.datasource.mybatis.interceptor.StatementPrepareHandlerInterceptorTest;
-import com.ctrip.datasource.spring.JavaConfigMybatisTest;
-import com.ctrip.datasource.spring.XmlConfigMybatisTest;
-import com.ctrip.datasource.util.DalBase64Test;
-import com.ctrip.datasource.util.DalEncrypterTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -14,7 +7,13 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.ctrip.datasource.configure.AllInOneConfigureReaderTest;
 import com.ctrip.datasource.configure.ConnectionStringParserParserTest;
 import com.ctrip.datasource.configure.CtripDalDataSourceTest;
+import com.ctrip.datasource.mybatis.interceptor.ExecutorInterceptorTest;
+import com.ctrip.datasource.mybatis.interceptor.StatementHandlerInterceptorTest;
+import com.ctrip.datasource.mybatis.interceptor.StatementPrepareHandlerInterceptorTest;
+import com.ctrip.datasource.spring.JavaConfigMybatisTest;
+import com.ctrip.datasource.spring.XmlConfigMybatisTest;
 import com.ctrip.datasource.titan.TitanServiceReaderTest;
+import com.ctrip.datasource.util.DalEncrypterTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -23,7 +22,6 @@ import com.ctrip.datasource.titan.TitanServiceReaderTest;
 	ConnectionStringParserParserTest.class,
 	CtripDalDataSourceTest.class,
 	MetricTest.class,
-  DalBase64Test.class,
   DalEncrypterTest.class,
 	JavaConfigMybatisTest.class,
   XmlConfigMybatisTest.class,

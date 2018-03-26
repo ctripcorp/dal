@@ -31,6 +31,7 @@ public class PersonDaoUnitTest {
 	private static final String DATA_BASE = "MySqlSimpleShard";
 	//ShardColModShardStrategy;columns=CountryID;mod=2;tableColumns=CityID;tableMod=4;separator=_;shardedTables=person
 
+
 	private static DalClient client = null;
 	private static PersonDao dao = null;
 	

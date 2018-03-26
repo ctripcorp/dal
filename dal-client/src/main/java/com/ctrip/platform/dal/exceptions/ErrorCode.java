@@ -64,10 +64,15 @@ public enum ErrorCode {
 	KeyGenerationFailOrNotCompleted(ErrorClassify.Validate, 5105, "The insertion is fail or not completed yet."),
 	
 	/**
-	 * The insertion is fail or not completed yet.
+	 * There is no field defined in pojo
 	 */
 	FieldNotExists(ErrorClassify.Validate, 5106, "There is no field defined in pojo %s for column %s. Please check with DalHintEnum.ignoreMissingFields"),
 	
+    /**
+     * Can not put generated primary key back to pojo
+     */
+    SetPrimaryKeyFailed(ErrorClassify.Validate, 5107, "Can not put generated primary key back to pojo %s for column %s"),
+    
 	/**
 	 * Sql cannot be null
 	 */
@@ -156,7 +161,8 @@ public enum ErrorCode {
     /**
      * The result mapping is faild.
      */
-    ResultMappingError(ErrorClassify.Extract, 5700, "Can not extract from result set. If the columns in result set does not match with columns in pojo, please check with DalHintEnum.partialQuery."),
+    ResultMappingError(ErrorClassify.Extract, 5700, "Can not extract from result set. If the columns in result set does not match with columns in pojo, please check with DalHintEnum.allowPartial or partialQuery. "
+            + "For more info please refer to https://github.com/ctripcorp/dal/wiki/Java%E5%AE%A2%E6%88%B7%E7%AB%AF-Hints%E8%AF%B4%E6%98%8E#allowpartial"),
     
 	/**
 	 * Can not get connection from DB %s

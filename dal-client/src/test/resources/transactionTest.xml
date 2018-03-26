@@ -6,16 +6,10 @@
        http://www.springframework.org/schema/context  
        http://www.springframework.org/schema/context/spring-context-3.0.xsd">  
   
+    <bean class="com.ctrip.platform.dal.dao.client.DalTransactionalEnabler"/>    
     <context:component-scan base-package="test.com.ctrip.platform.dal.dao.annotation.normal" />
-    <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.client.DalAnnotationValidator"/>  
-    <bean id="TransactionAnnoClassSqlServer" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
-        <constructor-arg name="targetClass" type="Class" value="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassSqlServer" />
-    </bean>
-    <bean id="TransactionAnnoClassMySql" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
-        <constructor-arg name="targetClass" type="Class" value="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassMySql" />
-    </bean>
-    <bean id="TransactionAnnoClassOracle" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
-        <constructor-arg name="targetClass" type="Class" value="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassOracle" />
-    </bean>
-    
+
+    <bean id="TransactionAnnoClassSqlServer" class="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassSqlServer"/>
+    <bean id="TransactionAnnoClassMySql" class="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassMySql" />
+    <bean id="TransactionAnnoClassOracle" class="test.com.ctrip.platform.dal.dao.annotation.normal.TransactionAnnoClassOracle" />    
 </beans>  

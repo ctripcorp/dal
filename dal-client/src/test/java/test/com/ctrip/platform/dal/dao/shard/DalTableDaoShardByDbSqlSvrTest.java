@@ -39,7 +39,7 @@ public class DalTableDaoShardByDbSqlSvrTest extends BaseDalTableDaoShardByDbTest
 	//Create the the table
 	private final static String CREATE_TABLE_SQL_SQLSVR_TPL = "CREATE TABLE " + TABLE_NAME +"("
 			+ "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
-			+ "quantity int,tableIndex int,type smallint, "
+			+ "quantity int,dbIndex int,tableIndex int,type smallint, "
 			+ "address varchar(64) not null,"
 			+ "last_changed datetime default getdate())";
 	

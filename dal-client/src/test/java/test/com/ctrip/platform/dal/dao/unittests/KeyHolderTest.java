@@ -36,9 +36,9 @@ public class KeyHolderTest {
 		assertEquals(1, test.size());
 
 		test = new KeyHolder();
-		test.setSize(0);
+		test.initialize(0);
 		assertEquals(0, test.size());
-		test.setSize(1);
+		test.initialize(1);
 		assertEquals(1, test.size());
 	}
 
@@ -119,7 +119,7 @@ public class KeyHolderTest {
 	@Test
 	public void testAddPatial() {
 		KeyHolder test = new KeyHolder();
-		test.setSize(6);
+		test.initialize(6);
 		test.requireMerge();
 		
 		KeyHolder tmpHolder = new KeyHolder();
@@ -145,7 +145,7 @@ public class KeyHolderTest {
 		service = new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
 		KeyHolder test = new KeyHolder();
-		test.setSize(6);
+		test.initialize(6);
 		test.requireMerge();
 		
 		KeyHolder tmpHolder = new KeyHolder();
@@ -177,7 +177,7 @@ public class KeyHolderTest {
 		service = new ThreadPoolExecutor(5, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
 		KeyHolder test = new KeyHolder();
-		test.setSize(30);
+		test.initialize(30);
 		test.requireMerge();
 		
 		List<Future<Boolean>> fList = new ArrayList<>();

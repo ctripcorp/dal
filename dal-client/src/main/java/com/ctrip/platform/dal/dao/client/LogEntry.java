@@ -4,10 +4,10 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
 public class LogEntry {
-	private static volatile ThreadLocal<String> currentCaller;
+    private static volatile ThreadLocal<String> currentCaller;
 
 	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao.";
-
+	
 	private boolean sensitive;
 	private String[] sqls;
 	private String[] pramemters;
@@ -37,29 +37,43 @@ public class LogEntry {
 	private String clientVersion;
 
 	private Throwable exception;
+	
+    private static final String JSON_PATTERN = "{'Decode':'%s','Connect':'%s','Prepare':'%s','Excute':'%s','ClearUp':'%s'}";
 
-	private long createTime = System.currentTimeMillis();
-
+    /**
+     * Internal performance recorder for performance cost in each stage.
+     * As each low level DB operation will be logged once at ConnectionAction level, this recorder will
+     * be set into LogEntry which is created as soon as ConnectionAction is created.
+     */
+    private long begin;
+    private long beginConnect;
+    private long endConnect;
+    private long beginExecute;
+    private long endExecute;
+    private long end;
+	
 	public LogEntry(){
+	    begin();
+
 		StackTraceElement[] callers = Thread.currentThread().getStackTrace();
 		for (int i = 4; i < callers.length; i++) {
 			StackTraceElement caller = callers[i];
 			if (caller.getClassName().startsWith(execludedPackageSpace))
 				continue;
-
+			
 			dao = caller.getClassName();
 			method = caller.getMethodName();
 			source = caller.toString();
 			break;
 		}
 	}
-
+	
 	public void setEvent(DalEventEnum event) {
 		this.event = event;
-
+		
 		String commandType;
-
-		if(this.event == DalEventEnum.CALL ||
+		
+		if(this.event == DalEventEnum.CALL || 
 				this.event == DalEventEnum.BATCH_CALL) {
 			commandType = "SP";
 		} else if(this.event == DalEventEnum.QUERY) {
@@ -67,7 +81,7 @@ public class LogEntry {
 		} else {
 			commandType = "Execute";
 		}
-
+		
 		setCommandType(commandType);
 	}
 
@@ -78,11 +92,11 @@ public class LogEntry {
 	public void setSensitive(boolean sensitive) {
 		this.sensitive = sensitive;
 	}
-
+	
 	public void setCallString(String callString) {
 		this.callString = callString;
 	}
-
+	
 	public String[] getSqls() {
 		return sqls;
 	}
@@ -114,7 +128,7 @@ public class LogEntry {
 	public void setException(Throwable exception) {
 		this.exception = exception;
 	}
-
+	
 	public boolean isSuccess() {
 		return success;
 	}
@@ -200,39 +214,39 @@ public class LogEntry {
 	}
 
 	public Integer getAffectedRows() {
-		return affectedRows;
-	}
+        return affectedRows;
+    }
 
-	public Integer setAffectedRows(Integer affectedRows) {
-		this.affectedRows = affectedRows;
-		return affectedRows;
-	}
+    public Integer setAffectedRows(Integer affectedRows) {
+        this.affectedRows = affectedRows;
+        return affectedRows;
+    }
 
-	public int[] getAffectedRowsArray() {
-		return affectedRowsArray;
-	}
+    public int[] getAffectedRowsArray() {
+        return affectedRowsArray;
+    }
 
-	public int[] setAffectedRowsArray(int[] affectedRowsArray) {
-		this.affectedRowsArray = affectedRowsArray;
-		return affectedRowsArray;
-	}
+    public int[] setAffectedRowsArray(int[] affectedRowsArray) {
+        this.affectedRowsArray = affectedRowsArray;
+        return affectedRowsArray;
+    }
 
-	public long getConnectionCost() {
-		return connectionCost;
-	}
+    public long getConnectionCost() {
+        return connectionCost;
+    }
 
-	public void setConnectionCost(long connectionCost) {
-		this.connectionCost = connectionCost;
-	}
+    public void setConnectionCost(long connectionCost) {
+        this.connectionCost = connectionCost;
+    }
 
-	public String getCallString() {
+    public String getCallString() {
 		return callString;
 	}
 
 	public DalEventEnum getEvent() {
 		return event;
 	}
-
+	
 	public String getDao() {
 		return dao;
 	}
@@ -264,11 +278,11 @@ public class LogEntry {
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}
-
+	
 	public void setShardId(String shardId) {
 		this.shardId = shardId;
 	}
-
+	
 	public String getShardId() {
 		return shardId;
 	}
@@ -285,15 +299,7 @@ public class LogEntry {
 		this.clientVersion = clientVersion;
 	}
 
-	public long getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(long createTime) {
-		this.createTime = createTime;
-	}
-
-	public int getSqlSize() {
+    public int getSqlSize() {
 		int size = 0;
 		if (this.event == DalEventEnum.QUERY
 				|| this.event == DalEventEnum.UPDATE_SIMPLE
@@ -314,57 +320,86 @@ public class LogEntry {
 		return size;
 	}
 
-	/**
-	 * @return Current caller
-	 */
+    public void begin(){
+        begin = System.currentTimeMillis();
+    }
+
+    public void beginConnect(){
+        beginConnect = System.currentTimeMillis();
+    }
+
+    public void endConnect(){
+        endConnect = System.currentTimeMillis();
+    }
+
+    public void beginExecute(){
+        beginExecute = System.currentTimeMillis();
+    }
+
+    public void endExectue(){
+        endExecute = System.currentTimeMillis();
+    }
+
+    public String getCostDetail(){
+        // Final end
+        end = System.currentTimeMillis();
+
+        return String.format(JSON_PATTERN, begin == 0 ? 0 : beginConnect - begin,
+                endConnect - beginConnect, beginExecute - endConnect,
+                endExecute - beginExecute, end - endExecute);
+    }
+
+    /**
+     * @return Current caller
+     */
 	public String getCaller() {
-		String sqlType = getDao() + "." + getMethod();
-
-		// If comes from internal executor
-		if(sqlType.startsWith("java.util.concurrent.FutureTask"))
-			sqlType = currentCaller.get();
-
-		return sqlType;
-	}
-
+        String sqlType = getDao() + "." + getMethod();
+        
+        // If comes from internal executor
+        if(sqlType.startsWith("java.util.concurrent.FutureTask"))
+            sqlType = currentCaller.get();
+        
+        return sqlType;
+    }
+	
 	public String getCallerInShort() {
-		try {
-			String caller = getCaller();
-			int lastIndex = caller.lastIndexOf('.');
-
-			lastIndex = caller.lastIndexOf('.', lastIndex - 1);
-			return caller.substring(lastIndex + 1);
-		} catch (Throwable e) {
-			return "Error!! Can Not Locate Calller";
-		}
+	    try {
+            String caller = getCaller();
+            int lastIndex = caller.lastIndexOf('.');
+            
+            lastIndex = caller.lastIndexOf('.', lastIndex - 1);
+            return caller.substring(lastIndex + 1);
+        } catch (Throwable e) {
+            return "Error!! Can Not Locate Calller";
+        }
 	}
+	
+    /**
+     * Put curent caller into threadlocal to allow ConnectionAction get caller in later stage
+     */
+    public static void populateCurrentCaller(String caller) {
+        currentCaller.set(caller);
+    }
+    
+    /**
+     * Clear curent caller of threadlocal
+     */
+    public static void clearCurrentCaller() {
+        currentCaller.remove();
+    }
 
-	/**
-	 * Put curent caller into threadlocal to allow ConnectionAction get caller in later stage
-	 */
-	public static void populateCurrentCaller(String caller) {
-		currentCaller.set(caller);
-	}
+    public synchronized static void init(){
+        if(currentCaller != null)
+            return;
+        
+        currentCaller = new ThreadLocal<>();
+    }
 
-	/**
-	 * Clear curent caller of threadlocal
-	 */
-	public static void clearCurrentCaller() {
-		currentCaller.remove();
-	}
-
-	public synchronized static void init(){
-		if(currentCaller != null)
-			return;
-
-		currentCaller = new ThreadLocal<>();
-	}
-
-	public synchronized static void shutdown() {
-		if(currentCaller == null)
-			return;
-
-		currentCaller.remove();
-		currentCaller = null;
-	}
+    public synchronized static void shutdown() {
+        if(currentCaller == null)
+            return;
+        
+        currentCaller.remove();
+        currentCaller = null;
+    }
 }

@@ -12,6 +12,12 @@ import org.junit.runners.Suite.SuiteClasses;
 	AbstractBuilderTest.class,
 	BaseQueryBuilderTest.class,
 	InsertSqlBuilderTest.class,
+	AbstractFreeSqlBuilderTest.class,
+	ExpressionsTest.class,
+	FreeUpdateSqlBuilderTest.class,
+	FreeSelectSqlBuilderTest.class,
+	AbstractFreeSqlBuilderMeltdownTest.class,
+	AbstractFreeSqlBuilderMeltdownWithSpaceSkipDisabledTest.class,
 	})
 public class AllTests {
 

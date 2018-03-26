@@ -7,10 +7,10 @@
       <add  name="dao_test_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
     </databaseSet>
     <databaseSet name="HA_Test" provider="mysqlProvider" shardingStrategy="">
-    	<add  name="dao_test_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
-    	<add  name="dao_test_S1" databaseType="Slave" sharding="" connectionString="MySqlShard_0"/>
-      	<add  name="dao_test_S2" databaseType="Slave" sharding="" connectionString="MySqlShard_1"/>
-      	<add  name="dao_test_S3" databaseType="Slave" sharding="" connectionString="MySqlShard_1"/>
+    	<add  name="dao_test_M" databaseType="Master" connectionString="MySqlShard_0"/>
+    	<add  name="dao_test_S1" databaseType="Slave" connectionString="MySqlShard_0"/>
+      	<add  name="dao_test_S2" databaseType="Slave" connectionString="MySqlShard_1"/>
+      	<add  name="dao_test_S3" databaseType="Slave" connectionString="MySqlShard_1"/>
     </databaseSet>
       <databaseSet name="HA_Test_1" provider="mySqlProvider" shardingStrategy="">
     	<add  name="dao_test_M" databaseType="Master" sharding="" connectionString="MySqlShard_0"/>
@@ -90,6 +90,11 @@
         <add name="dal_shard_0" databaseType="Master" sharding="0" connectionString="dal_shard_0"/>   
         <add name="dal_shard_1" databaseType="Master" sharding="1" connectionString="dal_shard_1"/>   
     </databaseSet>
+    <databaseSet name="MySqlSimpleShardForDB" provider="mySqlProvider"
+         shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=CountryID;mod=2">
+        <add name="dal_shard_0" databaseType="Master" sharding="0" connectionString="dal_shard_0"/>   
+        <add name="dal_shard_1" databaseType="Master" sharding="1" connectionString="dal_shard_1"/>   
+    </databaseSet>
     <databaseSet name="dao_test_oracle" provider="oracleProvider" >
         <add name="dao_test_oracle" databaseType="Master" sharding="" connectionString="OracleShard_0"/>   
     </databaseSet>
@@ -103,6 +108,25 @@
     <databaseSet name="dao_test_oracle_dbTableShard" provider="oracleprovider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;column=index,dbIndex;mod=2;tableColumn=table,tableIndex;tableMod=4;separator=_;shardedTables=dal_client_test">
         <add name="dao_test_oracle_0" databaseType="Master" sharding="0" connectionString="OracleShard_0"/>   
         <add name="dao_test_oracle_1" databaseType="Master" sharding="1" connectionString="OracleShard_1"/>   
+    </databaseSet>
+    <databaseSet name="MysqlNoFreshness" provider="mysqlProvider">
+      <add  name="dao_test_mysql_dbShard_0" databaseType="Master" sharding="0" connectionString="dao_test"/>
+      <add  name="dao_test_mysql_dbShard_1" databaseType="Slave" sharding="1" connectionString="dao_test_mysql"/>
+    </databaseSet>
+    <databaseSet name="SimpleMysqlFreshness" provider="mysqlProvider">
+      <add  name="dao_test_mysql_dbShard_0" databaseType="Master" sharding="0" connectionString="MySqlShard_0"/>
+      <add  name="dao_test_mysql_dbShard_3" databaseType="Slave" sharding="0" connectionString="MySqlShard_0"/>
+      <add  name="dao_test_mysql_dbShard_5" databaseType="Slave" sharding="0" connectionString="MySqlShard_1"/>
+      <add  name="dao_test_mysql_dbShard_7" databaseType="Slave" sharding="0" connectionString="dal_shard_0"/>
+      <add  name="dao_test_mysql_dbShard_9" databaseType="Slave" sharding="0" connectionString="dal_shard_1"/>
+    </databaseSet>
+    <databaseSet name="SimpleMysqlShardFreshness" provider="mysqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.SimpleShardHintStrategy;shardByDb=true">
+      <add  name="dao_test_mysql_dbShard_0" databaseType="Master" sharding="0" connectionString="dao_test"/>
+      <add  name="dao_test_mysql_dbShard_1" databaseType="Master" sharding="1" connectionString="dao_test_mysql"/>
+      <add  name="dao_test_mysql_dbShard_3" databaseType="Slave" sharding="0" connectionString="MySqlShard_0"/>
+      <add  name="dao_test_mysql_dbShard_5" databaseType="Slave" sharding="0" connectionString="MySqlShard_1"/>
+      <add  name="dao_test_mysql_dbShard_7" databaseType="Slave" sharding="1" connectionString="dal_shard_0"/>
+      <add  name="dao_test_mysql_dbShard_9" databaseType="Slave" sharding="1" connectionString="dal_shard_1"/>
     </databaseSet>
   </databaseSets>
   <LogListener enabled="true">
@@ -131,4 +155,11 @@
 		 <maxPoolSize>100</maxPoolSize>
 	  </settings>
   </TaskFactory>
+  <DatabaseSelector>
+      <selector>com.ctrip.platform.dal.dao.configure.FreshnessSelector</selector>
+      <settings>
+         <freshnessReader>test.com.ctrip.platform.dal.dao.configure.TestFreshnessReader</freshnessReader>
+         <updateInterval>2</updateInterval>
+      </settings>
+  </DatabaseSelector>
 </dal>

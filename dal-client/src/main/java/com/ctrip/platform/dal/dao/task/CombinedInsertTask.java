@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
-public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask<Integer, T> {
+public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask<Integer, T>, KeyHolderAwaredTask {
 	public static final String TMPL_SQL_MULTIPLE_INSERT = "INSERT INTO %s(%s) VALUES %s";
 
 	@Override
@@ -51,16 +50,7 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 				getTableName(hints), insertColumns,
 				values.substring(0, values.length() - 2) + ")");
 
-		KeyHolder keyHolder = hints.getKeyHolder();
-		KeyHolder tmpHolder = keyHolder != null && keyHolder.isRequireMerge() ? new KeyHolder() : keyHolder;
-		
-		int count = client.update(sql, parameters, hints.setKeyHolder(tmpHolder));
-		
-		if(tmpHolder != null)
-			keyHolder.addPatial(daoPojos.keySet().toArray(new Integer[daoPojos.size()]), tmpHolder);
-		
-		hints.setKeyHolder(keyHolder);
-		return count;
+		return client.update(sql, parameters, hints);
 	}
 
 	@Override

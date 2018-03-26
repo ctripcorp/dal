@@ -35,6 +35,16 @@ public class DalTableDaoShardByDbOracleTest extends BaseDalTableDaoShardByDbTest
 	
 	private static DalClient client;
 	
+    public final static String CREATE_TABLE_SQL_TPL = "CREATE TABLE DAL_CLIENT_TEST"
+            + "(ID NUMBER(5) NOT NULL ENABLE, " 
+            + "QUANTITY NUMBER(5)," 
+            + "dbIndex NUMBER(10),"
+            + "tableIndex NUMBER(10),"
+            + "TYPE NUMBER(2),"
+            + "ADDRESS VARCHAR2(64 BYTE) NOT NULL ENABLE," 
+            + "LAST_CHANGED TIMESTAMP (6) DEFAULT SYSDATE, "
+            + "CONSTRAINT DAL_CLIENT_TEST_PK PRIMARY KEY (ID))";
+    
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		DalClientFactory.initClientFactory();
@@ -42,7 +52,7 @@ public class DalTableDaoShardByDbOracleTest extends BaseDalTableDaoShardByDbTest
 		for(int i = 0; i < mod; i++) {
 			DalHints hints = new DalHints();
 			String[] sqls = new String[] { 
-					DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL2, CREATE_TABLE_TRIG,
+					DROP_TABLE_SEQ, DROP_TABLE_SQL, CREATE_TABLE_SEQ, CREATE_TABLE_SQL_TPL, CREATE_TABLE_TRIG,
 					};
 			client.batchUpdate(sqls, hints.inShard(i));
 		}

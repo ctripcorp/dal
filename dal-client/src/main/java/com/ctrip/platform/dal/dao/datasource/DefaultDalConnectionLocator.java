@@ -12,10 +12,10 @@ import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import javax.sql.DataSource;
 
 public class DefaultDalConnectionLocator implements DalConnectionLocator {
-    private static final String DATASOURCE_CONFIG_PROVIDER = "dataSourceConfigureProvider";
+    public static final String DATASOURCE_CONFIG_PROVIDER = "dataSourceConfigureProvider";
 
-    private DataSourceConfigureProvider provider;
     private DataSourceLocator locator;
+    private DataSourceConfigureProvider provider;
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
@@ -26,6 +26,7 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
         }
 
         provider.initialize(settings);
+
         locator = new DataSourceLocator(provider);
     }
 
@@ -40,5 +41,4 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
         DataSource dataSource = locator.getDataSource(keyName);
         return dataSource.getConnection();
     }
-
 }

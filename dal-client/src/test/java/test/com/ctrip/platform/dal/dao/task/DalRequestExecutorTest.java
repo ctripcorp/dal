@@ -25,14 +25,14 @@ import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 
 public class DalRequestExecutorTest {
 	private class TestDalRequest implements DalRequest<Integer> {
-		private SQLException e;
+		private SQLException e; 
 		public Integer[] values;
-
+		
 		private TestDalRequest(SQLException e, Integer[] values) {
 			this.e = e;
 			this.values = values;
 		}
-
+		
 		@Override
 		public void validate() throws SQLException {
 			if(e!= null)
@@ -52,21 +52,21 @@ public class DalRequestExecutorTest {
 		@Override
 		public Map<String, Callable<Integer>> createTasks() throws SQLException {
 			Map<String, Callable<Integer>> tasks = new HashMap<>();
-
+			
 			for(int i = 0; i < values.length; i++) {
 				final int k = values[i];
 				tasks.put(String.valueOf(i), createInternalTask(k));
 			}
-
+				
 			return tasks;
 		}
-
+		
 		public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
-			return new Callable<Integer>() {
-				public Integer call() throws Exception {
-					return k;
-				}
-			};
+		    return new Callable<Integer>() {
+		        public Integer call() throws Exception {
+		            return k;
+		        }
+		    };
 		}
 
 		@Override
@@ -74,54 +74,60 @@ public class DalRequestExecutorTest {
 			return new ResultMerger.IntSummary();
 		}
 
-		@Override
-		public String getCaller() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        @Override
+        public String getCaller() {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
-		@Override
-		public boolean isAsynExecution() {
-			// TODO Auto-generated method stub
-			return false;
-		}
+        @Override
+        public boolean isAsynExecution() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public void endExecution() throws SQLException {
+            // TODO Auto-generated method stub
+
+        }
 	}
+	
+    static ConcurrentHashMap<String, Object> all = new ConcurrentHashMap<>();
+    
+    private class TestThreadPoolDalRequest extends TestDalRequest {
+        TestThreadPoolDalRequest(int size) {
+            super(null, null);
+            values = new Integer[size];
+            for(int i = 0; i < size; i++)
+                values[i] = i;
+            
+        }
+        
+        private boolean sleep;
+        
+        public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
+            return new Callable<Integer>() {
+                public Integer call() throws Exception {
+                    all.put(Thread.currentThread().getName(), 1);
+                    if(sleep)
+                        Thread.sleep(1000);
+                    return k;
+                }
+            };
+        }
+    }
+    
+    @Before
+    public void setUp() {
+        try{
+            DalRequestExecutor.init(null, null);
+        }catch(Throwable e) {
+            fail();
+        }
+    }
 
-	static ConcurrentHashMap<String, Object> all = new ConcurrentHashMap<>();
-
-	private class TestThreadPoolDalRequest extends TestDalRequest {
-		TestThreadPoolDalRequest(int size) {
-			super(null, null);
-			values = new Integer[size];
-			for(int i = 0; i < size; i++)
-				values[i] = i;
-
-		}
-
-		private boolean sleep;
-
-		public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
-			return new Callable<Integer>() {
-				public Integer call() throws Exception {
-					all.put(Thread.currentThread().getName(), 1);
-					if(sleep)
-						Thread.sleep(1000);
-					return k;
-				}
-			};
-		}
-	}
-
-	@Before
-	public void setUp() {
-		try{
-			DalRequestExecutor.init(null, null);
-		}catch(Throwable e) {
-			fail();
-		}
-	}
-
-	@After
+    @After
 	public void teardown() {
 		try{
 			DalRequestExecutor.shutdown();
@@ -136,7 +142,7 @@ public class DalRequestExecutorTest {
 		SQLException ex = new SQLException("Test");
 		TestDalRequest request = new TestDalRequest(ex, null);
 		DalHints hints = new DalHints();
-
+		
 		try {
 			test.execute(hints, request);
 			fail();
@@ -151,7 +157,7 @@ public class DalRequestExecutorTest {
 		SQLException ex = new SQLException("Test");
 		TestDalRequest request = new TestDalRequest(ex, null);
 		DalHints hints = new DalHints().asyncExecution();
-
+		
 		try {
 			assertNull(test.execute(hints, request));
 			Future<?> result = hints.getAsyncResult();
@@ -167,7 +173,7 @@ public class DalRequestExecutorTest {
 		DalRequestExecutor test = new DalRequestExecutor();
 		TestDalRequest request = new TestDalRequest(null, new Integer[]{1});
 		DalHints hints = new DalHints();
-
+		
 		try {
 			Integer result = test.execute(hints, request);
 			assertEquals(1, result.intValue());
@@ -181,7 +187,7 @@ public class DalRequestExecutorTest {
 		DalRequestExecutor test = new DalRequestExecutor();
 		TestDalRequest request = new TestDalRequest(null, new Integer[]{1, 2});
 		DalHints hints = new DalHints();
-
+		
 		try {
 			Integer result = test.execute(hints, request);
 			assertEquals(3, result.intValue());
@@ -195,7 +201,7 @@ public class DalRequestExecutorTest {
 		DalRequestExecutor test = new DalRequestExecutor();
 		TestDalRequest request = new TestDalRequest(null, new Integer[]{null});
 		DalHints hints = new DalHints();
-
+		
 		try {
 			Integer result = test.execute(hints, request, true);
 			assertNull(result);
@@ -216,7 +222,7 @@ public class DalRequestExecutorTest {
 		TestDalRequest request = new TestDalRequest(null, new Integer[]{1});
 		DalHints hints = new DalHints();
 		DefaultResultCallback callback = new DefaultResultCallback();
-
+		
 		try {
 			Integer result = test.execute(hints.callbackWith(callback), request, true);
 			assertNull(result);
@@ -226,7 +232,6 @@ public class DalRequestExecutorTest {
 			fail();
 		}
 	}
-
 
     @Test
     public void testThreadPoolFeature() {

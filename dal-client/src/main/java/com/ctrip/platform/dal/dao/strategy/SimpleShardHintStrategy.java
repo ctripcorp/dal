@@ -31,7 +31,7 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 		if(settings.containsKey(SHARDED_TABLES)) {
 			String[] tables = settings.get(SHARDED_TABLES).split(",");
 			for(String table: tables)
-				shardedTables.add(table);
+				shardedTables.add(table.toLowerCase().trim());
 		}
 		
 		if(settings.containsKey(SEPARATOR)) {
@@ -63,7 +63,7 @@ public class SimpleShardHintStrategy extends AbstractRWSeparationStrategy implem
 
 	@Override
 	public boolean isShardingEnable(String tableName) {
-		return shardedTables.contains(tableName);
+		return shardedTables.contains(tableName.toLowerCase());
 	}
 
 	@Override

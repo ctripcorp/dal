@@ -169,6 +169,22 @@ public abstract class ConnectionAction<T> {
 		handleException(e);
 	}
 
+    public void beginExecute() {
+        entry.beginExecute();
+    }
+    
+    public void endExectue() {
+        entry.endExectue();
+    }
+    
+    public void beginConnect() {
+        entry.beginConnect();
+    }
+    
+    public void endConnect() {
+        entry.endConnect();
+    }
+
 	private void log(Object result, Throwable e) {
 		try {
 			entry.setDuration(System.currentTimeMillis() - start);

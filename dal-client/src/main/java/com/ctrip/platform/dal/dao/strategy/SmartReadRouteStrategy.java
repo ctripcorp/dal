@@ -74,7 +74,7 @@ public class SmartReadRouteStrategy implements DalShardingStrategy {
 	}
 
 	@Override
-	public String locateTableShard(DalConfigure configure, String logicDbName,
+	public String locateTableShard(DalConfigure configure, String logicDbName, String tabelName,
 			DalHints hints) {
 		return hints.getString(DalHintEnum.tableShard);
 	}

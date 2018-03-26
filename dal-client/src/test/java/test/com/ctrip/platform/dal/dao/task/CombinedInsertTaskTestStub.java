@@ -60,10 +60,28 @@ public class CombinedInsertTaskTestStub extends TaskTestStub {
 		}
 	}
 	
+    @Test
+    public void testExecuteWithIdInsertBackOldPojo() throws SQLException {
+        CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
+        test.initialize(new ClientTestDalParser(getDbName()));
+        
+        DalHints hints = new DalHints().setIdentityBack();
+        if(enableKeyHolder)
+            hints.setKeyHolder(new KeyHolder());
+        try {
+            List<ClientTestModel> pojos = getAll();
+            for(ClientTestModel pojo: pojos)
+                pojo.setId(null);
+            execute(test, hints, getAllMap(), pojos);
+            fail();
+        } catch (Throwable e) {
+        }
+    }
+    
 	@Test
 	public void testExecuteWithId() {
-		CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
-		test.initialize(new ClientTestDalParser(getDbName()));
+        CombinedInsertTask<ClientTestModel> test = new CombinedInsertTask<>();
+        test.initialize(new ClientTestDalParser(getDbName()));
 		DalHints hints = new DalHints().enableIdentityInsert();
 		if(enableKeyHolder)
 			hints.setKeyHolder(new KeyHolder());

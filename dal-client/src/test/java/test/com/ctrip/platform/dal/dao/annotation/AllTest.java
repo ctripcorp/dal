@@ -6,9 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import test.com.ctrip.platform.dal.dao.annotation.autowire.DalTransactionalValidatorAutoWireTest;
 import test.com.ctrip.platform.dal.dao.annotation.beanDefine.DalTransactionalValidatorTest;
-import test.com.ctrip.platform.dal.dao.annotation.normal.DalTransactionalAnnotationMySqlTest;
-import test.com.ctrip.platform.dal.dao.annotation.normal.DalTransactionalAnnotationOracleTest;
-import test.com.ctrip.platform.dal.dao.annotation.normal.DalTransactionalAnnotationSqlServerTest;
+import test.com.ctrip.platform.dal.dao.annotation.normal.BaseDalTransactionalAnnotationTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -16,9 +14,7 @@ import test.com.ctrip.platform.dal.dao.annotation.normal.DalTransactionalAnnotat
 	DalTransactionalValidatorAutoWireTest.class,	
 	DalAnnotationValidatorTest.class,
 	
-	DalTransactionalAnnotationMySqlTest.class,
-    DalTransactionalAnnotationSqlServerTest.class,
-    DalTransactionalAnnotationOracleTest.class,
+	BaseDalTransactionalAnnotationTest.class,
 
 })
 public class AllTest {}

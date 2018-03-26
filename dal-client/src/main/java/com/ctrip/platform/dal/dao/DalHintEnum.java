@@ -222,6 +222,11 @@ public enum DalHintEnum {
 	 */
 	enableIdentityInsert,
 	
+    /**
+     * Set generated incremental id back to the original pojo
+     */
+    setIdentityBack,
+    
 	/**
 	 * Columns that will be excluded for update
 	 */
@@ -248,4 +253,9 @@ public enum DalHintEnum {
      * It request extractor or mapper to be HintsAwareExtractor or HintsAareMapper to do the required work
      */
     allowPartial,
+    
+    /**
+     * when select all columns, use column names instead of *
+     */
+    selectByNames,
 }

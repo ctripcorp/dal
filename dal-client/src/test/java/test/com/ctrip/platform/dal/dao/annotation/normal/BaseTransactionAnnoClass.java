@@ -14,7 +14,6 @@ import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.annotation.Shard;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 
 public class BaseTransactionAnnoClass {
@@ -37,14 +36,14 @@ public class BaseTransactionAnnoClass {
         this.shardDb = shardDb;
         this.query = query;
     }
-
+    
     @Autowired
     private JustAnotherClass jac;
-
+    
     public JustAnotherClass getJac() {
         return jac;
     }
-
+    
     public String performNormal() {
         assertTrue(!DalTransactionManager.isInTransaction());
         return DONE;
@@ -99,21 +98,21 @@ public class BaseTransactionAnnoClass {
         return DONE;
     }
 
-    public String perform(@Shard String id) {
+    public String perform(String id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(shardDb, DalTransactionManager.getLogicDbName());
         assertEquals(id, DalTransactionManager.getCurrentShardId());
         return DONE;
     }
 
-    public String perform(@Shard Integer id) {
+    public String perform(Integer id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(shardDb, DalTransactionManager.getLogicDbName());
         assertEquals(id.toString(), DalTransactionManager.getCurrentShardId());
         return DONE;
     }
 
-    public String perform(@Shard int id) {
+    public String perform(int id) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(String.valueOf(id), DalTransactionManager.getCurrentShardId());
         testQuery(shardDb);
@@ -126,15 +125,15 @@ public class BaseTransactionAnnoClass {
         testQuery(shardDb);
         return DONE;
     }
-
+    
     public String performFail(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(hints.getShardId(), DalTransactionManager.getCurrentShardId());
         testQuery(shardDb);
         throw new RuntimeException();
     }
-
-    public String performWitShard(@Shard String id, DalHints hints) {
+    
+    public String performWitShard(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         if(id != null)
             assertEquals(id, DalTransactionManager.getCurrentShardId());
@@ -143,8 +142,8 @@ public class BaseTransactionAnnoClass {
         testQuery(shardDb);
         return DONE;
     }
-
-    public String performWitShardNest(@Shard String id, DalHints hints) {
+    
+    public String performWitShardNest(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         if(id != null)
             assertEquals(id, DalTransactionManager.getCurrentShardId());
@@ -153,16 +152,16 @@ public class BaseTransactionAnnoClass {
         performWitShard(id, hints);
         return DONE;
     }
-
-    public String performWitShardNestConflict(@Shard String id, DalHints hints) {
+    
+    public String performWitShardNestConflict(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(id, DalTransactionManager.getCurrentShardId());
         performWitShard(id+id, hints);
         fail();
         return DONE;
     }
-
-    public String performWitShardNestFail(@Shard String id, DalHints hints) {
+    
+    public String performWitShardNestFail(String id, DalHints hints) {
         assertTrue(DalTransactionManager.isInTransaction());
         if(id != null)
             assertEquals(id, DalTransactionManager.getCurrentShardId());
@@ -171,10 +170,10 @@ public class BaseTransactionAnnoClass {
         performFail(id, hints.inShard(id));
         return DONE;
     }
-
-    public String performCommandWitShardNest(final @Shard String id, DalHints hints) throws SQLException {
+    
+    public String performCommandWitShardNest(final String id, DalHints hints) throws SQLException {
         DalClientFactory.getClient(shardDb).execute(new DalCommand() {
-
+            
             @Override
             public boolean execute(DalClient client) throws SQLException {
                 perform(id, new DalHints().inShard(id));
@@ -188,10 +187,10 @@ public class BaseTransactionAnnoClass {
 
         return DONE;
     }
-
-    public String performCommandWitShardNestFail(final @Shard String id, DalHints hints) throws SQLException {
+    
+    public String performCommandWitShardNestFail(final String id, DalHints hints) throws SQLException {
         DalClientFactory.getClient(shardDb).execute(new DalCommand() {
-
+            
             @Override
             public boolean execute(DalClient client) throws SQLException {
                 perform(id, new DalHints().inShard(id));
@@ -203,13 +202,13 @@ public class BaseTransactionAnnoClass {
                 return false;
             }
         }, new DalHints().inShard(id));
-
+        
         return DONE;
     }
-
-    public String performDetectDistributedTransaction(final @Shard String id, DalHints hints) throws SQLException {
+    
+    public String performDetectDistributedTransaction(final String id, DalHints hints) throws SQLException {
         DalClientFactory.getClient(shardDb).execute(new DalCommand() {
-
+            
             @Override
             public boolean execute(DalClient client) throws SQLException {
                 perform(id, new DalHints().inShard(id));
@@ -221,10 +220,10 @@ public class BaseTransactionAnnoClass {
                 return false;
             }
         }, new DalHints().inShard(id));
-
+        
         return DONE;
     }
-
+    
     private void testQuery(String db) {
         try {
             new DalQueryDao(db).query(query, new StatementParameters(), new DalHints(), Integer.class);
@@ -233,7 +232,7 @@ public class BaseTransactionAnnoClass {
             fail();
         }
     }
-
+    
     private void testQueryFail(String db) {
         try {
             new DalQueryDao(db).query(query, new StatementParameters(), new DalHints(), Integer.class);

@@ -6,6 +6,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.ctrip.platform.dal.dao.client.DalAnnotationValidator;
+
 public class DalTransactionalValidatorAutoWireTest {
     @Test
     public void testValidateFail() throws InstantiationException, IllegalAccessException {
@@ -14,7 +16,7 @@ public class DalTransactionalValidatorAutoWireTest {
             ctx = new ClassPathXmlApplicationContext("transactionTestFailByAutowire.xml");
             Assert.fail();
         } catch (BeansException e) {
-            Assert.assertTrue(e.getCause().getMessage().contains("Bean annotated by @Transactional must be created through DalTransactionManager.create()"));
+            Assert.assertTrue(e.getMessage().contains(DalAnnotationValidator.VALIDATION_MSG));
         }
     }   
 }

@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -17,6 +18,9 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.DalRowCallback;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalCustomRowMapper;
+import com.ctrip.platform.dal.dao.sqlbuilder.AbstractFreeSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 
 public class DalQueryDaoTestStub extends BaseTestStub {
 	private DalQueryDao client = null;
@@ -109,6 +113,12 @@ public class DalQueryDaoTestStub extends BaseTestStub {
 		DalHints hints = new DalHints();
 		ClientTestModel model = client.queryForObject(sql, param, hints, mapper);
 		Assert.assertEquals(1, model.getId().intValue());
+
+		FreeSelectSqlBuilder<List<Map<String, Object>>> builder = new FreeSelectSqlBuilder<>();
+		builder.append("select count(*) as c1, 111 as c2");
+		builder.mapWith(new DalCustomRowMapper("c1", "c2"));
+        builder.with(new StatementParameters());
+		List<Map<String, Object>> l = client.query(builder, hints);
 	}
 	
 	/**

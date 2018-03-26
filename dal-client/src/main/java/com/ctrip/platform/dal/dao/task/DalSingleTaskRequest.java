@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao.task;
 
+import static com.ctrip.platform.dal.dao.KeyHolder.mergePartial;
+import static com.ctrip.platform.dal.dao.KeyHolder.prepareLocalHints;
+import static com.ctrip.platform.dal.dao.KeyHolder.setGeneratedKeyBack;
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.detectDistributedTransaction;
 
 import java.sql.SQLException;
@@ -10,13 +13,12 @@ import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.ResultMerger;
-import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
-	private String caller;
+    private String caller;
 	private String logicDbName;
 	private DalHints hints;
 	private boolean isList;
@@ -31,7 +33,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		this.hints = hints;
 		this.caller = LogContext.getRequestCaller();
 	}
-
+	
 	public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
 		this(logicDbName, hints, task);
 
@@ -44,16 +46,16 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		this.rawPojos = rawPojos;
 		isList = true;
 	}
-
-	@Override
-	public String getCaller() {
-		return caller;
-	}
-
-	@Override
-	public boolean isAsynExecution() {
-		return hints.isAsyncExecution();
-	}
+	
+    @Override
+    public String getCaller() {
+        return caller;
+    }
+    
+    @Override
+    public boolean isAsynExecution() {
+        return hints.isAsyncExecution();
+    }
 
 	@Override
 	public void validate() throws SQLException {
@@ -62,20 +64,20 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 
 		if(isList == false && null == rawPojo)
 			throw new DalException(ErrorCode.ValidatePojo);
-
+		
 		if(task == null)
 			throw new DalException(ErrorCode.ValidateTask);
-
+		
 		if(isList == false){
 			rawPojos = new ArrayList<>(1);
 			rawPojos.add(rawPojo);
 		}
 
 		daoPojos = task.getPojosFields(rawPojos);
-
+			
 		detectDistributedTransaction(logicDbName, hints, daoPojos);
 	}
-
+	
 	@Override
 	public boolean isCrossShard() {
 		// The single task request is always executed as if the pojos are not corss shard even they really are.
@@ -98,6 +100,11 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		return null;
 	}
 
+    @Override
+    public void endExecution() throws SQLException {
+        setGeneratedKeyBack(task, hints, rawPojos);
+    }
+
 	private static class SingleTaskCallable<T> implements Callable<int[]> {
 		private DalHints hints;
 		private List<Map<String, ?>> daoPojos;
@@ -114,15 +121,20 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]>{
 		@Override
 		public int[] call() throws Exception {
 			int[] counts = new int[daoPojos.size()];
-			DalHints localHints = hints.clone();// To avoid shard id being polluted by each pojos
 			for (int i = 0; i < daoPojos.size(); i++) {
-				DalWatcher.begin();// TODO check if we needed
+			    Throwable error = null;
+			    DalHints localHints = prepareLocalHints(task, hints);
+
 				try {
 					counts[i] = task.execute(localHints, daoPojos.get(i), rawPojos.get(i));
-				} catch (SQLException e) {
-					hints.handleError("Error when execute single pojo operation", e);
+				} catch (Throwable e) {
+				    error = e;
 				}
+
+				mergePartial(task, hints.getKeyHolder(), localHints.getKeyHolder(), error);
+                hints.handleError("Error when execute single pojo operation", error);
 			}
+
 			return counts;
 		}
 	}

@@ -3,7 +3,13 @@ package com.ctrip.platform.dal.dao.helper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServiceLoaderHelper {
@@ -20,13 +26,13 @@ public class ServiceLoaderHelper {
             if (!Ordered.class.isAssignableFrom(clazz)) {
                 if (iterator.hasNext())
                     return iterator.next();
-            }else {
+            } else {
                 List<T> sortServices = new LinkedList<>();
-                while (iterator.hasNext()){
+                while (iterator.hasNext()) {
                     T service = iterator.next();
                     sortServices.add(service);
                 }
-                if(sortServices.size() == 0){
+                if (sortServices.size() == 0) {
                     return null;
                 }
                 Collections.sort(sortServices, (Comparator<? super T>) new OrderedComparator());

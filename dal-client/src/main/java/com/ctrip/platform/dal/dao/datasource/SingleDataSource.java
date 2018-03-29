@@ -53,13 +53,14 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
                     p.getDriverClassName(), dataSourceConfigure.getConnectionUrl());
-            LOGGER.info(message);
             ilogger.logTransaction(DAL, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, new Callback() {
                 @Override
                 public void execute() throws Exception {
                     dataSource.createPool();
                 }
             });
+
+            LOGGER.info(message);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
         }

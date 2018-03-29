@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -78,6 +79,7 @@ public class TitanDataSourceLocator {
 
             TitanData data = getConnectionStrings(titanSvcUrl, name, appid);
             DataSourceConfigure configure = parse(name, decrypt(data.getConnectionString()));
+            name = ConnectionStringKeyHelper.getKeyName(name);
             configure.setName(name);
             configure = DataSourceConfigureManager.getInstance().mergeDataSourceConfig(configure);
 

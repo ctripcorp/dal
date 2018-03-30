@@ -20,18 +20,13 @@
         }
 
         .pie {
-            width: 600px;
+            width: 100%;
             height: 480px;
         }
 
         .table-size {
-            width: 1000px;
-            height: 640px;
-        }
-
-        .table-size-2 {
-            width: 1500px;
-            height: 800px;
+            width: 100%;
+            height: 480px;
         }
 
         .display-none {
@@ -52,6 +47,10 @@
 
         .font-size {
             font-size: 90% !important;
+        }
+
+        .margin-left {
+            margin-left: 5px;
         }
 
         .padding-left-right {
@@ -76,7 +75,7 @@
         <li role="presentation" class="active">
             <a href="#dalVersion" aria-controls="dalVersion" role="tab" data-toggle="tab">DAL.version</a>
         </li>
-        <li role="presentation">
+        <li role="presentation" style="display: none;">
             <a id="anchorLocalDatasource" href="#dalLocalDatasource" aria-controls="dalLocalDatasource" role="tab"
                data-toggle="tab">DAL.local.datasource</a>
         </li>
@@ -90,6 +89,18 @@
                     </div>
                     <div id="divVersion" class="container-fluid bg-info">
                     </div>
+                    <div id="divCategory" class="container-fluid bg-info">
+                        <div class="checkbox" class="margin-left">
+                            数据库类型：
+                            <label>
+                                <input type="checkbox" id="chkSqlServer" checked="checked">SqlServer
+                            </label>
+                            &nbsp;
+                            <label>
+                                <input type="checkbox" id="chkMySql" checked="checked">MySql
+                            </label>
+                        </div>
+                    </div>
                     <div id="divExport" class="container-fluid bg-info">
                         <span id="spanExport" class="label label-success span-margin cursor font-size">导出Excel</span>
                         <span id="spanForceFresh" class="label label-success span-margin cursor font-size"
@@ -97,9 +108,11 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <div id="divPie" class="pie float-left">
+                    <div id="divPie" class="pie">
                     </div>
-                    <div id="divTable" class="float-left display-none">
+                </div>
+                <div class="panel-body">
+                    <div id="divTable" class="display-none">
                         <p class="bg-success padding-left-right">
                             <span id="spanCount"></span>
                             <span id="spanLastUpdate" class="float-right"></span>

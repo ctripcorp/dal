@@ -10,14 +10,14 @@
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.4.15-SNAPSHOT</version>
+    <version>1.4.22</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
         <file_encoding>UTF-8</file_encoding>
         <framework-bom.version>1.3.1</framework-bom.version>
-        <dao-gen-core-version>1.4.15-SNAPSHOT</dao-gen-core-version>
-        <dal-dao-gen-version>1.4.15-SNAPSHOT</dal-dao-gen-version>
+        <dao-gen-core-version>1.4.22</dao-gen-core-version>
+        <dal-dao-gen-version>1.4.22</dal-dao-gen-version>
         <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
         <mysql-connector-version>5.1.41</mysql-connector-version>
         <javax-mail-version>1.4.7</javax-mail-version>

@@ -18,6 +18,11 @@
         <constructor-arg value="mysqldaltest01db_W"/>
     </bean>
 
+    <bean id="titanDataSource" factory-bean="dalDataSourceFactory" factory-method="createTitanDataSource">
+        <constructor-arg value="AbacusDB_INSERT_1"/>
+        <constructor-arg value="https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query/"/>
+    </bean>
+    
     <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
     <!--<property name="dataSource" ref="dataSource"/>-->
     <!--<property name="configLocation" value="classpath:mybatis-config.xml"/>-->

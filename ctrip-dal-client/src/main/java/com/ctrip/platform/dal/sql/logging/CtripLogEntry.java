@@ -147,6 +147,6 @@ public class CtripLogEntry extends LogEntry {
 				params,
 				isSuccess() ? 1 : 0,
 				CommonUtil.string2Json(getErrorMsg()),
-				DalWatcher.toJson());
+				entry.getCostDetail());
 	}
 }

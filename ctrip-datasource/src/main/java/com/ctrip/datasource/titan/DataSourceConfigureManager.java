@@ -2,8 +2,8 @@ package com.ctrip.datasource.titan;
 
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
 import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
+import com.ctrip.datasource.configure.qconfig.IPDomainStatusProviderImpl;
 import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
-import com.ctrip.datasource.configure.qconfig.TempIPDomainStatusProviderImpl;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.datasource.common.enums.SourceType;
@@ -82,8 +82,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
-    // private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
-    private IPDomainStatusProvider ipDomainStatusProvider = new TempIPDomainStatusProviderImpl();
+    private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
+    // private IPDomainStatusProvider ipDomainStatusProvider = new TempIPDomainStatusProviderImpl();
 
     private AtomicReference<Boolean> isPoolPropertiesListenerAdded = new AtomicReference<>(false);
     private AtomicReference<Boolean> isIPDomainStatusListenerAdded = new AtomicReference<>(false);

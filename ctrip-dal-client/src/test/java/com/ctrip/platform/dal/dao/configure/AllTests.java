@@ -8,7 +8,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     CtripDalConfigLoaderTest.class,
     FreshnessHelperTest.class,
-    FreshnessScannerTest.class,
     SlaveFreshnessScannerMysqlTest.class,
     SlaveFreshnessScannerSqlSvrTest.class
 })

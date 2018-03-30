@@ -1,25 +1,22 @@
 package noShardTest;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.*;
-import com.ctrip.platform.dal.dao.annotation.Transactional;
-import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
-import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
+
+import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by lilj on 2017/7/24.
  */
-public class NoShardTransactionTestOnMysqlDao {
-    private static final boolean ASC = true;
+public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTestOnMysqlDao {
+    private static final String DATA_BASE = "noShardTestOnMysql";
+    public NoShardDalTransactionalTestOnMysqlDao() throws SQLException {
+//        this.client = new DalTableDao<>(new DalDefaultJpaParser<>(NoShardTransactionTestOnMysql.class));
+//        this.personGenRowMapper = new DalDefaultJpaMapper<>(NoShardTransactionTestOnMysql.class);
+//        this.queryDao = new DalQueryDao(DATA_BASE);
+    }
+    /*private static final boolean ASC = true;
     private DalTableDao<NoShardTransactionTestOnMysql> client;
     private static final String DATA_BASE = "noShardTestOnMysql";
     private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
@@ -27,25 +24,25 @@ public class NoShardTransactionTestOnMysqlDao {
 
     private DalRowMapper<NoShardTransactionTestOnMysql> personGenRowMapper = null;
 
-    public NoShardTransactionTestOnMysqlDao() throws SQLException {
+    public NoShardTransactionalTestOnMysqlDao() throws SQLException {
         this.client = new DalTableDao<>(new DalDefaultJpaParser<>(NoShardTransactionTestOnMysql.class));
         this.personGenRowMapper = new DalDefaultJpaMapper<>(NoShardTransactionTestOnMysql.class);
         this.queryDao = new DalQueryDao(DATA_BASE);
     }
 
-//	/**
+//	*//**
 //	 * Query PersonGen by the specified ID
 //	 * The ID must be a number
-//	**/
+//	**//*
 //	public ShardTestTransactionTestOnMysql queryByPk(Number id, DalHints hints)
 //			throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //		return client.queryByPk(id, hints);
 //	}
 
-    /**
+    *//**
      * Query Person by complex primary key
-     **/
+     **//*
     public NoShardTransactionTestOnMysql queryByPk(Integer iD, DalHints hints)
             throws SQLException {
         hints = DalHints.createIfAbsent(hints);
@@ -54,28 +51,28 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryByPk(pk, hints);
     }
 
-    /**
+    *//**
      * Query PersonGen by PersonGen instance which the primary key is set
-     **/
+     **//*
     public NoShardTransactionTestOnMysql queryByPk(NoShardTransactionTestOnMysql pk, DalHints hints)
             throws SQLException {
         hints = DalHints.createIfAbsent(hints);
         return client.queryByPk(pk, hints);
     }
 
-    /**
+    *//**
      * Query against sample pojo. All not null attributes of the passed in pojo
      * will be used as search criteria.
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> queryLike(NoShardTransactionTestOnMysql sample, DalHints hints)
             throws SQLException {
         hints = DalHints.createIfAbsent(hints);
         return client.queryLike(sample, hints);
     }
 
-    /**
+    *//**
      * Get the all records count
-     */
+     *//*
     public int count(DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
         SelectSqlBuilder builder = new SelectSqlBuilder().selectCount();
@@ -90,10 +87,10 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.count(whereCondition, parameters, hints).intValue();
     }
 
-    /**
+    *//**
      * Query Person with paging function
      * The pageSize and pageNo must be greater than zero.
-     */
+     *//*
     public List<NoShardTransactionTestOnMysql> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -103,9 +100,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * Get all records from table
-     */
+     *//*
     public List<NoShardTransactionTestOnMysql> queryAll(DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -114,10 +111,10 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-//	/**
+//	*//**
 //	 * Query PersonGen with paging function
 //	 * The pageSize and pageNo must be greater than zero.
-//	 */
+//	 *//*
 //	public List<ShardTestTransactionTestOnMysql> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //
@@ -127,9 +124,9 @@ public class NoShardTransactionTestOnMysqlDao {
 //		return client.query(builder, hints);
 //	}
 //	
-//	/**
+//	*//**
 //	 * Get all records from table
-//	 */
+//	 *//*
 //	public List<ShardTestTransactionTestOnMysql> queryAll(DalHints hints) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //		
@@ -138,7 +135,7 @@ public class NoShardTransactionTestOnMysqlDao {
 //		return client.query(builder, hints);
 //	}
 
-    /**
+    *//**
      * Insert pojo and get the generated PK back in keyHolder. 
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
@@ -149,7 +146,7 @@ public class NoShardTransactionTestOnMysqlDao {
      *            pojo to be inserted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int insert(DalHints hints, NoShardTransactionTestOnMysql daoPojo) throws SQLException {
         if(null == daoPojo)
             return 0;
@@ -157,7 +154,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.insert(hints, daoPojo);
     }
 
-    /**
+    *//**
      * Insert pojos one by one. If you want to inert them in the batch mode,
      * user batchInsert instead. You can also use the combinedInsert.
      *
@@ -169,7 +166,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojos
      *            list of pojos to be inserted
      * @return how many rows been affected
-     */
+     *//*
     public int[] insert(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -177,7 +174,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.insert(hints, daoPojos);
     }
 
-    /**
+    *//**
      * Insert pojo and get the generated PK back in keyHolder. 
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
@@ -190,7 +187,7 @@ public class NoShardTransactionTestOnMysqlDao {
      *            pojo to be inserted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int insert(DalHints hints, KeyHolder keyHolder, NoShardTransactionTestOnMysql daoPojo) throws SQLException {
         if(null == daoPojo)
             return 0;
@@ -198,7 +195,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.insert(hints, keyHolder, daoPojo);
     }
 
-    /**
+    *//**
      * Insert pojos and get the generated PK back in keyHolder. 
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
@@ -214,7 +211,7 @@ public class NoShardTransactionTestOnMysqlDao {
      *            list of pojos to be inserted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int[] insert(DalHints hints, KeyHolder keyHolder, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -222,7 +219,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.insert(hints, keyHolder, daoPojos);
     }
 
-    /**
+    *//**
      * Insert pojos in batch mode. 
      * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
      *
@@ -230,7 +227,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojos list of pojos to be inserted
      * @return how many rows been affected for inserting each of the pojo
      * @throws SQLException
-     */
+     *//*
     public int[] batchInsert(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -238,7 +235,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.batchInsert(hints, daoPojos);
     }
 
-    /**
+    *//**
      * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
@@ -248,7 +245,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojos list of pojos to be inserted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int combinedInsert(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return 0;
@@ -256,7 +253,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.combinedInsert(hints, daoPojos);
     }
 
-    /**
+    *//**
      * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
@@ -267,7 +264,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojos list of pojos to be inserted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return 0;
@@ -275,14 +272,14 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.combinedInsert(hints, keyHolder, daoPojos);
     }
 
-    /**
+    *//**
      * Delete the given pojo.
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param daoPojo pojo to be deleted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int delete(DalHints hints, NoShardTransactionTestOnMysql daoPojo) throws SQLException {
         if(null == daoPojo)
             return 0;
@@ -290,14 +287,14 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.delete(hints, daoPojo);
     }
 
-    /**
+    *//**
      * Delete the given pojos list one by one.
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param daoPojos list of pojos to be deleted
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int[] delete(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -305,7 +302,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.delete(hints, daoPojos);
     }
 
-    /**
+    *//**
      * Delete the given pojo list in batch. 
      * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the shard.
      *
@@ -313,7 +310,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojos list of pojos to be deleted
      * @return how many rows been affected for deleting each of the pojo
      * @throws SQLException
-     */
+     *//*
     public int[] batchDelete(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -321,7 +318,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.batchDelete(hints, daoPojos);
     }
 
-    /**
+    *//**
      * Update the given pojo . By default, if a field of pojo is null value,
      * that field will be ignored, so that it will not be updated. You can
      * overwrite this by set updateNullField in hints.
@@ -333,7 +330,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojo pojo to be updated
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int update(DalHints hints, NoShardTransactionTestOnMysql daoPojo) throws SQLException {
         if(null == daoPojo)
             return 0;
@@ -341,7 +338,7 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.update(hints, daoPojo);
     }
 
-    /**
+    *//**
      * Update the given pojo list one by one. By default, if a field of pojo is null value,
      * that field will be ignored, so that it will not be updated. You can
      * overwrite this by set updateNullField in hints.
@@ -353,7 +350,7 @@ public class NoShardTransactionTestOnMysqlDao {
      * @param daoPojos list of pojos to be updated
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int[] update(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -361,12 +358,12 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.update(hints, daoPojos);
     }
 
-    /**
+    *//**
      * Update the given pojo list in batch. 
      *
      * @return how many rows been affected
      * @throws SQLException
-     */
+     *//*
     public int[] batchUpdate(DalHints hints, List<NoShardTransactionTestOnMysql> daoPojos) throws SQLException {
         if(null == daoPojos || daoPojos.size() <= 0)
             return new int[0];
@@ -374,9 +371,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.batchUpdate(hints, daoPojos);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<String> test_build_query_fieldList_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -388,9 +385,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<String> test_build_query_fieldList_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -402,9 +399,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<String> test_build_query_fieldListByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -418,9 +415,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<String> test_build_query_fieldListByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -434,9 +431,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public String test_build_query_field_single(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -448,9 +445,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public String test_build_query_field_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -464,9 +461,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public String test_build_query_field_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -481,9 +478,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints, String.class);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_ClientQueryFrom_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -494,9 +491,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryFrom("Age in ?", parameters, hints, start, count);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_ClientQueryFromPartialFieldsSet_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -511,9 +508,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryFrom("Age in ?", parameters, hints.partialQuery(columns), start, count);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_ClientQueryFromPartialFieldsStrings_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -528,9 +525,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryFrom("Age in ?", parameters, hints.partialQuery("Age","Name"), start, count);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_query_list_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -548,9 +545,9 @@ public class NoShardTransactionTestOnMysqlDao {
 
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_query_list_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -567,9 +564,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询部分字段
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_queryPartial_list_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -582,9 +579,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询部分字段
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_queryPartial_list_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -598,9 +595,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_query_listByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -614,9 +611,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_query_listByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -631,9 +628,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询部分字段
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_queryPartial_listByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -647,9 +644,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询部分字段
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_build_queryPartial_listByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -664,9 +661,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.query(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_build_query_single(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -678,9 +675,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询部分字段
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_build_queryPartial_single(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -692,9 +689,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_build_query_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -707,9 +704,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_build_query_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -723,9 +720,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_build_queryPartial_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -740,9 +737,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return client.queryObject(builder, hints);
     }
 
-    /**
+    *//**
      * 构建，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_build_queryPartial_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -759,9 +756,9 @@ public class NoShardTransactionTestOnMysqlDao {
     }
 
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_def_query(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -777,9 +774,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.query(sql, parameters, hints, NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_def_partialQuery(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -795,9 +792,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.query(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_queryForObject(List<Integer> ID, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -809,9 +806,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryForObject(sql, parameters, hints, NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_partialQueryForObject(List<Integer> ID, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -823,9 +820,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryForObject(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_queryForObjectNullable(List<Integer> ID, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -837,9 +834,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryForObjectNullable(sql, parameters, hints, NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_partialQueryForObjectNullable(List<Integer> ID, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -851,9 +848,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryForObjectNullable(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_queryFirst(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -865,9 +862,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryFirst(sql, parameters, hints, NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_partialQueryFirst(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -879,9 +876,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryFirst(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_queryFirstNullable(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -893,9 +890,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryFirstNullable(sql, parameters, hints, NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public NoShardTransactionTestOnMysql test_def_partialQueryFirstNullable(List<Integer> Age, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -907,9 +904,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryFirstNullable(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_def_queryTop(List<Integer> Age, DalHints hints, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -921,9 +918,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryTop(sql, parameters, hints, NoShardTransactionTestOnMysql.class,count);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_def_partialQueryTop(List<Integer> Age, DalHints hints, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -935,9 +932,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryTop(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class,count);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_def_queryFrom(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -949,9 +946,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryFrom(sql, parameters, hints, NoShardTransactionTestOnMysql.class,start,count);
     }
 
-    /**
+    *//**
      * 自定义，查询
-     **/
+     **//*
     public List<NoShardTransactionTestOnMysql> test_def_partialQueryFrom(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -963,9 +960,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.queryFrom(sql, parameters, hints.partialQuery("Name"), NoShardTransactionTestOnMysql.class,start,count);
     }
 
-    /**
+    *//**
      * mysql, noshard
-     **/
+     **//*
     public int test_def_update (DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -977,9 +974,9 @@ public class NoShardTransactionTestOnMysqlDao {
         return queryDao.update(builder, parameters, hints);
     }
 
-    /**
+    *//**
      * mysql, noshard
-     **/
+     **//*
 //	public int test_def_update (DalHints hints,String tableShardID) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //
@@ -991,9 +988,9 @@ public class NoShardTransactionTestOnMysqlDao {
 //		return queryDao.update(builder, parameters, hints);
 //	}
 
-    /**
+    *//**
      * ss
-     **/
+     **//*
 //	public List<ShardTestTransactionTestOnMysql> test_def_query(DalHints hints) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //
@@ -1005,9 +1002,9 @@ public class NoShardTransactionTestOnMysqlDao {
 //		return queryDao.query(builder, parameters, hints);
 //	}
 
-    /**
+    *//**
      * mysql, noshard
-     **/
+     **//*
 //	public int test_def_update (DalHints hints) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //
@@ -1019,9 +1016,9 @@ public class NoShardTransactionTestOnMysqlDao {
 //		return queryDao.update(builder, parameters, hints);
 //	}
 
-    /**
+    *//**
      * mysql, noshard
-     **/
+     **//*
     public int test_def_update (DalHints hints,String tableShardID) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
@@ -1031,9 +1028,9 @@ public class NoShardTransactionTestOnMysqlDao {
         int i = 1;
 
         return queryDao.update(builder, parameters, hints);
-    }
+    }*/
 
-    /*@Transactional(logicDbName = DATA_BASE)
+    @DalTransactional(logicDbName = DATA_BASE)
     public void transPass() throws Exception{
         NoShardTransactionTestOnMysql ret=queryByPk(1,null);
         ret.setAge(99);
@@ -1042,14 +1039,14 @@ public class NoShardTransactionTestOnMysqlDao {
         delete(null,ret);
     }
 
-    @Transactional(logicDbName = DATA_BASE)
+    @DalTransactional(logicDbName = DATA_BASE)
     public void transFail() throws Exception{
-            NoShardTransactionTestOnMysql ret=queryByPk(1,null);
-            delete(null,ret);
-            ret.setID(3);
-            ret.setAge(99);
-            update(null,ret);
-            throw new SQLException();
-    }*/
+        NoShardTransactionTestOnMysql ret=queryByPk(1,null);
+        delete(null,ret);
+        ret.setID(3);
+        ret.setAge(99);
+        update(null,ret);
+        throw new SQLException();
+    }
 
 }

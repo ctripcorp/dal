@@ -23,7 +23,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 	private static DalClient client = null;
 	private static MasterOnlyOnSqlServerDao dao = null;
 	private static PeopleShardColModShardByDBOnSqlServerDao dao1= null;
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		/**
@@ -40,9 +40,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		
+
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 //		for(int i = 0; i < 10; i++) {
@@ -56,19 +56,19 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 //		}
 		dao.test_def_truncate(new DalHints());
 		dao1.test_def_truncate(new DalHints().inShard(1));
-		
+
 		List<MasterOnlyOnSqlServer> daoPojos1 = new ArrayList<MasterOnlyOnSqlServer>(3);
 		for(int i=0;i<3;i++)
 		{
 			MasterOnlyOnSqlServer daoPojo = new MasterOnlyOnSqlServer();
-			daoPojo.setName("Master_"+i);	
+			daoPojo.setName("Master_"+i);
 			daoPojo.setCityID(i+20);
 			daoPojo.setProvinceID(i+30);
 			daoPojo.setCountryID(i+40);
 			daoPojos1.add(daoPojo);
 		}
 		dao.insert(new DalHints(), daoPojos1);
-		
+
 		List<PeopleShardColModShardByDBOnSqlServer> daoPojos2 = new ArrayList<PeopleShardColModShardByDBOnSqlServer>(6);
 		for(int i=0;i<6;i++)
 		{
@@ -81,46 +81,46 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		}
 		dao1.insert(new DalHints().inShard(1), daoPojos2);
 	}
-	
+
 	private MasterOnlyOnSqlServer createPojo(int index) {
 		MasterOnlyOnSqlServer daoPojo = new MasterOnlyOnSqlServer();
 
 		//daoPojo.setId(index);
 		//daoPojo set not null field
-		
+
 		return daoPojo;
 	}
 
 	private void changePojo(MasterOnlyOnSqlServer daoPojo) {
 		// Change a field to make pojo different with original one
 	}
-	
+
 	private void changePojos(List<MasterOnlyOnSqlServer> daoPojos) {
 		for(MasterOnlyOnSqlServer daoPojo: daoPojos)
 			changePojo(daoPojo);
 	}
-	
+
 	private void verifyPojo(MasterOnlyOnSqlServer daoPojo) {
 		//assert changed value
 	}
-	
+
 	private void verifyPojos(List<MasterOnlyOnSqlServer> daoPojos) {
 		for(MasterOnlyOnSqlServer daoPojo: daoPojos)
 			verifyPojo(daoPojo);
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 //		dao.test_def_truncate(new DalHints());
 //		dao1.test_def_truncate(new DalHints().inShard(1));
 	}
 
-	
+
 	@Test
 	public void testCount() throws Exception {
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(3, affected);
 
@@ -141,17 +141,17 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().freshness(3).masterOnly());
 		assertEquals(3,affected);
 	}
-	
+
 	@Test
 	public void testDelete1() throws Exception {
 	    DalHints hints = new DalHints();
 		MasterOnlyOnSqlServer daoPojo = createPojo(1);
 		daoPojo.setPeopleID(2l);
-		dao.delete(hints, daoPojo); 
+		dao.delete(hints, daoPojo);
 //		assertEquals(1, affected);
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(2, affected);
 
@@ -162,14 +162,14 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(2,affected);
 	}
-	
+
 	@Test
 	public void testDelete2() throws Exception {
 //		DalHints hints = new DalHints();
 //		List<MasterOnlyOnSqlServer> daoPojos = dao.queryAll(null);
 //		int[] affected = dao.delete(hints, daoPojos);
 //		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
-		
+
 		DalHints hints = new DalHints();
 		List<MasterOnlyOnSqlServer> daoPojos =new ArrayList<MasterOnlyOnSqlServer>(2);
 		MasterOnlyOnSqlServer daoPojo1 = createPojo(1);
@@ -178,13 +178,13 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo2.setPeopleID(3l);
 		daoPojos.add(daoPojo1);
 		daoPojos.add(daoPojo2);
-		
+
 		dao.delete(hints, daoPojos);
 //		assertArrayEquals(new int[]{1,1},  affected1);
-		
+
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(1, affected);
 
@@ -196,7 +196,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(1,affected);
 	}
-	
+
 	@Test
 	public void testBatchDelete() throws Exception {
 		DalHints hints = new DalHints();
@@ -211,7 +211,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 //		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(1, affected);
 
@@ -223,12 +223,12 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(1,affected);
 	}
-	
+
 	@Test
 	public void testQueryAll() throws Exception {
 		List<MasterOnlyOnSqlServer> list = dao.queryAll(new DalHints());
 		assertEquals(6, list.size());
-		
+
 		list = dao.queryAll(new DalHints().masterOnly());
 		assertEquals(3, list.size());
 
@@ -247,23 +247,23 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		list=dao.queryAll(new DalHints().freshness(3).masterOnly());
 		assertEquals(3,list.size());
 	}
-	
+
 	@Test
 	public void testInsert1() throws Exception {
 //		DalHints hints = new DalHints();
 //		MasterOnlyOnSqlServer daoPojo = createPojo(1);
 //		int affected = dao.insert(hints, daoPojo);
 //		assertEquals(1, affected);
-		
+
 		DalHints hints = new DalHints();
 		MasterOnlyOnSqlServer daoPojo = createPojo(1);
 		daoPojo.setName("masteronly");
 		dao.insert(hints, daoPojo);
 //		assertEquals(1, affected1);
-		
+
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(4, affected);
 
@@ -275,22 +275,22 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(4,affected);
 	}
-	
+
 	@Test
 	public void testInsert2() throws Exception {
 //		DalHints hints = new DalHints();
 //		List<MasterOnlyOnSqlServer> daoPojos = dao.queryAll(new DalHints());
 //		int[] affected = dao.insert(hints, daoPojos);
 //		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
-		
+
 		DalHints hints = new DalHints();
 		List<MasterOnlyOnSqlServer> daoPojos = dao.queryAll(new DalHints());
 		dao.insert(hints, daoPojos);
 //		assertArrayEquals(new int[]{1,1,1,1,1,1},  affected1);
-		
+
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(9, affected);
 
@@ -302,7 +302,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(9,affected);
 	}
-	
+
 	@Test
 	public void testInsert3() throws Exception {
 		DalHints hints = new DalHints();
@@ -311,10 +311,10 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo.setName("masteronly");
 		dao.insert(hints, keyHolder, daoPojo);
 		assertEquals(1, keyHolder.size());
-		
+
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(4, affected);
 
@@ -328,7 +328,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(4,affected);
 	}
-	
+
 	@Test
 	public void testInsert4() throws Exception {
 		DalHints hints = new DalHints();
@@ -338,7 +338,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		assertEquals(6, keyHolder.size());
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(9, affected);
 
@@ -350,16 +350,16 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.count(new DalHints().masterOnly());
 		assertEquals(9,affected);
 	}
-	
+
 	@Test
 	public void testInsert5() throws Exception {
 		DalHints hints = new DalHints();
 		List<MasterOnlyOnSqlServer> daoPojos = dao.queryAll(new DalHints());
 		dao.batchInsert(hints, daoPojos);
-		
+
 		int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(9, affected);
 
@@ -370,7 +370,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		assertEquals(9,affected);
 
 	}
-	
+
 	@Test
 	public void testQueryAllByPage() throws Exception {
 		DalHints hints = new DalHints();
@@ -397,7 +397,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		list=dao.queryAllByPage(pageNo,pageSize,new DalHints().freshness(3).masterOnly());
 		assertEquals(3,list.size());
 	}
-	
+
 	@Test
 	public void testQueryByPk1() throws Exception {
 		Number id = 1l;
@@ -425,7 +425,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.queryByPk(id,new DalHints().freshness(3).masterOnly());
 		assertEquals("Master_0",affected.getName());
 	}
-	
+
 	@Test
 	public void testQueryByPk2() throws Exception {
 		MasterOnlyOnSqlServer pk = createPojo(1);
@@ -453,7 +453,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		affected=dao.queryByPk(pk,new DalHints().freshness(3).masterOnly());
 		assertEquals("Master_0",affected.getName());
 	}
-	
+
 	@Test
 	public void testUpdate1() throws Exception {
 //		DalHints hints = new DalHints();
@@ -463,16 +463,16 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 //		assertEquals(1, affected);
 //		daoPojo = dao.queryByPk(createPojo(1), null);
 //		verifyPojo(daoPojo);
-		
+
 		DalHints hints = new DalHints();
 		MasterOnlyOnSqlServer daoPojo = createPojo(1);
 		daoPojo.setPeopleID(2l);
 		daoPojo.setName("update");
 		dao.update(hints, daoPojo);
-		
+
 		daoPojo = dao.queryByPk(2l, null);
 		assertEquals("Slave_1", daoPojo.getName());
-		
+
 		daoPojo = dao.queryByPk(2,hints.masterOnly());
 		assertEquals("update", daoPojo.getName());
 
@@ -484,7 +484,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo=dao.queryByPk(2l,new DalHints().masterOnly());
 		assertEquals("update",daoPojo.getName());
 	}
-	
+
 	@Test
 	public void testUpdate2() throws Exception {
 //		DalHints hints = new DalHints();
@@ -493,7 +493,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 //		int[] affected = dao.update(hints, daoPojos);
 //		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
 //		verifyPojos(dao.queryAll(new DalHints()));
-		
+
 		DalHints hints = new DalHints();
 		List<MasterOnlyOnSqlServer> daoPojos =new ArrayList<MasterOnlyOnSqlServer>(2);
 		MasterOnlyOnSqlServer daoPojo1 = createPojo(1);
@@ -504,18 +504,18 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo2.setName("update3");
 		daoPojos.add(daoPojo1);
 		daoPojos.add(daoPojo2);
-		
+
 	    dao.update(hints, daoPojos);
-		
+
 	    MasterOnlyOnSqlServer daoPojo=dao.queryByPk(2l, hints);
 		assertEquals("Slave_1", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(3l, hints);
 		assertEquals("Slave_2", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(2l, hints.masterOnly());
 		assertEquals("update2", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(3l, hints.masterOnly());
 		assertEquals("update3", daoPojo.getName());
 
@@ -533,7 +533,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo=dao.queryByPk(3,new DalHints().masterOnly());
 		assertEquals("update3",daoPojo.getName());
 	}
-	
+
 	@Test
 	public void testBatchUpdate() throws Exception {
 //		DalHints hints = new DalHints();
@@ -552,18 +552,18 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo2.setName("update3");
 		daoPojos.add(daoPojo1);
 		daoPojos.add(daoPojo2);
-		
+
 		dao.batchUpdate(hints, daoPojos);
-		
+
 		MasterOnlyOnSqlServer daoPojo=dao.queryByPk(2l, hints);
 		assertEquals("Slave_1", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(3l, hints);
 		assertEquals("Slave_2", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(2l, hints.masterOnly());
 		assertEquals("update2", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(3l, hints.masterOnly());
 		assertEquals("update3", daoPojo.getName());
 
@@ -581,7 +581,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		daoPojo=dao.queryByPk(3,new DalHints().masterOnly());
 		assertEquals("update3",daoPojo.getName());
 	}
-	
+
 	@Test
 	public void testtest_build_delete() throws Exception {
 		List<Integer> CityID=new ArrayList<Integer>();
@@ -589,27 +589,27 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(22);
 		CityID.add(30);
 	    int ret = dao.test_build_delete(CityID, new DalHints());
-	   
+
 	    int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(1, affected);
 	}
-	
+
 	@Test
 	public void testtest_build_insert() throws Exception {
 		Integer CityID = 50;// Test value here
 		String Name = "insert";// Test value here
 	    int ret = dao.test_build_insert(CityID, Name, new DalHints());
-	    
+
 	    int affected = dao.count(new DalHints());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(4, affected);
 	}
-	
+
 	@Test
 	public void testtest_build_update() throws Exception {
 		String Name = "update";// Test value here
@@ -618,18 +618,18 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 		CityID.add(22);
 		CityID.add(30);
 	    int ret = dao.test_build_update(Name, CityID, new DalHints());
-	    
+
 	    MasterOnlyOnSqlServer daoPojo=dao.queryByPk(1l, new DalHints());
 		assertEquals("Slave_0", daoPojo.getName());
-		
-	
+
+
 		daoPojo=dao.queryByPk(1l, new DalHints().masterOnly());
 		assertEquals("update", daoPojo.getName());
-		
+
 		daoPojo=dao.queryByPk(3l, new DalHints().masterOnly());
 		assertEquals("update", daoPojo.getName());
 	}
-	
+
 	@Test
 	public void testtest_build_queryFirst() throws Exception {
 		List<Integer> CityID=new ArrayList<Integer>();
@@ -641,7 +641,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_build_queryFirst(CityID, new DalHints().slaveOnly());
 		assertEquals("Slave_0",ret.getName());
-	   
+
 	    ret = dao.test_build_queryFirst(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0",ret.getName());
 
@@ -669,11 +669,11 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_build_queryList(CityID, new DalHints().slaveOnly());
 		assertEquals(1, ret.size());
-	    
+
 	    ret = dao.test_build_queryList(CityID, new DalHints().masterOnly());
 	    assertEquals(2, ret.size());
 	}
-	
+
 	@Test
 	public void testtest_build_querySingle() throws Exception {
 		List<Integer> CityID=new ArrayList<Integer>();
@@ -685,11 +685,11 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_build_querySingle(CityID, new DalHints().slaveOnly());
 		assertEquals("Slave_0",ret.getName());
-	    
+
 	    ret = dao.test_build_querySingle(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0",ret.getName());
 	}
-	
+
 	@Test
 	public void testtest_build_queryFieldFirst() throws Exception {
 		List<Integer> CityID=new ArrayList<Integer>();
@@ -701,7 +701,7 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_build_queryFieldFirst(CityID, new DalHints().slaveOnly());
 		assertEquals("Slave_0",ret);
-	    
+
 	    ret = dao.test_build_queryFieldFirst(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0",ret);
 	}
@@ -717,12 +717,12 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_build_queryFieldList(CityID, new DalHints().slaveOnly());
 		assertEquals(1, ret.size());
-	    
+
 	    ret = dao.test_build_queryFieldList(CityID, new DalHints().masterOnly());
-	    assertEquals(2, ret.size());    
+	    assertEquals(2, ret.size());
 	}
 
-	
+
 	@Test
 	public void testtest_build_queryFieldSingle() throws Exception {
 		List<Integer> CityID=new ArrayList<Integer>();
@@ -734,11 +734,11 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_build_queryFieldSingle(CityID, new DalHints().slaveOnly());
 		assertEquals("Slave_0", ret);
-	    
+
 	    ret = dao.test_build_queryFieldSingle(CityID, new DalHints().masterOnly());
 	    assertEquals("Master_0", ret);
 	}
-	
+
 	@Test
 	public void testtest_def_truncate() throws Exception {
 	    dao.test_def_truncate(new DalHints());
@@ -747,11 +747,11 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		affected = dao.count(new DalHints().slaveOnly());
 		assertEquals(6, affected);
-		
+
 		affected = dao.count(new DalHints().masterOnly());
 		assertEquals(0, affected);
 	}
-	
+
 	@Test
 	public void testtest_def_queryList() throws Exception {
 		List<Integer> CityID=new ArrayList<Integer>();
@@ -763,9 +763,9 @@ public class MasterOnlyOnSqlServerDaoUnitTest {
 
 		ret = dao.test_def_queryList(CityID, new DalHints().slaveOnly());
 		assertEquals(1, ret.size());
-		
+
 		ret = dao.test_def_queryList(CityID, new DalHints().masterOnly());
 		assertEquals(2, ret.size());
-		
+
 	}
 }

@@ -1,23 +1,28 @@
-package shardTest.newVersionCode;
+package shardTest.newVersionCodeTest;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
+
 
 /**
- * Created by lilj on 2017/7/27.
+ * Created by lilj on 2017/7/24.
  */
-public class TransactionWithShardOnMysqlNotSpringTest {
-    private static TransactionWithShardOnMysqlDao dao;
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath*:/DalTransactionalOnSqlServerTest.xml")
+public class DalTransactionalWithShardOnSqlServerSpringTest {
+    @Autowired
+    private DalTransactionalWithShardOnSqlServerDao dao;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -28,7 +33,7 @@ public class TransactionWithShardOnMysqlNotSpringTest {
          **/
         DalClientFactory.initClientFactory(); // load from class-path Dal.config
         DalClientFactory.warmUpConnections();
-        dao= DalTransactionManager.create(TransactionWithShardOnMysqlDao.class);
+
     }
 
     @AfterClass
@@ -38,27 +43,29 @@ public class TransactionWithShardOnMysqlNotSpringTest {
 
     @Before
     public void setUp() throws Exception {
-        dao.test_def_truncate(new DalHints().inShard(0),"_0");
-        dao.test_def_truncate(new DalHints().inShard(0),"_1");
-        dao.test_def_truncate(new DalHints().inShard(1),"_0");
-        dao.test_def_truncate(new DalHints().inShard(1),"_1");
+        dao.truncate(new DalHints().inShard(0),"_0");
+        dao.truncate(new DalHints().inShard(0),"_1");
+        dao.truncate(new DalHints().inShard(1),"_0");
+        dao.truncate(new DalHints().inShard(1),"_1");
 
-        List<TransactionWithShardOnMysql> daoPojos1 = new ArrayList<>(2);
+        List<TransactionWithShardOnSqlServer> daoPojos1 = new ArrayList<TransactionWithShardOnSqlServer>(2);
         for (int i = 0; i < 6; i++) {
-            TransactionWithShardOnMysql daoPojo = new TransactionWithShardOnMysql();
+            TransactionWithShardOnSqlServer daoPojo = new TransactionWithShardOnSqlServer();
             daoPojo.setCityID(200);
-            daoPojo.setAge(i + 20);
+            daoPojo.setProvinceID(i + 20);
             daoPojo.setName("InsertByfields_0fields_" + i);
+            daoPojo.setCountryID(500);
             daoPojos1.add(daoPojo);
         }
         dao.insert(new DalHints(), daoPojos1);
 
-        List<TransactionWithShardOnMysql> daoPojos2 = new ArrayList<>(2);
+        List<TransactionWithShardOnSqlServer> daoPojos2 = new ArrayList<TransactionWithShardOnSqlServer>(2);
         for (int i = 0; i <6; i++) {
-            TransactionWithShardOnMysql daoPojo = new TransactionWithShardOnMysql();
+            TransactionWithShardOnSqlServer daoPojo = new TransactionWithShardOnSqlServer();
             daoPojo.setCityID(201);
-            daoPojo.setAge(i + 20);
+            daoPojo.setProvinceID(i + 20);
             daoPojo.setName("InsertByfields_1fields_" + i);
+            daoPojo.setCountryID(501);
             daoPojos2.add(daoPojo);
         }
         dao.insert(new DalHints(), daoPojos2);
@@ -85,7 +92,7 @@ public class TransactionWithShardOnMysqlNotSpringTest {
     @Test
     public void transWithoutShardIDAndDalHintsTest() throws Exception{
         try {
-            dao.transWithoutShardIDAndDalHints();
+        dao.transWithoutShardIDAndDalHints();
             fail();
         }catch (Exception e){}
 
@@ -116,9 +123,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
             dao.transWithoutShardIDWithDalHints(new DalHints());
             fail();
         }catch (Exception e){}
-        assertNotEquals("transWithoutShardIDWithDalHints",dao.queryByPk(1,hints2.inTableShard(1)).getName());
-        assertEquals(2,dao.count(hints2.inTableShard(1)));
-        assertNull(dao.queryByPk(3, hints2.inTableShard(1)));
     }
 
     @Test
@@ -188,7 +192,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithStringShardIDWithDalHints("1",new DalHints().inShard("1"));
         assertEquals("transWithStringShardIDWithDalHints",dao.queryByPk(1,new DalHints().inShard(1).inTableShard(0)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(1).inTableShard(1)));
-        assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
     }
 
 
@@ -224,7 +227,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithIntegerShardIDWithDalHints(Integer.valueOf(1),new DalHints().inShard("1"));
         assertEquals("transWithIntegerShardIDWithDalHints",dao.queryByPk(1,new DalHints().inShard(1).inTableShard(0)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(1).inTableShard(1)));
-        assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
     }
 
     @Test
@@ -244,7 +246,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithStringShardIDWithDalHints(null,new DalHints().inShard("1"));
         assertEquals("transWithStringShardIDWithDalHints",dao.queryByPk(1,new DalHints().inShard(1).inTableShard(0)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(1).inTableShard(1)));
-        assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
     }
 
     @Test
@@ -264,7 +265,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithIntegerShardIDWithDalHints(null,new DalHints().inShard("1"));
         assertEquals("transWithIntegerShardIDWithDalHints",dao.queryByPk(1,new DalHints().inShard(1).inTableShard(0)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(1).inTableShard(1)));
-        assertEquals(3,dao.count(new DalHints().inShard(1).inTableShard(0)));
     }
 
     @Test
@@ -299,12 +299,11 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithIntShardIDWithDalHints(1,new DalHints().inShard("1"));
         assertEquals("transWithIntShardIDWithDalHints",dao.queryByPk(1,new DalHints().inShard(1).inTableShard(0)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(1).inTableShard(1)));
-        assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
     }
 
     @Test
     public void transWithStringShardIDVSNestStringHintsTest() throws Exception{
-        //string shardid和内部hints不同
+       //string shardid和内部hints不同
         try {
             dao.transWithStringShardIDVSNestStringHints("1");
             fail();
@@ -325,7 +324,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithStringShardIDVSNestStringHints("0");
         assertEquals("transWithStringShardIDVSNestStringHints",dao.queryByPk(1,new DalHints().inShard(0).inTableShard(1)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
-        assertEquals(3,dao.count(new DalHints().inShard(1).inTableShard(1)));
     }
 
     @Test
@@ -351,7 +349,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithStringShardIDVSNestIntHints("0");
         assertEquals("transWithStringShardIDVSNestIntHints",dao.queryByPk(1,new DalHints().inShard(0).inTableShard(1)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
-        assertEquals(3,dao.count(new DalHints().inShard(1).inTableShard(1)));
     }
 
     @Test
@@ -371,7 +368,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithIntShardIDVSNestIntHints(0);
         assertEquals("transWithIntShardIDVSNestIntHints",dao.queryByPk(1,new DalHints().inShard(0).inTableShard(1)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
-        assertEquals(3,dao.count(new DalHints().inShard(0).inTableShard(0)));
     }
 
     @Test
@@ -391,7 +387,6 @@ public class TransactionWithShardOnMysqlNotSpringTest {
         dao.transWithIntShardIDVSNestStringHints(0);
         assertEquals("transWithIntShardIDVSNestStringHints",dao.queryByPk(1,new DalHints().inShard(0).inTableShard(1)).getName());
         assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(1)));
-        assertEquals(3,dao.count(new DalHints().inShard(0).inTableShard(0)));
     }
 
     @Test

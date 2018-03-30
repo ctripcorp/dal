@@ -145,30 +145,55 @@ public class NoShardOnSqlServerUnitTest {
 //		List<NoShardOnSqlServerGen> list = dao.queryAll(new DalHints());
 //		assertEquals(10, list.size());
 //	}
-//	
-//	@Test
-//	public void testInsert1() throws Exception {
-//		DalHints hints = new DalHints();
-//		NoShardOnSqlServerGen daoPojo = new NoShardOnSqlServerGen();
-//		daoPojo.setPeopleID(10l);  
-//		daoPojo.setName("insert");
-//		daoPojo.setCityID(24);
-//		daoPojo.setProvinceID(34);
-//		daoPojo.setCountryID(44);
-//		int affected = dao.insert(hints.enableIdentityInsert(), daoPojo);
-////		assertEquals(1, affected);
-//		NoShardOnSqlServerGen ret=dao.queryByPk(10l, null);
-//		assertNotNull(ret);
-//	}
-//	
-//	@Test
-//	public void testInsert2() throws Exception {
-//		DalHints hints = new DalHints();
-//		List<NoShardOnSqlServerGen> daoPojos = dao.queryAll(new DalHints());
-//		int[] affected = dao.insert(hints, daoPojos);
-//		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
-//	}
-//	
+//
+
+	@Test
+	public void testInsert1SetIdentityBack() throws Exception {
+		DalHints hints = new DalHints();
+		NoShardOnSqlServerGen daoPojo = new NoShardOnSqlServerGen();
+		daoPojo.setPeopleID(10l);
+		daoPojo.setName("insert");
+		daoPojo.setCityID(24);
+		daoPojo.setProvinceID(34);
+		daoPojo.setCountryID(44);
+		dao.insert(hints.setIdentityBack(), daoPojo);
+//		assertEquals(1, affected);
+		assertEquals(7,daoPojo.getPeopleID().intValue());
+	}
+
+	@Test
+	public void testInsert2SetIdentityBack() throws Exception {
+		DalHints hints = new DalHints();
+		List<NoShardOnSqlServerGen> daoPojos = dao.queryAll(new DalHints());
+		dao.insert(hints.setIdentityBack(), daoPojos);
+		for(int i=0;i<daoPojos.size();i++){
+			assertEquals(i+7,daoPojos.get(i).getPeopleID().intValue());
+		}
+	}
+
+
+	@Test
+	public  void testInsertSetIdentityBack() throws Exception{
+		KeyHolder keyHolder=new KeyHolder();
+		NoShardOnSqlServerGen daoPojo=new NoShardOnSqlServerGen();
+		daoPojo.setName("insert");
+		dao.insert(new DalHints().setIdentityBack(),keyHolder,daoPojo);
+		assertEquals(7L,keyHolder.getKey());
+		assertEquals(7,daoPojo.getPeopleID().intValue());
+	}
+
+	@Test
+	public  void testInsertListSetIdentityBack() throws Exception{
+		KeyHolder keyHolder=new KeyHolder();
+		List<NoShardOnSqlServerGen> daoPojos=dao.queryAll(null);
+
+		dao.insert(new DalHints().setIdentityBack(),keyHolder,daoPojos);
+		int i=0;
+		for(NoShardOnSqlServerGen pojo:daoPojos){
+			assertEquals(pojo.getPeopleID().intValue(),keyHolder.getKey(i++).intValue());
+		}
+	}
+
 	@Test
 	public void testInsert3() throws Exception {
 		DalHints hints = new DalHints();
@@ -241,7 +266,7 @@ public class NoShardOnSqlServerUnitTest {
 			daoPojo.setPeopleID(20l+i*2);
 			daoPojo.setCityID(i + 20);
 			if(i%2==0)
-			daoPojo.setName("Initial_Shard_0" + i);
+			daoPojo.setName("Initial_Shard_0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + i);
 //			else
 //				daoPojo.setName("Initial_Shard_1" + i);
 			daoPojos.add(daoPojo);
@@ -253,32 +278,47 @@ public class NoShardOnSqlServerUnitTest {
 //		ret=dao.queryByPk(30, new DalHints());
 //		assertNotNull(ret);
 	}
-//	
-//	@Test
-//	public void testQueryAllByPage() throws Exception {
-//		DalHints hints = new DalHints();
-//		int pageSize = 100;
-//		int pageNo = 1;
-//		List<NoShardOnSqlServerGen> list = dao.queryAllByPage(pageNo, pageSize, hints);
-//		assertEquals(10, list.size());
-//	}
-//	
-//	@Test
-//	public void testQueryByPk1() throws Exception {
-//		Number id = 1;
-//		DalHints hints = new DalHints();
-//		NoShardOnSqlServerGen affected = dao.queryByPk(id, hints);
-//		assertNotNull(affected);
-//	}
-//	
-//	@Test
-//	public void testQueryByPk2() throws Exception {
-//		NoShardOnSqlServerGen pk = createPojo(1);
-//		DalHints hints = new DalHints();
-//		NoShardOnSqlServerGen affected = dao.queryByPk(pk, hints);
-//		assertNotNull(affected);
-//	}
 //
+	@Test
+	public void testQueryAll() throws Exception{
+		List<NoShardOnSqlServerGen> list=dao.queryAll(new DalHints().selectByNames());
+		assertEquals(6,list.size());
+	}
+
+	@Test
+	public void testQueryAllByPage() throws Exception {
+		DalHints hints = new DalHints();
+		int pageSize = 100;
+		int pageNo = 1;
+		List<NoShardOnSqlServerGen> list = dao.queryAllByPage(pageNo, pageSize, hints.selectByNames());
+		assertEquals(6, list.size());
+	}
+
+	@Test
+	public void testQueryByPk1() throws Exception {
+		Number id = 1;
+		DalHints hints = new DalHints();
+		NoShardOnSqlServerGen affected = dao.queryByPk(id, hints.selectByNames());
+		assertNotNull(affected);
+	}
+
+	@Test
+	public void testQueryByPk2() throws Exception {
+		NoShardOnSqlServerGen pk = createPojo(1);
+		pk.setPeopleID(1l);
+		DalHints hints = new DalHints();
+		NoShardOnSqlServerGen affected = dao.queryByPk(pk, hints.selectByNames());
+		assertNotNull(affected);
+	}
+
+	@Test
+	public void testQueryLike() throws Exception{
+		NoShardOnSqlServerGen sample=new NoShardOnSqlServerGen();
+		sample.setName("Initial_0");
+		List<NoShardOnSqlServerGen> list=dao.queryLike(sample,new DalHints().selectByNames());
+		assertEquals(1,list.size());
+	}
+
 	@Test
 	public void testUpdate1() throws Exception {
 		DalHints hints = new DalHints();

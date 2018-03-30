@@ -2,29 +2,20 @@ package shardTest.newVersionCode;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import org.junit.*;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-
+import static org.junit.Assert.*;
 
 /**
- * Created by lilj on 2017/7/24.
+ * Created by lilj on 2017/7/27.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*:/transactionMysqlTest.xml")
-public class TransactionWithShardOnMysqlSpringTest {
-    @Autowired
-    private TransactionWithShardOnMysqlDao dao;
+public class DalTransactionalWithShardOnMysqlNotSpringTest {
+    private static DalTransactionalWithShardOnMysqlDao dao;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -35,7 +26,7 @@ public class TransactionWithShardOnMysqlSpringTest {
          **/
         DalClientFactory.initClientFactory(); // load from class-path Dal.config
         DalClientFactory.warmUpConnections();
-
+        dao= DalTransactionManager.create(DalTransactionalWithShardOnMysqlDao.class);
     }
 
     @AfterClass
@@ -92,7 +83,7 @@ public class TransactionWithShardOnMysqlSpringTest {
     @Test
     public void transWithoutShardIDAndDalHintsTest() throws Exception{
         try {
-        dao.transWithoutShardIDAndDalHints();
+            dao.transWithoutShardIDAndDalHints();
             fail();
         }catch (Exception e){}
 
@@ -311,7 +302,7 @@ public class TransactionWithShardOnMysqlSpringTest {
 
     @Test
     public void transWithStringShardIDVSNestStringHintsTest() throws Exception{
-       //string shardid和内部hints不同
+        //string shardid和内部hints不同
         try {
             dao.transWithStringShardIDVSNestStringHints("1");
             fail();

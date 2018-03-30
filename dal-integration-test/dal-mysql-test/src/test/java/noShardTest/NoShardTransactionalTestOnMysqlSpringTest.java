@@ -16,10 +16,10 @@ import java.util.List;
  * Created by lilj on 2017/7/24.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*:/transactionSqlServerTest.xml")
-public class NoShardTransactionTestOnSqlServerSpringTest {
+@ContextConfiguration("classpath*:/TransactionalTestOnMysql.xml")
+public class NoShardTransactionalTestOnMysqlSpringTest {
     @Autowired
-    private NoShardTransactionTestOnSqlServerDao dao;
+    private NoShardTransactionalTestOnMysqlDao dao;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -42,20 +42,20 @@ public class NoShardTransactionTestOnSqlServerSpringTest {
     @Before
     public void setUp() throws Exception {
         dao.test_def_update(new DalHints());
-
-
-        List<NoShardTransactionTestOnSqlServer> daoPojos1 = new ArrayList<NoShardTransactionTestOnSqlServer>(3);
-        for(int i=0;i<6;i++)
-        {
-            NoShardTransactionTestOnSqlServer daoPojo = new NoShardTransactionTestOnSqlServer();
-            daoPojo.setPeopleID(Long.valueOf(i)+1);
-            daoPojo.setName("Initial_"+i);
-            daoPojo.setCityID(i+20);
-            daoPojo.setProvinceID(i+30);
-            daoPojo.setCountryID(i+40);
-            daoPojos1.add(daoPojo);
+        List<NoShardTransactionTestOnMysql> daoPojos = new ArrayList<>(
+                6);
+        for (int i = 0; i < 6; i++) {
+            NoShardTransactionTestOnMysql daoPojo = new NoShardTransactionTestOnMysql();
+            if (i % 2 == 0) {
+                daoPojo.setAge(20);
+                daoPojo.setName("Initial_Shard_0" + i);
+            } else {
+                daoPojo.setAge(21);
+                daoPojo.setName("Initial_Shard_1" + i);
+            }
+            daoPojos.add(daoPojo);
         }
-        dao.insert(new DalHints(), daoPojos1);
+        dao.insert(new DalHints(), daoPojos);
     }
 
     @After
@@ -66,7 +66,7 @@ public class NoShardTransactionTestOnSqlServerSpringTest {
     @Test
     public void transPassTest() throws Exception{
         dao.transPass();
-        Assert.assertEquals(99,dao.queryByPk(1,null).getCityID().intValue());
+        Assert.assertEquals(99,dao.queryByPk(1,null).getAge().intValue());
         Assert.assertEquals(5,dao.count(null));
     }
 
@@ -79,7 +79,7 @@ public class NoShardTransactionTestOnSqlServerSpringTest {
 
        }
         Assert.assertEquals(6,dao.count(null));
-       Assert.assertEquals(22,dao.queryByPk(3,null).getCityID().intValue());
+       Assert.assertEquals(20,dao.queryByPk(3,null).getAge().intValue());
     }
 
 }

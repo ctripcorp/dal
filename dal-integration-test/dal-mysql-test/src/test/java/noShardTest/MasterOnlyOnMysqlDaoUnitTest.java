@@ -472,7 +472,7 @@ public class MasterOnlyOnMysqlDaoUnitTest {
 //		DalHints hints = new DalHints();
 //		List<PersonMasterOnlyOnMysql> list = dao.queryAll(hints);
 //		assertEquals(6, list.size());
-//		
+//
 //		list = dao.queryAll(hints);
 //		assertEquals(3, list.size());
 //	}

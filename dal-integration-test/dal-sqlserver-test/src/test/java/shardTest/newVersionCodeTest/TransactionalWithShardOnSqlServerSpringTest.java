@@ -19,10 +19,10 @@ import static org.junit.Assert.*;
  * Created by lilj on 2017/7/24.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath*:/transactionSqlServerTest.xml")
-public class TransactionWithShardOnSqlServerSpringTest {
+@ContextConfiguration("classpath*:/TransactionalOnSqlServerTest.xml")
+public class TransactionalWithShardOnSqlServerSpringTest {
     @Autowired
-    private TransactionWithShardOnSqlServerDao dao;
+    private TransactionalWithShardOnSqlServerDao dao;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

@@ -50,6 +50,11 @@ public class PeopleShardColModShardByDBOnSqlServerDao {
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
 
+	public PeopleShardColModShardByDBOnSqlServerDao(String DATA_BASE) throws SQLException {
+		this.client = new DalTableDao<>(PeopleShardColModShardByDBOnSqlServer.class,DATA_BASE);
+		this.peopleShardColModShardByDBOnSqlServerRowMapper = new DalDefaultJpaMapper<>(PeopleShardColModShardByDBOnSqlServer.class);
+		this.queryDao = new DalQueryDao(DATA_BASE);
+	}
 
 	/**
 	 * Query ignoreMissingFieldsAndAllowPartialTestOnSqlServer by the specified ID
@@ -97,7 +102,7 @@ public class PeopleShardColModShardByDBOnSqlServerDao {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
-		builder.selectAll().atPage(pageNo, pageSize).orderBy("PeopleID", ASC);
+		builder.selectAllColumns().atPage(pageNo, pageSize).orderBy("PeopleID", ASC);
 
 		return client.query(builder, hints);
 	}
@@ -108,7 +113,7 @@ public class PeopleShardColModShardByDBOnSqlServerDao {
 	public List<PeopleShardColModShardByDBOnSqlServer> queryAll(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("PeopleID", ASC);
+		SelectSqlBuilder builder = new SelectSqlBuilder().selectAllColumns().orderBy("PeopleID", ASC);
 
 		return client.query(builder, hints);
 	}
@@ -313,13 +318,45 @@ public class PeopleShardColModShardByDBOnSqlServerDao {
 	}
 
 	/**
+	 * 构建，查询
+	 **/
+	public List<PeopleShardColModShardByDBOnSqlServer> testBuildQueryLikeWithMatchPattern(String Name, MatchPattern pattern, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
+//		builder.like("Name",Name,pattern,Types.VARCHAR,false);
+		builder.like("Name",Name,pattern,Types.VARCHAR);
+		builder.orderBy("PeopleID", true);
+
+		return client.query(builder, hints);
+
+	}
+
+	/**
+	 * 构建，查询
+	 **/
+	public List<PeopleShardColModShardByDBOnSqlServer> testBuildQueryLikeNullableWithMatchPattern(String Name,MatchPattern pattern, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
+//		builder.likeNullable("Name",Name,pattern,Types.VARCHAR,false);
+		builder.likeNullable("Name",Name,pattern,Types.VARCHAR);
+		builder.orderBy("PeopleID", true);
+
+		return client.query(builder, hints);
+
+	}
+
+	/**
 	 * testEqual
 	 **/
 	public List<PeopleShardColModShardByDBOnSqlServer> test(Integer param1, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
-		builder.selectAll();
+		builder.selectAllColumns();
 //		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
 		builder.equal("CityID", param1, Types.INTEGER, false);
 		builder.orderBy("ProvinceID", true);

@@ -26,6 +26,13 @@ public class PeopleShardColModShardByDBTableOnMysqlDao {
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
 
+	public PeopleShardColModShardByDBTableOnMysqlDao(String DATA_BASE) throws SQLException {
+//		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(PeopleShardColModShardByDBTableOnMysql.class));
+		this.client = new DalTableDao<>(PeopleShardColModShardByDBTableOnMysql.class,DATA_BASE);
+		this.peopleShardColModShardByDBTableOnMysqlRowMapper = new DalDefaultJpaMapper<>(PeopleShardColModShardByDBTableOnMysql.class);
+		this.queryDao = new DalQueryDao(DATA_BASE);
+	}
+
 	private class PeopleShardColModShardByDBTableOnMysqlComparator implements Comparator<PeopleShardColModShardByDBTableOnMysql> {
 		@Override
 		public int compare(PeopleShardColModShardByDBTableOnMysql o1, PeopleShardColModShardByDBTableOnMysql o2) {
@@ -595,6 +602,33 @@ public class PeopleShardColModShardByDBTableOnMysqlDao {
 		builder.mapWith(peopleShardColModShardByDBTableOnMysqlRowMapper);
 
 		return queryDao.query(builder, parameters, hints.sortBy(new PeopleShardColModShardByDBTableOnMysqlComparator()));
+	}
+
+	/**
+	 * 自定义
+	 **/
+	public List<PeopleShardColModShardByDBTableOnMysql> testFreeSqlQueryList(List<Integer> CityID, List<Integer> Age, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeSelectSqlBuilder<List<PeopleShardColModShardByDBTableOnMysql>> builder = new FreeSelectSqlBuilder<>();
+		builder.selectAll().from("People").where(Expressions.in("CityID",CityID, Types.INTEGER),Expressions.AND, Expressions.in("Age",Age, Types.INTEGER));
+
+		builder.mapWith(peopleShardColModShardByDBTableOnMysqlRowMapper);
+
+		return queryDao.query(builder, hints.sortBy(new PeopleShardColModShardByDBTableOnMysqlComparator()));
+	}
+
+	/**
+	 * 自定义
+	 **/
+	public List<String> testFreeSqlQueryFieldList(Integer CityID, Integer Age, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>();
+		builder.select("Name").from("People").where(Expressions.equal("CityID",CityID, Types.INTEGER),Expressions.AND, Expressions.equal("Age",Age, Types.INTEGER));
+		builder.simpleType();
+
+		return queryDao.query(builder, hints.sortBy(new StringComparator()));
 	}
 
 	/**

@@ -754,8 +754,38 @@ public class NoShardOnMysqlDao {
 
 		return client.queryObject(builder, hints);
 	}
-	
-	
+
+	/**
+	 * 构建，查询
+	 **/
+	public List<NoShardOnMysqlGen> testBuildQueryLikeWithMatchPattern(String Name,MatchPattern pattern, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+//		builder.like("Name",Name,pattern,Types.VARCHAR,false);
+		builder.like("Name",Name,pattern,Types.VARCHAR);
+		builder.orderBy("ID", true);
+
+		return client.query(builder, hints);
+
+	}
+
+	/**
+	 * 构建，查询
+	 **/
+	public List<NoShardOnMysqlGen> testBuildQueryLikeNullableWithMatchPattern(String Name,MatchPattern pattern, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+//		builder.likeNullable("Name",Name,pattern,Types.VARCHAR,false);
+		builder.likeNullable("Name",Name,pattern,Types.VARCHAR);
+		builder.orderBy("ID", true);
+
+		return client.query(builder, hints);
+
+	}
 	/**
 	 * 自定义，查询
 	**/

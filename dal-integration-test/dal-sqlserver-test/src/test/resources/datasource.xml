@@ -32,6 +32,6 @@
               minEvictableIdleTimeMillis="30000"
               connectionProperties="rewriteBatchedStatements=true"/>
   <!--<Datasource name="DalServiceDB"
-             initSQL="set nocount on"
-              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;useUnicode=true;characterEncoding=UTF-8;socketTimeout=10000"/>-->
+              initSQL="SET ANSI_WARNINGS OFF"
+              connectionProperties="sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;useUnicode=true;characterEncoding=UTF-8"/>-->
 </Datasources>

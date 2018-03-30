@@ -1,43 +1,23 @@
 package shardTest.newVersionCode;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.sqlbuilder.MatchPattern;
+import org.junit.*;
+import util.DalHintsChecker;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import com.ctrip.platform.dal.dao.sqlbuilder.MatchPattern;
-import noShardTest.NoShardOnMysqlGen;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalCommand;
-import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.KeyHolder;
-import com.ctrip.platform.dal.dao.ResultMerger;
-
-import util.DalHintsChecker;
+import static org.junit.Assert.*;
 
 /**
  * JUnit test of ignoreMissingFieldsAndAllowPartialTestOnMysqlDao class.
  * Before run the unit test, you should initiate the test data and change all the asserts correspond to you case.
 **/
-public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
+public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 
-	private static final String DATA_BASE = "ShardColModShardByDBOnMysql";
+	private static final String DATA_BASE = "FreeShardingStrategyByDBOnMysql";
 
 	private static DalClient client = null;
 	private static PersonShardColModShardByDBOnMysqlDao dao = null;
@@ -52,7 +32,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
 		DalClientFactory.initClientFactory(); // load from class-path Dal.config
 		DalClientFactory.warmUpConnections();
 		client = DalClientFactory.getClient(DATA_BASE);
-		dao = new PersonShardColModShardByDBOnMysqlDao();
+		dao = new PersonShardColModShardByDBOnMysqlDao(DATA_BASE);
 	}
 
 	@AfterClass
@@ -189,31 +169,6 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
 	}
 	
 	@Test
-	public void testInsert1SetIdentityBack() throws Exception {
-		PersonShardColModShardByDBOnMysql daoPojo = new PersonShardColModShardByDBOnMysql();
-		daoPojo.setAge(100);
-		int affected = dao.insert(new DalHints().setIdentityBack(), daoPojo);
-		assertEquals(1, affected);
-		assertEquals(4,daoPojo.getID().intValue());
-
-		PersonShardColModShardByDBOnMysql ret=dao.queryByPk(4, new DalHints().inShard(0));
-		assertNotNull(ret);
-		ret=dao.queryByPk(4, new DalHints().inShard(1));
-		assertNull(ret);
-		
-		//insert null
-		PersonShardColModShardByDBOnMysql nullPojo=new PersonShardColModShardByDBOnMysql();
-		affected=dao.insert(new DalHints().inShard(0).setIdentityBack(), nullPojo);
-		assertEquals(1, affected);
-		assertEquals(5,nullPojo.getID().intValue());
-
-		ret=dao.queryByPk(5, new DalHints().inShard(0));
-		assertNotNull(ret);
-		ret=dao.queryByPk(4, new DalHints().inShard(1));
-		assertNull(ret);
-	}
-
-	@Test
 	public void testInsert1() throws Exception {
 		PersonShardColModShardByDBOnMysql daoPojo = new PersonShardColModShardByDBOnMysql();
 		daoPojo.setAge(100);
@@ -223,7 +178,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
 		assertNotNull(ret);
 		ret=dao.queryByPk(4, new DalHints().inShard(1));
 		assertNull(ret);
-
+		
 		//insert null
 		PersonShardColModShardByDBOnMysql nullPojo=new PersonShardColModShardByDBOnMysql();
 		affected=dao.insert(new DalHints().inShard(0), nullPojo);
@@ -232,7 +187,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
 		assertNotNull(ret);
 		ret=dao.queryByPk(4, new DalHints().inShard(1));
 		assertNull(ret);
-
+		
 		//enableIdentityInsert
 		DalHints hints=new DalHints();
 		DalHints original=hints.clone();
@@ -297,51 +252,6 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
 		affected = dao.insert(new DalHints().inShard(0), nullPojos);
 		assertArrayEquals(new int[]{1,1,1},  affected);
 	}
-
-	@Test
-	public void testInsert2SetIdentityBack() throws Exception {
-		//singleShard
-		List<PersonShardColModShardByDBOnMysql> daoPojos = dao.queryAll(new DalHints().inShard(0));
-		int[] affected = dao.insert(new DalHints().setIdentityBack(), daoPojos);
-		assertArrayEquals(new int[]{1,1,1},  affected);
-
-		for(int i=0;i<affected.length;i++){
-			assertEquals(i+4,daoPojos.get(i).getID().intValue());
-		}
-
-		int ret=dao.count(new DalHints().inShard(0));
-		assertEquals(6, ret);
-
-		ret=dao.count(new DalHints().inShard(1));
-		assertEquals(3, ret);
-
-		//crossShard
-		daoPojos.get(1).setAge(33);
-		affected = dao.insert(new DalHints().setIdentityBack(), daoPojos);
-		assertArrayEquals(new int[]{1,1,1},  affected);
-assertEquals(7,daoPojos.get(0).getID().intValue());
-assertEquals(4,daoPojos.get(1).getID().intValue());
-assertEquals(8,daoPojos.get(2).getID().intValue());
-
-		ret=dao.count(new DalHints().inShard(0));
-		assertEquals(8, ret);
-
-		ret=dao.count(new DalHints().inShard(1));
-		assertEquals(4, ret);
-
-
-		//insert null
-		List<PersonShardColModShardByDBOnMysql> nullPojos = new ArrayList<>();
-		for(int i=0;i<3;i++){
-			PersonShardColModShardByDBOnMysql nullPojo=new PersonShardColModShardByDBOnMysql();
-			nullPojos.add(nullPojo);
-		}
-		affected = dao.insert(new DalHints().inShard(0).setIdentityBack(), nullPojos);
-		assertArrayEquals(new int[]{1,1,1},  affected);
-		assertEquals(9,nullPojos.get(0).getID().intValue());
-		assertEquals(10,nullPojos.get(1).getID().intValue());
-		assertEquals(11,nullPojos.get(2).getID().intValue());
-	}
 	
 	@Test
 	public void testInsert3() throws Exception {
@@ -392,48 +302,6 @@ assertEquals(8,daoPojos.get(2).getID().intValue());
 		
 		ret=dao.count(new DalHints().inShard(1));
 		assertEquals(4, ret);
-	}
-
-	@Test
-	public void testInsert3SetIdentityBack() throws Exception {
-		KeyHolder keyHolder1 = new KeyHolder();
-		PersonShardColModShardByDBOnMysql daoPojo = new PersonShardColModShardByDBOnMysql();
-		daoPojo.setAge(101);
-		int affected = dao.insert(new DalHints().setIdentityBack(), keyHolder1, daoPojo);
-		assertEquals(1, affected);
-		assertEquals(1, keyHolder1.size());
-		assertEquals(4l, keyHolder1.getKey());
-		assertEquals(4, daoPojo.getID().intValue());
-
-		int ret=dao.count(new DalHints().inShard(0));
-		assertEquals(3, ret);
-
-		ret=dao.count(new DalHints().inShard(1));
-		assertEquals(4, ret);
-
-		//insert null
-		KeyHolder keyHolder2 = new KeyHolder();
-		daoPojo.setAge(null);
-		DalHints hints=new DalHints();
-		DalHints original=hints.clone();
-		affected = dao.insert(hints.inShard(0).setIdentityBack(), keyHolder2, daoPojo);
-		List<DalHintEnum> exclude=new ArrayList<>();
-		exclude.add(DalHintEnum.shard);
-		exclude.add(DalHintEnum.setIdentityBack);
-		DalHintsChecker.checkEquals(original,hints,exclude);
-
-		assertEquals(1, affected);
-		assertEquals(1, keyHolder2.size());
-		assertEquals(4l, keyHolder2.getKey());
-		assertEquals(4, daoPojo.getID().intValue());
-
-		ret=dao.count(new DalHints().inShard(0));
-		assertEquals(4, ret);
-
-		ret=dao.count(new DalHints().inShard(1));
-		assertEquals(4, ret);
-
-
 	}
 	
 	@Test
@@ -504,76 +372,6 @@ assertEquals(8,daoPojos.get(2).getID().intValue());
 		assertEquals(9l, keyHolder4.getKey(0));
 		assertEquals(90l, keyHolder4.getKey(1));
 		assertEquals(10l, keyHolder4.getKey(2));
-	}
-
-	@Test
-	public void testInsert4SetIdentityBack() throws Exception {
-		//singleShard
-		KeyHolder keyHolder1 = new KeyHolder();
-		List<PersonShardColModShardByDBOnMysql> daoPojos = dao.queryAll(new DalHints().inShard(0));
-		DalHints hints=new DalHints();
-		DalHints original=hints.clone();
-		int[] affected = dao.insert(hints.inShard(1).setIdentityBack(), keyHolder1, daoPojos);
-		assertArrayEquals(new int[]{1,1,1},  affected);
-		assertEquals(3, keyHolder1.size());
-		int index=0;
-		for(PersonShardColModShardByDBOnMysql pojo: daoPojos)
-			assertEquals(keyHolder1.getKey(index++).intValue(), pojo.getID().intValue());
-
-		List<DalHintEnum> exclude=new ArrayList<>();
-		exclude.add(DalHintEnum.shard);
-		exclude.add(DalHintEnum.setIdentityBack);
-		DalHintsChecker.checkEquals(original,hints,exclude);
-
-		int ret=dao.count(new DalHints().inShard(0));
-		assertEquals(3, ret);
-
-		ret=dao.count(new DalHints().inShard(1));
-		assertEquals(6, ret);
-
-		//crossShard
-		KeyHolder keyHolder2 = new KeyHolder();
-		daoPojos.get(1).setAge(31);
-		affected = dao.insert(new DalHints().setIdentityBack(), keyHolder2,daoPojos);
-		assertArrayEquals(new int[] { 1, 1, 1 }, affected);
-		assertEquals(3, keyHolder2.size());
-		assertEquals(4l, keyHolder2.getKey(0));
-		assertEquals(4,daoPojos.get(0).getID().intValue());
-		assertEquals(7l, keyHolder2.getKey(1));
-		assertEquals(7,daoPojos.get(1).getID().intValue());
-		assertEquals(5l, keyHolder2.getKey(2));
-		assertEquals(5,daoPojos.get(2).getID().intValue());
-
-		ret = dao.count(new DalHints().inShard(0));
-		assertEquals(5, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(7, ret);
-
-		//insert null
-		KeyHolder keyHolder3 = new KeyHolder();
-		List<PersonShardColModShardByDBOnMysql> nullPojos = new ArrayList<>();
-		for(int i=0;i<3;i++){
-			PersonShardColModShardByDBOnMysql nullPojo=new PersonShardColModShardByDBOnMysql();
-			nullPojos.add(nullPojo);
-		}
-		affected = dao.insert(new DalHints().inShard(0).setIdentityBack(), keyHolder3,nullPojos);
-		assertArrayEquals(new int[] { 1, 1, 1 }, affected);
-		assertEquals(3, keyHolder3.size());
-		assertEquals(6l, keyHolder3.getKey(0));
-		assertEquals(7l, keyHolder3.getKey(1));
-		assertEquals(8l, keyHolder3.getKey(2));
-
-		int index2=0;
-		for(PersonShardColModShardByDBOnMysql pojo: nullPojos)
-			assertEquals(keyHolder3.getKey(index2++).intValue(), pojo.getID().intValue());
-
-		ret = dao.count(new DalHints().inShard(0));
-		assertEquals(8, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(7, ret);
-
 	}
 	
 	@Test
@@ -675,55 +473,6 @@ assertEquals(8,daoPojos.get(2).getID().intValue());
 		affected = dao.combinedInsert(new DalHints().inShard(0), nullPojos);
 		assertEquals(3, affected);
 	}
-
-	@Test
-	public void testCombinedInsert1SetIdentityBack() throws Exception {
-		//singleShard
-		List<PersonShardColModShardByDBOnMysql> daoPojos = dao
-				.queryAll(new DalHints().inShard(0));
-		int affected = dao.combinedInsert(new DalHints().setIdentityBack(), daoPojos);
-		assertEquals(3, affected);
-		assertEquals(4,daoPojos.get(0).getID().intValue());
-		assertEquals(5,daoPojos.get(1).getID().intValue());
-		assertEquals(6,daoPojos.get(2).getID().intValue());
-
-		int ret = dao.count(new DalHints().inShard(0));
-		assertEquals(6, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(3, ret);
-
-		// crossShard
-		daoPojos.get(1).setAge(33);
-		DalHints hints=new DalHints();
-		DalHints original=hints.clone();
-		affected = dao.combinedInsert(hints.setIdentityBack(), daoPojos);
-		assertEquals(3, affected);
-//		DalHintsChecker.checkEquals(original,hints);
-
-		assertEquals(7,daoPojos.get(0).getID().intValue());
-		assertEquals(4,daoPojos.get(1).getID().intValue());
-		assertEquals(8,daoPojos.get(2).getID().intValue());
-
-		ret = dao.count(new DalHints().inShard(0));
-		assertEquals(8, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(4, ret);
-
-
-		// insert null
-		List<PersonShardColModShardByDBOnMysql> nullPojos = new ArrayList<>();
-		for (int i = 0; i < 3; i++) {
-			PersonShardColModShardByDBOnMysql nullPojo = new PersonShardColModShardByDBOnMysql();
-			nullPojos.add(nullPojo);
-		}
-		affected = dao.combinedInsert(new DalHints().inShard(0).setIdentityBack(), nullPojos);
-		assertEquals(3, affected);
-		assertEquals(9,nullPojos.get(0).getID().intValue());
-		assertEquals(10,nullPojos.get(1).getID().intValue());
-		assertEquals(11,nullPojos.get(2).getID().intValue());
-	}
 	
 	@Test
 	public void testCombinedInsert2() throws Exception {
@@ -797,82 +546,6 @@ assertEquals(8,daoPojos.get(2).getID().intValue());
 		assertEquals(9l, keyHolder4.getKey(0));
 		assertEquals(90l, keyHolder4.getKey(1));
 		assertEquals(10l, keyHolder4.getKey(2));
-	}
-
-	@Test
-	public void testCombinedInsert2SetIdentityBack() throws Exception {
-		// singleShard
-		KeyHolder keyHolder1 = new KeyHolder();
-		List<PersonShardColModShardByDBOnMysql> daoPojos = dao
-				.queryAll(new DalHints().inShard(0));
-		int affected = dao.combinedInsert(new DalHints().inShard(1).setIdentityBack(),
-				keyHolder1, daoPojos);
-		assertEquals(3, affected);
-		assertEquals(3, keyHolder1.size());
-		assertEquals(4l, keyHolder1.getKey(0));
-
-		int index=0;
-		for(PersonShardColModShardByDBOnMysql pojo: daoPojos)
-			assertEquals(keyHolder1.getKey(index++).intValue(), pojo.getID().intValue());
-
-		int ret = dao.count(new DalHints().inShard(0));
-		assertEquals(3, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(6, ret);
-
-		// crossShard
-		KeyHolder keyHolder2 = new KeyHolder();
-		daoPojos.get(1).setAge(31);
-		affected = dao.combinedInsert(new DalHints().setIdentityBack(), keyHolder2, daoPojos);
-		assertEquals(3, affected);
-		assertEquals(3, keyHolder2.size());
-		assertEquals(4l, keyHolder2.getKey(0));
-		assertEquals(7l, keyHolder2.getKey(1));
-		assertEquals(5l, keyHolder2.getKey(2));
-
-		int index2=0;
-		for(PersonShardColModShardByDBOnMysql pojo: daoPojos)
-			assertEquals(keyHolder2.getKey(index2++).intValue(), pojo.getID().intValue());
-
-		ret = dao.count(new DalHints().inShard(0));
-		assertEquals(5, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(7, ret);
-
-		// insert null
-		KeyHolder keyHolder3 = new KeyHolder();
-		DalHints hints=new DalHints();
-		DalHints original=hints.clone();
-		List<PersonShardColModShardByDBOnMysql> nullPojos = new ArrayList<>();
-		for (int i = 0; i < 3; i++) {
-			PersonShardColModShardByDBOnMysql nullPojo = new PersonShardColModShardByDBOnMysql();
-			nullPojos.add(nullPojo);
-		}
-		affected = dao.combinedInsert(hints.inShard(0).setIdentityBack(), keyHolder3,
-				nullPojos);
-		assertEquals(3, affected);
-		assertEquals(3, keyHolder3.size());
-		assertEquals(6l, keyHolder3.getKey(0));
-		assertEquals(7l, keyHolder3.getKey(1));
-		assertEquals(8l, keyHolder3.getKey(2));
-
-		int index3=0;
-		for(PersonShardColModShardByDBOnMysql pojo: nullPojos)
-			assertEquals(keyHolder3.getKey(index3++).intValue(), pojo.getID().intValue());
-
-		List<DalHintEnum> exclude=new ArrayList<>();
-		exclude.add(DalHintEnum.shard);
-		exclude.add(DalHintEnum.setIdentityBack);
-		DalHintsChecker.checkEquals(original,hints,exclude);
-
-		ret = dao.count(new DalHints().inShard(0));
-		assertEquals(8, ret);
-
-		ret = dao.count(new DalHints().inShard(1));
-		assertEquals(7, ret);
-
 	}
 	
 	@Test
@@ -2776,14 +2449,7 @@ assertEquals(8,daoPojos.get(2).getID().intValue());
 		   System.out.println("sqlCount55:"+count8.get(i).longValue());
 	   
 	}
-
-
-	@Test
-	public void testDalColumnMapRowMapper() throws Exception{
-		List<Map<String,Object>> ret=dao.testDalColumnMapRowMapper(new DalHints().inShard(0));
-		assertEquals(20,ret.get(0).get("Age"));
-		assertEquals("Initial_Shard_00",ret.get(0).get("Name"));
-	}
+	
 //	@Test
 //	public void test_queryInMultipleAllShards() throws SQLException {
 //		List<Integer> Age=new ArrayList<Integer>(3);

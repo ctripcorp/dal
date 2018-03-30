@@ -19,21 +19,11 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.DalCustomRowMapper;
-import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
-import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
-import com.ctrip.platform.dal.dao.helper.DalListMerger;
-import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
-import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
+import com.ctrip.platform.dal.dao.helper.*;
+import com.ctrip.platform.dal.dao.sqlbuilder.*;
+import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 
 
 public class PersonShardColModShardByDBOnMysqlDao {
@@ -59,7 +49,14 @@ public class PersonShardColModShardByDBOnMysqlDao {
 		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(PersonShardColModShardByDBOnMysql.class));	
 		this.personShardColModShardByDBOnMysqlPojoRowMapper = new DalDefaultJpaMapper<>(PersonShardColModShardByDBOnMysql.class);
 		this.queryDao = new DalQueryDao(DATA_BASE);
-		this.parser = new DalDefaultJpaParser<>(PersonShardColModShardByDBOnMysql.class);
+//		this.parser = new DalDefaultJpaParser<>(PersonShardColModShardByDBOnMysql.class);
+	}
+
+	public PersonShardColModShardByDBOnMysqlDao(String DATA_BASE) throws SQLException {
+		this.client = new DalTableDao<>(PersonShardColModShardByDBOnMysql.class,DATA_BASE);
+		this.personShardColModShardByDBOnMysqlPojoRowMapper = new DalDefaultJpaMapper<>(PersonShardColModShardByDBOnMysql.class);
+		this.queryDao = new DalQueryDao(DATA_BASE);
+//		this.parser = new DalDefaultJpaParser<>(PersonShardColModShardByDBOnMysql.class);
 	}
 	
 	
@@ -174,7 +171,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
-		builder.selectAll().atPage(pageNo, pageSize).orderBy("ID", ASC);
+		builder.selectAllColumns().atPage(pageNo, pageSize).orderBy("ID", ASC);
 
 		return client.query(builder, hints);
 	}
@@ -188,7 +185,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 	public List<PersonShardColModShardByDBOnMysql> queryAll(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		
-		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("ID", ASC);
+		SelectSqlBuilder builder = new SelectSqlBuilder().selectAllColumns().orderBy("ID", ASC);
 		
 		return client.query(builder, hints);
 	}
@@ -472,9 +469,42 @@ public class PersonShardColModShardByDBOnMysqlDao {
 		return client.batchUpdate(hints, daoPojos);
 	}
 
+	/**
+	 * 构建，查询
+	 **/
+	public List<PersonShardColModShardByDBOnMysql> testBuildQueryLikeWithMatchPattern(String Name, MatchPattern pattern, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+//		builder.like("Name",Name,pattern,Types.VARCHAR,false);
+		builder.like("Name",Name,pattern,Types.VARCHAR);
+		builder.orderBy("ID", true);
+
+		return client.query(builder, hints);
+
+	}
+
+	/**
+	 * 构建，查询
+	 **/
+	public List<PersonShardColModShardByDBOnMysql> testBuildQueryLikeNullableWithMatchPattern(String Name,MatchPattern pattern, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+//		builder.likeNullable("Name",Name,pattern,Types.VARCHAR,false);
+		builder.likeNullable("Name",Name,pattern,Types.VARCHAR);
+		builder.orderBy("ID", true);
+
+		return client.query(builder, hints);
+
+	}
+
 	public List<String> testBuildQueryField(List<Integer> age) throws SQLException {
 		return test_build_query_fieldList(age, null);
 	}
+
 	/**
 	 * 构建，查询
 	**/
@@ -598,7 +628,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select("Birth","Name","Age","ID");
-//		builder.selectAll();
+//		builder.selectAllColumns();
 //		builder.equalNullable("1", 1, Types.INTEGER, false);
 //		builder.and();
 		builder.inNullable("Age", Age, Types.INTEGER, false);
@@ -614,7 +644,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select("Age","Name","ID");
-//		builder.selectAll();
+//		builder.selectAllColumns();
 		builder.inNullable("Age", Age, Types.INTEGER, false);
 
 		return client.query(builder, hints.sortBy(new PersonShardColModShardByDBOnMysqlComparator()));
@@ -1418,5 +1448,11 @@ public class PersonShardColModShardByDBOnMysqlDao {
 //	    builder.addQuery(sqlCount, new StatementParameters(), new IntegerRowMapper(),new IntegerComparator());
 //	    builder.addQuery(sqlCount, new StatementParameters(), Integer.class, new IntegerComparator());
 	    return queryDao.query(builder, hints);
+	}
+
+	public List<Map<String,Object>> testDalColumnMapRowMapper(DalHints hints) throws SQLException{
+		hints=DalHints.createIfAbsent(hints);
+		String sql="SELECT Age, Name FROM person";
+		return queryDao.query(sql, new StatementParameters(), hints, new DalColumnMapRowMapper());
 	}
 }

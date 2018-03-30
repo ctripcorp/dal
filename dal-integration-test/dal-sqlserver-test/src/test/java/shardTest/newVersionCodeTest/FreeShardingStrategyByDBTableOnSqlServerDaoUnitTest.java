@@ -1,23 +1,24 @@
 package shardTest.newVersionCodeTest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.SQLException;
-
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.KeyHolder;
 import org.junit.*;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
 
-
-import com.ctrip.platform.dal.dao.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * JUnit test of PeopleGenDao class.
  * Before run the unit test, you should initiate the test data and change all the asserts correspond to you case.
  **/
-public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
+public class FreeShardingStrategyByDBTableOnSqlServerDaoUnitTest {
 
-	private static final String DATA_BASE = "ShardColModByDBTableOnSqlServer";
+	private static final String DATA_BASE = "FreeShardingStrategyByDBTableOnSqlServer";
 
 	private static DalClient client = null;
 	private static PeopleShardColModByDBTableOnSqlServerDao dao = null;
@@ -32,7 +33,7 @@ public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
 		DalClientFactory.initClientFactory(); // load from class-path Dal.config
 		DalClientFactory.warmUpConnections();
 		client = DalClientFactory.getClient(DATA_BASE);
-		dao = new PeopleShardColModByDBTableOnSqlServerDao();
+		dao = new PeopleShardColModByDBTableOnSqlServerDao(DATA_BASE);
 	}
 
 	@AfterClass
@@ -274,7 +275,7 @@ public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
 //		List<ShardColModByDBTableOnSqlServer> daoPojos = dao.queryAll(new DalHints());
 //		int[] affected = dao.insert(hints, daoPojos);
 //		assertArrayEquals(new int[]{1,1,1,1,1,1,1,1,1,1},  affected);
-//
+//		
 		DalHints hints = new DalHints();
 		List<PeopleShardColModByDBTableOnSqlServer> daoPojos = dao.queryAll(new DalHints().inShard(0).inTableShard(0));
 		dao.insert(hints, daoPojos);
@@ -490,46 +491,4 @@ public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
 			assertEquals("Update"+i, daoPojos.get(i).getName());
 	}
 
-	@Test
-	public void testFreeSqlQueryFieldList() throws Exception {
-		int CityID=200;
-		int ProvinceID=21;
-
-		List<String> ret = dao.testFreeSqlQueryFieldList(CityID, ProvinceID, new DalHints().setShardColValue("CityID", 200).setTableShardValue(20));
-		assertEquals(0, ret.size());
-
-		ret = dao.testFreeSqlQueryFieldList(CityID, ProvinceID, new DalHints().inAllShards().inTableShard(1));
-		assertEquals(1, ret.size());
-
-		ret = dao.testFreeSqlQueryFieldList(CityID, ProvinceID,new DalHints());
-		assertEquals(1, ret.size());
-
-		ret = dao.testFreeSqlQueryFieldList(CityID, ProvinceID, new DalHints().setShardValue(200).setTableShardValue(0));
-		assertEquals(0, ret.size());
-	}
-
-	@Test
-	public void testFreeSqlQueryList() throws Exception {
-		List<Integer> CityID=new ArrayList<>(2);
-		CityID.add(200);
-		CityID.add(201);
-
-		List<Integer> ProvinceID=new ArrayList<>(2);
-		ProvinceID.add(20);
-		ProvinceID.add(21);
-		ProvinceID.add(22);
-		ProvinceID.add(23);
-
-		List<PeopleShardColModByDBTableOnSqlServer> ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().setShardColValue("CityID", 200).setTableShardValue(20));
-		assertEquals(2, ret.size());
-
-		ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().inAllShards().inTableShard(0));
-		assertEquals(4, ret.size());
-
-		ret = dao.testFreeSqlQueryList(CityID, ProvinceID,new DalHints().inTableShard(1));
-		assertEquals(2, ret.size());
-
-		ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().setShardValue(200).setTableShardValue(0));
-		assertEquals(2, ret.size());
-	}
 }

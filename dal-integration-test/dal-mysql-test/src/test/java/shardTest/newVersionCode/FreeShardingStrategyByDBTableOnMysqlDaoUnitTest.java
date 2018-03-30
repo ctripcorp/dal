@@ -1,20 +1,22 @@
 package shardTest.newVersionCode;
 
 
+import com.ctrip.platform.dal.dao.*;
+import org.junit.*;
+import util.DalHintsChecker;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.*;
+
 import static org.junit.Assert.*;
-import com.ctrip.platform.dal.dao.*;
-import util.DalHintsChecker;
 
 /**
  * JUnit test of PeopleShardColModShardByDBTableOnMysqlDao class.
  * Before run the unit test, you should initiate the test data and change all the asserts correspond to you case.
 **/
-public class PeopleShardColModShardByDBTableOnMysqlDaoUnitTest {
+public class FreeShardingStrategyByDBTableOnMysqlDaoUnitTest {
 
-	private static final String DATA_BASE = "ShardColModShardByDBTableOnMysql";
+	private static final String DATA_BASE = "FreeShardingStrategyByDBTableOnMysql";
 
 	private static DalClient client = null;
 	private static PeopleShardColModShardByDBTableOnMysqlDao dao = null;
@@ -29,7 +31,7 @@ public class PeopleShardColModShardByDBTableOnMysqlDaoUnitTest {
 		DalClientFactory.initClientFactory(); // load from class-path Dal.config
 		DalClientFactory.warmUpConnections();
 		client = DalClientFactory.getClient(DATA_BASE);
-		dao = new PeopleShardColModShardByDBTableOnMysqlDao();
+		dao = new PeopleShardColModShardByDBTableOnMysqlDao(DATA_BASE);
 	}
 
 	@AfterClass
@@ -914,49 +916,6 @@ public class PeopleShardColModShardByDBTableOnMysqlDaoUnitTest {
 //			System.out.println("3: "+ret.get(i).getName());
 		
 		ret = dao.test_def_query_list(CityID, Age, new DalHints().setShardValue(200),"_0");
-		assertEquals(2, ret.size());
-	}
-
-	@Test
-	public void testFreeSqlQueryFieldList() throws Exception {
-		int CityID=200;
-		int Age=21;
-
-		List<String> ret = dao.testFreeSqlQueryFieldList(CityID, Age, new DalHints().setShardColValue("CityID", 200).setTableShardValue(20));
-		assertEquals(0, ret.size());
-
-		ret = dao.testFreeSqlQueryFieldList(CityID, Age, new DalHints().inAllShards().inTableShard(1));
-		assertEquals(1, ret.size());
-
-		ret = dao.testFreeSqlQueryFieldList(CityID, Age,new DalHints());
-		assertEquals(1, ret.size());
-
-		ret = dao.testFreeSqlQueryFieldList(CityID, Age, new DalHints().setShardValue(200).setTableShardValue(0));
-		assertEquals(0, ret.size());
-	}
-
-	@Test
-	public void testFreeSqlQueryList() throws Exception {
-		List<Integer> CityID=new ArrayList<>(2);
-		CityID.add(200);
-		CityID.add(201);
-
-		List<Integer> Age=new ArrayList<>(2);
-		Age.add(20);
-		Age.add(21);
-		Age.add(22);
-		Age.add(23);
-
-		List<PeopleShardColModShardByDBTableOnMysql> ret = dao.testFreeSqlQueryList(CityID, Age, new DalHints().setShardColValue("CityID", 200).setTableShardValue(20));
-		assertEquals(2, ret.size());
-
-		ret = dao.testFreeSqlQueryList(CityID, Age, new DalHints().inAllShards().inTableShard(0));
-		assertEquals(4, ret.size());
-
-		ret = dao.testFreeSqlQueryList(CityID, Age,new DalHints().inTableShard(1));
-		assertEquals(2, ret.size());
-
-		ret = dao.testFreeSqlQueryList(CityID, Age, new DalHints().setShardValue(200).setTableShardValue(0));
 		assertEquals(2, ret.size());
 	}
 	

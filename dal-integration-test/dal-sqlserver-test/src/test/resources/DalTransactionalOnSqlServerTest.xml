@@ -8,11 +8,14 @@
 
     <context:component-scan base-package="noShardTest" />
     <context:component-scan base-package="shardTest.newVersionCodeTest" />
-    <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.client.DalAnnotationValidator"/>
+    <!--<bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.client.DalAnnotationValidator"/>
     <bean id="noShardTransactionTestOnSqlServerDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
         <constructor-arg name="targetClass" type="Class" value="noShardTest.NoShardTransactionTestOnSqlServerDao" />
     </bean>
     <bean id="transactionWithShardOnSqlServerDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
         <constructor-arg name="targetClass" type="Class" value="shardTest.newVersionCodeTest.TransactionWithShardOnSqlServerDao" />
-    </bean>
+    </bean>-->
+    <bean class="com.ctrip.platform.dal.dao.client.DalTransactionalEnabler"/>
+    <!--<bean id="noShardTransactionTestOnSqlServerDao" class="noShardTest.NoShardTransactionTestOnSqlServerDao"></bean>-->
+    <bean id="dalTransactionalWithShardOnSqlServerDao" class="shardTest.newVersionCodeTest.DalTransactionalWithShardOnSqlServerDao"></bean>
 </beans>

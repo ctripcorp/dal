@@ -9,10 +9,10 @@
     <context:component-scan base-package="noShardTest" />
     <context:component-scan base-package="shardTest.newVersionCode" />
     <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.client.DalAnnotationValidator"/>
-    <bean id="noShardTransactionTestOnMysqlDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
-        <constructor-arg name="targetClass" type="Class" value="noShardTest.NoShardTransactionTestOnMysqlDao" />
+    <bean id="noShardTransactionalTestOnMysqlDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
+        <constructor-arg name="targetClass" type="Class" value="noShardTest.NoShardTransactionalTestOnMysqlDao" />
     </bean>
-    <bean id="transactionWithShardOnMysqlDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
-        <constructor-arg name="targetClass" type="Class" value="shardTest.newVersionCode.TransactionWithShardOnMysqlDao" />
+    <bean id="transactionalWithShardOnMysqlDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
+        <constructor-arg name="targetClass" type="Class" value="shardTest.newVersionCode.TransactionalWithShardOnMysqlDao" />
     </bean>
 </beans>

@@ -5,6 +5,8 @@ package noShardTest;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
+import com.ctrip.platform.dal.dao.helper.DalCustomRowMapper;
 import com.ctrip.platform.dal.dao.sqlbuilder.*;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
@@ -79,6 +82,58 @@ public class AllTypesOnSqlServerDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
+	public Integer testFreeSQLBuilderQueryMax(Integer id,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<Integer> builder=new FreeSelectSqlBuilder<>();
+		builder.append("select max(IntCol)");
+		builder.from("all_types").where();
+		builder.greaterThan("id",id, Types.INTEGER);
+		builder.simpleType().requireFirst().nullable();
+		return queryDao.query(builder,hints);
+	}
+
+	public List<Integer> testFreeSQLBuilderQueryFieldList(Integer id,DalHints hints) throws Exception{
+		hints=DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<Integer>> builder=new FreeSelectSqlBuilder<>();
+		builder.select("IntCol");
+		builder.from("all_types").where();
+		builder.greaterThan("id",id, Types.INTEGER);
+		builder.simpleType();
+		return queryDao.query(builder,hints);
+	}
+
+	public List<Integer> testFreeSQLBuilderQueryFieldListByPage(Integer id,int pageNo,int pageSize,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<Integer>> builder=new FreeSelectSqlBuilder<>();
+		builder.select("IntCol");
+		builder.from("all_types").where();
+		builder.greaterThan("id",id, Types.INTEGER);
+		builder.orderBy("id",true);
+		builder.simpleType().atPage(pageNo,pageSize);
+		return queryDao.query(builder,hints);
+	}
+
+	public Integer testFreeSQLBuilderQueryFieldSingle(Integer id,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<Integer> builder=new FreeSelectSqlBuilder<>();
+		builder.select("IntCol");
+		builder.from("all_types").where();
+		builder.equal("id",id, Types.INTEGER);
+		builder.simpleType().requireSingle().nullable();
+		return queryDao.query(builder,hints);
+	}
+
+	public Integer testFreeSQLBuilderQueryFieldFirst(Integer id,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<Integer> builder=new FreeSelectSqlBuilder<>();
+		builder.select("IntCol");
+		builder.from("all_types");
+		builder.where();
+		builder.greaterThan("id",id, Types.INTEGER);
+		builder.orderBy("id",true);
+		builder.simpleType().requireFirst().nullable();
+		return queryDao.query(builder,hints);
+	}
 	/**
 	 * 自定义，查询，filedList
 	**/
@@ -171,6 +226,32 @@ public class AllTypesOnSqlServerDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
+	public List<AllTypesOnSqlServer> testFreeSqlQueryListByPage(Integer id,int pageNo, int pageSize,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.selectAll();
+		builder.from("all_types").where(Expressions.greaterThan("id",id, Types.INTEGER)).orderBy("id",true);
+		builder.mapWith(AllTypesRowMapper).atPage(pageNo,pageSize);
+		return queryDao.query(builder,hints);
+	}
+
+	public AllTypesOnSqlServer testFreeSqlQuerySingle(Integer id,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<AllTypesOnSqlServer> builder=new FreeSelectSqlBuilder<>();
+		builder.selectAll();
+		builder.from("all_types").where(Expressions.equal("id",id, Types.INTEGER));
+		builder.mapWith(AllTypesRowMapper).requireSingle().nullable();
+		return queryDao.query(builder,hints);
+	}
+
+	public AllTypesOnSqlServer testFreeSqlQueryFirst(Integer id,DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<AllTypesOnSqlServer> builder=new FreeSelectSqlBuilder<>();
+		builder.selectAll();
+		builder.from("all_types").where(Expressions.greaterThan("id",id, Types.INTEGER)).orderBy("id",true);
+		builder.mapWith(AllTypesRowMapper).requireFirst().nullable();
+		return queryDao.query(builder,hints);
+	}
     /**
 	 * 自定义，查询，pojoSingle
 	**/
@@ -230,6 +311,19 @@ public class AllTypesOnSqlServerDao {
 
 	/**
 	 * 自定义，update
+	 **/
+	public int testFreeSqlUpdate (String varcharcol, String charcol,Integer id, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
+		builder.update("all_types").set("VarCharCol","CharCol");
+		builder.set("varCharCol",varcharcol, Types.VARCHAR).set("charCol",charcol, Types.CHAR);
+		builder.where(Expressions.equal("id",id, Types.INTEGER));
+
+		return queryDao.update(builder, hints);
+	}
+	/**
+	 * 自定义，update
 	**/
 	public int testDefUpdate (String varcharcol, String charcol, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -249,6 +343,19 @@ public class AllTypesOnSqlServerDao {
 	**/
 	public int testDefDelete (Integer id) throws SQLException {
 		return testDefDelete(id, null);
+	}
+
+	/**
+	 * 自定义，删除
+	 **/
+	public int testFreeSqlDelete (Integer id, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
+//		builder.setLogicDbName(DATA_BASE);
+		builder.deleteFrom("all_types").where().equal("id",id, Types.INTEGER);
+
+		return queryDao.update(builder, hints);
 	}
 
 	/**
@@ -309,8 +416,20 @@ public class AllTypesOnSqlServerDao {
 
 		return queryDao.update(builder, parameters, hints);
 	}
-	
-	
+
+	/**
+	 * 自定义，insert
+	 **/
+	public int testFreeSqlInsert (String varcharcol, Integer intcol, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
+		builder.insertInto("all_types").values("VarCharCol","IntCol");
+		builder.set("VarCharCol",varcharcol, Types.VARCHAR);
+		builder.set("IntCol",intcol, Types.INTEGER);
+
+		return queryDao.update(builder, hints);
+	}
 
 	/**
 	 * Query AllTypes by the specified ID
@@ -819,6 +938,93 @@ public class AllTypesOnSqlServerDao {
 		return client.batchUpdate(hints, daoPojos);
 	}
 
+	public List<Map<String,Object>> testFreeSqlGroupByHaving(List<String> VarCharCol) throws Exception{
+		DalCustomRowMapper mapper = new DalCustomRowMapper("VarCharCol", "Count");
+		FreeSelectSqlBuilder<List<Map<String,Object>>> builder=new FreeSelectSqlBuilder<>();
+		builder.select().append("VarCharCol,count(*) as Count").from("all_types").groupBy("VarCharCol").having("VarCharCol in (?)").setIn("VarCharCol",VarCharCol, Types.VARCHAR);
+		builder.mapWith(mapper);
+		return queryDao.query(builder,new DalHints());
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlLikePattern(String varcharcol,MatchPattern matchPattern) throws Exception{
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.select("VarCharCol","BigIntCol").from("all_types").where().like("VarCharCol",varcharcol,matchPattern,Types.VARCHAR);
+		builder.mapWith(AllTypesOnSqlServer.class);
+		return queryDao.query(builder,new DalHints().allowPartial());
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlNotLikePattern(String varcharcol,MatchPattern matchPattern) throws Exception{
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.select("VarCharCol","BigIntCol").from("all_types").where().notLike("VarCharCol",varcharcol,matchPattern,Types.VARCHAR);
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder,new DalHints().allowPartial());
+	}
+
+	public List<Map<String,Object>> testFreeSqlGroupByHaving2(List<String> VarCharCol) throws Exception{
+		FreeSelectSqlBuilder<List<Map<String,Object>>> builder=new FreeSelectSqlBuilder<>();
+		builder.append("select VarCharCol, count(*) as Count").from("all_types").groupBy("VarCharCol").having("VarCharCol in (?)").setIn("VarCharCol",VarCharCol, Types.VARCHAR);
+		builder.mapWith(new DalColumnMapRowMapper());
+		return queryDao.query(builder, new DalHints());
+	}
+
+	public List<AllTypesOnSqlServer> testNotNotNull(int low, int upper, List<Long> BigIntCol, String VarCharCol) throws  Exception{
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.selectAll().from("all_types").where();
+		builder.notBetween("IntCol",low,upper, Types.INTEGER).and();
+		builder.notIn("BigIntCol",BigIntCol, Types.BIGINT).and();
+		builder.notLike("VarCharCol",VarCharCol, Types.VARCHAR);
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder,new DalHints());
+	}
+
+	public List<AllTypesOnSqlServer> testNotNullable(Integer low, Integer upper, List<Long> BigIntCol, String VarCharCol) throws  Exception{
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.selectAll().from("all_types").where();
+		builder.notBetween("IntCol",low,upper, Types.INTEGER).ignoreNull().and();
+		builder.notIn("BigIntCol",BigIntCol, Types.BIGINT).ignoreNull().and();
+		builder.notLike("VarCharCol",VarCharCol, Types.VARCHAR).ignoreNull();
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder,new DalHints());
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlQueryNotNullWithSet(String CharCol, String NcharCol, Boolean BitCol, Integer IntCol, Short SmallIntCol, Short TinyIntCol, BigDecimal NumericCol, Long BigIntCol_start, Long BigIntCol_end, List<String> VarcharCol, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+//		SelectSqlBuilder builder=new SelectSqlBuilder();
+//		builder.select("SetCol","TextCol","DecimalCol","TimeCol","FloatCol","BinaryCol","LongTextCol","BitCol","BlobCol","VarCharCol","DoubleCol","TinyBlobCol","MediumIntCol","CharCol","TimeStampCol","EnumCol","TinyIntCol","YearCol","SmallIntCol","MediumBlobCol","TinyTextCol","MediumTextCol","BigIntCol","DateTimeCol","LongBlobCol","GeometryCol","IntCol","idAll_Types","DateCol","VarBinaryCol");
+		builder.selectAll();
+		builder.from("all_types");
+		builder.where();
+		builder.like("CharCol").set("CharCol",CharCol,Types.CHAR);
+		builder.and();
+		builder.leftBracket();
+		builder.equal("NcharCol").set("NcharCol", NcharCol, Types.NCHAR);
+		builder.or();
+		builder.not();
+		builder.notEqual("BitCol").set("BitCol", BitCol, Types.BIT);
+		builder.rightBracket();
+		builder.and();
+		builder.greaterThan("IntCol").set("IntCol", IntCol, Types.INTEGER);
+		builder.and();
+		builder.lessThan("SmallIntCol").set("SmallIntCol", SmallIntCol, Types.SMALLINT);
+		builder.and();
+		builder.greaterThanEquals("TinyIntCol").set("TinyIntCol", TinyIntCol, Types.TINYINT);
+		builder.and();
+		builder.lessThanEquals("NumericCol").set("NumericCol", NumericCol, Types.NUMERIC);
+		builder.and();
+		builder.between("BigIntCol", BigIntCol_start, BigIntCol_end, Types.BIGINT);
+		builder.and();
+		builder.in("VarCharCol").setIn("VarCharCol", VarcharCol, Types.VARCHAR);
+		builder.and();
+		builder.isNull("FloatCol");
+		builder.and();
+		builder.isNotNull("RealCol");
+
+		builder.orderBy("id", false);
+
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder,hints);
+	}
 	/**
 	 * ��������ѯ��nullable
 	**/
@@ -856,6 +1062,143 @@ public class AllTypesOnSqlServerDao {
 //		StatementParameters parameters = builder.buildParameters();
 //		return queryDao.query(sql, parameters, hints, parser);
 		return client.query(builder, hints);
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlQueryNotNull(String CharCol, String NcharCol, Boolean BitCol, Integer IntCol, Short SmallIntCol, Short TinyIntCol, BigDecimal NumericCol, Long BigIntCol_start, Long BigIntCol_end, List<String> VarcharCol, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+//		SelectSqlBuilder builder=new SelectSqlBuilder();
+//		builder.select("SetCol","TextCol","DecimalCol","TimeCol","FloatCol","BinaryCol","LongTextCol","BitCol","BlobCol","VarCharCol","DoubleCol","TinyBlobCol","MediumIntCol","CharCol","TimeStampCol","EnumCol","TinyIntCol","YearCol","SmallIntCol","MediumBlobCol","TinyTextCol","MediumTextCol","BigIntCol","DateTimeCol","LongBlobCol","GeometryCol","IntCol","idAll_Types","DateCol","VarBinaryCol");
+		builder.selectAll();
+		builder.from("all_types");
+		builder.where();
+		builder.like("CharCol", CharCol, Types.CHAR);
+		builder.and();
+		builder.leftBracket();
+		builder.equal("NcharCol", NcharCol, Types.NCHAR);
+		builder.or();
+		builder.not();
+		builder.notEqual("BitCol", BitCol, Types.BIT);
+		builder.rightBracket();
+		builder.and();
+		builder.greaterThan("IntCol", IntCol, Types.INTEGER);
+		builder.and();
+		builder.lessThan("SmallIntCol", SmallIntCol, Types.SMALLINT);
+		builder.and();
+		builder.greaterThanEquals("TinyIntCol", TinyIntCol, Types.TINYINT);
+		builder.and();
+		builder.lessThanEquals("NumericCol", NumericCol, Types.NUMERIC);
+		builder.and();
+		builder.between("BigIntCol", BigIntCol_start, BigIntCol_end, Types.BIGINT);
+		builder.and();
+		builder.in("VarCharCol", VarcharCol, Types.VARCHAR);
+		builder.and();
+		builder.isNull("FloatCol");
+		builder.and();
+		builder.isNotNull("RealCol");
+
+		builder.orderBy("id", false);
+
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder, hints);
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlQueryWithAppendNullable(String CharCol, String NcharCol, Boolean BitCol, Integer IntCol, Short SmallIntCol, Short TinyIntCol, BigDecimal NumericCol, Long BigIntCol_start, Long BigIntCol_end, List<String> VarcharCol, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+//		SelectSqlBuilder builder=new SelectSqlBuilder();
+//		builder.select("SetCol","TextCol","DecimalCol","TimeCol","FloatCol","BinaryCol","LongTextCol","BitCol","BlobCol","VarCharCol","DoubleCol","TinyBlobCol","MediumIntCol","CharCol","TimeStampCol","EnumCol","TinyIntCol","YearCol","SmallIntCol","MediumBlobCol","TinyTextCol","MediumTextCol","BigIntCol","DateTimeCol","LongBlobCol","GeometryCol","IntCol","idAll_Types","DateCol","VarBinaryCol");
+		builder.selectAll();
+		builder.append("from all_types where");
+		builder.appendWhen(CharCol!=null,"CharCol like ?");
+		builder.and();
+//		builder.bracket("SetCol=? or not BitCol!=?").setNullable("SetCol", SetCol, Types.CHAR).setNullable("BitCol",BitCol, Types.BIT);
+		builder.leftBracket();
+		builder.appendWhen(NcharCol!=null,new Expressions.Expression("NcharCol=?"));
+		builder.or();
+		builder.not();
+		builder.appendWhen(BitCol!=null,"BitCol!=?");
+		builder.rightBracket();
+		builder.and();
+		builder.appendWhen(IntCol!=null,"IntCol>?");
+		builder.and();
+		builder.appendWhen(SmallIntCol!=null,"SmallIntCol<?");
+		builder.and();
+		builder.appendWhen(TinyIntCol!=null,"TinyIntCol>=?", "");
+		builder.and();
+		builder.appendWhen(NumericCol!=null,new Expressions.Expression("NumericCol<=?"));
+		builder.and();
+		builder.between("BigIntCol",BigIntCol_start,BigIntCol_end, Types.BIGINT).ignoreNull();
+		builder.and();
+		builder.in("VarCharCol").setInNullable("VarCharCol", VarcharCol, Types.VARCHAR);
+		builder.and();
+		builder.isNull("FloatCol");
+		builder.and();
+		builder.isNotNull("RealCol");
+
+		builder.orderBy("id", false);
+
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder, hints);
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlSetNullableAndIncludeAll(String varcharcol,DalHints hints) throws Exception{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.append("select * from all_types");
+		builder.where(builder.includeAll());
+		builder.between("VarCharCol").setNullable("VarCharCol",varcharcol, Types.VARCHAR).ignoreNull();
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder,hints);
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlSetNullableAndExcludeAll(String varcharcol,DalHints hints) throws Exception{
+		hints= DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+		builder.append("select * from all_types");
+		builder.where(builder.excludeAll());
+		builder.append(Expressions.between("VarCharCol")).ignoreNull().setNullable("VarCharCol",varcharcol, Types.VARCHAR);
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder,hints);
+	}
+
+	public List<AllTypesOnSqlServer> testFreeSqlQueryNullable(String CharCol, String NcharCol, Boolean BitCol, Integer IntCol, Short SmallIntCol, Short TinyIntCol, BigDecimal NumericCol, Long BigIntCol_start, Long BigIntCol_end, List<String> VarcharCol, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		FreeSelectSqlBuilder<List<AllTypesOnSqlServer>> builder=new FreeSelectSqlBuilder<>();
+//		SelectSqlBuilder builder=new SelectSqlBuilder();
+//		builder.select("SetCol","TextCol","DecimalCol","TimeCol","FloatCol","BinaryCol","LongTextCol","BitCol","BlobCol","VarCharCol","DoubleCol","TinyBlobCol","MediumIntCol","CharCol","TimeStampCol","EnumCol","TinyIntCol","YearCol","SmallIntCol","MediumBlobCol","TinyTextCol","MediumTextCol","BigIntCol","DateTimeCol","LongBlobCol","GeometryCol","IntCol","idAll_Types","DateCol","VarBinaryCol");
+		builder.selectAll();
+		builder.from("all_types");
+		builder.where();
+		builder.like("CharCol", CharCol, Types.CHAR).ignoreNull();
+		builder.and();
+		builder.leftBracket();
+		builder.equal("NcharCol", NcharCol, Types.NCHAR).ignoreNull();
+		builder.or();
+		builder.not();
+		builder.notEqual("BitCol", BitCol, Types.BIT).ignoreNull();
+		builder.rightBracket();
+		builder.and();
+		builder.greaterThan("IntCol", IntCol, Types.INTEGER).ignoreNull();
+		builder.and();
+		builder.lessThan("SmallIntCol", SmallIntCol, Types.SMALLINT).ignoreNull();
+		builder.and();
+		builder.greaterThanEquals("TinyIntCol", TinyIntCol, Types.TINYINT).ignoreNull();
+		builder.and();
+		builder.lessThanEquals("NumericCol", NumericCol, Types.NUMERIC).ignoreNull();
+		builder.and();
+		builder.between("BigIntCol", BigIntCol_start, BigIntCol_end, Types.BIGINT).ignoreNull();
+		builder.and();
+		builder.in("VarCharCol", VarcharCol, Types.VARCHAR).ignoreNull();
+		builder.and();
+		builder.isNull("FloatCol");
+		builder.and();
+		builder.isNotNull("RealCol");
+
+		builder.orderBy("id", false);
+
+		builder.mapWith(AllTypesRowMapper);
+		return queryDao.query(builder, hints);
 	}
 	
 	public List<AllTypesOnSqlServer> test_build_query(Timestamp datatimecol, DalHints hints) throws SQLException {

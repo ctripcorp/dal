@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import com.ctrip.platform.dal.dao.sqlbuilder.MatchPattern;
 import org.junit.*;
 import static org.junit.Assert.*;
 import com.ctrip.platform.dal.dao.*;
@@ -226,10 +229,17 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		assertEquals(4, list.size());
 		
 		list.clear();
-		list = dao.queryAll(null);
+		list = dao.queryAll(new DalHints().selectByNames());
 		assertEquals(4, list.size());
 	}
-	
+
+	/*@Test
+	public void  test() throws Exception{
+		AllTypesOnSqlServer pojo=new AllTypesOnSqlServer();
+		pojo.setNvarcharCol("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		dao.insert(pojo);
+	}*/
+
 	@Test
 	public void testInsert1() throws Exception {
 		
@@ -368,7 +378,7 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		List<AllTypesOnSqlServer> list = dao.queryAllByPage(pageNo, pageSize);
 		assertEquals(2, list.size());
 		
-		list = dao.queryAllByPage(pageNo, pageSize,null);
+		list = dao.queryAllByPage(pageNo, pageSize,new DalHints().selectByNames());
 		assertEquals(2, list.size());
 	}
 	
@@ -379,7 +389,7 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		AllTypesOnSqlServer affected = dao.queryByPk(id);
 		assertNotNull(affected);
 		
-		affected = dao.queryByPk(id,null);
+		affected = dao.queryByPk(id,new DalHints().selectByNames());
 		assertNotNull(affected);
 	}
 	
@@ -390,7 +400,7 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		AllTypesOnSqlServer affected = dao.queryByPk(pk);
 		assertNotNull(affected);
 		
-		affected = dao.queryByPk(pk,null);
+		affected = dao.queryByPk(pk,new DalHints().selectByNames());
 		assertNotNull(affected);
 	}
 	
@@ -401,7 +411,7 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		List<AllTypesOnSqlServer> affected = dao.queryLike(sample);
 		assertEquals(2, affected.get(0).getID().intValue());
 		
-		affected = dao.queryLike(sample,null);
+		affected = dao.queryLike(sample,new DalHints().selectByNames());
 		assertEquals(2, affected.get(0).getID().intValue());
 	}
 	
@@ -484,6 +494,91 @@ public class AllTypesOnSqlServerDaoUnitTest {
 	}
 
 	@Test
+	public void testFreeSqlQueryWithAppendNullable() throws Exception {
+		String CharCol = null;
+		String NcharCol = null;
+		Boolean BitCol = null;
+		Integer IntCol = null;
+		Short SmallIntCol = null;
+		Short TinyIntCol = null;
+		BigDecimal NumericCol = null;
+		Long BigIntCol_start = null;
+		Long BigIntCol_end = 90l;
+		List<String> varCharCol = new ArrayList<String>();
+		varCharCol.add("hello");
+		varCharCol.add(null);
+		varCharCol.add("world");
+		List<AllTypesOnSqlServer> ret = dao.testFreeSqlQueryWithAppendNullable(CharCol, NcharCol,  BitCol, IntCol,SmallIntCol, TinyIntCol, NumericCol, BigIntCol_start, BigIntCol_end, varCharCol, new DalHints());
+		assertEquals(2, ret.size());
+	}
+
+	@Test
+	public void testFreeSqlQueryNullable() throws Exception {
+		String CharCol = null;
+		String NcharCol = null;
+		Boolean BitCol = null;
+		Integer IntCol = null;
+		Short SmallIntCol = null;
+		Short TinyIntCol = null;
+		BigDecimal NumericCol = null;
+		Long BigIntCol_start = null;
+		Long BigIntCol_end = 90l;
+		List<String> varCharCol = new ArrayList<String>();
+		varCharCol.add("hello");
+		varCharCol.add(null);
+		varCharCol.add("world");
+		List<AllTypesOnSqlServer> ret = dao.testFreeSqlQueryNullable(CharCol, NcharCol,  BitCol, IntCol,SmallIntCol, TinyIntCol, NumericCol, BigIntCol_start, BigIntCol_end, varCharCol, new DalHints());
+		assertEquals(2, ret.size());
+	}
+
+	@Test
+	public void testFreeSqlQueryNotNullWithSet() throws Exception {
+		String CharCol = "a%";
+		String NcharCol = "a";
+		Boolean BitCol = false;
+		Integer IntCol = 3;
+		Short SmallIntCol = 20;
+		Short TinyIntCol = 50;
+		BigDecimal NumericCol = new BigDecimal(2015);
+		Long BigIntCol_start = 70l;
+		Long BigIntCol_end = 90l;
+		List<String> varCharCol = new ArrayList<String>();
+		varCharCol.add("hello");
+		varCharCol.add("colorful");
+		varCharCol.add("world");
+		List<AllTypesOnSqlServer> ret = dao.testFreeSqlQueryNotNullWithSet(CharCol, NcharCol,  BitCol, IntCol,SmallIntCol, TinyIntCol, NumericCol, BigIntCol_start, BigIntCol_end, varCharCol, new DalHints());
+		assertEquals(2, ret.size());
+	}
+
+	@Test
+	public void testFreeSqlQueryNotNull() throws Exception {
+		String CharCol = "a%";
+		String NcharCol = "a";
+		Boolean BitCol = false;
+		Integer IntCol = 3;
+		Short SmallIntCol = 20;
+		Short TinyIntCol = 50;
+		BigDecimal NumericCol = new BigDecimal(2015);
+		Long BigIntCol_start = 70l;
+		Long BigIntCol_end = 90l;
+		List<String> varCharCol = new ArrayList<String>();
+		varCharCol.add("hello");
+		varCharCol.add("colorful");
+		varCharCol.add("world");
+		List<AllTypesOnSqlServer> ret = dao.testFreeSqlQueryNotNull(CharCol, NcharCol,  BitCol, IntCol,SmallIntCol, TinyIntCol, NumericCol, BigIntCol_start, BigIntCol_end, varCharCol, new DalHints());
+		assertEquals(2, ret.size());
+	}
+
+	@Test
+	public void testFreeSqlSetNullable() throws Exception {
+		List<AllTypesOnSqlServer> ret1 = dao.testFreeSqlSetNullableAndIncludeAll(null, new DalHints());
+		assertEquals(4, ret1.size());
+
+		List<AllTypesOnSqlServer> ret2 = dao.testFreeSqlSetNullableAndExcludeAll(null, new DalHints());
+		assertEquals(0, ret2.size());
+	}
+
+	@Test
 	public void testtest_build_nullable_notnull() throws Exception {
 		String CharCol = "a%";
 		String NcharCol = "a";
@@ -559,6 +654,20 @@ public class AllTypesOnSqlServerDaoUnitTest {
 	    daoPojo = dao.queryByPk(2);
 		assertNull(daoPojo);
 	}
+
+	@Test
+	public void testFreeSqlDelete() throws Exception {
+		Integer id = 1;// Test value here
+		int ret = dao.testFreeSqlDelete(id, null);
+
+		AllTypesOnSqlServer pojo = dao.queryByPk(1);
+		assertNull(pojo);
+
+		ret = dao.testFreeSqlDelete(2, null);
+
+		pojo = dao.queryByPk(2);
+		assertNull(pojo);
+	}
 	
 	@Test
 	public void testtestBuildInsert() throws Exception {
@@ -571,6 +680,15 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		ret = dao.testBuildInsert(VarCharCol, TinyIntCol,null);
 	    daoPojo = dao.queryByPk(5);
 		assertNotNull(daoPojo);
+	}
+
+	@Test
+	public void testFreeSqlInsert() throws Exception {
+		String varcharcol = "defInsert";// Test value here
+		Integer intcol = 1;// Test value here
+		dao.testFreeSqlInsert(varcharcol, intcol, null);
+		AllTypesOnSqlServer pojo = dao.queryByPk(5);
+		assertEquals("defInsert", pojo.getVarcharCol());
 	}
 	
 	@Test
@@ -587,7 +705,19 @@ public class AllTypesOnSqlServerDaoUnitTest {
 	    daoPojo = dao.queryByPk(3);
 		assertEquals("buildupdate", daoPojo.getVarcharCol());
 	}
-	
+
+	@Test
+	public void testFreeSqlUpdate() throws Exception {
+		String varcharcol = "defupdate";// Test value here
+		String charcol = "b";// Test value here
+		int id = 2;
+		dao.testFreeSqlUpdate(varcharcol, charcol, id, new DalHints());
+
+		AllTypesOnSqlServer pojo = dao.queryByPk(2);
+		assertEquals("defupdate", pojo.getVarcharCol());
+		assertEquals("b", pojo.getCharCol().trim());
+	}
+
 	@Test
 	public void testtestBuildQueryPojoFirst() throws Exception {
 		Integer id = 1;// Test value here
@@ -668,7 +798,89 @@ public class AllTypesOnSqlServerDaoUnitTest {
 	    ret = dao.testBuildQueryFieldSingle(id,null);
 	    assertEquals(1, ret.intValue());
 	}
-	
+
+	@Test
+	public void testFreeSQLBuilderQueryMax() throws Exception {
+		Integer id = 2;
+		int maxIntCol = dao.testFreeSQLBuilderQueryMax(id, new DalHints());
+		assertEquals(12, maxIntCol);
+	}
+
+	@Test
+	public void testFreeSqlLikePattern() throws Exception {
+		List<AllTypesOnSqlServer> ret1 = dao.testFreeSqlLikePattern("n", MatchPattern.BEGIN_WITH);
+		assertEquals(1, ret1.size());
+		assertEquals(100, ret1.get(0).getBigIntCol().intValue());
+
+		List<AllTypesOnSqlServer> ret2 = dao.testFreeSqlLikePattern("e", MatchPattern.CONTAINS);
+		assertEquals(2, ret2.size());
+
+		List<AllTypesOnSqlServer> ret3 = dao.testFreeSqlLikePattern("ful", MatchPattern.END_WITH);
+		assertEquals(1, ret3.size());
+
+		List<AllTypesOnSqlServer> ret4 = dao.testFreeSqlLikePattern("%ful", MatchPattern.USER_DEFINED);
+		assertEquals(1, ret4.size());
+	}
+
+	@Test
+	public void testFreeSqlNotLikePattern() throws Exception {
+		List<AllTypesOnSqlServer> ret1 = dao.testFreeSqlNotLikePattern("n", MatchPattern.BEGIN_WITH);
+		assertEquals(3, ret1.size());
+
+		List<AllTypesOnSqlServer> ret2 = dao.testFreeSqlNotLikePattern("e", MatchPattern.CONTAINS);
+		assertEquals(2, ret2.size());
+
+		List<AllTypesOnSqlServer> ret3 = dao.testFreeSqlNotLikePattern("ful", MatchPattern.END_WITH);
+		assertEquals(3, ret3.size());
+
+		List<AllTypesOnSqlServer> ret4 = dao.testFreeSqlNotLikePattern("%ful", MatchPattern.USER_DEFINED);
+		assertEquals(3, ret4.size());
+	}
+
+	@Test
+	public void testFreeSqlGroupByHaving() throws Exception {
+		List<String> VarCharColList = new ArrayList<>();
+		VarCharColList.add("hello");
+		VarCharColList.add("world");
+		List<Map<String, Object>> retList = dao.testFreeSqlGroupByHaving2(VarCharColList);
+		assertEquals("hello", retList.get(0).get("VarCharCol").toString());
+		assertEquals(1, Integer.parseInt(retList.get(0).get("Count").toString()));
+
+		assertEquals("world", retList.get(1).get("VarCharCol").toString());
+		assertEquals(1, Integer.parseInt(retList.get(1).get("Count").toString()));
+
+		List<Map<String, Object>> retList2 = dao.testFreeSqlGroupByHaving(VarCharColList);
+		assertEquals("hello", retList2.get(0).get("VarCharCol").toString());
+		assertEquals(1, Integer.parseInt(retList2.get(0).get("Count").toString()));
+
+		assertEquals("world", retList2.get(1).get("VarCharCol").toString());
+		assertEquals(1, Integer.parseInt(retList2.get(1).get("Count").toString()));
+	}
+
+	@Test
+	public void testFreeSqlNotNotNull() throws Exception {
+		int low = 2;
+		int upper = 4;
+		List<Long> bigIntCol = new ArrayList<>();
+		bigIntCol.add(1l);
+		bigIntCol.add(70l);
+		String varCharCol = "%ful";
+		List<AllTypesOnSqlServer> ret = dao.testNotNotNull(low, upper, bigIntCol, varCharCol);
+		assertEquals(2, ret.size());
+		assertEquals(2, ret.get(0).getID().intValue());
+		assertEquals(4, ret.get(1).getID().intValue());
+	}
+
+	@Test
+	public void testFreeSqlNotNullable() throws Exception {
+		List<Long> bigIntCol = new ArrayList<>();
+		bigIntCol.add(70l);
+		bigIntCol.add(null);
+		String varCharCol = null;
+		List<AllTypesOnSqlServer> ret = dao.testNotNullable(null, 4, bigIntCol, varCharCol);
+		assertEquals(3, ret.size());
+	}
+
 	@Test
 	public void testtestDefUpdate() throws Exception {
 		String varcharcol = "defupdate";// Test value here
@@ -720,6 +932,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		
 		ret = dao.testDefQueryPojoFirst(id,null);
 		assertEquals("new", ret.getVarcharCol());
+
+		ret = dao.testFreeSqlQueryFirst(id,null);
+		assertEquals("new", ret.getVarcharCol());
 	}
 	
 	@Test
@@ -729,6 +944,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		assertEquals(1, ret);
 		
 		ret = dao.testDefQueryFieldFirst(id,null);
+		assertEquals(1, ret);
+
+		ret = dao.testFreeSQLBuilderQueryFieldFirst(id,null);
 		assertEquals(1, ret);
 	}
 	
@@ -753,6 +971,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		
 		ret = dao.testDefQueryPojoListByPage(id, 2, 2,null);
 		assertEquals(1, ret.size());
+
+		ret = dao.testFreeSqlQueryListByPage(id, 2, 2,null);
+		assertEquals(1, ret.size());
 	}
 	
 	@Test
@@ -762,6 +983,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		assertEquals(3, ret.size());
 		
 		ret = dao.testDefQueryFieldList(id,null);
+		assertEquals(3, ret.size());
+
+		ret = dao.testFreeSQLBuilderQueryFieldList(id,null);
 		assertEquals(3, ret.size());
 	}
 	
@@ -773,6 +997,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		
 		ret = dao.testDefQueryFieldListByPage(id, 2, 2,null);
 		assertEquals(1, ret.size());
+
+		ret = dao.testFreeSQLBuilderQueryFieldListByPage(id, 2, 2,null);
+		assertEquals(1, ret.size());
 	}
 	
 	@Test
@@ -783,6 +1010,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		
 		ret = dao.testDefQueryPojoSingle(id,null);
 		assertEquals("colorful", ret.getVarcharCol());
+
+		ret = dao.testFreeSqlQuerySingle(id,null);
+		assertEquals("colorful", ret.getVarcharCol());
 	}
 	
 	@Test
@@ -792,6 +1022,9 @@ public class AllTypesOnSqlServerDaoUnitTest {
 		assertEquals(8, ret);
 		
 		ret = dao.testDefQueryFieldSingle(id,null);
+		assertEquals(8, ret);
+
+		ret = dao.testFreeSQLBuilderQueryFieldSingle(id,null);
 		assertEquals(8, ret);
 	}
 }

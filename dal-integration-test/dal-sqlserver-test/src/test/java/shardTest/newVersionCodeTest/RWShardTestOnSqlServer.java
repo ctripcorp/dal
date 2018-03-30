@@ -24,8 +24,8 @@ public class RWShardTestOnSqlServer {
     private static String shard_0_slave_db = "DalService1DB";
     private static String shard_1_master_db= "test_masteronly_sqlserver_0";
     private static String shard_1_slave_db = "test_masteronly_sqlserver_1";
-    
-    
+
+
     @Before
     public void setUp() throws Exception {
 //        DalClientFactory.shutdownFactory();

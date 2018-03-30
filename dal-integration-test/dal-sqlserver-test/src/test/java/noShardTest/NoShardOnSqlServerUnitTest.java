@@ -266,7 +266,7 @@ public class NoShardOnSqlServerUnitTest {
 			daoPojo.setPeopleID(20l+i*2);
 			daoPojo.setCityID(i + 20);
 			if(i%2==0)
-			daoPojo.setName("Initial_Shard_0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + i);
+			daoPojo.setName("Initial_Shard_0" + i);
 //			else
 //				daoPojo.setName("Initial_Shard_1" + i);
 			daoPojos.add(daoPojo);

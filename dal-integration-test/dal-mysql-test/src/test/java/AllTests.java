@@ -1,14 +1,14 @@
 import com.ctrip.framework.dal.qmq.QmqApiTest;
-//import noShardTest.TitanDataSourceTest;
-import noShardTest.NoShardTransactionalTestOnMysqlNotSpringTest;
-import noShardTest.NoShardTransactionalTestOnMysqlSpringTest;
 import noShardTest.TitanDataSourceTest;
+import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import shardTest.newVersionCode.*;
 import shardTest.oldVersionCode.FreeShardingStrategyByTableOnMysqlGenDaoUnitTest;
+import util.NetStatChecker;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -52,6 +52,13 @@ import shardTest.oldVersionCode.FreeShardingStrategyByTableOnMysqlGenDaoUnitTest
 public class AllTests {
     @BeforeClass
     public static void setUp() throws Exception {
-        System.setProperty("env", "fat");
+        if(NetStatChecker.netstatCMD()>5)
+            Assert.fail("connection count greater than 5!!");
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception{
+        if(NetStatChecker.netstatCMD()>5)
+            Assert.fail("connection count greater than 5!!");
     }
 }

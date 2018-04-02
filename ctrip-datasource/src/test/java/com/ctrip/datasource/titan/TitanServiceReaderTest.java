@@ -319,7 +319,7 @@ public class TitanServiceReaderTest {
     public void testSubEnvironmentService() {
         TitanProvider provider = new TitanProvider();
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("mysqldbatestshard01db_W");
+        dbNames.add("ActProductDB_R");
         dbNames.add("mysqldbatestshard02db_w");
 
         Map<String, String> settings = new HashMap<>();

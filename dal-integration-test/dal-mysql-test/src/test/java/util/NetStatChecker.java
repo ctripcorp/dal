@@ -16,14 +16,18 @@ public class NetStatChecker {
     private static Logger log = LoggerFactory.getLogger(NetStatChecker.class);
     private static String[] cmd;
 
-    public static Integer netstatCMD(boolean isWindows) throws Exception {
-        if (isWindows)
-            cmd = new String[]{"cmd", "/c", "netstat -ano | findstr \"10.2.22.232\" | findstr \"ESTABLISHED\""};
-        else
+    public static Integer netstatCMD() throws Exception {
+        Process process;
+        log.info(String.format("check netstat"));
+        try{
             cmd = new String[]{"/bin/sh", "-c", "netstat -ano | grep \"10.2.22.232\" | grep \"ESTABLISHED\""};
+            process = Runtime.getRuntime().exec(cmd);
+        }catch (Exception e) {
+            cmd = new String[]{"cmd", "/c", "netstat -ano | findstr \"10.2.22.232\" | findstr \"ESTABLISHED\""};
+            process = Runtime.getRuntime().exec(cmd);
+        }
         int connectionNum = 0;
         try {
-            Process process = Runtime.getRuntime().exec(cmd);
             InputStream in = process.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader br = new BufferedReader(inputStreamReader);

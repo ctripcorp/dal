@@ -152,13 +152,13 @@ public class QConfigTest2 {
 		}
 
 		// case7,配置env=fat环境，QConfig
-		// APP级别配置removeAbandonedTimeout=100,app级别配置mysqldbatestshard01db_W
+		// APP级别配置removeAbandonedTimeout=100,datasource级别配置commonOrderShard1DB_S1_S
 		@Test
 		public void testQConfigCase7() {
 			TitanProvider provider = new TitanProvider();
 			Set<String> dbNames = new HashSet<>();
 			dbNames.add("CorpPerformanceManagementDB_W");
-			dbNames.add("mysqldbatestshard01db_W");
+			dbNames.add("commonOrderShard1DB_S1_S");
 			Map<String, String> settings = new HashMap<>();
 			/*settings.put(TitanProvider.SERVICE_ADDRESS,
 					"https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
@@ -192,7 +192,7 @@ public class QConfigTest2 {
 						"com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
 						pc.getValidatorClassName());
 
-				pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("mysqldbatestshard01db_W"));
+				pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("commonOrderShard1DB_S1_S"));
 
 				assertFalse(pc.isTestWhileIdle());
 				assertTrue(pc.isTestOnBorrow());
@@ -222,7 +222,7 @@ public class QConfigTest2 {
 						.getDataSourceConfigure("CorpPerformanceManagementDB_W");
 				Assert.assertNotNull(result);
 
-				result = provider.getDataSourceConfigure("mysqldbatestshard01db_W");
+				result = provider.getDataSourceConfigure("commonOrderShard1DB_S1_S");
 				Assert.assertNotNull(result);
 
 			} catch (Exception e) {
@@ -317,7 +317,7 @@ public class QConfigTest2 {
 		TitanProvider provider = new TitanProvider();
 		Set<String> dbNames = new HashSet<>();
 		dbNames.add("abtestdb");
-		dbNames.add("AccFltLogDB_W");
+		dbNames.add("commonOrderShard2DB_S2_S");
 		dbNames.add("uiautomationtestdb_W");
 		dbNames.add("ACTCkvDB_W");
 		Map<String, String> settings = new HashMap<>();
@@ -332,7 +332,7 @@ public class QConfigTest2 {
 					pc.getConnectionProperties());
 
 
-			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("AccFltLogDB_W"));
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("commonOrderShard2DB_S2_S"));
 
 			assertEquals("rewriteBatchedStatements=true",
 					pc.getConnectionProperties());

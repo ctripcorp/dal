@@ -35,7 +35,7 @@
                 connectionProperties="rewriteBatchedStatements=true"/>
     <Datasource name="abtestdb"
                 option="rewriteBatchedStatements=true"/>
-    <Datasource name="AccFltLogDB_W"
+    <Datasource name="commonOrderShard2DB_S2_S"
                 connectionProperties="rewriteBatchedStatements=true"/>
     <Datasource name="uiautomationtestdb_W"
                 option="rewriteBatchedStatements=true"/>

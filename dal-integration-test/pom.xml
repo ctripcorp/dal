@@ -25,7 +25,7 @@
   <modules>
     <module>dal-mysql-test</module>
     <module>dal-sqlserver-test</module>
-    <module>mybatis-test</module>
+    <!--<module>mybatis-test</module>-->
   </modules>
 
   <dependencyManagement>

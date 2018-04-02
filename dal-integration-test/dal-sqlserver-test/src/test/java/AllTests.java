@@ -2,11 +2,14 @@ import noShardTest.NoShardDalTransactionalTestOnSqlServerNotSpringTest;
 import noShardTest.NoShardDalTransactionalTestOnSqlServerSpringTest;
 import noShardTest.NoShardTransactionalTestOnSqlServerNotSpringTest;
 import noShardTest.NoShardTransactionalTestOnSqlServerSpringTest;
+import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import shardTest.newVersionCodeTest.*;
+import util.NetStatChecker;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -47,6 +50,14 @@ import shardTest.newVersionCodeTest.*;
 public class AllTests {
     @BeforeClass
     public static void setUp() throws Exception {
-        System.setProperty("env", "fat");
+//        System.setProperty("env", "fat");
+        if(NetStatChecker.netstatCMD()>5)
+            Assert.fail("connection count greater than 5!!");
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception{
+        if(NetStatChecker.netstatCMD()>5)
+            Assert.fail("connection count greater than 5!!");
     }
 }

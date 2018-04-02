@@ -2,6 +2,7 @@ import noShardTest.NoShardDalTransactionalTestOnSqlServerNotSpringTest;
 import noShardTest.NoShardDalTransactionalTestOnSqlServerSpringTest;
 import noShardTest.NoShardTransactionalTestOnSqlServerNotSpringTest;
 import noShardTest.NoShardTransactionalTestOnSqlServerSpringTest;
+import org.apache.zookeeper.server.quorum.FastLeaderElection;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -50,14 +51,14 @@ import util.NetStatChecker;
 public class AllTests {
     @BeforeClass
     public static void setUp() throws Exception {
-//        System.setProperty("env", "fat");
-        if(NetStatChecker.netstatCMD()>5)
+        System.setProperty("env", "fat");
+        if(NetStatChecker.netstatCMD(false)>5)
             Assert.fail("connection count greater than 5!!");
     }
 
     @AfterClass
     public static void tearDown() throws Exception{
-        if(NetStatChecker.netstatCMD()>5)
+        if(NetStatChecker.netstatCMD(false)>5)
             Assert.fail("connection count greater than 5!!");
     }
 }

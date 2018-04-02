@@ -1,6 +1,7 @@
 package util;
 
 
+import org.hibernate.validator.internal.engine.messageinterpolation.parser.ELState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +15,15 @@ import java.io.InputStreamReader;
  */
 public class NetStatChecker {
     private static Logger log = LoggerFactory.getLogger(NetStatChecker.class);
+    private static String[] cmd;
 
-    public static Integer netstatCMD() throws Exception {
-        String[] cmd = {"cmd", "/c", "netstat -ano | findstr \"10.2.8.231\" | findstr \"ESTABLISHED\""};
-        int connectionNum=0;
+    public static Integer netstatCMD(Boolean isWindows) throws Exception {
+        if (isWindows) {
+              cmd = new String[]{"cmd", "/c", "netstat -ano | findstr \"10.2.8.231\" | findstr \"ESTABLISHED\""};
+        } else {
+              cmd =new String[] {"/bin/sh", "-c", "netstat -ano | grep \"10.2.8.231\" | grep \"ESTABLISHED\""};
+        }
+        int connectionNum = 0;
         try {
             Process process = Runtime.getRuntime().exec(cmd);
             InputStream in = process.getInputStream();
@@ -34,4 +40,5 @@ public class NetStatChecker {
         }
         return connectionNum;
     }
+
 }

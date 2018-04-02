@@ -52,13 +52,13 @@ import util.NetStatChecker;
 public class AllTests {
     @BeforeClass
     public static void setUp() throws Exception {
-        if(NetStatChecker.netstatCMD()>5)
+        if(NetStatChecker.netstatCMD(false)>5)
             Assert.fail("connection count greater than 5!!");
     }
 
     @AfterClass
     public static void tearDown() throws Exception{
-        if(NetStatChecker.netstatCMD()>5)
+        if(NetStatChecker.netstatCMD(false)>5)
             Assert.fail("connection count greater than 5!!");
     }
 }

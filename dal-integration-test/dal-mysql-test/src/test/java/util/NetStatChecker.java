@@ -9,16 +9,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 
-
 /**
  * Created by lilj on 2018/3/4.
  */
 public class NetStatChecker {
     private static Logger log = LoggerFactory.getLogger(NetStatChecker.class);
+    private static String[] cmd;
 
-    public static Integer netstatCMD() throws Exception {
-        String[] cmd = {"cmd", "/c", "netstat -ano | findstr \"10.2.22.232\" | findstr \"ESTABLISHED\""};
-        int connectionNum=0;
+    public static Integer netstatCMD(boolean isWindows) throws Exception {
+        if (isWindows)
+            cmd = new String[]{"cmd", "/c", "netstat -ano | findstr \"10.2.22.232\" | findstr \"ESTABLISHED\""};
+        else
+            cmd = new String[]{"/bin/sh", "-c", "netstat -ano | grep \"10.2.22.232\" | grep \"ESTABLISHED\""};
+        int connectionNum = 0;
         try {
             Process process = Runtime.getRuntime().exec(cmd);
             InputStream in = process.getInputStream();

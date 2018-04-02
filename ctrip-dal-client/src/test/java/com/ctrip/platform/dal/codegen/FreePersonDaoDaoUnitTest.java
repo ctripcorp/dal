@@ -63,7 +63,7 @@ public class FreePersonDaoDaoUnitTest {
 
         client = DalClientFactory.getClient(DATABASE_NAME_MYSQL);
         dao = new FreePersonDaoDao();
-        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, "MySqlSimpleShard", "PERSON");
+        DalParser<Person> parser = new DalDefaultJpaParser<>(Person.class, DATABASE_NAME_MYSQL);
         pdao = new DalTableDao<>(parser);
     }
 

@@ -20,18 +20,29 @@ public class DataSourceIPDomainStatusTest {
         DataSourceConfigureManager.getInstance().setConnectionStringProvider(new AbstractConnectionStringProvider());
         DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new AbstractPoolPropertiesProvider());
         DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(provider);
-
-        DalClientFactory.initClientFactory();
     }
 
     @Test
-    public void testDataSourceIPDomainStatusTest() throws Exception {
+    public void testInitializedByIPStatus() throws Exception {
+        provider.setIPStatus();
+        DalClientFactory.initClientFactory();
+        testSwitchStatus();
+    }
+
+    @Test
+    public void testInitializedByDomainStatus() throws Exception {
+        provider.setDomainStatus();
+        DalClientFactory.initClientFactory();
+        testSwitchStatus();
+    }
+
+    private void testSwitchStatus() throws Exception {
         displayConnectionStringProperties();
+        provider.initStatus();
 
         for (int i = 0; i < 10; i++) {
-            System.out.println("**********Trigger ip domain status changed callback**********");
             provider.triggerIPDomainStatusChanged();
-            Thread.sleep(1 * 1000);
+            Thread.sleep(3 * 1000);
             displayConnectionStringProperties();
         }
     }

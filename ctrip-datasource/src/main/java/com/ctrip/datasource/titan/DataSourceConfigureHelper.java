@@ -291,8 +291,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     protected DataSourceConfigure getDataSourceConfigure(String name, IPDomainStatus status) {
         DataSourceConfigure temp = getDataSourceConfigure(name);
         ConnectionString connectionString = temp.getConnectionString();
-        String cs = status.equals(IPDomainStatus.IP) ? connectionString.getNormalConnectionString()
-                : connectionString.getFailoverConnectionString();
+        String cs = getConnectionStringByIPDomainStatus(status, connectionString);
         DataSourceConfigure configure = dataSourceConfigureLocator.parseConnectionString(name, cs);
         configure = mergeDataSourceConfigure(configure);
         configure.setConnectionString(connectionString);
@@ -303,11 +302,16 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
             String failoverConnectionString) {
         ConnectionString connectionString = new ConnectionString(normalConnectionString, failoverConnectionString);
         IPDomainStatus status = getIPDomainStatus();
-        String cs = status.equals(IPDomainStatus.IP) ? normalConnectionString : failoverConnectionString;
+        String cs = getConnectionStringByIPDomainStatus(status, connectionString);
         DataSourceConfigure configure = dataSourceConfigureLocator.parseConnectionString(name, cs);
         configure = mergeDataSourceConfigure(configure);
         configure.setConnectionString(connectionString);
         return configure;
+    }
+
+    protected String getConnectionStringByIPDomainStatus(IPDomainStatus status, ConnectionString connectionString) {
+        return status.equals(IPDomainStatus.IP) ? connectionString.getNormalConnectionString()
+                : connectionString.getFailoverConnectionString();
     }
 
     protected void setPoolProperties(Map<String, String> map) {

@@ -83,7 +83,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
     private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
-    // private IPDomainStatusProvider ipDomainStatusProvider = new TempIPDomainStatusProviderImpl();
 
     private AtomicReference<Boolean> isPoolPropertiesListenerAdded = new AtomicReference<>(false);
     private AtomicReference<Boolean> isIPDomainStatusListenerAdded = new AtomicReference<>(false);
@@ -190,6 +189,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         } else {
             try {
                 dataSourceConfigures = connectionStringProvider.getConnectionStrings(dbNames);
+                IPDomainStatus status = getIPDomainStatus();
+                dataSourceConfigures = getConnectionStringsByIPDomainStatus(status, dataSourceConfigures);
             } catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
                 throw new RuntimeException(e);
@@ -197,6 +198,27 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         }
 
         return dataSourceConfigures;
+    }
+
+    private Map<String, DataSourceConfigure> getConnectionStringsByIPDomainStatus(IPDomainStatus status,
+            Map<String, DataSourceConfigure> map) {
+        Map<String, DataSourceConfigure> result = new HashMap<>();
+        if (map == null || map.isEmpty())
+            return result;
+
+        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
+            ConnectionString connectionString = entry.getValue().getConnectionString();
+            if (connectionString == null)
+                continue;
+
+            String name = entry.getKey();
+            String cs = getConnectionStringByIPDomainStatus(status, connectionString);
+            DataSourceConfigure configure = dataSourceConfigureLocator.parseConnectionString(name, cs);
+            configure.setConnectionString(connectionString);
+            result.put(name, configure);
+        }
+
+        return result;
     }
 
     private void setDataSourceConfigures(Map<String, DataSourceConfigure> configures) {

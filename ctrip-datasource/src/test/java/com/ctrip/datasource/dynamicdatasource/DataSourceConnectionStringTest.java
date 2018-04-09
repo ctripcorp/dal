@@ -7,7 +7,6 @@ import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,6 +39,7 @@ public class DataSourceConnectionStringTest {
         System.out.println(String.format("Version:%s", version1));
 
         provider.triggerConnectionStringChanged();
+        Thread.sleep(3 * 1000);
 
         DataSourceConfigure configure2 = locator.getDataSourceConfigure(name);
         String userName2 = configure2.getUserName();
@@ -52,7 +52,6 @@ public class DataSourceConnectionStringTest {
         System.out.println(String.format("Driver:%s", driver2));
         String version2 = configure2.getVersion();
         System.out.println(String.format("Version:%s", version2));
-
     }
 
 }

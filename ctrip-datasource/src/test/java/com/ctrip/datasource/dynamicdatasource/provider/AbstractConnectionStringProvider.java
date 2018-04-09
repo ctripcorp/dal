@@ -12,10 +12,10 @@ import java.util.Set;
 
 public class AbstractConnectionStringProvider implements ConnectionStringProvider {
     private String connectionString1 =
-            "Server=DST56614;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
+            "Server=10.32.21.149;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
 
     private String connectionString1Failover =
-            "Server=10.32.21.149;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
+            "Server=DST56614;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
 
     @Override
     public Map<String, DataSourceConfigure> getConnectionStrings(Set<String> dbNames) throws Exception {

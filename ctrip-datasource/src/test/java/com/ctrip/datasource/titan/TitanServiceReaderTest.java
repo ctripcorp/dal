@@ -7,7 +7,8 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
+import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -355,8 +356,12 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-            Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("SimpleShard_0"));
-            Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("SimpleShard_0_SH"));
+            // Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("SimpleShard_0"));
+            // Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("SimpleShard_0_SH"));
+            Assert.assertTrue(
+                    DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure("SimpleShard_0") != null);
+            Assert.assertTrue(
+                    DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure("SimpleShard_0_SH") != null);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Foundation.server().getEnvType());
@@ -376,8 +381,12 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-            Assert.assertFalse(DataSourceConfigureLocator.getInstance().contains("Not_Exist"));
-            Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("ha_test"));
+            // Assert.assertFalse(DataSourceConfigureLocator.getInstance().contains("Not_Exist"));
+            // Assert.assertTrue(DataSourceConfigureLocator.getInstance().contains("ha_test"));
+            Assert.assertFalse(
+                    DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure("Not_Exist") != null);
+            Assert.assertTrue(
+                    DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure("ha_test") != null);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(Foundation.server().getEnvType());

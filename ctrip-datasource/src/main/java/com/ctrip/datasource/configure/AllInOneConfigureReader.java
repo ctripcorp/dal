@@ -11,7 +11,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
+import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.slf4j.Logger;
@@ -21,10 +21,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-
 public class AllInOneConfigureReader {
-
     private static final Logger logger = LoggerFactory.getLogger(AllInOneConfigureReader.class);
     private static final String CONFIG_FILE = "Database.Config";
     private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/" + CONFIG_FILE;
@@ -38,26 +35,25 @@ public class AllInOneConfigureReader {
 
     private static final String CLASSPATH_LOCATION = "$classpath";
 
-    public Map<String, DataSourceConfigure> getDataSourceConfigures(Set<String> dbNames, boolean useLocal,
+    public Map<String, ConnectionString> getConnectionStrings(Set<String> names, boolean useLocal,
             String databaseConfigLocation) {
         String location = getAllInOneConfigLocation(databaseConfigLocation);
-        Map<String, DataSourceConfigure> config = parseDBAllInOneConfig(location, dbNames, useLocal);
-        validate(dbNames, config);
+        Map<String, ConnectionString> config = parseDBAllInOneConfig(location, names, useLocal);
+        validate(names, config);
         return config;
     }
 
-    private void validate(Set<String> dbNames, Map<String, DataSourceConfigure> config) {
+    private void validate(Set<String> names, Map<String, ConnectionString> config) {
         if (config == null)
             throw new RuntimeException("Cannot load config");
 
         Set<String> dbConfigNames = config.keySet();
-        if (dbConfigNames.containsAll(dbNames))
+        if (dbConfigNames.containsAll(names))
             return;
 
-        dbNames.removeAll(dbConfigNames);
-
-        logger.error("Cannot load config for the following DB: " + dbNames.toString());
-        throw new RuntimeException("Cannot load config for the following DB: " + dbNames.toString());
+        names.removeAll(dbConfigNames);
+        logger.error("Cannot load config for the following DB: " + names.toString());
+        throw new RuntimeException("Cannot load config for the following DB: " + names.toString());
     }
 
     private String getAllInOneConfigLocation(String databaseConfigLocation) {
@@ -98,11 +94,11 @@ public class AllInOneConfigureReader {
         return location;
     }
 
-    private Map<String, DataSourceConfigure> parseDBAllInOneConfig(String absolutePath, Set<String> dbNames,
+    private Map<String, ConnectionString> parseDBAllInOneConfig(String absolutePath, Set<String> names,
             boolean useLocal) {
-        Map<String, DataSourceConfigure> dataSourceConfigures = new HashMap<>();
-
+        Map<String, ConnectionString> connectionStrings = new HashMap<>();
         FileInputStream in = null;
+
         try {
             logger.info("Allinone: using db config: " + absolutePath);
             File conFile = new File(absolutePath);
@@ -120,7 +116,6 @@ public class AllInOneConfigureReader {
             }
 
             List<Node> databaseEntryList = getChildNodes(root, DATABASE_ENTRY);
-
             for (int i = 0; i < databaseEntryList.size(); i++) {
                 Node databaseEntry = databaseEntryList.get(i);
 
@@ -131,18 +126,16 @@ public class AllInOneConfigureReader {
 
                 String name = getAttribute(databaseEntry, DATABASE_ENTRY_NAME);
                 String keyName = ConnectionStringKeyHelper.getKeyName(name);
-                if (!dbNames.contains(keyName))
+                if (!names.contains(keyName))
                     continue;
 
-                String connectionString = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
-
-                logger.info("Try to read config for " + name);
-                DataSourceConfigure config = ConnectionStringParser.getInstance().parse(name, connectionString);
-                dataSourceConfigures.put(keyName, config);
+                String cs = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
+                ConnectionString connectionString = new ConnectionString(keyName, cs, cs);
+                connectionStrings.put(keyName, connectionString);
             }
-            in.close();
 
-            return dataSourceConfigures;
+            in.close();
+            return connectionStrings;
         } catch (Throwable e) {
             String msg = String.format("Read %s file error, msg: %s", absolutePath, e.getMessage());
             logger.error(msg, e);
@@ -184,4 +177,5 @@ public class AllInOneConfigureReader {
         String version = getAttribute(node, VERSION);
         return DEV_FLAG.equalsIgnoreCase(version);
     }
+
 }

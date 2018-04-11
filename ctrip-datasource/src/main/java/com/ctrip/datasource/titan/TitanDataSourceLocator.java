@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -49,26 +50,22 @@ public class TitanDataSourceLocator {
     private static final Logger logger = LoggerFactory.getLogger(TitanDataSourceLocator.class);
     public static final String DB_NAME = "DBKeyName";
     private static final int DEFAULT_TIMEOUT = 15 * 1000;
-    
-    private static final Pattern dburlPattern = Pattern
-            .compile("(data\\ssource|server|address|addr|network)=([^;]+)",Pattern.CASE_INSENSITIVE);
-    private static final Pattern dbuserPattern = Pattern
-            .compile("(uid|user\\sid)=([^;]+)",Pattern.CASE_INSENSITIVE);
-    private static final Pattern dbpasswdPattern = Pattern
-            .compile("(password|pwd)=([^;]+)",Pattern.CASE_INSENSITIVE);
-    private static final Pattern dbnamePattern = Pattern
-            .compile("(database|initial\\scatalog)=([^;]+)",Pattern.CASE_INSENSITIVE);
-    private static final Pattern dbcharsetPattern = Pattern
-            .compile("(charset)=([^;]+)",Pattern.CASE_INSENSITIVE);
-    private static final Pattern dbportPattern = Pattern
-            .compile("(port)=([^;]+)",Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern dburlPattern =
+            Pattern.compile("(data\\ssource|server|address|addr|network)=([^;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern dbuserPattern = Pattern.compile("(uid|user\\sid)=([^;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern dbpasswdPattern = Pattern.compile("(password|pwd)=([^;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern dbnamePattern =
+            Pattern.compile("(database|initial\\scatalog)=([^;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern dbcharsetPattern = Pattern.compile("(charset)=([^;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern dbportPattern = Pattern.compile("(port)=([^;]+)", Pattern.CASE_INSENSITIVE);
     private static final String PORT_SPLIT = ",";
     private static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
     private static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s";
     private static final String DEFAULT_ENCODING = "UTF-8";
     private static final String DEFAULT_PORT = "3306";
-    private static final String DRIVER_MYSQL ="com.mysql.jdbc.Driver";
-    private static final String DRIVER_SQLSERVRE ="com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
+    private static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
     public DataSource getDataSource(String titanSvcUrl, String name) throws Exception {
         try {
@@ -81,8 +78,11 @@ public class TitanDataSourceLocator {
             DataSourceConfigureManager.getInstance().setup(dbNames, SourceType.Remote);
 
             TitanData data = getConnectionStrings(titanSvcUrl, name, appid);
-            DataSourceConfigure configure = parse(name, decrypt(data.getConnectionString()));
-            configure = DataSourceConfigureManager.getInstance().mergeDataSourceConfig(configure);
+            // DataSourceConfigure configure = parse(name, decrypt(data.getConnectionString()));
+            String cs = decrypt(data.getConnectionString());
+            ConnectionString connectionString = new ConnectionString(name, cs, cs);
+            DataSourceConfigure configure =
+                    DataSourceConfigureManager.getInstance().mergeDataSourceConfig(connectionString);
 
             return new SingleDataSource(name, configure).getDataSource();
         } catch (Throwable e) {
@@ -91,13 +91,13 @@ public class TitanDataSourceLocator {
             throw new RuntimeException(msg, e);
         }
     }
-    
+
     private String validate(String name, String originalValue) {
-        if(originalValue == null || originalValue.trim().length() == 0)
+        if (originalValue == null || originalValue.trim().length() == 0)
             throw new IllegalArgumentException(name + " is empty!");
-        
+
         originalValue = originalValue.trim();
-        
+
         info(name + " is " + originalValue);
 
         return originalValue;
@@ -112,7 +112,7 @@ public class TitanDataSourceLocator {
         StringBuilder body = new StringBuilder();
         body.append("ids=").append(name);
         body.append("&appid=").append(appid);
-        
+
         String subEnv = Foundation.server().getSubEnv();
         if (subEnv != null && subEnv.trim().length() > 0) {
             subEnv = subEnv.trim();
@@ -133,22 +133,23 @@ public class TitanDataSourceLocator {
         HttpClient sslClient = initWeakSSLClient();
         if (sslClient == null)
             throw new IllegalStateException("Can not create SSL");
-        
+
         HttpPost httpPost = new HttpPost();
         httpPost.setURI(uri);
         httpPost.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_FORM_URLENCODED));
 
         HttpResponse response = sslClient.execute(httpPost);
-        
+
         int code = response.getStatusLine().getStatusCode();
 
         HttpEntity entity = response.getEntity();
 
         String content = EntityUtils.toString(entity);
-        
-        if(code != 200) {
-            throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
-                    code, content));
+
+        if (code != 200) {
+            throw new DalException(
+                    String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
+                            code, content));
         }
 
         TitanResponse resp = null;
@@ -261,7 +262,8 @@ public class TitanDataSourceLocator {
     }
 
     /**
-     * parse "Data Source=devdb.dev.sh.ctriptravel.com,28747;UID=uws_AllInOneKey_dev;password=!QAZ@WSX1qaz2wsx; database=AbacusDB;"
+     * parse "Data Source=devdb.dev.sh.ctriptravel.com,28747;UID=uws_AllInOneKey_dev;password=!QAZ@WSX1qaz2wsx;
+     * database=AbacusDB;"
      * 
      * @return DataSourceConfigure
      */
@@ -272,7 +274,7 @@ public class TitanDataSourceLocator {
         String userName = null;
         String password = null;
         String driverClass = null;
-        
+
         String dbname = null, charset = null, dbhost = null;
         Matcher matcher = dbnamePattern.matcher(connStr);
         if (matcher.find()) {
@@ -302,26 +304,26 @@ public class TitanDataSourceLocator {
                     url = String.format(DBURL_MYSQL, dbhost, DEFAULT_PORT, dbname, charset);
                 }
             }
-            
-            driverClass = isSqlServer?DRIVER_SQLSERVRE : DRIVER_MYSQL;
-        }else
+
+            driverClass = isSqlServer ? DRIVER_SQLSERVRE : DRIVER_MYSQL;
+        } else
             throw new RuntimeException("The format of connection string is incorrect for " + name);
 
         matcher = dbuserPattern.matcher(connStr);
         if (matcher.find()) {
             userName = matcher.group(2);
         }
-        
+
         matcher = dbpasswdPattern.matcher(connStr);
         if (matcher.find()) {
             password = matcher.group(2);
         }
-            
+
         config.setConnectionUrl(url);
         config.setUserName(userName);
         config.setPassword(password);
         config.setDriverClass(driverClass);
-        
+
         return config;
     }
 

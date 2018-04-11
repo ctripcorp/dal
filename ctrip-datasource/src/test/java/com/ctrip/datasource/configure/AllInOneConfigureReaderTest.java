@@ -32,7 +32,7 @@ public class AllInOneConfigureReaderTest {
         dbNames.add("dao_test_mysql");
         dbNames.add("test");
         try {
-            reader.getDataSourceConfigures(dbNames, true, null);
+            reader.getConnectionStrings(dbNames, true, null);
             Assert.fail();
         } catch (Exception e) {
         }

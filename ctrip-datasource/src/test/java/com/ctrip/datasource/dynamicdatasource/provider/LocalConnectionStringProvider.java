@@ -1,5 +1,6 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
+import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 
@@ -20,7 +21,9 @@ public class LocalConnectionStringProvider extends AbstractConnectionStringProvi
         Map<String, String> map = new HashMap<>();
         map.put(TITAN_KEY_NORMAL, connectionString2);
         map.put(TITAN_KEY_FAILOVER, connectionString2Failover);
-        callback.onChanged(map);
+        ConnectionString connectionString = new ConnectionString("", connectionString2, connectionString2Failover);
+
+        callback.onChanged(connectionString);
     }
 
     @Override

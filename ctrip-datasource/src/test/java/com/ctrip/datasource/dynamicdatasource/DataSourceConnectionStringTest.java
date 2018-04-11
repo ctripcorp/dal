@@ -6,13 +6,13 @@ import com.ctrip.datasource.dynamicdatasource.provider.LocalConnectionStringProv
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DataSourceConnectionStringTest {
     private static final String name = "mysqldaltest01db_W";
-    private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
+    private static DefaultDataSourceConfigureLocator locator = DefaultDataSourceConfigureLocator.getInstance();
     private static LocalConnectionStringProvider provider = new LocalConnectionStringProvider();
 
     @BeforeClass

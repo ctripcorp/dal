@@ -1,8 +1,7 @@
 package com.ctrip.datasource.configure.qconfig;
 
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
-import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.ConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
@@ -29,7 +28,6 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     private static final String NORMAL_CONNECTIONSTRING = "Normal ConnectionString";
     private static final String FAILOVER_CONNECTIONSTRING = "Failover ConnectionString";
 
-    private ConnectionStringParser connectionStringParser = ConnectionStringParser.getInstance();
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
@@ -44,7 +42,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     }
 
     @Override
-    public Map<String, DataSourceConfigure> getConnectionStrings(Set<String> dbNames) throws Exception {
+    public Map<String, ConnectionString> getConnectionStrings(Set<String> dbNames) throws Exception {
         refreshConnectionStringMapConfig(dbNames);
         return _getConnectionStrings(dbNames);
     }
@@ -71,40 +69,42 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         return MapConfig.get(TITAN_APP_ID, keyName, feature);
     }
 
-    private Map<String, DataSourceConfigure> _getConnectionStrings(Set<String> dbNames) throws Exception {
-        Map<String, DataSourceConfigure> configures = new HashMap<>();
-        if (dbNames == null || dbNames.isEmpty())
+    private Map<String, ConnectionString> _getConnectionStrings(Set<String> names) throws Exception {
+        Map<String, ConnectionString> configures = new HashMap<>();
+        if (names == null || names.isEmpty())
             return configures;
 
-        for (String name : dbNames) {
+        for (String name : names) {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
             MapConfig config = getConfigMap(name);
 
             if (config != null) {
-                String normalConnectionString;
-                String failoverConnectionString;
+                String ipConnectionString;
+                String domainConnectionString;
                 String transactionName = String.format("%s:%s", GET_CONNECTIONSTRING, name);
                 Transaction transaction = Cat.newTransaction(DAL, transactionName);
 
                 try {
                     Map<String, String> map = config.asMap();
-                    normalConnectionString = map.get(TITAN_KEY_NORMAL);
-                    failoverConnectionString = map.get(TITAN_KEY_FAILOVER);
+                    ipConnectionString = map.get(TITAN_KEY_NORMAL);
+                    domainConnectionString = map.get(TITAN_KEY_FAILOVER);
                 } catch (Throwable e) {
                     throw new DalException(String.format("Error getting connection string from QConfig for %s", name),
                             e);
                 }
 
-                DataSourceConfigure configure;
-                DataSourceConfigure failoverConfigure;
+                ConnectionString connectionString =
+                        new ConnectionString(keyName, ipConnectionString, domainConnectionString);
+                ConnectionStringConfigure ipConfigure;
+                ConnectionStringConfigure domainConfigure;
                 try {
-                    configure = connectionStringParser.parse(name, normalConnectionString);
-                    failoverConfigure = connectionStringParser.parse(name, failoverConnectionString);
+                    ipConfigure = connectionString.getIPConnectionStringConfigure();
+                    domainConfigure = connectionString.getDomainConnectionStringConfigure();
 
-                    String msg = String.format("%s=%s,%s=%s", NORMAL_CONNECTIONSTRING, configure.getConnectionUrl(),
-                            FAILOVER_CONNECTIONSTRING, failoverConfigure.getConnectionUrl());
-                    transaction.addData(NORMAL_CONNECTIONSTRING, configure.getConnectionUrl());
-                    transaction.addData(FAILOVER_CONNECTIONSTRING, failoverConfigure.getConnectionUrl());
+                    String msg = String.format("%s=%s,%s=%s", NORMAL_CONNECTIONSTRING, ipConfigure.getConnectionUrl(),
+                            FAILOVER_CONNECTIONSTRING, domainConfigure.getConnectionUrl());
+                    transaction.addData(NORMAL_CONNECTIONSTRING, ipConfigure.getConnectionUrl());
+                    transaction.addData(FAILOVER_CONNECTIONSTRING, domainConfigure.getConnectionUrl());
                     transaction.setStatus(Transaction.SUCCESS);
                     Cat.logEvent(DAL, transactionName, Message.SUCCESS, msg);
                 } catch (Throwable e) {
@@ -114,10 +114,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     transaction.complete();
                 }
 
-                ConnectionString connectionString =
-                        new ConnectionString(normalConnectionString, failoverConnectionString);
-                configure.setConnectionString(connectionString);
-                configures.put(keyName, configure);
+                configures.put(keyName, connectionString);
             }
         }
 
@@ -142,7 +139,12 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     return;
                 }
 
-                callback.onChanged(map);
+                String ipConnectionString = map.get(TITAN_KEY_NORMAL);
+                String domainConnectionString = map.get(TITAN_KEY_FAILOVER);
+                ConnectionString connectionString =
+                        new ConnectionString(keyName, ipConnectionString, domainConnectionString);
+
+                callback.onChanged(connectionString);
             }
         });
     }

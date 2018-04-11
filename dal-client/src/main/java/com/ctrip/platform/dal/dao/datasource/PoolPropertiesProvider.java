@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import java.util.Map;
+import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 
 public interface PoolPropertiesProvider {
-    Map<String, String> getPoolProperties();
+    PoolPropertiesConfigure getPoolProperties();
 
     void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback);
 }

@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import java.util.Map;
+import com.ctrip.platform.dal.dao.configure.ConnectionString;
 
 public interface ConnectionStringChanged {
-    void onChanged(Map<String, String> map);
+    void onChanged(ConnectionString connectionString);
 }

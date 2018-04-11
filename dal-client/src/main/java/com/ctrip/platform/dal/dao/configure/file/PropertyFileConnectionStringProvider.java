@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configure.file;
 
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 
@@ -18,6 +18,7 @@ public class PropertyFileConnectionStringProvider implements ConnectionStringPro
     private static final String PASSWORD = ".password";
     private static final String CONNECTION_URL = ".connectionUrl";
     private static final String DRIVER_CLASS_NAME = ".driverClassName";
+    private static final String COMMA = ",";
 
     private Properties properties = new Properties();
 
@@ -39,19 +40,22 @@ public class PropertyFileConnectionStringProvider implements ConnectionStringPro
     }
 
     @Override
-    public Map<String, DataSourceConfigure> getConnectionStrings(Set<String> dbNames) throws Exception {
-        if (dbNames == null || dbNames.isEmpty())
+    public Map<String, ConnectionString> getConnectionStrings(Set<String> names) throws Exception {
+        if (names == null || names.isEmpty())
             return null;
 
-        Map<String, DataSourceConfigure> map = new HashMap<>();
-        for (String name : dbNames) {
-            DataSourceConfigure configure = new DataSourceConfigure();
-            configure.setUserName(properties.getProperty(name + USER_NAME));
-            configure.setPassword(properties.getProperty(name + PASSWORD));
-            configure.setConnectionUrl(properties.getProperty(name + CONNECTION_URL));
-            configure.setDriverClass(properties.getProperty(name + DRIVER_CLASS_NAME));
-
-            map.put(name, configure);
+        Map<String, ConnectionString> map = new HashMap<>();
+        for (String name : names) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(properties.getProperty(name + USER_NAME));
+            sb.append(COMMA);
+            sb.append(properties.getProperty(name + PASSWORD));
+            sb.append(COMMA);
+            sb.append(properties.getProperty(name + CONNECTION_URL));
+            sb.append(COMMA);
+            sb.append(properties.getProperty(name + DRIVER_CLASS_NAME));
+            ConnectionString connectionString = new ConnectionString(name, sb.toString(), sb.toString());
+            map.put(name, connectionString);
         }
 
         return map;

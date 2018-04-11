@@ -5,6 +5,10 @@ public class DataSourceConfigureChangeEvent {
     private DataSourceConfigure newDataSourceConfigure;
     private DataSourceConfigure oldDataSourceConfigure;
 
+    public DataSourceConfigureChangeEvent(String name) {
+        this.name = name;
+    }
+
     public DataSourceConfigureChangeEvent(String name, DataSourceConfigure newDataSourceConfigure,
             DataSourceConfigure oldDataSourceConfigure) {
         this.name = name;
@@ -16,12 +20,20 @@ public class DataSourceConfigureChangeEvent {
         return name;
     }
 
+    public DataSourceConfigure getOldDataSourceConfigure() {
+        return oldDataSourceConfigure;
+    }
+
+    public void setOldDataSourceConfigure(DataSourceConfigure oldDataSourceConfigure) {
+        this.oldDataSourceConfigure = oldDataSourceConfigure;
+    }
+
     public DataSourceConfigure getNewDataSourceConfigure() {
         return newDataSourceConfigure;
     }
 
-    public DataSourceConfigure getOldDataSourceConfigure() {
-        return oldDataSourceConfigure;
+    public void setNewDataSourceConfigure(DataSourceConfigure newDataSourceConfigure) {
+        this.newDataSourceConfigure = newDataSourceConfigure;
     }
 
 }

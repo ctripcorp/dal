@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-public class DataSourceConfigure implements DataSourceConfigureConstants {
+public class DataSourceConfigure
+        implements DataSourceConfigureConstants, ConnectionStringConfigure, PoolPropertiesConfigure {
     private String name;
     private Properties properties = new Properties();
     private Map<String, String> map = new HashMap<>();
@@ -43,6 +44,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
             properties.setProperty(entry.getKey(), entry.getValue());
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -51,6 +53,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         this.name = name;
     }
 
+    @Override
     public String getUserName() {
         return getProperty(USER_NAME);
     }
@@ -59,6 +62,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         setProperty(USER_NAME, userName);
     }
 
+    @Override
     public String getPassword() {
         return getProperty(PASSWORD);
     }
@@ -67,6 +71,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         setProperty(PASSWORD, password);
     }
 
+    @Override
     public String getConnectionUrl() {
         return getProperty(CONNECTION_URL);
     }
@@ -75,6 +80,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         setProperty(CONNECTION_URL, connectionUrl);
     }
 
+    @Override
     public String getDriverClass() {
         return getProperty(DRIVER_CLASS_NAME);
     }
@@ -83,6 +89,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         setProperty(DRIVER_CLASS_NAME, driverClass);
     }
 
+    @Override
     public String getVersion() {
         return version;
     }
@@ -99,14 +106,7 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         this.connectionString = connectionString;
     }
 
-    public String getNormalConnectionString() {
-        return connectionString.getNormalConnectionString();
-    }
-
-    public String getFailoverConnectionString() {
-        return connectionString.getFailoverConnectionString();
-    }
-
+    @Override
     public Properties getProperties() {
         return properties;
     }
@@ -115,37 +115,33 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
         this.properties = properties;
     }
 
+    @Override
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
 
+    @Override
     public String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
     }
 
     public void setProperty(String key, String value) {
         properties.setProperty(key, value);
-        map.put(key, value);
     }
 
+    @Override
     public int getIntProperty(String key, int defaultValue) {
         return properties.containsKey(key) ? Integer.parseInt(getProperty(key)) : defaultValue;
     }
 
+    @Override
     public long getLongProperty(String key, long defaultValue) {
         return properties.containsKey(key) ? Long.parseLong(getProperty(key)) : defaultValue;
     }
 
+    @Override
     public boolean getBooleanProperty(String key, boolean defaultValue) {
         return properties.containsKey(key) ? Boolean.parseBoolean(getProperty(key)) : defaultValue;
-    }
-
-    public Map<String, String> getMap() {
-        return map;
-    }
-
-    public void setMap(Map<String, String> map) {
-        this.map = map;
     }
 
     public String toConnectionUrl() {
@@ -153,27 +149,27 @@ public class DataSourceConfigure implements DataSourceConfigureConstants {
                 (version == null ? "" : version), getCRC());
     }
 
-    public Map<String, String> toMap() {
-        Map<String, String> m = new HashMap<>();
+    public Properties toProperties() {
+        Properties p = new Properties();
         Set<String> set = new HashSet<>();
         set.add(USER_NAME);
         set.add(PASSWORD);
         set.add(CONNECTION_URL);
         set.add(DRIVER_CLASS_NAME);
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             if (!set.contains(entry.getKey())) {
-                m.put(entry.getKey(), entry.getValue());
+                p.setProperty(entry.getKey().toString(), entry.getValue().toString());
             }
         }
 
-        return m;
+        return p;
     }
 
     public boolean dynamicPoolPropertiesEnabled() {
-        if (map == null || map.isEmpty())
+        if (properties == null || properties.isEmpty())
             return false;
 
-        String value = map.get(ENABLE_DYNAMIC_POOL_PROPERTIES);
+        String value = properties.getProperty(ENABLE_DYNAMIC_POOL_PROPERTIES);
         if (value == null)
             return false;
 

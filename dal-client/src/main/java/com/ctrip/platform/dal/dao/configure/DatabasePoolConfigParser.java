@@ -14,7 +14,7 @@ public class DatabasePoolConfigParser implements DataSourceConfigureConstants {
     }
 
     public DatabasePoolConfig getDatabasePoolConfig(String name) {
-        DataSourceConfigure configure = DefaultDataSourceConfigureLocator.getInstance().getDataSourceConfigure(name);
+        DataSourceConfigure configure = DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name);
         PoolProperties poolProperties = new PoolProperties();
 
         poolProperties.setTestWhileIdle(configure.getBooleanProperty(TESTWHILEIDLE, DEFAULT_TESTWHILEIDLE));

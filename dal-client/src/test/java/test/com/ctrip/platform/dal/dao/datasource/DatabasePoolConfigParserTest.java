@@ -1,7 +1,7 @@
 package test.com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import junit.framework.Assert;
@@ -29,7 +29,7 @@ public class DatabasePoolConfigParserTest {
     @Test
     public void test1() {
         PoolPropertiesConfigure configure =
-                DefaultDataSourceConfigureLocator.getInstance().getUserPoolPropertiesConfigure("dao_test");
+                DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dao_test");
         Assert.assertEquals(10000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals(
                 "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8",
@@ -39,7 +39,7 @@ public class DatabasePoolConfigParserTest {
     @Test
     public void test2() {
         PoolPropertiesConfigure configure =
-                DefaultDataSourceConfigureLocator.getInstance().getUserPoolPropertiesConfigure("dao_test_select");
+                DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dao_test_select");
         Assert.assertEquals(true, configure.getBooleanProperty(DataSourceConfigureConstants.TESTWHILEIDLE, false));
         Assert.assertEquals(true, configure.getBooleanProperty(DataSourceConfigureConstants.TESTONBORROW, false));
         Assert.assertEquals("SELECT 1", configure.getProperty(DataSourceConfigureConstants.VALIDATIONQUERY));
@@ -62,7 +62,7 @@ public class DatabasePoolConfigParserTest {
     @Test
     public void test3() {
         PoolPropertiesConfigure configure =
-                DefaultDataSourceConfigureLocator.getInstance().getUserPoolPropertiesConfigure("dal_test_new");
+                DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dal_test_new");
         Assert.assertEquals(10000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals("sendTimeAsDateTime=false", configure.getProperty(DataSourceConfigureConstants.OPTION));
 
@@ -73,7 +73,7 @@ public class DatabasePoolConfigParserTest {
     @Test
     public void test4() {
         PoolPropertiesConfigure configure =
-                DefaultDataSourceConfigureLocator.getInstance().getUserPoolPropertiesConfigure("dao_test_select");
+                DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dao_test_select");
         Assert.assertEquals(1000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
         Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true",
                 configure.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));

@@ -15,15 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLocator {
-    private volatile static DefaultDataSourceConfigureLocator locator = null;
-
-    public synchronized static DefaultDataSourceConfigureLocator getInstance() {
-        if (locator == null) {
-            locator = new DefaultDataSourceConfigureLocator();
-        }
-        return locator;
-    }
-
     protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSourceConfigureLocator.class);
     private static final String SEPARATOR = "\\.";
     protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();

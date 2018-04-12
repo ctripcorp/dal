@@ -68,7 +68,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
     @Override
     public DataSourceConfigure getDataSourceConfigure(String dbName) {
         PoolPropertiesConfigure configure =
-                DefaultDataSourceConfigureLocator.getInstance().getUserPoolPropertiesConfigure(dbName);
+                DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure(dbName);
         DataSourceConfigure dataSourceConfigure = configure == null ? new DataSourceConfigure(dbName)
                 : new DataSourceConfigure(dbName, configure.getProperties());
 

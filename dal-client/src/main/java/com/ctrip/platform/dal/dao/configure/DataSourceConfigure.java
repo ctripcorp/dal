@@ -2,7 +2,6 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -12,7 +11,6 @@ public class DataSourceConfigure
         implements DataSourceConfigureConstants, ConnectionStringConfigure, PoolPropertiesConfigure {
     private String name;
     private Properties properties = new Properties();
-    private Map<String, String> map = new HashMap<>();
     private String version;
     private ConnectionString connectionString;
 

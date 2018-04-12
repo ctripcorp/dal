@@ -13,7 +13,7 @@ public class DefaultDataSourceConfigureProvider implements DataSourceConfigurePr
     @Override
     public DataSourceConfigure getDataSourceConfigure(String dbName) {
         DataSourceConfigure dataSourceConfigure =
-                DefaultDataSourceConfigureLocator.getInstance().getDataSourceConfigure(dbName);
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(dbName);
         if (dataSourceConfigure == null)
             return new DataSourceConfigure(dbName);
 

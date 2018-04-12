@@ -33,7 +33,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     private String dataSourceXmlLocation = null;
     private boolean dataSourceXmlExist = false;
 
-    private DefaultDataSourceConfigureLocator defaultDataSourceConfigureLocator = DefaultDataSourceConfigureLocator.getInstance();
+    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocatorManager.getInstance();
 
     private DataSourceConfigureParser() {
         try {
@@ -90,7 +90,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         List<Node> resourceList = getChildNodes(root, RESOURCE_NODE);
         for (Node resource : resourceList) {
             DataSourceConfigure dataSourceConfigure = parseResource(resource);
-            defaultDataSourceConfigureLocator.addUserPoolPropertiesConfigure(dataSourceConfigure.getName(),
+            dataSourceConfigureLocator.addUserPoolPropertiesConfigure(dataSourceConfigure.getName(),
                     dataSourceConfigure);
         }
     }

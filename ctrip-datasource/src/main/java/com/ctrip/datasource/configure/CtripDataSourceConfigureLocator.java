@@ -16,7 +16,7 @@ import java.util.Properties;
 
 public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureLocator {
     private static final String DAL = "DAL";
-    private static final String POOLPROPERTIES_MERGEPOOLPROPERTIES = "PoolProperties::mergePoolProperties";
+    private static final String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
 
     @Override
     public DataSourceConfigure mergeDataSourceConfigure(ConnectionString connectionString) {
@@ -26,7 +26,8 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
 
         String name = connectionStringConfigure.getName();
         DataSourceConfigure c = cloneDataSourceConfigure(null);
-        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES);
+        String catName = String.format(POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT, name);
+        Transaction transaction = Cat.newTransaction(DAL, catName);
 
         try {
             PropertiesWrapper wrapper = propertiesWrapperReference.get();
@@ -36,7 +37,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
                 overrideProperties(c.getProperties(), appProperties);
                 String log = "App 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
                 LOGGER.info(log);
-                Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, log);
+                Cat.logEvent(DAL, catName, Message.SUCCESS, log);
             }
 
             // override datasource-level properties
@@ -48,7 +49,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
                         overrideProperties(c.getProperties(), p1);
                         String log = name + " 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
                         LOGGER.info(log);
-                        Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, log);
+                        Cat.logEvent(DAL, catName, Message.SUCCESS, log);
                     } else {
                         String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
                         possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
@@ -58,7 +59,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
                             String log = possibleName + " 覆盖结果："
                                     + poolPropertiesHelper.propertiesToString(c.getProperties());
                             LOGGER.info(log);
-                            Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS, log);
+                            Cat.logEvent(DAL, catName, Message.SUCCESS, log);
                         }
                     }
                 }
@@ -66,7 +67,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
 
             // override config from connection settings,datasource.xml
             overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
-            Cat.logEvent(DAL, POOLPROPERTIES_MERGEPOOLPROPERTIES, Message.SUCCESS,
+            Cat.logEvent(DAL, catName, Message.SUCCESS,
                     String.format("最终覆盖结果：%s", poolPropertiesHelper.propertiesToString(c.toProperties())));
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {

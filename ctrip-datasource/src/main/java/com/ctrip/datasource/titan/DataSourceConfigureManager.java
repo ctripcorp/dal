@@ -68,6 +68,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private static final String POOLPROPERTIES_REFRESH_POOLPROPERTIES = "PoolProperties::refreshPoolProperties";
     private static final String IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS = "IPDomainStatus::refreshIPDomainStatus";
 
+    private static final String SET_PROPERTIES = "Set PoolProperties";
+    private static final String SET_IP_DOMAIN_STATUS = "Set IPDomainStatus";
+
     // DataSourceConfigure
     private static final String DATASOURCECONFIGURE_REFRESH_DATASOURCECONFIG =
             "DataSourceConfig::refreshDataSourceConfig";
@@ -90,8 +93,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private AtomicReference<Boolean> isPoolPropertiesListenerAdded = new AtomicReference<>(false);
     private AtomicReference<Boolean> isIPDomainStatusListenerAdded = new AtomicReference<>(false);
 
-    private DataSourceConfigureLocator defaultDataSourceConfigureLocator =
-            DataSourceConfigureLocatorManager.getInstance();
+    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocatorManager.getInstance();
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
     private volatile boolean isInitialized = false;
@@ -125,18 +127,18 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         // set ip domain status
         IPDomainStatus status = ipDomainStatusProvider.getStatus();
-        defaultDataSourceConfigureLocator.setIPDomainStatus(status);
+        dataSourceConfigureLocator.setIPDomainStatus(status);
 
         // set connection strings
         Map<String, ConnectionString> connectionStrings = getConnectionStrings(names, sourceType);
-        defaultDataSourceConfigureLocator.setConnectionStrings(connectionStrings);
+        dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
 
         // set pool properties
         PoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
-        defaultDataSourceConfigureLocator.setPoolProperties(poolProperties);
+        dataSourceConfigureLocator.setPoolProperties(poolProperties);
 
         if (sourceType == SourceType.Remote) {
-            defaultDataSourceConfigureLocator.addDataSourceConfigureKeySet(names);
+            dataSourceConfigureLocator.addDataSourceConfigureKeySet(names);
             addConnectionStringChangedListeners(names);
 
             boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get().booleanValue();
@@ -212,7 +214,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     public DataSourceConfigure mergeDataSourceConfig(ConnectionString connectionString) {
-        return defaultDataSourceConfigureLocator.mergeDataSourceConfigure(connectionString);
+        return dataSourceConfigureLocator.mergeDataSourceConfigure(connectionString);
     }
 
     private void addConnectionStringChangedListeners(Set<String> names) {
@@ -249,7 +251,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         // validate version
         ConnectionStringConfigure connectionStringConfigure = connectionString.getIPConnectionStringConfigure();
         String newVersion = connectionStringConfigure.getVersion();
-        DataSourceConfigure oldConfigure = defaultDataSourceConfigureLocator.getDataSourceConfigure(keyName);
+        DataSourceConfigure oldConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
         String oldVersion = oldConfigure.getVersion();
 
         if (newVersion != null && oldVersion != null) {
@@ -285,9 +287,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         // set connection string
         Map<String, ConnectionString> map = new HashMap<>();
         map.put(keyName, connectionString);
-        defaultDataSourceConfigureLocator.setConnectionStrings(map);
+        dataSourceConfigureLocator.setConnectionStrings(map);
 
-        DataSourceConfigure newConfigure = defaultDataSourceConfigureLocator.getDataSourceConfigure(keyName);
+        DataSourceConfigure newConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);
 
         Map<String, DataSourceConfigureChangeEvent> events = new HashMap<>();
@@ -322,16 +324,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         try {
-            Set<String> names = defaultDataSourceConfigureLocator.getDataSourceConfigureKeySet();
-            Map<String, DataSourceConfigureChangeEvent> events = new HashMap<>();
-            setOldDataSourceConfigure(names, events);
-            defaultDataSourceConfigureLocator.setPoolProperties(configure); // set pool properties
-            setNewDataSourceConfigure(names, events);
+            Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
+            Map<String, DataSourceConfigure> oldConfigures = getDataSourceConfigureByNames(names);
+            dataSourceConfigureLocator.setPoolProperties(configure); // set pool properties
+            t.addData(SET_PROPERTIES);
+            Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
+            Map<String, DataSourceConfigure> newConfigures = getDataSourceConfigureByNames(names);
+            Map<String, DataSourceConfigureChangeEvent> events =
+                    getDataSourceConfigureChangeEvent(names, oldConfigures, newConfigures);
 
             addNotifyTask(names, events);
-            Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
             t.addData(DATASOURCE_NOTIFY_LISTENER_END);
             t.setStatus(Transaction.SUCCESS);
+            Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
         } catch (Throwable e) {
             String msg = "DataSourceConfigureManager addPoolPropertiesChangedListener warn:" + e.getMessage();
             LOGGER.warn(msg, e);
@@ -344,7 +349,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         ipDomainStatusProvider.addIPDomainStatusChangedListener(new IPDomainStatusChanged() {
             @Override
             public void onChanged(IPDomainStatus status) {
-                IPDomainStatus currentStatus = defaultDataSourceConfigureLocator.getIPDomainStatus();
+                IPDomainStatus currentStatus = dataSourceConfigureLocator.getIPDomainStatus();
                 if (currentStatus.equals(status)) {
                     String msg = String.format("New status equals to current status:%s", status.toString());
                     Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, msg);
@@ -366,16 +371,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         try {
-            Set<String> names = defaultDataSourceConfigureLocator.getDataSourceConfigureKeySet();
-            Map<String, DataSourceConfigureChangeEvent> events = new HashMap<>();
-            setOldDataSourceConfigure(names, events);
-            defaultDataSourceConfigureLocator.setIPDomainStatus(status); // set ip domain status
-            setNewDataSourceConfigure(names, events);
+            Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
+            Map<String, DataSourceConfigure> oldConfigures = getDataSourceConfigureByNames(names);
+            dataSourceConfigureLocator.setIPDomainStatus(status); // set ip domain status
+            t.addData(SET_IP_DOMAIN_STATUS);
+            Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, SET_IP_DOMAIN_STATUS);
+            Map<String, DataSourceConfigure> newConfigures = getDataSourceConfigureByNames(names);
+            Map<String, DataSourceConfigureChangeEvent> events =
+                    getDataSourceConfigureChangeEvent(names, oldConfigures, newConfigures);
 
             addNotifyTask(names, events);
-            Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
             t.addData(DATASOURCE_NOTIFY_LISTENER_END);
             t.setStatus(Transaction.SUCCESS);
+            Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
         } catch (Throwable e) {
             DalConfigException exception = new DalConfigException(e);
             t.setStatus(exception);
@@ -386,25 +394,38 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         }
     }
 
-    private void setOldDataSourceConfigure(Set<String> names, Map<String, DataSourceConfigureChangeEvent> events) {
+    private Map<String, DataSourceConfigure> getDataSourceConfigureByNames(Set<String> names) {
+        Map<String, DataSourceConfigure> map = new HashMap<>();
         for (String name : names) {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
-            DataSourceConfigure oldConfigure = defaultDataSourceConfigureLocator.getDataSourceConfigure(keyName);
-            DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName);
-            event.setOldDataSourceConfigure(oldConfigure);
-            events.put(keyName, event);
+            DataSourceConfigure configure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
+            map.put(keyName, configure);
         }
+        return map;
     }
 
-    private void setNewDataSourceConfigure(Set<String> names, Map<String, DataSourceConfigureChangeEvent> events) {
+    private Map<String, DataSourceConfigureChangeEvent> getDataSourceConfigureChangeEvent(Set<String> names,
+            Map<String, DataSourceConfigure> oldConfigures, Map<String, DataSourceConfigure> newConfigures) {
+        Map<String, DataSourceConfigureChangeEvent> events = new HashMap<>();
+        if (oldConfigures == null || oldConfigures.isEmpty())
+            return events;
+
+        if (newConfigures == null || newConfigures.isEmpty())
+            return events;
+
         for (String name : names) {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
-            DataSourceConfigure newConfigure = defaultDataSourceConfigureLocator.getDataSourceConfigure(keyName);
-            DataSourceConfigureChangeEvent event = events.get(keyName);
-            if (event != null) {
-                event.setNewDataSourceConfigure(newConfigure);
-            }
+            DataSourceConfigure oldConfigure = oldConfigures.get(keyName);
+            DataSourceConfigure newConfigure = newConfigures.get(keyName);
+            if (oldConfigure == null || newConfigure == null)
+                continue;
+
+            DataSourceConfigureChangeEvent event =
+                    new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);
+            events.put(keyName, event);
         }
+
+        return events;
     }
 
     private void addNotifyTask(final Set<String> names, final Map<String, DataSourceConfigureChangeEvent> events) {

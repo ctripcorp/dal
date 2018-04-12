@@ -6,13 +6,14 @@ import com.ctrip.datasource.dynamicdatasource.provider.LocalIPDomainStatusProvid
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DataSourceIPDomainStatusTest {
     private static final String name = "mysqldaltest01db_W";
-    private static DefaultDataSourceConfigureLocator locator = DefaultDataSourceConfigureLocator.getInstance();
+    private static DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
     private static LocalIPDomainStatusProvider provider = new LocalIPDomainStatusProvider();
 
     @BeforeClass

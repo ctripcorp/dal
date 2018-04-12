@@ -8,7 +8,6 @@ import java.util.Set;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

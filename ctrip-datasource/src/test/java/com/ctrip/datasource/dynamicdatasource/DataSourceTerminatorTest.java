@@ -2,7 +2,7 @@ package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceTerminator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import org.junit.BeforeClass;
@@ -54,7 +54,7 @@ public class DataSourceTerminatorTest {
 
     private void _testAbandonedConnection() throws Exception {
         DataSourceConfigure dataSourceConfigure =
-                DefaultDataSourceConfigureLocator.getInstance().getDataSourceConfigure(name1);
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name1);
         final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
 
         // leaked busy connection
@@ -93,7 +93,7 @@ public class DataSourceTerminatorTest {
 
     private void _testBusyConnection() throws Exception {
         DataSourceConfigure dataSourceConfigure =
-                DefaultDataSourceConfigureLocator.getInstance().getDataSourceConfigure(name2);
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name2);
         final SingleDataSource dataSource = new SingleDataSource(name2.toLowerCase(), dataSourceConfigure);
 
         // busy connection
@@ -116,7 +116,7 @@ public class DataSourceTerminatorTest {
 
     private void _testHangConnection() throws Exception {
         DataSourceConfigure dataSourceConfigure =
-                DefaultDataSourceConfigureLocator.getInstance().getDataSourceConfigure(name1);
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name1);
 
         for (int i = 0; i < 5; i++) {
             final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);
@@ -139,7 +139,7 @@ public class DataSourceTerminatorTest {
 
     private void _testMultipleConnections() throws Exception {
         DataSourceConfigure dataSourceConfigure =
-                DefaultDataSourceConfigureLocator.getInstance().getDataSourceConfigure(name1);
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name1);
 
         for (int i = 0; i < 100; i++) {
             final SingleDataSource dataSource = new SingleDataSource(name1.toLowerCase(), dataSourceConfigure);

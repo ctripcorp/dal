@@ -9,7 +9,6 @@ import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 
 public class TitanProvider implements DataSourceConfigureProvider {

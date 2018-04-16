@@ -319,7 +319,7 @@ public class QConfigTest2 {
 		dbNames.add("abtestdb");
 		dbNames.add("commonOrderShard2DB_S2_S");
 		dbNames.add("uiautomationtestdb_W");
-		dbNames.add("ACTCkvDB_W");
+		dbNames.add("CommonOrderDB_S6_R");
 		Map<String, String> settings = new HashMap<>();
 		try {
 			provider.initialize(settings);
@@ -342,7 +342,7 @@ public class QConfigTest2 {
 			assertEquals("rewriteBatchedStatements=true",
 					pc.getConnectionProperties());
 
-			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("ACTCkvDB_W"));
+			pc = PoolPropertiesHelper.getInstance().convert(provider.getDataSourceConfigure("CommonOrderDB_S6_R"));
 
 			assertEquals("rewriteBatchedStatements=true",
 					pc.getConnectionProperties());

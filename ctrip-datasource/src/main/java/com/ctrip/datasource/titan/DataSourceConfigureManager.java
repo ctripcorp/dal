@@ -289,6 +289,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         map.put(keyName, connectionString);
         dataSourceConfigureLocator.setConnectionStrings(map);
 
+        // remove old configure
+        dataSourceConfigureLocator.removeDataSourceConfigure(keyName);
+
         DataSourceConfigure newConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);
 
@@ -326,9 +329,15 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         try {
             Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
             Map<String, DataSourceConfigure> oldConfigures = getDataSourceConfigureByNames(names);
-            dataSourceConfigureLocator.setPoolProperties(configure); // set pool properties
+
+            // set pool properties
+            dataSourceConfigureLocator.setPoolProperties(configure);
             t.addData(SET_PROPERTIES);
             Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
+
+            // remove old configures
+            removeDataSourceConfigureByNames(names);
+
             Map<String, DataSourceConfigure> newConfigures = getDataSourceConfigureByNames(names);
             Map<String, DataSourceConfigureChangeEvent> events =
                     getDataSourceConfigureChangeEvent(names, oldConfigures, newConfigures);
@@ -373,9 +382,15 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         try {
             Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
             Map<String, DataSourceConfigure> oldConfigures = getDataSourceConfigureByNames(names);
-            dataSourceConfigureLocator.setIPDomainStatus(status); // set ip domain status
+
+            // set ip domain status
+            dataSourceConfigureLocator.setIPDomainStatus(status);
             t.addData(SET_IP_DOMAIN_STATUS);
             Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, SET_IP_DOMAIN_STATUS);
+
+            // remove old configures
+            removeDataSourceConfigureByNames(names);
+
             Map<String, DataSourceConfigure> newConfigures = getDataSourceConfigureByNames(names);
             Map<String, DataSourceConfigureChangeEvent> events =
                     getDataSourceConfigureChangeEvent(names, oldConfigures, newConfigures);
@@ -391,6 +406,16 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             LOGGER.error(String.format("DalConfigException:%s", e.getMessage()), exception);
         } finally {
             t.complete();
+        }
+    }
+
+    private void removeDataSourceConfigureByNames(Set<String> names) {
+        if (names == null || names.isEmpty())
+            return;
+
+        for (String name : names) {
+            String keyName = ConnectionStringKeyHelper.getKeyName(name);
+            dataSourceConfigureLocator.removeDataSourceConfigure(keyName);
         }
     }
 

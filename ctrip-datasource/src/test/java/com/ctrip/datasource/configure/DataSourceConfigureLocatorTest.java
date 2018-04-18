@@ -76,6 +76,34 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
     }
 
     @Test
+    public void testSetAndGetConnectionString() {
+        String name = "test";
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        ConnectionString connectionString = new ConnectionString(name, ipConnectionString, domainConnectionString);
+        Map<String, ConnectionString> map = new HashMap<>();
+        map.put(name, connectionString);
+        locator.setConnectionStrings(map);
+        Properties p = getProperties();
+        DataSourceConfigure poolPropertiesConfigure = new DataSourceConfigure(name, p);
+        locator.setPoolProperties(poolPropertiesConfigure);
+
+        for (int i = 0; i < 10; i++) {
+            String temp = name + i;
+            ConnectionString connectionString1 = new ConnectionString(temp, ipConnectionString, domainConnectionString);
+            Map<String, ConnectionString> map1 = new HashMap<>();
+            map.put(temp, connectionString1);
+            locator.setConnectionStrings(map1);
+            Properties p1 = getProperties();
+            DataSourceConfigure poolPropertiesConfigure1 = new DataSourceConfigure(temp, p1);
+            locator.setPoolProperties(poolPropertiesConfigure1);
+        }
+
+        DataSourceConfigure configure = locator.getDataSourceConfigure(name);
+        ConnectionString connectionString2 = configure.getConnectionString();
+        Assert.assertEquals(connectionString, connectionString2);
+    }
+
+    @Test
     public void testSetAndGetDataSourceConfigure() {
         String name = "test";
         DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();

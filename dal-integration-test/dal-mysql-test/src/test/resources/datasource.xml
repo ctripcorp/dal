@@ -39,7 +39,7 @@
                 connectionProperties="rewriteBatchedStatements=true"/>
     <Datasource name="uiautomationtestdb_W"
                 option="rewriteBatchedStatements=true"/>
-    <Datasource name="ACTCkvDB_W"
+    <Datasource name="CommonOrderDB_S6_R"
                 connectionProperties="rewriteBatchedStatements=true"/>
     <!-- <Datasource name="DalService2DB_W"
 

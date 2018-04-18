@@ -45,9 +45,30 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     @Override
     public DataSourceConfigure getDataSourceConfigure(String name) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        ConnectionString connectionString = connectionStrings.get(keyName);
-        DataSourceConfigure configure = mergeDataSourceConfigure(connectionString);
+        DataSourceConfigure configure = _getDataSourceConfigure(keyName);
         return configure;
+    }
+
+    private DataSourceConfigure _getDataSourceConfigure(String name) {
+        DataSourceConfigure configure = null;
+        configure = dataSourceConfigures.get(name);
+        if (configure != null) {
+            return configure;
+        }
+
+        ConnectionString connectionString = connectionStrings.get(name);
+        configure = mergeDataSourceConfigure(connectionString);
+        if (configure != null) {
+            dataSourceConfigures.put(name, configure);
+        }
+
+        return configure;
+    }
+
+    @Override
+    public void removeDataSourceConfigure(String name) {
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
+        dataSourceConfigures.remove(keyName);
     }
 
     @Override
@@ -63,11 +84,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     @Override
     public Set<String> getDataSourceConfigureKeySet() {
         return dataSourceConfigureKeySet;
-    }
-
-    private void addDataSourceConfigure(String name, DataSourceConfigure configure) {
-        String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        dataSourceConfigures.put(keyName, configure);
     }
 
     @Override

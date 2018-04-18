@@ -13,8 +13,6 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     DataSourceConfigure getDataSourceConfigure(String name);
 
-    void removeDataSourceConfigure(String name);
-
     void addDataSourceConfigureKeySet(Set<String> names);
 
     Set<String> getDataSourceConfigureKeySet();

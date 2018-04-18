@@ -65,10 +65,15 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return configure;
     }
 
-    @Override
-    public void removeDataSourceConfigure(String name) {
-        String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        dataSourceConfigures.remove(keyName);
+    private void removeDataSourceConfigures() {
+        Set<String> names = getDataSourceConfigureKeySet();
+        if (names == null || names.isEmpty())
+            return;
+
+        for (String name : names) {
+            String keyName = ConnectionStringKeyHelper.getKeyName(name);
+            dataSourceConfigures.remove(keyName);
+        }
     }
 
     @Override
@@ -89,6 +94,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     @Override
     public void setIPDomainStatus(IPDomainStatus status) {
         ipDomainStatusReference.set(status);
+        removeDataSourceConfigures();
     }
 
     @Override
@@ -104,6 +110,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         for (Map.Entry<String, ConnectionString> entry : map.entrySet()) {
             String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
             connectionStrings.put(keyName, entry.getValue());
+            dataSourceConfigures.remove(keyName);
         }
     }
 
@@ -120,6 +127,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
         PropertiesWrapper wrapper = new PropertiesWrapper(originalProperties, appProperties, datasourceProperties);
         propertiesWrapperReference.set(wrapper);
+        removeDataSourceConfigures();
     }
 
     private void processProperties(Properties properties, Properties appProperties,

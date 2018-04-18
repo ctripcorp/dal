@@ -78,7 +78,6 @@ public class TitanDataSourceLocator {
             DataSourceConfigureManager.getInstance().setup(dbNames, SourceType.Remote);
 
             TitanData data = getConnectionStrings(titanSvcUrl, name, appid);
-            // DataSourceConfigure configure = parse(name, decrypt(data.getConnectionString()));
             String cs = decrypt(data.getConnectionString());
             ConnectionString connectionString = new ConnectionString(name, cs, cs);
             DataSourceConfigure configure =

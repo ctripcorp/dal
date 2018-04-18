@@ -26,7 +26,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     // user datasource.xml pool properties configure
     private Map<String, PoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
 
-    private Map<String, DataSourceConfigure> dataSourceConfigures = new ConcurrentHashMap<>();
+    private Map<String, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
 
     private Set<String> dataSourceConfigureKeySet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
@@ -51,7 +51,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     private DataSourceConfigure _getDataSourceConfigure(String name) {
         DataSourceConfigure configure = null;
-        configure = dataSourceConfigures.get(name);
+        configure = dataSourceConfiguresCache.get(name);
         if (configure != null) {
             return configure;
         }
@@ -59,21 +59,14 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         ConnectionString connectionString = connectionStrings.get(name);
         configure = mergeDataSourceConfigure(connectionString);
         if (configure != null) {
-            dataSourceConfigures.put(name, configure);
+            dataSourceConfiguresCache.put(name, configure);
         }
 
         return configure;
     }
 
     private void removeDataSourceConfigures() {
-        Set<String> names = getDataSourceConfigureKeySet();
-        if (names == null || names.isEmpty())
-            return;
-
-        for (String name : names) {
-            String keyName = ConnectionStringKeyHelper.getKeyName(name);
-            dataSourceConfigures.remove(keyName);
-        }
+        dataSourceConfiguresCache.clear();
     }
 
     @Override
@@ -110,7 +103,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         for (Map.Entry<String, ConnectionString> entry : map.entrySet()) {
             String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
             connectionStrings.put(keyName, entry.getValue());
-            dataSourceConfigures.remove(keyName);
+            dataSourceConfiguresCache.remove(keyName);
         }
     }
 

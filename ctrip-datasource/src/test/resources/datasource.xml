@@ -89,4 +89,6 @@
               logAbandoned="true"
               minEvictableIdleTimeMillis="30000"
               option="sendTimeAsDateTime=false"/>
+	<Datasource name="mysqldaltest01db_w"
+				option="sendTimeAsDateTime=false"/>
 </Datasources>

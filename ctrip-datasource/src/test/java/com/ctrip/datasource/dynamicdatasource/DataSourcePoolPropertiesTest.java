@@ -9,6 +9,8 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
+import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,6 +45,13 @@ public class DataSourcePoolPropertiesTest {
         System.out.println(String.format("dynamicEnabled:%s", dynamicEnabled2));
         int minIdle2 = configure2.getIntProperty(DataSourceConfigureConstants.MINIDLE, -1);
         System.out.println(String.format("minIdle:%s", minIdle2));
+    }
+
+    @Test
+    public void testPoolPropertiesOptionProperty() throws Exception {
+        PoolPropertiesConfigure configure1 = locator.getUserPoolPropertiesConfigure(name);
+        String option = configure1.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES);
+        Assert.assertEquals(option, "sendTimeAsDateTime=false");
     }
 
 }

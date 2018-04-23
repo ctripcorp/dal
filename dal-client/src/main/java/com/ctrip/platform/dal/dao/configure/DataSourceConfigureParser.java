@@ -155,6 +155,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
             if (hasAttribute(resource, OPTION)) {
                 String value = getAttribute(resource, OPTION);
                 dataSourceConfigure.setProperty(OPTION, value);
+                dataSourceConfigure.setProperty(CONNECTIONPROPERTIES, value);
             }
         }
 

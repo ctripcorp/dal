@@ -15,17 +15,16 @@
   <packaging>pom</packaging>
 
   <properties>
-    <framework-bom.version>2.9.0</framework-bom.version>
-    <!--<dal.version>1.13.8-SNAPSHOT</dal.version>
-    <ctrip-datasource.version>1.13.8-SNAPSHOT</ctrip-datasource.version>-->
-    <dal.version>1.15.0</dal.version>
-    <ctrip-datasource.version>1.15.0</ctrip-datasource.version>
+    <framework-bom.version>2.11.2</framework-bom.version>
+    <!--<dal.version>1.13.6-SNAPSHOT</dal.version>
+    <ctrip-datasource.version>1.13.6-SNAPSHOT</ctrip-datasource.version>-->
+    <dal.version>1.15.1-SNAPSHOT</dal.version>
+    <ctrip-datasource.version>1.15.1-SNAPSHOT</ctrip-datasource.version>
   </properties>
 
   <modules>
     <module>dal-mysql-test</module>
     <module>dal-sqlserver-test</module>
-    <!--<module>mybatis-test</module>-->
   </modules>
 
   <dependencyManagement>

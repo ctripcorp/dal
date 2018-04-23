@@ -7,12 +7,13 @@ import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DataSourceIPDomainStatusTest {
     private static final String name = "mysqldaltest01db_W";
-    private static DataSourceConfigureLocator locator = DataSourceConfigureLocator.getInstance();
+    private static DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
     private static LocalIPDomainStatusProvider provider = new LocalIPDomainStatusProvider();
 
     @BeforeClass
@@ -20,18 +21,29 @@ public class DataSourceIPDomainStatusTest {
         DataSourceConfigureManager.getInstance().setConnectionStringProvider(new AbstractConnectionStringProvider());
         DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new AbstractPoolPropertiesProvider());
         DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(provider);
-
-        DalClientFactory.initClientFactory();
     }
 
     @Test
-    public void testDataSourceIPDomainStatusTest() throws Exception {
+    public void testInitializedByIPStatus() throws Exception {
+        provider.setIPStatus();
+        DalClientFactory.initClientFactory();
+        testSwitchStatus();
+    }
+
+    @Test
+    public void testInitializedByDomainStatus() throws Exception {
+        provider.setDomainStatus();
+        DalClientFactory.initClientFactory();
+        testSwitchStatus();
+    }
+
+    private void testSwitchStatus() throws Exception {
         displayConnectionStringProperties();
+        provider.initStatus();
 
         for (int i = 0; i < 10; i++) {
-            System.out.println("**********Trigger ip domain status changed callback**********");
             provider.triggerIPDomainStatusChanged();
-            Thread.sleep(1 * 1000);
+            Thread.sleep(3 * 1000);
             displayConnectionStringProperties();
         }
     }

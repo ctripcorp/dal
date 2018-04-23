@@ -8,6 +8,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 
 public class TitanProvider implements DataSourceConfigureProvider {
@@ -44,7 +45,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(String name) {
-        return dataSourceConfigureManager.getDataSourceConfigure(name);
+        return DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name);
     }
 
     @Override

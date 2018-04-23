@@ -2,7 +2,7 @@ package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceTerminator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import org.junit.BeforeClass;
@@ -23,7 +23,8 @@ public class TomcatDataSourcePoolTest {
 
     @Test
     public void testTomcatDataSourcePool() throws Exception {
-        DataSourceConfigure dataSourceConfigure = DataSourceConfigureLocator.getInstance().getDataSourceConfigure(name);
+        DataSourceConfigure dataSourceConfigure =
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name);
         final SingleDataSource dataSource = new SingleDataSource(name.toLowerCase(), dataSourceConfigure);
 
         executorService.submit(new Runnable() {

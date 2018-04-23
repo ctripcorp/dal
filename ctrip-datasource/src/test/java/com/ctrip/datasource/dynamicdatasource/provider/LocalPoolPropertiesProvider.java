@@ -1,19 +1,21 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 
-import java.util.Map;
+import java.util.Properties;
 
 public class LocalPoolPropertiesProvider extends AbstractPoolPropertiesProvider
         implements DataSourceConfigureConstants {
     private PoolPropertiesChanged callback = null;
 
     public void triggerPoolPropertiesChanged() {
-        Map<String, String> map = getMap();
-        map.put(ENABLE_DYNAMIC_POOL_PROPERTIES, "true");
-        map.put(MINIDLE, "1");
-        callback.onChanged(map);
+        Properties p = getProperties();
+        p.setProperty(ENABLE_DYNAMIC_POOL_PROPERTIES, "true");
+        p.setProperty(MINIDLE, "1");
+        DataSourceConfigure configure = new DataSourceConfigure("", p);
+        callback.onChanged(configure);
     }
 
     @Override

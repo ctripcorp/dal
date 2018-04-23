@@ -1,7 +1,9 @@
 package com.ctrip.datasource.configure.qconfig;
 
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
@@ -10,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,7 +28,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     }
 
     @Override
-    public Map<String, String> getPoolProperties() {
+    public PoolPropertiesConfigure getPoolProperties() {
         refreshPoolPropertiesMapConfig();
         return _getPoolProperties();
     }
@@ -51,26 +52,27 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         return MapConfig.get(DAL_APPNAME, DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
     }
 
-    private Map<String, String> _getPoolProperties() {
-        Map<String, String> map = new HashMap<>();
+    private PoolPropertiesConfigure _getPoolProperties() {
+        DataSourceConfigure configure = null;
         MapConfig config = mapConfigReference.get();
         if (config == null)
-            return map;
+            return configure;
 
         try {
-            map = config.asMap();
+            Map<String, String> map = config.asMap();
             String log = "PoolProperties 配置:" + PoolPropertiesHelper.getInstance().mapToString(map);
             LOGGER.info(log);
+            configure = new DataSourceConfigure("", map);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
 
-        return map;
+        return configure;
     }
 
     @Override
     public void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback) {
-        MapConfig config = getConfig();
+        final MapConfig config = getConfig();
         if (config == null)
             return;
 
@@ -92,7 +94,8 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
                     return;
                 }
 
-                callback.onChanged(map);
+                DataSourceConfigure configure = new DataSourceConfigure("", map);
+                callback.onChanged(configure);
             }
         });
     }

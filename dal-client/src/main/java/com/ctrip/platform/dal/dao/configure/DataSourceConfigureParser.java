@@ -3,12 +3,9 @@ package com.ctrip.platform.dal.dao.configure;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -36,7 +33,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
     private String dataSourceXmlLocation = null;
     private boolean dataSourceXmlExist = false;
 
-    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocator.getInstance();
+    private DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocatorManager.getInstance();
 
     private DataSourceConfigureParser() {
         try {
@@ -91,22 +88,16 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
             databaseConfigLocation = getAttribute(root, LOCATION);
         }
         List<Node> resourceList = getChildNodes(root, RESOURCE_NODE);
-        Map<String, DataSourceConfigure> map = new HashMap<>();
         for (Node resource : resourceList) {
             DataSourceConfigure dataSourceConfigure = parseResource(resource);
-            map.put(dataSourceConfigure.getName(), dataSourceConfigure);
-        }
-
-        for (Map.Entry<String, DataSourceConfigure> entry : map.entrySet()) {
-            dataSourceConfigureLocator.addUserDataSourceConfigure(entry.getKey(), entry.getValue());
+            dataSourceConfigureLocator.addUserPoolPropertiesConfigure(dataSourceConfigure.getName(),
+                    dataSourceConfigure);
         }
     }
 
     private DataSourceConfigure parseResource(Node resource) {
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         dataSourceConfigure.setName(getAttribute(resource, NAME));
-        Map<String, String> map = new HashMap<>();
-        dataSourceConfigure.setMap(map);
 
         // The following are key connection parameters, developer do not need to provide them in case the configure
         // provider is set
@@ -151,7 +142,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         properties.add(INIT_SQL2);
 
         properties.add(JDBC_INTERCEPTORS);
-        processProperties(dataSourceConfigure, map, resource, properties);
+        processProperties(dataSourceConfigure, resource, properties);
 
         /**
          * Special handing for connectionProperties and option. If connectionProperties is not set, we will use option's
@@ -160,25 +151,21 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         if (hasAttribute(resource, CONNECTIONPROPERTIES)) {
             String value = getAttribute(resource, CONNECTIONPROPERTIES);
             dataSourceConfigure.setProperty(CONNECTIONPROPERTIES, value);
-            map.put(CONNECTIONPROPERTIES, value);
         } else {
             if (hasAttribute(resource, OPTION)) {
                 String value = getAttribute(resource, OPTION);
                 dataSourceConfigure.setProperty(OPTION, value);
-                map.put(CONNECTIONPROPERTIES, value);
             }
         }
 
         return dataSourceConfigure;
     }
 
-    private void processProperties(DataSourceConfigure dataSourceConfigure, Map<String, String> map, Node resource,
-            List<String> properties) {
+    private void processProperties(DataSourceConfigure dataSourceConfigure, Node resource, List<String> properties) {
         for (String property : properties) {
             if (hasAttribute(resource, property)) {
                 String value = getAttribute(resource, property);
                 dataSourceConfigure.setProperty(property, value);
-                map.put(property, value);
             }
         }
     }

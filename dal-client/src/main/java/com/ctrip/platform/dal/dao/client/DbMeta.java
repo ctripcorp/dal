@@ -9,10 +9,11 @@ import java.util.regex.Pattern;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 
 public class DbMeta {
     private static Pattern hostRegxPattern = null;
-    private DataSourceConfigureLocator configureLocator = DataSourceConfigureLocator.getInstance();
+    private DataSourceConfigureLocator configureLocator = DataSourceConfigureLocatorManager.getInstance();
 
     private String databaseName;
     private DatabaseCategory dbCategory;

@@ -38,7 +38,7 @@ public class ConnectionStringParser {
      *
      * @return DataSourceConfigure
      */
-    public DataSourceConfigure parse(String name, String connectionString) {
+    public ConnectionStringConfigure parse(String name, String connectionString) {
         DataSourceConfigure config = new DataSourceConfigure();
         if (connectionString == null)
             return config;

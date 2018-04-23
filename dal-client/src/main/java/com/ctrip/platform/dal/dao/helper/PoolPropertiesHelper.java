@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import java.util.Map;
+import java.util.Properties;
 
 public class PoolPropertiesHelper implements DataSourceConfigureConstants {
     private volatile static PoolPropertiesHelper helper = null;
@@ -69,6 +70,21 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
         properties.setJdbcInterceptors(config.getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS));
 
         return properties;
+    }
+
+    public String propertiesToString(Properties properties) {
+        String result = "";
+        try {
+            if (properties != null && !properties.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                    sb.append(entry.getKey().toString() + "=" + entry.getValue().toString() + ",");
+                }
+                result = sb.substring(0, sb.length() - 1);
+            }
+        } catch (Throwable e) {
+        }
+        return result;
     }
 
     public String mapToString(Map<String, String> map) {

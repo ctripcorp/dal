@@ -1,28 +1,42 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+
 public class ConnectionString {
-    private String normalConnectionString;
-    private String failoverConnectionString;
+    private ConnectionStringParser parser = ConnectionStringParser.getInstance();
 
-    public ConnectionString(String normalConnectionString, String failoverConnectionString) {
-        this.normalConnectionString = normalConnectionString;
-        this.failoverConnectionString = failoverConnectionString;
+    private String name;
+    private String ipConnectionString;
+    private String domainConnectionString;
+
+    public ConnectionString() {}
+
+    public ConnectionString(String name, String ipConnectionString, String domainConnectionString) {
+        this.name = name;
+        this.ipConnectionString = ipConnectionString;
+        this.domainConnectionString = domainConnectionString;
     }
 
-    public String getNormalConnectionString() {
-        return normalConnectionString;
+    public String getName() {
+        return name;
     }
 
-    public void setNormalConnectionString(String normalConnectionString) {
-        this.normalConnectionString = normalConnectionString;
+    public String getIPConnectionString() {
+        return ipConnectionString;
     }
 
-    public String getFailoverConnectionString() {
-        return failoverConnectionString;
+    public String getDomainConnectionString() {
+        return domainConnectionString;
     }
 
-    public void setFailoverConnectionString(String failoverConnectionString) {
-        this.failoverConnectionString = failoverConnectionString;
+    public ConnectionStringConfigure getIPConnectionStringConfigure() {
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
+        return parser.parse(keyName, ipConnectionString);
+    }
+
+    public ConnectionStringConfigure getDomainConnectionStringConfigure() {
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
+        return parser.parse(keyName, domainConnectionString);
     }
 
 }

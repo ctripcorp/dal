@@ -31,7 +31,7 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
 
     @Override
     public void start() throws Exception {
-        if (started.get())
+        if (started.getAndSet(true))
             return;
         try {
             nonRegisteringDriver = Class.forName(driverClassName);
@@ -42,12 +42,12 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
             connectionPhantomReference.setAccessible(true);
         } catch (ClassNotFoundException e) {
             LOGGER.error(String.format("Class %s not found", driverClassName), e);
+            started.compareAndSet(true,false);
             return;
         }
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, new CustomThreadFactory("DefaultConnectionPhantomReferenceCleaner"));
         executor.scheduleWithFixedDelay(new ConnectionPhantomReferenceCleanUpThread(), DEFAULT_INTERVAL, DEFAULT_INTERVAL, TimeUnit.SECONDS);
         defaultConnectionPhantomReferenceCleanerRef.set(executor);
-        started.set(true);
     }
 
 
@@ -69,6 +69,6 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
             return;
         defaultConnectionPhantomReferenceCleanerRef.get().shutdown();
         defaultConnectionPhantomReferenceCleanerRef.set(null);
-        started.getAndSet(false);
+        started.compareAndSet(true,false);
     }
 }

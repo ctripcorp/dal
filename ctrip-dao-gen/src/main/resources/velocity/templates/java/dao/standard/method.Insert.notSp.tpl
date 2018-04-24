@@ -23,8 +23,9 @@
 	 * @throws SQLException
 	 */
 	public int insert(DalHints hints, ${host.getPojoClassName()} daoPojo) throws SQLException {
-		if(null == daoPojo)
+		if(null == daoPojo) {
 			return 0;
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.insert(hints, daoPojo);
 	}
@@ -57,8 +58,9 @@
 	 * @return how many rows been affected
 	 */
 	public int[] insert(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0) {
 			return new int[0];
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.insert(hints, daoPojos);
 	}
@@ -96,8 +98,9 @@
 	 * @throws SQLException
 	 */
 	public int insert(DalHints hints, KeyHolder keyHolder, ${host.getPojoClassName()} daoPojo) throws SQLException {
-		if(null == daoPojo)
+		if(null == daoPojo) {
 			return 0;
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.insert(hints, keyHolder, daoPojo);
 	}
@@ -138,8 +141,9 @@
 	 * @throws SQLException
 	 */
 	public int[] insert(DalHints hints, KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0) {
 			return new int[0];
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.insert(hints, keyHolder, daoPojos);
 	}
@@ -168,8 +172,9 @@
 	 * @throws SQLException
 	 */
 	public int[] batchInsert(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0) {
 			return new int[0];
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.batchInsert(hints, daoPojos);
 	}
@@ -198,8 +203,9 @@
 	 * @throws SQLException
 	 */
 	public int combinedInsert(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0) {
 			return 0;
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.combinedInsert(hints, daoPojos);
 	}
@@ -234,8 +240,9 @@
 	 * @throws SQLException
 	 */
 	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0)
+		if(null == daoPojos || daoPojos.size() <= 0) {
 			return 0;
+		}
 		hints = DalHints.createIfAbsent(hints);
 		return client.combinedInsert(hints, keyHolder, daoPojos);
 	}

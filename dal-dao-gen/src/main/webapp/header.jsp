@@ -40,6 +40,16 @@
             <li id="eventmanagejsp"><a href="eventmanage.jsp">审批管理</a></li>
             <li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
             <li id="usermanagejsp" style="display: none;"><a href="usermanage.jsp">用户管理</a></li>
+            <li id="tooljsp" class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
+                                                 data-hover="dropdown" data-close-others="true"> <span
+                    class="username">工具</span> <i class="glyphicon glyphicon-menu-down"> </i>
+            </a> <span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top: 1px"></span>
+                <ul class="dropdown-menu dropdown-inverse" style="margin-top: 8px !important">
+                    <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">Java DAL 参数解密</a>
+                    </li>
+                    <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">Java DAL 版本统计</a></li>
+                </ul>
+            </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
@@ -63,9 +73,6 @@
                            onclick="window.open('${mySqlSpec}', '_blank');">MySQL
                         开发规范详解</a>
                     </li>
-                    <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">Java DAL 参数解密</a>
-                    </li>
-                    <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">Java DAL 版本统计</a></li>
                     <li><a href="mailto:${dalTeamEmail}"><span
                             class="glyphicon glyphicon-envelope"></span>&nbsp;联系我们</a>
                     </li>

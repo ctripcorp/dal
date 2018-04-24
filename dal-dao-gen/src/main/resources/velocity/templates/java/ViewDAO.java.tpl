@@ -59,8 +59,9 @@ public class ${host.getPojoClassName()}Dao {
 	}
 	
 	public List<${host.getPojoClassName()}> getListByPage(int pagesize, int pageNo, DalHints hints) throws SQLException {
-		if(pageNo < 1 || pagesize < 1) 
+		if(pageNo < 1 || pagesize < 1) {
 			throw new SQLException("Illigal pagesize or pageNo, pls check");
+		}
 		
         StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);	

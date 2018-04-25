@@ -37,7 +37,7 @@
         </init-param>
         <init-param>
             <param-name>serverName</param-name>
-            <param-value>http://dalcodegen.ctripcorp.com</param-value>
+            <param-value>http://dal.ctripcorp.com</param-value>
         </init-param>
         <init-param>
             <param-name>redisClusterName</param-name>
@@ -58,7 +58,7 @@
         </init-param>
         <init-param>
             <param-name>serverName</param-name>
-            <param-value>http://dalcodegen.ctripcorp.com</param-value>
+            <param-value>http://dal.ctripcorp.com</param-value>
         </init-param>
         <init-param>
             <param-name>encoding</param-name>

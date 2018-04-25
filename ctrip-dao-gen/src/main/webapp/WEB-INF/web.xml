@@ -10,14 +10,12 @@
         <param-name>credisServiceUrl</param-name>
         <param-value>http://ws.config.framework.uat.qa.nt.ctripcorp.com/configws/</param-value>
     </context-param>
-
     <listener>
         <listener-class>org.jasig.cas.client.credis.CRedisAppSettingListner</listener-class>
     </listener>
     <listener>
         <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
     </listener>
-
     <filter>
         <filter-name>CAS Single Sign Out Filter</filter-name>
         <filter-class>org.jasig.cas.client.session.SingleSignOutFilter</filter-class>
@@ -26,10 +24,9 @@
         <filter-name>CAS Single Sign Out Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <filter>
-        <filter-name>CAS Authentication Filter</filter-name>
-        <filter-class>org.jasig.cas.client.authentication.CustomAuthenticationFilter</filter-class>
+        <filter-name>CASFilter</filter-name>
+        <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>
         <init-param>
             <param-name>casServerLoginUrl</param-name>
             <param-value>http://cas.uat.qa.nt.ctripcorp.com/caso/login</param-value>
@@ -42,16 +39,11 @@
             <param-name>redisClusterName</param-name>
             <param-value>casClientPrincipal</param-value>
         </init-param>
-        <init-param>
-            <param-name>exclusions</param-name>
-            <param-value>slbhealthcheck.html</param-value>
-        </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>CAS Authentication Filter</filter-name>
+        <filter-name>CASFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <filter>
         <filter-name>CAS Validation Filter</filter-name>
         <filter-class>
@@ -82,7 +74,6 @@
         <filter-name>CAS Validation Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <filter>
         <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
         <filter-class>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</filter-class>
@@ -91,7 +82,6 @@
         <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <filter>
         <filter-name>CAS Assertion Thread Local Filter</filter-name>
         <filter-class>org.jasig.cas.client.util.AssertionThreadLocalFilter</filter-class>
@@ -100,25 +90,22 @@
         <filter-name>CAS Assertion Thread Local Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <filter>
-        <filter-name>Cat Filter</filter-name>
+        <filter-name>cat-filter</filter-name>
         <filter-class>com.dianping.cat.servlet.CatFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>Cat Filter</filter-name>
+        <filter-name>cat-filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <filter>
-        <filter-name>User Filter</filter-name>
+        <filter-name>UserLoginFilter</filter-name>
         <filter-class>com.ctrip.platform.dal.daogen.filter.UserFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>User Filter</filter-name>
+        <filter-name>UserLoginFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
     <servlet>
         <servlet-name>DaoGenApplication</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
@@ -132,7 +119,6 @@
         <servlet-name>DaoGenApplication</servlet-name>
         <url-pattern>/rest/*</url-pattern>
     </servlet-mapping>
-
     <session-config>
         <!-- Default to 60 minute session timeouts -->
         <session-timeout>60</session-timeout>

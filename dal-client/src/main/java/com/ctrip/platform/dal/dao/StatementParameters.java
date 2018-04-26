@@ -1,10 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
@@ -302,4 +299,8 @@ public class StatementParameters {
         parameters = newParameters;
         return this;
     }
+
+    public void sortStatementParameters(){
+		Collections.sort(parameters);
+	}
 }

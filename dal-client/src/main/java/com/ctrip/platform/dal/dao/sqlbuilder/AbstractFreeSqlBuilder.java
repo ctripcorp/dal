@@ -98,6 +98,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * @return
      */
     public AbstractFreeSqlBuilder with(StatementParameters parameters) {
+        parameters.sortStatementParameters();
         context.setParameters(parameters);
         return this;
     }

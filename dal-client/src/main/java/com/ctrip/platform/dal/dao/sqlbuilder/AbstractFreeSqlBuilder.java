@@ -98,7 +98,6 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * @return
      */
     public AbstractFreeSqlBuilder with(StatementParameters parameters) {
-        parameters.sortStatementParameters();
         context.setParameters(parameters);
         return this;
     }
@@ -236,7 +235,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * Basic append method. Parameter value can be String, Clause or Object. It will allow the maximal
      * flexibility for input parameter.
      * 
-     * @param template String
+     * @param templates String
      * @return builder itself
      */
     public AbstractFreeSqlBuilder append(String...templates) {
@@ -335,7 +334,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     /**
      * Append as column. The column name will be quoted by database specific char.
      * 
-     * @param names 
+     * @param name
      * @return
      */
     public AbstractFreeSqlBuilder appendColumn(String name) {
@@ -345,7 +344,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     /**
      * Append as column with alias. The column name will be quoted by database specific char.
      * 
-     * @param names 
+     * @param name
      * @param alias
      * @return
      */
@@ -401,7 +400,6 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * Note: The text value will be wrapped by Column clause.
      * 
      * @param names
-     * @param table
      * @return
      */
     public AbstractFreeSqlBuilder select(String... names) {
@@ -412,7 +410,6 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * Build a SELECT column1, column2,...using the giving names
      * 
      * @param columns The type of column can be Column or other clause
-     * @param table
      * @return
      */
     public AbstractFreeSqlBuilder select(Clause... columns) {
@@ -431,8 +428,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     /**
      * Append FROM and table for SELECT statement. And if logic DB is sql server, it will 
      * append "WITH (NOLOCK)" by default 
-     * 
-     * @param columns The type of column can be Column or other clause
+     *
      * @param table table name string
      * @return
      */
@@ -443,8 +439,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     /**
      * Append FROM and table for query. And if logic DB is MS Sql Server, it will 
      * append "WITH (NOLOCK)" by default 
-     * 
-     * @param columns The type of column can be Column or other clause
+     *
      * @param table table name clause
      * @return
      */
@@ -645,8 +640,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     
     /**
      * Ignore last expression if iy's value is null.
-     * 
-     * @param value
+     *
      * @return
      */
     public AbstractFreeSqlBuilder ignoreNull() {
@@ -662,7 +656,7 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     /**
      * Mark last expression as valid expression that is to be used in builder when the condition is met.
      * 
-     * @param value
+     * @param condition
      * @return
      */
     public AbstractFreeSqlBuilder when(boolean condition) {

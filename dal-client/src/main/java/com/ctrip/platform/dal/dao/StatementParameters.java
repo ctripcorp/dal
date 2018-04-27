@@ -286,8 +286,8 @@ public class StatementParameters {
      * Remove invalid parameter and reorder index
      */
 	public StatementParameters buildParameters() {
+		Collections.sort(parameters);
 	    List<StatementParameter> newParameters = new LinkedList<StatementParameter>();
-
         int i = 1;
         for(StatementParameter parameter: parameters) {
             if(parameter.isValid()) {
@@ -299,8 +299,4 @@ public class StatementParameters {
         parameters = newParameters;
         return this;
     }
-
-    public void sortStatementParameters(){
-		Collections.sort(parameters);
-	}
 }

@@ -73,6 +73,10 @@ public class InsertWithKeyHolder {
             pojo5.setId(5);
             pojo5.setName("Test5");
             list.add(pojo5);
+            TestNonAutoIncrementIdentity pojo6 = new TestNonAutoIncrementIdentity();
+            pojo6.setId(6);
+            pojo6.setName("Test6");
+            list.add(pojo6);
 
             dao.combinedInsert(hints, holder, list);
             Assert.assertTrue(true);

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -98,7 +97,7 @@ public class KeyHolder {
      * @throws SQLException if there is more than one generated key or the conversion is failed.
      */
     public Number getKey() throws SQLException {
-        return getId(getFirstKey());
+        return getId(getUniqueKey());
     }
 
     /**
@@ -126,17 +125,13 @@ public class KeyHolder {
      */
     @Deprecated
     public Map<String, Object> getKeys() throws SQLException {
-        return getFirstKey();
+        return getUniqueKey();
     }
 
-    public Map<String, Object> getFirstKey() throws SQLException {
-        int size = size();
-        if (size != 1) {
-            logger.warn(String.format(ErrorCode.ValidateKeyHolderSize.getMessage(), getKeyList()));
+    public Map<String, Object> getUniqueKey() throws SQLException {
+        if (size() != 1) {
+            throw new DalException(ErrorCode.ValidateKeyHolderSize, getKeyList());
         }
-
-        if (size == 0)
-            return new HashMap<>();
 
         return allKeys.get(0);
     }
@@ -237,7 +232,7 @@ public class KeyHolder {
             return;
 
         if (error == null)
-            originalHolder.addKey(localHolder.getFirstKey());
+            originalHolder.addKey(localHolder.getUniqueKey());
         else
             originalHolder.singleFail();
     }
@@ -249,6 +244,16 @@ public class KeyHolder {
      */
     private void singleFail() {
         addKey(createEmptyKeys());
+    }
+
+    public void addEmptyKeys(int count) {
+        if (count < 1)
+            return;
+
+        for (int i = 0; i < count; i++) {
+            Map<String, Object> map = createEmptyKeys();
+            allKeys.put(i, map);
+        }
     }
 
     private Map<String, Object> createEmptyKeys() {
@@ -275,13 +280,8 @@ public class KeyHolder {
      */
     public void addPatial(Integer[] indexList, KeyHolder tmpHolder) {
         int i = 0;
-        int size = tmpHolder.allKeys.size();
         for (Integer index : indexList) {
-            if (size == 0) {
-                allKeys.put(index, new HashMap<String, Object>());
-            } else {
-                allKeys.put(index, tmpHolder.allKeys.get(i++));
-            }
+            allKeys.put(index, tmpHolder.allKeys.get(i++));
         }
 
         // All partial is added, start merge generated keys

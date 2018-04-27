@@ -147,7 +147,13 @@ public class DalDirectClient implements DalClient {
 
                 DalRowMapperExtractor<Map<String, Object>> rse =
                         new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-                generatedKeyHolder.addKeys(rse.extract(rs));
+                List<Map<String, Object>> keys = rse.extract(rs);
+                if (keys.size() == 0) {
+                    generatedKeyHolder.addEmptyKeys(rows);
+                } else {
+                    generatedKeyHolder.addKeys(keys);
+                }
+
                 return rows;
             }
         };

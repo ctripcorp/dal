@@ -367,6 +367,7 @@ public class KeyHolder {
             if (clazz.equals(BigInteger.class)) {
                 BigInteger bigIntegerValue = BigInteger.valueOf(val.longValue());
                 pkFlield.set(entity, bigIntegerValue);
+                return;
             }
         } catch (Throwable e) {
             throw new DalException(ErrorCode.SetPrimaryKeyFailed, entity.getClass().getName(), pkFlield.getName());

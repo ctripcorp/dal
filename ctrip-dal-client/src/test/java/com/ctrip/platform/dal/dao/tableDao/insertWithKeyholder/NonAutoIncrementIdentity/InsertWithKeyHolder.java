@@ -35,25 +35,6 @@ public class InsertWithKeyHolder {
     }
 
     @Test
-    public void testInsertSetIdentityBack() {
-        try {
-            TestNonAutoIncrementIdentityDao dao = new TestNonAutoIncrementIdentityDao();
-            DalHints hints = new DalHints();
-            hints.setIdentityBack();
-            KeyHolder holder = new KeyHolder();
-            TestNonAutoIncrementIdentity pojo1 = new TestNonAutoIncrementIdentity();
-            pojo1.setId(1);
-            pojo1.setName("Test1");
-
-            dao.insert(hints, holder, pojo1);
-            Assert.assertTrue(pojo1.getId() != null);
-        } catch (Throwable e) {
-            System.out.println(e);
-            Assert.assertFalse(true);
-        }
-    }
-
-    @Test
     public void testInsertArrayByNonAutoIncrementIdentity() {
         try {
             TestNonAutoIncrementIdentityDao dao = new TestNonAutoIncrementIdentityDao();
@@ -99,6 +80,25 @@ public class InsertWithKeyHolder {
 
             dao.combinedInsert(hints, holder, list);
             Assert.assertTrue(true);
+        } catch (Throwable e) {
+            System.out.println(e);
+            Assert.assertFalse(true);
+        }
+    }
+
+    @Test
+    public void testInsertSetIdentityBack() {
+        try {
+            TestNonAutoIncrementIdentityDao dao = new TestNonAutoIncrementIdentityDao();
+            DalHints hints = new DalHints();
+            hints.setIdentityBack();
+            KeyHolder holder = new KeyHolder();
+            TestNonAutoIncrementIdentity pojo1 = new TestNonAutoIncrementIdentity();
+            pojo1.setId(7);
+            pojo1.setName("Test7");
+
+            dao.insert(hints, holder, pojo1);
+            Assert.assertTrue(pojo1.getId() != null);
         } catch (Throwable e) {
             System.out.println(e);
             Assert.assertFalse(true);

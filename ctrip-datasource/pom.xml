@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>keyholder-size-bugfix-branch-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <dal-client.version>keyholder-size-bugfix-branch-SNAPSHOT</dal-client.version>

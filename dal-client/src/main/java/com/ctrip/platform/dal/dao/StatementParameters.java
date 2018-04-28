@@ -1,10 +1,9 @@
 package com.ctrip.platform.dal.dao;
 
-import java.sql.Types;
 import java.util.*;
-
+import java.util.List;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class StatementParameters {
 	private static final String SQLHIDDENString = "*";
@@ -281,22 +280,39 @@ public class StatementParameters {
 			}
 		}
 	}
-	
+
+	public List<Integer> findDuplicateIndex() {
+		Set<Integer> set = new HashSet<>();
+		List<Integer> duplicateIndex = new ArrayList<>();
+		for (StatementParameter parameter : parameters) {
+			Integer indexValue = parameter.getIndex();
+			if (set.contains(indexValue)) {
+				duplicateIndex.add(indexValue);
+			} else {
+				set.add(indexValue);
+			}
+		}
+		return duplicateIndex;
+	}
+
     /**
      * Remove invalid parameter and reorder index
      */
-	public StatementParameters buildParameters() {
+	public StatementParameters buildParameters(){
+		List<Integer> duplicateIndex = findDuplicateIndex();
+		if (duplicateIndex.size() != 0) {
+			throw new DalRuntimeException(String.format("Duplicate index %s in statement parameters",duplicateIndex.toString()));
+		}
 		Collections.sort(parameters);
-	    List<StatementParameter> newParameters = new LinkedList<StatementParameter>();
-        int i = 1;
-        for(StatementParameter parameter: parameters) {
-            if(parameter.isValid()) {
-                parameter.setIndex(i++);
-                newParameters.add(parameter);
-            }
-        }
-        
-        parameters = newParameters;
-        return this;
-    }
+		List<StatementParameter> newParameters = new LinkedList<StatementParameter>();
+		int i = 1;
+		for (StatementParameter parameter : parameters) {
+			if (parameter.isValid()) {
+				parameter.setIndex(i++);
+				newParameters.add(parameter);
+			}
+		}
+		parameters = newParameters;
+		return this;
+	}
 }

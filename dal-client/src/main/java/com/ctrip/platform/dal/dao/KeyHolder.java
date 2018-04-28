@@ -26,7 +26,7 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  */
 public class KeyHolder {
     public static final String NOT_SET = "NOT SET!!!";
-
+    private static final Map<String, Object> emptyMap = new HashMap<>();
     private volatile boolean requireMerge = false;
     private AtomicInteger currentPos = new AtomicInteger();
     private AtomicInteger remainSize = new AtomicInteger();
@@ -39,6 +39,10 @@ public class KeyHolder {
 
     public KeyHolder() {
         logger = DalClientFactory.getDalLogger();
+    }
+
+    static {
+        emptyMap.put(NOT_SET, null);
     }
 
     /**
@@ -257,10 +261,7 @@ public class KeyHolder {
     }
 
     private Map<String, Object> createEmptyKeys() {
-        HashMap<String, Object> emptyKeys = new HashMap<>();
-        emptyKeys.put(NOT_SET, null);
-
-        return emptyKeys;
+        return emptyMap;
     }
 
     /**
@@ -324,7 +325,16 @@ public class KeyHolder {
                     "insertIdentityBack only support JPA POJO. Please use code gen to regenerate your POJO");
 
         for (int i = 0; i < rawPojos.size(); i++)
-            setPrimaryKey(pkFlield, rawPojos.get(i), keyHolder.getKey(i));
+            if (!keyHolder.isEmptyKey(i)) {
+                setPrimaryKey(pkFlield, rawPojos.get(i), keyHolder.getKey(i));
+            }
+    }
+
+    private boolean isEmptyKey(int index) throws DalException {
+        boolean result = false;
+        Map<String, Object> map = getKeyList().get(index);
+        result = map == emptyMap;
+        return result;
     }
 
     /**

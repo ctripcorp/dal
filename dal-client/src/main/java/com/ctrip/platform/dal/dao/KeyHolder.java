@@ -331,10 +331,8 @@ public class KeyHolder {
     }
 
     private boolean isEmptyKey(int index) throws DalException {
-        boolean result = false;
         Map<String, Object> map = getKeyList().get(index);
-        result = map == emptyMap;
-        return result;
+        return map == emptyMap;
     }
 
     /**

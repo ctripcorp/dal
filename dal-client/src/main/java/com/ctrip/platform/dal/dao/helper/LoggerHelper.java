@@ -11,7 +11,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class LoggerHelper {
 
 	public static final String SQLHIDDENString = "*";
-	public static ObjectMapper objectMapper;
+
+	private static class ObjectMapperHolder{
+		private static ObjectMapper objectMapperInstance=new ObjectMapper();
+		static {
+			objectMapperInstance.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+			objectMapperInstance.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+		}
+	}
+
+	public static ObjectMapper getObjectMapperInstance(){
+		return ObjectMapperHolder.objectMapperInstance;
+	}
 
 	public static int getHashCode(String str) {
 		str = getCompactSql(str);
@@ -202,13 +213,8 @@ public class LoggerHelper {
 	}
 
 	public static String toJson(Object object) {
-		if (objectMapper == null) {
-			objectMapper = new ObjectMapper();
-		}
-		objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
-		objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 		try {
-			return objectMapper.writeValueAsString(object);
+			return getObjectMapperInstance().writeValueAsString(object);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

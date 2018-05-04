@@ -167,6 +167,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     private List<T> queryList(T sample, DalHints hints, boolean checkAllNullFields) throws SQLException {
+        if (sample == null) {
+            throw new DalException(ErrorCode.ValidatePojo);
+        }
+
         StatementParameters parameters = new StatementParameters();
         Map<String, ?> fields = parser.getFields(sample);
         Map<String, ?> queryCriteria = filterNullFileds(fields);

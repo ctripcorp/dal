@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao.datasource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
+import com.ctrip.platform.dal.dao.helper.ConnectionPhantomReferenceCleaner;
+import com.ctrip.platform.dal.dao.helper.DefaultConnectionPhantomReferenceCleaner;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.log.Callback;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SingleDataSource implements DataSourceConfigureConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleDataSource.class);
@@ -25,6 +28,10 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private static final String DAL = "DAL";
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
     private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
+
+    private static ConnectionPhantomReferenceCleaner connectionPhantomReferenceCleaner = new DefaultConnectionPhantomReferenceCleaner();
+    private static AtomicBoolean containsMySQL=new AtomicBoolean(false);
+    private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
     public String getName() {
         return name;
@@ -63,6 +70,17 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             LOGGER.info(message);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
+        }
+
+        try {
+            if (!containsMySQL.get()) {
+                if (dataSourceConfigure.getConnectionUrl().startsWith(MYSQL_URL_PREFIX)){
+                    connectionPhantomReferenceCleaner.start();
+                    containsMySQL.set(true);
+                }
+            }
+        } catch (Throwable e) {
+            LOGGER.error(String.format("Error starting pool connectionPhantomReferenceCleaner"), e);
         }
     }
 

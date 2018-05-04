@@ -5,11 +5,25 @@ import java.io.StringWriter;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LoggerHelper {
 
 	public static final String SQLHIDDENString = "*";
-	
+
+	private static class ObjectMapperHolder{
+		private static ObjectMapper objectMapperInstance=new ObjectMapper();
+		static {
+			objectMapperInstance.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+			objectMapperInstance.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+		}
+	}
+
+	public static ObjectMapper getObjectMapperInstance(){
+		return ObjectMapperHolder.objectMapperInstance;
+	}
+
 	public static int getHashCode(String str) {
 		str = getCompactSql(str);
 		int hash, i;
@@ -196,5 +210,14 @@ public class LoggerHelper {
 		}
 
 		return msg;
+	}
+
+	public static String toJson(Object object) {
+		try {
+			return getObjectMapperInstance().writeValueAsString(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "Error convert log value to json string!";
 	}
 }

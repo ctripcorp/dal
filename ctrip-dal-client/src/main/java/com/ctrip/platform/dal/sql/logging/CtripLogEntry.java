@@ -1,14 +1,11 @@
 package com.ctrip.platform.dal.sql.logging;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.framework.clogging.agent.trace.ISpan;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.client.DalWatcher;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -133,20 +130,15 @@ public class CtripLogEntry extends LogEntry {
 			params = "over long with param, can not be recorded";
 		}
 
-		try {
-			params = URLEncoder.encode(params, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			setErrorMsg(getErrorMsg() + LoggerHelper.getExceptionStack(e));
-			params = "";
-		}
+		Map<String,String> logMap=new LinkedHashMap<>();
+		logMap.put("HasSql","1");
+		logMap.put("Hash","");
+		logMap.put("SqlTpl",sqlTpl);
+		logMap.put("Param",params);
+		logMap.put("IsSuccess",isSuccess() ? "1" : "0");
+		logMap.put("ErrorMsg", getErrorMsg() == null ? "" : getErrorMsg());
+		logMap.put("CostDetail", entry.getCostDetail());
 
-		return String.format(JSON_PATTERN,
-				1,
-				"",
-				sqlTpl,
-				params,
-				isSuccess() ? 1 : 0,
-				CommonUtil.string2Json(getErrorMsg()),
-				entry.getCostDetail());
+		return LoggerHelper.toJson(logMap);
 	}
 }

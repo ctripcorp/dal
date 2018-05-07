@@ -73,7 +73,7 @@
 <div>
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active">
-            <a href="#dalVersion" aria-controls="dalVersion" role="tab" data-toggle="tab">DAL.version</a>
+            <a href="#dalVersion" aria-controls="dalVersion" role="tab" data-toggle="tab">DAL 版本统计</a>
         </li>
         <li role="presentation" style="display: none;">
             <a id="anchorLocalDatasource" href="#dalLocalDatasource" aria-controls="dalLocalDatasource" role="tab"

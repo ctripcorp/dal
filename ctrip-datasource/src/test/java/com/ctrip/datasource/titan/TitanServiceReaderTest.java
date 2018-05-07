@@ -210,7 +210,7 @@ public class TitanServiceReaderTest {
         String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
         TitanProvider provider = new TitanProvider();
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("PkgWorkflowDB_W");
+        dbNames.add("CommonOrderDB");
 
         Map<String, String> settings = new HashMap<>();
         settings.put(DataSourceConfigureConstants.SERVICE_ADDRESS, fws);
@@ -222,7 +222,7 @@ public class TitanServiceReaderTest {
 
             DataSourceConfigure result = null;
 
-            result = provider.getDataSourceConfigure("PkgWorkflowDB_W");
+            result = provider.getDataSourceConfigure("CommonOrderDB");
             Assert.assertNotNull(result);
         } catch (Exception e) {
             e.printStackTrace();

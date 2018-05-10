@@ -2,6 +2,11 @@ package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class LogEntry {
     private static volatile ThreadLocal<String> currentCaller;
@@ -340,14 +345,17 @@ public class LogEntry {
         endExecute = System.currentTimeMillis();
     }
 
-    public String getCostDetail(){
-        // Final end
-        end = System.currentTimeMillis();
-
-        return String.format(JSON_PATTERN, begin == 0 ? 0 : beginConnect - begin,
-                endConnect - beginConnect, beginExecute - endConnect,
-                endExecute - beginExecute, end - endExecute);
-    }
+	public String getCostDetail() {
+		// Final end
+		end = System.currentTimeMillis();
+		Map<String, String> costDetailMap = new LinkedHashMap<>();
+		costDetailMap.put("'Decode'", begin == 0 ? "'0'" : "'" + Long.toString(beginConnect - begin) + "'");
+		costDetailMap.put("'Connect'", "'" + Long.toString(endConnect - beginConnect) + "'");
+		costDetailMap.put("'Prepare'", "'" + Long.toString(beginExecute - endConnect) + "'");
+		costDetailMap.put("'Execute'", "'" + Long.toString(endExecute - beginExecute) + "'");
+		costDetailMap.put("'ClearUp'", "'" + Long.toString(end - endExecute) + "'");
+		return costDetailMap.toString();
+	}
 
     /**
      * @return Current caller

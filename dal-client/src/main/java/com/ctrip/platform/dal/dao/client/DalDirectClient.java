@@ -142,12 +142,17 @@ public class DalDirectClient implements DalClient {
                     return rows;
 
                 rs = preparedStatement.getGeneratedKeys();
-                if (rs == null)
-                    return rows;
+                int actualKeySize = 0;
+                if (rs != null) {
+                    DalRowMapperExtractor<Map<String, Object>> rse =
+                            new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
+                    List<Map<String, Object>> keys = rse.extract(rs);
+                    generatedKeyHolder.addKeys(keys);
+                    actualKeySize = keys.size();
+                }
 
-                DalRowMapperExtractor<Map<String, Object>> rse =
-                        new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-                generatedKeyHolder.addKeys(rse.extract(rs));
+                generatedKeyHolder.addEmptyKeys(rows - actualKeySize);
+
                 return rows;
             }
         };

@@ -272,7 +272,7 @@ public class DatabaseResource {
                 return status;
             }
 
-            return Status.OK();
+            return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             Status status = Status.ERROR();
@@ -337,7 +337,7 @@ public class DatabaseResource {
                     try {
                         return mapper.writeValueAsString(sets);
                     } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                        LoggerManager.getInstance().error(e);
                     }
                 }
             } else {
@@ -345,7 +345,7 @@ public class DatabaseResource {
                     List<String> dbAllinOneNames = BeanGetter.getDaoOfDalGroupDB().getAllDbAllinOneNames();
                     return mapper.writeValueAsString(dbAllinOneNames);
                 } catch (JsonProcessingException e) {
-                    e.printStackTrace();
+                    LoggerManager.getInstance().error(e);
                 }
             }
             return null;
@@ -556,4 +556,5 @@ public class DatabaseResource {
             return status;
         }
     }
+
 }

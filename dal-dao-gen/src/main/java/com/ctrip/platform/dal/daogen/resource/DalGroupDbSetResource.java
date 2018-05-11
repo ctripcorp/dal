@@ -302,7 +302,7 @@ public class DalGroupDbSetResource {
             DatabaseSetEntry dbsetEntry = new DatabaseSetEntry();
             dbsetEntry.setName(name);
             dbsetEntry.setDatabaseType(databaseType);
-            dbsetEntry.setSharding(sharding);
+            dbsetEntry.setSharding(sharding == null ? "" : sharding);
             dbsetEntry.setConnectionString(connectionString);
             dbsetEntry.setDatabaseSet_Id(dbsetID);
             dbsetEntry.setUpdate_time(new Timestamp(System.currentTimeMillis()));

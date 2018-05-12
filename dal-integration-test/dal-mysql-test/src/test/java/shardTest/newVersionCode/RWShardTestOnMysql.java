@@ -26,12 +26,21 @@ public class RWShardTestOnMysql {
     private static String shard_1_master_db= "test_masteronly_mysql_0";
     private static String shard_1_slave_db = "test_masteronly_mysql_1";
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+//        DalClientFactory.shutdownFactory();
+//        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath()  + "DalConfigForRWTest/Dal.config");
+        dao = new MasterOnlyOnMysqlDao(DATA_BASE);
+        //        先查询一遍并等待2秒，确保所有逻辑库的读库freshness已更新
+        dao.count(new DalHints().inShard(0));
+        Thread.sleep(2000);
+    }
+
     @Before
     public void setUp() throws Exception {
 //        DalClientFactory.shutdownFactory();
 //        DalClientFactory.initClientFactory(this.getClass().getClassLoader().getResource(".").getPath() + "RWDalConfig/Dal.config");
 
-        dao = new MasterOnlyOnMysqlDao(DATA_BASE);
         dao.test_def_truncate(new DalHints().inShard(0));
         dao.test_def_truncate(new DalHints().inShard(0).slaveOnly());
         dao.test_def_truncate(new DalHints().inShard(1));

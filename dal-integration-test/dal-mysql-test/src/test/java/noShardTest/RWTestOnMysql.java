@@ -23,12 +23,21 @@ public class RWTestOnMysql {
     private static String keyName2 = "DalService2DB_W";
     private static String keyName3 = "DalService3DB_W";
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+//        DalClientFactory.shutdownFactory();
+//        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath()  + "DalConfigForRWTest/Dal.config");
+        dao = new MasterOnlyOnMysqlDao(DATA_BASE);
+        //        先查询一遍并等待2秒，确保所有逻辑库的读库freshness已更新
+        dao.count(null);
+        Thread.sleep(2000);
+    }
+
     @Before
     public void setUp() throws Exception {
 //        DalClientFactory.shutdownFactory();
 //        DalClientFactory.initClientFactory(this.getClass().getClassLoader().getResource(".").getPath() + "RWDalConfig/Dal.config");
 
-        dao = new MasterOnlyOnMysqlDao(DATA_BASE);
         dao.test_def_truncate(new DalHints().inDatabase(keyName0));
         dao.test_def_truncate(new DalHints().inDatabase(keyName1).slaveOnly());
         dao.test_def_truncate(new DalHints().inDatabase(keyName2));

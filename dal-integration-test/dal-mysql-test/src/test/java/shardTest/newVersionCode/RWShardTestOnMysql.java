@@ -4,9 +4,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import noShardTest.MasterOnlyOnMysql;
 import noShardTest.MasterOnlyOnMysqlDao;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.ArrayList;
 import java.util.List;

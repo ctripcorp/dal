@@ -5,8 +5,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.FreshnessHelper;
 import org.junit.After;
 import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import java.util.ArrayList;
 import java.util.List;
 

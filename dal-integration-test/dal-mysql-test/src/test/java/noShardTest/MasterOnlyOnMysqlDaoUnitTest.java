@@ -37,6 +37,9 @@ public class MasterOnlyOnMysqlDaoUnitTest {
         client = DalClientFactory.getClient(DATA_BASE);
         dao = new MasterOnlyOnMysqlDao();
         dao2 = new PersonShardColModShardByDBOnMysqlDao();
+        //        先查询一遍并等待2秒，确保所有逻辑库的读库freshness已更新
+        dao.count(null);
+        Thread.sleep(2000);
     }
 
     @AfterClass

@@ -50,7 +50,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(
@@ -104,7 +104,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(
@@ -185,7 +185,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(
@@ -265,7 +265,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(

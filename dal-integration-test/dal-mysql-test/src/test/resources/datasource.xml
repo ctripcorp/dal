@@ -44,7 +44,7 @@
     <!-- <Datasource name="DalService2DB_W"
 
                 connectionProperties="rewriteBatchedStatements=false;allowMultiQueries=true;socketTimeout=10000"/>-->
-    <Datasource name="ActLogDB_W"
+    <Datasource name="CommonOrderDB_S4_R"
                 minIdle="哦"
     />
 </Datasources>

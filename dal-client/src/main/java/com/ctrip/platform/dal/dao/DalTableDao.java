@@ -6,13 +6,7 @@ import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
-import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
-import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.*;
 import com.ctrip.platform.dal.dao.task.BulkTask;
 import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
@@ -201,11 +195,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * Query by the given where clause and parameters. The where clause can contain value placeholder "?". The parameter
-     * should match the index of the placeholder.
-     * 
-     * @param whereClause the where section for the search statement.
-     * @param parameters A container that holds all the necessary parameters
+     * query by given selectBuilder
+     * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @return List of pojos that meet the search criteria
      * @throws SQLException
@@ -215,11 +206,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * Query by the given where clause and parameters. The where clause can contain value placeholder "?". The parameter
-     * should match the index of the placeholder.
-     * 
-     * @param whereClause the where section for the search statement.
-     * @param parameters A container that holds all the necessary parameters
+     * query by given selectBuilder
+     * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param clazz the return type, not the pojo, but simple type
      * @return List of pojos that meet the search criteria
@@ -227,6 +215,30 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      */
     public <K> List<K> query(SelectSqlBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
         return commonQuery((SelectSqlBuilder) selectBuilder.mapWith(clazz).nullable(), hints);
+    }
+
+
+    /**
+     * query by given selectBuilder
+     * @param selectBuilder
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @return List of pojos that meet the search criteria
+     * @throws SQLException
+     */
+    public List<T> query(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
+        return query((SelectSqlBuilder) selectBuilder, hints);
+    }
+
+    /**
+     * query by given selectBuilder
+     * @param selectBuilder
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param clazz the return type, not the pojo, but simple type
+     * @return List of pojos that meet the search criteria
+     * @throws SQLException
+     */
+    public <K> List<K> query(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
+        return query((SelectSqlBuilder) selectBuilder, hints, clazz);
     }
 
     /**

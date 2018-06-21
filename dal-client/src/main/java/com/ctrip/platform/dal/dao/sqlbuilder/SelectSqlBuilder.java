@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.sqlbuilder;
 
-import static com.ctrip.platform.dal.dao.helper.EntityManager.getMapper;
-
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -25,7 +23,7 @@ import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
 import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
 import com.ctrip.platform.dal.dao.helper.EntityManager;
 
-public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectBuilder {
+public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectBuilder, TableSelectBuilder {
     private static final String ALL = "*";
     private static final String ALL_COLUMNS = "***";
     private static final String COUNT = "COUNT(1)";

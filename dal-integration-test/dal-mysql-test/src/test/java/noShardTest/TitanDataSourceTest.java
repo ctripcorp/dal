@@ -35,7 +35,7 @@ public class TitanDataSourceTest {
 
     @Test
     public void testTitanDataSourcePoolPropertiesMySQL() throws Exception {
-        DataSource ds = new DalDataSourceFactory().createTitanDataSource("ActLogDB_W", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
+        DataSource ds = new DalDataSourceFactory().createTitanDataSource("CommonOrderDB_S4_R", "https://ws.titan.uat.qa.nt.ctripcorp.com/titanservice/query");
         Assert.assertNull(ds);
     }
 

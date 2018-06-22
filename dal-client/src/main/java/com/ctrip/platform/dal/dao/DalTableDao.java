@@ -195,7 +195,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * query by given selectBuilder
+     * Query by given selectBuilder
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @return List of pojos that meet the search criteria
@@ -206,7 +206,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * query by given selectBuilder
+     * Query by given selectBuilder
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param clazz the return type, not the pojo, but simple type
@@ -219,24 +219,28 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
 
     /**
-     * query by given selectBuilder
+     * Query by given selectBuilder
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @return List of pojos that meet the search criteria
      * @throws SQLException
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #query(SelectSqlBuilder , DalHints )}
      */
+    @Deprecated
     public List<T> query(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
         return query((SelectSqlBuilder) selectBuilder, hints);
     }
 
     /**
-     * query by given selectBuilder
+     * Query by given selectBuilder
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param clazz the return type, not the pojo, but simple type
      * @return List of pojos that meet the search criteria
      * @throws SQLException
+     * @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #query(SelectSqlBuilder , DalHints, Class<K>)}
      */
+    @Deprecated
     public <K> List<K> query(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
         return query((SelectSqlBuilder) selectBuilder, hints, clazz);
     }
@@ -281,6 +285,37 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return commonQuery((SelectSqlBuilder) selectBuilder.mapWith(clazz), hints);
     }
 
+    /**
+     * Query pojo for the given query builder. The requireSingle or requireFirst MUST be set on builder.
+     *
+     * @param selectBuilder select builder which represents the query criteria
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @return
+     * @throws SQLException
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #queryObject(SelectSqlBuilder , DalHints )}
+     */
+    @Deprecated
+    public T queryObject(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
+        return queryObject((SelectSqlBuilder)selectBuilder, hints);
+    }
+
+    /**
+     * Query object for the given type for the given query builder. The requireSingle or requireFirst MUST be set on
+     * builder.
+     *
+     * @param selectBuilder select builder which represents the query criteria
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param clazz the class which the returned result belongs to.
+     * @return
+     * @throws SQLException
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #queryObject(SelectSqlBuilder , DalHints , Class<K> )}
+     */
+    @Deprecated
+    public <K> K queryObject(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
+        return queryObject((SelectSqlBuilder)selectBuilder, hints, clazz);
+    }
+
+
     public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
         return count(new SelectSqlBuilder().where(whereClause).with(parameters).selectCount(), hints);
     }
@@ -288,6 +323,19 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     // Assume selectCount() is already invoked
     public Number count(SelectSqlBuilder selectBuilder, DalHints hints) throws SQLException {
         return commonQuery(selectBuilder, hints);
+    }
+
+
+    /**
+     * @param selectBuilder
+     * @param hints
+     * @return
+     * @throws SQLException
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #count(SelectSqlBuilder , DalHints )}
+     */
+    @Deprecated
+    public Number count(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
+        return count((SelectSqlBuilder)selectBuilder, hints);
     }
 
     /**

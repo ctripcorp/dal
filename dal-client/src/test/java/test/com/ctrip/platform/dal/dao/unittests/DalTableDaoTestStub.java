@@ -7,6 +7,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctrip.platform.dal.dao.sqlbuilder.TableSelectBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -217,8 +218,44 @@ public class DalTableDaoTestStub extends BaseTestStub {
 		Assert.assertTrue(null != models);
 		Assert.assertEquals(0, models.size());
 	}
-	
-    @Test
+
+	@Test
+	public void testCompatabilityWithTableSelectBuilder() throws SQLException{
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.equal("type", 1, Types.SMALLINT);
+		List<ClientTestModel> models1 = dao.query((TableSelectBuilder) builder, new DalHints());
+		Assert.assertTrue(null != models1);
+		Assert.assertEquals(3, models1.size());
+
+		builder = new SelectSqlBuilder();
+		builder.equal("type", 1, Types.SMALLINT);
+		List<Short> models2 = dao.query((TableSelectBuilder)builder, new DalHints(), Short.class);
+		Assert.assertTrue(null != models2);
+		Assert.assertEquals(3, models2.size());
+
+
+		builder = new SelectSqlBuilder();
+		builder.equal("type", 1, Types.SMALLINT);
+		builder.requireFirst();
+		ClientTestModel clientTestModel = dao.queryObject((TableSelectBuilder)builder, new DalHints());
+		Assert.assertNotNull(clientTestModel);
+
+		builder = new SelectSqlBuilder();
+		builder.equal("type", 1, Types.SMALLINT);
+		builder.requireFirst();
+		Short shortResult = dao.queryObject((TableSelectBuilder)builder.atPage(1, 1), new DalHints(), Short.class);
+		Assert.assertNotNull(shortResult);
+
+
+		builder = new SelectSqlBuilder();
+		builder.selectCount();
+		builder.equal("type", 1, Types.SMALLINT);
+		Number number = dao.count((TableSelectBuilder)builder, new DalHints());
+		Assert.assertEquals(3, number.intValue());
+	}
+
+		@Test
     public void testQueryList() throws SQLException{
         SelectSqlBuilder builder = new SelectSqlBuilder();
         

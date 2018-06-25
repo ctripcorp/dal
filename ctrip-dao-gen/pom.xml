@@ -24,6 +24,7 @@
         <mysql-connector-version>5.1.41</mysql-connector-version>
         <javax-mail-version>1.4.7</javax-mail-version>
         <cas-version>3.1.15-30Days-no-jsessionid</cas-version>
+        <credis-version>3.0.5</credis-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -43,6 +44,11 @@
                 <groupId>javax.activation</groupId>
                 <artifactId>activation</artifactId>
                 <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.credis</groupId>
+                <artifactId>credis</artifactId>
+                <version>${credis-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jasig.cas.client</groupId>

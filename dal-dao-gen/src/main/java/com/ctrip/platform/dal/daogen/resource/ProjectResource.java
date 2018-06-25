@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen.resource;
 
+import com.ctrip.platform.dal.daogen.Consts;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 import com.ctrip.platform.dal.daogen.CodeGenContext;
@@ -15,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -529,11 +531,22 @@ public class ProjectResource {
                 status.setInfo(String.format("Language error for project %s", id));
                 return status;
             }
+
+            String userName = "";
+            HttpSession session = RequestUtil.getSession(request);
+            if (session != null) {
+                Object userInfo = session.getAttribute(Consts.USER_INFO);
+                if (userInfo != null) {
+                    userName = ((LoginUser) userInfo).getUserName();
+                }
+            }
+
             String code = "";
             if (hashSet.contains(JAVA)) {
                 code = JAVA;
                 DalGenerator generator = new JavaDalGenerator();
                 CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
+                context.setUserName(userName);
                 LoggerManager.getInstance().info(String.format("Begin to generate java task for project %s", id));
                 generateLanguageProject(generator, context);
                 LoggerManager.getInstance().info(String.format("Java task for project %s generated.", id));
@@ -542,6 +555,7 @@ public class ProjectResource {
                 code = "cs";
                 DalGenerator generator = new CSharpDalGenerator();
                 CodeGenContext context = generator.createContext(id, true, progress, newPojo, false);
+                context.setUserName(userName);
                 LoggerManager.getInstance().info(String.format("Begin to generate csharp task for project %s", id));
                 generateLanguageProject(generator, context);
                 LoggerManager.getInstance().info(String.format("Csharp task for project %s generated.", id));

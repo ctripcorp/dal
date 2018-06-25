@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class FreeSqlHost {
+public class FreeSqlHost extends PojoInfo {
     private String packageName;
     private String dbSetName;
     private String className;

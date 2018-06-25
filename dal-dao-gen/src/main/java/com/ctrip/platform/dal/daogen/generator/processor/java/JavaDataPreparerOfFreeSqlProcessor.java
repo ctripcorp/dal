@@ -38,6 +38,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         final String namespace = ctx.getNamespace();
         final Map<String, JavaMethodHost> freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
         final Queue<FreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
+        final String userName = ctx.getUserName();
         DaoByFreeSql daoByFreeSql = BeanGetter.getDaoByFreeSql();
         List<GenTaskByFreeSql> freeSqlTasks;
         if (ctx.isRegenerate()) {
@@ -75,12 +76,12 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     host.setClassName(currentTasks.get(0).getClass_name());
                     host.setPackageName(namespace);
                     host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
-                    //host.setLength(currentTasks.get(0).getLength());
+                    // host.setLength(currentTasks.get(0).getLength());
 
                     List<JavaMethodHost> methods = new ArrayList<>();
                     for (GenTaskByFreeSql task : currentTasks) {
                         try {
-                            processMethodHost(task, namespace, methods, freeSqlPojoHosts);
+                            processMethodHost(task, namespace, methods, freeSqlPojoHosts, userName);
                         } catch (Throwable e) {
                             progress.setOtherMessage(e.getMessage());
                             throw new Exception(String.format("Task Id[%s]:%s\r\n", task.getId(), e.getMessage()), e);
@@ -119,7 +120,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
     }
 
     private void processMethodHost(GenTaskByFreeSql task, String namespace, List<JavaMethodHost> methods,
-            Map<String, JavaMethodHost> freeSqlPojoHosts) throws Exception {
+            Map<String, JavaMethodHost> freeSqlPojoHosts, String userName) throws Exception {
         JavaMethodHost method = new JavaMethodHost();
         method.setSql(task.getSql_content());
         method.setName(task.getMethod_name());
@@ -129,6 +130,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
         method.setPaging(task.getPagination());
         method.setCrud_type(task.getCrud_type());
         method.setComments(task.getComment());
+        method.setUserName(userName);
         // method.setLength(task.getLength());
 
         if (task.getPojo_name() != null && !task.getPojo_name().isEmpty())

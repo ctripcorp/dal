@@ -6,7 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-public class JavaTableHost {
+public class JavaTableHost extends PojoInfo {
     private DatabaseCategory databaseCategory;
     private String packageName;
     private String dbSetName;
@@ -22,7 +22,7 @@ public class JavaTableHost {
     private SpOperationHost SpUpdate;
     private List<JavaMethodHost> methods = new ArrayList<>();
     private String api_list;
-//    private boolean length;
+    // private boolean length;
 
     public boolean generateAPI(Integer... apiID) {
         if (api_list == null || api_list.isEmpty()) {

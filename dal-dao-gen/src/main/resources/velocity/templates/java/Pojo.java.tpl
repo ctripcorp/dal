@@ -16,6 +16,10 @@ import ${field};
 
 import com.ctrip.platform.dal.dao.DalPojo;
 
+/**
+ * @author ${host.getUserName()}
+ * @date ${host.getDate()}
+ */
 @Entity
 @Database(name="$!{host.getDbSetName()}")
 @Table(name="$!{host.getTableName()}")
@@ -23,7 +27,9 @@ public class ${host.getPojoClassName()} implements DalPojo {
 #foreach( $field in ${host.getFields()} )
 
 #if($field.getComment() != "")
-    // $field.getComment()
+    /**
+     * $field.getComment()
+     */
 #end
 #if(${field.isPrimary()})
 	@Id

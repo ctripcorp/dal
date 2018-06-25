@@ -9,7 +9,7 @@ import org.apache.commons.lang.WordUtils;
 
 import java.util.*;
 
-public class JavaMethodHost {
+public class JavaMethodHost extends PojoInfo {
     private String crud_type;
     private String name;
     private String sql;

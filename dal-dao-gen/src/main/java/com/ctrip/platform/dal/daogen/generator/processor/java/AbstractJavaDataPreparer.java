@@ -65,6 +65,7 @@ public class AbstractJavaDataPreparer {
         tableHost.setPojoClassName(getPojoClassName(tableViewSp.getPrefix(), tableViewSp.getSuffix(), tableName));
         tableHost.setSp(tableViewSp.getCud_by_sp());
         tableHost.setApi_list(tableViewSp.getApi_list());
+        tableHost.setUserName(ctx.getUserName());
         // tableHost.setLength(tableViewSp.getLength());
 
         // 主键及所有列

@@ -34,6 +34,20 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     public void addUserPoolPropertiesConfigure(String name, PoolPropertiesConfigure configure) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         userPoolPropertiesConfigure.put(keyName, configure);
+        
+        /*
+         * The original design of DAL allows user to use dal only with dal.xml and datasource.xml.
+         * Like dal-demo project, the connection information can be provided in datasource.xml like this:
+         * 	<Datasource name="dal_shard_0"
+              userName="xxx"
+              password="xxx"
+              connectionUrl="jdbc:mysql://localhost:3306/dal_shard_0"
+              driverClassName="com.mysql.jdbc.Driver"
+         * 
+         * The follwing code will create DataSourceConfigure for this case 
+         * Fixed by Jerry He. 
+         */
+    	dataSourceConfiguresCache.put(name, new DataSourceConfigure(name, configure.getProperties()));
     }
 
     @Override

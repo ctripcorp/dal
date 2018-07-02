@@ -9,7 +9,7 @@
     <properties>
         <environment>open</environment>
         <file_encoding>UTF-8</file_encoding>
-        <dao-gen-core-version>1.5.4</dao-gen-core-version>
+        <dao-gen-core-version>1.5.4.1</dao-gen-core-version>
     </properties>
     <dependencies>
         <dependency>

@@ -56,7 +56,7 @@ public class FreshnessHelper implements FreshnessReader {
             parameters.setResultsParameter(COUNT);
                         
             DalClientFactory.getClient(logicDbName).call(MYSQL_LATERNCY_SP, parameters, hints.timeout(READ_TIMEOUT));
-            freshness = parseFreshness(slaveConnectionString, parameters.get("Freshness", null).getValue());
+            freshness = parseFreshness(slaveConnectionString, parameters.getResultParameterByName("Freshness").getValue());
         } catch (Throwable e) {
             DalClientFactory.getDalConfigure().getDalLogger().error(String.format("Can not get freshness from slave %s for logic db %s. Error message: %s", logicDbName, slaveConnectionString, e.getMessage()), e);
         }
@@ -75,7 +75,7 @@ public class FreshnessHelper implements FreshnessReader {
             parameters.setResultsParameter(FRESHNESS, new DalScalarExtractor());
             
             DalClientFactory.getClient(logicDbName).call(SQLSVR_LATERNCY_SP, parameters, hints);
-            freshness = parseFreshness(slaveConnectionString, parameters.get(FRESHNESS, null).getValue());
+            freshness = parseFreshness(slaveConnectionString, parameters.getResultParameterByName(FRESHNESS).getValue());
         } catch (Throwable e) {
             DalClientFactory.getDalConfigure().getDalLogger().error(String.format("Can not get freshness from slave %s for logic db %s. Error message: %s", logicDbName, slaveConnectionString, e.getMessage()), e);
         }

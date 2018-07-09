@@ -11,16 +11,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.ctrip.platform.dal.dao.client.DalLogger;
+
 import com.ctrip.platform.dal.dao.helper.EntityManager;
+import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.task.DaoTask;
 import com.ctrip.platform.dal.dao.task.KeyHolderAwaredTask;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
+
 /**
  * A helper class that will collect all generated keys for insert operation
- * 
+ *
  * @author jhhe
  *
  */
@@ -35,10 +38,10 @@ public class KeyHolder {
 
     private AtomicBoolean merged = new AtomicBoolean(false);
 
-    private DalLogger logger;
+    private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
 
     public KeyHolder() {
-        logger = DalClientFactory.getDalLogger();
+
     }
 
     static {
@@ -47,7 +50,7 @@ public class KeyHolder {
 
     /**
      * For internal use. Initialize all generated keys
-     * 
+     *
      * @param size
      */
     public void initialize(int size) {
@@ -55,7 +58,7 @@ public class KeyHolder {
         remainSize.set(size);
 
         if (allKeys.size() > 0)
-            logger.warn("Reuse of KeyHolder detected!");
+            ilogger.warn("Reuse of KeyHolder detected!");
 
         allKeys.clear();
 
@@ -96,7 +99,7 @@ public class KeyHolder {
 
     /**
      * Get the generated Id. The type is of Number.
-     * 
+     *
      * @return id in number
      * @throws SQLException if there is more than one generated key or the conversion is failed.
      */
@@ -106,7 +109,7 @@ public class KeyHolder {
 
     /**
      * Get the generated Id for given index. The type is of Number.
-     * 
+     *
      * @return key in number format
      * @throws SQLException if the generated key is not number type.
      */
@@ -123,7 +126,7 @@ public class KeyHolder {
 
     /**
      * Get the first generated key in map.
-     * 
+     *
      * @return null if no key found, or the keys in a map
      * @throws SQLException
      */
@@ -142,7 +145,7 @@ public class KeyHolder {
 
     /**
      * Get all the generated keys for multiple insert.
-     * 
+     *
      * @return all the generated keys
      * @throws DalException
      */
@@ -161,7 +164,7 @@ public class KeyHolder {
 
     /**
      * Convert generated keys to list of number.
-     * 
+     *
      * @return
      * @throws SQLException if the conversion fails
      */
@@ -189,7 +192,7 @@ public class KeyHolder {
 
     /**
      * For internal use, add generated keys, for combined insert case
-     * 
+     *
      * @param keys
      */
     public void addKeys(List<Map<String, Object>> keys) {
@@ -200,7 +203,7 @@ public class KeyHolder {
 
     /**
      * For internal use, add a generated key for single insert case
-     * 
+     *
      * @param key
      */
     public void addKey(Map<String, Object> key) {
@@ -219,7 +222,7 @@ public class KeyHolder {
     }
 
     public static void mergePartial(DaoTask<?> task, KeyHolder originalHolder, Integer[] indexList,
-            KeyHolder localHolder, Throwable error) throws SQLException {
+                                    KeyHolder localHolder, Throwable error) throws SQLException {
         if (!isKeyHolderRequired(task, originalHolder))
             return;
 
@@ -243,7 +246,7 @@ public class KeyHolder {
 
     /**
      * For internal use, add a generated key
-     * 
+     *
      * @param
      */
     private void singleFail() {
@@ -266,7 +269,7 @@ public class KeyHolder {
 
     /**
      * For internal use. Indicate how many partial pojo insert failed
-     * 
+     *
      * @param partialSize
      */
     private void patialFailed(int partialSize) {
@@ -275,7 +278,7 @@ public class KeyHolder {
 
     /**
      * For internal use. Add partial generated keys, it will only be invoked for cross shard combine insert case
-     * 
+     *
      * @param indexList
      * @param tmpHolder
      */
@@ -337,7 +340,7 @@ public class KeyHolder {
 
     /**
      * Only support number type and auto incremental id is one column
-     * 
+     *
      * @throws SQLException
      */
     private static void setPrimaryKey(Field pkFlield, Object entity, Number val) throws SQLException {

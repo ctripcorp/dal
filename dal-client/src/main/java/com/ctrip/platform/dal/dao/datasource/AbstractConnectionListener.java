@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,7 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
 
         try {
             String connectionId = connection.toString();
-            String url = simpleUrl(connection.getMetaData().getURL());
+            String url = LoggerHelper.getSimplifiedDBUrl(connection.getMetaData().getURL());
             if (url == null || url.isEmpty())
                 return;
 

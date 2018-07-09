@@ -31,7 +31,7 @@ import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
  * The direct connection implementation for DalClient.
- * 
+ *
  * @author jhhe
  */
 public class DalDirectClient implements DalClient {
@@ -49,7 +49,7 @@ public class DalDirectClient implements DalClient {
 
     @Override
     public <T> T query(String sql, StatementParameters parameters, final DalHints hints,
-            final DalResultSetExtractor<T> extractor) throws SQLException {
+                       final DalResultSetExtractor<T> extractor) throws SQLException {
         ConnectionAction<T> action = new ConnectionAction<T>() {
             @Override
             public T execute() throws Exception {
@@ -80,7 +80,7 @@ public class DalDirectClient implements DalClient {
 
     @Override
     public List<?> query(String sql, StatementParameters parameters, final DalHints hints,
-            final List<DalResultSetExtractor<?>> extractors) throws SQLException {
+                         final List<DalResultSetExtractor<?>> extractors) throws SQLException {
         ConnectionAction<List<?>> action = new ConnectionAction<List<?>>() {
             @Override
             public List<?> execute() throws Exception {
@@ -249,10 +249,9 @@ public class DalDirectClient implements DalClient {
             public Map<String, ?> execute() throws Exception {
                 List<StatementParameter> resultParameters = new ArrayList<StatementParameter>();
                 List<StatementParameter> callParameters = new ArrayList<StatementParameter>();
+                resultParameters.addAll(parameters.getResultParameters());
                 for (StatementParameter parameter : parameters.values()) {
-                    if (parameter.isResultsParameter()) {
-                        resultParameters.add(parameter);
-                    } else if (parameter.isOutParameter()) {
+                    if (parameter.isOutParameter()) {
                         callParameters.add(parameter);
                     }
                 }
@@ -309,7 +308,7 @@ public class DalDirectClient implements DalClient {
 
     /**
      * First try getRow(), then try parse result
-     * 
+     *
      * @param rs
      * @param result
      * @return
@@ -340,7 +339,7 @@ public class DalDirectClient implements DalClient {
     }
 
     private Map<String, Object> extractReturnedResults(CallableStatement statement,
-            List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
+                                                       List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
         Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
         if (hints.is(DalHintEnum.skipResultsProcessing))
             return returnedResults;
@@ -391,7 +390,7 @@ public class DalDirectClient implements DalClient {
     }
 
     private Map<String, Object> extractOutputParameters(CallableStatement statement,
-            List<StatementParameter> callParameters) throws SQLException {
+                                                        List<StatementParameter> callParameters) throws SQLException {
 
         Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
         for (StatementParameter parameter : callParameters) {
@@ -441,27 +440,27 @@ public class DalDirectClient implements DalClient {
     }
 
     private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createPreparedStatement(conn, sql, parameters, hints);
     }
 
     private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters,
-            DalHints hints, KeyHolder keyHolder) throws Exception {
+                                                      DalHints hints, KeyHolder keyHolder) throws Exception {
         return stmtCreator.createPreparedStatement(conn, sql, parameters, hints, keyHolder);
     }
 
     private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters[] parametersList,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createPreparedStatement(conn, sql, parametersList, hints);
     }
 
     private CallableStatement createCallableStatement(Connection conn, String sql, StatementParameters parameters,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createCallableStatement(conn, sql, parameters, hints);
     }
 
     private CallableStatement createCallableStatement(Connection conn, String sql, StatementParameters[] parametersList,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
     }
 

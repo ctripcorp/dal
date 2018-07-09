@@ -114,8 +114,8 @@ public class DalConnectionManager {
 		}
 
 		allInOneKey = select(logicDbName, dbSet, hints, shardId, isMaster, isSelect);
-		
-		try {	
+
+		try {
 			conn = locator.getConnection(allInOneKey);
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
 			return new DalConnection(conn, isMaster, shardId, meta);
@@ -123,21 +123,21 @@ public class DalConnectionManager {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}
 	}
-	
+
 	private String select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
-	    SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
-	    
-	    if(shard == null) {
-	        context.setMasters(dbSet.getMasterDbs());
-	        context.setSlaves(dbSet.getSlaveDbs());
-	    }else{
-            context.setMasters(dbSet.getMasterDbs(shard));
-            context.setSlaves(dbSet.getSlaveDbs(shard));	        
-	    }
-	    
-	    return config.getSelector().select(context);
+		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
+
+		if(shard == null) {
+			context.setMasters(dbSet.getMasterDbs());
+			context.setSlaves(dbSet.getSlaveDbs());
+		}else{
+			context.setMasters(dbSet.getMasterDbs(shard));
+			context.setSlaves(dbSet.getSlaveDbs(shard));
+		}
+
+		return config.getSelector().select(context);
 	}
-	
+
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
 		// If HA disabled or not query, we just directly call _doInConnnection
@@ -172,7 +172,7 @@ public class DalConnectionManager {
 			MarkdownManager.detect(action.connHolder, action.start, e);
 			action.error(e);
 		} finally {
-		    action.endExectue();
+			action.endExectue();
 			action.populateDbMeta();
 			action.cleanup();
 		}

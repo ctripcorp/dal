@@ -8,6 +8,6 @@ import com.ctrip.platform.dal.exceptions.DalException;
  * @author jhhe
  *
  */
-public interface DatabaseSelector {
+public interface DatabaseSelector extends DalComponent {
     String select(SelectionContext context) throws DalException;
 }

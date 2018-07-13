@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,13 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
-import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.exceptions.DalException;
 
-public class FreshnessSelector implements DatabaseSelector, DalComponent {
+public class FreshnessSelector implements DatabaseSelector {
     public static final String FRESHNESS_READER = "freshnessReader";
     public static final String UPDATE_INTERVAL = "updateInterval"; 
     public static final int DEFAULT_INTERVAL = 5; 

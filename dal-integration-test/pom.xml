@@ -15,9 +15,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <framework-bom.version>2.11.2</framework-bom.version>
-    <!--<dal.version>1.13.6-SNAPSHOT</dal.version>
-    <ctrip-datasource.version>1.13.6-SNAPSHOT</ctrip-datasource.version>-->
+    <framework-bom.version>2.23.0</framework-bom.version>
     <dal.version>1.15.6</dal.version>
     <ctrip-datasource.version>1.15.6</ctrip-datasource.version>
   </properties>

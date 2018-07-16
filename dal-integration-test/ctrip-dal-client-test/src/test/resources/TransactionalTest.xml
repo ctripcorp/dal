@@ -1,0 +1,24 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation=" http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:component-scan base-package="dao.noshard" />
+    <context:component-scan base-package="dao.shard.newVersionCode" />
+    <bean id="dalAnnotationValidator" class="com.ctrip.platform.dal.dao.client.DalAnnotationValidator"/>
+    <bean id="noShardTransactionalTestOnMysqlDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
+        <constructor-arg name="targetClass" type="Class" value="dao.noshard.NoShardTransactionalTestOnMysqlDao" />
+    </bean>
+    <bean id="transactionalWithShardOnMysqlDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
+        <constructor-arg name="targetClass" type="Class" value="dao.shard.newVersionCode.TransactionalWithShardOnMysqlDao" />
+    </bean>
+    <bean id="noShardTransactionalTestOnSqlServerDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
+        <constructor-arg name="targetClass" type="Class" value="dao.noshard.NoShardTransactionalTestOnSqlServerDao" />
+    </bean>
+    <bean id="transactionalWithShardOnSqlServerDao" class="com.ctrip.platform.dal.dao.client.DalTransactionManager" factory-method="create">
+        <constructor-arg name="targetClass" type="Class" value="dao.shard.newVersionCode.TransactionalWithShardOnSqlServerDao" />
+    </bean>
+</beans>

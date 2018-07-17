@@ -134,13 +134,14 @@ public class DalGroupDbResource {
             }
 
             DalGroupDB groupdb = BeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
+            /*
             if (null != groupdb && groupdb.getDal_group_id() > 0) {
                 DalGroup group = BeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
                 Status status = Status.ERROR();
                 status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
                 return status;
             }
-
+            */
             int ret = -1;
             if (null != groupdb) {
                 ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);

@@ -1,0 +1,53 @@
+<Datasources>
+    <Datasource name="CruiseInterfaceDB"
+                testWhileIdle="false"
+                testOnBorrow="false"
+                testOnReturn="false"
+                validationQuery="SELECT 1"
+                validationInterval="30000"
+                validationQueryTimeout="6"
+                timeBetweenEvictionRunsMillis="5000"
+                maxActive="100"
+                minIdle="10"
+                maxWait="10000"
+                initialSize="1"
+                removeAbandonedTimeout="75"
+                removeAbandoned="true"
+                logAbandoned="true"
+                minEvictableIdleTimeMillis="30000"
+                connectionProperties="rewriteBatchedStatements=true"/>
+    <Datasource name="YouSearchDB"
+                testWhileIdle="true"
+                testOnBorrow="true"
+                testOnReturn="true"
+                validationQuery="SELECT 100"
+                validationInterval="31000"
+                timeBetweenEvictionRunsMillis="800"
+                maxActive="110"
+                minIdle="70"
+                maxWait="11000"
+                maxAge="31000"
+                initialSize="5"
+                removeAbandonedTimeout="70"
+                removeAbandoned="false"
+                logAbandoned="false"
+                minEvictableIdleTimeMillis="31000"
+                connectionProperties="rewriteBatchedStatements=true"/>
+    <Datasource name="abtestdb"
+                option="rewriteBatchedStatements=true"/>
+    <Datasource name="commonOrderShard2DB_S2_S"
+                connectionProperties="rewriteBatchedStatements=true"/>
+    <Datasource name="uiautomationtestdb_W"
+                option="rewriteBatchedStatements=true"/>
+    <Datasource name="CommonOrderDB_S6_R"
+                connectionProperties="rewriteBatchedStatements=true"/>
+    <!-- <Datasource name="DalService2DB_W"
+
+                connectionProperties="rewriteBatchedStatements=false;allowMultiQueries=true;socketTimeout=10000"/>-->
+    <Datasource name="CommonOrderDB_S4_R"
+                minIdle="哦"
+    />
+    <!--<Datasource name="DalServiceDB"
+                initSQL="set nocount off"
+    />-->
+</Datasources>

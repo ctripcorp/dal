@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -138,7 +139,13 @@ public class DalHints {
 		hints.put(hint, value);
 		return this;
 	}
-	
+
+	/**
+	 * Specify which db to execute the operation
+	 *
+	 * @param databaseName the connectionString part of the dal.xml/config
+	 * @return
+	 */
 	public DalHints inDatabase(String databaseName) {
 		hints.put(DalHintEnum.designatedDatabase, databaseName);
 		return this;
@@ -264,14 +271,16 @@ public class DalHints {
 
 	public DalHints masterOnly() {
 		set(DalHintEnum.masterOnly, true);
+		hints.remove(DalHintEnum.slaveOnly);
 		return this;
 	}
 
-//	public DalHints slaveOnly() {
-//		set(DalHintEnum.masterOnly, false);
-//		return this;
-//	}
-//	
+    public DalHints slaveOnly() {
+        set(DalHintEnum.slaveOnly, true);
+        hints.remove(DalHintEnum.masterOnly);
+        return this;
+    }
+
 	public DalHints continueOnError() {
 		set(DalHintEnum.continueOnError);
 		return this;
@@ -331,7 +340,10 @@ public class DalHints {
 		return !is(DalHintEnum.continueOnError);
 	}
 
-	public void handleError(String msg, Throwable e) throws DalException {
+	public void handleError(String msg, Throwable e) throws SQLException {
+	    if(e == null)
+	        return;
+
 		// Just make sure error is not swallowed by us
 		DalClientFactory.getDalLogger().error(msg, e);
 
@@ -354,10 +366,20 @@ public class DalHints {
 		return this;
 	}
 	
+	public DalHints freshness(int seconds) {
+        set(DalHintEnum.freshness, seconds);
+        return this;
+	}
+	
 	public DalHints enableIdentityInsert() {
 		set(DalHintEnum.enableIdentityInsert);
 		return this;
 	}
+
+    public DalHints setIdentityBack() {
+        set(DalHintEnum.setIdentityBack);
+        return this;
+    }
 
 	public boolean isIdentityInsertDisabled() {
 		return !is(DalHintEnum.enableIdentityInsert);
@@ -438,4 +460,7 @@ public class DalHints {
 	    return set(DalHintEnum.allowPartial);
     }
 
+    public DalHints selectByNames() {
+        return set(DalHintEnum.selectByNames);
+    }
 }

@@ -35,6 +35,7 @@ public class DalTableDaoShardByDbMySqlTest extends BaseDalTableDaoShardByDbTest 
 	private final static String CREATE_TABLE_SQL_MYSQL_TPL = "CREATE TABLE " + TABLE_NAME +"("
 			+ "id int UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			+ "quantity int,"
+            + "dbIndex int,"
 			+ "tableIndex int,"
 			+ "type smallint, "
 			+ "address VARCHAR(64) not null, "
@@ -71,11 +72,11 @@ public class DalTableDaoShardByDbMySqlTest extends BaseDalTableDaoShardByDbTest 
 		for(int i = 0; i < mod; i++) {
 			insertSqls = new String[] {
 					"INSERT INTO " + TABLE_NAME
-							+ " VALUES(1, 10, " + i + " ,1, 'SH INFO', NULL)",
+							+ " VALUES(1, 10, 1, " + i + " , 1, 'SH INFO', NULL)",
 					"INSERT INTO " + TABLE_NAME
-							+ " VALUES(2, 11, " + i + " ,1, 'BJ INFO', NULL)",
+							+ " VALUES(2, 11, 1, " + i + " , 1, 'BJ INFO', NULL)",
 					"INSERT INTO " + TABLE_NAME
-							+ " VALUES(3, 12, " + i + " ,1, 'SZ INFO', NULL)" };
+							+ " VALUES(3, 12, 1, " + i + " , 1, 'SZ INFO', NULL)" };
 			int[] counts = clientMySql.batchUpdate(insertSqls, hints.inShard(i));
 			assertArrayEquals(new int[] { 1, 1, 1 }, counts);
 		}

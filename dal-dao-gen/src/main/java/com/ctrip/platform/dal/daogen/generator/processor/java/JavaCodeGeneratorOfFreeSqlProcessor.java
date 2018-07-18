@@ -38,8 +38,8 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
         JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
-        Map<String, JavaMethodHost> _freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
-        for (final JavaMethodHost host : _freeSqlPojoHosts.values()) {
+        Map<String, JavaMethodHost> freeSqlPojoHosts = ctx.get_freeSqlPojoHosts();
+        for (final JavaMethodHost host : freeSqlPojoHosts.values()) {
             if (host.isSampleType())
                 continue;
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
@@ -50,6 +50,7 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
                     try {
                         VelocityContext context = GenUtils.buildDefaultVelocityContext();
                         context.put("host", host);
+
                         GenUtils.mergeVelocityContext(context, String.format("%s/Entity/%s.java",
                                 mavenLikeDir.getAbsolutePath(), host.getPojoClassName()),
                                 "templates/java/Pojo.java.tpl");
@@ -63,8 +64,8 @@ public class JavaCodeGeneratorOfFreeSqlProcessor implements DalProcessor {
             results.add(worker);
         }
 
-        Queue<FreeSqlHost> _freeSqlHosts = ctx.getFreeSqlHosts();
-        for (final FreeSqlHost host : _freeSqlHosts) {
+        Queue<FreeSqlHost> freeSqlHosts = ctx.getFreeSqlHosts();
+        for (final FreeSqlHost host : freeSqlHosts) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
 
                 @Override

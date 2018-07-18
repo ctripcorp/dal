@@ -2,7 +2,7 @@
 
 #Java related ignore
 *.class
-*.jar
+#*.jar
 
 /bin
 /target

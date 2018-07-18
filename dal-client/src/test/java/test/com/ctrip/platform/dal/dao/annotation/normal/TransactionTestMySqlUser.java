@@ -15,4 +15,8 @@ public class TransactionTestMySqlUser implements TransactionTestUser{
     public String performNest() {
         return test.performNest();
     }
+    
+    public BaseTransactionAnnoClass getTransactionAnnoTest() {
+        return test;
+    }
 }

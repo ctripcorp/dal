@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.domain.FreeSqlClassPojoNames;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.domain.TaskAggeragation;
 import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.enums.LanguageType;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpDalGenerator;
 import com.ctrip.platform.dal.daogen.generator.java.JavaCodeGenContext;
@@ -39,6 +40,9 @@ import java.util.*;
 @Singleton
 @Path("task")
 public class GenTaskResource {
+    private static final String CSHARP = "csharp";
+    private static final String JAVA = "java";
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public TaskAggeragation getTasks(@QueryParam("project_id") int id) throws SQLException {
@@ -67,6 +71,57 @@ public class GenTaskResource {
             LoggerManager.getInstance().error(e);
             throw e;
         }
+    }
+
+    @GET
+    @Path("getLanguageType")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Status getLanguageType(@QueryParam("project_id") int id) throws Exception {
+        Status status = Status.ERROR();
+        TaskAggeragation task = getTasks(id);
+        List<GenTaskByTableViewSp> tableTasks = task.getTableViewSpTasks();
+        if (tableTasks != null && tableTasks.size() > 0) {
+            for (GenTaskByTableViewSp table : tableTasks) {
+                if (table.getSql_style().equals(CSHARP)) {
+                    status.setInfo(CSHARP);
+                } else if (table.getSql_style().equals(JAVA)) {
+                    status.setInfo(JAVA);
+                }
+                break;
+            }
+            status.setCode("OK");
+            return status;
+        }
+
+        List<GenTaskBySqlBuilder> buildTasks = task.getAutoTasks();
+        if (buildTasks != null && buildTasks.size() > 0) {
+            for (GenTaskBySqlBuilder build : buildTasks) {
+                if (build.getSql_style().equals(CSHARP)) {
+                    status.setInfo(CSHARP);
+                } else if (build.getSql_style().equals(JAVA)) {
+                    status.setInfo(JAVA);
+                }
+                break;
+            }
+            status.setCode("OK");
+            return status;
+        }
+
+        List<GenTaskByFreeSql> sqlTasks = task.getSqlTasks();
+        if (sqlTasks != null && sqlTasks.size() > 0) {
+            for (GenTaskByFreeSql sql : sqlTasks) {
+                if (sql.getSql_style().equals(CSHARP)) {
+                    status.setInfo(CSHARP);
+                } else if (sql.getSql_style().equals(JAVA)) {
+                    status.setInfo(JAVA);
+                }
+                break;
+            }
+            status.setCode("OK");
+            return status;
+        }
+
+        return status;
     }
 
     @GET
@@ -104,7 +159,7 @@ public class GenTaskResource {
             @FormParam("is_update") String is_update, @FormParam("dao_id") int dao_id,
             @FormParam("prefix") String prefix, @FormParam("suffix") String suffix) {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             daoName = daoName.replaceAll("_", "");
             List<GenTaskByTableViewSp> tableViewSpTasks =
                     BeanGetter.getDaoByTableViewSp().getTasksByProjectId(project_id);
@@ -183,10 +238,10 @@ public class GenTaskResource {
                 }
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -198,7 +253,7 @@ public class GenTaskResource {
     public Status approveTask(@Context HttpServletRequest request, @FormParam("taskId") String taskId,
             @FormParam("taskType") String taskType, @FormParam("userId") int userId) throws Exception {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             LoginUser approver = BeanGetter.getDaoOfLoginUser().getUserById(userId);
             if (approver == null) {
                 return status;
@@ -276,10 +331,10 @@ public class GenTaskResource {
                 e.printStackTrace();
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -371,7 +426,7 @@ public class GenTaskResource {
             @QueryParam("taskType") String taskType, @QueryParam("approveFlag") int approveFlag,
             @QueryParam("approveMsg") String approveMsg) throws Exception {
         try {
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             String userNo = RequestUtil.getUserNo(request);
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             if (user == null) {
@@ -439,10 +494,10 @@ public class GenTaskResource {
                 e.printStackTrace();
             }
 
-            return Status.OK;
+            return Status.OK();
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            Status status = Status.ERROR;
+            Status status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

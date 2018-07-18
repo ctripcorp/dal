@@ -138,10 +138,33 @@
         $(".step2-3-3").hide();
         $(".step2-3-4").hide();
         $(".step2-3-5").hide();
+        setLanguageType(current_project);
         $("#page1").attr('is_update', '0');
         $("#page1").modal({"backdrop": "static"});
         window.ajaxutil.reload_dbsets();
     };
+
+    function setLanguageType(id) {
+        $.getJSON("rest/task/getLanguageType", {project_id: id}, function (data) {
+            var sql_style = $("#sql_style");
+            if (data.code == "OK") {
+                sql_style.val(data.info);
+                sql_style.attr("readonly", true);
+                sql_style.change(function () {
+                    sql_style.val(data.info);
+                });
+            }
+            else if (data.code == "Error") {
+                recoverLanguageType();
+            }
+        });
+    }
+
+    function recoverLanguageType() {
+        $("#sql_style").removeAttr("readonly");
+        $("#sql_style").unbind("change");
+        sql_style.selectedIndex = 0;
+    }
 
     var editDAO = function () {
         var current_project = w2ui['grid'].current_project;
@@ -178,11 +201,20 @@
         window.ajaxutil.reload_dbsets(function () {
             $("#databases")[0].selectize.setValue(record['databaseSetName']);
         });
+
         $("#page1").attr('is_update', '1');
         $("#gen_style").val(record.task_type);
+
         if (record['sql_style']) {
-            $("#sql_style").val(record.sql_style);
+            var sql_style = $("#sql_style");
+            recoverLanguageType();
+            sql_style.val(record.sql_style);
+            sql_style.attr("readonly", true);
+            sql_style.change(function () {
+                sql_style.val(record.sql_style);
+            });
         }
+
         $("#comment").val(record.comment);
         $("#page1").modal({"backdrop": "static"});
     };
@@ -203,8 +235,6 @@
             return;
         }
         if (confirm("您确定要删除吗?")) {
-            var records = w2ui['grid'].getSelection();
-            var record = w2ui['grid'].get(records[0]);
             var url = "";
             if (record.task_type == "table_view_sp") {
                 url = "rest/task/table";
@@ -451,11 +481,16 @@
                     type: 'text'
                 }],
                 columns: [{
+                    field: 'id',
+                    caption: 'ID',
+                    size: '5%',
+                    sortable: true,
+                    resizable: true
+                }, {
                     field: 'databaseSetName',
                     caption: '逻辑数据库',
                     size: '20%',
                     sortable: true,
-                    attr: 'align=center',
                     resizable: true
                 }, {
                     field: 'class_name',
@@ -493,12 +528,12 @@
                 }, {
                     field: 'update_user_no',
                     caption: '最后修改',
-                    size: '7%',
+                    size: '5%',
                     resizable: true
                 }, {
                     field: 'str_update_time',
                     caption: '修改时间',
-                    size: '13%',
+                    size: '10%',
                     resizable: true
                 }, {
                     field: 'str_approved',

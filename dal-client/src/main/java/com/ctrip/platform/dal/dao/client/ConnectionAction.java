@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,52 +36,50 @@ public abstract class ConnectionAction<T> {
 	public CallableStatement callableStatement;
 	public ResultSet rs;
 	public long start;
-	
+
 	public DalLogger logger = DalClientFactory.getDalLogger();
 	public LogEntry entry;
-	
+	public Throwable e;
+
 	void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
 		this.operation = operation;
-		this.sql = this.wrapAPPID(sql);
+		this.sql = sql;
 		this.parameters = parameters;
 	}
 
 	void populate(String[] sqls) {
 		this.operation = DalEventEnum.BATCH_UPDATE;
 		this.sqls = sqls;
-		for(int i = 0; i < this.sqls.length; i++){
-			this.sqls[i] = this.wrapAPPID(this.sqls[i]);
-		}
 	}
-	
+
 	void populate(String sql, StatementParameters[] parametersList) {
 		this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
-		this.sql = this.wrapAPPID(sql);
+		this.sql = sql;
 		this.parametersList = parametersList;
 	}
-	
+
 	void populate(DalCommand command) {
 		this.operation = DalEventEnum.EXECUTE;
 		this.command = command;
 	}
-	
+
 	void populate(List<DalCommand> commands) {
 		this.operation = DalEventEnum.EXECUTE;
 		this.commands = commands;
 	}
-	
+
 	void populateSp(String callString, StatementParameters parameters) {
 		this.operation = DalEventEnum.CALL;
 		this.callString = callString;
 		this.parameters = parameters;
 	}
-	
+
 	void populateSp(String callString, StatementParameters []parametersList) {
 		this.operation = DalEventEnum.BATCH_CALL;
 		this.callString = callString;
 		this.parametersList = parametersList;
 	}
-	
+
 	public void populateDbMeta() {
 		DbMeta meta = null;
 
@@ -90,31 +87,33 @@ public abstract class ConnectionAction<T> {
 
 		if(DalTransactionManager.isInTransaction()) {
 			meta = DalTransactionManager.getCurrentDbMeta();
-			
+
 		} else {
 			if(connHolder != null) {
 				meta = connHolder.getMeta();
 			}
 		}
-		
+
 		if(meta != null)
 			meta.populate(entry);
-		
+
 		if(connHolder !=null) {
-		    entry.setMaster(connHolder.isMaster());
-		    entry.setShardId(connHolder.getShardId());
+			entry.setMaster(connHolder.isMaster());
+			entry.setShardId(connHolder.getShardId());
 		}
 	}
-	
+
 	public void initLogEntry(String logicDbName, DalHints hints) {
 		this.entry = logger.createLogEntry();
-		
+		entry.setLogicDbName(logicDbName);
+		entry.setDbCategory(DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory());
 		entry.setClientVersion(Version.getVersion());
 		entry.setSensitive(hints.is(DalHintEnum.sensitive));
 		entry.setEvent(operation);
+
+		wrapSql();
 		entry.setCallString(callString);
-		
-		if(sqls != null)	
+		if(sqls != null)
 			entry.setSqls(sqls);
 		else
 			entry.setSqls(sql);
@@ -130,22 +129,67 @@ public abstract class ConnectionAction<T> {
 			hints.setParameters(parameters);
 		}
 	}
-	
+
+	private void wrapSql() {
+		/**
+		 * You can not add comments before callString
+		 */
+		if(sql != null) {
+			sql = wrapAPPID(sql);
+		}
+
+		if(sqls != null) {
+			for(int i = 0; i < sqls.length; i++){
+				sqls[i] = wrapAPPID(sqls[i]);
+			}
+		}
+
+		if(callString != null) {
+			// Call can not have comments at the begining
+			callString = callString + wrapAPPID("");
+		}
+
+	}
+
 	public void start() {
 		start = System.currentTimeMillis();
 		logger.start(entry);
 	}
-	
-	public void end(Object result, Throwable e) throws SQLException {
-		log(result, e);	
+
+	public void error(Throwable e) throws SQLException {
+		this.e = e;
+
+		// When Db is markdown, there will be no connHolder
+		if(connHolder!=null)
+			connHolder.error(e);
+	}
+
+	public void end(Object result) throws SQLException {
+		log(result, e);
 		handleException(e);
 	}
+
+    public void beginExecute() {
+        entry.beginExecute();
+    }
+    
+    public void endExectue() {
+        entry.endExectue();
+    }
+    
+    public void beginConnect() {
+        entry.beginConnect();
+    }
+    
+    public void endConnect() {
+        entry.endConnect();
+    }
 
 	private void log(Object result, Throwable e) {
 		try {
 			entry.setDuration(System.currentTimeMillis() - start);
 			if(e == null) {
-				logger.success(entry, fetchQueryRows(result));
+				logger.success(entry, entry.getResultCount());
 			}else{
 				logger.fail(entry, e);
 			}
@@ -154,16 +198,12 @@ public abstract class ConnectionAction<T> {
 		}
 	}
 
-	private int fetchQueryRows(Object result) {
-		return null != result && result instanceof Collection<?> ? ((Collection<?>)result).size() : 0;
-	}
-	
 	public void cleanup() {
 		closeResultSet();
 		closeStatement();
 		closeConnection();
 	}
-	
+
 	private void closeResultSet() {
 		if(rs != null) {
 			try {
@@ -174,36 +214,36 @@ public abstract class ConnectionAction<T> {
 		}
 		rs = null;
 	}
-	
+
 	private void closeStatement() {
-		Statement _statement = statement != null? 
+		Statement _statement = statement != null?
 				statement : preparedStatement != null?
-						preparedStatement : callableStatement;
+				preparedStatement : callableStatement;
 
 		statement = null;
 		preparedStatement = null;
 		callableStatement = null;
-		
+
 		if(_statement != null) {
 			try {
 				_statement.close();
 			} catch (Throwable e) {
 				logger.error("Close statement failed.", e);
 			}
-		}		
+		}
 	}
 
 	private void closeConnection() {
 		//do nothing for connection in transaction
 		if(DalTransactionManager.isInTransaction())
 			return;
-		
+
 		// For list of nested commands, the top level action will not hold any connHolder
 		if(connHolder == null)
 			return;
-		
+
 		connHolder.close();
-		
+
 		connHolder = null;
 		conn = null;
 	}
@@ -214,8 +254,8 @@ public abstract class ConnectionAction<T> {
 	}
 
 	private String wrapAPPID(String sql){
-		return "/*" + DalClientFactory.getDalLogger().getAppID() + "*/" + sql;
+		return "/*" + logger.getAppID() + "-" + entry.getCallerInShort() + "*/" + sql;
 	}
-	
+
 	public abstract T execute() throws Exception;
 }

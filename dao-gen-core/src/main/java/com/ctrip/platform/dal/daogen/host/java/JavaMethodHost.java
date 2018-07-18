@@ -9,7 +9,7 @@ import org.apache.commons.lang.WordUtils;
 
 import java.util.*;
 
-public class JavaMethodHost {
+public class JavaMethodHost extends PojoInfo {
     private String crud_type;
     private String name;
     private String sql;
@@ -48,6 +48,7 @@ public class JavaMethodHost {
     private String shards = "shards";
     private String async = "async";
     private String callback = "callback";
+    // private boolean length;
 
     public String getOrderByExp() {
         return orderByExp;
@@ -563,4 +564,13 @@ public class JavaMethodHost {
         }
         return result;
     }
+
+    // public boolean getLength() {
+    // return length;
+    // }
+    //
+    // public void setLength(boolean length) {
+    // this.length = length;
+    // }
+
 }

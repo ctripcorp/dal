@@ -91,7 +91,7 @@ public class DatabaseSetEntry implements Comparable<DatabaseSetEntry>, DalPojo {
     }
 
     public String getSharding() {
-        return sharding;
+        return sharding == null ? "" : sharding;
     }
 
     public void setSharding(String sharding) {

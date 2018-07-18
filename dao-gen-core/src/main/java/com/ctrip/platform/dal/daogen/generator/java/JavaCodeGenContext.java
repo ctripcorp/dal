@@ -32,6 +32,7 @@ public class JavaCodeGenContext implements CodeGenContext {
     protected Queue<FreeSqlHost> freeSqlHosts = new ConcurrentLinkedQueue<>();
     // <JavaMethodHost pojoClassName, JavaMethodHost>
     protected Map<String, JavaMethodHost> freeSqlPojoHosts = new ConcurrentHashMap<>();
+    private String userName = "";
 
     public JavaCodeGenContext(int projectId, boolean regenerate, Progress progress) {
         this.projectId = projectId;
@@ -158,6 +159,16 @@ public class JavaCodeGenContext implements CodeGenContext {
 
     public void setIgnoreApproveStatus(boolean ignoreApproveStatus) {
         this.ignoreApproveStatus = ignoreApproveStatus;
+    }
+
+    @Override
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    @Override
+    public String getUserName() {
+        return userName;
     }
 
 }

@@ -16,14 +16,16 @@ public class DalConfigure {
     private DalLogger dalLogger;
     private DalConnectionLocator locator;
     private DalTaskFactory facory;
+    private DatabaseSelector selector;
 
     public DalConfigure(String name, Map<String, DatabaseSet> databaseSets, DalLogger dalLogger,
-            DalConnectionLocator locator, DalTaskFactory facory) {
+            DalConnectionLocator locator, DalTaskFactory facory, DatabaseSelector selector) {
         this.name = name;
         this.databaseSets.putAll(databaseSets);
         this.dalLogger = dalLogger;
         this.locator = locator;
         this.facory = facory;
+        this.selector = selector;
     }
 
     public String getName() {
@@ -85,4 +87,7 @@ public class DalConfigure {
         return facory;
     }
 
+    public DatabaseSelector getSelector() {
+        return selector;
+    }
 }

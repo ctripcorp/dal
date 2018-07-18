@@ -4,25 +4,26 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client</artifactId>
-    <version>1.10.0</version>
+    <version>1.15.6</version>
     <properties>
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
         <commons-codec-version>1.8</commons-codec-version>
-        <sqljdbc-version>6.2.1.jre7</sqljdbc-version>
+        <sqljdbc-version>6.2.2.jre7.ctrip</sqljdbc-version>
         <mysql-connector-version>5.1.38</mysql-connector-version>
-        <oracle-jdbc-thin-version>10.2.0.4</oracle-jdbc-thin-version>
+        <oracle-jdbc-thin-version>11.2.0.4</oracle-jdbc-thin-version>
         <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>
         <dal-common-version>1.1.4</dal-common-version>
         <javax.servlet-api-version>3.1-b09</javax.servlet-api-version>
         <javax.servlet-version>3.0.0.v201103241009</javax.servlet-version>
         <slf4j-api-version>1.7.2</slf4j-api-version>
         <commons-lang-version>2.5</commons-lang-version>
-        <junit-version>4.4</junit-version>
+        <junit-version>4.12</junit-version>
         <easymock-version>2.3</easymock-version>
         <spring-version>4.3.8.RELEASE</spring-version>
         <cglib-nodep-version>2.1_3</cglib-nodep-version>
         <file_encoding>UTF-8</file_encoding>
+        <jackson-version>2.8.9</jackson-version>
     </properties>
     <dependencies>
         <dependency>
@@ -81,7 +82,7 @@
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
-            <artifactId>oracle-jdbc-thin</artifactId>
+            <artifactId>ojdbc6</artifactId>
             <version>${oracle-jdbc-thin-version}</version>
         </dependency>
         <dependency>
@@ -105,6 +106,21 @@
             <artifactId>easymockclassextension</artifactId>
             <version>${easymock-version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -164,14 +180,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
@@ -218,8 +226,53 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                        	<doclint>none</doclint>
+                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- jacoco plugin -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.9</version>
+                <executions>
+                    <execution>
+                        <!-- 在maven的initialize阶段，将Jacoco的runtime agent作为VM的一个参数 传给被测程序，用于监控JVM中的调用。 -->
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>
+                                ${project.build.directory}/coverage-reports/jacoco.exec
+                            </destFile>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- 在程序的verify阶段，执行report测试的程序。 文件的输入为perpare-agent阶段中设置或者默认的jacoco.exec.
+                        参数 includes和excludes可用来选定report中过滤的类。 -->
+                    <execution>
+                        <id>default-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <argLine>${surefireArgLine}</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>

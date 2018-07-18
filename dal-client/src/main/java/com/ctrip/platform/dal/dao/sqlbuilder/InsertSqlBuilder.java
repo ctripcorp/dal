@@ -58,7 +58,7 @@ public class InsertSqlBuilder implements TableSqlBuilder {
 
 		int i = 0;
 		for(FieldEntry entry: fieldEntrys) {
-			fieldsSb.append(AbstractSqlBuilder.wrapField(dbCategory, entry.getFieldName()));
+			fieldsSb.append(AbstractTableSqlBuilder.wrapField(dbCategory, entry.getFieldName()));
 			valueSb.append(PLACE_HOLDER);
 			if (++i < fieldEntrys.size()) {
 				fieldsSb.append(COLUMN_SEPARATOR);
@@ -66,7 +66,7 @@ public class InsertSqlBuilder implements TableSqlBuilder {
 			}
 		}
 		
-		return String.format(TMPL_SQL_INSERT, AbstractSqlBuilder.wrapField(dbCategory, effectiveTableName), fieldsSb.toString(),
+		return String.format(TMPL_SQL_INSERT, AbstractTableSqlBuilder.wrapField(dbCategory, effectiveTableName), fieldsSb.toString(),
 				valueSb.toString());
 	}
 		

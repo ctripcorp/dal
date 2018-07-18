@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 
-public class UpdateSqlBuilder extends AbstractSqlBuilder {
+public class UpdateSqlBuilder extends AbstractTableSqlBuilder {
 	private static final String UPDATE_TPL = "UPDATE %s %s WHERE %s";
 
 	private List<String> updateFieldNames =  new ArrayList<String>();

@@ -78,18 +78,18 @@ public class DalShardingHelperTest {
 		Map<String, Object> fields = null;
 		try {
 			// Preset
-			assertEquals("0", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", new DalHints().inTableShard("0"), parameters, fields));
+			assertEquals("0", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", "", new DalHints().inTableShard("0"), parameters, fields));
 			
 			// parameter
 			parameters = new StatementParameters ();
 			parameters.set(1, "index",  java.sql.Types.INTEGER, 1);
-			assertEquals("1", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", new DalHints(), parameters, fields));
+			assertEquals("1", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", "", new DalHints(), parameters, fields));
 
 			//Fields
 			parameters = null;
 			fields = new HashMap<String, Object>();
 			fields.put("index", 1);
-			assertEquals("1", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", new DalHints(), parameters, fields));
+			assertEquals("1", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", "", new DalHints(), parameters, fields));
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail("Not yet implemented");
@@ -103,7 +103,7 @@ public class DalShardingHelperTest {
 
 			fields = new HashMap<String, Object>();
 			fields.put("ab", 1);
-			assertEquals("1", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", new DalHints(), parameters, fields));
+			assertEquals("1", DalShardingHelper.locateTableShardId("dao_test_sqlsvr_tableShard", "", new DalHints(), parameters, fields));
 			fail();
 		} catch (SQLException e) {
 		}
@@ -204,8 +204,8 @@ public class DalShardingHelperTest {
 		
 
 		try {
-			assertEquals(2, DalShardingHelper.shuffleByTable(logicDbName, null, daoPojos).size());
-			assertEquals(1, DalShardingHelper.shuffleByTable(logicDbName, "1", daoPojos).size());
+			assertEquals(2, DalShardingHelper.shuffleByTable(logicDbName, "", null, daoPojos).size());
+			assertEquals(1, DalShardingHelper.shuffleByTable(logicDbName, "", "1", daoPojos).size());
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();

@@ -63,12 +63,12 @@ public class DalShardingHelper {
 	 * @return
 	 * @throws SQLException
 	 */
-	private static boolean locateTableShardId(String logicDbName, DalHints hints) throws SQLException {
+	private static boolean locateTableShardId(String logicDbName, String tableName, DalHints hints) throws SQLException {
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
 		
 		// First check if we can locate the table shard id with the original hints
-		String tableShardId = strategy.locateTableShard(config, logicDbName, hints);
+		String tableShardId = strategy.locateTableShard(config, logicDbName, tableName, hints);
 		if(tableShardId == null)
 			return false;
 		
@@ -82,17 +82,29 @@ public class DalShardingHelper {
 	 * @param hints
 	 * @return
 	 * @throws SQLException
+	 * @deprecated use below locateTableShardId method with tableName parameter
 	 */
 	public static String locateTableShardId(String logicDbName, DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+	    return locateTableShardId(logicDbName, null, hints, parameters, fields);
+	}
+	
+    /**
+     * Locate table shard id by hints.
+     * @param logicDbName
+     * @param hints
+     * @return
+     * @throws SQLException
+     */
+    public static String locateTableShardId(String logicDbName, String tableName, DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
 		
 		// First check if we can locate the table shard id with the original hints
-		String shard = strategy.locateTableShard(config, logicDbName, hints);
+		String shard = strategy.locateTableShard(config, logicDbName, tableName, hints);
 		if(shard != null)
 			return shard;
 		
-		shard = strategy.locateTableShard(config, logicDbName, new DalHints().setParameters(parameters).setFields(fields));
+		shard = strategy.locateTableShard(config, logicDbName, tableName, new DalHints().setParameters(parameters).setFields(fields));
 		if(shard != null)
 			return shard;
 
@@ -186,8 +198,20 @@ public class DalShardingHelper {
 	 * @param pojos
 	 * @return
 	 * @throws SQLException
+	 * @deprecated use below shuffleByTable method with tableName parameter
 	 */
 	public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, Map<Integer, Map<String, ?>> pojos) throws SQLException {
+	    return shuffleByTable(logicDbName, null, tableShardId, pojos);
+	}
+	
+    /**
+     * Shuffle by table shard id.
+     * @param logicDbName
+     * @param pojos
+     * @return
+     * @throws SQLException
+     */
+    public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableName, String tableShardId, Map<Integer, Map<String, ?>> pojos) throws SQLException {
 		Map<String, Map<Integer, Map<String, ?>>> shuffled = new HashMap<>();
 		DalConfigure config = DalClientFactory.getDalConfigure();
 		
@@ -199,7 +223,7 @@ public class DalShardingHelper {
 			Map<String, ?> fields = pojos.get(index);
 
 			String shardId = tableShardId == null ?
-					strategy.locateTableShard(config, logicDbName, tmpHints.setFields(fields)) :
+					strategy.locateTableShard(config, logicDbName, tableName, tmpHints.setFields(fields)) :
 					tableShardId;
 
 			Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(shardId);
@@ -234,7 +258,7 @@ public class DalShardingHelper {
 		
 		// Assume the out transaction already handle sharding logic
 		// This may have potential issue if PD think they can do cross DB operation
-		// TOD check here
+		// TODO check here
 		if(DalTransactionManager.isInTransaction())
 			return true;
 
@@ -245,7 +269,7 @@ public class DalShardingHelper {
 			return false;
 		
 		// Verify if table shard is defined
-		if(isTableShardingEnabled(logicDbName, tableName) && !locateTableShardId(logicDbName, hints))
+		if(isTableShardingEnabled(logicDbName, tableName) && !locateTableShardId(logicDbName, tableName, hints))
 			return false;
 		
 		return true;

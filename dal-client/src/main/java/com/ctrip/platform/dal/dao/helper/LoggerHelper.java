@@ -5,11 +5,28 @@ import java.io.StringWriter;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 
 public class LoggerHelper {
 
 	public static final String SQLHIDDENString = "*";
-	
+	private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
+	private static final String SQLSERVER_URL_PREFIX = "jdbc:sqlserver://";
+
+	private static class ObjectMapperHolder{
+		private static ObjectMapper objectMapperInstance=new ObjectMapper();
+		static {
+			objectMapperInstance.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+			objectMapperInstance.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+		}
+	}
+
+	public static ObjectMapper getObjectMapperInstance(){
+		return ObjectMapperHolder.objectMapperInstance;
+	}
+
 	public static int getHashCode(String str) {
 		str = getCompactSql(str);
 		int hash, i;
@@ -24,7 +41,7 @@ public class LoggerHelper {
 		hash += (hash << 15);
 		return hash;
 	}
-	
+
 	public static String getCompactSql(String sql) {
 		StringBuffer sqlnew=new StringBuffer();
 		StringBuffer word=new StringBuffer();
@@ -107,15 +124,18 @@ public class LoggerHelper {
 		}
 		return word;
 	}
-	
+
 	public static String getSqlTpl(LogEntry entry) {
 		if ( entry.isSensitive() )
 			return SQLHIDDENString;
 		DalEventEnum event = entry.getEvent();
-		
+
+		if (entry.getSqls() == null || entry.getSqls().length == 0)
+			return "";
+
 		if(event == DalEventEnum.QUERY ||  event == DalEventEnum.UPDATE_SIMPLE ||
 				event == DalEventEnum.UPDATE_KH || event == DalEventEnum.BATCH_UPDATE_PARAM){
-			return entry.getSqls() != null && entry.getSqls().length > 0 ? entry.getSqls()[0] : "";
+			return entry.getSqls()[0];
 		}
 		if(event == DalEventEnum.BATCH_UPDATE){
 			return join(entry.getSqls(), ";");
@@ -123,19 +143,19 @@ public class LoggerHelper {
 		if(event == DalEventEnum.CALL || event == DalEventEnum.BATCH_CALL){
 			return entry.getCallString();
 		}
-		
+
 		return "";
 	}
-	
+
 	public static String getParams(LogEntry entry) {
 		DalEventEnum event = entry.getEvent();
 		String[] pramemters = entry.getPramemters();
-		
+
 		StringBuilder sbout = new StringBuilder();
 		if(pramemters == null || pramemters.length <= 0){
 			return sbout.toString();
 		}
-		if(event == DalEventEnum.QUERY || 
+		if(event == DalEventEnum.QUERY ||
 				event == DalEventEnum.UPDATE_SIMPLE ||
 				event == DalEventEnum.UPDATE_KH ||
 				event == DalEventEnum.CALL){
@@ -150,7 +170,7 @@ public class LoggerHelper {
 		}
 		return "";
 	}
-	
+
 	public static String join(Object[] array, String separator) {
 		if (array == null) {
 			return null;
@@ -183,7 +203,7 @@ public class LoggerHelper {
 		}
 		return buf.toString();
 	}
-	
+
 	public static String getExceptionStack(Throwable e) {
 		String msg = e.getMessage();
 		try {
@@ -196,5 +216,42 @@ public class LoggerHelper {
 		}
 
 		return msg;
+	}
+
+	public static String toJson(Object object) {
+		try {
+			return getObjectMapperInstance().writeValueAsString(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "Error convert log value to json string!";
+	}
+
+	public static String getSimplifiedDBUrl(String url) {
+		if(StringUtils.isBlank(url))
+			return "blank url";
+
+		if (url.startsWith(MYSQL_URL_PREFIX)) {
+			String[] mySqlUrlStrings = url.split("[?]");
+			return mySqlUrlStrings[0];
+		}
+
+		if (url.startsWith(SQLSERVER_URL_PREFIX)) {
+			String[] sqlServerUrlStrings = url.split(";");
+			String databaseName = "";
+			for (String urlPart : sqlServerUrlStrings) {
+				if ((urlPart.trim().toLowerCase()).startsWith("databaseName".toLowerCase())) {
+					String[] databaseNamePart = urlPart.split("=");
+					databaseName = databaseNamePart.length == 2 ? databaseNamePart[1] : "blank database name";
+					break;
+				}
+			}
+			if (databaseName.length() == 0)
+				databaseName = "blank database name";
+			return sqlServerUrlStrings[0].concat("/").concat(databaseName);
+		}
+
+		return url;
+
 	}
 }

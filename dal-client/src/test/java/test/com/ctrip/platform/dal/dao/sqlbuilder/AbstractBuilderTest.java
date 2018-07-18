@@ -43,6 +43,35 @@ public class AbstractBuilderTest {
 		Assert.assertEquals(expect_sql, sql);
 	}
 	
+    @Test
+    public void testNullValueAtBegining() throws SQLException {
+        List<String> in = new ArrayList<String>();
+        in.add("12");
+        in.add("12");
+        
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        
+        builder.select("PeopleID","Name","CityID");
+        
+        builder.equalNullable("a", null, Types.INTEGER);
+        builder.and().in("b", in, Types.INTEGER);
+        builder.and().likeNullable("b", null, Types.INTEGER);
+        builder.and().between("c", "paramValue1", "paramValue2", Types.INTEGER);
+        builder.and().betweenNullable("d", null, "paramValue2", Types.INTEGER);
+        builder.and().isNull("sss");
+        builder.orderBy("PeopleID", false);
+        
+        builder.requireFirst();
+        builder.from("People").setDatabaseCategory(DatabaseCategory.MySql);
+        String sql = builder.build();
+        
+        String expect_sql = "SELECT `PeopleID`, `Name`, `CityID` FROM `People` "
+                + "WHERE `b` in ( ? ) AND `c` BETWEEN ? AND ? "
+                + "AND `sss` IS NULL ORDER BY `PeopleID` DESC LIMIT 1";
+        
+        Assert.assertEquals(expect_sql, sql);
+    }
+    
 	@Test
 	public void testEqual() throws SQLException {
 		validate("equal", "[a] = ?");

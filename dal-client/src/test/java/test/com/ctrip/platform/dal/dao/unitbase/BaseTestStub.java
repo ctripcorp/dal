@@ -36,6 +36,7 @@ public class BaseTestStub {
 	public final static String SP_WITH_IN_OUT_PARAM = "SP_WITH_IN_OUT_PARAM";
 	public final static String SP_WITH_INTERMEDIATE_RESULT = "SP_WITH_INTERMEDIATE_RESULT";
 
+	public String dbName;
 	public DatabaseDifference diff;
 
 	public DalClient client = null;
@@ -46,6 +47,7 @@ public class BaseTestStub {
 	public BaseTestStub(
 			String dbName, 
 			DatabaseDifference diff) {
+	    this.dbName = dbName;
 		this.diff = diff;
 		try {
 			client = DalClientFactory.getClient(dbName);

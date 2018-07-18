@@ -62,7 +62,7 @@ public class DalTransactionTest {
     private DalConnection getDalConnection(int shard) throws Exception {
         Connection conn = null;
         conn = DalClientFactory.getDalConfigure().getLocator().getConnection("SqlSvrShard_" + shard);
-        return new DalConnection(conn, true, String.valueOf(shard), DbMeta.createIfAbsent(logicDbName, null, conn));
+        return new DalConnection(conn, true, String.valueOf(shard), DbMeta.createIfAbsent(logicDbName, DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory(), conn));
     }
 
 	@Test

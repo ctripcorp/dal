@@ -105,6 +105,13 @@ public enum DalHintEnum {
 	 */
 	timeout,
 	
+	/**
+	 * Specify how many seconds the slave is behind master. Dal framework does not use it directly.
+	 * User can customize DatabaseSelector in order to use it
+	 *  
+	 */
+	freshness,
+	
 	/* 
 	 * resultSetType a result set type; one of
      *         <code>ResultSet.TYPE_FORWARD_ONLY</code>,
@@ -153,6 +160,11 @@ public enum DalHintEnum {
 	 */
 	masterOnly, 
 	
+    /* 
+     * Indicate using slave database even the operation is not a query 
+     */
+    slaveOnly,
+    
 	heighAvaliable,
 	
 	/* 
@@ -210,6 +222,11 @@ public enum DalHintEnum {
 	 */
 	enableIdentityInsert,
 	
+    /**
+     * Set generated incremental id back to the original pojo
+     */
+    setIdentityBack,
+    
 	/**
 	 * Columns that will be excluded for update
 	 */
@@ -236,4 +253,9 @@ public enum DalHintEnum {
      * It request extractor or mapper to be HintsAwareExtractor or HintsAareMapper to do the required work
      */
     allowPartial,
+    
+    /**
+     * when select all columns, use column names instead of *
+     */
+    selectByNames,
 }

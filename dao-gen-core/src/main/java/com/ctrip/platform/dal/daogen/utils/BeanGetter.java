@@ -5,8 +5,6 @@ import com.ctrip.platform.dal.daogen.dao.*;
 import java.sql.SQLException;
 
 public class BeanGetter {
-    private static final Object LOCK = new Object();
-
     private static DaoOfProject daoOfProject = null;
 
     private static DaoBySqlBuilder daoBySqlBuilder = null;
@@ -37,166 +35,136 @@ public class BeanGetter {
 
     private static ConfigTemplateDao configTemplateDao = null;
 
-    public static DaoOfProject getDaoOfProject() throws SQLException {
+    public synchronized static DaoOfProject getDaoOfProject() throws SQLException {
         if (daoOfProject == null) {
-            synchronized (LOCK) {
-                if (daoOfProject == null) {
-                    daoOfProject = new DaoOfProject();
-                }
+            if (daoOfProject == null) {
+                daoOfProject = new DaoOfProject();
             }
         }
         return daoOfProject;
     }
 
-    public static DaoBySqlBuilder getDaoBySqlBuilder() throws SQLException {
+    public synchronized static DaoBySqlBuilder getDaoBySqlBuilder() throws SQLException {
         if (daoBySqlBuilder == null) {
-            synchronized (LOCK) {
-                if (daoBySqlBuilder == null) {
-                    daoBySqlBuilder = new DaoBySqlBuilder();
-                }
+            if (daoBySqlBuilder == null) {
+                daoBySqlBuilder = new DaoBySqlBuilder();
             }
         }
         return daoBySqlBuilder;
     }
 
-    public static DaoByFreeSql getDaoByFreeSql() throws SQLException {
+    public synchronized static DaoByFreeSql getDaoByFreeSql() throws SQLException {
         if (daoByFreeSql == null) {
-            synchronized (LOCK) {
-                if (daoByFreeSql == null) {
-                    daoByFreeSql = new DaoByFreeSql();
-                }
+            if (daoByFreeSql == null) {
+                daoByFreeSql = new DaoByFreeSql();
             }
         }
         return daoByFreeSql;
     }
 
-    public static DaoByTableViewSp getDaoByTableViewSp() throws SQLException {
+    public synchronized static DaoByTableViewSp getDaoByTableViewSp() throws SQLException {
         if (daoByTableViewSp == null) {
-            synchronized (LOCK) {
-                if (daoByTableViewSp == null) {
-                    daoByTableViewSp = new DaoByTableViewSp();
-                }
+            if (daoByTableViewSp == null) {
+                daoByTableViewSp = new DaoByTableViewSp();
             }
         }
         return daoByTableViewSp;
     }
 
-    public static DaoOfLoginUser getDaoOfLoginUser() throws SQLException {
+    public synchronized static DaoOfLoginUser getDaoOfLoginUser() throws SQLException {
         if (daoOfLoginUser == null) {
-            synchronized (LOCK) {
-                if (daoOfLoginUser == null) {
-                    daoOfLoginUser = new DaoOfLoginUser();
-                }
+            if (daoOfLoginUser == null) {
+                daoOfLoginUser = new DaoOfLoginUser();
             }
         }
         return daoOfLoginUser;
     }
 
-    public static DaoOfUserProject getDaoOfUserProject() throws SQLException {
+    public synchronized static DaoOfUserProject getDaoOfUserProject() throws SQLException {
         if (daoOfUserProject == null) {
-            synchronized (LOCK) {
-                if (daoOfUserProject == null) {
-                    daoOfUserProject = new DaoOfUserProject();
-                }
+            if (daoOfUserProject == null) {
+                daoOfUserProject = new DaoOfUserProject();
             }
         }
         return daoOfUserProject;
     }
 
-    public static DalGroupDao getDaoOfDalGroup() throws SQLException {
+    public synchronized static DalGroupDao getDaoOfDalGroup() throws SQLException {
         if (daoOfDalGroup == null) {
-            synchronized (LOCK) {
-                if (daoOfDalGroup == null) {
-                    daoOfDalGroup = new DalGroupDao();
-                }
+            if (daoOfDalGroup == null) {
+                daoOfDalGroup = new DalGroupDao();
             }
         }
         return daoOfDalGroup;
     }
 
-    public static DalGroupDBDao getDaoOfDalGroupDB() throws SQLException {
+    public synchronized static DalGroupDBDao getDaoOfDalGroupDB() throws SQLException {
         if (daoOfDalGroupDB == null) {
-            synchronized (LOCK) {
-                if (daoOfDalGroupDB == null) {
-                    daoOfDalGroupDB = new DalGroupDBDao();
-                }
+            if (daoOfDalGroupDB == null) {
+                daoOfDalGroupDB = new DalGroupDBDao();
             }
         }
         return daoOfDalGroupDB;
     }
 
-    public static DaoOfDatabaseSet getDaoOfDatabaseSet() throws SQLException {
+    public synchronized static DaoOfDatabaseSet getDaoOfDatabaseSet() throws SQLException {
         if (daoOfDatabaseSet == null) {
-            synchronized (LOCK) {
-                if (daoOfDatabaseSet == null) {
-                    daoOfDatabaseSet = new DaoOfDatabaseSet();
-                }
+            if (daoOfDatabaseSet == null) {
+                daoOfDatabaseSet = new DaoOfDatabaseSet();
             }
         }
         return daoOfDatabaseSet;
     }
 
-    public static DalApiDao getDalApiDao() throws SQLException {
+    public synchronized static DalApiDao getDalApiDao() throws SQLException {
         if (dalApiDao == null) {
-            synchronized (LOCK) {
-                if (dalApiDao == null) {
-                    dalApiDao = new DalApiDao();
-                }
+            if (dalApiDao == null) {
+                dalApiDao = new DalApiDao();
             }
         }
         return dalApiDao;
     }
 
-    public static UserGroupDao getDalUserGroupDao() throws SQLException {
+    public synchronized static UserGroupDao getDalUserGroupDao() throws SQLException {
         if (dalUserGroupDao == null) {
-            synchronized (LOCK) {
-                if (dalUserGroupDao == null) {
-                    dalUserGroupDao = new UserGroupDao();
-                }
+            if (dalUserGroupDao == null) {
+                dalUserGroupDao = new UserGroupDao();
             }
         }
         return dalUserGroupDao;
     }
 
-    public static GroupRelationDao getGroupRelationDao() throws SQLException {
+    public synchronized static GroupRelationDao getGroupRelationDao() throws SQLException {
         if (groupRelationDao == null) {
-            synchronized (LOCK) {
-                if (groupRelationDao == null) {
-                    groupRelationDao = new GroupRelationDao();
-                }
+            if (groupRelationDao == null) {
+                groupRelationDao = new GroupRelationDao();
             }
         }
         return groupRelationDao;
     }
 
-    public static ApproveTaskDao getApproveTaskDao() throws SQLException {
+    public synchronized static ApproveTaskDao getApproveTaskDao() throws SQLException {
         if (approveTaskDao == null) {
-            synchronized (LOCK) {
-                if (approveTaskDao == null) {
-                    approveTaskDao = new ApproveTaskDao();
-                }
+            if (approveTaskDao == null) {
+                approveTaskDao = new ApproveTaskDao();
             }
         }
         return approveTaskDao;
     }
 
-    public static SetupDBDao getSetupDBDao() {
+    public synchronized static SetupDBDao getSetupDBDao() {
         if (setupDBDao == null) {
-            synchronized (LOCK) {
-                if (setupDBDao == null) {
-                    setupDBDao = new SetupDBDao();
-                }
+            if (setupDBDao == null) {
+                setupDBDao = new SetupDBDao();
             }
         }
         return setupDBDao;
     }
 
-    public static ConfigTemplateDao getConfigTemplateDao() throws SQLException {
+    public synchronized static ConfigTemplateDao getConfigTemplateDao() throws SQLException {
         if (configTemplateDao == null) {
-            synchronized (LOCK) {
-                if (configTemplateDao == null) {
-                    configTemplateDao = new ConfigTemplateDao();
-                }
+            if (configTemplateDao == null) {
+                configTemplateDao = new ConfigTemplateDao();
             }
         }
         return configTemplateDao;

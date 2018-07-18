@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
+import com.mysql.jdbc.MySQLConnection;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 import org.apache.tomcat.jdbc.pool.Validator;
@@ -33,7 +35,13 @@ public class DataSourceValidator implements Validator {
             }
 
             if (query == null) {
-                isValid = connection.isValid(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+                if (connection instanceof MySQLConnection) {
+                    MySQLConnection mySqlConnection = (MySQLConnection) connection;
+                    isValid = MySqlConnectionHelper.isValid(mySqlConnection, DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+                } else {
+                    isValid = connection.isValid(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+                }
+
                 if (!isValid) {
                     LOGGER.warn("isValid() returned false.");
                 }
@@ -71,7 +79,7 @@ public class DataSourceValidator implements Validator {
             return null;
         }
 
-        return DataSourceLocator.getPoolProperties(url, userName);
+        return PoolPropertiesHolder.getInstance().getPoolProperties(url, userName);
     }
 
 }

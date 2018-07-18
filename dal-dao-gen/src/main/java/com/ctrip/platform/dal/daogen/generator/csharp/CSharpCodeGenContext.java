@@ -48,6 +48,7 @@ public class CSharpCodeGenContext implements CodeGenContext {
 
     public static String regEx = null;
     public static Pattern inRegxPattern = null;
+    private String userName = "";
 
     static {
         // regEx="in\\s(@\\w+)";
@@ -205,6 +206,16 @@ public class CSharpCodeGenContext implements CodeGenContext {
 
     public void setIgnoreApproveStatus(boolean ignoreApproveStatus) {
         this.ignoreApproveStatus = ignoreApproveStatus;
+    }
+
+    @Override
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    @Override
+    public String getUserName() {
+        return userName;
     }
 
 }

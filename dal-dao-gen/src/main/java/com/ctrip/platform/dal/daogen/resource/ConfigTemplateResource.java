@@ -94,9 +94,9 @@ public class ConfigTemplateResource {
     @Path("addConfigTemplate")
     public Status addConfigTemplate(@FormParam("configType") String configType, @FormParam("langType") String langType,
             @FormParam("template") String template) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         if (configType == null || langType == null || template == null) {
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo("Null parameters.");
             return status;
         }
@@ -116,7 +116,7 @@ public class ConfigTemplateResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -126,9 +126,9 @@ public class ConfigTemplateResource {
     @Path("updateConfigTemplate")
     public Status updateConfigTemplate(@FormParam("id") String id, @FormParam("configType") String configType,
             @FormParam("langType") String langType, @FormParam("template") String template) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         if (id == null || configType == null || langType == null || template == null) {
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo("Null parameters");
             return status;
         }
@@ -152,7 +152,7 @@ public class ConfigTemplateResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }
@@ -161,9 +161,9 @@ public class ConfigTemplateResource {
     @POST
     @Path("deleteConfigTemplate")
     public Status deleteConfigTemplate(@FormParam("id") String id) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         if (id == null) {
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo("Null parameters");
             return status;
         }
@@ -178,7 +178,7 @@ public class ConfigTemplateResource {
             return status;
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
             return status;
         }

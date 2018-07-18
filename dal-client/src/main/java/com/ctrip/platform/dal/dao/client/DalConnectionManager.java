@@ -8,6 +8,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.configure.SelectionContext;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -26,15 +27,15 @@ public class DalConnectionManager {
 		this.logger = config.getDalLogger();
 		this.locator = config.getLocator();
 	}
-	
+
 	public String getLogicDbName() {
 		return logicDbName;
 	}
-	
+
 	public DalConfigure getConfig() {
 		return config;
 	}
-	
+
 	public DalLogger getLogger() {
 		return logger;
 	}
@@ -47,15 +48,15 @@ public class DalConnectionManager {
 		{
 			if(DalStatusManager.getDatabaseSetStatus(logicDbName).isMarkdown())
 				throw new DalException(ErrorCode.MarkdownLogicDb, logicDbName);
-			
+
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
 			boolean isSelect = operation == DalEventEnum.QUERY;
-			
+
 			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 
 			connHolder.setAutoCommit(true);
 			connHolder.applyHints(hints);
-			
+
 			if(hints.getHA() != null){
 				hints.getHA().setDatabaseCategory(connHolder.getMeta().getDatabaseCategory());
 			}
@@ -71,34 +72,34 @@ public class DalConnectionManager {
 	}
 
 	public String evaluateShard(DalHints hints) throws SQLException {
-        DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-        String shardId;
-        
-        if(!dbSet.isShardingSupported())
-            return null;
+		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+		String shardId;
 
-        DalShardingStrategy strategy = dbSet.getStrategy();
+		if(!dbSet.isShardingSupported())
+			return null;
 
-        shardId = hints.getShardId();
-        if(shardId == null)
-            shardId = strategy.locateDbShard(config, logicDbName, hints);
-        
-        // We allow this happen
-        if(shardId == null)
-            return null;
-        
-        dbSet.validate(shardId);
-        
-        return shardId;
+		DalShardingStrategy strategy = dbSet.getStrategy();
+
+		shardId = hints.getShardId();
+		if(shardId == null)
+			shardId = strategy.locateDbShard(config, logicDbName, hints);
+
+		// We allow this happen
+		if(shardId == null)
+			return null;
+
+		dbSet.validate(shardId);
+
+		return shardId;
 	}
 
 	private DalConnection getConnectionFromDSLocator(DalHints hints,
-			boolean isMaster, boolean isSelect) throws SQLException {
+													 boolean isMaster, boolean isSelect) throws SQLException {
 		Connection conn;
 		String allInOneKey;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		String shardId = null;
-		
+
 		if(dbSet.isShardingSupported()){
 			DalShardingStrategy strategy = dbSet.getStrategy();
 
@@ -110,13 +111,11 @@ public class DalConnectionManager {
 			if(shardId == null)
 				throw new DalException(ErrorCode.ShardLocated, logicDbName);
 			dbSet.validate(shardId);
-			
-			allInOneKey = dbSet.getRandomRealDbName(hints, shardId, isMaster, isSelect);
-		} else {
-			allInOneKey = dbSet.getRandomRealDbName(hints, isMaster, isSelect);
 		}
-		
-		try {	
+
+		allInOneKey = select(logicDbName, dbSet, hints, shardId, isMaster, isSelect);
+
+		try {
 			conn = locator.getConnection(allInOneKey);
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
 			return new DalConnection(conn, isMaster, shardId, meta);
@@ -124,12 +123,26 @@ public class DalConnectionManager {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}
 	}
-	
+
+	private String select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
+		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
+
+		if(shard == null) {
+			context.setMasters(dbSet.getMasterDbs());
+			context.setSlaves(dbSet.getSlaveDbs());
+		}else{
+			context.setMasters(dbSet.getMasterDbs(shard));
+			context.setSlaves(dbSet.getSlaveDbs(shard));
+		}
+
+		return config.getSelector().select(context);
+	}
+
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)
 			throws SQLException {
 		// If HA disabled or not query, we just directly call _doInConnnection
 
-		if(!DalStatusManager.getHaStatus().isEnabled() 
+		if(!DalStatusManager.getHaStatus().isEnabled()
 				|| action.operation != DalEventEnum.QUERY)
 			return _doInConnection(action, hints);
 
@@ -137,12 +150,12 @@ public class DalConnectionManager {
 		hints.setHA(highAvalible);
 		do{
 			try {
-				return _doInConnection(action, hints);			
+				return _doInConnection(action, hints);
 			} catch (SQLException e) {
-				highAvalible.update(e);	
+				highAvalible.update(e);
 			}
 		}while(highAvalible.needTryAgain());
-		
+
 		throw highAvalible.getException();
 	}
 
@@ -150,21 +163,21 @@ public class DalConnectionManager {
 			throws SQLException {
 		action.initLogEntry(logicDbName, hints);
 		action.start();
-		
+
 		Throwable ex = null;
 		T result = null;
 		try {
 			result = action.execute();
 		} catch (Throwable e) {
 			MarkdownManager.detect(action.connHolder, action.start, e);
-			ex = e;
+			action.error(e);
 		} finally {
-			DalWatcher.endExectue();
+			action.endExectue();
 			action.populateDbMeta();
 			action.cleanup();
 		}
-		
-		action.end(result, ex);
+
+		action.end(result);
 		return result;
 	}
 }

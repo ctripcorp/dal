@@ -37,7 +37,7 @@ public class DalAnnotationValidatorTest {
             test.postProcessAfterInitialization(bean, "beanName");
             fail();
         }catch(BeanInstantiationException e) {
-            assertTrue(e.getMessage().contains("Bean annotated by @Transactional must be created through DalTransactionManager.create()"));
+            assertTrue(e.getMessage().contains(DalAnnotationValidator.VALIDATION_MSG));
         }
     }
     

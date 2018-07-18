@@ -21,11 +21,13 @@ import com.ctrip.platform.dal.dao.ResultMerger;
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
 
 public class DalSqlTaskRequest<T> implements DalRequest<T>{
+    private String caller;
 	private DalLogger logger;
 	private String logicDbName;
 	private SqlBuilder builder;
@@ -46,9 +48,20 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 		this.task = task;
 		this.merger = merger;
 		shards = getShards();
+		this.caller = LogContext.getRequestCaller();
 	}
 	
-	@Override
+    @Override
+    public String getCaller() {
+        return caller;
+    }
+
+    @Override
+    public boolean isAsynExecution() {
+        return hints.isAsyncExecution();
+    }
+
+    @Override
 	public void validate() throws SQLException {
 		detectDistributedTransaction(shards);
 	}
@@ -90,8 +103,9 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	
 	private Callable<T> create(StatementParameters parameters, DalHints hints) throws SQLException {
 		if(builder instanceof TableSqlBuilder && isTableShardingEnabled(logicDbName, ((TableSqlBuilder)builder).getTableName())){
-			String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, hints, parameters, null));
-			return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), ((TableSqlBuilder)builder).build(tableShardStr), parameters, hints, task);
+		    TableSqlBuilder tableBuilder = (TableSqlBuilder)builder;
+			String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, tableBuilder.getTableName(), hints, parameters, null));
+			return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), tableBuilder.build(tableShardStr), parameters, hints, task);
 		}
 
 		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.build(), parameters, hints, task);
@@ -101,7 +115,12 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	public ResultMerger<T> getMerger() {
 		return merger;
 	}
-	
+
+    @Override
+    public void endExecution() {
+
+    }
+
 	private Set<String> getShards() throws SQLException {
 		Set<String> shards = null;
 		if(!DalShardingHelper.isShardingEnabled(logicDbName))

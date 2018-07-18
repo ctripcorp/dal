@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.daogen.entity.Progress;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.csharp.CSharpTableHost;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.TaskUtils;
 
@@ -21,43 +20,37 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> _sqlBuilderCallables = prepareSqlBuilder(context);
-            TaskUtils.invokeBatch(_sqlBuilderCallables);
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
+        List<Callable<ExecuteResult>> tasks = prepareSqlBuilder(context);
+        TaskUtils.invokeBatch(tasks);
     }
 
-    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext codeGenCtx) {
-        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
+    private List<Callable<ExecuteResult>> prepareSqlBuilder(CodeGenContext context) {
+        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         final Progress progress = ctx.getProgress();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
-        Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
-        final Queue<CSharpTableHost> _tableViewHosts = ctx.getTableViewHosts();
-        if (_sqlBuilders.size() > 0) {
-            Map<String, GenTaskBySqlBuilder> _TempSqlBuildres = sqlBuilderBroupBy(_sqlBuilders);
+        Queue<GenTaskBySqlBuilder> sqlBuilders = ctx.getSqlBuilders();
+        final Queue<CSharpTableHost> tableViewHosts = ctx.getTableViewHosts();
+        if (sqlBuilders.size() > 0) {
+            Map<String, GenTaskBySqlBuilder> tempSqlBuildres = sqlBuilderBroupBy(sqlBuilders);
 
-            for (final Map.Entry<String, GenTaskBySqlBuilder> _table : _TempSqlBuildres.entrySet()) {
+            for (final Map.Entry<String, GenTaskBySqlBuilder> sqlBuilder : tempSqlBuildres.entrySet()) {
                 Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                     @Override
                     public ExecuteResult call() throws Exception {
-                        /*
-                         * progress.setOtherMessage("正在整理表 " + _table.getValue().getClass_name());
-                         */
                         ExecuteResult result = new ExecuteResult("Build Extral SQL["
-                                + _table.getValue().getAllInOneName() + "." + _table.getKey() + "] Host");
+                                + sqlBuilder.getValue().getAllInOneName() + "." + sqlBuilder.getKey() + "] Host");
                         progress.setOtherMessage(result.getTaskName());
                         CSharpTableHost extraTableHost;
                         try {
-                            extraTableHost = buildExtraSqlBuilderHost(ctx, _table.getValue());
+                            extraTableHost = buildExtraSqlBuilderHost(ctx, sqlBuilder.getValue());
                             if (null != extraTableHost) {
-                                _tableViewHosts.add(extraTableHost);
+                                tableViewHosts.add(extraTableHost);
                             }
                             result.setSuccessal(true);
                         } catch (Throwable e) {
-                            throw e;
+                            throw new Exception(
+                                    String.format("Task Id[%s]:%s\r\n", sqlBuilder.getValue().getId(), e.getMessage()),
+                                    e);
                         }
                         return result;
                     }
@@ -69,16 +62,18 @@ public class CSharpDataPreparerOfSqlBuilderProcessor extends AbstractCSharpDataP
     }
 
     private Map<String, GenTaskBySqlBuilder> sqlBuilderBroupBy(Queue<GenTaskBySqlBuilder> builders) {
-        Map<String, GenTaskBySqlBuilder> groupBy = new HashMap<>();
+        Map<String, GenTaskBySqlBuilder> map = new HashMap<>();
+        if (builders == null || builders.size() == 0)
+            return map;
 
         for (GenTaskBySqlBuilder task : builders) {
             String key = String.format("%s_%s", task.getAllInOneName(), task.getTable_name());
 
-            if (!groupBy.containsKey(key)) {
-                groupBy.put(key, task);
+            if (!map.containsKey(key)) {
+                map.put(key, task);
             }
         }
-        return groupBy;
+        return map;
     }
 
     private CSharpTableHost buildExtraSqlBuilderHost(CodeGenContext codeGenCtx, GenTaskBySqlBuilder sqlBuilder)

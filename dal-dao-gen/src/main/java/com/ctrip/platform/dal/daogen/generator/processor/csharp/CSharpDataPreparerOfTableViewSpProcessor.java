@@ -13,7 +13,6 @@ import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.generator.csharp.CSharpCodeGenContext;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.csharp.*;
-import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.CommonUtils;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
@@ -38,17 +37,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 
     @Override
     public void process(CodeGenContext context) throws Exception {
-        try {
-            List<Callable<ExecuteResult>> _tableViewSpCallables = prepareTableViewSp(context);
-            TaskUtils.invokeBatch(_tableViewSpCallables);
-        } catch (Throwable e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        }
+        List<Callable<ExecuteResult>> tasks = prepareTableViewSp(context);
+        TaskUtils.invokeBatch(tasks);
     }
 
-    private List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext codeGenCtx) throws Exception {
-        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) codeGenCtx;
+    private List<Callable<ExecuteResult>> prepareTableViewSp(CodeGenContext context) throws Exception {
+        final CSharpCodeGenContext ctx = (CSharpCodeGenContext) context;
         int projectId = ctx.getProjectId();
         boolean regenerate = ctx.isRegenerate();
         final Progress progress = ctx.getProgress();
@@ -85,12 +79,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
             }
         }
 
-        Queue<GenTaskBySqlBuilder> _sqlBuilders = ctx.getSqlBuilders();
+        Queue<GenTaskBySqlBuilder> sqlBuilders = ctx.getSqlBuilders();
         for (GenTaskBySqlBuilder _t : sqlBuilderTasks) {
-            _sqlBuilders.add(_t);
+            sqlBuilders.add(_t);
         }
 
-        final Queue<CSharpTableHost> _spHosts = ctx.getSpHosts();
+        final Queue<CSharpTableHost> spHosts = ctx.getSpHosts();
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final GenTaskByTableViewSp tableViewSp : tableViewSpTasks) {
             final String[] viewNames = StringUtils.split(tableViewSp.getView_names(), ",");
@@ -105,17 +99,17 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                 dbCategory = DatabaseCategory.SqlServer;
             }
 
-            final Queue<CSharpTableHost> _tableViewHosts = ctx.getTableViewHosts();
-            results.addAll(prepareTable(ctx, progress, tableViewSp, tableNames, dbCategory, _tableViewHosts));
-            results.addAll(prepareView(ctx, progress, tableViewSp, viewNames, dbCategory, _tableViewHosts));
-            results.addAll(prepareSp(ctx, progress, _spHosts, tableViewSp, spNames, dbCategory));
+            final Queue<CSharpTableHost> tableViewHosts = ctx.getTableViewHosts();
+            results.addAll(prepareTable(ctx, progress, tableViewSp, tableNames, dbCategory, tableViewHosts));
+            results.addAll(prepareView(ctx, progress, tableViewSp, viewNames, dbCategory, tableViewHosts));
+            results.addAll(prepareSp(ctx, progress, spHosts, tableViewSp, spNames, dbCategory));
         }
 
         return results;
     }
 
     private List<Callable<ExecuteResult>> prepareSp(final CSharpCodeGenContext ctx, final Progress progress,
-            final Queue<CSharpTableHost> _spHosts, final GenTaskByTableViewSp tableViewSp, final String[] spNames,
+            final Queue<CSharpTableHost> spHosts, final GenTaskByTableViewSp tableViewSp, final String[] spNames,
             final DatabaseCategory dbCategory) {
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final String spName : spNames) {
@@ -124,16 +118,17 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                 public ExecuteResult call() throws Exception {
                     ExecuteResult result =
                             new ExecuteResult("Build SP[" + tableViewSp.getAllInOneName() + "." + spName + "] Host");
-                    // progress.setOtherMessage("正在整理存储过程 " + spName);
+
                     progress.setOtherMessage(result.getTaskName());
                     try {
                         CSharpTableHost currentSpHost = buildSpHost(ctx, tableViewSp, dbCategory, spName);
                         if (null != currentSpHost) {
-                            _spHosts.add(currentSpHost);
+                            spHosts.add(currentSpHost);
                         }
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        throw e;
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }
@@ -145,24 +140,25 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 
     private List<Callable<ExecuteResult>> prepareView(final CSharpCodeGenContext ctx, final Progress progress,
             final GenTaskByTableViewSp tableViewSp, final String[] viewNames, final DatabaseCategory dbCategory,
-            final Queue<CSharpTableHost> _tableViewHosts) {
+            final Queue<CSharpTableHost> tableViewHosts) {
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         for (final String view : viewNames) {
             Callable<ExecuteResult> viewWorker = new Callable<ExecuteResult>() {
                 @Override
                 public ExecuteResult call() throws Exception {
-                    // progress.setOtherMessage("正在整理视图 " + view);
+
                     ExecuteResult result =
                             new ExecuteResult("Build View[" + tableViewSp.getAllInOneName() + "." + view + "] Host");
                     progress.setOtherMessage(result.getTaskName());
                     try {
                         CSharpTableHost currentViewHost = buildViewHost(ctx, tableViewSp, dbCategory, view);
                         if (null != currentViewHost) {
-                            _tableViewHosts.add(currentViewHost);
+                            tableViewHosts.add(currentViewHost);
                         }
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        throw e;
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }
@@ -174,14 +170,13 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
 
     private List<Callable<ExecuteResult>> prepareTable(final CSharpCodeGenContext ctx, final Progress progress,
             final GenTaskByTableViewSp tableViewSp, final String[] tableNames, final DatabaseCategory dbCategory,
-            final Queue<CSharpTableHost> _tableViewHosts) throws Exception {
+            final Queue<CSharpTableHost> tableViewHosts) throws Exception {
         List<Callable<ExecuteResult>> results = new ArrayList<>();
         final List<StoredProcedure> allSpNames = DbUtils.getAllSpNames(tableViewSp.getAllInOneName());
         for (final String table : tableNames) {
             Callable<ExecuteResult> worker = new Callable<ExecuteResult>() {
                 @Override
                 public ExecuteResult call() throws Exception {
-                    // progress.setOtherMessage("正在整理表 " + table);
                     ExecuteResult result =
                             new ExecuteResult("Build Table[" + tableViewSp.getAllInOneName() + "." + table + "] Host");
                     progress.setOtherMessage(result.getTaskName());
@@ -189,11 +184,12 @@ public class CSharpDataPreparerOfTableViewSpProcessor extends AbstractCSharpData
                     try {
                         currentTableHost = buildTableHost(ctx, tableViewSp, table, dbCategory, allSpNames);
                         if (null != currentTableHost) {
-                            _tableViewHosts.add(currentTableHost);
+                            tableViewHosts.add(currentTableHost);
                         }
                         result.setSuccessal(true);
                     } catch (Throwable e) {
-                        throw e;
+                        throw new Exception(String.format("Task Id[%s]:%s\r\n", tableViewSp.getId(), e.getMessage()),
+                                e);
                     }
                     return result;
                 }

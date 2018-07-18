@@ -44,7 +44,7 @@ public class DalTabelDaoShardByTableSqlSvrTest extends BaseDalTabelDaoShardByTab
 	//Create the the table
 	private final static String CREATE_TABLE_SQL_SQLSVR_TPL = "CREATE TABLE " + TABLE_NAME +"_%d("
 			+ "Id int NOT NULL IDENTITY(1,1) PRIMARY KEY, "
-			+ "quantity int,tableIndex int,type smallint, "
+			+ "quantity int,dbIndex int,tableIndex int,type smallint, "
 			+ "address varchar(64) not null,"
 			+ "last_changed datetime default getdate())";
 	
@@ -97,8 +97,8 @@ public class DalTabelDaoShardByTableSqlSvrTest extends BaseDalTabelDaoShardByTab
 			for(int j = 0; j < i + 1; j ++) {
 				int id = j + 1;
 				int quantity = 10 + j;
-				insertSqls[j + 1] = "INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity,tableIndex,type,address)"
-							+ " VALUES(" + id + ", " + quantity + ", " + i + ",1, 'SH INFO')";
+				insertSqls[j + 1] = "INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity, dbIndex, tableIndex, type, address)"
+							+ " VALUES(" + id + ", " + quantity + ", 1, " + i + ", 1, 'SH INFO')";
 			}
 					
 			insertSqls[i+2] = "SET IDENTITY_INSERT "+ TABLE_NAME + "_" + i +" OFF";

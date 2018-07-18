@@ -93,7 +93,7 @@ public class DalTableDaoShardByDbTableSqlSvrTest extends BaseDalTableDaoShardByD
 				for(int j = 0; j < i + 1; j ++) {
 					int id = j + 1;
 					int quantity = id * (k + 1) * (i+1);
-					insertSqls[j + 1] = "INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity,dbIndex,tableIndex,type,address)"
+					insertSqls[j + 1] = "INSERT INTO " + TABLE_NAME + "_" + i + "(Id, quantity, dbIndex, tableIndex, type, address)"
 								+ " VALUES(" + id + ", " + quantity + ", " + k + ", " + i + ",1, 'SH INFO')";
 				}
 						

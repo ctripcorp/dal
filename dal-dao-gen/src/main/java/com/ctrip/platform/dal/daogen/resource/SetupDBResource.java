@@ -88,7 +88,7 @@ public class SetupDBResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("setupDbCheck")
     public Status setupDbCheck() throws Exception {
-        Status status = Status.OK;
+        Status status = Status.OK();
         if (initialized) {
             status.setInfo("");
             return status;
@@ -97,7 +97,7 @@ public class SetupDBResource {
         try {
             boolean valid = datasourceXmlValid();
             if (!valid) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("!valid");
             }
 
@@ -113,7 +113,7 @@ public class SetupDBResource {
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
         }
         return status;
@@ -125,19 +125,19 @@ public class SetupDBResource {
     public Status tableConsistentCheck(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
             @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
             @FormParam("dbcatalog") String dbcatalog) {
-        Status status = Status.ERROR;
+        Status status = Status.ERROR();
 
         try {
             boolean initialized = initializeDatasourceXml(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
             if (initialized) {
                 boolean result = tableConsistent(dbcatalog);
                 if (result) {
-                    status = Status.OK;
+                    status = Status.OK();
                 }
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
         }
 
@@ -150,15 +150,15 @@ public class SetupDBResource {
     public Status initializeDal(@FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
             @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
             @FormParam("dbcatalog") String dbcatalog) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         try {
             boolean result = initializeDatasourceXml(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
             if (!result) {
-                status = Status.ERROR;
+                status = Status.ERROR();
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
         }
         return status;
@@ -173,18 +173,18 @@ public class SetupDBResource {
             @FormParam("groupName") String groupName, @FormParam("groupComment") String groupComment,
             @FormParam("adminNo") String adminNo, @FormParam("adminName") String adminName,
             @FormParam("adminEmail") String adminEmail, @FormParam("adminPass") String adminPass) {
-        Status status = Status.OK;
+        Status status = Status.OK();
         try {
             boolean result = initializeDatasourceXml(dbaddress, dbport, dbuser, dbpassword, dbcatalog);
             if (!result) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("Error occured while initializing the jdbc.properties file.");
                 return status;
             }
 
             boolean isSetupTables = setupTables();
             if (!isSetupTables) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("Error occured while setting up the tables.");
                 return status;
             }
@@ -201,13 +201,13 @@ public class SetupDBResource {
 
             boolean isSetupAdmin = setupAdmin(group, user);
             if (!isSetupAdmin) {
-                status = Status.ERROR;
+                status = Status.ERROR();
                 status.setInfo("Error occured while setting up the admin.");
                 return status;
             }
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
         }
         return status;
@@ -219,7 +219,7 @@ public class SetupDBResource {
     public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
             @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
             @FormParam("dbpassword") String dbpassword) throws Exception {
-        Status status = Status.OK;
+        Status status = Status.OK();
         Connection conn = null;
         ResultSet rs = null;
         try {
@@ -233,7 +233,7 @@ public class SetupDBResource {
             status.setInfo(mapper.writeValueAsString(allCatalog));
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
-            status = Status.ERROR;
+            status = Status.ERROR();
             status.setInfo(e.getMessage());
         } finally {
             ResourceUtils.close(rs);

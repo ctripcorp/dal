@@ -4,9 +4,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -19,7 +24,9 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 
+@RunWith(Parameterized.class)
 public class BaseDalTransactionalAnnotationTest{
+    private int createOption; 
     public final String DONE = "done";
     
     private static final String DATABASE_NAME = SqlServerDatabaseInitializer.DATABASE_NAME;
@@ -28,15 +35,50 @@ public class BaseDalTransactionalAnnotationTest{
     Class<BaseTransactionAnnoClass> targetClass;
     Class<TransactionTestUser> autoWireClass;
     
-    BaseDalTransactionalAnnotationTest(Class annoTestClass, Class autoWireClass) {
+    @Parameters
+    public static Collection data() {
+        return Arrays.asList(new Object[][]{
+                {1, TransactionAnnoClassMySql.class, TransactionTestMySqlUser.class},
+                {2, TransactionAnnoClassMySql.class, TransactionTestMySqlUser.class},
+                {3, TransactionAnnoClassMySql.class, TransactionTestMySqlUser.class},
+                {1, TransactionAnnoClassMySqlNew.class, TransactionTestMySqlUserNew.class},
+                {2, TransactionAnnoClassMySqlNew.class, TransactionTestMySqlUserNew.class},
+                {3, TransactionAnnoClassMySqlNew.class, TransactionTestMySqlUserNew.class},
+                {1, TransactionAnnoClassSqlServer.class, TransactionTestSqlServerUser.class},
+                {2, TransactionAnnoClassSqlServer.class, TransactionTestSqlServerUser.class},
+                {3, TransactionAnnoClassSqlServer.class, TransactionTestSqlServerUser.class},
+                {1, TransactionAnnoClassSqlServerNew.class, TransactionTestSqlServerUserNew.class},
+                {2, TransactionAnnoClassSqlServerNew.class, TransactionTestSqlServerUserNew.class},
+                {3, TransactionAnnoClassSqlServerNew.class, TransactionTestSqlServerUserNew.class},
+                }
+        );
+    }
+    
+    public BaseDalTransactionalAnnotationTest(int option, Class annoTestClass, Class autoWireClass) {
+        this.createOption = option;
         this.targetClass = annoTestClass;
         this.autoWireClass = autoWireClass;
     }
 
     @Test
-    public void testAutoWireWithinFactoryCreatedBean() {
-        BaseTransactionAnnoClass test = (BaseTransactionAnnoClass)ctx.getBean(targetClass);
-        Assert.assertNotNull(test.getJac());
+    public void testAutoWireWithinFactoryCreatedBean() throws InstantiationException, IllegalAccessException {
+        BaseTransactionAnnoClass test = create();
+        if(createOption != 3)
+            Assert.assertNotNull(test.getJac());
+    }
+
+    private BaseTransactionAnnoClass create() throws InstantiationException, IllegalAccessException {
+        switch (createOption) {
+            case 1:
+                return (BaseTransactionAnnoClass)ctx.getBean(targetClass);
+            case 2:
+                return (BaseTransactionAnnoClass)ctx.getBean(autoWireClass).getTransactionAnnoTest();
+            case 3:
+                return DalTransactionManager.create(targetClass);
+
+            default:
+                throw new RuntimeException("wrong option");
+        }
     }
 
     @Test
@@ -57,13 +99,13 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testSingleLevel() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.perform());
     }
     
     @Test
     public void testTransactionFail() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         assertTrue(DalTransactionManager.isInTransaction() == false);
         
         try {
@@ -77,25 +119,25 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testNestedTransaction() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.performNest());
     }
     
     @Test
     public void testNestedTransaction2() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.performNest2());
     }
     
     @Test
     public void testNestedTransaction3() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.performNest3());
     }
     
     @Test
     public void testNestedDistributedTransaction() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         assertTrue(DalTransactionManager.isInTransaction() == false);
         
         try {
@@ -109,7 +151,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testDistributedTransaction() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         assertTrue(DalTransactionManager.isInTransaction() == false);
         
         try {
@@ -124,7 +166,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithShard() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.perform("1"));
         Assert.assertEquals(DONE, test.perform(1));
         Assert.assertEquals(DONE, test.perform(new Integer(1)));
@@ -132,7 +174,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithHints() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard(1)));
         Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard("1")));
         Assert.assertEquals(DONE, test.perform("1", new DalHints().inShard(0)));
@@ -148,7 +190,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithHintsFail() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         
         assertTrue(DalTransactionManager.isInTransaction() == false);
         
@@ -163,7 +205,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithShardAndHints() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard(1)));
         Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard("1")));
         Assert.assertEquals(DONE, test.performWitShard("1", new DalHints().inShard(0)));
@@ -177,7 +219,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithShardAndHintsNest() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard(1)));
         Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard("1")));
         Assert.assertEquals(DONE, test.performWitShardNest("1", new DalHints().inShard(0)));
@@ -191,7 +233,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithShardAndHintsNestConflict() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         try {
             test.performWitShardNestConflict("1", new DalHints().inShard(1));
             fail();
@@ -201,7 +243,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithShardAndHintsNestFail() throws InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         try {
             test.performWitShardNestFail("1", new DalHints().inShard(1));
             fail();
@@ -211,7 +253,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testSameShardWithCommand() throws SQLException, InstantiationException, IllegalAccessException {
-        final BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        final BaseTransactionAnnoClass test = create();
         DalClientFactory.getClient(test.getShardDb()).execute(new DalCommand() {
             
             @Override
@@ -228,7 +270,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testShardIdConfilictInCommand() throws SQLException, InstantiationException, IllegalAccessException {
-        final BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        final BaseTransactionAnnoClass test = create();
         try {
             DalClientFactory.getClient(test.getShardDb()).execute(new DalCommand() {
                 
@@ -249,7 +291,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testWithShardAndHintsNestWithCommandFail() throws SQLException, InstantiationException, IllegalAccessException {
-        final BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        final BaseTransactionAnnoClass test = create();
         try {
             assertTrue(DalTransactionManager.isInTransaction() == false);
             
@@ -271,13 +313,13 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testCommandNestWithShardAndHints() throws SQLException, InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         test.performCommandWitShardNest("1", new DalHints());
     }
     
     @Test
     public void testCommandNestWithShardAndHintsFail() throws SQLException, InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         try {
             assertTrue(DalTransactionManager.isInTransaction() == false);
             test.performCommandWitShardNestFail("1", new DalHints());
@@ -290,7 +332,7 @@ public class BaseDalTransactionalAnnotationTest{
     
     @Test
     public void testDetectDistributedTransaction() throws SQLException, InstantiationException, IllegalAccessException {
-        BaseTransactionAnnoClass test = DalTransactionManager.create(targetClass);
+        BaseTransactionAnnoClass test = create();
         try {
             assertTrue(DalTransactionManager.isInTransaction() == false);
             test.performDetectDistributedTransaction("1", new DalHints());

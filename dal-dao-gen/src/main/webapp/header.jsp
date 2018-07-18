@@ -7,11 +7,15 @@
     String sqlServerSpec = Configuration.get("sql_server_spec");
     String mySqlSpec = Configuration.get("mysql_spec");
     String dalTeamEmail = Configuration.get("dal_team_email");
+    String reportPage = Configuration.get("report_page");
+    String decryptionPage = Configuration.get("decryption_page");
     request.setAttribute("codegenManual", codegenManual);
     request.setAttribute("dalManual", dalManual);
     request.setAttribute("sqlServerSpec", sqlServerSpec);
     request.setAttribute("mySqlSpec", mySqlSpec);
     request.setAttribute("dalTeamEmail", dalTeamEmail);
+    request.setAttribute("reportPage", reportPage);
+    request.setAttribute("decryptionPage", decryptionPage);
 %>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top" role="navigation">
     <div class="navbar-header">
@@ -22,6 +26,7 @@
         <ul class="nav navbar-nav">
             <li id="indexjsp"><a href="index.jsp">代码生成器</a></li>
             <li id="codeviewjsp"><a href="codeview.jsp">项目一览</a></li>
+            <li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
             <li id="membermanagejsp"><a href="membermanage.jsp">组员管理</a></li>
             <li id="dbmanagejsp" class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
                                                      data-hover="dropdown" data-close-others="true"> <span
@@ -34,8 +39,17 @@
                 </ul>
             </li>
             <li id="eventmanagejsp"><a href="eventmanage.jsp">审批管理</a></li>
-            <li id="groupmanagejsp"><a href="groupmanage.jsp">组管理</a></li>
             <li id="usermanagejsp" style="display: none;"><a href="usermanage.jsp">用户管理</a></li>
+            <li id="tooljsp" class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"
+                                                 data-hover="dropdown" data-close-others="true"> <span
+                    class="username">工具</span> <i class="glyphicon glyphicon-menu-down"> </i>
+            </a> <span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top: 1px"></span>
+                <ul class="dropdown-menu dropdown-inverse" style="margin-top: 8px !important">
+                    <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">Java DAL 参数解密</a>
+                    </li>
+                    <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">DAL 版本统计</a></li>
+                </ul>
+            </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown"><a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"

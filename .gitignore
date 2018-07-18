@@ -174,3 +174,6 @@ pip-log.txt
 /dal-tester/.classpath
 /dal-java-client/.classpath
 /dal-common/.classpath
+
+# vscode 
+.vscode

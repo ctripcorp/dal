@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.dao.helper.*;
 public class ${host.getClassName()}Dao {
 
 	private static final String DATA_BASE = "${host.getDbSetName()}";
-	private static final DatabaseCategory dbCategory = DatabaseCategory.${host.getDatabaseCategory()};
 	private DalQueryDao queryDao = null;
 
 #foreach( $method in ${host.getMethods()} )

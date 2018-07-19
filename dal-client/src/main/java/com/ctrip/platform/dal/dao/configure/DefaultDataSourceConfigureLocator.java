@@ -49,19 +49,22 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return configure;
     }
 
+
     private DataSourceConfigure _getDataSourceConfigure(String name) {
         DataSourceConfigure configure = null;
         configure = dataSourceConfiguresCache.get(name);
         if (configure != null) {
             return configure;
         }
-
         ConnectionString connectionString = connectionStrings.get(name);
-        configure = mergeDataSourceConfigure(connectionString);
+        if (connectionString == null) {
+            configure = (DataSourceConfigure) this.getUserPoolPropertiesConfigure(name);
+        } else {
+            configure = mergeDataSourceConfigure(connectionString);
+        }
         if (configure != null) {
             dataSourceConfiguresCache.put(name, configure);
         }
-
         return configure;
     }
 

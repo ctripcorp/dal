@@ -43,7 +43,7 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
         Set<String> names = getKeySet();
         locator.addDataSourceConfigureKeySet(names);
         Set<String> names2 = locator.getDataSourceConfigureKeySet();
-        Assert.assertEquals(names, names2);
+        Assert.assertTrue(names2.containsAll(names));
     }
 
     @Test

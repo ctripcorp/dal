@@ -13,6 +13,7 @@ import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
+import qunar.tc.qconfig.client.exception.ResultUnexpectedException;
 
 import java.io.FileNotFoundException;
 import java.util.Collections;
@@ -27,6 +28,10 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     private static final String GET_CONNECTIONSTRING = "ConnectionString::getConnectionString";
     private static final String NORMAL_CONNECTIONSTRING = "Normal ConnectionString";
     private static final String FAILOVER_CONNECTIONSTRING = "Failover ConnectionString";
+    private static final int HTTP_STATUS_CODE_404 = 404;
+    private String QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT =
+            "An error occured while getting connection string from QConfig for %s";
+    private String QCONFIG_404_EXCEPTION_MESSAGE_FORMAT = "%s 不存在或已被禁用，请从Dal.config或相关配置和代码中移除这个titan key.";
 
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
@@ -57,8 +62,8 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     addConfigMap(name, config);
                 }
             } catch (Throwable e) {
-                throw new RuntimeException(new FileNotFoundException(String
-                        .format("Error occured while getting titan keyname %s from QConfig:%s", name, e.getMessage())));
+                throw new RuntimeException(new FileNotFoundException(String.format(
+                        "An error occurred while getting titan keyname %s from QConfig:%s", name, e.getMessage())));
             }
         }
     }
@@ -88,9 +93,15 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     Map<String, String> map = config.asMap();
                     ipConnectionString = map.get(TITAN_KEY_NORMAL);
                     domainConnectionString = map.get(TITAN_KEY_FAILOVER);
+                } catch (ResultUnexpectedException e) {
+                    String exceptionMessageFormat = QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT;
+                    if (e.getStatus() == HTTP_STATUS_CODE_404) {
+                        exceptionMessageFormat = QCONFIG_404_EXCEPTION_MESSAGE_FORMAT;
+                    }
+
+                    throw new DalException(String.format(exceptionMessageFormat, name), e);
                 } catch (Throwable e) {
-                    throw new DalException(String.format("Error getting connection string from QConfig for %s", name),
-                            e);
+                    throw new DalException(String.format(QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT, name), e);
                 }
 
                 ConnectionString connectionString =

@@ -7,6 +7,10 @@ import ${host.getPackageName()}.entity.*;
 
 import com.ctrip.platform.dal.dao.helper.*;
 
+/**
+ * @author ${host.getUserName()}
+ * @date ${host.getDate()}
+ */
 public class ${host.getClassName()}Dao {
 
 	private static final String DATA_BASE = "${host.getDbSetName()}";

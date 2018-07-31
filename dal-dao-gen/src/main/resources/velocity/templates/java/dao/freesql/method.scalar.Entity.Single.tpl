@@ -5,14 +5,14 @@
 
     /**
 	 * ${method.getComments()}
-	**/
+	 */
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
 		return ${method.getName()}(${method.getActualParameter()});
 	}
 
 	/**
 	 * ${method.getComments()}
-	**/
+	 */
 	public ${method.getPojoClassName()} ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")

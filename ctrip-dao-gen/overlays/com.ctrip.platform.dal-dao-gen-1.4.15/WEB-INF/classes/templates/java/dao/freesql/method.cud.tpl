@@ -15,7 +15,7 @@
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("${method.getSql()}");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;

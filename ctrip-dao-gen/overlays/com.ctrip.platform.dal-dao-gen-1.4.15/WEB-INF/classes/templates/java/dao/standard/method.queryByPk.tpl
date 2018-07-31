@@ -68,17 +68,17 @@
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
 	**/
-	public List<${host.getPojoClassName()}> queryLike(${host.getPojoClassName()} sample)
+	public List<${host.getPojoClassName()}> queryBy(${host.getPojoClassName()} sample)
 			throws SQLException {
-		return queryLike(sample, null);
+		return queryBy(sample, null);
 	}
 
 	/**
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
 	**/
-	public List<${host.getPojoClassName()}> queryLike(${host.getPojoClassName()} sample, DalHints hints)
+	public List<${host.getPojoClassName()}> queryBy(${host.getPojoClassName()} sample, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		return client.queryLike(sample, hints);
+		return client.queryBy(sample, hints);
 	}

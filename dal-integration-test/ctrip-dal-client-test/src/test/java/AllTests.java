@@ -20,7 +20,7 @@ import testUtil.NetStatChecker;
             NoShardOnMysqlDaoUnitTest.class,
             NoShardTransactionalTestOnMysqlNotSpringTest.class,
             NoShardTransactionalTestOnMysqlSpringTest.class,
-            QConfigTest2.class,
+            // QConfigTest2.class,
             RWTestOnMysql.class,
             KeyholderOnMysqlTest.class,
             DalTransactionalWithShardOnMysqlNotSpringTest.class,

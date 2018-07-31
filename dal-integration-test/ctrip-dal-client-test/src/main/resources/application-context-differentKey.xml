@@ -13,6 +13,7 @@
 
     <bean id="dalDataSourceFactory" class="com.ctrip.datasource.configure.DalDataSourceFactory"/>
 
+
     <!--MySQL-->
     <bean id="dataSourceMySQL" factory-bean="dalDataSourceFactory" factory-method="createDataSource">
         <constructor-arg value="mysqldaltest02db_W"/>

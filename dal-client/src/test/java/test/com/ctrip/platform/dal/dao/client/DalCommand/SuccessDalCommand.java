@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.dao.DalCommand;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class SuccessDalCommand implements DalCommand {
     private TestTableDao dao;
@@ -17,13 +18,14 @@ public class SuccessDalCommand implements DalCommand {
     @Override
     public boolean execute(DalClient client) throws SQLException {
         try {
+            Random r = new Random();
             List<TestTable> list = new ArrayList<>();
             TestTable a = new TestTable();
-            a.setID(5);
+            a.setID(r.nextInt());
             a.setName("5");
             list.add(a);
             TestTable b = new TestTable();
-            b.setID(6);
+            b.setID(r.nextInt());
             b.setName("6");
             list.add(b);
 

@@ -30,8 +30,9 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
     private static final String FAILOVER_CONNECTIONSTRING = "Failover ConnectionString";
     private static final int HTTP_STATUS_CODE_404 = 404;
     private String QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT =
-            "An error occured while getting connection string from QConfig for %s";
-    private String QCONFIG_404_EXCEPTION_MESSAGE_FORMAT = "%s 不存在或已被禁用，请从Dal.config或相关配置和代码中移除这个titan key.";
+            "An error occured while getting connection string from QConfig for titan key %s.";
+    private String QCONFIG_404_EXCEPTION_MESSAGE_FORMAT =
+            "Titan key %s does not exist or has been disabled, please remove it from your Dal.config or code.";
 
     private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
@@ -62,8 +63,8 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     addConfigMap(name, config);
                 }
             } catch (Throwable e) {
-                throw new RuntimeException(new FileNotFoundException(String.format(
-                        "An error occurred while getting titan keyname %s from QConfig:%s", name, e.getMessage())));
+                throw new RuntimeException(new FileNotFoundException(String
+                        .format("An error occurred while getting titan key %s from QConfig:%s", name, e.getMessage())));
             }
         }
     }
@@ -120,7 +121,8 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     Cat.logEvent(DAL, transactionName, Message.SUCCESS, msg);
                 } catch (Throwable e) {
                     transaction.setStatus(e);
-                    throw new IllegalArgumentException(String.format("Connection string of %s is illegal.", name), e);
+                    throw new IllegalArgumentException(
+                            String.format("Connection string of titan key %s is illegal.", name), e);
                 } finally {
                     transaction.complete();
                 }

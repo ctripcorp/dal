@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao;
 
-import static com.ctrip.platform.dal.common.enums.ParameterDirection.InputOutput;
-
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,76 +8,81 @@ import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.task.KeyHolderAwaredTask;
 
 public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolderAwaredTask {
-	private static final String INSERT_SPA_TPL = "spA_%s_i";
+    private static final String INSERT_SPA_TPL = "spA_%s_i";
 
-	private String outputIdName;
-	private int outputIdIndex;
+    private String outputIdName;
+    private int outputIdIndex;
 
-	private static final String RET_CODE = "retcode";
+    private static final String RET_CODE = "retcode";
 
-	public SingleInsertSpaTask() {
-	}
+    public SingleInsertSpaTask() {}
 
-	public void initialize(DalParser<T> parser) {
-		super.initialize(parser);
-		outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
-		outputIdIndex = 0;
-		for(String name: parser.getColumnNames()){
-			if(name.equals(outputIdName))
-				break;
-			outputIdIndex++;
-		}
-	}
+    public void initialize(DalParser<T> parser) {
+        super.initialize(parser);
+        outputIdName = parser.isAutoIncrement() ? parser.getPrimaryKeyNames()[0] : null;
+        outputIdIndex = 0;
+        for (String name : parser.getColumnNames()) {
+            if (name.equals(outputIdName))
+                break;
+            outputIdIndex++;
+        }
+    }
 
-	@Override
-	public int execute(DalHints hints, Map<String, ?> fields, T rawPojos) throws SQLException {
-		hints = DalHints.createIfAbsent(hints);
+    @Override
+    public int execute(DalHints hints, Map<String, ?> fields, T rawPojos) throws SQLException {
+        hints = DalHints.createIfAbsent(hints);
 
-		String insertSPA = String.format(INSERT_SPA_TPL, getRawTableName(hints, fields));
+        String insertSPA = String.format(INSERT_SPA_TPL, getRawTableName(hints, fields));
 
-		StatementParameters parameters = new StatementParameters();
-		String callSql = prepareSpCall(insertSPA, parameters, fields);
+        StatementParameters parameters = new StatementParameters();
+        String callSql = prepareSpCall(insertSPA, parameters, fields);
 
-		register(parameters, fields);
-		Map<String, ?> results = client.call(callSql, parameters, hints.setFields(fields));
-		extract(parameters, hints.getKeyHolder());
+        register(parameters, fields);
+        Map<String, ?> results = client.call(callSql, parameters, hints.setFields(fields));
+        extract(parameters, hints.getKeyHolder());
 
-		return (Integer)results.get(RET_CODE);
-	}
+        return (Integer) results.get(RET_CODE);
+    }
 
-	private void register(StatementParameters parameters, Map<String, ?> fields) {
-		if(!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
-			if(outputIdName != null) {
-				parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
-			}
-		}else {
-			/**
-			 * Must to be first one
-			 */
-			if(outputIdName != null) {
-				parameters.get(outputIdIndex).setDirection(InputOutput);
-			}
-		}
-	}
+    private void register(StatementParameters parameters, Map<String, ?> fields) {
+        if (!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
+            if (outputIdName != null) {
+                parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
+            }
+        } else {
+            /**
+             * Must to be first one
+             */
+            if (outputIdName != null) {
+                parameters.get(outputIdIndex).setDirection(ParameterDirection.InputOutput);
+            }
+        }
+    }
 
-	private void extract(StatementParameters parameters, KeyHolder holder) {
-		if(holder == null) return;
+    private void extract(StatementParameters parameters, KeyHolder holder) {
+        if (holder == null)
+            return;
 
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
+        Map<String, Object> map = new LinkedHashMap<>();
 
-		if(!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
-			if(outputIdName != null) {
-				map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
-			}
-		}else{
-			/**
-			 * Must to be first one
-			 */
-			if(outputIdName != null) {
-				map.put(outputIdName, parameters.get(outputIdIndex).getValue());
-			}
-		}
+        if (!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
+            if (outputIdName != null) {
+                map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
+            }
+        } else {
+            /**
+             * Must to be first one
+             */
+            if (outputIdName != null) {
+                map.put(outputIdName, parameters.get(outputIdIndex).getValue());
+            }
+        }
 
-		holder.addKey(map);
-	}
+        if (map.isEmpty()) {
+            holder.addEmptyKeys(1);
+        } else {
+            holder.addKey(map);
+        }
+
+    }
 }

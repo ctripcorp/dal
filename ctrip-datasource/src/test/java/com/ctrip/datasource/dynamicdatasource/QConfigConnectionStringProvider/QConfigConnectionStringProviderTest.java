@@ -158,8 +158,6 @@ public class QConfigConnectionStringProviderTest {
         return MapConfig.get(TITAN_APP_ID, name, feature);
     }
 
-
-
     @Test
     public void testTitanKeysNotFoundExceptionMessage() {
         ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
@@ -170,7 +168,8 @@ public class QConfigConnectionStringProviderTest {
             Map<String, ConnectionString> connectionStrings = connectionStringProvider.getConnectionStrings(names);
             Assert.fail();
         } catch (Throwable e) {
-            Assert.assertTrue(e.getMessage().equals("non_exist 不存在或已被禁用，请从Dal.config或相关配置和代码中移除这个titan key."));
+            Assert.assertTrue(e.getMessage().equals(
+                    "Titan key non_exist does not exist or has been disabled, please remove it from your Dal.config or code."));
         }
     }
 

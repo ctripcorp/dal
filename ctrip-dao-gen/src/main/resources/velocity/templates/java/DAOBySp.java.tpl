@@ -17,9 +17,9 @@ public class ${host.getDbSetName()}SpDao {
 #if($h.isSp3())
 	/**
 	 * Batch call ${h.getSpName()} Store Procedure
-	**/
+	 */
 	public int[] batchCall${h.getPojoClassName()}(${h.getPojoClassName()}[] params, DalHints hints) throws SQLException{
-		if(null == params || params.length == 0)
+		if (null == params || params.length == 0)
 			return new int[]{};
 		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
 		StatementParameters[] parametersList= new StatementParameters[params.length];
@@ -37,7 +37,7 @@ public class ${host.getDbSetName()}SpDao {
 	
 	/**
 	 * Call ${h.getSpName()} Store Procedure
-	**/
+	 */
 	public Map<String, ?> call${h.getPojoClassName()}(${h.getPojoClassName()} param, DalHints hints) throws SQLException {
 		String callString = "{call ${h.getSpName()}(${h.getCallParameters()})}";
 		StatementParameters parameters = new StatementParameters();

@@ -12,7 +12,7 @@
 
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-application</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>war</packaging>
 
 

@@ -1,11 +1,10 @@
 package com.ctrip.platform.dal.application.entity;
 
-import com.ctrip.platform.dal.dao.UpdatableEntity;
+
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.sql.Types;
 
 @Entity

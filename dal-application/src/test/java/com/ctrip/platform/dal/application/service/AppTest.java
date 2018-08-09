@@ -38,7 +38,7 @@ public class AppTest {
 
         DALServiceTable testSqlServerPojo=new DALServiceTable();
         testSqlServerPojo.setName("testInsertSqlServer");
-        DALServiceTable sqlServerPojo=dalService.insertSqlServer(testPojo);
+        DALServiceTable sqlServerPojo=dalService.insertSqlServer(testSqlServerPojo);
         Assert.assertEquals("testInsertSqlServer", sqlServerPojo.getName());
     }
 

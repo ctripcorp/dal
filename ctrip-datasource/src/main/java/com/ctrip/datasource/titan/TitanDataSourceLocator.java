@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
 
+import com.ctrip.datasource.configure.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
@@ -50,7 +51,7 @@ public class TitanDataSourceLocator {
     private static final Logger logger = LoggerFactory.getLogger(TitanDataSourceLocator.class);
     public static final String DB_NAME = "DBKeyName";
     private static final int DEFAULT_TIMEOUT = 15 * 1000;
-    
+
     private static final Pattern dburlPattern = Pattern
             .compile("(data\\ssource|server|address|addr|network)=([^;]+)",Pattern.CASE_INSENSITIVE);
     private static final Pattern dbuserPattern = Pattern
@@ -76,6 +77,8 @@ public class TitanDataSourceLocator {
             titanSvcUrl = validate("Titan service URL", titanSvcUrl);
             name = validate("All in one name", name);
             String appid = validate("App ID", Foundation.app().getAppId());
+
+            DalPropertiesManager.getInstance().setup();
 
             Set<String> dbNames = new HashSet<>();
             dbNames.add(name);

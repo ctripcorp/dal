@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
-import com.ctrip.platform.dal.dao.task.BulkTaskContext;
+import com.ctrip.platform.dal.dao.task.*;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
@@ -23,7 +23,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     }
 
     @Override
-    public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext)
+    public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, DalBulkTaskContext<T> taskContext)
             throws SQLException {
         String tableName = getRawTableName(hints);
         String tvpName = buildTvpName(tableName);
@@ -37,12 +37,19 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         newHints.retrieveAllResultsFromSp();
         int length = daoPojos.size();
         int[] result = new int[length];
-        Map<String, ?> map = client.call(execSql, parameters, newHints);
-        int value = getReturnValue(map);
-        for (int i = 0; i < length; i++) {
-            result[i] = value;
-        }
-        return result;
+
+        if (taskContext instanceof DalTableNameConfigure)
+            ((DalTableNameConfigure) taskContext).addTables(tableName);
+
+        if (client instanceof DalContextClient) {
+            Map<String, ?> map = ((DalContextClient) client).call(execSql, parameters, newHints, taskContext);
+            int value = getReturnValue(map);
+            for (int i = 0; i < length; i++) {
+                result[i] = value;
+            }
+            return result;
+        } else
+            throw new DalRuntimeException("The client is not instance of DalClient");
     }
 
     private SQLServerDataTable getDataTable(Map<Integer, Map<String, ?>> daoPojos) throws SQLServerException {

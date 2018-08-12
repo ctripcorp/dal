@@ -50,7 +50,7 @@ public class CtripLoggerImpl extends AbstractLogger {
     @Override
     public void error(final String msg, final Throwable e) {
             try {
-                Cat.logError(e);
+                Cat.logError(msg, e);
             } catch (Throwable ex) {
                 ex.printStackTrace();
             }

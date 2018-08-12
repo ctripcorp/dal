@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -83,7 +84,7 @@ public abstract class BaseSingleInsertTest {
 			DalHints hints = new DalHints();
 			hints.setKeyHolder(keyHolder);
 			
-			test.execute(hints.inShard(0), parser.getFields(p1), p1);
+			test.execute(hints.inShard(0), parser.getFields(p1), p1, new DefaultTaskContext());
 			Number id1 = keyHolder.getKey();
 			assertTrue(id1.intValue() > 0);
 			//----------
@@ -91,7 +92,7 @@ public abstract class BaseSingleInsertTest {
 			hints = new DalHints();
 			hints.setKeyHolder(keyHolder);
 			
-			test.execute(hints.inShard(0), parser.getFields(p1), p1);
+			test.execute(hints.inShard(0), parser.getFields(p1), p1, new DefaultTaskContext());
 			Number id2 = keyHolder.getKey();
 			assertTrue(id2.intValue() > 0);
 			assertTrue(id2.intValue() - id1.intValue() == 1);
@@ -125,7 +126,7 @@ public abstract class BaseSingleInsertTest {
 					hints = new DalHints();
 					hints.setKeyHolder(keyHolder);
 					
-					test.execute(hints, parser.getFields(p1), p1);
+					test.execute(hints, parser.getFields(p1), p1, new DefaultTaskContext());
 					Number id1 = keyHolder.getKey();
 					assertTrue(id1.intValue() > 0);
 					//----------
@@ -133,7 +134,7 @@ public abstract class BaseSingleInsertTest {
 					hints = new DalHints();
 					hints.setKeyHolder(keyHolder);
 					
-					test.execute(hints, parser.getFields(p1), p1);
+					test.execute(hints, parser.getFields(p1), p1, new DefaultTaskContext());
 					Number id2 = keyHolder.getKey();
 					assertTrue(id2.intValue() > 0);
 					assertTrue(id2.intValue() - id1.intValue() == 1);

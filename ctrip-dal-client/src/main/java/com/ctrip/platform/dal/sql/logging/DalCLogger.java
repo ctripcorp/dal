@@ -55,7 +55,7 @@ public class DalCLogger {
 			ISpan urlSpan = trace.startSpan("DAL", "DAL", SpanType.SQL);
 			entry.setUrlSpan(urlSpan);
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 	
@@ -65,7 +65,7 @@ public class DalCLogger {
 			entry.setResultCount(count);
 			log(entry);
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -76,7 +76,7 @@ public class DalCLogger {
 			entry.setException(e);
 			log(entry);
 		} catch (Throwable e1) {
-			e1.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -107,7 +107,7 @@ public class DalCLogger {
 					+ System.lineSeparator() + msg;
 			logger.error(TITLE, logMsg);
 		} catch (Throwable e1) {
-			e1.printStackTrace();
+			logger.error(e1);
 		}
 	}
 
@@ -125,7 +125,7 @@ public class DalCLogger {
 			
 			error(sbuffer.toString(), e);
 		} catch (Throwable e1) {
-			e1.printStackTrace();
+			logger.error(e1);
 		}
 	}
 	
@@ -147,7 +147,7 @@ public class DalCLogger {
 				break;
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 }

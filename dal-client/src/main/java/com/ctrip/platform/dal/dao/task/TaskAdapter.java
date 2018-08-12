@@ -445,4 +445,10 @@ public class TaskAdapter<T> implements DaoTask<T> {
 			quatedColumns[i] = quote(columns[i]);
 		return quatedColumns;
 	}
+
+	public DefaultTaskContext createTaskContext() throws SQLException {
+		DefaultTaskContext taskContext = new DefaultTaskContext();
+		return taskContext;
+	}
+
 }

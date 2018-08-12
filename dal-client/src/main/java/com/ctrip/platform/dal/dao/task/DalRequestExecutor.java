@@ -24,7 +24,7 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
- * Common reuqest executor that support execute request that is of pojo or 
+ * Common request executor that support execute request that is of pojo or
  * sql in single, all or multiple shards
  * 
  * @author jhhe

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.DalContextClient;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -29,13 +31,14 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 
 		if(pojoFieldStatus.size() == 0)
 			throw new DalException(ErrorCode.ValidateFieldCount);
-		
+
 		taskContext.setPojoFieldStatus(pojoFieldStatus);
+
 		return taskContext;
 	}
 
 	@Override
-	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> taskContext) throws SQLException {
+	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, DalBulkTaskContext<T> taskContext) throws SQLException {
 		List<T> rawPojos = taskContext.getRawPojos();
 		boolean isUpdatableEntity = taskContext.isUpdatableEntity();
 		Map<String, Boolean> pojoFieldStatus = taskContext.getPojoFieldStatus();
@@ -58,10 +61,17 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 			
 			parametersList[i++] = parameters;
 		}
-		
-		String batchUpdateSql = buildBatchUpdateSql(getTableName(hints), pojoFieldStatus);
-		
-		int[] result = client.batchUpdate(batchUpdateSql, parametersList, hints);
+
+		String tableName = getRawTableName(hints);
+		if (taskContext instanceof DalTableNameConfigure)
+			((DalTableNameConfigure) taskContext).addTables(tableName);
+
+		String batchUpdateSql = buildBatchUpdateSql(quote(tableName), pojoFieldStatus);
+		int[] result;
+		if (client instanceof DalContextClient)
+			result = ((DalContextClient) client).batchUpdate(batchUpdateSql, parametersList, hints, taskContext);
+		else
+			throw new DalRuntimeException("The client is not instance of DalClient");
 		return result;
 	}
 	

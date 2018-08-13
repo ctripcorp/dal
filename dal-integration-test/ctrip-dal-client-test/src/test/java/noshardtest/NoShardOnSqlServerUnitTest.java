@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -461,6 +462,20 @@ public class NoShardOnSqlServerUnitTest {
         assertNotNull(pojo1.getName());
         assertNotNull(pojo1.getCountryID());
         assertNotNull(pojo1.getProvinceID());
+    }
+
+    @Test
+    public void testDalColumnMapRowMapper() throws Exception {
+        List<Map<String, Object>> ret = dao.testDalColumnMapRowMapper(new DalHints());
+        assertEquals(20, ret.get(0).get("CityID"));
+        assertEquals("Initial_0", ret.get(0).get("Name"));
+    }
+
+    @Test
+    public void testDalColumnMapRowMapperWithAlias() throws Exception {
+        List<Map<String, Object>> ret = dao.testDalColumnMapRowMapperWithAlias(new DalHints());
+        assertEquals(20, ret.get(0).get("c"));
+        assertEquals("Initial_0", ret.get(0).get("n"));
     }
 
     @Test

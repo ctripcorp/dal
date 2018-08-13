@@ -2,6 +2,7 @@ package dao.noshard;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
@@ -12,6 +13,7 @@ import entity.SqlServerPeopleTable;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 
 //import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 
@@ -389,5 +391,17 @@ public class NoShardOnSqlServerDao {
 		parameters.set(3,Types.INTEGER,ID);
 		builder.mapWith(noShardOnSqlServerGenRowMapper);
 		return queryDao.query(builder, parameters, hints);
+	}
+
+	public List<Map<String,Object>> testDalColumnMapRowMapper(DalHints hints) throws SQLException{
+		hints=DalHints.createIfAbsent(hints);
+		String sql="SELECT CityID , Name FROM people with (nolock)";
+		return queryDao.query(sql, new StatementParameters(), hints, new DalColumnMapRowMapper());
+	}
+
+	public List<Map<String,Object>> testDalColumnMapRowMapperWithAlias(DalHints hints) throws SQLException{
+		hints=DalHints.createIfAbsent(hints);
+		String sql="SELECT CityID as c, Name as n FROM people";
+		return queryDao.query(sql, new StatementParameters(), hints, new DalColumnMapRowMapper());
 	}
 }

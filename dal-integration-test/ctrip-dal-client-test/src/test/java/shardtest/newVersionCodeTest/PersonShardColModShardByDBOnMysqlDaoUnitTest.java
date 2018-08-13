@@ -2856,12 +2856,12 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals("Initial_Shard_00", ret.get(0).get("Name"));
     }
 
-    /*@Test
+    @Test
     public void testDalColumnMapRowMapperWithAlias() throws Exception {
         List<Map<String, Object>> ret = dao.testDalColumnMapRowMapperWithAlias(new DalHints().inShard(0));
         assertEquals(20, ret.get(0).get("age"));
         assertEquals("Initial_Shard_00", ret.get(0).get("name"));
-    }*/
+    }
     //	@Test
 //	public void test_queryInMultipleAllShards() throws SQLException {
 //		List<Integer> Age=new ArrayList<Integer>(3);

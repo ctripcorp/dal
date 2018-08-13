@@ -4,7 +4,7 @@
 	/**
 	 * Query ${host.getPojoClassName()} by the specified ID
 	 * The ID must be a number
-	**/
+	 */
 	public ${host.getPojoClassName()} queryByPk(Number id)
 			throws SQLException {
 		return queryByPk(id, null);
@@ -13,7 +13,7 @@
 	/**
 	 * Query ${host.getPojoClassName()} by the specified ID
 	 * The ID must be a number
-	**/
+	 */
 	public ${host.getPojoClassName()} queryByPk(Number id, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -24,7 +24,7 @@
 
 	/**
 	 * Query ${host.getPojoClassName()} by complex primary key
-	**/
+	 */
 	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclarationWithoutHints()})
 			throws SQLException {
 		return queryByPk(${host.getPkParameters()}, null);
@@ -32,7 +32,7 @@
 
 	/**
 	 * Query ${host.getPojoClassName()} by complex primary key
-	**/
+	 */
 	public ${host.getPojoClassName()} queryByPk(${host.getPkParameterDeclaration()})
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -47,7 +47,7 @@
 
 	/**
 	 * Query ${host.getPojoClassName()} by ${host.getPojoClassName()} instance which the primary key is set
-	**/
+	 */
 	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk)
 			throws SQLException {
 		return queryByPk(pk, null);
@@ -55,7 +55,7 @@
 
 	/**
 	 * Query ${host.getPojoClassName()} by ${host.getPojoClassName()} instance which the primary key is set
-	**/
+	 */
 	public ${host.getPojoClassName()} queryByPk(${host.getPojoClassName()} pk, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
@@ -67,18 +67,18 @@
 	/**
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
-	**/
-	public List<${host.getPojoClassName()}> queryLike(${host.getPojoClassName()} sample)
+	 */
+	public List<${host.getPojoClassName()}> queryBy(${host.getPojoClassName()} sample)
 			throws SQLException {
-		return queryLike(sample, null);
+		return queryBy(sample, null);
 	}
 
 	/**
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
-	**/
-	public List<${host.getPojoClassName()}> queryLike(${host.getPojoClassName()} sample, DalHints hints)
+	 */
+	public List<${host.getPojoClassName()}> queryBy(${host.getPojoClassName()} sample, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		return client.queryLike(sample, hints);
+		return client.queryBy(sample, hints);
 	}

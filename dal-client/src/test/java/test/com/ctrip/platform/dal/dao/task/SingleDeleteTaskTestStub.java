@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -23,7 +24,7 @@ public class SingleDeleteTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int result = test.execute(hints, getAllMap().get(0), null);
+			int result = test.execute(hints, getAllMap().get(0), null, new DefaultTaskContext());
 //			assertEquals(1, result);
 			assertEquals(2, getCount());
 		} catch (SQLException e) {

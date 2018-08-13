@@ -531,6 +531,13 @@ public class DatabaseResource {
         try {
             Status status = Status.ERROR();
             Response res = WebUtil.getAllInOneResponse(key, null);
+
+            if (res == null) {
+                status = Status.OK();
+                status.setInfo("");
+                return status;
+            }
+
             String httpCode = res.getStatus();
             if (!httpCode.equals(WebUtil.HTTP_CODE)) {
                 status.setInfo("Access error.");

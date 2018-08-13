@@ -32,7 +32,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
     }
 
     private List<Callable<ExecuteResult>> prepareFreeSql(CodeGenContext codeGenCtx) throws Exception {
-        JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
+        final JavaCodeGenContext ctx = (JavaCodeGenContext) codeGenCtx;
         int projectId = ctx.getProjectId();
         final Progress progress = ctx.getProgress();
         final String namespace = ctx.getNamespace();
@@ -76,6 +76,7 @@ public class JavaDataPreparerOfFreeSqlProcessor extends AbstractJavaDataPreparer
                     host.setClassName(currentTasks.get(0).getClass_name());
                     host.setPackageName(namespace);
                     host.setDatabaseCategory(getDatabaseCategory(currentTasks.get(0).getAllInOneName()));
+                    host.setUserName(ctx.getUserName());
                     // host.setLength(currentTasks.get(0).getLength());
 
                     List<JavaMethodHost> methods = new ArrayList<>();

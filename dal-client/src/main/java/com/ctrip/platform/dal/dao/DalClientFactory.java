@@ -79,8 +79,8 @@ public class DalClientFactory {
             }
 
             LogEntry.init();
-            DalRequestExecutor.init(config.getFacory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
-                    config.getFacory().getProperty(DalRequestExecutor.KEEP_ALIVE_TIME));
+            DalRequestExecutor.init(config.getFactory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
+                    config.getFactory().getProperty(DalRequestExecutor.KEEP_ALIVE_TIME));
 
             DalStatusManager.initialize(config);
 
@@ -130,7 +130,7 @@ public class DalClientFactory {
     }
 
     public static DalTaskFactory getTaskFactory() {
-        return getDalConfigure().getFacory();
+        return getDalConfigure().getFactory();
     }
 
     /**

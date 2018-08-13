@@ -9,14 +9,14 @@
 
     /**
 	 * ${method.getComments()}
-	**/
+	 */
 	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclarationWithoutHints()}) throws SQLException {
 		return ${method.getName()}(${method.getActualParameter()});
 	}
 
 	/**
 	 * ${method.getComments()}
-	**/
+	 */
 	public List<${host.getPojoClassName()}> ${method.getName()}(${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")

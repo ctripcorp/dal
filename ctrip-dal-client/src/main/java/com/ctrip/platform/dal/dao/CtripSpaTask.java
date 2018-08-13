@@ -1,8 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
-import java.util.LinkedHashSet;
+
 import java.util.Map;
-import java.util.Set;
 
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 import com.ctrip.platform.dal.dao.task.SingleTask;

@@ -14,21 +14,23 @@ import com.ctrip.datasource.spring.JavaConfigMybatisTest;
 import com.ctrip.datasource.spring.XmlConfigMybatisTest;
 import com.ctrip.datasource.titan.TitanServiceReaderTest;
 import com.ctrip.datasource.util.DalEncrypterTest;
+import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	TitanServiceReaderTest.class,
-	AllInOneConfigureReaderTest.class,
-	ConnectionStringParserParserTest.class,
-	CtripDalDataSourceTest.class,
-	MetricTest.class,
-  DalEncrypterTest.class,
-	JavaConfigMybatisTest.class,
-  XmlConfigMybatisTest.class,
-  ExecutorInterceptorTest.class,
-  StatementHandlerInterceptorTest.class,
-  StatementPrepareHandlerInterceptorTest.class
-	})
+		TitanServiceReaderTest.class,
+		AllInOneConfigureReaderTest.class,
+		ConnectionStringParserParserTest.class,
+		CtripDalDataSourceTest.class,
+		MetricTest.class,
+		DalEncrypterTest.class,
+		JavaConfigMybatisTest.class,
+		XmlConfigMybatisTest.class,
+		ExecutorInterceptorTest.class,
+		StatementHandlerInterceptorTest.class,
+		StatementPrepareHandlerInterceptorTest.class,
+		DalPropertiesChangedTest.class
+})
 public class AllTests {
 
 }

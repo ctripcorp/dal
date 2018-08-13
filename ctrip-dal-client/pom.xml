@@ -7,11 +7,11 @@
         <version>1.6.0</version>
     </parent>
     <artifactId>ctrip-dal-client</artifactId>
-    <version>1.15.6</version>
+    <version>logtable</version>
     <name>ctrip-dal-client</name>
     <properties>
         <file_encoding>UTF-8</file_encoding>
-        <ctrip-datasource.version>1.15.6</ctrip-datasource.version>
+        <ctrip-datasource.version>logtable</ctrip-datasource.version>
         <vi.version>0.11.5</vi.version>
         <framework-foundation.version>1.8.2</framework-foundation.version>
         <clogging-agent.version>4.2.9</clogging-agent.version>

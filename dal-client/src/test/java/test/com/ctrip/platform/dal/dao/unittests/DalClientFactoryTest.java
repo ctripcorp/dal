@@ -35,6 +35,7 @@ public class DalClientFactoryTest {
 		try {
 			DalClientFactory.warmUpConnections();
 		} catch (Throwable e) {
+			e.printStackTrace();
 			Assert.fail();
 		}
 	}

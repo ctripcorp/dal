@@ -2834,7 +2834,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 			assertEquals(1, getCount(2));
 			assertEquals(1, getCount(3));
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			fail();
 		}
 	}
@@ -2893,6 +2893,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 			assertEquals(1, getCount(2));
 			assertEquals(1, getCount(3));
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 	}
@@ -3006,7 +3007,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 			assertEquals(1, getCount(2));
 			assertEquals(1, getCount(3));
 		} catch (Exception e) {
-
+            e.printStackTrace();
 			fail();
 		}
 	}
@@ -3063,7 +3064,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 			assertEquals(1, getCount(2));
 			assertEquals(1, getCount(3));
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			fail();
 		}
 	}

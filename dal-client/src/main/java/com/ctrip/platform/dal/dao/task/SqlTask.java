@@ -7,5 +7,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 
 public interface SqlTask<T> {
-	T execute(DalClient client, String sql, StatementParameters parameters, DalHints hints) throws SQLException;
+	T execute(DalClient client, String sql, StatementParameters parameters, DalHints hints, DalTaskContext taskContext) throws SQLException;
+	DalTaskContext createTaskContext() throws SQLException;
 }

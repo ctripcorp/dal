@@ -18,7 +18,7 @@ public class DalConnection {
 	private String shardId;
 	private DbMeta meta;
 	private DalLogger logger;
-	private boolean needDiscard;;
+	private boolean needDiscard;
 
 	public DalConnection(Connection conn, boolean master, String shardId, DbMeta meta) throws SQLException {
 		this.oldIsolationLevel = conn.getTransactionIsolation();

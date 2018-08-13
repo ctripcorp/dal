@@ -8,6 +8,8 @@ import static org.junit.Assert.fail;
 import java.sql.SQLException;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.task.BulkTaskContext;
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -32,7 +34,7 @@ public class BatchDeleteTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int[] result = test.execute(hints, getAllMap(), null);
+			int[] result = test.execute(hints, getAllMap(), new BulkTaskContext<>(getAll()));
 			assertEquals(3, result.length);
 			assertEquals(0, getCount());
 		} catch (SQLException e) {

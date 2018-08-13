@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.sql.logging;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
@@ -58,21 +59,27 @@ public class Metrics {
 	}
 
 	public static void success(CtripLogEntry entry, long duration) {
-		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
+		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(),entry.getTables());
 		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 
 	public static void fail(CtripLogEntry entry, long duration) {
-        report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name());
+        report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(),entry.getTables());
 		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), FAIL);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 
-	private static void report(String databaseSet, String version, String databaseType,String operationType){
-		OptInfo info = new OptInfo(databaseSet,version, databaseType, operationType);
+	private static void report(String databaseSet, String version, String databaseType, String operationType, Set<String> tables) {
+		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType);
 		metric.log(OptInfo.KEY, 1, info.toTag());
+
+		if (tables == null || tables.isEmpty())
+			return;
+
+		for (String table : tables)
+			metric.log(OptInfo.TABLECOUNTKEY, 1, info.toTableCountTag(table));
 	}
 }

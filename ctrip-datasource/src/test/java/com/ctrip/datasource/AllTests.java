@@ -17,6 +17,7 @@ import com.ctrip.datasource.spring.JavaConfigMybatisTest;
 import com.ctrip.datasource.spring.XmlConfigMybatisTest;
 import com.ctrip.datasource.titan.TitanServiceReaderTest;
 import com.ctrip.datasource.util.DalEncrypterTest;
+import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -33,7 +34,8 @@ import com.ctrip.datasource.util.DalEncrypterTest;
   		StatementPrepareHandlerInterceptorTest.class,
 		DataSourceConfigureLocatorTest.class,
 		DalDataSourceFactoryTest.class,
-		QConfigConnectionStringProviderTest.class
+		QConfigConnectionStringProviderTest.class,
+		DalPropertiesChangedTest.class
 	})
 
 public class AllTests {

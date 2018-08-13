@@ -319,7 +319,7 @@ public class NoShardDalTransactionalTestOnSqlServerDao extends NoShardTransactio
             ret.setCityID(99);
             ret.setPeopleID(3L);
             update(null,ret);
-            throw new SQLException();
+            throw new SQLException("Dal Test Exception");
     }
 
     @DalTransactional(logicDbName = DATA_BASE)
@@ -337,7 +337,7 @@ public class NoShardDalTransactionalTestOnSqlServerDao extends NoShardTransactio
                     forthLevelsuccessful,forthLevelthrowException);
             System.out.println("first level done");
             if(!firstLevelsuccessful)
-                throw new Exception();
+                throw new Exception("Dal Test Exception");
         }catch (Exception e){
             if (firstLevelThrowException)
                 throw e;
@@ -356,7 +356,7 @@ public class NoShardDalTransactionalTestOnSqlServerDao extends NoShardTransactio
                     forthLevelsuccessful,forthLevelthrowException);
             System.out.println("second level done");
             if(!secondLevelsuccessful)
-                throw new Exception();
+                throw new Exception("Dal Test Exception");
         } catch (Exception e) {
             if (secondLevelThrowException)
                 throw e;
@@ -373,7 +373,7 @@ public class NoShardDalTransactionalTestOnSqlServerDao extends NoShardTransactio
             forthLevelTransaction(forthLevelsuccessful,forthLevelthrowException);
             System.out.println("third level done");
             if(!thirdLevelsuccessful)
-                throw new Exception();
+                throw new Exception("Dal Test Exception");
         } catch (Exception e) {
             if (thirdLevelthrowException)
                 throw e;
@@ -388,7 +388,7 @@ public class NoShardDalTransactionalTestOnSqlServerDao extends NoShardTransactio
             insert(new DalHints(), ret);
             System.out.println("forth level done");
             if(!successful)
-                throw new Exception();
+                throw new Exception("Dal Test Exception");
         } catch (Exception e) {
             if (throwException)
                 throw e;

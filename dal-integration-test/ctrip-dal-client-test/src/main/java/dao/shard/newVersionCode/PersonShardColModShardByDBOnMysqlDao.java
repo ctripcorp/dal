@@ -951,7 +951,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 	public List<MysqlPersonTable> test_def_queryPartialStrings_list(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeSelectSqlBuilder<List<MysqlPersonTable>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<MysqlPersonTable>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Age in (?)");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;

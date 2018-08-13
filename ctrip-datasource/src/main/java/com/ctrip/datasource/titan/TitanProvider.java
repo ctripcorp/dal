@@ -3,18 +3,17 @@ package com.ctrip.datasource.titan;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.datasource.configure.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.*;
 
 public class TitanProvider implements DataSourceConfigureProvider {
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
+    private DalPropertiesManager dalSettingsManager = DalPropertiesManager.getInstance();
 
     public void initialize(Map<String, String> settings) throws Exception {
         setSourceType(settings);
@@ -50,6 +49,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     @Override
     public void setup(Set<String> names) {
+        dalSettingsManager.setup();
         dataSourceConfigureManager.setup(names, sourceType);
     }
 

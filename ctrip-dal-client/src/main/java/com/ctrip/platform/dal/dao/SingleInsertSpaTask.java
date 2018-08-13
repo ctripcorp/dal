@@ -1,11 +1,16 @@
 package com.ctrip.platform.dal.dao;
 
+import static com.ctrip.platform.dal.common.enums.ParameterDirection.InputOutput;
+
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.dao.task.DalTableNameConfigure;
+import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.dao.task.KeyHolderAwaredTask;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolderAwaredTask {
     private static final String INSERT_SPA_TPL = "spA_%s_i";
@@ -29,19 +34,27 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolder
     }
 
     @Override
-    public int execute(DalHints hints, Map<String, ?> fields, T rawPojos) throws SQLException {
+    public int execute(DalHints hints, Map<String, ?> fields, T rawPojos, DalTaskContext taskContext)
+            throws SQLException {
         hints = DalHints.createIfAbsent(hints);
-
-        String insertSPA = String.format(INSERT_SPA_TPL, getRawTableName(hints, fields));
+        String tableName = getRawTableName(hints, fields);
+        String insertSPA = String.format(INSERT_SPA_TPL, tableName);
 
         StatementParameters parameters = new StatementParameters();
         String callSql = prepareSpCall(insertSPA, parameters, fields);
 
         register(parameters, fields);
-        Map<String, ?> results = client.call(callSql, parameters, hints.setFields(fields));
-        extract(parameters, hints.getKeyHolder());
 
-        return (Integer) results.get(RET_CODE);
+        if (taskContext instanceof DalTableNameConfigure)
+            ((DalTableNameConfigure) taskContext).addTables(tableName);
+
+        if (client instanceof DalContextClient) {
+            Map<String, ?> results =
+                    ((DalContextClient) client).call(callSql, parameters, hints.setFields(fields), taskContext);
+            extract(parameters, hints.getKeyHolder());
+            return (Integer) results.get(RET_CODE);
+        } else
+            throw new DalRuntimeException("The client is not instance of DalClient");
     }
 
     private void register(StatementParameters parameters, Map<String, ?> fields) {
@@ -54,7 +67,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolder
              * Must to be first one
              */
             if (outputIdName != null) {
-                parameters.get(outputIdIndex).setDirection(ParameterDirection.InputOutput);
+                parameters.get(outputIdIndex).setDirection(InputOutput);
             }
         }
     }
@@ -63,7 +76,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolder
         if (holder == null)
             return;
 
-        Map<String, Object> map = new LinkedHashMap<>();
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
 
         if (!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
             if (outputIdName != null) {

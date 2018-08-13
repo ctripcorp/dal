@@ -3,8 +3,8 @@ package com.ctrip.platform.dal.dao;
 import java.sql.SQLException;
 import java.util.Map;
 
-import com.ctrip.platform.dal.dao.task.AbstractIntArrayBulkTask;
-import com.ctrip.platform.dal.dao.task.BulkTaskContext;
+import com.ctrip.platform.dal.dao.task.*;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 /**
  * Common SP3 task for batch operation
@@ -22,8 +22,9 @@ public class BatchSp3Task<T> extends AbstractIntArrayBulkTask<T> {
     }
     
     @Override
-    public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, BulkTaskContext<T> tastContext) throws SQLException {
-        String spName = String.format(spTempName, getRawTableName(hints));
+    public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, DalBulkTaskContext<T> taskContext) throws SQLException {
+        String tableName = getRawTableName(hints);
+        String spName = String.format(spTempName, tableName);
 
         String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, columns);
         StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
@@ -36,7 +37,13 @@ public class BatchSp3Task<T> extends AbstractIntArrayBulkTask<T> {
             
             parametersList[i++] = parameters;
         }
-        
-        return client.batchCall(callSql, parametersList, hints);
+
+        if (taskContext instanceof DalTableNameConfigure)
+            ((DalTableNameConfigure) taskContext).addTables(tableName);
+
+        if (client instanceof DalContextClient)
+            return ((DalContextClient) client).batchCall(callSql, parametersList, hints, taskContext);
+        else
+            throw new DalRuntimeException("The client is not instance of DalClient");
     }   
 }

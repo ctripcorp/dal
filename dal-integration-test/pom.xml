@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>framework-parent</artifactId>
-    <version>1.6.0</version>
+    <version>1.7.0-SNAPSHOT</version>
   </parent>
 
   <groupId>com.ctrip.framework.dal</groupId>
@@ -16,8 +16,11 @@
 
   <properties>
     <framework-bom.version>2.23.0</framework-bom.version>
-    <dal.version>1.15.6</dal.version>
-    <ctrip-datasource.version>1.15.6</ctrip-datasource.version>
+    <dal.version>logtable</dal.version>
+    <ctrip-datasource.version>logtable</ctrip-datasource.version>
+
+    <!--<dal.version>1.15.6</dal.version>
+    <ctrip-datasource.version>1.15.6</ctrip-datasource.version>-->
   </properties>
 
   <modules>
@@ -27,6 +30,21 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Third Party-->
+      <dependency>
+        <groupId>com.ctrip.thirdparty</groupId>
+        <artifactId>ctrip-thirdparty-bom</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.ctrip.framework</groupId>
+        <artifactId>framework-bom</artifactId>
+        <version>${framework-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-dal-client</artifactId>
@@ -38,24 +56,17 @@
         <version>${ctrip-datasource.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.ctrip.framework</groupId>
-        <artifactId>framework-bom</artifactId>
-        <version>${framework-bom.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>
         <version>2.0.8.RELEASE</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
+      <!--<dependency>
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>1.2.0</version>
-      </dependency>
+      </dependency>-->
       <dependency>
         <groupId>org.mybatis</groupId>
         <artifactId>mybatis</artifactId>
@@ -68,5 +79,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
 </project>

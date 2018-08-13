@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -108,7 +109,7 @@ public abstract class BaseSingleDeleteTest {
 	 	p1.setCountryID(-1);
 
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1);
+			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1, new DefaultTaskContext());
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -129,7 +130,7 @@ public abstract class BaseSingleDeleteTest {
 					Assert.assertTrue(p.size() == 3);
 					
 					for(People p1: p)
-						test.execute(hints, parser.getFields(p1), p1);
+						test.execute(hints, parser.getFields(p1), p1, new DefaultTaskContext());
 					
 					hints = new DalHints().inShard(i).inTableShard(j);
 					int c = dao.count("1=1", new StatementParameters(), hints).intValue();

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -111,7 +112,7 @@ public abstract class BaseSingleUpdateTest {
 	 	p1.setCountryID(-1);
 
 		try {
-			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1);
+			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1, new DefaultTaskContext());
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -132,7 +133,7 @@ public abstract class BaseSingleUpdateTest {
 					for(People p1: p) {
 					 	p1.setName("test123");
 					 	p1.setProvinceID(-100);
-						test.execute(new DalHints(), parser.getFields(p1), p1);
+						test.execute(new DalHints(), parser.getFields(p1), p1, new DefaultTaskContext());
 					}
 					
 					p = dao.query("1=1", new StatementParameters(), hints);

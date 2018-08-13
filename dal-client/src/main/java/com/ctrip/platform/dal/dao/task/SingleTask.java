@@ -6,5 +6,6 @@ import java.util.Map;
 import com.ctrip.platform.dal.dao.DalHints;
 
 public interface SingleTask<T> extends DaoTask<T> {
-	int execute(DalHints hints, Map<String, ?> daoPojo, T rawPojo) throws SQLException;
+	int execute(DalHints hints, Map<String, ?> daoPojo, T rawPojo, DalTaskContext taskContext) throws SQLException;
+	DalTaskContext createTaskContext() throws SQLException;
 }

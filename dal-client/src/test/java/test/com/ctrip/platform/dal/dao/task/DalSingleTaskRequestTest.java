@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.ctrip.platform.dal.dao.task.DalTaskContext;
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -46,9 +48,15 @@ public class DalSingleTaskRequestTest {
 		}
 
 		@Override
-		public int execute(DalHints hints, Map<String, ?> daoPojo, Integer a)
+		public int execute(DalHints hints, Map<String, ?> daoPojo, Integer a, DalTaskContext dalTaskContext)
 				throws SQLException {
 			return (Integer)daoPojo.values().iterator().next();
+		}
+
+		@Override
+		public DefaultTaskContext createTaskContext() throws SQLException {
+			DefaultTaskContext taskContext = new DefaultTaskContext();
+			return taskContext;
 		}
 	}
 	

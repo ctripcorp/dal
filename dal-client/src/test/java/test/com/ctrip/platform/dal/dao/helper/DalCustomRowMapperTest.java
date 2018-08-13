@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.DalQueryDao;
+import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -19,6 +21,9 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalCustomRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class DalCustomRowMapperTest{
 	
@@ -74,5 +79,20 @@ public class DalCustomRowMapperTest{
 		List<Map<String, Object>> rest = database.getClient().query(sql, new StatementParameters(), new DalHints(), rse);
 		Assert.assertEquals(3, rest.size());
 		Assert.assertEquals("1", rest.get(0).get("id").toString());
+	}
+
+	@Test
+	public void testDalColumnMapRowMapperAlias() {
+		try {
+			StatementParameters parameters = new StatementParameters();
+			String sqlAlias="select quantity as q, type as t from "+ database.getTableName() +" where id=1";
+			DalQueryDao dao = new DalQueryDao(database.getDatabaseName());
+			List<Map<String, Object>> result = dao.query(sqlAlias, parameters, new DalHints(), new DalColumnMapRowMapper());
+			assertEquals(1, result.size());
+			assertEquals(10,result.get(0).get("q"));
+			assertEquals(1,result.get(0).get("t"));
+		} catch (Exception e) {
+			fail();
+		}
 	}
 }

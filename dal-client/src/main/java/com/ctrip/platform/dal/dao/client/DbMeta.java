@@ -10,15 +10,16 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
-import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import org.apache.commons.lang.StringUtils;
+
+
 
 public class DbMeta {
     private static Pattern hostRegxPattern = null;
     private DataSourceConfigureLocator configureLocator = DataSourceConfigureLocatorManager.getInstance();
-    private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
+    private static ILogger ilogger = DalElementFactory.DEFAULT.getILogger();
     private String databaseName;
     private DatabaseCategory dbCategory;
     private String dataBaseKeyName;

@@ -27,7 +27,7 @@ public class UpdateSqlTaskTestStub extends TaskTestStub {
 		parameters.set(2, Types.INTEGER, 1);
 		
 		try {
-			int result = test.execute(getClient(), "update " + getParser().getTableName() + " set address=? where id=?", parameters, hints);
+			int result = test.execute(getClient(), "update " + getParser().getTableName() + " set address=? where id=?", parameters, hints, null);
 			assertEquals("123456", getDao().queryByPk(1, hints).getAddress());
 		} catch (SQLException e) {
 			e.printStackTrace();

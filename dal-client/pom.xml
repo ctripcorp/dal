@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client</artifactId>
-    <version>1.15.6</version>
+    <version>1.15.7-SNAPSHOT</version>
     <properties>
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
@@ -24,6 +24,7 @@
         <cglib-nodep-version>2.1_3</cglib-nodep-version>
         <file_encoding>UTF-8</file_encoding>
         <jackson-version>2.8.9</jackson-version>
+        <jsqlparser-version>1.2</jsqlparser-version>
     </properties>
     <dependencies>
         <dependency>
@@ -121,6 +122,11 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>${jsqlparser-version}</version>
         </dependency>
     </dependencies>
     <build>

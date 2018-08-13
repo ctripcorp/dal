@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -28,7 +29,7 @@ public class QuerySqlTaskTestStub extends TaskTestStub {
 		parameters.set(1, Types.INTEGER, 1);
 		
 		try {
-			List<ClientTestModel> result = test.execute(getClient(), "select * from " + getParser().getTableName() + " where id=?", parameters, hints);
+			List<ClientTestModel> result = test.execute(getClient(), "select * from " + getParser().getTableName() + " where id=?", parameters, hints, null);
 			assertEquals(1, result.size());
 			assertEquals(1, result.get(0).getId().intValue());
 		} catch (SQLException e) {

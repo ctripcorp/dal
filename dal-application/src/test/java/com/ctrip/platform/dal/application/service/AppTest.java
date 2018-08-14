@@ -50,4 +50,31 @@ public class AppTest {
         DALServiceTable retPojo=dalService.updateMySql(testPojo);
         Assert.assertEquals("testUpdate", retPojo.getName());
     }
+
+    @Test
+    public void testDeleteMySql() throws Exception{
+        DALServiceTable testPojo=new DALServiceTable();
+        testPojo.setName("testInsert");
+        dalService.insertMySql(testPojo);
+        Assert.assertNotNull(testPojo);
+        testPojo.setName("testUpdate");
+        dalService.updateMySql(testPojo);
+        Assert.assertEquals("testUpdate",dalService.queryMySql(testPojo).getName());
+        dalService.deleteMySql(testPojo);
+        Assert.assertNull(dalService.queryMySql(testPojo));
+    }
+
+
+    @Test
+    public void testDeleteSqlServer() throws Exception{
+        DALServiceTable testPojo=new DALServiceTable();
+        testPojo.setName("testInsert");
+        dalService.insertSqlServer(testPojo);
+        Assert.assertNotNull(testPojo);
+        testPojo.setName("testUpdate");
+        dalService.updateSqlServer(testPojo);
+        Assert.assertEquals("testUpdate",dalService.querySqlServer(testPojo).getName());
+        dalService.deleteSqlServer(testPojo);
+        Assert.assertNull(dalService.querySqlServer(testPojo));
+    }
 }

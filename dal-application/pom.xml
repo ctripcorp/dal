@@ -7,31 +7,31 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.6.0</version>
+        <version>1.7.0</version>
     </parent>
 
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-application</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>war</packaging>
 
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
+           <!-- <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-dal-client</artifactId>
-                <version>1.15.6</version>
+                &lt;!&ndash;<version>1.15.6</version>&ndash;&gt;
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.15.6</version>
-            </dependency>
+                &lt;!&ndash;<version>1.15.6</version>&ndash;&gt;
+            </dependency>-->
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
-                <version>2.15.1</version>
+                <version>2.28.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -61,4 +61,24 @@ public class DALServiceController {
   public ModelAndView welcomePage(){
     return new ModelAndView("welcome");
   }
+
+  @RequestMapping("/mysql")
+  public void testMysql() throws Exception{
+    DALServiceTable testPojo=new DALServiceTable();
+    testPojo.setName("testInsert");
+    dalService.insertMySql(testPojo);
+    testPojo.setName("testUpdate");
+    dalService.updateMySql(testPojo);
+    dalService.deleteMySql(testPojo);
+  }
+
+  @RequestMapping("/sqlserver")
+  public void testSqlServer() throws Exception{
+    DALServiceTable testPojo=new DALServiceTable();
+    testPojo.setName("testInsert");
+    dalService.insertSqlServer(testPojo);
+    testPojo.setName("testUpdate");
+    dalService.updateSqlServer(testPojo);
+    dalService.deleteSqlServer(testPojo);
+  }
 }

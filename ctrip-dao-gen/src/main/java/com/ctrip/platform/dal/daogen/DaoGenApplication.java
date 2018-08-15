@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.daogen;
 
+import com.ctrip.platform.dal.daogen.hickwall.HickwallMetrics;
 import com.ctrip.platform.dal.daogen.resource.DalReportResource;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 
@@ -17,8 +18,10 @@ public class DaoGenApplication extends ResourceConfig {
 
         Configuration.addResource("conf.properties");
 
-        // init async thread
+        // init hickwall metrics
+        HickwallMetrics.initHickwallMetrics();
+
+        // init dal version report
         DalReportResource.initReportData();
     }
-
 }

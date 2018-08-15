@@ -1,18 +1,13 @@
 package com.ctrip.platform.dal.daogen;
 
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
-import com.ctrip.platform.dal.daogen.report.All;
+import com.ctrip.platform.dal.daogen.hickwall.HickwallMetrics;
 import com.ctrip.platform.dal.daogen.report.App;
 import com.ctrip.platform.dal.daogen.report.CMSApp;
 import com.ctrip.platform.dal.daogen.report.CMSAppInfo;
-import com.ctrip.platform.dal.daogen.report.DALLocalDatasource;
 import com.ctrip.platform.dal.daogen.report.DalReport;
-import com.ctrip.platform.dal.daogen.report.Machines;
 import com.ctrip.platform.dal.daogen.report.RawInfo;
-import com.ctrip.platform.dal.daogen.report.Report;
-import com.ctrip.platform.dal.daogen.report.Root;
-import com.ctrip.platform.dal.daogen.report.Types;
-import com.ctrip.platform.dal.daogen.report.Version;
+import com.ctrip.platform.dal.daogen.report.VersionStats;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDalClientVersionRawInfo;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDatasourceVersion;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDatasourceVersionRawInfo;
@@ -30,7 +25,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.glassfish.jersey.message.internal.MsgTraceEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,9 +52,6 @@ public class DalReportDao {
         return reportDao;
     }
 
-    private static final String DAL_LOCAL_DATASOURCE =
-            "http://cat.ctripcorp.com/cat/r/e?domain=All&ip=All&type=DAL.local.datasource&min=-1&max=-1&forceDownload=json";
-
     private static final String DAL_VERSION_URL =
             "http://cat.ctripcorp.com/cat/r/globalEvent?type=DAL.version&op=appDetail&forceDownload=json";
 
@@ -75,90 +66,36 @@ public class DalReportDao {
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REQUEST_BODY = "request_body";
 
-    private static final String LOCAL_DATASOURCE = "DAL.local.datasource";
-
     private static final String ALL = "All";
     private static final String MYSQL = "mysql";
 
+    private static final String JAVA = "java";
+    private static final String NET = "net";
+
     private List<DalReport> reportList = null;
-    private ConcurrentHashMap<String, CMSApp> appInfoMap = null;
+    private ConcurrentHashMap<String, CMSApp> appInfoMap = new ConcurrentHashMap<>();
     private Date lastUpdate = null;
-    private Map<String, List<NewDatabaseCategory>> databaseCategoryMap = null;
+    private Map<String, List<NewDatabaseCategory>> databaseCategoryMap = new HashMap<>();
+    private VersionStats versionStats = new VersionStats();
 
     public boolean isTaskRunning = false;
 
     private static final int COLUMN_COUNT = 6;
-    private static final int COLUMN_COUNT2 = 7;
 
     // minutes
     private static final long INIT_DELAY = 0;
-    private static final long DELAY = 60;
+    private static final long DELAY = 60; // 3
 
     public void init() {
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(new ReportTask(), INIT_DELAY, DELAY, TimeUnit.MINUTES);
     }
 
-    public List<App> getLocalDatasourceAppList() throws Exception {
-        List<App> list = new ArrayList<>();
-        List<String> appIds = getLocalDatasourceAppIds();
-        if (appIds.isEmpty())
-            return list;
-        Collections.sort(appIds);
-        Map<String, DalReport> map = convertListToMap(reportList);
-        Map<String, CMSApp> cmsMap = getAllCMSAppInfo();
-        for (String appId : appIds) {
-            App app = new App();
-            app.setId(appId);
-            DalReport report = map.get(appId);
-            if (report != null) {
-                app.setVersion(report.getVersion());
-            }
-            CMSApp cmsApp = cmsMap.get(appId);
-            if (cmsApp != null) {
-                app.setOrgName(cmsApp.getOrgName());
-                app.setName(cmsApp.getAppName());
-                app.setChineseName(cmsApp.getChineseName());
-                app.setOwner(cmsApp.getOwner());
-                app.setOwnerEmail(cmsApp.getOwnerEmail());
-            }
-            list.add(app);
-        }
-
-        return list;
-    }
-
-    private List<String> getLocalDatasourceAppIds() throws Exception {
-        List<String> appIds = new ArrayList<>();
-        Root root = HttpUtil.getJSONEntity(Root.class, DAL_LOCAL_DATASOURCE, null, HttpMethod.HttpGet);
-        if (root == null)
-            return appIds;
-        Report report = root.getReport();
-        if (report == null)
-            return appIds;
-        Machines machines = report.getMachines();
-        if (machines == null)
-            return appIds;
-        All all = machines.getAll();
-        if (all == null)
-            return appIds;
-        Types types = all.getTypes();
-        if (types == null)
-            return appIds;
-        DALLocalDatasource localDatasource = types.getDalLocalDatasource();
-        if (localDatasource == null)
-            return appIds;
-        Map<String, Version> map = localDatasource.getNames();
-        if (map != null && map.size() > 0) {
-            appIds.addAll(map.keySet());
-        }
-        return appIds;
-    }
-
     public RawInfo getNewRawInfo() throws Exception {
         RawInfo raw = new RawInfo();
         CtripDalClientVersionRawInfo dalVersion = getCtripDalVersion();
         CtripDatasourceVersionRawInfo datasourceVersion = getCtripDatasourceVersion();
+
         // depts
         Set<String> set = new HashSet<>();
         set.addAll(dalVersion.getDepts());
@@ -414,11 +351,11 @@ public class DalReportDao {
             String dept = report.getDept();
             String version = report.getVersion();
             if (!map.containsKey(dept))
-                map.put(dept, new TreeMap<String, List<DalReport>>());
+                map.put(dept, new TreeMap<>());
 
             Map<String, List<DalReport>> temp = map.get(dept);
             if (!temp.containsKey(version))
-                temp.put(version, new ArrayList<DalReport>());
+                temp.put(version, new ArrayList<>());
 
             temp.get(version).add(report);
         }
@@ -445,9 +382,9 @@ public class DalReportDao {
         String dept = report.getDept();
         String version = report.getVersion();
         if (!deptMap.containsKey(dept))
-            deptMap.put(dept, new ArrayList<List<String>>());
+            deptMap.put(dept, new ArrayList<>());
         if (!versionMap.containsKey(version))
-            versionMap.put(version, new ArrayList<List<String>>());
+            versionMap.put(version, new ArrayList<>());
 
         for (Map.Entry<String, CMSApp> entry : appMap.entrySet()) {
             CMSApp app = entry.getValue();
@@ -517,38 +454,6 @@ public class DalReportDao {
         return workbook;
     }
 
-    public Workbook getWorkbook2() throws Exception {
-        try (Workbook workbook = new HSSFWorkbook()) {
-            List<App> list = getLocalDatasourceAppList();
-            if (list == null || list.isEmpty())
-                return workbook;
-
-            int index = 0;
-            Sheet sheet = workbook.createSheet(LOCAL_DATASOURCE);
-            Row rowTitle = sheet.createRow(index);
-            List<String> title = getLocalDatasourceTitle();
-            createCells(rowTitle, title);
-            index++;
-
-            for (App app : list) {
-                List<String> temp = new ArrayList<>();
-                temp.add(app.getId());
-                temp.add(app.getOrgName());
-                temp.add(app.getName());
-                temp.add(app.getChineseName());
-                temp.add(app.getOwner());
-                temp.add(app.getOwnerEmail());
-                Row row = sheet.createRow(index);
-                createCells(row, temp);
-                index++;
-            }
-            setAutoSizeColumn(sheet, COLUMN_COUNT2);
-            return workbook;
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
     private void setAutoSizeColumn(Sheet sheet, int length) {
         if (sheet != null) {
             for (int i = 0; i < length; i++) {
@@ -573,17 +478,6 @@ public class DalReportDao {
         return title;
     }
 
-    private List<String> getLocalDatasourceTitle() {
-        List<String> title = new ArrayList<>();
-        title.add("App Id");
-        title.add("BU");
-        title.add("App Name");
-        title.add("Chinese Name");
-        title.add("Owner");
-        title.add("Owner Email");
-        return title;
-    }
-
     private List<String> getCommonTitle() {
         List<String> title = new ArrayList<>();
         title.add("App Id");
@@ -602,26 +496,6 @@ public class DalReportDao {
             Cell cell = row.createCell(i);
             cell.setCellValue(list.get(i));
         }
-    }
-
-    private Map<String, DalReport> convertListToMap(List<DalReport> list) {
-        Map<String, DalReport> map = new HashMap<>();
-        if (list == null || list.isEmpty())
-            return map;
-        for (DalReport report : list) {
-            List<String> appIds = report.getAppIds();
-            if (appIds == null || appIds.isEmpty())
-                continue;
-            String dept = report.getDept();
-            String version = report.getVersion();
-            for (String appId : appIds) {
-                DalReport temp = new DalReport();
-                temp.setDept(dept);
-                temp.setVersion(version);
-                map.put(appId, temp);
-            }
-        }
-        return map;
     }
 
     public void runTask() throws Exception {
@@ -681,6 +555,8 @@ public class DalReportDao {
         datasourceVersionList = formattedDataSourceVersionList(datasourceVersionList);
         result.addAll(dalVersionList);
         result.addAll(datasourceVersionList);
+        setDalVersionStats();
+        logDalVersionStats();
 
         reportList = result;
         lastUpdate = new Date();
@@ -704,12 +580,45 @@ public class DalReportDao {
         if (dalVersion == null)
             return list;
 
+        Map<String, NewName> nameDetails = dalVersion.getNameDetails();
+        if (nameDetails == null || nameDetails.isEmpty())
+            return list;
+
+        processAppIds(nameDetails);
+
         Map<String, Map<String, List<String>>> map = getAppMap(dalVersion.getNameDetails());
         if (map == null || map.isEmpty())
             return list;
 
         list = convertMapToList(map);
         return list;
+    }
+
+    private void processAppIds(Map<String, NewName> nameDetails) {
+        Set<String> javaAppIds = new HashSet<>();
+        Set<String> netAppIds = new HashSet<>();
+
+        for (Map.Entry<String, NewName> entry : nameDetails.entrySet()) {
+            NewName temp = entry.getValue();
+            if (temp == null)
+                continue;
+
+            Map<String, NewApp> appDetails = temp.getAppDetails();
+            if (appDetails == null || appDetails.isEmpty())
+                continue;
+
+            String key = entry.getKey().toLowerCase();
+            Set<String> appIds = appDetails.keySet();
+
+            if (key.indexOf(JAVA) > -1) {
+                javaAppIds.addAll(appIds);
+            } else if (key.indexOf(NET) > -1) {
+                netAppIds.addAll(appIds);
+            }
+        }
+
+        versionStats.setCtripDalClientAppIds(javaAppIds);
+        versionStats.setNetDalAppIds(netAppIds);
     }
 
     private List<DalReport> getDatasourceVersionVector() throws Exception {
@@ -730,12 +639,37 @@ public class DalReportDao {
         if (datasourceVersion == null)
             return list;
 
+        Map<String, NewName> nameDetails = datasourceVersion.getNameDetails();
+        if (nameDetails == null || nameDetails.isEmpty())
+            return list;
+
+        processDataSourceAppIds(nameDetails);
+
         Map<String, Map<String, List<String>>> map = getAppMap(datasourceVersion.getNameDetails());
         if (map == null || map.isEmpty())
             return list;
 
         list = convertMapToList(map);
         return list;
+    }
+
+    private void processDataSourceAppIds(Map<String, NewName> nameDetails) {
+        Set<String> datasourceAppIds = new HashSet<>();
+
+        for (Map.Entry<String, NewName> entry : nameDetails.entrySet()) {
+            NewName temp = entry.getValue();
+            if (temp == null)
+                continue;
+
+            Map<String, NewApp> appDetails = temp.getAppDetails();
+            if (appDetails == null || appDetails.isEmpty())
+                continue;
+
+            Set<String> appIds = appDetails.keySet();
+            datasourceAppIds.addAll(appIds);
+        }
+
+        versionStats.setTempDataSourceAppIds(datasourceAppIds);
     }
 
     private List<DalReport> formattedDataSourceVersionList(List<DalReport> list) {
@@ -753,6 +687,40 @@ public class DalReportDao {
         }
 
         return result;
+    }
+
+    private void setDalVersionStats() {
+        Set<String> ctripDalClientAppIds = versionStats.getCtripDalClientAppIds();
+        Set<String> tempDataSourceAppIds = versionStats.getTempDataSourceAppIds();
+        Set<String> javaAppIds = new HashSet<>();
+        javaAppIds.addAll(ctripDalClientAppIds);
+        javaAppIds.addAll(tempDataSourceAppIds);
+        versionStats.setJavaDalAppIds(javaAppIds);
+
+        Set<String> datasourceAppIds = new HashSet<>();
+        for (String appId : tempDataSourceAppIds) {
+            if (!ctripDalClientAppIds.contains(appId))
+                datasourceAppIds.add(appId);
+        }
+
+        versionStats.setCtripDataSourceAppIds(datasourceAppIds);
+
+        if (appInfoMap != null) {
+            Set<String> allAppIds = new HashSet<>();
+            for (Map.Entry<String, CMSApp> entry : appInfoMap.entrySet()) {
+                allAppIds.add(entry.getKey());
+            }
+
+            versionStats.setAllAppIds(allAppIds);
+        }
+    }
+
+    private void logDalVersionStats() {
+        HickwallMetrics.setAllMetricValue(versionStats.getAllAppIds().size());
+        HickwallMetrics.setJavaAllMetricValue(versionStats.getJavaDalAppIds().size());
+        HickwallMetrics.setJavaCtripDalClientMetricValue(versionStats.getCtripDalClientAppIds().size());
+        HickwallMetrics.setJavaCtripDataSourceMetricValue(versionStats.getCtripDataSourceAppIds().size());
+        HickwallMetrics.setNetDalMetricValue(versionStats.getNetDalAppIds().size());
     }
 
     // outer key:BU,inner key:version,value:app ids
@@ -779,11 +747,11 @@ public class DalReportDao {
 
                 String orgName = appInfo.getOrgName();
                 if (!result.containsKey(orgName))
-                    result.put(orgName, new HashMap<String, List<String>>());
+                    result.put(orgName, new HashMap<>());
 
                 Map<String, List<String>> versionMap = result.get(orgName);
                 if (!versionMap.containsKey(version))
-                    versionMap.put(version, new ArrayList<String>());
+                    versionMap.put(version, new ArrayList<>());
 
                 List<String> list = versionMap.get(version);
                 list.add(appId);
@@ -842,7 +810,7 @@ public class DalReportDao {
             for (Map.Entry<String, NewApp> appDetail : appDetails.entrySet()) {
                 String appId = appDetail.getKey();
                 if (!map.containsKey(appId))
-                    map.put(appId, new ArrayList<NewDatabaseCategory>());
+                    map.put(appId, new ArrayList<>());
 
                 List<NewDatabaseCategory> list = map.get(appId);
                 list.add(category);

@@ -170,41 +170,6 @@ public class DalReportResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("getLocalDatasourceAppList")
-    public List<App> getLocalDatasourceAppList() throws Exception {
-        return reportDao.getLocalDatasourceAppList();
-    }
-
-    @GET
-    @Path("exportExcel2")
-    @Produces(MIME_EXCEL)
-    public String exportExcel2(@Context HttpServletResponse response) throws Exception {
-        Workbook workbook = null;
-        OutputStream stream = null;
-        try (ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream()) {
-            response.setContentType(MIME_EXCEL);
-            response.setHeader("Content-Disposition", String.format("attachment; filename=%s.xls", EXCEL_FILE_NAME2));
-            workbook = reportDao.getWorkbook2();
-            workbook.write(byteArrayStream);
-            byte[] outArray = byteArrayStream.toByteArray();
-            stream = response.getOutputStream();
-            stream.write(outArray);
-        } catch (Exception e) {
-            LoggerManager.getInstance().error(e);
-            throw e;
-        } finally {
-            if (workbook != null)
-                workbook.close();
-            if (stream != null) {
-                stream.flush();
-                stream.close();
-            }
-        }
-        return "";
-    }
-
-    @GET
     @Path("forceFresh")
     public String forceFresh() throws Exception {
         String result = "Task is running,can't refresh right now,please try again later.";

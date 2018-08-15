@@ -18,13 +18,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * DAL Member Manage.
- *
- * @author gzxia
- * @modified yn.wang
- */
-
 @Resource
 @Singleton
 @Path("member")

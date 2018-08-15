@@ -18,13 +18,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * DAL databaseSet of group manage.
- *
- * @author gzxia
- * @modified yn.wang
- */
-
 @Resource
 @Singleton
 @Path("groupdbset")

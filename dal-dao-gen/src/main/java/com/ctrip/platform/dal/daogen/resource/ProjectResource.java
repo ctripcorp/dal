@@ -402,12 +402,6 @@ public class ProjectResource {
         return sets;
     }
 
-    /**
-     * 一键添加project缺失的databaseSet
-     *
-     * @param project_id
-     * @return
-     */
     @POST
     @Path("addLackDbset")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -633,12 +627,9 @@ public class ProjectResource {
             info = status.getInfo();
         }
         /*
-        // 验证project的task所需要的database在组内是否存在
-        status = validateDbPermision(groupId, project_id);
-        if (status.getCode().equals(Status.ERROR().getCode())) {
-            info += "</br>" + status.getInfo();
-        }
-        */
+         * // 验证project的task所需要的database在组内是否存在 status = validateDbPermision(groupId, project_id); if
+         * (status.getCode().equals(Status.ERROR().getCode())) { info += "</br>" + status.getInfo(); }
+         */
         if (info.length() > 0) {
             status = Status.ERROR();
             status.setInfo(info);

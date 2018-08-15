@@ -1,1 +1,0 @@
-JAVA_OPTS="${JAVA_OPTS} -Xms4g -Xmx4g -Xmn2560m -Xss512k -XX:SoftRefLRUPolicyMSPerMB=0 -XX:-UseAdaptiveSizePolicy -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+ExplicitGCInvokesConcurrent -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps"

@@ -1,13 +1,13 @@
 package com.ctrip.platform.dal.daogen.hickwall;
 
 import com.ctrip.ops.hickwall.HickwallUDPReporter;
-import io.dropwizard.metrics5.Gauge;
 import io.dropwizard.metrics5.MetricName;
 import io.dropwizard.metrics5.MetricRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HickwallMetrics {
     private static final MetricRegistry metrics = new MetricRegistry();
@@ -17,45 +17,55 @@ public class HickwallMetrics {
     private static final String JAVA_CTRIP_DATASOURCE = "java ctrip datasource";
     private static final String NET_DAL = ".net dal";
 
+    private static AtomicInteger allCount = new AtomicInteger();
+    private static AtomicInteger javaAllCount = new AtomicInteger();
+    private static AtomicInteger javaCtripDalClientCount = new AtomicInteger();
+    private static AtomicInteger javaCtripDataSourceCount = new AtomicInteger();
+    private static AtomicInteger netDalCount = new AtomicInteger();
+
     public static void initHickwallMetrics() {
         HickwallUDPReporter.enable(metrics, // singleton metrics registry
-                30 * 60, // interval, minimum 10s
+                60 * 60, // interval, minimum 10s //30
                 TimeUnit.SECONDS, // interval time unit
                 "udp.sink.hickwall.ctripcorp.com", // hickwall receive address //udp.sink.hickwall.ctripcorp.com:8090
-                                                   // //10.2.29.118:8090
+                // //10.2.29.118:8090
                 8090, // port
                 "SmallestDB" // influxdb database name
         );
+
+        initMetricValue(ALL, allCount);
+        initMetricValue(JAVA_ALL, javaAllCount);
+        initMetricValue(JAVA_CTRIP_DAL_CLIENT, javaCtripDalClientCount);
+        initMetricValue(JAVA_CTRIP_DATASOURCE, javaCtripDataSourceCount);
+        initMetricValue(NET_DAL, netDalCount);
     }
 
-    public static void setAllMetricValue(Integer count) {
-        setMetricValue(ALL, count);
-    }
-
-    public static void setJavaAllMetricValue(Integer count) {
-        setMetricValue(JAVA_ALL, count);
-    }
-
-    public static void setJavaCtripDalClientMetricValue(Integer count) {
-        setMetricValue(JAVA_CTRIP_DAL_CLIENT, count);
-    }
-
-    public static void setJavaCtripDataSourceMetricValue(Integer count) {
-        setMetricValue(JAVA_CTRIP_DATASOURCE, count);
-    }
-
-    public static void setNetDalMetricValue(Integer count) {
-        setMetricValue(NET_DAL, count);
-    }
-
-    private static void setMetricValue(String name, Integer count) {
+    private static void initMetricValue(String name, AtomicInteger count) {
         Map<String, String> tags = new HashMap<>();
         tags.put("appid", "930201");
 
         MetricName metricName = new MetricName(name, tags);
-        Gauge<Integer> gauge = () -> count;
-        MetricRegistry.MetricSupplier<Gauge> supplier = () -> gauge;
-        metrics.gauge(metricName, supplier);
+        metrics.gauge(metricName, () -> () -> count.get());
+    }
+
+    public static void setAllMetricValue(Integer count) {
+        allCount.set(count);
+    }
+
+    public static void setJavaAllMetricValue(Integer count) {
+        javaAllCount.set(count);
+    }
+
+    public static void setJavaCtripDalClientMetricValue(Integer count) {
+        javaCtripDalClientCount.set(count);
+    }
+
+    public static void setJavaCtripDataSourceMetricValue(Integer count) {
+        javaCtripDataSourceCount.set(count);
+    }
+
+    public static void setNetDalMetricValue(Integer count) {
+        netDalCount.set(count);
     }
 
 }

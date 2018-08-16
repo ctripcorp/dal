@@ -84,7 +84,7 @@ public class DalReportDao {
 
     // minutes
     private static final long INIT_DELAY = 0;
-    private static final long DELAY = 60; // 3
+    private static final long DELAY = 60; // 2 60
 
     public void init() {
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();

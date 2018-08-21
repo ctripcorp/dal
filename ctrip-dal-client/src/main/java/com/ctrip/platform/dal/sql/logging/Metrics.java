@@ -2,12 +2,13 @@ package com.ctrip.platform.dal.sql.logging;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+
 
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
+
 
 public class Metrics {
 	private static final String AllInOneKey = "AllInOneKey";
@@ -59,27 +60,24 @@ public class Metrics {
 	}
 
 	public static void success(CtripLogEntry entry, long duration) {
-		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(),entry.getTables());
-		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS);
+		String tableString = CommonUtil.setToOrderedString(entry.getTables());
+		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(), tableString);
+		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS, tableString);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 
 	public static void fail(CtripLogEntry entry, long duration) {
-        report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(),entry.getTables());
-		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), FAIL);
+		String tableString = CommonUtil.setToOrderedString(entry.getTables());
+		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(), tableString);
+		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), FAIL, tableString);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 
-	private static void report(String databaseSet, String version, String databaseType, String operationType, Set<String> tables) {
-		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType);
+	private static void report(String databaseSet, String version, String databaseType, String operationType, String tableString) {
+		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType, tableString);
 		metric.log(OptInfo.KEY, 1, info.toTag());
-
-		if (tables == null || tables.isEmpty())
-			return;
-
-		for (String table : tables)
-			metric.log(OptInfo.TABLECOUNTKEY, 1, info.toTableCountTag(table));
 	}
+
 }

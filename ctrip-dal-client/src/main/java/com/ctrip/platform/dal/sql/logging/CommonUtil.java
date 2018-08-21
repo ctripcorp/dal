@@ -1,12 +1,10 @@
 package com.ctrip.platform.dal.sql.logging;
 
-import java.security.Key;
-
-import javax.crypto.Cipher;
-
+import java.util.Set;
+import java.util.TreeSet;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
-import com.ctrip.platform.dal.dao.helper.DalBase64;
+import org.apache.commons.lang3.StringUtils;
 
 
 public class CommonUtil {
@@ -81,4 +79,14 @@ public class CommonUtil {
 	public static String desDecrypt(String encryptString) {
 	    return encryptCipher.desDecrypt(encryptString);
 	}
+
+    public static String setToOrderedString(Set<String> tables) {
+        if (tables == null)
+            return "empty tables";
+
+        Set<String> treeSet = new TreeSet<>();
+        treeSet.addAll(tables);
+
+        return StringUtils.join(treeSet.toArray(), ",");
+    }
 }

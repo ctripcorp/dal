@@ -21,8 +21,11 @@ public class SQLInfo {
 	
 	private static final String STATUS = "Status";
 	private String status;
+
+	private static final String TABLES = "Tables";
+	private String tables;
 	
-	public SQLInfo(String dao, String version, String method, int size, String status){
+	public SQLInfo(String dao, String version, String method, int size, String status, String tables){
 		this.dao = dao;
 		this.method = method;
 		this.version = "Java " + version;
@@ -36,6 +39,7 @@ public class SQLInfo {
         	this.size = 99999;
         }
 		this.status = status;
+		this.tables = tables;
 	}
 	
 	public String getDao() {
@@ -70,7 +74,7 @@ public class SQLInfo {
 		tag.put(SIZE, this.size.toString());
 		tag.put(STATUS, this.status);
 		tag.put(CLIENT, this.version);
-		
+		tag.put(TABLES, this.tables);
 		return tag;
 	}
 }

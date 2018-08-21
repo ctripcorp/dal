@@ -40,6 +40,7 @@ public abstract class ConnectionAction<T> {
     public LogEntry entry;
     public Throwable e;
     public Set<String> tables;
+    private static final String SWITCH_OFF = "SwitchOff";
 
     void populate(DalEventEnum operation, String sql, StatementParameters parameters, DalTaskContext dalTaskContext) {
         this.operation = operation;
@@ -214,10 +215,11 @@ public abstract class ConnectionAction<T> {
         try {
             entry.setDuration(System.currentTimeMillis() - start);
             if (dalPropertiesLocator.getTableParseSwitch() == TableParseSwitch.OFF) {
-                tables.clear();
-                tables.add("switch off");
-            }
-            entry.setTables(tables);
+                Set<String> localTables = new HashSet<>();
+                localTables.add(SWITCH_OFF);
+                entry.setTables(localTables);
+            } else
+                entry.setTables(tables);
             if (e == null) {
                 logger.success(entry, entry.getResultCount());
             } else {

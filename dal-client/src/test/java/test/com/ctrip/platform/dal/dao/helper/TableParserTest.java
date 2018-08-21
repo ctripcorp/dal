@@ -2,6 +2,8 @@ package test.com.ctrip.platform.dal.dao.helper;
 
 import com.ctrip.platform.dal.dao.helper.DefaultTableParser;
 import com.ctrip.platform.dal.dao.helper.TableParser;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -267,23 +269,12 @@ public class TableParserTest {
             fail();
     }
 
-    /*@Test
-    public void testJSqlParserPerformance() throws Exception{
-        String sql="*//*100008423-PersonShardColModShardByDBOnMysqlDao.queryListMultipleAllShards[MSG_ID:100008423-0a201579-425503-10051]*//*select * from person1;select * from person2;select * from person3;select * from person4;select * from person5;select * from person6;select * from person7;select * from person8;select count(*) from person9;select count(*) from person10" +
-                ";select count(*) from person11;select count(*) from person12;select count(*) from person13;select count(*) from person14;select count(*) from person15;select Name from person16;select Name from person17;select Name from person18;select Name from person19;select Name from person20;" +
-                "select Name from person21;select Name from person22;select Name from person23;select * from person24 where ID = ?;select * from person25 where ID = ?;select * from person26 where ID = ?;select * from person27 where ID = ?;select * from person28 where ID = ?;select * from person29 where ID = ?;select * from person30 where ID = ?;" +
-                "select * from person31 where ID = ?;select * from person32 where ID = ? and Age=21;select * from person33 where ID = ? and Age=21;select * from person where34 ID = ? and Age=21;select * from person35 where ID = ? and Age=21;select * from person36 where ID = ? and Age=21;select * from person37 where ID = ? and Age=21;select * from person38 where ID = ? and Age=21;select * from person39 where ID = ? and Age=21;select * from person40 where Age In (?,?,?) ;" +
-                "select * from person41 where Age In (?,?,?) ;select * from person42 where Age In (?,?,?) ;select * from person43 where Age In (?,?,?) ;select * from person44 where Age In (?,?,?) ;select * from person45 where Age In (?,?,?) ;select * from person46 where Age In (?,?,?) ;select * from person47 where Age In (?,?,?) ;select * from person48 where ID = 4;select * from person49 where ID = 4;select * from person50 where ID = 4;" +
-                "select * from person51 where ID = 4;select * from person52 where ID = 4;select * from person53 where ID = 4;select * from person54 where ID = 4;select * from person55 where ID = 4;select count(*) from person56;";
-//        String sql="select * from person";
-        Set<String> tables=new HashSet<>();
-        long start=System.currentTimeMillis();
-        for(int i=0;i<1000;i++){
-            tables.addAll(tableParser.getTablesFromSqls(sql));
-        }
-        long end=System.currentTimeMillis();
-        System.out.println("cost time: "+ (end-start)/1000);
-        for(String table:tables)
-        System.out.println(table);
-    }*/
+    @Test
+    public void testIsNull() throws Exception {
+        String sql = "update Trainorder set ReturnTicketState=? where orderid=? and (ISNULL(ReturnTicketState) OR ReturnTicketState<?)";
+        Set<String> tables = tableParser.getTablesFromSqls(sql);
+
+        assertEquals(1, tables.size());
+        assertTrue(tables.contains("trainorder"));
+    }
 }

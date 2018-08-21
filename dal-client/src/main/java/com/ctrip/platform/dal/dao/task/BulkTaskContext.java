@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.task;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +14,7 @@ import com.ctrip.platform.dal.dao.UpdatableEntity;
  * what dal internal created for intermediate use.   
  * @author jhhe
  */
-public class BulkTaskContext<T> implements DalBulkTaskContext<T>,  DalTableNameConfigure {
+public class BulkTaskContext<T> extends DefaultTaskContext implements DalBulkTaskContext<T>,  DalTableNameConfigure {
 	private List<T> rawPojos;
 	
 	// This is only for batch and combined insert operation
@@ -24,21 +23,6 @@ public class BulkTaskContext<T> implements DalBulkTaskContext<T>,  DalTableNameC
 	private boolean isUpdatableEntity;
 	// This is only for batch update operation
 	private Map<String, Boolean> pojoFieldStatus;
-
-	private Set<String> tables = new HashSet<>();
-
-	@Override
-	public Set<String> getTables() {
-		Set<String> tablesCopy = new HashSet<>();
-		tablesCopy.addAll(this.tables);
-		return tablesCopy;
-	}
-
-	@Override
-	public void addTables(String... tables) {
-		for (String table : tables)
-			this.tables.add(table.toLowerCase());
-	}
 
 	@Override
 	public Map<String, Boolean> getPojoFieldStatus() {

@@ -76,8 +76,7 @@ public class DefaultTableParser implements TableParser{
     private List<String> extractTablesFromSql(String sql) {
         List<String> tableList = new ArrayList<>();
         try {
-//			the jsqlparser can not parse "with (nolock)" or "(nolock)"
-            sql = ignoreWithNolock(sql);
+            sql = ignoreUnsupportedSyntax(sql);
             finderLock.lock();
             try {
                 tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
@@ -92,6 +91,14 @@ public class DefaultTableParser implements TableParser{
         }
 //			remove mysql quote "``" or sqlserver quote "[]" and db prefix like "dbname.tablename"
         return removePrefixAndQuote(tableList);
+    }
+
+    private String ignoreUnsupportedSyntax(String sql) {
+//		 the jsqlparser can not parse "with (nolock)" or "(nolock)"
+        sql = ignoreWithNolock(sql);
+//       the jsqlparser can not parse "isnull"
+        sql = sql.replace("isnull", " ");
+        return sql;
     }
 
     private String ignoreWithNolock(String sql) {

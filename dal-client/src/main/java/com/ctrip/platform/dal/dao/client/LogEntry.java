@@ -41,6 +41,7 @@ public class LogEntry {
 	private String source;
 	private String clientVersion;
 	private Set<String> tables=new HashSet<>();
+	private static final String NOT_FOUND="NotFound";
 	private Throwable exception;
 	private TableParser tableParser = new DefaultTableParser();
 	private static final String JSON_PATTERN = "{'Decode':'%s','Connect':'%s','Prepare':'%s','Excute':'%s','ClearUp':'%s'}";
@@ -417,6 +418,8 @@ public class LogEntry {
 			tables = tableParser.getTablesFromSqls(sqls);
 		if (callString != null)
 			tables = tableParser.getTablesFromSqls(callString);
+		if (tables.size() == 0)
+			tables.add(NOT_FOUND);
 		return tables;
 	}
 

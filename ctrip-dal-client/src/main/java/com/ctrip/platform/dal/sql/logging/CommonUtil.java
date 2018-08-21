@@ -8,8 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 
 
 public class CommonUtil {
-	
-	private static String key = LoggerAdapter.secretKey;
+
+    private static String key = LoggerAdapter.secretKey;
+    public static final String NULL_SET = "NullSet";
+    public static final String EMPTY_SET = "EmptySet";
 
 	public static String null2NA(String str) {
 		return null != str ? str : "NA";
@@ -80,12 +82,15 @@ public class CommonUtil {
 	    return encryptCipher.desDecrypt(encryptString);
 	}
 
-    public static String setToOrderedString(Set<String> tables) {
-        if (tables == null)
-            return "empty tables";
+    public static String setToOrderedString(Set<String> origin) {
+        if (origin == null)
+            return NULL_SET;
+
+        if (origin.size()==0)
+            return EMPTY_SET;
 
         Set<String> treeSet = new TreeSet<>();
-        treeSet.addAll(tables);
+        treeSet.addAll(origin);
 
         return StringUtils.join(treeSet.toArray(), ",");
     }

@@ -22,24 +22,32 @@ public class SQLInfo {
 	private static final String STATUS = "Status";
 	private String status;
 
+	private static final String DB = "DB";
+	private String database;
+
 	private static final String TABLES = "Tables";
 	private String tables;
-	
-	public SQLInfo(String dao, String version, String method, int size, String status, String tables){
+
+	private static final String OPTTYPE = "OperationType";
+	private String operationType;
+
+	public SQLInfo(String dao, String version, String method, int size, String status, String database, String tables, String optType) {
 		this.dao = dao;
 		this.method = method;
 		this.version = "Java " + version;
 		if (size < 200) {
-            this.size = 200;
-        } else if (size < 1000) {
-        	this.size = 1000;
-        } else if (size < 5000) {
-        	this.size = 5000;
-        } else {
-        	this.size = 99999;
-        }
+			this.size = 200;
+		} else if (size < 1000) {
+			this.size = 1000;
+		} else if (size < 5000) {
+			this.size = 5000;
+		} else {
+			this.size = 99999;
+		}
 		this.status = status;
+		this.database = database;
 		this.tables = tables;
+		this.operationType = optType;
 	}
 	
 	public String getDao() {
@@ -74,7 +82,9 @@ public class SQLInfo {
 		tag.put(SIZE, this.size.toString());
 		tag.put(STATUS, this.status);
 		tag.put(CLIENT, this.version);
+		tag.put(DB,this.database);
 		tag.put(TABLES, this.tables);
+		tag.put(OPTTYPE,this.operationType);
 		return tag;
 	}
 }

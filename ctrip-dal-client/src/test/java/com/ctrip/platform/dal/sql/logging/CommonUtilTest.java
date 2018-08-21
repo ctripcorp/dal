@@ -44,17 +44,20 @@ public class CommonUtilTest {
 			assertTrue(str3.equals(str2));
 
 			Set<String> set4 = new HashSet<>();
-			set4.add("switch off");
+			set4.add("SwitchOff");
 			String str4 = CommonUtil.setToOrderedString(set4);
-			assertTrue("switch off".equals(str4));
+			assertTrue("SwitchOff".equals(str4));
 
 			String str5 = CommonUtil.setToOrderedString(null);
-			assertTrue("empty tables".equals(str5));
+			assertTrue("NullSet".equals(str5));
+
+			String str7 = CommonUtil.setToOrderedString(new HashSet<String>());
+			assertTrue("EmptySet".equals(str7));
 
 			Set<String> set6 = new HashSet<>();
-			set6.add("not supported");
+			set6.add("NotFound");
 			String str6 = CommonUtil.setToOrderedString(set6);
-			assertTrue("not supported".equals(str6));
+			assertTrue("NotFound".equals(str6));
 		} catch (Throwable e) {
 			e.printStackTrace();
 			fail();

@@ -70,7 +70,7 @@ public class Metrics {
 	}
 
 	private static void reportAll(CtripLogEntry entry, long duration,String status){
-		String database = entry.getDatabaseName();
+		String database = entry.getDataBaseKeyName();
 		String tableString = getTableString(entry);
 		String optType = entry.getEvent().name();
 		String version = entry.getClientVersion();

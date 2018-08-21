@@ -1,17 +1,17 @@
 package com.ctrip.platform.dal.sql.logging;
 
-import java.security.Key;
-
-import javax.crypto.Cipher;
-
+import java.util.Set;
+import java.util.TreeSet;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
-import com.ctrip.platform.dal.dao.helper.DalBase64;
+import org.apache.commons.lang3.StringUtils;
 
 
 public class CommonUtil {
-	
-	private static String key = LoggerAdapter.secretKey;
+
+    private static String key = LoggerAdapter.secretKey;
+    public static final String NULL_SET = "NullSet";
+    public static final String EMPTY_SET = "EmptySet";
 
 	public static String null2NA(String str) {
 		return null != str ? str : "NA";
@@ -81,4 +81,17 @@ public class CommonUtil {
 	public static String desDecrypt(String encryptString) {
 	    return encryptCipher.desDecrypt(encryptString);
 	}
+
+    public static String setToOrderedString(Set<String> origin) {
+        if (origin == null)
+            return NULL_SET;
+
+        if (origin.size()==0)
+            return EMPTY_SET;
+
+        Set<String> treeSet = new TreeSet<>();
+        treeSet.addAll(origin);
+
+        return StringUtils.join(treeSet.toArray(), ",");
+    }
 }

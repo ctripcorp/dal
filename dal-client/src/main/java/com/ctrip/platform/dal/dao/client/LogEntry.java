@@ -417,6 +417,8 @@ public class LogEntry {
 			tables = tableParser.getTablesFromSqls(sqls);
 		if (callString != null)
 			tables = tableParser.getTablesFromSqls(callString);
+		if (tables.size() == 0)
+			tables.add("not found");
 		return tables;
 	}
 

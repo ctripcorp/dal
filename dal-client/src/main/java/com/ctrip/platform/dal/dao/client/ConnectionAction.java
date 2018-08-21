@@ -213,8 +213,11 @@ public abstract class ConnectionAction<T> {
     private void log(Object result, Throwable e) {
         try {
             entry.setDuration(System.currentTimeMillis() - start);
-            if (dalPropertiesLocator.getTableParseSwitch() == TableParseSwitch.ON)
-                entry.setTables(tables);
+            if (dalPropertiesLocator.getTableParseSwitch() == TableParseSwitch.OFF) {
+                tables.clear();
+                tables.add("switch off");
+            }
+            entry.setTables(tables);
             if (e == null) {
                 logger.success(entry, entry.getResultCount());
             } else {

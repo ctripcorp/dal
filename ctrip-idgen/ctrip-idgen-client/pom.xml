@@ -11,7 +11,7 @@
 
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-idgen-client</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <frameworkbom.version>2.23.0</frameworkbom.version>

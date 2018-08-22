@@ -2,6 +2,7 @@ package com.ctrip.framework.idgen.server.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
 
 import java.util.Map;
@@ -29,7 +30,30 @@ public class ServerConfigProvider implements ConfigProvider {
         if (null == config) {
             return null;
         }
-        return config.asMap();
+
+        Map<String, String> map = null;
+        try {
+            map = config.asMap();
+        } catch (Throwable t) {
+            LOGGER.error(t.getMessage(), t);
+        }
+        return map;
+    }
+
+    public void addConfigChangedListener(final ConfigChanged callback) {
+        final MapConfig config = configReference.get();
+        if (null == config || null == callback) {
+            return;
+        }
+
+        config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
+            @Override
+            public void onLoad(Map<String, String> map) {
+                if (map != null && !map.isEmpty()) {
+                    callback.onConfigChanged(map);
+                }
+            }
+        });
     }
 
 }

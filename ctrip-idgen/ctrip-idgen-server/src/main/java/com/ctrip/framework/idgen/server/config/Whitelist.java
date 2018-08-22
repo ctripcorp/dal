@@ -8,4 +8,6 @@ public interface Whitelist {
 
     boolean validateSequenceName(String sequenceName);
 
+    void refreshConfig(Map<String, String> properties);
+
 }

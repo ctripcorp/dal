@@ -20,6 +20,7 @@ public class SnowflakeWorker implements IdWorker {
     public SnowflakeWorker(String sequenceName, ServerConfig config) {
         this.sequenceName = sequenceName;
         this.config = config;
+        this.sequence = getRandomSequence();
     }
 
     @Override

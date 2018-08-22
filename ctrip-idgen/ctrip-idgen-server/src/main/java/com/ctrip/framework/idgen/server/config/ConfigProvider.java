@@ -8,4 +8,6 @@ public interface ConfigProvider {
 
     Map<String, String> getConfig();
 
+    void addConfigChangedListener(final ConfigChanged callback);
+
 }

@@ -4,6 +4,8 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class ConfigManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
@@ -25,6 +27,15 @@ public class ConfigManager {
         whitelistProvider.initialize();
         serverConfig.importConfig(serverConfigProvider.getConfig());
         whitelist.importConfig(whitelistProvider.getConfig());
+    }
+
+    private void addWhitelistChangedListener() {
+        whitelistProvider.addConfigChangedListener(new ConfigChanged() {
+            @Override
+            public void onConfigChanged(Map<String, String> properties) {
+
+            }
+        });
     }
 
     public ServerConfig getServerConfig() {

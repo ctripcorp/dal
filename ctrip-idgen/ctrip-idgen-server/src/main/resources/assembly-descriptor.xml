@@ -22,7 +22,7 @@
             <directory>src/main/resources</directory>
             <outputDirectory>config</outputDirectory>
             <excludes>
-                <exclude>ctrip-idgen-server.conf</exclude>
+                <exclude>idgen-server.conf</exclude>
             </excludes>
             <lineEnding>unix</lineEnding>
         </fileSet>
@@ -30,7 +30,7 @@
             <directory>src/main/resources</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>ctrip-idgen-server.conf</include>
+                <include>idgen-server.conf</include>
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>

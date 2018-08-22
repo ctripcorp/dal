@@ -64,8 +64,8 @@ function getCurrentRealPath(){
 
 #VARS
 FULL_DIR=`getCurrentRealPath`
-SERVICE_NAME=ctrip-idgen-server
-LOG_DIR=/opt/logs/100016264
+SERVICE_NAME=idgen-server
+LOG_DIR=/opt/logs/100016446
 SERVER_PORT=`getPortFromPathOrDefault $FULL_DIR 8080`
 JMX_PORT=` expr $SERVER_PORT + 10000 `
 IP=`ifconfig | grep "inet.10" | awk '{print $2}; NR == 1 {exit}'`

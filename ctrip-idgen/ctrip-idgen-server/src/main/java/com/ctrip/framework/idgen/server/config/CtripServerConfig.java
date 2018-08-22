@@ -1,5 +1,6 @@
 package com.ctrip.framework.idgen.server.config;
 
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.framework.idgen.server.util.PropertiesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,9 +99,9 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
 
     private String getWorkerIdPropertyKeySuffix() {
         try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Get local IP failed", e);
+            return Foundation.net().getHostAddress();
+        } catch (Throwable t) {
+            throw new RuntimeException("Get local IP failed", t);
         }
     }
 

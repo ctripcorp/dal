@@ -36,6 +36,9 @@ public class SnowflakeWorker implements IdWorker {
         if (timeoutMillis <= 0) {
             timeoutMillis = ConfigConstants.TIMEOUTMILLIS_DEFAULT_VALUE;
         }
+        if (timeoutMillis > ConfigConstants.TIMEOUTMILLIS_MAX_VALUE) {
+            timeoutMillis = ConfigConstants.TIMEOUTMILLIS_MAX_VALUE;
+        }
 
         long sequenceStart;
 

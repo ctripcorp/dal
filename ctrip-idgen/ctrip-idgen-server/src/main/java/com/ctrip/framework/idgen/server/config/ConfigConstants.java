@@ -10,7 +10,7 @@ public interface ConfigConstants {
 
     String WORKERID_PROPERTY_KEY_PATTERN = "workerId_%s";
     String DATEREFERENCE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    String WHITELIST_ENABLE_FLAG = "on";
+    String WHITELIST_ENABLED_FLAG = "on";
 
     int IDBITS_MAX_VALUE = 63;
     int TIMESTAMPBITS_DEFAULT_VALUE = 40;
@@ -20,6 +20,7 @@ public interface ConfigConstants {
     String DATEREFERENCE_DEFAULT_VALUE = "2018-08-08 00:00:00";
 
     int REQUESTSIZE_MAX_VALUE = 5000;
-    int TIMEOUTMILLIS_DEFAULT_VALUE = 5;
+    int TIMEOUTMILLIS_MAX_VALUE = 10;
+    int TIMEOUTMILLIS_DEFAULT_VALUE = 2;
 
 }

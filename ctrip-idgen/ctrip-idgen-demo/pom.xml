@@ -9,13 +9,13 @@
         <version>1.0.2-SNAPSHOT</version>
     </parent>
 
-
-    <artifactId>idgen-service-api</artifactId>
+    <artifactId>idgen-demo</artifactId>
     <version>1.0.2-SNAPSHOT</version>
-    <packaging>jar</packaging>
 
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.ctrip.platform</groupId>
+            <artifactId>ctrip-idgen-client</artifactId>
+        </dependency>
+    </dependencies>
 </project>

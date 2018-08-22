@@ -3,6 +3,7 @@ package com.ctrip.framework.idgen.server.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,7 +11,7 @@ public class CtripWhitelist implements Whitelist, ConfigConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripServerConfig.class);
 
-    private Set<String> whitelist;
+    private Set<String> whitelist = new HashSet<>();
 
     public void importConfig(Map<String, String> properties) {
         if (null == properties) {

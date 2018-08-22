@@ -44,9 +44,9 @@ public class ServiceManager {
             newRefConfig.setRegistry(regConfig);
             newRefConfig.setInterface(IdGenerateService.class);
             Map<String, String> params = new HashMap<String, String>();
-            params.put("serviceId", "framework.service.idgenerator.v1.idgenerateservice");
+            params.put("serviceId", "framework.service.idgenerator.v2.idgenerateservice");
             newRefConfig.setParameters(params);
-            newRefConfig.setUrl("dubbo://10.5.70.134:20880/");
+            newRefConfig.setUrl("dubbo://localhost:20880/");
             newRefConfig.setInit(true);
 
             refConfigReference.compareAndSet(refConfig, newRefConfig);

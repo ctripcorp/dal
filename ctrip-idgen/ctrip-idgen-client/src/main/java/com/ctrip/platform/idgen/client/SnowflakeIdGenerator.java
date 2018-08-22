@@ -7,7 +7,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
     // cat transaction
     @Override
     public Number nextId() {
-        return nextId("test1");
+        return nextId("testName1");
     }
 
     public Number nextId(String sequenceName) {

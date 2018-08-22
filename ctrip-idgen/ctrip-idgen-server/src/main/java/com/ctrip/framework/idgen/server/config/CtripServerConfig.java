@@ -51,7 +51,7 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
         try {
             dateReference = PropertiesParser.parseDateString(properties, DATEREFERENCE_PROPERTY_KEY);
         } catch (Throwable t) {
-            LOGGER.info("[sequenceInitRange] invalid, use default value");
+            LOGGER.info("[dateReference] invalid, use default value");
         }
 
         workerId = parseWorkerId(properties);
@@ -66,6 +66,10 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
     }
 
     private long parseWorkerId(Map<String, String> properties) {
+        if (checkWorkerIdDuplication(properties)) {
+            LOGGER.error("workerId duplicated");
+            throw new RuntimeException("workerId duplicated");
+        }
         try {
             return PropertiesParser.parseLong(properties, getWorkerIdPropertyKey());
         } catch (Throwable t) {
@@ -75,7 +79,7 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
     }
 
     private boolean checkWorkerIdDuplication(Map<String, String> properties) {
-        return true;
+        return false;
     }
 
     private long parseTimestamp(String date) {
@@ -124,6 +128,7 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
         }
 
         if (errMsg != null) {
+            LOGGER.error(errMsg);
             throw new RuntimeException(errMsg);
         }
     }

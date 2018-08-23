@@ -10,7 +10,7 @@
         <CatAppender name="Cat"/>
     </appenders>
     <loggers>
-        <logger name="com.ctrip.platform.idgen" additivity="false" level="TRACE">
+        <logger name="com.ctrip.platform.idgen" additivity="false" level="INFO">
             <AppenderRef ref="Async"/>
             <AppenderRef ref="Cat"/>
         </logger>

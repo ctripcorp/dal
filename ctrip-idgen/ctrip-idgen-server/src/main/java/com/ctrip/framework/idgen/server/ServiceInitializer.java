@@ -17,7 +17,6 @@ public class ServiceInitializer extends SpringBootServletInitializer {
         try {
             ConfigManager.getInstance().initialize();
         } catch (Throwable t) {
-//            t.printStackTrace();
             System.exit(-1);
         }
         SpringApplication.run(ServiceInitializer.class);

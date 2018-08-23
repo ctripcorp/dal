@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface ConfigChanged {
 
-    void onConfigChanged(Map<String, String> properties);
+    void onConfigChanged(final Map<String, String> properties);
 
 }

@@ -21,35 +21,35 @@ public class WhitelistProvider implements ConfigProvider {
                 configReference.set(config);
             }
         } catch (Throwable t) {
-            LOGGER.warn("Load " + WHITELIST_PROPERTIES + " from QConfig exception", t);
+            LOGGER.error(t.getMessage(), t);
         }
     }
 
     public Map<String, String> getConfig() {
-        MapConfig config = configReference.get();
-        if (null == config) {
-            return null;
-        }
-
         Map<String, String> map = null;
-        try {
-            map = config.asMap();
-        } catch (Throwable t) {
-            LOGGER.error(t.getMessage(), t);
+        MapConfig config = configReference.get();
+        if (config != null) {
+            try {
+                map = config.asMap();
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage(), t);
+            }
         }
         return map;
     }
 
     public void addConfigChangedListener(final ConfigChanged callback) {
-        final MapConfig config = configReference.get();
-        if (null == config || null == callback) {
+        if (null == callback) {
             return;
         }
-
+        MapConfig config = configReference.get();
+        if (null == config) {
+            return;
+        }
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
-                if (map != null && !map.isEmpty()) {
+                if (map != null) {
                     callback.onConfigChanged(map);
                 }
             }

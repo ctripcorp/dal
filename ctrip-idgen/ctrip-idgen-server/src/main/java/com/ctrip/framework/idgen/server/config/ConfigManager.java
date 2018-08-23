@@ -9,17 +9,17 @@ import java.util.Map;
 public class ConfigManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
-    private volatile static ConfigManager configManager = null;
+    private volatile static ConfigManager manager = null;
     private ServerConfig serverConfig = new CtripServerConfig();
     private Whitelist whitelist = new CtripWhitelist();
     private ConfigProvider serverConfigProvider = new ServerConfigProvider();
     private ConfigProvider whitelistProvider = new WhitelistProvider();
 
     public synchronized static ConfigManager getInstance() {
-        if (null == configManager) {
-            configManager = new ConfigManager();
+        if (null == manager) {
+            manager = new ConfigManager();
         }
-        return configManager;
+        return manager;
     }
 
     public void initialize() {
@@ -27,13 +27,14 @@ public class ConfigManager {
         whitelistProvider.initialize();
         serverConfig.importConfig(serverConfigProvider.getConfig());
         whitelist.importConfig(whitelistProvider.getConfig());
+        addWhitelistChangedListener();
     }
 
     private void addWhitelistChangedListener() {
         whitelistProvider.addConfigChangedListener(new ConfigChanged() {
             @Override
             public void onConfigChanged(Map<String, String> properties) {
-
+                whitelist.refreshConfig(properties);
             }
         });
     }

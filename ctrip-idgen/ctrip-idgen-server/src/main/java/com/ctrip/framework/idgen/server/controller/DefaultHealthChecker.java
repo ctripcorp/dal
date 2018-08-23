@@ -8,11 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DefaultHealthChecker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultHealthChecker.class);
+//    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultHealthChecker.class);
 
-    @RequestMapping(value = "/healthCheck")
-    public String healthCheck() {
-        LOGGER.info("===healthChecked===");
+    @RequestMapping(value = "/checkhealth")
+    public String checkHealth() {
         return "OK";
     }
 

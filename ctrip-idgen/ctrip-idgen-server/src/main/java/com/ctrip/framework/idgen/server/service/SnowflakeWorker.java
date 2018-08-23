@@ -20,7 +20,7 @@ public class SnowflakeWorker implements IdWorker {
     public SnowflakeWorker(String sequenceName, ServerConfig config) {
         this.sequenceName = sequenceName;
         this.config = config;
-        this.sequence = getRandomSequence();
+        sequence = getRandomSequence();
     }
 
     @Override
@@ -149,7 +149,7 @@ public class SnowflakeWorker implements IdWorker {
     }
 
     private boolean isTimeout(long startNanoTime, int timeoutMillis) {
-        return ((getNanoTime() - startNanoTime) >= (timeoutMillis * 10 ^ 6));
+        return ((getNanoTime() - startNanoTime) >= (timeoutMillis * 1000000L));
     }
 
     private long getRandomSequence() {
@@ -177,6 +177,21 @@ public class SnowflakeWorker implements IdWorker {
     private long constructId(long timestamp, long workerId, long sequence) {
         return (((timestamp - config.getTimestampReference()) & config.getTimestampMask()) << config.getTimestampShift()) |
                 (workerId << config.getWorkerIdShift()) | (sequence);
+    }
+
+    // for unit test
+    public void setLastTimestamp(long lastTimestamp) {
+        this.lastTimestamp = lastTimestamp;
+    }
+
+    // for unit test
+    public void setFallbackLocked(boolean fallbackLocked) {
+        this.fallbackLocked = fallbackLocked;
+    }
+
+    // for unit test
+    public void setSequence(long sequence) {
+        this.sequence = sequence;
     }
 
 }

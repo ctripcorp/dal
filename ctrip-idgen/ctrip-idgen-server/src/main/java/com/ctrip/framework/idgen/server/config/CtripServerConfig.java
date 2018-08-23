@@ -5,8 +5,6 @@ import com.ctrip.framework.idgen.server.util.PropertiesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
@@ -68,7 +66,7 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
 
     private long parseWorkerId(Map<String, String> properties) {
         if (checkWorkerIdDuplication(properties)) {
-            LOGGER.error("workerId duplicated");
+            LOGGER.error("[workerId] duplicated");
             throw new RuntimeException("workerId duplicated");
         }
         try {

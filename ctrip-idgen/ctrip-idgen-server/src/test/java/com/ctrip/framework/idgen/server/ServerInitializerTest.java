@@ -22,7 +22,14 @@ public class ServerInitializerTest extends SpringBootServletInitializer {
             overrideArtemisUrl("10.2.35.218");
             ConfigManager.getInstance().initialize();
         } catch (Throwable t) {
-            LOGGER.error("Server initialize failed");
+            for (int i = 0; i < 10; i++) {
+                LOGGER.error("Server initialize failed");
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    LOGGER.error("InterruptedException");
+                }
+            }
             throw t;
             //System.exit(-1);
         }

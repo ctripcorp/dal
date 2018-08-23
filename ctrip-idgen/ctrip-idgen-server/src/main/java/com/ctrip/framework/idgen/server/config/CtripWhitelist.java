@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class CtripWhitelist implements Whitelist, ConfigConstants {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CtripServerConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CtripWhitelist.class);
 
     private Set<String> whitelist = new HashSet<>();
 
@@ -18,7 +18,6 @@ public class CtripWhitelist implements Whitelist, ConfigConstants {
         if (null == properties) {
             return;
         }
-
         whitelist = new HashSet<>();
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null &&

@@ -11,12 +11,17 @@ public class IdFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdFactory.class);
     private volatile static IdFactory factory = null;
+    private static final Object object = new Object();
 
     private final ConcurrentMap<String, IdWorker> workerCache = new ConcurrentHashMap<>();
 
-    public synchronized static IdFactory getInstance() {
+    public static IdFactory getInstance() {
         if (null == factory) {
-            factory = new IdFactory();
+            synchronized (object) {
+                if (null == factory) {
+                    factory = new IdFactory();
+                }
+            }
         }
         return factory;
     }

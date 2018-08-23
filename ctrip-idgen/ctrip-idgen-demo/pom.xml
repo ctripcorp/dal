@@ -14,8 +14,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ctrip.platform</groupId>
-            <artifactId>ctrip-idgen-client</artifactId>
+            <groupId>com.ctrip.framework.idgen</groupId>
+            <artifactId>idgen-client</artifactId>
         </dependency>
     </dependencies>
 </project>

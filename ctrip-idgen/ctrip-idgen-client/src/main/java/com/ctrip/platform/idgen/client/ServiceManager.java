@@ -11,7 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ServiceManager {
 
-    private static final AtomicReference<ReferenceConfig<IdGenerateService>> refConfigReference = new AtomicReference<>();
+    private static final AtomicReference<ReferenceConfig<IdGenerateService>> refConfigReference =
+            new AtomicReference<>();
     private static final AtomicReference<IdGenerateService> idGenServiceReference = new AtomicReference<>();
 
     public static IdGenerateService getIdGenServiceInstance() {
@@ -46,7 +47,8 @@ public class ServiceManager {
             Map<String, String> params = new HashMap<String, String>();
             params.put("serviceId", "framework.service.idgenerator.v2.idgenerateservice");
             newRefConfig.setParameters(params);
-            newRefConfig.setUrl("dubbo://localhost:20880/");
+            // newRefConfig.setUrl("dubbo://localhost:20880/");
+            newRefConfig.setUrl("dubbo://10.5.108.18:20880/");
             newRefConfig.setInit(true);
 
             refConfigReference.compareAndSet(refConfig, newRefConfig);

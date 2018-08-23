@@ -44,8 +44,8 @@
                 <version>${dal-client.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.ctrip.platform</groupId>
-                <artifactId>ctrip-idgen-client</artifactId>
+                <groupId>com.ctrip.framework.idgen</groupId>
+                <artifactId>idgen-service-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

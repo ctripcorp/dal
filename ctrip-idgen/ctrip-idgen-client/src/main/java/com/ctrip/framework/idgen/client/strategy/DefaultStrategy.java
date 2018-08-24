@@ -1,6 +1,5 @@
 package com.ctrip.framework.idgen.client.strategy;
 
-import com.ctrip.framework.idgen.client.generator.DynamicIdGenerator;
 import com.ctrip.framework.idgen.client.generator.StaticIdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import org.slf4j.Logger;

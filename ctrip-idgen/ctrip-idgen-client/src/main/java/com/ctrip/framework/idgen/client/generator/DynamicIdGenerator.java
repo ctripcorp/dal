@@ -16,9 +16,9 @@ public class DynamicIdGenerator implements IdGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicIdGenerator.class);
 
-    private String sequenceName;
-    private Deque<IdGenerator> idGeneratorQueue = new ConcurrentLinkedDeque<>();
-    private PrefetchStrategy strategy;
+    private final String sequenceName;
+    private final Deque<IdGenerator> idGeneratorQueue = new ConcurrentLinkedDeque<>();
+    private final PrefetchStrategy strategy;
 
     public DynamicIdGenerator(String sequenceName) {
         this(sequenceName, new DefaultStrategy());
@@ -64,11 +64,14 @@ public class DynamicIdGenerator implements IdGenerator {
                 public void run() {
                     try {
                         IdGenerator idGenerator = new StaticIdGenerator(sequenceName, strategy);
+                        ((StaticIdGenerator) idGenerator).initialize();
                         idGeneratorQueue.addLast(idGenerator);
                         ((DefaultStrategy) strategy).initialize(idGeneratorQueue);
                         LOGGER.info("Prefetch Id pool successfully, fetch size: " + ((StaticIdGenerator) idGenerator).getRemainedSize());
+//                        System.out.println("Prefetch Id pool successfully, fetch size: " + ((StaticIdGenerator) idGenerator).getRemainedSize());
                     } catch (Throwable t) {
                         LOGGER.error("Prefetch Id pool failed", t);
+//                        System.out.println("Prefetch Id pool failed");
                     }
                 }
             });

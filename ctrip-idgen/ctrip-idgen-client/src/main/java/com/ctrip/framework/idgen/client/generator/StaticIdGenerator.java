@@ -19,11 +19,11 @@ public class StaticIdGenerator implements IdGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticIdGenerator.class);
 
-    private String sequenceName;
-    private Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();;
-    private long initialSize = 0;
-    private long remainedSize = 0;
-    private long currentId = -1;
+    private final String sequenceName;
+    private final Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();
+    private volatile long initialSize = 0;
+    private volatile long remainedSize = 0;
+    private volatile long currentId = -1;
     private final PrefetchStrategy strategy;
 
     public StaticIdGenerator(String sequenceName) {
@@ -64,7 +64,7 @@ public class StaticIdGenerator implements IdGenerator {
     private void importIdPool(List<IdSegment> segments) {
         if (segments != null && !segments.isEmpty()) {
             for (IdSegment segment : segments) {
-                this.idSegments.addLast(segment);
+                idSegments.addLast(segment);
                 initialSize += segment.getEnd().longValue() - segment.getStart().longValue() + 1;
             }
             remainedSize = initialSize;
@@ -72,7 +72,7 @@ public class StaticIdGenerator implements IdGenerator {
     }
 
     @Override
-    public Number nextId() {
+    public synchronized Number nextId() {
         IdSegment first = idSegments.peekFirst();
         if (null == first) {
             LOGGER.warn("Static pool empty, sequenceName: [" + sequenceName + "]");
@@ -101,7 +101,7 @@ public class StaticIdGenerator implements IdGenerator {
         return initialSize;
     }
 
-    public long getRemainedSize() {
+    public synchronized long getRemainedSize() {
         return remainedSize;
     }
 

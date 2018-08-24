@@ -1,8 +1,9 @@
-package com.ctrip.framework.idgen.client;
+package com.ctrip.framework.idgen.demo;
 
+import com.ctrip.framework.idgen.client.IdGeneratorFactory;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 
-public class IdGeneratorFactoryTest {
+public class IdGenDemo {
 
     public static void main(String[] args) {
         String sequenceName = "testName1";

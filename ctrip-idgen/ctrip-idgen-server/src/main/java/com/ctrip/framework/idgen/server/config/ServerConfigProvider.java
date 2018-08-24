@@ -38,22 +38,6 @@ public class ServerConfigProvider implements ConfigProvider {
         return map;
     }
 
-    public void addConfigChangedListener(final ConfigChanged callback) {
-        if (null == callback) {
-            return;
-        }
-        MapConfig config = configReference.get();
-        if (null == config) {
-            return;
-        }
-        config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
-            @Override
-            public void onLoad(Map<String, String> map) {
-                if (map != null) {
-                    callback.onConfigChanged(map);
-                }
-            }
-        });
-    }
+    public void addConfigChangedListener(final ConfigChanged callback) {}
 
 }

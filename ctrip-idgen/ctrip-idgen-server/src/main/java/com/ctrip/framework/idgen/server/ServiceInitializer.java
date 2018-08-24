@@ -14,11 +14,7 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 public class ServiceInitializer extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        try {
-            ConfigManager.getInstance().initialize();
-        } catch (Throwable t) {
-            System.exit(-1);
-        }
+        ConfigManager.getInstance().initialize();
         SpringApplication.run(ServiceInitializer.class);
     }
 

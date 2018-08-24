@@ -38,14 +38,14 @@ public class SnowflakeIdGenerateService implements IdGenerateService {
 
         String sequenceName = request.getSequenceName();
         int timeoutMillis = request.getTimeoutMillis();
+        request = new IdGenRequestType(sequenceName, 1, timeoutMillis);
 
-        IdWorker idWorker = IdFactory.getInstance().getOrCreateIdWorker(sequenceName);
-        if (null == idWorker) {
+        IdGenResponseType response = fetchIdPool(request);
+        if (null == response) {
             throw new RuntimeException("Unknown exception");
         }
-
-        List<IdSegment> idSegments = idWorker.generateIdPool(1, timeoutMillis);
-        if (null == idSegments || idSegments.size() == 0) {
+        List<IdSegment> idSegments = response.getIdSegments();
+        if (null == idSegments || idSegments.isEmpty()) {
             throw new RuntimeException("Unknown exception");
         }
 

@@ -1,5 +1,6 @@
-package com.ctrip.framework.idgen.client;
+package com.ctrip.framework.idgen.client.generator;
 
+import com.ctrip.framework.idgen.client.service.ServiceManager;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
@@ -19,10 +20,10 @@ public class StaticIdGenerator implements IdGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticIdGenerator.class);
 
     private String sequenceName;
-    private Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();
+    private Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();;
     private long initialSize = 0;
-    private long currentId = -1;
     private long remainedSize = 0;
+    private long currentId = -1;
     private final PrefetchStrategy strategy;
 
     public StaticIdGenerator(String sequenceName) {
@@ -32,14 +33,9 @@ public class StaticIdGenerator implements IdGenerator {
     public StaticIdGenerator(String sequenceName, final PrefetchStrategy strategy) {
         this.sequenceName = sequenceName;
         this.strategy = (strategy != null) ? strategy : new DefaultStrategy();
-        initialize();
     }
 
-    private void initialize() {
-        idSegments = new ConcurrentLinkedDeque<>();
-        initialSize = 0;
-        remainedSize = 0;
-        currentId = -1;
+    public void initialize() {
         importIdPool(fetchIdPool());
     }
 

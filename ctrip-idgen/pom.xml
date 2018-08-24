@@ -11,7 +11,7 @@
 
     <groupId>com.ctrip.framework.idgen</groupId>
     <artifactId>idgen-parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -42,8 +42,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${springboot.version}</version>
-                <!--<type>pom</type>-->
-                <!--<scope>import</scope>-->
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
@@ -90,7 +90,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
-
 </project>

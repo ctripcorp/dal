@@ -67,7 +67,7 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
     private long parseWorkerId(Map<String, String> properties) {
         if (checkWorkerIdDuplication(properties)) {
             LOGGER.error("[workerId] duplicated");
-            throw new RuntimeException("workerId duplicated");
+            throw new RuntimeException("[workerId] duplicated");
         }
         try {
             return PropertiesParser.parseLong(properties, getWorkerIdPropertyKey());
@@ -81,16 +81,6 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
         return false;
     }
 
-    private long parseTimestamp(String date) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATEREFERENCE_FORMAT);
-        try {
-            return sdf.parse(date).getTime();
-        } catch (ParseException e) {
-            LOGGER.error("Parse [timestampReference] failed", e);
-            throw new RuntimeException("Parse [timestampReference] failed", e);
-        }
-    }
-
     private String getWorkerIdPropertyKey() {
         return String.format(WORKERID_PROPERTY_KEY_PATTERN, getWorkerIdPropertyKeySuffix());
     }
@@ -100,6 +90,16 @@ public class CtripServerConfig implements ServerConfig, ConfigConstants {
             return Foundation.net().getHostAddress();
         } catch (Throwable t) {
             throw new RuntimeException("Get local IP failed", t);
+        }
+    }
+
+    private long parseTimestamp(String date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATEREFERENCE_FORMAT);
+        try {
+            return sdf.parse(date).getTime();
+        } catch (ParseException e) {
+            LOGGER.error("[timestampReference] failed", e);
+            throw new RuntimeException("[timestampReference] failed", e);
         }
     }
 

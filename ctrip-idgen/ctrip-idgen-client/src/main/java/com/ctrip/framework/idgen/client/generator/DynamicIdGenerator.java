@@ -1,4 +1,4 @@
-package com.ctrip.framework.idgen.client;
+package com.ctrip.framework.idgen.client.generator;
 
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
@@ -27,11 +27,11 @@ public class DynamicIdGenerator implements IdGenerator {
     public DynamicIdGenerator(String sequenceName, PrefetchStrategy strategy) {
         this.sequenceName = sequenceName;
         this.strategy = (strategy != null) ? strategy : new DefaultStrategy();
-        initialize();
     }
 
-    private void initialize() {
+    public void initialize() {
         IdGenerator idGenerator = new StaticIdGenerator(sequenceName, strategy);
+        ((StaticIdGenerator) idGenerator).initialize();
         idGeneratorQueue.addLast(idGenerator);
         ((DefaultStrategy) strategy).initialize(idGeneratorQueue);
     }

@@ -1,4 +1,4 @@
-package com.ctrip.framework.idgen.client;
+package com.ctrip.framework.idgen.client.service;
 
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
@@ -79,7 +79,7 @@ public class ServiceManager {
         Map<String, String> params = new HashMap<>();
         params.put(REFERENCE_SERVICEID_KEY, IDGENERATESERVICE_SERVICEID_VALUE);
         refConfig.setParameters(params);
-        refConfig.setUrl("dubbo://10.5.109.160:20880/");
+//        refConfig.setUrl("dubbo://localhost:20880/");
         refConfig.setInit(true);
 
         return refConfig;

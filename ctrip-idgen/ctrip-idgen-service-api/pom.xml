@@ -6,16 +6,8 @@
     <parent>
         <groupId>com.ctrip.framework.idgen</groupId>
         <artifactId>idgen-parent</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
-
-
     <artifactId>idgen-service-api</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
-
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
 </project>

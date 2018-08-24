@@ -1,7 +1,7 @@
 package com.ctrip.framework.idgen.client.strategy;
 
-import com.ctrip.framework.idgen.client.DynamicIdGenerator;
-import com.ctrip.framework.idgen.client.StaticIdGenerator;
+import com.ctrip.framework.idgen.client.generator.DynamicIdGenerator;
+import com.ctrip.framework.idgen.client.generator.StaticIdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import java.util.Iterator;
 
 public class DefaultStrategy implements PrefetchStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicIdGenerator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStrategy.class);
     private static final int PERCENTAGE_THRESHOLD = 40;
 
     private long initialSize = 0;

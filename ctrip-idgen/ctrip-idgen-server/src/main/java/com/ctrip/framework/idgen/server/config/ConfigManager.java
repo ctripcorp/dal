@@ -1,6 +1,5 @@
 package com.ctrip.framework.idgen.server.config;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

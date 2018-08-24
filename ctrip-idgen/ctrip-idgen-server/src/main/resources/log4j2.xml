@@ -11,12 +11,12 @@
         <Async name="Async" includeLocation="true">
             <AppenderRef ref="Console"/>
         </Async>
-        <RollingFile name="IdGenerator" fileName="${baseDir}/${appName}.log"
-                     filePattern="${baseDir}/${appName}-%d{yyyy-MM-dd}-%i.log.gz">
-            <PatternLayout pattern="[%d{HH:mm:Ss:SSS}][%p][%t][%c{1}]%m%xpEx%n"/>
+        <RollingFile name="IdGenServerRollingFile" fileName="${baseDir}/${appName}.log"
+                     filePattern="${baseDir}/${appName}-%d{yyyyMMdd}-%i.log.gz">
+            <PatternLayout pattern="[%d{HH:mm:ss,SSS}][%p][%t][%c{1}]%m%xpEx%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
             </Policies>
             <DefaultRolloverStrategy max="5">
                 <Delete basePath="${baseDir}" maxDepth="2">
@@ -28,14 +28,13 @@
         <CatAppender name="Cat"/>
     </appenders>
     <loggers>
-        <logger name="com.ctrip.platform.idgen" additivity="false" level="INFO">
+        <logger name="com.ctrip.framework.idgen.server" additivity="false" level="INFO">
             <AppenderRef ref="Async"/>
-            <AppenderRef ref="IdGenerator"/>
+            <AppenderRef ref="IdGenServerRollingFile"/>
             <AppenderRef ref="Cat"/>
         </logger>
         <root level="INFO">
             <AppenderRef ref="Async"/>
-            <AppenderRef ref="IdGenerator"/>
             <AppenderRef ref="Cat"/>
         </root>
     </loggers>

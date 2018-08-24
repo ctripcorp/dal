@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration monitorInterval="60">
+    <Properties>
+        <Property name="appName">idgen-client</Property>
+    </Properties>
     <appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[ctrip-idgen-client][%t]%d %-5p [%c] %m%n"/>
+            <PatternLayout pattern="[${appName}][%t]%d %-5p [%c] %m%n"/>
         </Console>
         <Async name="Async" includeLocation="true">
             <AppenderRef ref="Console"/>
@@ -10,7 +13,7 @@
         <CatAppender name="Cat"/>
     </appenders>
     <loggers>
-        <logger name="com.ctrip.platform.idgen" additivity="false" level="INFO">
+        <logger name="com.ctrip.framework.idgen.client" additivity="false" level="INFO">
             <AppenderRef ref="Async"/>
             <AppenderRef ref="Cat"/>
         </logger>

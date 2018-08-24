@@ -61,8 +61,14 @@ function getCurrentRealPath(){
     dir="$( cd -P "$( dirname "$source" )" && pwd )"
     echo $dir
 }
-
+function initVI() {
+    mkdir -p /opt/status
+    rm /opt/status/webapp.status
+    touch /opt/status/webapp.status
+    echo "On" > /opt/status/webapp.status
+}
 #VARS
+`initVI`
 FULL_DIR=`getCurrentRealPath`
 SERVICE_NAME=idgen-server
 LOG_DIR=/opt/logs/100016446

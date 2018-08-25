@@ -75,6 +75,8 @@ public class ServiceManager {
         ReferenceConfig<IdGenerateService> refConfig = new ReferenceConfig<>();
         refConfig.setApplication(appConfig);
         refConfig.setRegistry(regConfig);
+        refConfig.setTimeout(100);
+        refConfig.setRetries(2);
         refConfig.setInterface(IdGenerateService.class);
         Map<String, String> params = new HashMap<>();
         params.put(REFERENCE_SERVICEID_KEY, IDGENERATESERVICE_SERVICEID_VALUE);

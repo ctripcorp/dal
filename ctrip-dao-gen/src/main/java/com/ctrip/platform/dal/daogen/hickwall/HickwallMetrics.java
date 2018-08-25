@@ -12,10 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HickwallMetrics {
     private static final MetricRegistry metrics = new MetricRegistry();
     private static final String ALL = "all";
-    private static final String JAVA_ALL = "java all";
-    private static final String JAVA_CTRIP_DAL_CLIENT = "java ctrip dal client";
-    private static final String JAVA_CTRIP_DATASOURCE = "java ctrip datasource";
-    private static final String NET_DAL = ".net dal";
+    private static final String JAVA_ALL = "java.all";
+    private static final String JAVA_CTRIP_DAL_CLIENT = "java.ctrip.dal.client";
+    private static final String JAVA_CTRIP_DATASOURCE = "java.ctrip.datasource";
+    private static final String NET_DAL = "net.dal";
 
     private static AtomicInteger allCount = new AtomicInteger();
     private static AtomicInteger javaAllCount = new AtomicInteger();
@@ -25,7 +25,7 @@ public class HickwallMetrics {
 
     public static void initHickwallMetrics() {
         HickwallUDPReporter.enable(metrics, // singleton metrics registry
-                60 * 60, // interval, minimum 10s //30
+                1 * 60, // interval, minimum 10s
                 TimeUnit.SECONDS, // interval time unit
                 "udp.sink.hickwall.ctripcorp.com", // hickwall receive address //udp.sink.hickwall.ctripcorp.com:8090
                 // //10.2.29.118:8090

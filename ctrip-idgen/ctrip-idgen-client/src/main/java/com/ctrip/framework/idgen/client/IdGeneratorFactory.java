@@ -23,7 +23,7 @@ public class IdGeneratorFactory {
         return factory;
     }
 
-    public LongIdGenerator getOrCreateIdGenerator(String sequenceName) {
+    public LongIdGenerator getOrCreateLongIdGenerator(String sequenceName) {
         LongIdGenerator idGenerator = idGeneratorCache.get(sequenceName);
         if (null == idGenerator) {
             synchronized (this) {

@@ -14,7 +14,7 @@ public class IdGeneratorFactoryTest {
     @Test
     public static void generalTest() {
         String sequenceName = "testName1";
-        IdGenerator generator = IdGeneratorFactory.getInstance().getOrCreateIdGenerator(sequenceName);
+        IdGenerator generator = IdGeneratorFactory.getInstance().getOrCreateLongIdGenerator(sequenceName);
         Number id = null;
         for (int i = 0; i < 1200; i++) {
             if (i >= 998 && i <= 1002) {

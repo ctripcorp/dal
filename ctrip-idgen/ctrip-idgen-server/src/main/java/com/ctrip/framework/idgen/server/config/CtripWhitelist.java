@@ -25,6 +25,8 @@ public class CtripWhitelist implements Whitelist, ConfigConstants {
                 whitelist.add(entry.getKey());
             }
         }
+        String initialList = StringUtils.setToString(whitelist, ", ");
+        LOGGER.info("Initial whitelist: " + initialList);
     }
 
     public boolean validateSequenceName(String sequenceName) {

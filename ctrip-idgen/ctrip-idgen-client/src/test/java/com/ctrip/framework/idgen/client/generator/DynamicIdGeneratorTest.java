@@ -1,25 +1,14 @@
 package com.ctrip.framework.idgen.client.generator;
 
-import com.ctrip.framework.idgen.client.IdGeneratorFactory;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
-import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
-import com.ctrip.platform.idgen.service.api.IdSegment;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class DynamicIdGeneratorTest {
 
@@ -27,8 +16,9 @@ public class DynamicIdGeneratorTest {
     public void testPrefetchConcurrent() {
         String sequenceName = "testName1";
         int nThread = 4;
-        PrefetchStrategy testStrategy = new TestStrategy();
-        int nRequest = 10000;
+//        PrefetchStrategy testStrategy = new TestStrategy();
+        PrefetchStrategy testStrategy = new DefaultStrategy();
+        int nRequest = PrefetchStrategy.REQUESTSIZE_DEFAULT_VALUE;
         final CountDownLatch latch = new CountDownLatch(nRequest);
         final DynamicIdGenerator generator = new DynamicIdGenerator(sequenceName, testStrategy);
         generator.fetchPool();
@@ -40,6 +30,7 @@ public class DynamicIdGeneratorTest {
                 @Override
                 public void run() {
                     try {
+                        generator.nextId();
                         generator.prefetchIfNecessary();
                     } catch (Throwable t) {
                         t.printStackTrace();
@@ -56,7 +47,7 @@ public class DynamicIdGeneratorTest {
             e.printStackTrace();
         }
         int count2 = generator.getStaticGeneratorQueue().size();
-//        Assert.assertEquals(1, count2 - count1);
+        Assert.assertEquals(1, count2 - count1);
     }
 
     @Before

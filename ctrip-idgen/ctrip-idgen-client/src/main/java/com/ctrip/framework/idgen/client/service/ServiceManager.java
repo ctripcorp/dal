@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ServiceManager {
 
     private volatile static ServiceManager manager = null;
-    private static final Object object = new Object();
+    private static final Object lock = new Object();
 
     private final AtomicReference<ReferenceConfig<IdGenerateService>> refConfigReference = new AtomicReference<>();
     private final AtomicReference<IdGenerateService> idGenServiceReference = new AtomicReference<>();
@@ -27,7 +27,7 @@ public class ServiceManager {
 
     public static ServiceManager getInstance() {
         if (null == manager) {
-            synchronized (object) {
+            synchronized (lock) {
                 if (null == manager) {
                     manager = new ServiceManager();
                 }
@@ -79,7 +79,6 @@ public class ServiceManager {
         Map<String, String> params = new HashMap<>();
         params.put(REFERENCE_SERVICEID_KEY, IDGENERATESERVICE_SERVICEID_VALUE);
         refConfig.setParameters(params);
-//        refConfig.setUrl("dubbo://localhost:20880/");
         refConfig.setInit(true);
 
         return refConfig;

@@ -23,5 +23,11 @@
             <groupId>com.ctrip.framework.cdubbo</groupId>
             <artifactId>cdubbo-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>7.0.73</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

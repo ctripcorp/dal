@@ -3,21 +3,19 @@ package com.ctrip.framework.idgen.client.generator;
 import com.ctrip.framework.idgen.client.service.ServiceManager;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
-import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
+import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
 import com.ctrip.platform.idgen.service.api.IdGenRequestType;
 import com.ctrip.platform.idgen.service.api.IdGenResponseType;
 import com.ctrip.platform.idgen.service.api.IdGenerateService;
 import com.ctrip.platform.idgen.service.api.IdSegment;
-import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class StaticIdGenerator implements IdGenerator {
+public class StaticIdGenerator implements LongIdGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticIdGenerator.class);
 
@@ -27,9 +25,6 @@ public class StaticIdGenerator implements IdGenerator {
     private volatile long remainedSize = 0;
     private volatile long currentId = -1;
     private final PrefetchStrategy strategy;
-
-    private List<IdSegment> rawSegments;
-    private Date fetchTime;
 
     public StaticIdGenerator(String sequenceName) {
         this(sequenceName, new DefaultStrategy());
@@ -41,10 +36,14 @@ public class StaticIdGenerator implements IdGenerator {
     }
 
     public void initialize() {
-        importIdPool(fetchIdPool());
+        try {
+            importIdPool(fetchPool());
+        } catch (Throwable t) {
+            LOGGER.error(t.getMessage(), t);
+        }
     }
 
-    private List<IdSegment> fetchIdPool() {
+    private List<IdSegment> fetchPool() {
         IdGenRequestType request = new IdGenRequestType(sequenceName,
                 strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
 
@@ -63,9 +62,6 @@ public class StaticIdGenerator implements IdGenerator {
             throw new RuntimeException("Get IdSegments failed, sequenceName: [" + sequenceName + "]");
         }
 
-        rawSegments = segments;
-        fetchTime = new Date();
-
         return segments;
     }
 
@@ -80,7 +76,7 @@ public class StaticIdGenerator implements IdGenerator {
     }
 
     @Override
-    public synchronized Number nextId() {
+    public synchronized Long nextId() {
         IdSegment first = idSegments.peekFirst();
         if (null == first) {
             LOGGER.warn("Static pool empty, sequenceName: [" + sequenceName + "]");
@@ -109,7 +105,7 @@ public class StaticIdGenerator implements IdGenerator {
         return initialSize;
     }
 
-    public synchronized long getRemainedSize() {
+    public long getRemainedSize() {
         return remainedSize;
     }
 

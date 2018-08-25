@@ -5,7 +5,7 @@ import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 public interface PrefetchStrategy {
 
     int REQUESTSIZE_DEFAULT_VALUE = 1000;
-    int TIMEOUTMILLIS_DEFAULT_VALUE = 2;
+    int TIMEOUTMILLIS_DEFAULT_VALUE = 800;
 
     int getSuggestedRequestSize();
 

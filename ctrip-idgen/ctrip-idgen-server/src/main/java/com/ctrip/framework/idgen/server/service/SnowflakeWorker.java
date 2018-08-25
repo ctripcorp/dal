@@ -3,12 +3,16 @@ package com.ctrip.framework.idgen.server.service;
 import com.ctrip.framework.idgen.server.config.ConfigConstants;
 import com.ctrip.framework.idgen.server.config.ServerConfig;
 import com.ctrip.platform.idgen.service.api.IdSegment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 public class SnowflakeWorker implements IdWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SnowflakeWorker.class);
 
     private volatile String sequenceName;
     private volatile long sequence;
@@ -124,6 +128,8 @@ public class SnowflakeWorker implements IdWorker {
         }
         sequence = sequenceEnd;
         fallbackLocked = false;
+
+        LOGGER.info("Success! sequenceEnd: " + sequenceEnd);
 
         return idSegments;
     }

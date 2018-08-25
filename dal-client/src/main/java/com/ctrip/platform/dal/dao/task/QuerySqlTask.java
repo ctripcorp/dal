@@ -2,20 +2,21 @@ package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalResultSetExtractor;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
-public class QuerySqlTask<T> implements SqlTask<T>{
+public class QuerySqlTask<T> extends TaskAdapter implements SqlTask<T>{
 	private DalResultSetExtractor<T> extractor;
 	
 	public QuerySqlTask(DalResultSetExtractor<T> extractor) {
 		this.extractor = extractor;
 	}
-	
+
 	@Override
-	public T execute(DalClient client, String sql, StatementParameters parameters, DalHints hints) throws SQLException {
-		return client.query(sql, parameters, hints, extractor);
+	public T execute(DalClient client, String sql, StatementParameters parameters, DalHints hints, DalTaskContext taskContext) throws SQLException {
+		if (client instanceof DalContextClient)
+			return ((DalContextClient) client).query(sql, parameters, hints, extractor, taskContext);
+		else
+			throw new DalRuntimeException("The client is not instance of DalClient");
 	}
 }

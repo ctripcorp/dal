@@ -9,16 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.ctrip.platform.dal.dao.task.*;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.task.BulkTask;
-import com.ctrip.platform.dal.dao.task.BulkTaskContext;
-import com.ctrip.platform.dal.dao.task.BulkTaskResultMerger;
-import com.ctrip.platform.dal.dao.task.DalBulkTaskRequest;
-import com.ctrip.platform.dal.dao.task.ShardedIntResultMerger;
 
 public class DalBulkTaskRequestTest {
 	private class TestPojo {
@@ -51,7 +47,7 @@ public class DalBulkTaskRequestTest {
 		}
 
 		@Override
-		public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTaskContext<TestPojo> ctx) throws SQLException {
+		public Integer execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, DalBulkTaskContext<TestPojo> ctx) throws SQLException {
 			return shaffled.size();
 		}
 

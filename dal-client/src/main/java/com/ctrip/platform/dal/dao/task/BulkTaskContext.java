@@ -14,7 +14,7 @@ import com.ctrip.platform.dal.dao.UpdatableEntity;
  * what dal internal created for intermediate use.   
  * @author jhhe
  */
-public class BulkTaskContext<T> {
+public class BulkTaskContext<T> extends DefaultTaskContext implements DalBulkTaskContext<T>,  DalTableNameConfigure {
 	private List<T> rawPojos;
 	
 	// This is only for batch and combined insert operation
@@ -23,7 +23,8 @@ public class BulkTaskContext<T> {
 	private boolean isUpdatableEntity;
 	// This is only for batch update operation
 	private Map<String, Boolean> pojoFieldStatus;
-	
+
+	@Override
 	public Map<String, Boolean> getPojoFieldStatus() {
 		return pojoFieldStatus;
 	}
@@ -32,25 +33,45 @@ public class BulkTaskContext<T> {
 		this.pojoFieldStatus = pojoFieldStatus;
 	}
 
+
 	public BulkTaskContext(List<T> rawPojos) {
 		this.rawPojos = rawPojos;
 		if(rawPojos != null && rawPojos.size() > 0)
 			isUpdatableEntity = rawPojos.get(0) instanceof UpdatableEntity;
 	}
 
+	@Override
 	public boolean isUpdatableEntity() {
 		return isUpdatableEntity;
 	}
 
+	@Override
 	public List<T> getRawPojos() {
 		return rawPojos;
 	}
 
+	@Override
 	public Set<String> getUnqualifiedColumns() {
 		return unqualifiedColumns;
 	}
 
 	public void setUnqualifiedColumns(Set<String> unqualifiedColumns) {
 		this.unqualifiedColumns = unqualifiedColumns;
+	}
+
+	@Override
+	public BulkTaskContext fork() {
+		BulkTaskContext taskContext = new BulkTaskContext(this.rawPojos);
+		taskContext.isUpdatableEntity = this.isUpdatableEntity;
+
+		Set<String> newUnqualifiedColumns = getUnqualifiedColumns();
+		taskContext.setUnqualifiedColumns(newUnqualifiedColumns);
+
+		Map<String, Boolean> newPojoFieldStatus = getPojoFieldStatus();
+		taskContext.setPojoFieldStatus(newPojoFieldStatus);
+
+		taskContext.tables.addAll(this.tables);
+
+		return taskContext;
 	}
 }

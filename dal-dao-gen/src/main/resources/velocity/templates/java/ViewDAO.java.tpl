@@ -34,10 +34,10 @@ public class ${host.getPojoClassName()}Dao {
 	}
 
 	/**
-	  *Get all ${host.getPojoClassName()} instances
-	  *@return 
-	  *     ${host.getPojoClassName()} collection
-	**/
+	 * Get all ${host.getPojoClassName()} instances
+	 * @return
+	 * ${host.getPojoClassName()} collection
+	 */
 	public List<${host.getPojoClassName()}> getAll(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
@@ -47,10 +47,10 @@ public class ${host.getPojoClassName()}Dao {
 	}
 	
 	/**
-	  *Get the count of ${host.getPojoClassName()} instances
-	  *@return 
-	  *     the ${host.getPojoClassName()} records count
-	**/
+	 * Get the count of ${host.getPojoClassName()} instances
+	 * @return
+	 * the ${host.getPojoClassName()} records count
+	 */
 	public int count(DalHints hints) throws SQLException {
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);	

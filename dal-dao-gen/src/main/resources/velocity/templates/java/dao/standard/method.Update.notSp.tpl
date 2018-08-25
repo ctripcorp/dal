@@ -27,7 +27,7 @@
 	 * @throws SQLException
 	 */
 	public int update(DalHints hints, ${host.getPojoClassName()} daoPojo) throws SQLException {
-		if(null == daoPojo) {
+		if (null == daoPojo) {
 			return 0;
 		}
 		hints = DalHints.createIfAbsent(hints);
@@ -63,7 +63,7 @@
 	 * @throws SQLException
 	 */
 	public int[] update(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0) {
+		if (null == daoPojos || daoPojos.size() <= 0) {
 			return new int[0];
 		}
 		hints = DalHints.createIfAbsent(hints);
@@ -89,7 +89,7 @@
 	 * @throws SQLException
 	 */
 	public int[] batchUpdate(DalHints hints, List<${host.getPojoClassName()}> daoPojos) throws SQLException {
-		if(null == daoPojos || daoPojos.size() <= 0) {
+		if (null == daoPojos || daoPojos.size() <= 0) {
 			return new int[0];
 		}
 		hints = DalHints.createIfAbsent(hints);

@@ -9,9 +9,9 @@ import com.ctrip.platform.dal.dao.DalHints;
 public interface BulkTask<K, T> extends DaoTask<T> {
 	K getEmptyValue();
 	
-	BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException;
+	DalBulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException;
 	
-	K execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTaskContext<T> taskContext) throws SQLException;
+	K execute(DalHints hints, Map<Integer, Map<String, ?>> shaffled, DalBulkTaskContext<T> taskContext) throws SQLException;
 	
 	//Merger factory, always return a new merger instance
 	BulkTaskResultMerger<K> createMerger();

@@ -5,7 +5,6 @@ import com.ctrip.platform.dal.daogen.enums.ConditionType;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
-import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import org.apache.commons.lang.WordUtils;
 
 import java.sql.Types;

@@ -4,12 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalTableDao;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 
 public class TaskTestStub {

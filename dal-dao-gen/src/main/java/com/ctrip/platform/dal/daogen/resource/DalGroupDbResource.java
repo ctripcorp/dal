@@ -16,13 +16,6 @@ import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * DAL database of group manage.
- *
- * @author gzxia
- * @modified yn.wang
- */
-
 @Resource
 @Singleton
 @Path("groupdb")
@@ -134,13 +127,11 @@ public class DalGroupDbResource {
             }
 
             DalGroupDB groupdb = BeanGetter.getDaoOfDalGroupDB().getGroupDBByDbName(dbname);
-            if (null != groupdb && groupdb.getDal_group_id() > 0) {
-                DalGroup group = BeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id());
-                Status status = Status.ERROR();
-                status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name());
-                return status;
-            }
-
+            /*
+             * if (null != groupdb && groupdb.getDal_group_id() > 0) { DalGroup group =
+             * BeanGetter.getDaoOfDalGroup().getDalGroupById(groupdb.getDal_group_id()); Status status = Status.ERROR();
+             * status.setInfo(groupdb.getDbname() + " is already added in " + group.getGroup_name()); return status; }
+             */
             int ret = -1;
             if (null != groupdb) {
                 ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);
@@ -325,11 +316,6 @@ public class DalGroupDbResource {
         return false;
     }
 
-    /**
-     * 生成默认的databaseSet和databaseSet Entry
-     *
-     * @param dbname
-     */
     public static Status genDefaultDbset(int groupId, String dbname, String dbProvider) throws Exception {
         Status status = Status.OK();
         List<DatabaseSet> exist = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);

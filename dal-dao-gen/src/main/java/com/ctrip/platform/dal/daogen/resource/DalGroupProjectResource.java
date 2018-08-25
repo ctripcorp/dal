@@ -15,11 +15,6 @@ import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * DAL Project & Code 一览
- *
- * @author gzxia
- */
 @Resource
 @Singleton
 @Path("projectview")

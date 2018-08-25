@@ -99,7 +99,7 @@ public class DalColumnMapRowMapperTest {
 	private String sqlList = "select * from " + TABLE_NAME;
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";
-	
+	private String sqlAlias="select quantity as q, type as t from "+ TABLE_NAME +" where id=1";
 	@Test
 	public void testDalColumnMapRowMapperList() {
 		try {
@@ -137,6 +137,21 @@ public class DalColumnMapRowMapperTest {
 			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
 			List<Map<String, Object>> result = dao.query(sqlObject, parameters, hints, new DalColumnMapRowMapper());
 			assertEquals(1, result.size());
+		} catch (Exception e) {
+			fail();
+		}
+	}
+
+	@Test
+	public void testDalColumnMapRowMapperAlias() {
+		try {
+			StatementParameters parameters = new StatementParameters();
+
+			DalQueryDao dao = new DalQueryDao(DATABASE_NAME);
+			List<Map<String, Object>> result = dao.query(sqlAlias, parameters, hints, new DalColumnMapRowMapper());
+			assertEquals(1, result.size());
+			assertEquals(10,result.get(0).get("q"));
+			assertEquals(new Short("1"),result.get(0).get("t"));
 		} catch (Exception e) {
 			fail();
 		}

@@ -28,13 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 构建SQL（生成的代码绑定到模板）
- *
- * @author gzxia
- * @modified yn.wang
- */
-
 @Resource
 @Singleton
 @Path("task/auto")

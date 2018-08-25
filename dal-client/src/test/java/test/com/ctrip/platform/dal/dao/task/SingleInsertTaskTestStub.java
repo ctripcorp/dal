@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.Test;
 
 import com.ctrip.platform.dal.dao.DalHints;
@@ -30,7 +31,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 		DalHints hints = new DalHints();
 		
 		try {
-			int result = test.execute(hints, getAllMap().get(0), null);
+			int result = test.execute(hints, getAllMap().get(0), null, new DefaultTaskContext());
 //			assertEquals(1, result);
 			assertEquals(3+1, getCount());
 		} catch (SQLException e) {
@@ -48,7 +49,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 		try {
 			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
 			model.setAddress("abc");
-			int result = test.execute(hints, getFields(model), model);
+			int result = test.execute(hints, getFields(model), model, new DefaultTaskContext());
 //			assertEquals(0, result);
 			assertEquals(4, getCount());
 
@@ -77,7 +78,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 
 			Map<String, ?> pojo = getAllMap().get(0);
 			((Map)pojo).put("id", new Integer(210));
-			int result = test.execute(hints, pojo, null);
+			int result = test.execute(hints, pojo, null, new DefaultTaskContext());
 
 			assertEquals(3+1, getCount());
 
@@ -104,7 +105,7 @@ public class SingleInsertTaskTestStub extends TaskTestStub {
 		test.initialize(parser);
 		
 		DalHints hints = new DalHints();
-		int result = test.execute(hints, getAllMap().get(0), null);
+		int result = test.execute(hints, getAllMap().get(0), null, new DefaultTaskContext());
 
 		assertEquals(3+1, getCount());
 		

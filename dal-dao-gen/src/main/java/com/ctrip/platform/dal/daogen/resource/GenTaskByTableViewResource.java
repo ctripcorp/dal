@@ -19,13 +19,6 @@ import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * 生成模板(包含基础的增删改查操作)
- *
- * @author gzxia
- * @modified yn.wang
- */
-
 @Resource
 @Singleton
 @Path("task/table")

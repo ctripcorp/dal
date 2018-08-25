@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.log;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +9,7 @@ public abstract class AbstractLogger implements ILogger {
 
     @Override
     public void logEvent(String type, String name, String message) {
-        log(String.format("Type:%s,name:%s,message:%s", type, name, message));
+        info(String.format("Type:%s,name:%s,message:%s", type, name, message));
     }
 
     @Override
@@ -17,15 +18,41 @@ public abstract class AbstractLogger implements ILogger {
             try {
                 callback.execute();
             } catch (Throwable e) {
-                LOGGER.error(e.getMessage(), e);
+                error(e.getMessage(), e);
             }
         }
 
-        log(String.format("Type:%s,name:%s,message:%s", type, name, message));
+        info(String.format("Type:%s,name:%s,message:%s", type, name, message));
     }
 
-    private void log(String info) {
-        LOGGER.info(info);
+
+    @Override
+    public void warn(final String msg) {
+        try {
+            LOGGER.warn(msg);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void error(final String msg, final Throwable e) {
+        try {
+            LOGGER.error(e.getMessage(), e);
+        }catch (Throwable ex){
+            ex.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void info(String msg) {
+        try{
+            LOGGER.info(msg);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
     }
 
 }

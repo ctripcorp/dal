@@ -26,6 +26,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
     private List<T> rawPojos;
     private List<Map<String, ?>> daoPojos;
     private SingleTask<T> task;
+    private DalTaskContext dalTaskContext;
 
     private DalSingleTaskRequest(String logicDbName, DalHints hints, SingleTask<T> task) {
         this.logicDbName = logicDbName;
@@ -74,7 +75,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
         }
 
         daoPojos = task.getPojosFields(rawPojos);
-
+        dalTaskContext = task.createTaskContext();
         detectDistributedTransaction(logicDbName, hints, daoPojos);
     }
 
@@ -86,7 +87,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
 
     @Override
     public Callable<int[]> createTask() {
-        return new SingleTaskCallable<>(hints, daoPojos, rawPojos, task);
+        return new SingleTaskCallable<>(hints, daoPojos, rawPojos, task, dalTaskContext);
     }
 
     @Override
@@ -110,12 +111,14 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
         private List<Map<String, ?>> daoPojos;
         private List<T> rawPojos;
         private SingleTask<T> task;
+        private DalTaskContext taskContext;
 
-        public SingleTaskCallable(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos, SingleTask<T> task) {
+        public SingleTaskCallable(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos, SingleTask<T> task, DalTaskContext taskContext) {
             this.hints = hints;
             this.daoPojos = daoPojos;
             this.rawPojos = rawPojos;
             this.task = task;
+            this.taskContext = taskContext;
         }
 
         @Override
@@ -126,7 +129,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
                 DalHints localHints = prepareLocalHints(task, hints);
 
                 try {
-                    counts[i] = task.execute(localHints, daoPojos.get(i), rawPojos.get(i));
+                    counts[i] = task.execute(localHints, daoPojos.get(i), rawPojos.get(i), taskContext);
                 } catch (Throwable e) {
                     error = e;
                 }

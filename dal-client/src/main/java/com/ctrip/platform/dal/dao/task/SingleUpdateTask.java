@@ -6,16 +6,18 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.DalContextClient;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.UpdatableEntity;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T> {
 	public static final String TMPL_SQL_UPDATE = "UPDATE %s SET %s WHERE %s";
 	
 	@Override
-	public int execute(DalHints hints, Map<String, ?> fields, T rawPojo) throws SQLException {
+	public int execute(DalHints hints, Map<String, ?> fields, T rawPojo, DalTaskContext taskContext) throws SQLException {
 		if (fields.size() == 0)
 			throw new DalException(ErrorCode.ValidateFieldCount);
 		Map<String, ?> pks = getPrimaryKeys(fields);
@@ -32,15 +34,22 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		// If there is no columns changed, we will not perform update
 		if(filted.size() == 0)
 			return 0;
-		
-		String updateSql = buildUpdateSql(getTableName(hints, fields), filted, hints);
+
+		String tableName = getRawTableName(hints, fields);
+		if (taskContext instanceof DalTableNameConfigure)
+			((DalTableNameConfigure) taskContext).addTables(tableName);
+
+		String updateSql = buildUpdateSql(quote(tableName), filted, hints);
 
 		StatementParameters parameters = new StatementParameters();
 		addParameters(parameters, filted);
 		addParameters(parameters, pks);
 		addVersion(parameters, version);
-		
-		return client.update(updateSql, parameters, hints.setFields(fields));
+
+		if (client instanceof DalContextClient)
+			return ((DalContextClient) client).update(updateSql, parameters, hints.setFields(fields), taskContext);
+		else
+			throw new DalRuntimeException("The client is not instance of DalClient");
 	}
 
 	private Object getVersion(Map<String, ?> fields) throws DalException {

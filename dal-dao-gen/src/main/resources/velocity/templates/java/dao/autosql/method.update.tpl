@@ -3,14 +3,14 @@
 
     /**
 	 * ${method.getComments()}
-	**/
+	 */
 	public int ${method.getName()}(${method.getUpdateParameterDeclarationWithoutHints()}) throws SQLException {
 		return ${method.getName()}(${method.getUpdateActualParameter()});
 	}
 
 	/**
 	 * ${method.getComments()}
-	**/
+	 */
 	public int ${method.getName()}(${method.getUpdateParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")

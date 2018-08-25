@@ -3,10 +3,7 @@ package com.ctrip.platform.dal.dao.datasource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
-import com.ctrip.platform.dal.dao.helper.ConnectionPhantomReferenceCleaner;
-import com.ctrip.platform.dal.dao.helper.DefaultConnectionPhantomReferenceCleaner;
-import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
-import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.helper.*;
 import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -27,7 +24,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
     private static final String DAL = "DAL";
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
-    private static ILogger ilogger = ServiceLoaderHelper.getInstance(ILogger.class);
+    private static ILogger ilogger = DalElementFactory.DEFAULT.getILogger();
 
     private static ConnectionPhantomReferenceCleaner connectionPhantomReferenceCleaner = new DefaultConnectionPhantomReferenceCleaner();
     private static AtomicBoolean containsMySQL=new AtomicBoolean(false);

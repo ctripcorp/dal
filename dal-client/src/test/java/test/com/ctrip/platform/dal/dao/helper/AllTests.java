@@ -6,14 +6,16 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	DalFirstResultMergerTest.class,
-	DalSingleResultMergerTest.class,
-	PartialQueryTableDaoUnitTest.class,
-	PartialQueryQueryDaoTest.class,
-	DalColumnMapRowMapperTest.class,
-	DalCustomRowMapperTest.class,
-	SQLCompilerTest.class,
-	ServiceLoaderHelperTest.class,
-	DalBase64Test.class,
+		DalFirstResultMergerTest.class,
+		DalSingleResultMergerTest.class,
+		PartialQueryTableDaoUnitTest.class,
+		PartialQueryQueryDaoTest.class,
+		DalColumnMapRowMapperTest.class,
+		DalCustomRowMapperTest.class,
+		SQLCompilerTest.class,
+		ServiceLoaderHelperTest.class,
+		DalBase64Test.class,
+		LoggerHelperTest.class,
+		TableParserTest.class
 })
 public class AllTests {}

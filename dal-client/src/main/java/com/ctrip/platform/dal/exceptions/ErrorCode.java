@@ -152,7 +152,7 @@ public enum ErrorCode {
     TransactionEnd(ErrorClassify.Transaction, 5603, "Calling endTransaction with empty ConnectionCache"),
 
     /**
-     * Calling endTransaction with empty ConnectionCache
+     * There is no transaction found
      */
     TransactionNoFound(ErrorClassify.Transaction, 5604, "There is no transaction found"),
 
@@ -160,6 +160,11 @@ public enum ErrorCode {
      * DAL do not support distributed transaction in same db but different shard
      */
     TransactionDistributedShard(ErrorClassify.Transaction, 5605, "DAL do not support distributed transaction in same DB but different shard. Current shard: %s, requested in hints: %s"),
+
+    /**
+     * The state of nesting transaction are conflicted.
+     */
+    TransactionStateConflicted(ErrorClassify.Transaction, 5606, "The state of nesting transactions are conflicted,transaction has been rollbacked."),
 
     /**
      * The result mapping is faild.

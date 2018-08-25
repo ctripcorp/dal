@@ -10,16 +10,22 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
+import com.ctrip.platform.dal.dao.log.ILogger;
+
+
 
 public class DbMeta {
     private static Pattern hostRegxPattern = null;
     private DataSourceConfigureLocator configureLocator = DataSourceConfigureLocatorManager.getInstance();
-
+    private static ILogger ilogger = DalElementFactory.DEFAULT.getILogger();
     private String databaseName;
     private DatabaseCategory dbCategory;
     private String dataBaseKeyName;
     private String userName;
     private String url;
+    private String simplifiedUrl;
     private String host;
 
     static {
@@ -35,20 +41,21 @@ public class DbMeta {
             DatabaseMetaData meta = conn.getMetaData();
             databaseName = conn.getCatalog();
             url = meta.getURL();
+            simplifiedUrl=LoggerHelper.getSimplifiedDBUrl(url);
             host = parseHostFromDBURL(url);
-
             DataSourceConfigure configure = configureLocator.getDataSourceConfigure(realDbName);
             if (configure != null) {
                 userName = configure.getUserName();
             }
         } catch (Throwable e) {
+            ilogger.error(e.getMessage(),e);
         }
     }
 
     public void populate(LogEntry entry) {
         entry.setDatabaseName(databaseName);
         entry.setServerAddress(host);
-        entry.setDbUrl(url);
+        entry.setDbUrl(simplifiedUrl);
         entry.setUserName(userName);
         entry.setDataBaseKeyName(dataBaseKeyName);
     }

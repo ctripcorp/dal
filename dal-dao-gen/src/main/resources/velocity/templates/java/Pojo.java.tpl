@@ -21,8 +21,8 @@ import com.ctrip.platform.dal.dao.DalPojo;
  * @date ${host.getDate()}
  */
 @Entity
-@Database(name="$!{host.getDbSetName()}")
-@Table(name="$!{host.getTableName()}")
+@Database(name = "$!{host.getDbSetName()}")
+@Table(name = "$!{host.getTableName()}")
 public class ${host.getPojoClassName()} implements DalPojo {
 #foreach( $field in ${host.getFields()} )
 
@@ -32,13 +32,13 @@ public class ${host.getPojoClassName()} implements DalPojo {
      */
 #end
 #if(${field.isPrimary()})
-	@Id
+    @Id
 #end
-	@Column(name="${field.getName()}"#if($field.isDataChangeLastTimeField()), insertable=false, updatable=false#end)
+	@Column(name = "${field.getName()}"#if($field.isDataChangeLastTimeField()), insertable = false, updatable = false#end)
 #if(${field.isIdentity()})
 	@GeneratedValue(strategy = GenerationType.AUTO)
 #end
-	@Type(value=${field.getJavaTypeDisplay()})
+	@Type(value = ${field.getJavaTypeDisplay()})
 	private ${field.getClassDisplayName()} ${field.getCamelCaseUncapitalizedName()};
 #end
 

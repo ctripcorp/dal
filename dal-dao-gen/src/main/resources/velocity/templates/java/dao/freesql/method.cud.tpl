@@ -3,19 +3,20 @@
 
 	/**
 	 * ${method.getComments()}
-	**/
+	 */
 	public int ${method.getName()} (${method.getParameterDeclarationWithoutHints()}) throws SQLException {
 		return ${method.getName()}(${method.getActualParameter()});
 	}
 
 	/**
 	 * ${method.getComments()}
-	**/
+	 */
 	public int ${method.getName()} (${method.getParameterDeclaration()}) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 #parse("templates/java/Hints.java.tpl")
+#parse("templates/java/Hints.java.tpl")
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("${method.getSql()}");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;

@@ -13,28 +13,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalCommand;
-import com.ctrip.platform.dal.dao.DalEventEnum;
-import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalResultSetExtractor;
-import com.ctrip.platform.dal.dao.KeyHolder;
-import com.ctrip.platform.dal.dao.StatementParameter;
-import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.HintsAwareExtractor;
+import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
  * The direct connection implementation for DalClient.
- * 
+ *
  * @author jhhe
  */
-public class DalDirectClient implements DalClient {
+public class DalDirectClient implements DalContextClient {
     private DalStatementCreator stmtCreator;
     private DalConnectionManager connManager;
     private DalTransactionManager transManager;
@@ -49,7 +41,7 @@ public class DalDirectClient implements DalClient {
 
     @Override
     public <T> T query(String sql, StatementParameters parameters, final DalHints hints,
-            final DalResultSetExtractor<T> extractor) throws SQLException {
+                       final DalResultSetExtractor<T> extractor, final DalTaskContext dalTaskContext) throws SQLException {
         ConnectionAction<T> action = new ConnectionAction<T>() {
             @Override
             public T execute() throws Exception {
@@ -58,7 +50,7 @@ public class DalDirectClient implements DalClient {
                 preparedStatement = createPreparedStatement(conn, sql, parameters, hints);
                 beginExecute();
                 rs = executeQuery(preparedStatement, entry);
-                endExectue();
+                endExecute();
 
                 T result;
 
@@ -73,14 +65,21 @@ public class DalDirectClient implements DalClient {
                 return result;
             }
         };
-        action.populate(DalEventEnum.QUERY, sql, parameters);
+        action.populate(DalEventEnum.QUERY, sql, parameters, dalTaskContext);
 
         return doInConnection(action, hints);
     }
 
+
+    @Override
+    public <T> T query(String sql, StatementParameters parameters, final DalHints hints,
+                       final DalResultSetExtractor<T> extractor) throws SQLException {
+        return query(sql, parameters, hints, extractor, null);
+    }
+
     @Override
     public List<?> query(String sql, StatementParameters parameters, final DalHints hints,
-            final List<DalResultSetExtractor<?>> extractors) throws SQLException {
+                         final List<DalResultSetExtractor<?>> extractors, final DalTaskContext dalTaskContext) throws SQLException {
         ConnectionAction<List<?>> action = new ConnectionAction<List<?>>() {
             @Override
             public List<?> execute() throws Exception {
@@ -108,20 +107,26 @@ public class DalDirectClient implements DalClient {
                     preparedStatement.getMoreResults();
                 }
 
-                endExectue();
+                endExecute();
 
                 entry.setResultCount(count);
 
                 return result;
             }
         };
-        action.populate(DalEventEnum.QUERY, sql, parameters);
+        action.populate(DalEventEnum.QUERY, sql, parameters, dalTaskContext);
 
         return doInConnection(action, hints);
     }
 
     @Override
-    public int update(String sql, StatementParameters parameters, final DalHints hints) throws SQLException {
+    public List<?> query(String sql, StatementParameters parameters, final DalHints hints,
+                         final List<DalResultSetExtractor<?>> extractors) throws SQLException {
+        return query(sql, parameters, hints, extractors, null);
+    }
+
+    @Override
+    public int update(String sql, StatementParameters parameters, final DalHints hints, final DalTaskContext dalTaskContext) throws SQLException {
         final KeyHolder generatedKeyHolder = hints.getKeyHolder();
         ConnectionAction<Integer> action = new ConnectionAction<Integer>() {
             @Override
@@ -136,7 +141,7 @@ public class DalDirectClient implements DalClient {
 
                 beginExecute();
                 int rows = executeUpdate(preparedStatement, entry);
-                endExectue();
+                endExecute();
 
                 if (generatedKeyHolder == null)
                     return rows;
@@ -157,13 +162,18 @@ public class DalDirectClient implements DalClient {
             }
         };
         action.populate(generatedKeyHolder == null ? DalEventEnum.UPDATE_SIMPLE : DalEventEnum.UPDATE_KH, sql,
-                parameters);
+                parameters, dalTaskContext);
 
         return doInConnection(action, hints);
     }
 
     @Override
-    public int[] batchUpdate(String[] sqls, final DalHints hints) throws SQLException {
+    public int update(String sql, StatementParameters parameters, final DalHints hints) throws SQLException {
+        return update(sql, parameters, hints, null);
+    }
+
+    @Override
+    public int[] batchUpdate(String[] sqls, final DalHints hints, final DalTaskContext dalTaskContext) throws SQLException {
         ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
             @Override
             public int[] execute() throws Exception {
@@ -175,18 +185,24 @@ public class DalDirectClient implements DalClient {
 
                 beginExecute();
                 int[] ret = executeBatch(statement, entry);
-                endExectue();
+                endExecute();
 
                 return ret;
             }
         };
-        action.populate(sqls);
+        action.populate(sqls, dalTaskContext);
 
         return executeBatch(action, hints);
     }
 
     @Override
-    public int[] batchUpdate(String sql, StatementParameters[] parametersList, final DalHints hints)
+    public int[] batchUpdate(String[] sqls, final DalHints hints) throws SQLException {
+        return batchUpdate(sqls,hints,null);
+    }
+
+
+    @Override
+    public int[] batchUpdate(String sql, StatementParameters[] parametersList, final DalHints hints, final DalTaskContext dalTaskContext)
             throws SQLException {
         ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
             @Override
@@ -197,14 +213,20 @@ public class DalDirectClient implements DalClient {
 
                 beginExecute();
                 int[] ret = executeBatch(statement, entry);
-                endExectue();
+                endExecute();
 
                 return ret;
             }
         };
-        action.populate(sql, parametersList);
+        action.populate(sql, parametersList, dalTaskContext);
 
         return executeBatch(action, hints);
+    }
+
+    @Override
+    public int[] batchUpdate(String sql, StatementParameters[] parametersList, final DalHints hints)
+            throws SQLException {
+        return batchUpdate(sql, parametersList, hints, null);
     }
 
     @Override
@@ -242,17 +264,16 @@ public class DalDirectClient implements DalClient {
     }
 
     @Override
-    public Map<String, ?> call(String callString, StatementParameters parameters, final DalHints hints)
+    public Map<String, ?> call(String callString, StatementParameters parameters, final DalHints hints, final DalTaskContext dalTaskContext)
             throws SQLException {
         ConnectionAction<Map<String, ?>> action = new ConnectionAction<Map<String, ?>>() {
             @Override
             public Map<String, ?> execute() throws Exception {
                 List<StatementParameter> resultParameters = new ArrayList<StatementParameter>();
                 List<StatementParameter> callParameters = new ArrayList<StatementParameter>();
+                resultParameters.addAll(parameters.getResultParameters());
                 for (StatementParameter parameter : parameters.values()) {
-                    if (parameter.isResultsParameter()) {
-                        resultParameters.add(parameter);
-                    } else if (parameter.isOutParameter()) {
+                    if (parameter.isOutParameter()) {
                         callParameters.add(parameter);
                     }
                 }
@@ -269,7 +290,7 @@ public class DalDirectClient implements DalClient {
                 boolean retVal = executeCall(callableStatement, entry);
                 int updateCount = callableStatement.getUpdateCount();
 
-                endExectue();
+                endExecute();
 
                 Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
                 if (retVal || updateCount != -1) {
@@ -280,13 +301,19 @@ public class DalDirectClient implements DalClient {
                 return returnedResults;
             }
         };
-        action.populateSp(callString, parameters);
+        action.populateSp(callString, parameters, dalTaskContext);
 
         return doInConnection(action, hints);
     }
 
     @Override
-    public int[] batchCall(String callString, StatementParameters[] parametersList, final DalHints hints)
+    public Map<String, ?> call(String callString, StatementParameters parameters, final DalHints hints)
+            throws SQLException {
+        return call(callString, parameters, hints, null);
+    }
+
+    @Override
+    public int[] batchCall(String callString, StatementParameters[] parametersList, final DalHints hints, final DalTaskContext dalTaskContext)
             throws SQLException {
         ConnectionAction<int[]> action = new ConnectionAction<int[]>() {
             @Override
@@ -297,19 +324,25 @@ public class DalDirectClient implements DalClient {
 
                 beginExecute();
                 int[] ret = executeBatch(callableStatement, entry);
-                endExectue();
+                endExecute();
 
                 return ret;
             }
         };
-        action.populateSp(callString, parametersList);
+        action.populateSp(callString, parametersList, dalTaskContext);
 
         return executeBatch(action, hints);
     }
 
+    @Override
+    public int[] batchCall(String callString, StatementParameters[] parametersList, final DalHints hints)
+            throws SQLException {
+        return batchCall(callString, parametersList, hints, null);
+    }
+
     /**
      * First try getRow(), then try parse result
-     * 
+     *
      * @param rs
      * @param result
      * @return
@@ -340,7 +373,7 @@ public class DalDirectClient implements DalClient {
     }
 
     private Map<String, Object> extractReturnedResults(CallableStatement statement,
-            List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
+                                                       List<StatementParameter> resultParameters, int updateCount, DalHints hints) throws SQLException {
         Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
         if (hints.is(DalHintEnum.skipResultsProcessing))
             return returnedResults;
@@ -391,7 +424,7 @@ public class DalDirectClient implements DalClient {
     }
 
     private Map<String, Object> extractOutputParameters(CallableStatement statement,
-            List<StatementParameter> callParameters) throws SQLException {
+                                                        List<StatementParameter> callParameters) throws SQLException {
 
         Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
         for (StatementParameter parameter : callParameters) {
@@ -441,27 +474,27 @@ public class DalDirectClient implements DalClient {
     }
 
     private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createPreparedStatement(conn, sql, parameters, hints);
     }
 
     private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters parameters,
-            DalHints hints, KeyHolder keyHolder) throws Exception {
+                                                      DalHints hints, KeyHolder keyHolder) throws Exception {
         return stmtCreator.createPreparedStatement(conn, sql, parameters, hints, keyHolder);
     }
 
     private PreparedStatement createPreparedStatement(Connection conn, String sql, StatementParameters[] parametersList,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createPreparedStatement(conn, sql, parametersList, hints);
     }
 
     private CallableStatement createCallableStatement(Connection conn, String sql, StatementParameters parameters,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createCallableStatement(conn, sql, parameters, hints);
     }
 
     private CallableStatement createCallableStatement(Connection conn, String sql, StatementParameters[] parametersList,
-            DalHints hints) throws Exception {
+                                                      DalHints hints) throws Exception {
         return stmtCreator.createCallableStatement(conn, sql, parametersList, hints);
     }
 

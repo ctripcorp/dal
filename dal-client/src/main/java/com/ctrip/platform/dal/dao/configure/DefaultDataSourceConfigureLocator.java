@@ -34,6 +34,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     public void addUserPoolPropertiesConfigure(String name, PoolPropertiesConfigure configure) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         userPoolPropertiesConfigure.put(keyName, configure);
+        dataSourceConfiguresCache.put(keyName, new DataSourceConfigure(keyName, configure.getProperties()));
     }
 
     @Override

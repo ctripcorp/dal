@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -27,7 +26,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	private List<T> rawPojos;
 	private List<Map<String, ?>> daoPojos;
 	private BulkTask<K, T> task;
-	private BulkTaskContext<T> taskContext;
+	private DalBulkTaskContext<T> taskContext;
 	private BulkTaskResultMerger<K> dbShardMerger;
 	Map<String, Map<Integer, Map<String, ?>>> shuffled;
 	
@@ -82,14 +81,14 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	public Callable<K> createTask() throws SQLException {
 		hints = hints.clone();
 		handleKeyHolder(false);
-		
+
 		// If only one shard is shuffled
 		if(shuffled != null) {
 			if(shuffled.size() == 0)
-				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), task, taskContext);
+				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), task, (DalBulkTaskContext<T>) taskContext.fork());
 
 			String shard = shuffled.keySet().iterator().next();
-			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), task, taskContext);
+			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), task, (DalBulkTaskContext<T>) taskContext.fork());
 		}
 	
 		// Convert to index map
@@ -97,7 +96,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		for(int i = 0; i < daoPojos.size(); i++)
 			daoPojosMap.put(i, daoPojos.get(i));
 
-		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, task, taskContext);
+		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, task, (DalBulkTaskContext<T>) taskContext.fork());
 	}
 
 	@Override
@@ -113,7 +112,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			dbShardMerger.recordPartial(shard, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 			
 			tasks.put(shard, new BulkTaskCallable<>(
-					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task, taskContext));
+					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task, (DalBulkTaskContext<T>) taskContext.fork()));
 		}
 
 		return tasks; 
@@ -142,9 +141,9 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		private DalHints hints;
 		private Map<Integer, Map<String, ?>> shaffled;
 		private BulkTask<K, T> task;
-		private BulkTaskContext<T> taskContext;
+		private DalBulkTaskContext<T> taskContext;
 
-		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTask<K, T> task, BulkTaskContext<T> taskContext){
+		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTask<K, T> task, DalBulkTaskContext<T> taskContext){
 			this.logicDbName = logicDbName;
 			this.rawTableName = rawTableName;
 			this.hints = hints;
@@ -165,14 +164,14 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			}
 		}
 
-		private K execute(DalHints hints, Map<Integer, Map<String, ?>> pojosInShard, BulkTaskContext<T> taskContext) throws SQLException {
+		private K execute(DalHints hints, Map<Integer, Map<String, ?>> pojosInShard, DalBulkTaskContext<T> taskContext) throws SQLException {
 		    K partial = null;
 		    Throwable error = null;
             Integer[] indexList = pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]);
 		    DalHints localHints = prepareLocalHints(task, hints);
 
             try {
-                partial = task.execute(localHints, pojosInShard, taskContext);
+                partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>) taskContext.fork());
             } catch (Throwable e) {
                 error = e;
             }
@@ -207,7 +206,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 				Throwable error = null;
                 try {
-                    K partial = task.execute(localHints, pojosInShard, taskContext);
+                    K partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>)taskContext.fork());
                     merger.addPartial(curTableShardId, partial);
                 } catch (Throwable e) {
                     error = e;

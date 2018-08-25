@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -52,7 +53,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 			ClientTestModel model = getAll().get(0);
 			model.setAddress("1122334455");
 			
-			int result = test.execute(hints, getParser().getFields(model), model);
+			int result = test.execute(hints, getParser().getFields(model), model, new DefaultTaskContext());
 			assertIntEquals(1, result);
 			model = getDao().queryByPk(model, new DalHints());
 			assertEquals("1122334455", model.getAddress());
@@ -80,7 +81,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 			oldModel.setType(null);// This is ignored by default
 			getDao().update(hints, oldModel);
 			
-			int result = test.execute(hints, parser.getFields(model), model);
+			int result = test.execute(hints, parser.getFields(model), model, new DefaultTaskContext());
 			assertIntEquals(1, result);
 			model = getDao(UpdatableClientTestModel.class).queryByPk(model, new DalHints());
 			assertEquals("1122334455", model.getAddress());
@@ -136,7 +137,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		try {
 			UpdatableClientTestModel model = getAll(UpdatableClientTestModel.class).get(0);
 			
-			int result = test.execute(hints, parser.getFields(model), model);
+			int result = test.execute(hints, parser.getFields(model), model, new DefaultTaskContext());
 			assertEquals(0, result);
 			
 			result = getDao(UpdatableClientTestModel.class).update(hints, model);
@@ -159,7 +160,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 			Timestamp version = model.getLastChanged();
 			System.out.println(version);
 			Thread.sleep(1000);
-			int result = test.execute(hints.updateUnchangedField(), parser.getFields(model), model);
+			int result = test.execute(hints.updateUnchangedField(), parser.getFields(model), model, new DefaultTaskContext());
 			assertIntEquals(1, result);
 			model = getDao(UpdatableClientTestModel.class).queryByPk(model, new DalHints());
 			System.out.println(model.getLastChanged());
@@ -182,7 +183,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		model.setLastChanged(null);
 		
 		try {
-			test.execute(hints, getFields(model), model);
+			test.execute(hints, getFields(model), model, new DefaultTaskContext());
 			fail();
 		} catch (SQLException e) {
 			assertEquals(ErrorCode.ValidateVersion.getMessage(), e.getMessage());
@@ -205,7 +206,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		t.setTime(t.getTime()+100);
 		model.setLastChanged(t);
 		
-		int result = test.execute(hints, getFields(model), model);
+		int result = test.execute(hints, getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(0, result);
 		model = getDao(UpdatableVersionModel.class).queryByPk(model, new DalHints());
 		assertEquals("SH INFO", model.getAddress());
@@ -221,7 +222,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		UpdatableVersionModel model = getAll(UpdatableVersionModel.class).get(0);
 		model.setAddress("1122334455");
 		
-		int result = test.execute(hints, getFields(model), model);
+		int result = test.execute(hints, getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(1, result);
 		model = getDao(UpdatableVersionModel.class).queryByPk(model, new DalHints());
 		assertEquals("1122334455", model.getAddress());
@@ -261,7 +262,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		NonUpdatableVersionModel model = getAll(NonUpdatableVersionModel.class).get(0);
 		model.setAddress("1122334455");
 		
-		int result = test.execute(hints, getFields(model), model);
+		int result = test.execute(hints, getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(1, result);
 		model = getDao(NonUpdatableVersionModel.class).queryByPk(model, new DalHints());
 		assertEquals("1122334455", model.getAddress());
@@ -283,7 +284,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		model.setAddress("1122334455");
 		model.setTableIndex(100);
 		
-		int result = test.execute(hints, getFields(model), model);
+		int result = test.execute(hints, getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(1, result);
 		model = getDao(NonUpdatableModel.class).queryByPk(model, new DalHints());
 		assertEquals(oldAddr, model.getAddress());
@@ -310,7 +311,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		model.setQuantity(500);
 		model.setType((short)8);
 		
-		int result = test.execute(hints.include("dbIndex", "type"), getFields(model), model);
+		int result = test.execute(hints.include("dbIndex", "type"), getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(1, result);
 		model = getDao(NonUpdatableModel.class).queryByPk(model, new DalHints());
 		assertEquals(oldAddr, model.getAddress());
@@ -368,7 +369,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		model.setQuantity(500);
 		model.setType((short)8);
 		
-		int result = test.execute(hints.exclude("quantity"), getFields(model), model);
+		int result = test.execute(hints.exclude("quantity"), getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(1, result);
 		model = getDao(NonUpdatableModel.class).queryByPk(model, new DalHints());
 		assertEquals(oldAddr, model.getAddress());
@@ -397,7 +398,7 @@ public class SingleUpdateTaskTestStub extends TaskTestStub {
 		model.setQuantity(500);
 		model.setType((short)8);
 		
-		int result = test.execute(hints.include("dbIndex", "type", "quantity").exclude("quantity"), getFields(model), model);
+		int result = test.execute(hints.include("dbIndex", "type", "quantity").exclude("quantity"), getFields(model), model, new DefaultTaskContext());
 		assertIntEquals(1, result);
 		model = getDao(NonUpdatableModel.class).queryByPk(model, new DalHints());
 		assertEquals(oldAddr, model.getAddress());

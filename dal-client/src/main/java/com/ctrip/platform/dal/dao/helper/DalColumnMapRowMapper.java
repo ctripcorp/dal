@@ -32,7 +32,7 @@ public class DalColumnMapRowMapper implements DalRowMapper<Map<String, Object>>,
 		
 		String[] temColumns = new String[rsmd.getColumnCount()];
 		for(int i = 0; i < temColumns.length; i++) {
-		    temColumns[i] = rsmd.getColumnName(i + 1);
+		    temColumns[i] = rsmd.getColumnLabel(i + 1);
 		}
 		
 		columns = temColumns;

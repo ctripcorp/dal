@@ -2,12 +2,13 @@ package com.ctrip.platform.dal.sql.logging;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+
 
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
+
 
 public class Metrics {
 	private static final String AllInOneKey = "AllInOneKey";
@@ -25,6 +26,8 @@ public class Metrics {
 	public static long ticksPerMillisecond = 10000;
 	private static String SUCCESS = "success";
 	private static String FAIL = "fail";
+	private static final String NULL_TABLES="NullTables";
+	private static final String EMPTY_TABLES="EmptyTables";
 
 	public static void report(MarkDownInfo info){
 
@@ -59,27 +62,38 @@ public class Metrics {
 	}
 
 	public static void success(CtripLogEntry entry, long duration) {
-		report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(),entry.getTables());
-		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), SUCCESS);
-		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
-		metric.log(SQLInfo.COUNT, 1, info.toTag());
+		reportAll(entry,duration,SUCCESS);
 	}
 
 	public static void fail(CtripLogEntry entry, long duration) {
-        report(entry.getDatabaseName(), entry.getClientVersion(), entry.isMaster() ? "Master" : "Slave", entry.getEvent().name(),entry.getTables());
-		SQLInfo info = new SQLInfo(entry.getDao(), entry.getClientVersion(), entry.getMethod(), entry.getSqlSize(), FAIL);
+		reportAll(entry,duration,FAIL);
+	}
+
+	private static void reportAll(CtripLogEntry entry, long duration,String status){
+		String database = entry.getDataBaseKeyName();
+		String tableString = getTableString(entry);
+		String optType = entry.getEvent().name();
+		String version = entry.getClientVersion();
+//		arch.dal.rw.count
+		report(database, version, entry.isMaster() ? "Master" : "Slave", optType, tableString);
+
+//		arch.dal.sql.count & arch.dal.sql.cost
+		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(), entry.getSqlSize(), status, database, tableString, optType);
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 
-	private static void report(String databaseSet, String version, String databaseType, String operationType, Set<String> tables) {
-		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType);
+	private static void report(String databaseSet, String version, String databaseType, String operationType, String tableString) {
+		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType, tableString);
 		metric.log(OptInfo.KEY, 1, info.toTag());
+	}
 
-		if (tables == null || tables.isEmpty())
-			return;
-
-		for (String table : tables)
-			metric.log(OptInfo.TABLECOUNTKEY, 1, info.toTableCountTag(table));
+	private static String getTableString(CtripLogEntry entry) {
+		String tableString = CommonUtil.setToOrderedString(entry.getTables());
+		if (tableString.equalsIgnoreCase(CommonUtil.EMPTY_SET))
+			return EMPTY_TABLES;
+		if (tableString.equalsIgnoreCase(CommonUtil.NULL_SET))
+			return NULL_TABLES;
+		return tableString;
 	}
 }

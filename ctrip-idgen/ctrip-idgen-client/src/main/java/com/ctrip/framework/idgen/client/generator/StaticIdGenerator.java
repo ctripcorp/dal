@@ -8,9 +8,11 @@ import com.ctrip.platform.idgen.service.api.IdGenRequestType;
 import com.ctrip.platform.idgen.service.api.IdGenResponseType;
 import com.ctrip.platform.idgen.service.api.IdGenerateService;
 import com.ctrip.platform.idgen.service.api.IdSegment;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -25,6 +27,9 @@ public class StaticIdGenerator implements IdGenerator {
     private volatile long remainedSize = 0;
     private volatile long currentId = -1;
     private final PrefetchStrategy strategy;
+
+    private List<IdSegment> rawSegments;
+    private Date fetchTime;
 
     public StaticIdGenerator(String sequenceName) {
         this(sequenceName, new DefaultStrategy());
@@ -57,6 +62,9 @@ public class StaticIdGenerator implements IdGenerator {
         if (null == segments || segments.isEmpty()) {
             throw new RuntimeException("Get IdSegments failed, sequenceName: [" + sequenceName + "]");
         }
+
+        rawSegments = segments;
+        fetchTime = new Date();
 
         return segments;
     }
@@ -105,4 +113,11 @@ public class StaticIdGenerator implements IdGenerator {
         return remainedSize;
     }
 
+    public Deque<IdSegment> getIdSegments() {
+        return idSegments;
+    }
+
+    public long getCurrentId() {
+        return currentId;
+    }
 }

@@ -63,5 +63,29 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
         </dependency>
+
+        <!-- qmq start -->
+        <dependency>
+            <groupId>com.ctrip.framework</groupId>
+            <artifactId>vi-server</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework</groupId>
+            <artifactId>vi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>qunar.common</groupId>
+            <artifactId>common-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>qunar.tc</groupId>
+            <artifactId>qmq-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>qunar.tc</groupId>
+            <artifactId>qmq-dal</artifactId>
+        </dependency>
+        <!-- qmq end -->
     </dependencies>
 </project>

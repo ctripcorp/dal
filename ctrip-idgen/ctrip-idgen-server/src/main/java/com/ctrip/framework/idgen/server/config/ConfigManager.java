@@ -1,13 +1,9 @@
 package com.ctrip.framework.idgen.server.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 public class ConfigManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
     private volatile static ConfigManager manager = null;
     private ServerConfig serverConfig = new CtripServerConfig();
     private Whitelist whitelist = new CtripWhitelist();

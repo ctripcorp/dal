@@ -12,7 +12,7 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 @SpringBootApplication
 @DubboComponentScan
 @EnableCDubbo
-public class ServerInitializerTest extends SpringBootServletInitializer {
+public class ServiceInitializerTest extends SpringBootServletInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
 

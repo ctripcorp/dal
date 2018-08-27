@@ -39,7 +39,8 @@ public class StaticIdGenerator implements LongIdGenerator {
         try {
             importIdPool(fetchPool());
         } catch (Throwable t) {
-            LOGGER.error(t.getMessage(), t);
+            LOGGER.warn("StaticIdGenerator initialization failed.", t);
+            throw t;
         }
     }
 
@@ -79,7 +80,6 @@ public class StaticIdGenerator implements LongIdGenerator {
     public synchronized Long nextId() {
         IdSegment first = idSegments.peekFirst();
         if (null == first) {
-            LOGGER.warn("Static pool empty, sequenceName: [" + sequenceName + "]");
             return null;
         }
 
@@ -91,7 +91,6 @@ public class StaticIdGenerator implements LongIdGenerator {
             idSegments.removeFirst();
             first = idSegments.peekFirst();
             if (null == first) {
-                LOGGER.warn("Static pool empty, sequenceName: [" + sequenceName + "]");
                 return null;
             }
             currentId = first.getStart().longValue();

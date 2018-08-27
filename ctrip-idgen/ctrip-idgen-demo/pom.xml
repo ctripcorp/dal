@@ -15,5 +15,10 @@
             <groupId>com.ctrip.framework.idgen</groupId>
             <artifactId>idgen-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>7.0.73</version>
+        </dependency>
     </dependencies>
 </project>

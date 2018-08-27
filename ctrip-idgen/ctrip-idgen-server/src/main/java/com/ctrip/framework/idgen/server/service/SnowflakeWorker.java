@@ -58,6 +58,7 @@ public class SnowflakeWorker implements IdWorker {
                     sequenceStart = (sequence + 1) & config.getSequenceMask();
                     if (sequenceStart == 0) {
                         fallbackLocked = true;
+                        LOGGER.error("Time fallback locked. Timestamp: " + timestamp + ", Last timestamp: " + lastTimestamp);
                         throw new RuntimeException("Time fallback locked");
                     }
 
@@ -129,7 +130,7 @@ public class SnowflakeWorker implements IdWorker {
         sequence = sequenceEnd;
         fallbackLocked = false;
 
-        LOGGER.info("Success! sequenceEnd: " + sequenceEnd);
+//        LOGGER.debug("fetId success, sequenceEnd: " + sequenceEnd);
 
         return idSegments;
     }
@@ -186,17 +187,17 @@ public class SnowflakeWorker implements IdWorker {
     }
 
     // for unit test
-    public void setLastTimestamp(long lastTimestamp) {
+    protected void setLastTimestamp(long lastTimestamp) {
         this.lastTimestamp = lastTimestamp;
     }
 
     // for unit test
-    public void setFallbackLocked(boolean fallbackLocked) {
+    protected void setFallbackLocked(boolean fallbackLocked) {
         this.fallbackLocked = fallbackLocked;
     }
 
     // for unit test
-    public void setSequence(long sequence) {
+    protected void setSequence(long sequence) {
         this.sequence = sequence;
     }
 

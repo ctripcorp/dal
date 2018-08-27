@@ -11,7 +11,6 @@ public class IdGeneratorFactoryTest {
         generalTest();
     }
 
-    @Test
     public static void generalTest() {
         String sequenceName = "testName1";
         IdGenerator generator = IdGeneratorFactory.getInstance().getOrCreateLongIdGenerator(sequenceName);

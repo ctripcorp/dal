@@ -52,8 +52,8 @@ public class DynamicIdGeneratorTest {
 
     @Before
     public void setEnv() {
-        System.setProperty("java.awt.headless", "false");
-        overrideArtemisUrl("10.2.35.218");
+//        System.setProperty("java.awt.headless", "false");
+//        overrideArtemisUrl("10.2.35.218");
     }
 
     private void overrideArtemisUrl(String ip) {

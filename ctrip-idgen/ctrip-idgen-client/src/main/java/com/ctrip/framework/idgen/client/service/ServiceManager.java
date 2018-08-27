@@ -22,6 +22,8 @@ public class ServiceManager {
     private static final String REGISTRY_PROTOCOL_VALUE = "artemis";
     private static final String REFERENCE_SERVICEID_KEY = "serviceId";
     private static final String IDGENERATESERVICE_SERVICEID_VALUE = "framework.service.idgenerator.v2.idgenerateservice";
+    private static final int TIMEOUT_DEFAULT_VALUE = 100;
+    private static final int RETRIES_DEFAULT_VALUE = 2;
 
     private ServiceManager() {}
 
@@ -75,8 +77,8 @@ public class ServiceManager {
         ReferenceConfig<IdGenerateService> refConfig = new ReferenceConfig<>();
         refConfig.setApplication(appConfig);
         refConfig.setRegistry(regConfig);
-        refConfig.setTimeout(100);
-        refConfig.setRetries(2);
+        refConfig.setTimeout(TIMEOUT_DEFAULT_VALUE);
+        refConfig.setRetries(RETRIES_DEFAULT_VALUE);
         refConfig.setInterface(IdGenerateService.class);
         Map<String, String> params = new HashMap<>();
         params.put(REFERENCE_SERVICEID_KEY, IDGENERATESERVICE_SERVICEID_VALUE);

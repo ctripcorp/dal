@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ctrip.framework.idgen</groupId>
+        <artifactId>idgen-parent</artifactId>
+        <version>1.0.3-SNAPSHOT</version>
+    </parent>
+    <artifactId>idgen-client</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ctrip.framework.idgen</groupId>
+            <artifactId>idgen-service-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.platform</groupId>
+            <artifactId>dal-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework.cdubbo</groupId>
+            <artifactId>cdubbo-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>7.0.73</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

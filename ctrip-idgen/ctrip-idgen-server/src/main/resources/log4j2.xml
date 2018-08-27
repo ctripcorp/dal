@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration monitorInterval="60">
+    <Properties>
+        <Property name="baseDir">/opt/logs/100016446</Property>
+        <Property name="appName">idgen-server</Property>
+    </Properties>
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[${appName}][%t]%d %-5p [%c] %m%n"/>
+        </Console>
+        <Async name="Async" includeLocation="true">
+            <AppenderRef ref="Console"/>
+        </Async>
+        <RollingFile name="IdGenServerRollingFile" fileName="${baseDir}/${appName}.log"
+                     filePattern="${baseDir}/${appName}-%d{yyyyMMdd}-%i.log.gz">
+            <PatternLayout pattern="[%d{HH:mm:ss,SSS}][%p][%t][%c{1}]%m%xpEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5">
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="${appName}*.log.gz"/>
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <CatAppender name="Cat"/>
+    </appenders>
+    <loggers>
+        <logger name="com.ctrip.framework.idgen.server" additivity="false" level="INFO">
+            <AppenderRef ref="Async"/>
+            <AppenderRef ref="IdGenServerRollingFile"/>
+            <AppenderRef ref="Cat"/>
+        </logger>
+        <root level="INFO">
+            <AppenderRef ref="Async"/>
+            <AppenderRef ref="Cat"/>
+        </root>
+    </loggers>
+</configuration>

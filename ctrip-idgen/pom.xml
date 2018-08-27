@@ -19,6 +19,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <frameworkbom.version>2.29.1</frameworkbom.version>
         <springboot.version>1.4.3.RELEASE</springboot.version>
+        <dal-client.version>1.16.0</dal-client.version>
     </properties>
 
     <modules>

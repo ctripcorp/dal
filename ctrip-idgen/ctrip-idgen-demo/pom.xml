@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.ctrip.framework.idgen</groupId>
         <artifactId>idgen-parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>idgen-demo</artifactId>
 
@@ -18,7 +18,6 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-websocket</artifactId>
-            <version>7.0.73</version>
         </dependency>
     </dependencies>
 </project>

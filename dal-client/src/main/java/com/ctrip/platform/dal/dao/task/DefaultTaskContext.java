@@ -7,7 +7,7 @@ import java.util.Set;
  * Created by lilj on 2018/7/27.
  */
 public class DefaultTaskContext implements DalTaskContext, DalTableNameConfigure {
-    private Set<String> tables = new HashSet<>();
+    protected Set<String> tables = new HashSet<>();
 
     @Override
     public Set<String> getTables() {

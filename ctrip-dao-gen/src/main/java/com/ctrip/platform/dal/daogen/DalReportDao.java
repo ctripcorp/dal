@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.report.App;
 import com.ctrip.platform.dal.daogen.report.CMSApp;
 import com.ctrip.platform.dal.daogen.report.CMSAppInfo;
 import com.ctrip.platform.dal.daogen.report.DalReport;
+import com.ctrip.platform.dal.daogen.report.LangType;
 import com.ctrip.platform.dal.daogen.report.RawInfo;
 import com.ctrip.platform.dal.daogen.report.VersionStats;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDalClientVersionRawInfo;
@@ -707,16 +708,30 @@ public class DalReportDao {
 
         if (appInfoMap != null) {
             Set<String> allAppIds = new HashSet<>();
+            Set<String> allJavaAppIds = new HashSet<>();
+            Set<String> allNetAppIds = new HashSet<>();
+
             for (Map.Entry<String, CMSApp> entry : appInfoMap.entrySet()) {
                 allAppIds.add(entry.getKey());
+                LangType langType = entry.getValue().getLangType();
+                if (langType.equals(LangType.Java)) {
+                    allJavaAppIds.add(entry.getKey());
+                } else if (langType.equals(LangType.Net)) {
+                    allNetAppIds.add(entry.getKey());
+                }
             }
 
             versionStats.setAllAppIds(allAppIds);
+            versionStats.setAllJavaAppIds(allJavaAppIds);
+            versionStats.setAllNetAppIds(allNetAppIds);
         }
     }
 
     private void logDalVersionStats() {
         HickwallMetrics.setAllMetricValue(versionStats.getAllAppIds().size());
+        HickwallMetrics.setAllJavaMetricValue(versionStats.getAllJavaAppIds().size());
+        HickwallMetrics.setAllNetMetricValue(versionStats.getAllNetAppIds().size());
+
         HickwallMetrics.setJavaAllMetricValue(versionStats.getJavaDalAppIds().size());
         HickwallMetrics.setJavaCtripDalClientMetricValue(versionStats.getCtripDalClientAppIds().size());
         HickwallMetrics.setJavaCtripDataSourceMetricValue(versionStats.getCtripDataSourceAppIds().size());

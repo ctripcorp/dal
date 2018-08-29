@@ -5,6 +5,10 @@ import java.util.Set;
 public class VersionStats {
     private Set<String> allAppIds;
 
+    private Set<String> allJavaAppIds;
+
+    private Set<String> allNetAppIds;
+
     private Set<String> ctripDalClientAppIds;
 
     private Set<String> tempDataSourceAppIds;
@@ -21,6 +25,22 @@ public class VersionStats {
 
     public void setAllAppIds(Set<String> allAppIds) {
         this.allAppIds = allAppIds;
+    }
+
+    public Set<String> getAllJavaAppIds() {
+        return allJavaAppIds;
+    }
+
+    public void setAllJavaAppIds(Set<String> allJavaAppIds) {
+        this.allJavaAppIds = allJavaAppIds;
+    }
+
+    public Set<String> getAllNetAppIds() {
+        return allNetAppIds;
+    }
+
+    public void setAllNetAppIds(Set<String> allNetAppIds) {
+        this.allNetAppIds = allNetAppIds;
     }
 
     public Set<String> getCtripDalClientAppIds() {

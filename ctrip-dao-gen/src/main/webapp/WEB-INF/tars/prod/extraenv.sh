@@ -1,1 +1,0 @@
-JAVA_OPTS="${JAVA_OPTS} -Xms4g -Xmx4g -Xmn2560m -Xss512k

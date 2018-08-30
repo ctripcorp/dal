@@ -16,6 +16,10 @@ public class HickwallMetrics {
     private static final String ALL_JAVA = "all.java";
     private static final String ALL_NET = "all.net";
 
+    // cat app count
+    private static final String ALL_JAVA_IN_CAT = "all.java.cat";
+    private static final String ALL_NET_IN_CAT = "all.net.cat";
+
     // dal client users count
     private static final String JAVA_ALL = "java.all";
     private static final String JAVA_CTRIP_DAL_CLIENT = "java.ctrip.dal.client";
@@ -25,6 +29,9 @@ public class HickwallMetrics {
     private static AtomicInteger allCount = new AtomicInteger();
     private static AtomicInteger allJavaCount = new AtomicInteger();
     private static AtomicInteger allNetCount = new AtomicInteger();
+
+    private static AtomicInteger allJavaCountInCat = new AtomicInteger();
+    private static AtomicInteger allNetCountInCat = new AtomicInteger();
 
     private static AtomicInteger javaAllCount = new AtomicInteger();
     private static AtomicInteger javaCtripDalClientCount = new AtomicInteger();
@@ -41,9 +48,14 @@ public class HickwallMetrics {
                 "SmallestDB" // influxdb database name
         );
 
+        // all app
         initMetricValue(ALL, allCount);
         initMetricValue(ALL_JAVA, allJavaCount);
         initMetricValue(ALL_NET, allNetCount);
+
+        // all cat
+        initMetricValue(ALL_JAVA_IN_CAT, allJavaCountInCat);
+        initMetricValue(ALL_NET_IN_CAT, allNetCountInCat);
 
         initMetricValue(JAVA_ALL, javaAllCount);
         initMetricValue(JAVA_CTRIP_DAL_CLIENT, javaCtripDalClientCount);
@@ -69,6 +81,14 @@ public class HickwallMetrics {
 
     public static void setAllNetMetricValue(Integer count) {
         allNetCount.set(count);
+    }
+
+    public static void setAllJavaInCatMetricValue(Integer count) {
+        allJavaCountInCat.set(count);
+    }
+
+    public static void setAllNetInCatMetricValue(Integer count) {
+        allNetCountInCat.set(count);
     }
 
     public static void setJavaAllMetricValue(Integer count) {

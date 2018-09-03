@@ -45,7 +45,7 @@ public class PoolPropertiesSwitchTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(3000);
         poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -57,7 +57,6 @@ public class PoolPropertiesSwitchTest {
     @AfterClass
     public static void tearDownAfterClass() throws  Exception{
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
         poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -167,7 +166,7 @@ public class PoolPropertiesSwitchTest {
         }
     }
 
-    public void checkAfterMHASwitch(DRTestDao dao,String keyName, String hostname, DalHints hints) {
+    public void checkAfterMHASwitch(DRTestDao dao, String keyName, String hostname, DalHints hints) {
         //检查切换是否生效
         log.info("开始连接串切换生效检查");
         long startTime = System.currentTimeMillis();
@@ -259,8 +258,8 @@ public class PoolPropertiesSwitchTest {
         map.put("connectionProperties", "rewriteBatchedStatements=false;");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于enableDynamicPoolProperties未设置，修改datasource之后并未动态生效，batchInsert返回值仍然是-2");
         checkBatchInsertReturnListWithSingleKey(dao, -2, "enableDynamicPoolProperties未设置,返回值异常", null);
@@ -302,8 +301,8 @@ public class PoolPropertiesSwitchTest {
         Map<String, String> map = new HashMap<>();
         map.put("mysqldaltest01db_W.connectionProperties", "rewriteBatchedStatements=false;");
         poolPropertiesSwitch.modifyPoolProperties(map);
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于enableDynamicPoolProperties未设置，修改datasource之后并未动态生效，batchInsert返回值仍然是-2");
         checkBatchInsertReturnListWithSingleKey(dao1, -2, "enableDynamicPoolProperties未设置，shard0返回值异常", new DalHints().inShard(0));
@@ -343,8 +342,8 @@ public class PoolPropertiesSwitchTest {
         map.put("mysqldaltest01db_W.connectionProperties", "rewriteBatchedStatements=false;");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于enableDynamicPoolProperties未设置，修改datasource之后并未动态生效，batchInsert返回值仍然是-2");
         checkBatchInsertReturnListWithSingleKey(dao1, -2, "enableDynamicPoolProperties未设置，shard0返回值异常", new DalHints().inShard(0));
@@ -354,8 +353,8 @@ public class PoolPropertiesSwitchTest {
         map.put("enableDynamicPoolProperties", "False");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于enableDynamicPoolProperties设置为False，修改datasource之后并未动态生效，batchInsert返回值仍然是-2");
         checkBatchInsertReturnListWithSingleKey(dao1, -2, "enableDynamicPoolProperties设置为False，shard0返回值异常", new DalHints().inShard(0));
@@ -365,8 +364,8 @@ public class PoolPropertiesSwitchTest {
         map.put("enableDynamicPoolProperties", "f");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于enableDynamicPoolProperties设置为f，修改datasource之后并未动态生效，batchInsert返回值仍然是-2");
         checkBatchInsertReturnListWithSingleKey(dao1, -2, "enableDynamicPoolProperties设置为f，shard0返回值异常", new DalHints().inShard(0));
@@ -394,8 +393,8 @@ public class PoolPropertiesSwitchTest {
         map.put("maxAge", "哦");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于开关未开启，错误修改并未生效");
         checkBatchInsertReturnListWithSingleKey(dao, -2, "开关未开启，batchInser操作出现异常", null);
@@ -501,8 +500,8 @@ public class PoolPropertiesSwitchTest {
             map.put("enableDynamicPoolProperties", "true");
             poolPropertiesSwitch.modifyPoolProperties(map);
 
-            log.info(String.format("修改文件后等待35秒"));
-            Thread.sleep(35000);
+            log.info(String.format("修改文件后等待10秒"));
+            Thread.sleep(10000);
 
             log.info("开始修改生效检查");
             long startTime = System.currentTimeMillis();

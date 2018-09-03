@@ -16,9 +16,6 @@ import testUtil.ConnectionStringSwitch;
 import testUtil.PoolPropertiesSwitch;
 import testUtil.netstat.NetStat;
 
-import java.io.File;
-import java.io.PrintStream;
-
 import static org.junit.Assert.*;
 
 
@@ -27,23 +24,25 @@ import static org.junit.Assert.*;
  */
 public class ConnectionStringSwitchTest {
     private static DRTestDao dao = null;
+    private static DRTestDao shardingDao = null;
     private static ConnectionStringSwitch connectionStringSwitch = null;
-    private static PoolPropertiesSwitch poolPropertiesSwitch=null;
+    private static PoolPropertiesSwitch poolPropertiesSwitch = null;
     private static NetStat netStat = null;
     private static Logger log = LoggerFactory.getLogger(ConnectionStringSwitchTest.class);
     private static String currentHostname;
     private String keyName1 = "mysqldaltest01db_W";
     private String keyName2 = "mysqldaltest02db_W";
-    private String databaseSet2 = "shardSwitchTestOnMysql";
-    private static Boolean isPro=true;
+    private static String databaseSet = "shardSwitchTestOnMysql";
+    private static Boolean isPro = true;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         DalClientFactory.shutdownFactory();
-        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath()+"DalConfigForSwitch/Dal.config");
+        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "DalConfigForSwitch/Dal.config");
         dao = new DRTestDao();
+        shardingDao = new DRTestDao(databaseSet);
         connectionStringSwitch = new ConnectionStringSwitch();
-        poolPropertiesSwitch=new PoolPropertiesSwitch();
+        poolPropertiesSwitch = new PoolPropertiesSwitch();
         netStat = new NetStat();
         poolPropertiesSwitch.resetPoolProperties();
     }
@@ -57,20 +56,20 @@ public class ConnectionStringSwitchTest {
 
     @After
     public void tearDown() throws Exception {
-        connectionStringSwitch.resetConnectionString(isPro);
+//        connectionStringSwitch.resetConnectionString(isPro);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
 
     @AfterClass
-    public static void tearDownAfterClass() throws Exception{
+    public static void tearDownAfterClass() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
     }
 
 
     public void initialize() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         currentHostname = dao.selectHostname(new DalHints());
         log.info(String.format("initialize currentHostname is：%s", currentHostname));
     }
@@ -107,8 +106,49 @@ public class ConnectionStringSwitchTest {
         queryData(name, hints, dao);
     }
 
+    public void checkSwitchSucceed(DalHints hints, DRTestDao dao) throws Exception {
+        try {
+            log.info("开始切换生效检查");
+            long startTime = System.currentTimeMillis();
+            String hostname;
+            boolean toBeContinued = true;
+            int times = 1;
+            while (toBeContinued) {
+                try {
+                    log.info(String.format("第 %d 次请求开始 ", times));
+                    hostname = queryHostName(keyName1, hints, dao);
+                    //如果斷言成立，即hostname已經改變，則說明切換生效
+                    assertNotEquals(currentHostname, hostname);
+                    //切換后修改當前hostname
+                    currentHostname = hostname;
+                    toBeContinued = false;
+                    log.info(String.format("第 %d 次请求成功 ", times));
+                } catch (Throwable e) {
+                    //斷言失敗則說明切換還未生效，需要繼續等待
+                    log.warn(String.format("第 %d 次请求失败，切換還在進行中 ", times));
+                    //如果等待時間已經超過40秒（30秒輪詢一次），說明此次切換失敗，結束等待；否則繼續等待
+                    if ((System.currentTimeMillis() - startTime) < 40000) {
+                        toBeContinued = true;
+                        times++;
+                    } else {
+                        log.warn(String.format("等待切换时间超过40秒，本次切换失败 "));
+                        toBeContinued = false;
+                        fail();
+                    }
+                }
+            }
+            //检查读写操作是否正常
+            log.info("开始检查写操作是否正常");
+            checkQueryAndUpdate("setNameAfterTheFirstSwitch", hints, dao);
+            log.info("读写操作正常，切换生效");
+        } catch (Exception e) {
+            log.warn("切换检查失败，本次切換失敗", e);
+            fail();
+        }
+    }
+
     @Test
-    public void testDomainToIp() throws Exception{
+    public void testDomainToIp() throws Exception {
         String nullIp = "";
         String recoveryIp;
         String url;
@@ -132,10 +172,10 @@ public class ConnectionStringSwitchTest {
         log.info(String.format("the initial url in domain mode is: %s", url));
         Assert.assertNotEquals(-1, url.indexOf("mysqldaltest01.mysql.db.fat.qa.nt.ctripcorp.com:55111"));
 
-        if(currentHostname.equalsIgnoreCase("FAT1868"))
-            recoveryIp="10.2.74.111";
+        if (currentHostname.equalsIgnoreCase("FAT1868"))
+            recoveryIp = "10.2.74.111";
         else
-            recoveryIp="10.2.74.122";
+            recoveryIp = "10.2.74.122";
 
         jsonArray.remove(0);
         JsonObject subJsonWithIp = new JsonObject();
@@ -145,15 +185,15 @@ public class ConnectionStringSwitchTest {
         jsonArray.add(subJsonWithIp);
 
         log.info(String.format("switch domain to ip"));
-        connectionStringSwitch.postByQconfig(jsonArray,isPro);
+        connectionStringSwitch.postByQconfig(jsonArray, isPro);
         Thread.sleep(5000);
 
         dataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName1);
         url = dataSourceConfigure.getConnectionUrl();
         log.info(String.format("the url after switch in ip mode is: %s", url));
         Assert.assertNotEquals(-1, url.indexOf("10.2.74"));
-        String hostnameAfterSwithToIp=dao.selectHostname(null);
-        Assert.assertEquals(currentHostname,hostnameAfterSwithToIp);
+        String hostnameAfterSwithToIp = dao.selectHostname(null);
+        Assert.assertEquals(currentHostname, hostnameAfterSwithToIp);
 
         log.info(String.format("switch ip"));
         connectionStringSwitch.postByMHA(isPro);
@@ -163,65 +203,24 @@ public class ConnectionStringSwitchTest {
         url = dataSourceConfigure.getConnectionUrl();
         log.info(String.format("the url after switch ip is: %s", url));
         Assert.assertNotEquals(-1, url.indexOf("10.2.74"));
-        String hostnameAfterSwithIp=dao.selectHostname(null);
-        Assert.assertNotEquals(currentHostname,hostnameAfterSwithIp);
+        String hostnameAfterSwithIp = dao.selectHostname(null);
+        Assert.assertNotEquals(currentHostname, hostnameAfterSwithIp);
     }
 
     @Test
     public void confirmNoNewConnectionsToOldMaster() throws Exception {
         log.info(String.format("****************query hostname before switch: %s", dao.selectHostname(null)));
-        netStat.netstatCMD(currentHostname,true);
-        Thread.sleep(2000);
+        netStat.netstatCMD(currentHostname, true);
         log.info("switch starts");
         connectionStringSwitch.postByMHA(isPro);
-        /*log.info(String.format("****************sleep 5s after switch..."));
-        Thread.sleep(5000);*/
         //检查切换是否生效
-        try {
-            log.info("开始切换生效检查");
-            long startTime = System.currentTimeMillis();
-            String hostname;
-            boolean toBeContinued = true;
-            int times = 1;
-            while (toBeContinued) {
-                try {
-                    log.info(String.format("第 %d 次请求开始 ", times));
-                    hostname = queryHostName(keyName1, null, dao);
-                    //如果斷言成立，即hostname已經改變，則說明切換生效
-                    assertNotEquals(currentHostname, hostname);
-                    //切換后修改當前hostname
-                    currentHostname = hostname;
-                    toBeContinued = false;
-                    log.info(String.format("第 %d 次请求成功 ", times));
-                } catch (Throwable e) {
-                    //斷言失敗則說明切換還未生效，需要繼續等待
-                    log.warn(String.format("第 %d 次请求失败，切換還在進行中 ", times));
-                    //如果等待時間已經超過40秒（30秒輪詢一次），說明此次切換失敗，結束等待；否則繼續等待
-                    if ((System.currentTimeMillis() - startTime) < 40000) {
-                        toBeContinued = true;
-                        times++;
-                    } else {
-                        log.warn(String.format("等待切换时间超过40秒，本次切换失败 "));
-                        toBeContinued = false;
-                        fail();
-                    }
-                }
-            }
-            //检查读写操作是否正常
-            log.info("开始检查写操作是否正常");
-            checkQueryAndUpdate("setNameAfterTheFirstSwitch", null, dao);
-            log.info("读写操作正常，切换生效");
-        } catch (Exception e) {
-            log.warn("切换检查失败，本次切換失敗", e);
-            fail();
-        }
-        Thread.sleep(2000);
-        netStat.netstatCMD(currentHostname,true);
+        checkSwitchSucceed(null, dao);
+        netStat.netstatCMD(currentHostname, true);
         log.info(String.format("Done"));
     }
 
 
-    @Test
+   /* @Test
     public void autoCycleTestDynamicDatasourceWithSingleKeyReturnCostTime() throws Exception {
         DRTestDao autoTestDynamicDatasourceWithSingleKeyDao = new DRTestDao();
         int i = 1;
@@ -301,7 +300,7 @@ public class ConnectionStringSwitchTest {
             i++;
             Thread.sleep(1000);
         }
-    }
+    }*/
 
     /*@Test
     public void autoCycleTestDynamicDatasourceWithSingleKey() throws Exception {
@@ -372,54 +371,24 @@ public class ConnectionStringSwitchTest {
         }
     }*/
 
-    /*@Test
+    @Test
     public void autoTestDynamicDatasourceWithSingleKey() throws Exception {
-        DRTestDao autoTestDynamicDatasourceWithSingleKeyDao = new DRTestDao();
+//        DRTestDao autoTestDynamicDatasourceWithSingleKeyDao = new DRTestDao();
         log.info(String.format("切换前"));
 
         log.info(String.format("检查当前hostname"));
-        assertEquals(currentHostname, queryHostName(keyName1, null, autoTestDynamicDatasourceWithSingleKeyDao));
+        assertEquals(currentHostname, queryHostName(keyName1, null, dao));
 
-        checkQueryAndUpdate("setNameBeforeTheFirstSwitch", null, autoTestDynamicDatasourceWithSingleKeyDao);
+        checkQueryAndUpdate("setNameBeforeTheFirstSwitch", null, dao);
 
-        log.info(String.format("开始切换"));
-        postByMHA(autoTestDynamicDatasourceWithSingleKeyDao);
+        log.info(String.format("开始第一次切换"));
+        connectionStringSwitch.postByMHA(true);
+        checkSwitchSucceed(null, dao);
 
-        try {
-            //等待3秒钟切换生效
-            log.info("3 seconds after the first switch...");
-            Thread.sleep(3000);
-
-            //检查切换是否生效
-            log.info("切换后");
-            assertNotEquals(currentHostname, queryHostName(keyName1, null, autoTestDynamicDatasourceWithSingleKeyDao));
-
-            //检查读写操作是否正常
-            checkQueryAndUpdate("setNameAfterTheFirstSwitch", null, autoTestDynamicDatasourceWithSingleKeyDao);
-
-            log.info("切换生效");
-        } catch (Exception e) {
-            log.warn("切换检查失败，或许要等待30秒轮询通知", e);
-
-            try {
-                //再等30秒
-                log.info("30 seconds wait...");
-                Thread.sleep(30000);
-
-                //检查切换是否生效
-                log.info("start the second time validation");
-                assertNotEquals(currentHostname, queryHostName(keyName1, null, autoTestDynamicDatasourceWithSingleKeyDao));
-
-                //检查读写操作是否正常
-                checkQueryAndUpdate("setNameTheSecondValidation", null, autoTestDynamicDatasourceWithSingleKeyDao);
-
-                log.info("30秒轮询后切换生效");
-            } catch (Exception ex) {
-                log.error("30秒轮询检查依然失败，本次切换失败", e);
-                fail();
-            }
-        }
-    }*/
+        log.info(String.format("开始回切"));
+        connectionStringSwitch.postByMHA(true);
+        checkSwitchSucceed(null, dao);
+    }
 
     @Test
     public void autoTestSwitchSingleKeyWithInvalidIp() throws Exception {
@@ -444,9 +413,8 @@ public class ConnectionStringSwitchTest {
         connectionStringSwitch.postByQconfig(jsonArray, isPro);
 
         try {
-            //本次切换假设通知推送正常，无需30秒轮询，故保险起见把等待时间延长至5秒
-            log.info("5 seconds wait...");
-            Thread.sleep(5000);
+            log.info("3 seconds wait...");
+            Thread.sleep(3000);
 
             //检查切换是否生效
             log.info("start the first validation after invalid ip switch");
@@ -464,8 +432,8 @@ public class ConnectionStringSwitchTest {
 
             try {
                 //等待3秒重新创建数据源
-                log.info("5 seconds wait...");
-                Thread.sleep(5000);
+                log.info("3 seconds wait...");
+                Thread.sleep(3000);
 
                 log.info("start the second time validation after the recovery switch");
                 assertNotEquals(currentHostname, queryHostName(keyName1, null, autoTestSwitchSingleKeyWithInvalidIpDao));
@@ -480,7 +448,7 @@ public class ConnectionStringSwitchTest {
         }
     }
 
-    @Test
+    /*@Test
     public void autoTestDynamicDatasourceWithMultipleKeysReturnCostTime() throws Exception {
         DRTestDao autoTestDynamicDatasourceWithMultipleKeysDao = new DRTestDao(databaseSet2);
         int i = 1;
@@ -569,44 +537,36 @@ public class ConnectionStringSwitchTest {
             i++;
             Thread.sleep(1000);
         }
-    }
+    }*/
 
-    /*@Test
+    @Test
     public void autoTestDynamicDatasourceWithMultipleKeys() throws Exception {
-        DRTestDao autoTestDynamicDatasourceWithMultipleKeysDao = new DRTestDao(databaseSet2);
+//        DRTestDao autoTestDynamicDatasourceWithMultipleKeysDao = new DRTestDao(databaseSet);
         //before switch
         log.info(String.format("before switch"));
+        String initHostname = currentHostname;
+        assertEquals(initHostname, queryHostName(keyName1, new DalHints().inShard(0), shardingDao));
+        assertEquals(initHostname, queryHostName(keyName2, new DalHints().inShard(1), shardingDao));
 
-        assertEquals(currentHostname, queryHostName(keyName1, new DalHints().inShard(0), autoTestDynamicDatasourceWithMultipleKeysDao));
-        assertEquals(currentHostname, queryHostName(keyName2, new DalHints().inShard(1), autoTestDynamicDatasourceWithMultipleKeysDao));
-
-        checkQueryAndUpdate("setNameBeforeSwitch0", new DalHints().inShard(0), autoTestDynamicDatasourceWithMultipleKeysDao);
-        checkQueryAndUpdate("setNameBeforeSwitch1", new DalHints().inShard(1), autoTestDynamicDatasourceWithMultipleKeysDao);
+        checkQueryAndUpdate("setNameBeforeSwitch0", new DalHints().inShard(0), shardingDao);
+        checkQueryAndUpdate("setNameBeforeSwitch1", new DalHints().inShard(1), shardingDao);
 
         //start switch
         log.info(String.format("start switch"));
-        postByMHA(autoTestDynamicDatasourceWithMultipleKeysDao);
+        connectionStringSwitch.postByMHA(true);
 
         //after switch
-        try {
-            //等待5秒获取通知重建数据源
-            log.info("5 seconds wait...");
-            Thread.sleep(5000);
+        checkSwitchSucceed(new DalHints().inShard(0), shardingDao);
+        //检查切换是否成功
+        log.info("After switch");
+        assertNotEquals(initHostname, queryHostName(keyName1, new DalHints().inShard(0), shardingDao));
+        assertNotEquals(initHostname, queryHostName(keyName2, new DalHints().inShard(1), shardingDao));
 
-            //检查切换是否成功
-            log.info("After switch");
-            assertNotEquals(currentHostname, queryHostName(keyName1, new DalHints().inShard(0), autoTestDynamicDatasourceWithMultipleKeysDao));
-            assertNotEquals(currentHostname, queryHostName(keyName2, new DalHints().inShard(1), autoTestDynamicDatasourceWithMultipleKeysDao));
+        checkQueryAndUpdate("setNameAfterSwitch0", new DalHints().inShard(0), shardingDao);
+        checkQueryAndUpdate("setNameAfterSwitch1", new DalHints().inShard(1), shardingDao);
 
-            checkQueryAndUpdate("setNameAfterSwitch0", new DalHints().inShard(0), autoTestDynamicDatasourceWithMultipleKeysDao);
-            checkQueryAndUpdate("setNameAfterSwitch1", new DalHints().inShard(1), autoTestDynamicDatasourceWithMultipleKeysDao);
-
-            log.info("切换已生效");
-        } catch (Exception e) {
-            log.error("Qconfig没有在5秒内推送切换通知，请检查问题", e);
-            fail();
-        }
-    }*/
+        log.info("切换已生效");
+    }
 
     @Test
     public void autoTestSwitchMultipleKeysWithOneFailedAndOnePassed() throws Exception {
@@ -614,7 +574,7 @@ public class ConnectionStringSwitchTest {
         String validIp;
         String recoveryIp;
 
-        DRTestDao autoTestSwitchMultipleKeysWithOneFailedAndOnePassedDao = new DRTestDao(databaseSet2);
+        DRTestDao autoTestSwitchMultipleKeysWithOneFailedAndOnePassedDao = new DRTestDao(databaseSet);
 
         //before switch
         log.info(String.format("before switch"));
@@ -651,9 +611,9 @@ public class ConnectionStringSwitchTest {
 
         //after switch
 
-        //等待5秒获取通知重建数据源
-        log.info("5 seconds wait...");
-        Thread.sleep(5000);
+        //等待3秒获取通知重建数据源
+        log.info("3 seconds wait...");
+        Thread.sleep(3000);
 
         //检查切换是否成功
         log.info("After switch");
@@ -694,7 +654,7 @@ public class ConnectionStringSwitchTest {
         connectionStringSwitch.postByQconfig(jsonArray2, isPro);
 
         try {
-            Thread.sleep(5000);
+            Thread.sleep(3000);
 
             log.info("validate after recovery");
             assertEquals(currentHostname, queryHostName(keyName1, new DalHints().inShard(0), autoTestSwitchMultipleKeysWithOneFailedAndOnePassedDao));

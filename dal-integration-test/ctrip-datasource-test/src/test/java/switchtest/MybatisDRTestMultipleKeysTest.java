@@ -49,14 +49,14 @@ public class MybatisDRTestMultipleKeysTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -182,7 +182,7 @@ public class MybatisDRTestMultipleKeysTest {
         String recoveryIp;
 
         connectionStringSwitch.postByMHA(isPro);
-        Thread.sleep(5000);
+        Thread.sleep(3000);
 
         //before switch
         log.info(String.format("before switch"));
@@ -224,8 +224,8 @@ public class MybatisDRTestMultipleKeysTest {
         //after switch
 
         //等待5秒获取通知重建数据源
-        log.info("5 seconds wait...");
-        Thread.sleep(5000);
+        log.info("3 seconds wait...");
+        Thread.sleep(3000);
 
         //检查切换是否成功
         log.info("After switch");
@@ -269,7 +269,7 @@ public class MybatisDRTestMultipleKeysTest {
         connectionStringSwitch.postByQconfig(jsonArray2, isPro);
 
         try {
-            Thread.sleep(5000);
+            Thread.sleep(3000);
 
             log.info("validate after recovery");
 

@@ -43,14 +43,14 @@ public class MybatisDRTestSingleKeyTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
     /*@Test
@@ -144,8 +144,8 @@ public class MybatisDRTestSingleKeyTest {
 
         try {
             //本次切换假设通知推送正常，无需30秒轮询，故保险起见把等待时间延长至5秒
-            log.info("5 seconds wait...");
-            Thread.sleep(5000);
+            log.info("3 seconds wait...");
+            Thread.sleep(3000);
 
             //检查切换是否生效
             log.info("start the first validation after invalid ip switch");
@@ -165,8 +165,8 @@ public class MybatisDRTestSingleKeyTest {
 
             try {
                 //等待3秒重新创建数据源
-                log.info("5 seconds wait...");
-                Thread.sleep(5000);
+                log.info("3 seconds wait...");
+                Thread.sleep(3000);
 
                 log.info("start the second time validation after the recovery switch");
                 String currentHostname = drTestMapperDao.getHostNameMySQL();

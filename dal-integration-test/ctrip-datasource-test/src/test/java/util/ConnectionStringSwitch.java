@@ -115,7 +115,7 @@ public class ConnectionStringSwitch {
         postByMHA(isPro);
         log.info("reset connectionStrings succeed");
         //等待5秒钟
-        log.info("5 seconds after connectionStrings reset");
-        Thread.sleep(5000);
+        log.info("3 seconds after connectionStrings reset");
+        Thread.sleep(3000);
     }
 }

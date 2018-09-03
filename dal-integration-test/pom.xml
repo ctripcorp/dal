@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.ctrip.framework</groupId>
@@ -15,12 +15,12 @@
   <packaging>pom</packaging>
 
   <properties>
-    <framework-bom.version>2.28.0</framework-bom.version>
-    <!--<dal.version>logtable</dal.version>
-    <ctrip-datasource.version>logtable</ctrip-datasource.version>-->
+    <framework-bom.version>2.31.0</framework-bom.version>
+    <!--<dal.version>1.15.9-SNAPSHOT</dal.version>
+    <ctrip-datasource.version>1.15.9-SNAPSHOT</ctrip-datasource.version>-->
 
-    <!--<dal.version>1.15.7</dal.version>
-    <ctrip-datasource.version>1.15.7</ctrip-datasource.version>-->
+    <!--<dal.version>1.15.8</dal.version>
+    <ctrip-datasource.version>1.15.8</ctrip-datasource.version>-->
   </properties>
 
   <modules>
@@ -62,11 +62,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!--<dependency>
-        <groupId>org.mybatis.spring.boot</groupId>
-        <artifactId>mybatis-spring-boot-starter</artifactId>
-        <version>1.2.0</version>
-      </dependency>-->
       <dependency>
         <groupId>org.mybatis</groupId>
         <artifactId>mybatis</artifactId>

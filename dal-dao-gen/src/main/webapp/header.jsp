@@ -9,6 +9,8 @@
     String dalTeamEmail = Configuration.get("dal_team_email");
     String reportPage = Configuration.get("report_page");
     String decryptionPage = Configuration.get("decryption_page");
+    String accessPage = Configuration.get("access_page");
+
     request.setAttribute("codegenManual", codegenManual);
     request.setAttribute("dalManual", dalManual);
     request.setAttribute("sqlServerSpec", sqlServerSpec);
@@ -16,6 +18,7 @@
     request.setAttribute("dalTeamEmail", dalTeamEmail);
     request.setAttribute("reportPage", reportPage);
     request.setAttribute("decryptionPage", decryptionPage);
+    request.setAttribute("accessPage", accessPage);
 %>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top" role="navigation">
     <div class="navbar-header">
@@ -48,6 +51,7 @@
                     <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">Java DAL 参数解密</a>
                     </li>
                     <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">DAL 版本统计</a></li>
+                    <li><a href="javascript:;" onclick="window.open('${accessPage}', '_blank');">DAL 接入趋势统计</a></li>
                 </ul>
             </li>
         </ul>

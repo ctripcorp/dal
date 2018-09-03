@@ -24,7 +24,7 @@ import com.ctrip.platform.dal.dao.sqlbuilder.Expressions.Expression;
  * @author jhhe
  *
  */
-public abstract class AbstractTableSqlBuilder extends AbstractSqlBuilder implements TableSqlBuilder {
+public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuilder implements TableSqlBuilder {
 	
 	protected int index = 1;
 	

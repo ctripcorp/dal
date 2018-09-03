@@ -50,8 +50,7 @@ public class FreshnessSelector implements DatabaseSelector {
 
     /**
      * Need to be called during getQualifiedSlaveNames
-     * 
-     * @param configure
+     *
      */
     private void initialize() {
         if (freshnessUpdatorRef.get() != null)
@@ -120,7 +119,6 @@ public class FreshnessSelector implements DatabaseSelector {
      * Get freshness for given logic db and slave
      * 
      * @param logicDbName
-     * @param slaveDbName
      * @return
      */
     public static int getFreshness(String logicDbName, String connectionString) {
@@ -131,7 +129,6 @@ public class FreshnessSelector implements DatabaseSelector {
      * A handy way of getting qualified slaves
      * 
      * @param logicDbName
-     * @param freshness
      * @return
      */
     private List<DataBase> filterQualifiedSlaves(String logicDbName, List<DataBase> slaves, int qualifiedFreshness) {

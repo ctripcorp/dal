@@ -75,8 +75,7 @@
                             <textarea id="encryptNet" class="form-control text-area-width" rows="6"></textarea>
                         </div>
                         <div class="button-margin " style="float: left">
-                            <input id="btnDecryptNet" class="btn btn-default" type="button" value="解密 Clog">
-                            <input id="btnDecryptNet2" class="btn btn-default margin-left" type="button" value="解密 CAT">
+                            <input id="btnDecryptNet" class="btn btn-default" type="button" value="解密">
                             <input id="btnClearNet" class="btn btn-default margin-left" type="button" value="清空">
                         </div>
                         <div class="margin-top" style="float: left">

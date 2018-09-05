@@ -104,7 +104,7 @@ public class DecryptResource {
         try {
             Cipher cipher = getDecryptCipher();
             byte[] bytes = Base64.decodeBase64(encryptString.getBytes());
-            return new String(cipher.doFinal(bytes));
+            return new String(cipher.doFinal(bytes), UTF8);
         } catch (Throwable e) {
             throw e;
         }
@@ -112,16 +112,30 @@ public class DecryptResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("decryptNetClog")
-    public DecryptInfo getNetClogDecryptInfo(@QueryParam("encrypt") String encrypt) {
+    @Path("decryptNet")
+    public DecryptInfo getNetDecryptInfo(@QueryParam("encrypt") String encrypt) {
         DecryptInfo result = new DecryptInfo();
+        Boolean isCat = isCatParameter(encrypt);
+
         try {
-            String decrypt = desDecryptNetClog(encrypt);
+            String decrypt = null;
+            if (isCat) {
+                decrypt = desDecryptNetCat(encrypt);
+            } else {
+                decrypt = desDecryptNet(encrypt);
+            }
+
             result.setDecryptMsg(decrypt);
             result.setErrorMsg("");
         } catch (Throwable e) {
             try {
-                String decrypt2 = desDecryptNetClog(URLDecoder.decode(encrypt, UTF8));
+                String decrypt2 = null;
+                if (isCat) {
+                    decrypt2 = desDecryptNet(URLDecoder.decode(encrypt, UTF8));
+                } else {
+                    decrypt2 = desDecryptNetCat(URLDecoder.decode(encrypt, UTF8));
+                }
+
                 result.setDecryptMsg(decrypt2);
                 result.setErrorMsg("");
             } catch (Throwable e1) {
@@ -147,39 +161,44 @@ public class DecryptResource {
         return cipher;
     }
 
-    private String desDecryptNetClog(String encryptString) throws Exception {
+    private Boolean isCatParameter(String encryptString) {
+        if (encryptString == null || encryptString.isEmpty())
+            return false;
+
+        int index1 = encryptString.indexOf(tripleEqual);
+        if (index1 > -1)
+            return true;
+
+        int index2 = encryptString.indexOf(doubleEqual);
+        if (index2 > -1) {
+            if (index2 == (encryptString.length() - doubleEqual.length())) {
+                return false;
+            }
+
+            return true;
+        }
+
+        int index3 = encryptString.indexOf(equal);
+        if (index3 > -1) {
+            if (index3 == (encryptString.length() - equal.length())) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private String desDecryptNet(String encryptString) throws Exception {
         if (encryptString == null || encryptString.isEmpty())
             return "";
 
         try {
             Cipher cipher = getDecryptCipherNet();
             byte[] bytes = Base64.decodeBase64(encryptString.getBytes());
-            return new String(cipher.doFinal(bytes));
+            return new String(cipher.doFinal(bytes), UTF8);
         } catch (Throwable e) {
             throw e;
         }
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("decryptNetCat")
-    public DecryptInfo getNetCatDecryptInfo(@QueryParam("encrypt") String encrypt) {
-        DecryptInfo result = new DecryptInfo();
-        try {
-            String decrypt = desDecryptNetCat(encrypt);
-            result.setDecryptMsg(decrypt);
-            result.setErrorMsg("");
-        } catch (Throwable e) {
-            try {
-                String decrypt2 = desDecryptNetCat(URLDecoder.decode(encrypt, UTF8));
-                result.setDecryptMsg(decrypt2);
-                result.setErrorMsg("");
-            } catch (Throwable e1) {
-                result.setErrorMsg(e.getMessage());
-            }
-        }
-
-        return result;
     }
 
     private String desDecryptNetCat(String encryptString) throws Exception {
@@ -193,16 +212,16 @@ public class DecryptResource {
                 List<String> parameter = new ArrayList<>();
                 if (item.indexOf(tripleEqual) > -1) {
                     int index = item.indexOf(tripleEqual);
-                    parameter.add(desDecryptNetClog(item.substring(0, index).concat(doubleEqual)));
-                    parameter.add(desDecryptNetClog(item.substring(index + tripleEqual.length())));
+                    parameter.add(desDecryptNet(item.substring(0, index).concat(doubleEqual)));
+                    parameter.add(desDecryptNet(item.substring(index + tripleEqual.length())));
                 } else if (item.indexOf(doubleEqual) > -1) {
                     int index = item.indexOf(doubleEqual);
-                    parameter.add(desDecryptNetClog(item.substring(0, index).concat(equal)));
-                    parameter.add(desDecryptNetClog(item.substring(index + doubleEqual.length())));
+                    parameter.add(desDecryptNet(item.substring(0, index).concat(equal)));
+                    parameter.add(desDecryptNet(item.substring(index + doubleEqual.length())));
                 } else {
                     int index = item.indexOf(equal);
-                    parameter.add(desDecryptNetClog(item.substring(0, index)));
-                    parameter.add(desDecryptNetClog(item.substring(index + equal.length())));
+                    parameter.add(desDecryptNet(item.substring(0, index)));
+                    parameter.add(desDecryptNet(item.substring(index + equal.length())));
                 }
 
                 parameters.add(String.join(equal, parameter));

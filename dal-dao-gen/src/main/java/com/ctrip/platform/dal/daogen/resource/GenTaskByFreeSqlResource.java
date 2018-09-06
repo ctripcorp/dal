@@ -211,16 +211,20 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
             @FormParam("sql_content") String sql_content, @FormParam("params") String params,
             @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) {
         Status status = Status.OK();
+        Boolean containsQuestionMark = sql_content.indexOf("?") > -1;
 
         try {
             Map<String, Parameter> map = new LinkedHashMap<>();
             List<Parameter> list = new ArrayList<>();
-            Matcher matcher = pattern.matcher(sql_content);
-            while (matcher.find()) {
-                String parameter = matcher.group();
-                Parameter p = new Parameter();
-                p.setName(parameter.substring(1)); // trim @
-                list.add(p);
+
+            if (!containsQuestionMark) {
+                Matcher matcher = pattern.matcher(sql_content);
+                while (matcher.find()) {
+                    String parameter = matcher.group();
+                    Parameter p = new Parameter();
+                    p.setName(parameter.substring(1)); // trim @
+                    list.add(p);
+                }
             }
 
             String[] values = mockValues.split(";");
@@ -247,6 +251,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
                 }
             }
 
+            // C#
             if (list.size() > 0) {
                 for (Parameter p : list) {
                     String name = p.getName();
@@ -256,7 +261,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
                         p.setValue(temp.getValue());
                     }
                 }
-            } else {
+            } else { // Java
                 for (Map.Entry<String, Parameter> entry : map.entrySet()) {
                     Parameter p = new Parameter();
                     Parameter temp = entry.getValue();
@@ -266,7 +271,10 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
                 }
             }
 
-            sql_content = sql_content.replaceAll(expression, "?");
+            if (!containsQuestionMark) {
+                sql_content = sql_content.replaceAll(expression, "?");
+            }
+
             int[] sqlTypes = getTypes(list);
             values = getValues(list);
 

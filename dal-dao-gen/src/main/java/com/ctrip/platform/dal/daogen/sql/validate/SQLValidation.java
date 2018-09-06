@@ -238,7 +238,6 @@ public class SQLValidation {
      * @param status Result to be updated
      * @param paramsTypes SQL Types of parameters
      */
-
     private static void sqlserverQueryWithoutExplain(Connection connection, String sql, ValidateResult status,
             int[] paramsTypes, Object[] vals) {
         sqlserverExplain(connection, sql, status, paramsTypes, vals);
@@ -246,7 +245,12 @@ public class SQLValidation {
             ResultSet rs = null;
             PreparedStatement stat = null;
             try {
-                stat = connection.prepareStatement(SqlBuilder.net2Java(sql));
+                Boolean containsQuestionMark = sql.indexOf("?") > -1;
+                String temp = sql;
+                if (!containsQuestionMark) {
+                    temp = SqlBuilder.net2Java(sql);
+                }
+                stat = connection.prepareStatement(temp);
                 for (int i = 1; i <= paramsTypes.length; i++) {
                     if (paramsTypes[i - 1] == 10001)
                         stat.setObject(i, vals[i - 1], Types.CHAR);

@@ -44,7 +44,7 @@ public class QPSTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
         hostname = dao.selectHostname(null);
         log.info(String.format("current hostname is : %s", hostname));
@@ -59,7 +59,7 @@ public class QPSTest {
     @AfterClass
     public static void tearDownAfterClass() throws Exception{
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
     }
 
     public void switchDatasource() throws Exception {

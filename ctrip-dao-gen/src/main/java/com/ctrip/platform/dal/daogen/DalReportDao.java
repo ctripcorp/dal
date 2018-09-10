@@ -6,8 +6,10 @@ import com.ctrip.platform.dal.daogen.report.App;
 import com.ctrip.platform.dal.daogen.report.CMSApp;
 import com.ctrip.platform.dal.daogen.report.CMSAppInfo;
 import com.ctrip.platform.dal.daogen.report.DalReport;
+import com.ctrip.platform.dal.daogen.report.LangType;
 import com.ctrip.platform.dal.daogen.report.RawInfo;
 import com.ctrip.platform.dal.daogen.report.VersionStats;
+import com.ctrip.platform.dal.daogen.report.newReport.CatClientVersion;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDalClientVersionRawInfo;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDatasourceVersion;
 import com.ctrip.platform.dal.daogen.report.newReport.CtripDatasourceVersionRawInfo;
@@ -60,6 +62,9 @@ public class DalReportDao {
 
     private static final String SQL_DATABASE_URL =
             "http://cat.ctripcorp.com/cat/r/globalEvent?type=SQL.database&op=appDetail&forceDownload=json";
+
+    private static final String CAT_APPID_URL =
+            "http://cat.ctripcorp.com/cat/r/globalEvent?type=Cat.Client.Version&op=appDetail&forceDownload=json";
 
     private static final String CMS_ALL_APPS_URL = "http://osg.ops.ctripcorp.com/api/11209";
     private static final String CMS_TOKEN = "70c152d9c4980f8843c497ed9b6b5386";
@@ -552,6 +557,7 @@ public class DalReportDao {
         List<DalReport> result = new ArrayList<>();
         List<DalReport> dalVersionList = getDalVersionVector();
         List<DalReport> datasourceVersionList = getDatasourceVersionVector();
+        List<String> catAppIds = getCatAppIds();
         datasourceVersionList = formattedDataSourceVersionList(datasourceVersionList);
         result.addAll(dalVersionList);
         result.addAll(datasourceVersionList);
@@ -689,7 +695,88 @@ public class DalReportDao {
         return result;
     }
 
+    private List<String> getCatAppIds() throws Exception {
+        List<String> result = new ArrayList<>();
+        NewRoot root = HttpUtil.getJSONEntity(NewRoot.class, CAT_APPID_URL, null, HttpMethod.HttpGet);
+        if (root == null)
+            return result;
+
+        NewReport report = root.getReport();
+        if (report == null)
+            return result;
+
+        TypeDetails typeDetails = report.getTypeDetails();
+        if (typeDetails == null)
+            return result;
+
+        CatClientVersion catClientVersion = typeDetails.getCatClientVersion();
+        if (catClientVersion == null)
+            return result;
+
+        Map<String, NewApp> appDetails = catClientVersion.getAppDetails();
+        if (appDetails == null || appDetails.isEmpty())
+            return result;
+
+        Set<String> set = appDetails.keySet();
+        versionStats.setAllAppIdsInCat(set);
+        result.addAll(set);
+        return result;
+    }
+
     private void setDalVersionStats() {
+        setAppIds();
+        setDalAppIds();
+    }
+
+    private void setAppIds() {
+        if (appInfoMap == null)
+            return;
+
+        Set<String> allAppIds = new HashSet<>();
+        Set<String> allJavaAppIds = new HashSet<>();
+        Set<String> allNetAppIds = new HashSet<>();
+
+        for (Map.Entry<String, CMSApp> entry : appInfoMap.entrySet()) {
+            allAppIds.add(entry.getKey());
+            LangType langType = entry.getValue().getLangType();
+            if (langType.equals(LangType.Java)) {
+                allJavaAppIds.add(entry.getKey());
+            } else if (langType.equals(LangType.Net)) {
+                allNetAppIds.add(entry.getKey());
+            }
+        }
+
+        versionStats.setAllAppIds(allAppIds);
+        versionStats.setAllJavaAppIds(allJavaAppIds);
+        versionStats.setAllNetAppIds(allNetAppIds);
+
+        setCatAppIds(allJavaAppIds, allNetAppIds);
+    }
+
+    private void setCatAppIds(Set<String> allJavaAppIds, Set<String> allNetAppIds) {
+        Set<String> allAppIdsInCat = versionStats.getAllAppIdsInCat();
+        if (allAppIdsInCat == null || allAppIdsInCat.isEmpty())
+            return;
+
+        Set<String> tempJavaAppIds = new HashSet<>(allJavaAppIds);
+        Set<String> tempNetAppIds = new HashSet<>(allNetAppIds);
+
+        Set<String> allJavaAppIdsInCat = new HashSet<>();
+        Set<String> allNetAppIdsInCat = new HashSet<>();
+
+        for (String appId : allAppIdsInCat) {
+            if (tempJavaAppIds.contains(appId)) {
+                allJavaAppIdsInCat.add(appId);
+            } else if (tempNetAppIds.contains(appId)) {
+                allNetAppIdsInCat.add(appId);
+            }
+        }
+
+        versionStats.setAllJavaAppIdsInCat(allJavaAppIdsInCat);
+        versionStats.setAllNetAppIdsInCat(allNetAppIdsInCat);
+    }
+
+    private void setDalAppIds() {
         Set<String> ctripDalClientAppIds = versionStats.getCtripDalClientAppIds();
         Set<String> tempDataSourceAppIds = versionStats.getTempDataSourceAppIds();
         Set<String> javaAppIds = new HashSet<>();
@@ -704,19 +791,16 @@ public class DalReportDao {
         }
 
         versionStats.setCtripDataSourceAppIds(datasourceAppIds);
-
-        if (appInfoMap != null) {
-            Set<String> allAppIds = new HashSet<>();
-            for (Map.Entry<String, CMSApp> entry : appInfoMap.entrySet()) {
-                allAppIds.add(entry.getKey());
-            }
-
-            versionStats.setAllAppIds(allAppIds);
-        }
     }
 
     private void logDalVersionStats() {
         HickwallMetrics.setAllMetricValue(versionStats.getAllAppIds().size());
+        HickwallMetrics.setAllJavaMetricValue(versionStats.getAllJavaAppIds().size());
+        HickwallMetrics.setAllNetMetricValue(versionStats.getAllNetAppIds().size());
+
+        HickwallMetrics.setAllJavaInCatMetricValue(versionStats.getAllJavaAppIdsInCat().size());
+        HickwallMetrics.setAllNetInCatMetricValue(versionStats.getAllNetAppIdsInCat().size());
+
         HickwallMetrics.setJavaAllMetricValue(versionStats.getJavaDalAppIds().size());
         HickwallMetrics.setJavaCtripDalClientMetricValue(versionStats.getCtripDalClientAppIds().size());
         HickwallMetrics.setJavaCtripDataSourceMetricValue(versionStats.getCtripDataSourceAppIds().size());

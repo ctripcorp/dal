@@ -34,14 +34,14 @@ public class TestPoolProperties {
         DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath()+"DalConfigForSwitch/Dal.config");
         DalClientFactory.warmUpConnections();
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         poolPropertiesSwitch.resetPoolProperties();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -72,7 +72,7 @@ public class TestPoolProperties {
         map.put("maxAge", "哦");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        Thread.sleep(35000);
+        Thread.sleep(10000);
 
         log.info("check modify when switch is off");
         try {
@@ -91,7 +91,7 @@ public class TestPoolProperties {
         log.info("MHA switch");
         connectionStringSwitch.postByMHA(isPro);
 
-        Thread.sleep(35000);
+        Thread.sleep(10000);
 
         log.info("check MHA switch");
         try {
@@ -168,7 +168,7 @@ public class TestPoolProperties {
         map.put("maxAge", "哦");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        Thread.sleep(35000);
+        Thread.sleep(10000);
 
         log.info("check modify when switch is off");
         try {
@@ -187,7 +187,7 @@ public class TestPoolProperties {
         log.info("MHA switch");
         connectionStringSwitch.postByMHA(isPro);
 
-        Thread.sleep(35000);
+        Thread.sleep(10000);
 
         log.info("check MHA switch");
         try {

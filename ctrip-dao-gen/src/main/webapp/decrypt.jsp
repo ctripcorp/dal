@@ -32,22 +32,60 @@
     <meta name="author" content="">
     <title>Ctrip DAO Generator</title>
     <link href="/static/images/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
-    <link href="/static/bootstrap/css/bootstrap.min.css?codegen=${version}" rel="stylesheet">
-    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap.min.css?version=${version}" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?version=${version}" rel="stylesheet">
 </head>
 <body>
-<div style="display:inline;">
-    <div class="margin-left margin-top" style="float: left">
-        <label for="encrypt">加密串：</label>
-        <textarea id="encrypt" class="form-control text-area-width" rows="6"></textarea>
-    </div>
-    <div class="button-margin " style="float: left">
-        <input id="btnDecrypt" class="btn btn-default" type="button" value="解密">
-        <input id="btnClear" class="btn btn-default margin-left" type="button" value="清空">
-    </div>
-    <div class="margin-top" style="float: left">
-        <label for="decrypt">解密串：</label>
-        <textarea id="decrypt" class="form-control text-area-width" rows="6"></textarea>
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#javaDal" aria-controls="javaDal" role="tab" data-toggle="tab">Java DAL</a>
+        </li>
+        <li role="presentation">
+            <a href="#netDal" aria-controls="netDal" role="tab" data-toggle="tab">.Net DAL</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="javaDal">
+            <div class="panel">
+                <div class="panel-body">
+                    <div style="display:inline;">
+                        <div class="margin-left margin-top" style="float: left">
+                            <label for="encrypt">加密串：</label>
+                            <textarea id="encrypt" class="form-control text-area-width" rows="6"></textarea>
+                        </div>
+                        <div class="button-margin " style="float: left">
+                            <input id="btnDecrypt" class="btn btn-default" type="button" value="解密">
+                            <input id="btnClear" class="btn btn-default margin-left" type="button" value="清空">
+                        </div>
+                        <div class="margin-top" style="float: left">
+                            <label for="decrypt">解密串：</label>
+                            <textarea id="decrypt" class="form-control text-area-width" rows="6"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="netDal">
+            <div class="panel">
+                <div class="panel-body">
+                    <div style="display:inline;">
+                        <div class="margin-left margin-top" style="float: left">
+                            <label for="encryptNet">加密串：</label>
+                            <textarea id="encryptNet" class="form-control text-area-width" rows="6"></textarea>
+                        </div>
+                        <div class="button-margin " style="float: left">
+                            <input id="btnDecryptNet" class="btn btn-default" type="button" value="解密">
+                            <input id="btnClearNet" class="btn btn-default margin-left" type="button" value="清空">
+                        </div>
+                        <div class="margin-top" style="float: left">
+                            <label for="decryptNet">解密串：</label>
+                            <textarea id="decryptNet" class="form-control text-area-width" rows="6"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script src="/static/jquery/jquery-1.10.2.min.js?codegen=${version}"></script>

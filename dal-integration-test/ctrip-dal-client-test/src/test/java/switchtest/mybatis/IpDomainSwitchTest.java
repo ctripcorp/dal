@@ -25,7 +25,7 @@ public class IpDomainSwitchTest {
     public static void setUpBeforeClass() throws Exception {
         if (ipDomainSwitch.getStatus().equalsIgnoreCase("failover")) {
             ipDomainSwitch.setNormal();
-            Thread.sleep(35000);
+//            Thread.sleep(35000);
         }
     }
 
@@ -33,7 +33,7 @@ public class IpDomainSwitchTest {
     public static void tearDownBeforeClass() throws Exception {
         if (ipDomainSwitch.getStatus().equalsIgnoreCase("failover")) {
             ipDomainSwitch.setNormal();
-            Thread.sleep(35000);
+//            Thread.sleep(35000);
         }
     }
 
@@ -57,7 +57,7 @@ public class IpDomainSwitchTest {
             log.info(String.format("set failover before dal setup"));
             ipDomainSwitch.setFailover();
             log.info(String.format("set failover done"));
-            Thread.sleep(35000);
+//            Thread.sleep(35000);
 
 //            DalClientFactory.shutdownFactory();
             DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath()+"DalConfigForSwitch/Dal.config");

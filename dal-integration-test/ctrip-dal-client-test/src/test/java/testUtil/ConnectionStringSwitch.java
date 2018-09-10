@@ -14,7 +14,8 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Created by lilj on 2018/3/4.
@@ -114,7 +115,7 @@ public class ConnectionStringSwitch {
         postByMHA(isPro);
         log.info("reset connectionStrings succeed");
         //等待5秒钟
-        log.info("5 seconds after connectionStrings reset");
-        Thread.sleep(5000);
+        log.info("3 seconds after connectionStrings reset");
+        Thread.sleep(3000);
     }
 }

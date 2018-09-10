@@ -86,15 +86,15 @@ public class PoolPropertiesSwitch {
         Map<String, String> map = new HashMap<>();
         map.put("enableDynamicPoolProperties", "true");
         modifyPoolProperties(map);
-        log.info(String.format("清空属性配置后等待35秒生效"));
-        Thread.sleep(35000);
+        log.info(String.format("清空属性配置后等待10秒生效"));
+        Thread.sleep(10000);
 
         //把开关信息删除，恢复到默认状态
         log.info(String.format("清除开关"));
         map.clear();
         modifyPoolProperties(map);
-        log.info(String.format("清除开关后等待35秒"));
-        Thread.sleep(35000);
+        log.info(String.format("清除开关后等待10秒"));
+        Thread.sleep(10000);
     }
 
     public void modifyPoolProperties(Map<String, String> map) {

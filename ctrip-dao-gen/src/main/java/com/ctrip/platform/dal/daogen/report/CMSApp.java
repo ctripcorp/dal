@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.daogen.report;
 
 public class CMSApp {
+    private static final String[] NET_CONTAINER = new String[] {"windows_web_iis"};
+    private static final String[] JAVA_CONTAINER = new String[] {"linux_tomcat", "linux_java"};
+
     private String appId;
     private String appName;
     private String chineseName;
@@ -10,6 +13,8 @@ public class CMSApp {
 
     private Organization organization;
     private String orgName;
+
+    private String appContainer;
 
     public String getAppId() {
         return appId;
@@ -73,6 +78,35 @@ public class CMSApp {
 
     public void setOrgName(String orgName) {
         this.orgName = orgName;
+    }
+
+    public String getAppContainer() {
+        return appContainer;
+    }
+
+    public void setAppContainer(String appContainer) {
+        this.appContainer = appContainer;
+    }
+
+    public LangType getLangType() {
+        if (appContainer == null || appContainer.isEmpty()) {
+            return LangType.Others;
+        }
+
+        String temp = appContainer.trim().toLowerCase();
+        for (String container : JAVA_CONTAINER) {
+            if (temp.indexOf(container) > -1) {
+                return LangType.Java;
+            }
+        }
+
+        for (String container : NET_CONTAINER) {
+            if (temp.indexOf(container) > -1) {
+                return LangType.Net;
+            }
+        }
+
+        return LangType.Others;
     }
 
 }

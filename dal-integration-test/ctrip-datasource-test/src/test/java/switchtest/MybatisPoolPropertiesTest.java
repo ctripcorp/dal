@@ -42,7 +42,7 @@ public class MybatisPoolPropertiesTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -54,7 +54,7 @@ public class MybatisPoolPropertiesTest {
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -225,8 +225,8 @@ public class MybatisPoolPropertiesTest {
         map.put(keyName1 + ".maxAge", "哦");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于开关未开启，错误修改并未生效");
 //        checkBatchInsertReturnListWithSingleKey(dao,-2,"开关未开启，batchInser操作出现异常",null);
@@ -277,8 +277,8 @@ public class MybatisPoolPropertiesTest {
         map.put(keyName1 + ".maxAge", "哦");
         poolPropertiesSwitch.modifyPoolProperties(map);
 
-        log.info("修改文件后等待35秒钟");
-        Thread.sleep(35000);
+        log.info("修改文件后等待10秒钟");
+        Thread.sleep(10000);
 
         log.info("由于enableDynamicPoolProperties未设置，修改datasource之后并未动态生效，数据库操作仍然正常");
 //        checkBatchInsertReturnListWithSingleKey(dao1,-2, "enableDynamicPoolProperties未设置，shard0返回值异常",new DalHints().inShard(0));

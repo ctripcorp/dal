@@ -3,8 +3,6 @@ package switchtest.mybatiswithdal;
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
-
-
 import mybatis.mysql.DRTestDao;
 import mybatis.mysql.DRTestMapperDao;
 import mybatis.mysql.DRTestPojo;
@@ -39,14 +37,14 @@ public class TestBothDALAndMybatis {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception{
         connectionStringSwitch.resetConnectionString(isPro);
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
 
@@ -197,7 +195,7 @@ public class TestBothDALAndMybatis {
                 //调用切换接口
                 connectionStringSwitch.postByMHA(isPro);
                 //等待5秒
-                Thread.sleep(10000);
+                Thread.sleep(5000);
 
                 String currentHostnameMybatis = drTestMapperDao.getHostNameMySQL();
                 log.info(String.format("切换后hostname in mybatis：%s", drTestMapperDao.getHostNameMySQL()));

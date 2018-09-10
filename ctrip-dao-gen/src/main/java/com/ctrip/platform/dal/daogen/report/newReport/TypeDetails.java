@@ -12,6 +12,9 @@ public class TypeDetails {
     @JSONField(name = "Ctrip.datasource.version")
     private CtripDatasourceVersion ctripDatasourceVersion;
 
+    @JSONField(name = "Cat.Client.Version")
+    private CatClientVersion catClientVersion;
+
     public NewDALversion getDaLVersion() {
         return daLVersion;
     }
@@ -34,6 +37,14 @@ public class TypeDetails {
 
     public void setCtripDatasourceVersion(CtripDatasourceVersion ctripDatasourceVersion) {
         this.ctripDatasourceVersion = ctripDatasourceVersion;
+    }
+
+    public CatClientVersion getCatClientVersion() {
+        return catClientVersion;
+    }
+
+    public void setCatClientVersion(CatClientVersion catClientVersion) {
+        this.catClientVersion = catClientVersion;
     }
 
 }

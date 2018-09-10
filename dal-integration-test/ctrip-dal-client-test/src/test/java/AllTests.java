@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import shardtest.newVersionCodeTest.*;
 import shardtest.oldVersionCodeTest.*;
+import shardtest.qmq.QmqDalIntegrationTest;
 import testUtil.NetStatChecker;
 
 /**
@@ -47,6 +48,7 @@ import testUtil.NetStatChecker;
 
             QmqApiTest.class,
             TitanDataSourceTest.class,
+            QmqDalIntegrationTest.class,
 
             DalTransactionalWithShardOnSqlServerNotSpringTest.class,
             DalTransactionalWithShardOnSqlServerSpringTest.class,

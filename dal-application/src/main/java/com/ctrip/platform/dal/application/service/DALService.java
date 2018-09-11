@@ -62,4 +62,12 @@ public class DALService {
     sqlServerDao.insert(new DalHints().setIdentityBack(),pojo);
     return sqlServerDao.queryByPk(pojo,null);
   }
+
+  public int deleteMySqlAll() throws Exception{
+    return mySqlDao.deleteAll();
+  }
+
+  public int deleteSqlServerAll() throws Exception{
+    return sqlServerDao.deleteAll();
+  }
 }

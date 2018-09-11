@@ -62,23 +62,13 @@ public class DALServiceController {
     return new ModelAndView("welcome");
   }
 
-  @RequestMapping("/mysql")
-  public void testMysql() throws Exception{
-    DALServiceTable testPojo=new DALServiceTable();
-    testPojo.setName("testInsert");
-    dalService.insertMySql(testPojo);
-    testPojo.setName("testUpdate");
-    dalService.updateMySql(testPojo);
-    dalService.deleteMySql(testPojo);
+  @RequestMapping("/deleteMySqlAll")
+  public int deleteMySqlAll() throws Exception{
+    return dalService.deleteMySqlAll();
   }
 
-  @RequestMapping("/sqlserver")
-  public void testSqlServer() throws Exception{
-    DALServiceTable testPojo=new DALServiceTable();
-    testPojo.setName("testInsert");
-    dalService.insertSqlServer(testPojo);
-    testPojo.setName("testUpdate");
-    dalService.updateSqlServer(testPojo);
-    dalService.deleteSqlServer(testPojo);
+  @RequestMapping("/deleteSqlServerAll")
+  public int deleteSqlServerAll() throws Exception{
+    return dalService.deleteSqlServerAll();
   }
 }

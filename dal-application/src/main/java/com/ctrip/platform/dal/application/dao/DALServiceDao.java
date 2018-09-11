@@ -1179,7 +1179,28 @@ public class DALServiceDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
-	public static void main(String args[]){
+	/**
+	 * delete
+	 */
+	public int deleteAll () throws SQLException {
+		return deleteAll(null);
+	}
+
+	/**
+	 * delete
+	 */
+	public int deleteAll (DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
+		builder.setTemplate("delete from dalservicetable");
+		StatementParameters parameters = new StatementParameters();
+		int i = 1;
+
+		return queryDao.update(builder, parameters, hints);
+	}
+
+	/*public static void main(String args[]){
 		try {
 			Thread.sleep(300000);
 			DALServiceDao dao = new DALServiceDao();
@@ -1216,5 +1237,6 @@ public class DALServiceDao {
 		}
 
 
-	}
+
+	}*/
 }

@@ -13,7 +13,7 @@ public class PropertiesParser {
         try {
             return Integer.parseInt(properties.get(key));
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Property of [" + key + "] format exception", e);
+            throw new IllegalArgumentException("Property of [" + key + "] format exception", e);
         }
     }
 
@@ -22,7 +22,7 @@ public class PropertiesParser {
         try {
             return Long.parseLong(properties.get(key));
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Property of [" + key + "] format exception", e);
+            throw new IllegalArgumentException("Property of [" + key + "] format exception", e);
         }
     }
 
@@ -31,7 +31,7 @@ public class PropertiesParser {
         try {
             return Boolean.parseBoolean(properties.get(key));
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Property of [" + key + "] format exception", e);
+            throw new IllegalArgumentException("Property of [" + key + "] format exception", e);
         }
     }
 
@@ -41,7 +41,7 @@ public class PropertiesParser {
             SimpleDateFormat sdf = new SimpleDateFormat(ConfigConstants.DATEREFERENCE_FORMAT);
             sdf.parse(properties.get(key));
         } catch (ParseException e) {
-            throw new RuntimeException("Property of [" + key + "] format exception", e);
+            throw new IllegalArgumentException("Property of [" + key + "] format exception", e);
         }
         return properties.get(key);
     }

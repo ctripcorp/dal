@@ -10,14 +10,14 @@ import java.util.concurrent.ConcurrentMap;
 public class IdFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdFactory.class);
-    private volatile static IdFactory factory = null;
-    private static final Object object = new Object();
+    private static final Object lock = new Object();
+    private static IdFactory factory = null;
 
     private final ConcurrentMap<String, IdWorker> workerCache = new ConcurrentHashMap<>();
 
     public static IdFactory getInstance() {
         if (null == factory) {
-            synchronized (object) {
+            synchronized (lock) {
                 if (null == factory) {
                     factory = new IdFactory();
                 }
@@ -27,9 +27,10 @@ public class IdFactory {
     }
 
     public IdWorker getOrCreateIdWorker(String sequenceName) {
-        if (!ConfigManager.getInstance().getWhitelist().validateSequenceName(sequenceName)) {
-            LOGGER.warn("sequenceName [" + sequenceName + "] invalid");
-            throw new RuntimeException("sequenceName [" + sequenceName + "] invalid");
+        if (!ConfigManager.getInstance().getWhitelist().validate(sequenceName)) {
+            String msg = String.format("sequenceName '{}' invalid", sequenceName);
+            LOGGER.warn(msg);
+            throw new IllegalArgumentException(msg);
         }
 
         IdWorker worker = workerCache.get(sequenceName);
@@ -39,6 +40,7 @@ public class IdFactory {
                 if (null == worker) {
                     worker = new SnowflakeWorker(sequenceName, ConfigManager.getInstance().getServerConfig());
                     workerCache.put(sequenceName, worker);
+                    LOGGER.info("Created idWorker (sequenceName: '{}')", sequenceName);
                 }
             }
         }

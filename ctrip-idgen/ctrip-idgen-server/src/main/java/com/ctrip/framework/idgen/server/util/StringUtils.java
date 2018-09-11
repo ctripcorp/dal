@@ -20,4 +20,8 @@ public class StringUtils {
         return sb.toString();
     }
 
+    public static boolean isEmpty(String string) {
+        return (null == string || string.trim().isEmpty());
+    }
+
 }

@@ -4,10 +4,8 @@ import java.util.Map;
 
 public interface Whitelist {
 
-    void importConfig(Map<String, String> properties);
+    void load(Map<String, String> config);
 
-    boolean validateSequenceName(String sequenceName);
-
-    void refreshConfig(Map<String, String> properties);
+    boolean validate(String name);
 
 }

@@ -8,59 +8,48 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class CtripWhitelist implements Whitelist, ConfigConstants {
+public class CtripWhitelist implements Whitelist {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripWhitelist.class);
-
+    private static final String WHITELIST_ENABLED_FLAG = "on";
     private Set<String> whitelist = new HashSet<>();
 
-    public void importConfig(Map<String, String> properties) {
-        if (null == properties) {
-            return;
-        }
-        whitelist = new HashSet<>();
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            if (entry.getKey() != null && entry.getValue() != null &&
-                    WHITELIST_ENABLED_FLAG.equalsIgnoreCase(entry.getValue().trim())) {
-                whitelist.add(entry.getKey());
-            }
-        }
-        String initialList = StringUtils.setToString(whitelist, ", ");
-        LOGGER.info("Initial whitelist: " + initialList);
-    }
-
-    public boolean validateSequenceName(String sequenceName) {
-        return (sequenceName != null && whitelist != null && whitelist.contains(sequenceName));
-    }
-
-    public void refreshConfig(Map<String, String> properties) {
-        if (null == properties) {
+    public void load(Map<String, String> config) {
+        if (null == config) {
             return;
         }
 
-        Set<String> updatedWhitelist = new HashSet<>();
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            if (entry.getKey() != null && entry.getValue() != null &&
-                    WHITELIST_ENABLED_FLAG.equalsIgnoreCase(entry.getValue().trim())) {
-                updatedWhitelist.add(entry.getKey());
+        Set<String> enabledList = new HashSet<>();
+        for (Map.Entry<String, String> entry : config.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key != null && value != null && WHITELIST_ENABLED_FLAG.equalsIgnoreCase(value.trim())) {
+                enabledList.add(key.trim());
             }
         }
 
+        // Parse removed list
         Set<String> tempSet = new HashSet<>(whitelist);
-        tempSet.removeAll(updatedWhitelist);
+        tempSet.removeAll(enabledList);
         String removedList = StringUtils.setToString(tempSet, ", ");
-        if (removedList != null) {
-            LOGGER.info("Removed from whitelist: " + removedList);
+        if (!StringUtils.isEmpty(removedList)) {
+            LOGGER.info("Removed from whitelist: {}", removedList);
         }
+
+        // Parse added list
         tempSet.clear();
-        tempSet.addAll(updatedWhitelist);
+        tempSet.addAll(enabledList);
         tempSet.removeAll(whitelist);
         String addedList = StringUtils.setToString(tempSet, ", ");
-        if (addedList != null) {
-            LOGGER.info("Added to whitelist: " + addedList);
+        if (!StringUtils.isEmpty(addedList)) {
+            LOGGER.info("Added to whitelist: {}", addedList);
         }
 
-        whitelist = updatedWhitelist;
+        whitelist = enabledList;
+    }
+
+    public boolean validate(String name) {
+        return (name != null && whitelist.contains(name.trim()));
     }
 
 }

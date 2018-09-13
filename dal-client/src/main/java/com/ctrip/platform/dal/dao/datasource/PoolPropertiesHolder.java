@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +35,7 @@ public class PoolPropertiesHolder {
         if (userName == null || userName.length() == 0)
             return;
 
-        url = getShortString(url, SEMICOLON);
+        url = LoggerHelper.getSimplifiedDBUrl(url);
         userName = getShortString(userName, AT);
         ConcurrentHashMap<String, PoolProperties> map = poolPropertiesMap.get(url);
 
@@ -48,28 +49,28 @@ public class PoolPropertiesHolder {
             }
         }
 
-        /*
-         * if (!map.containsKey(userName)) { synchronized (LOCK2) { if (!map.containsKey(userName)) { map.put(userName,
-         * poolProperties); } } }
-         */
-
         // avoid caching for InitSQL
         synchronized (LOCK2) {
             map.put(userName, poolProperties);
         }
     }
 
-    public PoolProperties getPoolProperties(String url, String userName) {
-        if (url == null || url.length() == 0)
-            return null;
-        if (userName == null || userName.length() == 0)
+    public PoolProperties getPoolProperties(ConnectionMetaData metaData) {
+        if (metaData == null)
             return null;
 
-        url = getShortString(url, SEMICOLON);
-        userName = getShortString(userName, AT);
+        String url = metaData.getConnectionUrl();
+        if (url == null || url.isEmpty())
+            return null;
+
+        String userName = metaData.getUserName();
+        if (userName == null || userName.isEmpty())
+            return null;
+
         ConcurrentHashMap<String, PoolProperties> map = poolPropertiesMap.get(url);
         if (map == null)
             return null;
+
         return map.get(userName);
     }
 

@@ -66,7 +66,7 @@ public class DalReportDao {
     private static final String CAT_APPID_URL =
             "http://cat.ctripcorp.com/cat/r/globalEvent?type=Cat.Client.Version&op=appDetail&forceDownload=json";
 
-    private static final String CMS_ALL_APPS_URL = "http://osg.ops.ctripcorp.com/api/11209";
+    private static final String CMS_ALL_APPS_URL = "http://osg.ops.ctripcorp.com/api/17676";
     private static final String CMS_TOKEN = "70c152d9c4980f8843c497ed9b6b5386";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REQUEST_BODY = "request_body";
@@ -829,7 +829,7 @@ public class DalReportDao {
                 if (appInfo == null)
                     continue;
 
-                String orgName = appInfo.getOrgName();
+                String orgName = appInfo.getOrganizationName();
                 if (!result.containsKey(orgName))
                     result.put(orgName, new HashMap<>());
 

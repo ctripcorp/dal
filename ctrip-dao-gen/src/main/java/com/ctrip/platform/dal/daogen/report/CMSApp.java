@@ -10,10 +10,7 @@ public class CMSApp {
     private String owner;
     private String ownerEmail;
     private String ownerCode;
-
-    private Organization organization;
-    private String orgName;
-
+    private String organizationName;
     private String appContainer;
 
     public String getAppId() {
@@ -64,28 +61,20 @@ public class CMSApp {
         this.ownerCode = ownerCode;
     }
 
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
-    }
-
-    public String getOrgName() {
-        return organization == null ? "" : organization.getName();
-    }
-
-    public void setOrgName(String orgName) {
-        this.orgName = orgName;
-    }
-
     public String getAppContainer() {
         return appContainer;
     }
 
     public void setAppContainer(String appContainer) {
         this.appContainer = appContainer;
+    }
+
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
     }
 
     public LangType getLangType() {

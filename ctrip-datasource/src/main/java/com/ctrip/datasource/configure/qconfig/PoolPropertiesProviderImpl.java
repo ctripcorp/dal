@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
+import com.dianping.cat.Cat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Configuration;
@@ -17,8 +18,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataSourceConfigureConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(PoolPropertiesProviderImpl.class);
+
     private static final String DAL_APPNAME = "dal";
     private static final String DATASOURCE_PROPERTIES = "datasource.properties";
+    private static final String DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE =
+            "An error occured while getting datasource.properties from QConfig.";
+    private static final String POOL_PROPERTIES_CONFIGURATION = "PoolProperties configuration:";
+    private static final String ON_LOAD_EXCEPTION = "Parameter for onLoad event is null.";
+    private static final String DYNAMIC_POOL_PROPERTIES_NOT_ENABLED =
+            "DAL DataSource DynamicPoolProperties does not enabled.";
 
     private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
     private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
@@ -43,8 +51,9 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
                 mapConfigReference.set(config);
             }
         } catch (Throwable e) {
-            String msg = "从QConfig读取DataSource配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
-            LOGGER.warn(msg, e);
+            LOGGER.error(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
+            Cat.logError(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
+            throw e;
         }
     }
 
@@ -60,11 +69,13 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
 
         try {
             Map<String, String> map = config.asMap();
-            String log = "PoolProperties 配置:" + PoolPropertiesHelper.getInstance().mapToString(map);
+            String log = POOL_PROPERTIES_CONFIGURATION + PoolPropertiesHelper.getInstance().mapToString(map);
             LOGGER.info(log);
             configure = new DataSourceConfigure("", map);
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
+            String message = e.getMessage();
+            LOGGER.error(message, e);
+            Cat.logError(message, e);
         }
 
         return configure;
@@ -72,15 +83,19 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
 
     @Override
     public void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback) {
-        final MapConfig config = getConfig();
+        MapConfig config = getConfig();
         if (config == null)
             return;
 
+        _addPoolPropertiesChangedListener(config, callback);
+    }
+
+    private void _addPoolPropertiesChangedListener(MapConfig config, final PoolPropertiesChanged callback) {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
                 if (map == null || map.isEmpty())
-                    throw new RuntimeException("Parameter for onLoad event is null.");
+                    throw new RuntimeException(ON_LOAD_EXCEPTION);
 
                 Boolean firstTime = isFirstTime.get().booleanValue();
                 if (firstTime) {
@@ -90,7 +105,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
 
                 boolean dynamicEnabled = dynamicPoolPropertiesEnabled(map);
                 if (!dynamicEnabled) {
-                    LOGGER.info(String.format("DAL DataSource DynamicPoolProperties does not enabled."));
+                    LOGGER.info(DYNAMIC_POOL_PROPERTIES_NOT_ENABLED);
                     return;
                 }
 

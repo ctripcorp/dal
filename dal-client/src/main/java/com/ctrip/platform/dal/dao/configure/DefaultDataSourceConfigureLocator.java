@@ -2,9 +2,10 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,20 +16,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLocator {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSourceConfigureLocator.class);
-    private static final String SEPARATOR = "\\.";
-    protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
+    protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
-    private Map<String, ConnectionString> connectionStrings = new ConcurrentHashMap<>();
+    protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
     protected AtomicReference<PropertiesWrapper> propertiesWrapperReference = new AtomicReference<>();
     private AtomicReference<IPDomainStatus> ipDomainStatusReference = new AtomicReference<>(IPDomainStatus.IP);
 
+    private Map<String, ConnectionString> connectionStrings = new ConcurrentHashMap<>();
     // user datasource.xml pool properties configure
     private Map<String, PoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
-
     private Map<String, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
-
     private Set<String> dataSourceConfigureKeySet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+
+    private static final String SEPARATOR = "\\.";
+    protected static final String DAL = "DAL";
+    private static final String DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE =
+            "An error occured while getting datasource properties.";
+    private static final String APP_OVERRIDE_RESULT = "App override result: ";
+    private static final String OVERRIDE_RESULT = " override result: ";
+    private static final String DATASOURCE_XML_OVERRIDE_RESULT = "datasource.xml override result: ";
+    private static final String CONNECTION_URL = "connection url:";
+
+    private String FINAL_OVERRIDE_RESULT_FORMAT = "Final override result: %s";
+    protected String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
 
     @Override
     public void addUserPoolPropertiesConfigure(String name, PoolPropertiesConfigure configure) {
@@ -152,43 +162,16 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
             return null;
 
         String name = connectionStringConfigure.getName();
-        DataSourceConfigure c = cloneDataSourceConfigure(null);
+        String logName = String.format(POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT, name);
+        DataSourceConfigure c = null;
 
         try {
             PropertiesWrapper wrapper = propertiesWrapperReference.get();
-            // override app-level properties
-            Properties appProperties = wrapper.getAppProperties();
-            if (appProperties != null && !appProperties.isEmpty()) {
-                overrideProperties(c.getProperties(), appProperties);
-                String log = "App 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
-                LOGGER.info(log);
-            }
+            if (wrapper == null)
+                throw new DalException(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE);
 
-            // override datasource-level properties
-            Map<String, Properties> datasourceProperties = wrapper.getDatasourceProperties();
-            if (datasourceProperties != null && !datasourceProperties.isEmpty()) {
-                if (name != null) {
-                    Properties p1 = datasourceProperties.get(name);
-                    if (p1 != null && !p1.isEmpty()) {
-                        overrideProperties(c.getProperties(), p1);
-                        String log = name + " 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
-                        LOGGER.info(log);
-                    } else {
-                        String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
-                        possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
-                        Properties p2 = datasourceProperties.get(possibleName);
-                        if (p2 != null && !p2.isEmpty()) {
-                            overrideProperties(c.getProperties(), p2);
-                            String log = possibleName + " 覆盖结果："
-                                    + poolPropertiesHelper.propertiesToString(c.getProperties());
-                            LOGGER.info(log);
-                        }
-                    }
-                }
-            }
-
-            // override config from connection settings,datasource.xml
-            overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
+            c = cloneDataSourceConfigure(null);
+            overrideProperties(connectionStringConfigure, connectionString, wrapper, c, name, logName);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -196,29 +179,101 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return c;
     }
 
+    protected void overrideProperties(ConnectionStringConfigure connectionStringConfigure,
+            ConnectionString connectionString, PropertiesWrapper wrapper, DataSourceConfigure c, String name,
+            String logName) {
+        // override app-level properties
+        overrideAppLevelProperties(wrapper, c, logName);
+
+        // override datasource-level properties
+        overrideDataSourceLevelProperties(wrapper, c, name, logName);
+
+        // override config from connection settings,datasource.xml
+        overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
+
+        LOGGER.logEvent(DAL, logName,
+                String.format(FINAL_OVERRIDE_RESULT_FORMAT, poolPropertiesHelper.propertiesToString(c.toProperties())));
+    }
+
+    private void overrideAppLevelProperties(PropertiesWrapper wrapper, DataSourceConfigure c, String logName) {
+        Properties appProperties = wrapper.getAppProperties();
+        if (appProperties == null || appProperties.isEmpty())
+            return;
+
+        overrideProperties(c.getProperties(), appProperties);
+        String log = APP_OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+        LOGGER.info(log);
+        LOGGER.logEvent(DAL, logName, log);
+    }
+
+    private void overrideDataSourceLevelProperties(PropertiesWrapper wrapper, DataSourceConfigure c, String name,
+            String logName) {
+        if (name == null || name.isEmpty())
+            return;
+
+        Map<String, Properties> datasourceProperties = wrapper.getDatasourceProperties();
+        if (datasourceProperties == null || datasourceProperties.isEmpty())
+            return;
+
+        _overrideDataSourceLevelProperties(datasourceProperties, c, name, logName);
+    }
+
+    private void _overrideDataSourceLevelProperties(Map<String, Properties> datasourceProperties, DataSourceConfigure c,
+            String name, String logName) {
+        Properties p1 = datasourceProperties.get(name);
+        if (p1 != null && !p1.isEmpty()) {
+            overrideProperties(c.getProperties(), p1);
+            String log = name + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+            LOGGER.info(log);
+            LOGGER.logEvent(DAL, logName, log);
+        } else {
+            String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
+            possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
+            Properties p2 = datasourceProperties.get(possibleName);
+            if (p2 != null && !p2.isEmpty()) {
+                overrideProperties(c.getProperties(), p2);
+                String log =
+                        possibleName + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+                LOGGER.info(log);
+                LOGGER.logEvent(DAL, logName, log);
+            }
+        }
+    }
+
     protected void overrideConnectionStringConfigureAndDataSourceXml(
             ConnectionStringConfigure connectionStringConfigure, DataSourceConfigure c,
             ConnectionString connectionString, String name) {
-        if (connectionStringConfigure != null) {
-            // merge connection string configure
-            mergeConnectionStringConfigure(c, connectionStringConfigure);
-            c.setConnectionString(connectionString);
-            String log = "connection url:" + connectionStringConfigure.getConnectionUrl();
-            LOGGER.info(log);
+        if (connectionStringConfigure == null)
+            return;
 
-            // override datasource.xml
-            if (name != null) {
-                PoolPropertiesConfigure dataSourceXml = getUserPoolPropertiesConfigure(name);
-                if (dataSourceXml != null) {
-                    overrideDataSourceXml(c, dataSourceXml);
-                } else {
-                    String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
-                    possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
-                    PoolPropertiesConfigure ppc = getUserPoolPropertiesConfigure(possibleName);
-                    if (ppc != null) {
-                        overrideDataSourceXml(c, ppc);
-                    }
-                }
+        // merge connection string configure
+        mergeConnectionStringConfigure(c, connectionStringConfigure, connectionString);
+
+        // override datasource.xml
+        overrideDataSourceXml(name, c);
+    }
+
+    private void mergeConnectionStringConfigure(DataSourceConfigure c,
+            ConnectionStringConfigure connectionStringConfigure, ConnectionString connectionString) {
+        mergeConnectionStringConfigure(c, connectionStringConfigure);
+        c.setConnectionString(connectionString);
+        String log = CONNECTION_URL + connectionStringConfigure.getConnectionUrl();
+        LOGGER.info(log);
+    }
+
+    private void overrideDataSourceXml(String name, DataSourceConfigure c) {
+        if (name == null || name.isEmpty())
+            return;
+
+        PoolPropertiesConfigure dataSourceXml = getUserPoolPropertiesConfigure(name);
+        if (dataSourceXml != null) {
+            overrideDataSourceXml(c, dataSourceXml);
+        } else {
+            String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
+            possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
+            PoolPropertiesConfigure ppc = getUserPoolPropertiesConfigure(possibleName);
+            if (ppc != null) {
+                overrideDataSourceXml(c, ppc);
             }
         }
     }
@@ -239,11 +294,9 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     protected void overrideDataSourceXml(DataSourceConfigure c, PoolPropertiesConfigure dataSourceXml) {
-        String originalXml = String.format("datasource.xml 属性：%s",
-                poolPropertiesHelper.propertiesToString(dataSourceXml.getProperties()));
         overrideProperties(c.getProperties(), dataSourceXml.getProperties());
-        String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.toProperties());
-        LOGGER.info(xmlLog);
+        String log = DATASOURCE_XML_OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.toProperties());
+        LOGGER.info(log);
     }
 
     protected DataSourceConfigure cloneDataSourceConfigure(DataSourceConfigure configure) {
@@ -275,12 +328,53 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         if (dataSourceConfigure == null || connectionStringConfigure == null)
             return;
 
-        dataSourceConfigure.setName(connectionStringConfigure.getName());
-        dataSourceConfigure.setConnectionUrl(connectionStringConfigure.getConnectionUrl());
-        dataSourceConfigure.setUserName(connectionStringConfigure.getUserName());
-        dataSourceConfigure.setPassword(connectionStringConfigure.getPassword());
-        dataSourceConfigure.setDriverClass(connectionStringConfigure.getDriverClass());
-        dataSourceConfigure.setVersion(connectionStringConfigure.getVersion());
+        setName(dataSourceConfigure, connectionStringConfigure);
+        setConnectionUrl(dataSourceConfigure, connectionStringConfigure);
+        setUserName(dataSourceConfigure, connectionStringConfigure);
+        setPassword(dataSourceConfigure, connectionStringConfigure);
+        setDriverClass(dataSourceConfigure, connectionStringConfigure);
+        setVersion(dataSourceConfigure, connectionStringConfigure);
+    }
+
+    private void setName(DataSourceConfigure dataSourceConfigure, ConnectionStringConfigure connectionStringConfigure) {
+        String name = connectionStringConfigure.getName();
+        if (name != null)
+            dataSourceConfigure.setName(name);
+    }
+
+    private void setConnectionUrl(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String connectionUrl = connectionStringConfigure.getConnectionUrl();
+        if (connectionUrl != null)
+            dataSourceConfigure.setConnectionUrl(connectionUrl);
+    }
+
+    private void setUserName(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String userName = connectionStringConfigure.getUserName();
+        if (userName != null)
+            dataSourceConfigure.setUserName(userName);
+    }
+
+    private void setPassword(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String password = connectionStringConfigure.getPassword();
+        if (password != null)
+            dataSourceConfigure.setPassword(password);
+    }
+
+    private void setDriverClass(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String driverClass = connectionStringConfigure.getDriverClass();
+        if (driverClass != null)
+            dataSourceConfigure.setDriverClass(driverClass);
+    }
+
+    private void setVersion(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String version = connectionStringConfigure.getVersion();
+        if (version != null)
+            dataSourceConfigure.setVersion(version);
     }
 
     protected void overrideProperties(Properties lowLevel, Properties highLevel) {
@@ -296,4 +390,5 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     public int getOrder() {
         return LOWEST_PRECEDENCE;
     }
+
 }

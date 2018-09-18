@@ -34,19 +34,24 @@ public class DalConnectionPool extends ConnectionPool {
         final String tempPassword = password;
 
         try {
-            connectionListener.onCreateConnection(getPoolUrl(), new CreateConnectionCallback() {
-                @Override
-                public Connection createConnection() throws Exception {
-                    PooledConnection pooledConnection =
-                            DalConnectionPool.super.createConnection(tempNow, tempNotUsed, tempUsername, tempPassword);
-                    pooledConnectionReference.set(pooledConnection);
-                    return pooledConnection == null ? null : pooledConnection.getConnection();
-                }
-            });
+            _createConnection(tempNow, tempNotUsed, tempUsername, tempPassword, pooledConnectionReference);
         } catch (Exception e) {
             LOGGER.error("[createConnection]" + this, e);
         }
         return pooledConnectionReference.get();
+    }
+
+    private void _createConnection(final long now, final PooledConnection notUsed, final String username,
+            final String password, final AtomicReference<PooledConnection> pooledConnectionReference) {
+        connectionListener.onCreateConnection(getPoolUrl(), new CreateConnectionCallback() {
+            @Override
+            public Connection createConnection() throws Exception {
+                PooledConnection pooledConnection =
+                        DalConnectionPool.super.createConnection(now, notUsed, username, password);
+                pooledConnectionReference.set(pooledConnection);
+                return pooledConnection == null ? null : pooledConnection.getConnection();
+            }
+        });
     }
 
     @Override

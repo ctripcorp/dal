@@ -6,7 +6,7 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 import java.sql.Connection;
 
 public abstract class AbstractConnectionListener implements ConnectionListener {
-    protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    protected static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private String BEFORE_CREATE_CONNECTION_FORMAT = "[beforeCreateConnection]%s";
     private String ON_CREATE_CONNECTION_FORMAT = "[onCreateConnection]%s, %s";
     private String ON_RELEASE_CONNECTION_FORMAT = "[onReleaseConnection]%s, %s";
@@ -74,6 +74,10 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
 
     private void removeConnectionUrlFromCache(Connection connection) {
         metaDataManager.remove(connection);
+    }
+
+    public static void setILogger(ILogger logger) {
+        AbstractConnectionListener.LOGGER = logger;
     }
 
 }

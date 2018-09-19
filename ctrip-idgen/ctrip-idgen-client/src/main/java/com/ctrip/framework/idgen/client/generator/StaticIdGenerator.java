@@ -1,13 +1,14 @@
 package com.ctrip.framework.idgen.client.generator;
 
+import com.ctrip.framework.idgen.client.constant.CatConstants;
+import com.ctrip.framework.idgen.client.log.IdGenLogger;
 import com.ctrip.framework.idgen.client.service.ServiceManager;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
-import com.ctrip.platform.idgen.service.api.IdGenRequestType;
-import com.ctrip.platform.idgen.service.api.IdGenResponseType;
-import com.ctrip.platform.idgen.service.api.IdGenerateService;
 import com.ctrip.platform.idgen.service.api.IdSegment;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +22,9 @@ public class StaticIdGenerator implements LongIdGenerator {
 
     private final String sequenceName;
     private final Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();
-    private volatile long initialSize = 0;
-    private volatile long remainedSize = 0;
-    private volatile long currentId = -1;
+    private long initialSize = 0;
+    private long remainedSize = 0;
+    private long currentId = -1;
     private final PrefetchStrategy strategy;
 
     public StaticIdGenerator(String sequenceName) {
@@ -36,44 +37,36 @@ public class StaticIdGenerator implements LongIdGenerator {
     }
 
     public void initialize() {
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_STATIC_GENERATOR, "initialize");
         try {
-            importIdPool(fetchPool());
-        } catch (Throwable t) {
-            LOGGER.warn("StaticIdGenerator initialization failed.", t);
-            throw t;
+            importPool(fetchPool());
+            IdGenLogger.logSizeEvent(CatConstants.TYPE_FETCH_POOL_SIZE, initialSize);
+            transaction.setStatus(CatConstants.STATUS_SUCCESS);
+        } catch (Exception e) {
+            LOGGER.warn("StaticIdGenerator initialization failed.", e);
+            transaction.setStatus(e);
+            throw e;
+        } finally {
+            transaction.complete();
         }
     }
 
     private List<IdSegment> fetchPool() {
-        IdGenRequestType request = new IdGenRequestType(sequenceName,
-                strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
-
-        IdGenerateService service = ServiceManager.getInstance().getIdGenServiceInstance();
-        if (null == service) {
-            throw new RuntimeException("Get IdGenerateService failed");
+        int requestSize = strategy.getSuggestedRequestSize();
+        int timeoutMillis = strategy.getSuggestedTimeoutMillis();
+        List<IdSegment> pool = ServiceManager.getInstance().fetchIdPool(sequenceName, requestSize, timeoutMillis);
+        if (null == pool || pool.isEmpty()) {
+            throw new RuntimeException("Failed to fetch id pool (sequence name: '" + sequenceName + "')");
         }
-
-        IdGenResponseType response = service.fetchIdPool(request);
-        if (null == response) {
-            throw new RuntimeException("Get IdGenerateService response failed, sequenceName: [" + sequenceName + "]");
-        }
-
-        List<IdSegment> segments = response.getIdSegments();
-        if (null == segments || segments.isEmpty()) {
-            throw new RuntimeException("Get IdSegments failed, sequenceName: [" + sequenceName + "]");
-        }
-
-        return segments;
+        return pool;
     }
 
-    private void importIdPool(List<IdSegment> segments) {
-        if (segments != null && !segments.isEmpty()) {
-            for (IdSegment segment : segments) {
-                idSegments.addLast(segment);
-                initialSize += segment.getEnd().longValue() - segment.getStart().longValue() + 1;
-            }
-            remainedSize = initialSize;
+    private void importPool(List<IdSegment> pool) {
+        for (IdSegment segment : pool) {
+            idSegments.addLast(segment);
+            initialSize += segment.getEnd().longValue() - segment.getStart().longValue() + 1;
         }
+        remainedSize = initialSize;
     }
 
     @Override
@@ -115,4 +108,5 @@ public class StaticIdGenerator implements LongIdGenerator {
     public long getCurrentId() {
         return currentId;
     }
+
 }

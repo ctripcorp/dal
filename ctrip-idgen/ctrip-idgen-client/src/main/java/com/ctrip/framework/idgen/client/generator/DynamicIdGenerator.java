@@ -75,7 +75,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
         while (iterator.hasNext()) {
             id = iterator.next().nextId();
             if (id != null) {
-                ((DefaultStrategy) strategy).decrease();
+                ((DefaultStrategy) strategy).consume();
                 break;
             } else {
                 iterator.remove();
@@ -114,7 +114,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
     private void prefetch() {
         StaticIdGenerator staticGenerator = new StaticIdGenerator(sequenceName, strategy);
         staticGenerator.initialize();
-        ((DefaultStrategy) strategy).increase(staticGenerator.getRemainedSize());
+        ((DefaultStrategy) strategy).provide(staticGenerator.getRemainedSize());
         addStaticGenerator(staticGenerator);
     }
 

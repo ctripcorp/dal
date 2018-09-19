@@ -11,7 +11,7 @@ public class DynamicStrategy extends AbstractStrategy {
     private static final long QPS_CHECK_PERIOD_MILLIS = 500;
     private static final long REMAINED_ENDURANCE_MILLIS = 200;
     private static final long PREFETCH_ENDURANCE_MILLIS = 800;
-    private static final int REQUEST_SIZE_MIN_VALUE = 1;
+    private static final int REQUEST_SIZE_MIN_VALUE = 10;
 
     private AtomicLong consumedCount = new AtomicLong();
     private volatile long lastTime;
@@ -54,8 +54,8 @@ public class DynamicStrategy extends AbstractStrategy {
     }
 
     @Override
-    public void decrease() {
-        super.decrease();
+    public void consume() {
+        super.consume();
         consumedCount.incrementAndGet();
     }
 

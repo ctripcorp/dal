@@ -13,7 +13,7 @@ public abstract class AbstractStrategy implements PrefetchStrategy {
         return TIMEOUT_MILLIS_DEFAULT_VALUE;
     }
 
-    public void decrease() {
+    public void consume() {
         for (;;) {
             long value = remainedSize.get();
             if (value > 0) {
@@ -27,7 +27,7 @@ public abstract class AbstractStrategy implements PrefetchStrategy {
         }
     }
 
-    public void increase(long increment) {
+    public void provide(long increment) {
         remainedSize.addAndGet(increment);
     }
 

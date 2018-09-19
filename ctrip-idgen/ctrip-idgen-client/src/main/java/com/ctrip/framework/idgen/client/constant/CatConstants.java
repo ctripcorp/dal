@@ -14,6 +14,7 @@ public interface CatConstants {
     String TYPE_SEQUENCE_NAME = TYPE_ROOT + ".sequenceName";
     String TYPE_FETCH_POOL_SIZE = TYPE_ROOT + ".fetchPoolSize";
     String TYPE_REMAINED_POOL_SIZE = TYPE_ROOT + ".remainedPoolSize";
+    String TYPE_POOL_QPS = TYPE_ROOT + ".poolQps";
     String TYPE_ACTIVE_FETCH_RETRIES = TYPE_ROOT + ".activeFetchRetries";
 
     String STATUS_SUCCESS = Transaction.SUCCESS;

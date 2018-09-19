@@ -4,7 +4,9 @@ import com.ctrip.framework.idgen.client.constant.CatConstants;
 import com.ctrip.framework.idgen.client.exception.IdGenTimeoutException;
 import com.ctrip.framework.idgen.client.log.IdGenLogger;
 import com.ctrip.framework.idgen.client.service.ServiceManager;
+import com.ctrip.framework.idgen.client.strategy.AbstractStrategy;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
+import com.ctrip.framework.idgen.client.strategy.DynamicStrategy;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
 import com.dianping.cat.Cat;
@@ -24,7 +26,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicIdGenerator.class);
 
-    private static final int PREFETCH_THREAD_POOL_SIZE = 8;
+    private static final int PREFETCH_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
     private static final int CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE = 1500;
     private static final long FETCH_ID_RETRY_BASE_INTERVAL = 1;
 
@@ -127,8 +129,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
                 public void run() {
                     try {
                         transaction.fork();
-                        IdGenLogger.logVersion();
-                        IdGenLogger.logEvent(CatConstants.TYPE_SEQUENCE_NAME, sequenceName);
+                        logTransactionForPrefetch();
                         prefetch();
                         transaction.setStatus(CatConstants.STATUS_SUCCESS);
                     } catch (Exception e) {
@@ -140,6 +141,19 @@ public class DynamicIdGenerator implements LongIdGenerator {
                     }
                 }
             });
+        }
+    }
+
+    private void logTransactionForPrefetch() {
+        IdGenLogger.logVersion();
+        IdGenLogger.logEvent(CatConstants.TYPE_SEQUENCE_NAME, sequenceName);
+        if (strategy instanceof DynamicStrategy) {
+            String qps = String.valueOf(((DynamicStrategy) strategy).getQps());
+            IdGenLogger.logEvent(CatConstants.TYPE_POOL_QPS, qps);
+        }
+        if (strategy instanceof AbstractStrategy) {
+            String remainedSize = String.valueOf(((AbstractStrategy) strategy).getRemainedSize());
+            IdGenLogger.logEvent(CatConstants.TYPE_REMAINED_POOL_SIZE, remainedSize);
         }
     }
 

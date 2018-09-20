@@ -9,16 +9,12 @@ import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
 import com.ctrip.platform.idgen.service.api.IdSegment;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class StaticIdGenerator implements LongIdGenerator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticIdGenerator.class);
 
     private final String sequenceName;
     private final Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();
@@ -43,7 +39,6 @@ public class StaticIdGenerator implements LongIdGenerator {
             IdGenLogger.logSizeEvent(CatConstants.TYPE_FETCH_POOL_SIZE, initialSize);
             transaction.setStatus(CatConstants.STATUS_SUCCESS);
         } catch (Exception e) {
-            LOGGER.warn("StaticIdGenerator initialization failed.", e);
             transaction.setStatus(e);
             throw e;
         } finally {
@@ -51,7 +46,7 @@ public class StaticIdGenerator implements LongIdGenerator {
         }
     }
 
-    private List<IdSegment> fetchPool() {
+    protected List<IdSegment> fetchPool() {
         int requestSize = strategy.getSuggestedRequestSize();
         int timeoutMillis = strategy.getSuggestedTimeoutMillis();
         List<IdSegment> pool = ServiceManager.getInstance().fetchIdPool(sequenceName, requestSize, timeoutMillis);
@@ -93,20 +88,8 @@ public class StaticIdGenerator implements LongIdGenerator {
         return currentId;
     }
 
-    public long getInitialSize() {
-        return initialSize;
-    }
-
     public long getRemainedSize() {
         return remainedSize;
-    }
-
-    public Deque<IdSegment> getIdSegments() {
-        return idSegments;
-    }
-
-    public long getCurrentId() {
-        return currentId;
     }
 
 }

@@ -11,4 +11,8 @@ public interface PrefetchStrategy {
 
     boolean checkIfNeedPrefetch();
 
+    void consume();
+
+    void provide(long increment);
+
 }

@@ -3,9 +3,6 @@ package com.ctrip.framework.idgen.client.strategy;
 public class DefaultStrategy extends AbstractStrategy {
 
     @Override
-    public void initialize() {}
-
-    @Override
     public int getSuggestedRequestSize() {
         return REQUEST_SIZE_DEFAULT_VALUE;
     }

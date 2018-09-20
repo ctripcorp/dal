@@ -6,13 +6,12 @@ public abstract class AbstractStrategy implements PrefetchStrategy {
 
     protected AtomicLong remainedSize = new AtomicLong(0);
 
-    abstract public void initialize();
-
     @Override
     public int getSuggestedTimeoutMillis() {
         return TIMEOUT_MILLIS_DEFAULT_VALUE;
     }
 
+    @Override
     public void consume() {
         for (;;) {
             long value = remainedSize.get();
@@ -27,6 +26,7 @@ public abstract class AbstractStrategy implements PrefetchStrategy {
         }
     }
 
+    @Override
     public void provide(long increment) {
         remainedSize.addAndGet(increment);
     }

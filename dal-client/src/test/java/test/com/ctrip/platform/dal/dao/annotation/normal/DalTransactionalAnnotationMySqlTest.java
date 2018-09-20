@@ -3,15 +3,11 @@ package test.com.ctrip.platform.dal.dao.annotation.normal;
 import java.util.Arrays;
 import java.util.Collection;
 
-import oracle.sql.OPAQUE;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
-import test.com.ctrip.platform.dal.dao.unitbase.MySqlDatabaseInitializer;
 
 @RunWith(Parameterized.class)
 public class DalTransactionalAnnotationMySqlTest extends BaseDalTransactionalAnnotationTest {

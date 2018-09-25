@@ -1,23 +1,18 @@
 package com.ctrip.framework.idgen.server.service;
 
-import com.ctrip.framework.idgen.server.config.ServerConfig;
+import com.ctrip.framework.idgen.server.config.SnowflakeConfig;
 import com.ctrip.platform.idgen.service.api.IdSegment;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CASSnowflakeWorker implements IdWorker {
+public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
 
-    private volatile String sequenceName;
     private final AtomicLong atomLastId = new AtomicLong(0);
-    private Random rand = new Random();
-    private ServerConfig config;
 
-    public CASSnowflakeWorker(String sequenceName, ServerConfig config) {
-        this.sequenceName = sequenceName;
-        this.config = config;
+    public CASSnowflakeWorker(String sequenceName, SnowflakeConfig config) {
+        super(sequenceName, config);
     }
 
     @Override
@@ -42,7 +37,7 @@ public class CASSnowflakeWorker implements IdWorker {
         long endSequence;
         long timestamp = getTimestamp();
 
-        if (timestamp > config.getTimestampMask()) {
+        if (timestamp > config.getMaxTimestamp()) {
             return null;
         }
 
@@ -70,46 +65,6 @@ public class CASSnowflakeWorker implements IdWorker {
         } else {
             return null;
         }
-    }
-
-    private long getMilliTime() {
-        return System.currentTimeMillis();
-    }
-
-    private long getNanoTime() {
-        return System.nanoTime();
-    }
-
-    private long getTimestamp() {
-        return getMilliTime() - config.getTimestampReference();
-    }
-
-    private boolean isTimeout(long startNanoTime, int timeoutMillis) {
-        return (getNanoTime() - startNanoTime) >= (timeoutMillis * 1000000L);
-    }
-
-    private long constructId(long timestamp, long sequence) {
-        return constructId(timestamp, config.getWorkerId(), sequence);
-    }
-
-    private long constructId(long timestamp, long workerId, long sequence) {
-        return (timestamp << config.getTimestampShift()) | (workerId << config.getWorkerIdShift()) | (sequence);
-    }
-
-    private long parseTimestamp(long id) {
-        return id >> config.getTimestampShift();
-    }
-
-    private long parseSequence(long id) {
-        return id & config.getSequenceMask();
-    }
-
-    private long getRandomSequence() {
-        return getRandomSequence(config.getSequenceInitRange());
-    }
-
-    private long getRandomSequence(int sequenceInitRange) {
-        return rand.nextInt(sequenceInitRange);
     }
 
 }

@@ -1,29 +1,23 @@
 package com.ctrip.framework.idgen.server.service;
 
-import com.ctrip.framework.idgen.server.config.ConfigConstants;
-import com.ctrip.framework.idgen.server.config.ServerConfig;
+import com.ctrip.framework.idgen.server.config.SnowflakeConfig;
 import com.ctrip.platform.idgen.service.api.IdSegment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
-public class SnowflakeWorker implements IdWorker {
+public class SnowflakeWorker extends AbstractSnowflakeWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SnowflakeWorker.class);
 
-    private volatile String sequenceName;
     private volatile long sequence;
     private volatile long lastTimestamp = -1L;
     private volatile boolean fallbackLocked = false;
-    private Random rand = new Random();
-    private ServerConfig config;
 
-    public SnowflakeWorker(String sequenceName, ServerConfig config) {
-        this.sequenceName = sequenceName;
-        this.config = config;
+    public SnowflakeWorker(String sequenceName, SnowflakeConfig config) {
+        super(sequenceName, config);
         sequence = getRandomSequence();
     }
 
@@ -35,14 +29,14 @@ public class SnowflakeWorker implements IdWorker {
         if (requestSize <= 0) {
             return null;
         }
-        if (requestSize > ConfigConstants.REQUESTSIZE_MAX_VALUE) {
-            requestSize = ConfigConstants.REQUESTSIZE_MAX_VALUE;
+        if (requestSize > REQUESTSIZE_MAX_VALUE) {
+            requestSize = REQUESTSIZE_MAX_VALUE;
         }
         if (timeoutMillis <= 0) {
-            timeoutMillis = ConfigConstants.TIMEOUTMILLIS_DEFAULT_VALUE;
+            timeoutMillis = TIMEOUTMILLIS_DEFAULT_VALUE;
         }
-        if (timeoutMillis > ConfigConstants.TIMEOUTMILLIS_MAX_VALUE) {
-            timeoutMillis = ConfigConstants.TIMEOUTMILLIS_MAX_VALUE;
+        if (timeoutMillis > TIMEOUTMILLIS_MAX_VALUE) {
+            timeoutMillis = TIMEOUTMILLIS_MAX_VALUE;
         }
 
         long sequenceStart;
@@ -135,36 +129,12 @@ public class SnowflakeWorker implements IdWorker {
         return idSegments;
     }
 
-    private long getTimestamp() {
-        return System.currentTimeMillis();
-    }
-
-    private long getNanoTime() {
-        return System.nanoTime();
-    }
-
     private long tilNextMillis(long lastTimestamp) {
         long timestamp = getTimestamp();
         while (timestamp <= lastTimestamp) {
             timestamp = getTimestamp();
         }
         return timestamp;
-    }
-
-    private boolean isTimeout(int timeoutMillis) {
-        return (timeoutMillis == 0);
-    }
-
-    private boolean isTimeout(long startNanoTime, int timeoutMillis) {
-        return ((getNanoTime() - startNanoTime) >= (timeoutMillis * 1000000L));
-    }
-
-    private long getRandomSequence() {
-        return getRandomSequence(config.getSequenceInitRange());
-    }
-
-    private long getRandomSequence(int sequenceInitRange) {
-        return rand.nextInt(sequenceInitRange);
     }
 
     private IdSegment constructIdSegment(long timestamp, long sequenceStart, long sequenceEnd) {
@@ -175,15 +145,6 @@ public class SnowflakeWorker implements IdWorker {
         long idStart = constructId(timestamp, workerId, sequenceStart);
         long idEnd = constructId(timestamp, workerId, sequenceEnd);
         return new IdSegment(idStart, idEnd);
-    }
-
-    private long constructId(long timestamp, long sequence) {
-        return constructId(timestamp, config.getWorkerId(), sequence);
-    }
-
-    private long constructId(long timestamp, long workerId, long sequence) {
-        return (((timestamp - config.getTimestampReference()) & config.getTimestampMask()) << config.getTimestampShift()) |
-                (workerId << config.getWorkerIdShift()) | (sequence);
     }
 
     // for unit test

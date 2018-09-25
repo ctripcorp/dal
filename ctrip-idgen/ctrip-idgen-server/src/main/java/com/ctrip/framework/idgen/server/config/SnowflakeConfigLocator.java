@@ -1,10 +1,8 @@
 package com.ctrip.framework.idgen.server.config;
 
-public interface ConfigManager {
+public interface SnowflakeConfigLocator<T> {
 
-    void initialize();
-
-    Whitelist getWhitelist();
+    void setup(T config);
 
     SnowflakeConfig getSnowflakeConfig(String sequenceName);
 

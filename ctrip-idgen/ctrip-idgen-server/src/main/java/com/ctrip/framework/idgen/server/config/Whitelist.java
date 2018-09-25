@@ -1,10 +1,8 @@
 package com.ctrip.framework.idgen.server.config;
 
-import java.util.Map;
+public interface Whitelist<T> {
 
-public interface Whitelist {
-
-    void load(Map<String, String> config);
+    void load(T config);
 
     boolean validate(String name);
 

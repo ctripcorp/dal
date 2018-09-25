@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class StringUtils {
 
-    public static String setToString(Set<String> set, String seperator) {
+    public static String setToString(Set<String> set, String separator) {
         if (null == set || set.isEmpty()) {
             return null;
         }
@@ -14,14 +14,14 @@ public class StringUtils {
         while (iterator.hasNext()) {
             sb.append(iterator.next());
             if (iterator.hasNext()) {
-                sb.append(seperator);
+                sb.append(separator);
             }
         }
         return sb.toString();
     }
 
     public static boolean isEmpty(String string) {
-        return (null == string || string.trim().isEmpty());
+        return null == string || string.trim().isEmpty();
     }
 
 }

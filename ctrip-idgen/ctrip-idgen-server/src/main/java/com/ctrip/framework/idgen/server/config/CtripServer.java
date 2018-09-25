@@ -1,7 +1,7 @@
 package com.ctrip.framework.idgen.server.config;
 
 import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.framework.idgen.server.util.PropertiesParser;
+import com.ctrip.framework.idgen.server.exception.InvalidParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,44 +10,36 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class CtripServerConfig {
+public class CtripServer implements Server<Map<String, String>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CtripServerConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CtripServer.class);
+
     private static final String WORKERID_PROPERTY_KEY_FORMAT = "workerId_%s";
     private static final String WORKERID_PROPERTY_KEY_PATTERN = "workerId_*";
 
     private long workerId;
 
-    public void load(Map<String, String> config) {
-        if (checkWorkerIdDuplication(config)) {
+    public void initialize(Map<String, String> properties) {
+        if (checkWorkerIdDuplication(properties)) {
             String msg = "[workerId] duplicated";
             LOGGER.error(msg);
-            throw new RuntimeException(msg);
+            throw new InvalidParameterException(msg);
         }
-        workerId = parseWorkerId(config);
+        workerId = parseWorkerId(properties);
         if (workerId < 0) {
             String msg = "[workerId] should not be negative";
             LOGGER.error(msg);
-            throw new RuntimeException(msg);
+            throw new InvalidParameterException(msg);
         }
     }
 
-    private long parseWorkerId(Map<String, String> config) {
-        try {
-            return PropertiesParser.parseLong(config, getWorkerIdPropertyKey().trim());
-        } catch (Throwable t) {
-            LOGGER.error("[workerId] invalid", t);
-            throw t;
-        }
-    }
-
-    private boolean checkWorkerIdDuplication(Map<String, String> config) {
-        if (null == config) {
+    private boolean checkWorkerIdDuplication(Map<String, String> properties) {
+        if (null == properties) {
             return false;
         }
         Set<Long> workerIds = new HashSet<>();
         boolean result = false;
-        for (Map.Entry<String, String> entry : config.entrySet()) {
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (key != null && value != null && Pattern.matches(WORKERID_PROPERTY_KEY_PATTERN, key.trim())) {
@@ -65,6 +57,15 @@ public class CtripServerConfig {
         return result;
     }
 
+    private long parseWorkerId(Map<String, String> properties) {
+        try {
+            return Long.parseLong(properties.get(getWorkerIdPropertyKey()));
+        } catch (Exception e) {
+            LOGGER.error("[workerId] invalid", e);
+            throw e;
+        }
+    }
+
     private String getWorkerIdPropertyKey() {
         return String.format(WORKERID_PROPERTY_KEY_FORMAT, getWorkerIdPropertyKeySuffix());
     }
@@ -72,11 +73,12 @@ public class CtripServerConfig {
     private String getWorkerIdPropertyKeySuffix() {
         try {
             return Foundation.net().getHostAddress();
-        } catch (Throwable t) {
-            throw new RuntimeException("Failed to get local IP", t);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get local IP", e);
         }
     }
 
+    @Override
     public long getWorkerId() {
         return workerId;
     }

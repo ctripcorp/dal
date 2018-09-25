@@ -16,11 +16,12 @@ public class CtripConfigManager implements ConfigManager {
     private ConfigProvider snowflakeConfigProvider = new TableConfigProvider(SNOWFLAKE_QCONFIG_FILE_NAME);
     private Server server = new CtripServer();
     private Whitelist whitelist = new CtripWhitelist();
-    private SnowflakeConfigLocator snowflakeConfigLocator = new CtripSnowflakeConfigLocator();
+    private SnowflakeConfigLocator snowflakeConfigLocator;
 
     public void initialize() {
         server.initialize(serverConfigProvider.getConfig());
         whitelist.load(whitelistConfigProvider.getConfig());
+        snowflakeConfigLocator = new CtripSnowflakeConfigLocator(server);
         snowflakeConfigLocator.setup(snowflakeConfigProvider.getConfig());
     }
 

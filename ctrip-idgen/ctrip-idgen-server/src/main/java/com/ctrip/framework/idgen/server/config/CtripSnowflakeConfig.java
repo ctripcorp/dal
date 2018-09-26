@@ -12,48 +12,46 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripSnowflakeConfig.class);
 
-    protected static final String TIMESTAMP_BITS_PROPERTY_KEY = "timestampBits";
-    protected static final String WORKER_ID_BITS_PROPERTY_KEY = "workerIdBits";
-    protected static final String SEQUENCE_BITS_PROPERTY_KEY = "sequenceBits";
-    protected static final String ID_REFERENCE_PROPERTY_KEY = "idReference";
-    protected static final String DATE_REFERENCE_PROPERTY_KEY = "dateReference";
-    protected static final String SEQUENCE_RESET_RANGE_PROPERTY_KEY = "sequenceResetRange";
+    private static final String TIMESTAMP_BITS_PROPERTY_KEY = "timestampBits";
+    private static final String WORKER_ID_BITS_PROPERTY_KEY = "workerIdBits";
+    private static final String SEQUENCE_BITS_PROPERTY_KEY = "sequenceBits";
+    private static final String ID_REFERENCE_PROPERTY_KEY = "idReference";
+    private static final String DATE_REFERENCE_PROPERTY_KEY = "dateReference";
+    private static final String SEQUENCE_RESET_RANGE_PROPERTY_KEY = "sequenceResetRange";
 
-    protected static final int ID_BITS_MAX_VALUE = 63;
-    protected static final int TIMESTAMP_BITS_DEFAULT_VALUE = 40;
-    protected static final int WORKER_ID_BITS_DEFAULT_VALUE = 7;
-    protected static final int SEQUENCE_BITS_DEFAULT_VALUE = 16;
-    protected static final long ID_REFERENCE_DEFAULT_VALUE = 0;
-    protected static final String DATE_REFERENCE_DEFAULT_VALUE = "2018-08-08 00:00:00";
-    protected static final String DATE_REFERENCE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    protected static final int SEQUENCE_RESET_RANGE_DEFAULT_VALUE = 128;
+    private static final int ID_BITS_MAX_VALUE = 63;
+    private static final int TIMESTAMP_BITS_DEFAULT_VALUE = 40;
+    private static final int WORKER_ID_BITS_DEFAULT_VALUE = 7;
+    private static final int SEQUENCE_BITS_DEFAULT_VALUE = 16;
+    private static final long ID_REFERENCE_DEFAULT_VALUE = 0;
+    private static final String DATE_REFERENCE_DEFAULT_VALUE = "2018-08-08 00:00:00";
+    private static final String DATE_REFERENCE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final int SEQUENCE_RESET_RANGE_DEFAULT_VALUE = 128;
 
     // Originally configured parameters
-    protected int timestampBits;
-    protected int workerIdBits;
-    protected int sequenceBits;
-    protected long idReference;
-    protected String dateReference;
-    protected int sequenceResetRange;
+    private int timestampBits;
+    private int workerIdBits;
+    private int sequenceBits;
+    private long idReference;
+    private String dateReference = DATE_REFERENCE_DEFAULT_VALUE;
+    private int sequenceResetRange;
 
     // Computed parameters
-    protected int timestampShift;
-    protected int workerIdShift;
-    protected long maxTimestamp;
-    protected long maxWorkerId;
-    protected long sequenceMask;
-    protected long timestampReference;
+    private int timestampShift;
+    private int workerIdShift;
+    private long maxTimestamp;
+    private long maxWorkerId;
+    private long sequenceMask;
+    private long timestampReference;
 
-    private String sequenceName;
     private Server server;
     private SnowflakeConfig defaultConfig;
 
-    public CtripSnowflakeConfig(String sequenceName, Server server) {
-        this(sequenceName, server, null);
+    public CtripSnowflakeConfig(Server server) {
+        this(server, null);
     }
 
-    public CtripSnowflakeConfig(String sequenceName, Server server, SnowflakeConfig defaultConfig) {
-        this.sequenceName = sequenceName;
+    public CtripSnowflakeConfig(Server server, SnowflakeConfig defaultConfig) {
         this.server = server;
         this.defaultConfig = defaultConfig;
     }
@@ -161,6 +159,31 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
             LOGGER.error(msg);
             throw new InvalidParameterException(msg);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("timestampBits: " + timestampBits + ", ");
+        builder.append("workerIdBits: " + workerIdBits + ", ");
+        builder.append("sequenceBits: " + sequenceBits + ", ");
+        builder.append("idReference: " + idReference + ", ");
+        builder.append("dateReference: " + dateReference + ", ");
+        builder.append("sequenceResetRange: " + sequenceResetRange);
+        return builder.toString();
+    }
+
+    @Override
+    public boolean diffs(SnowflakeConfig another) {
+        if (null == another) {
+            return true;
+        }
+        return (this.timestampBits != another.getTimestampBits() ||
+                this.workerIdBits != another.getWorkerIdBits() ||
+                this.sequenceBits != another.getSequenceBits() ||
+                this.idReference != another.getIdReference() ||
+                !this.dateReference.equals(another.getDateReference()) ||
+                this.sequenceResetRange != another.getSequenceResetRange());
     }
 
     @Override

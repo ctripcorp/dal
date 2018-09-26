@@ -38,7 +38,6 @@ public class CtripServer implements Server<Map<String, String>> {
             return false;
         }
         Set<Long> workerIds = new HashSet<>();
-        boolean result = false;
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -47,14 +46,13 @@ public class CtripServer implements Server<Map<String, String>> {
                     long workerId = Long.parseLong(value.trim());
                     if (!workerIds.add(workerId)) {
                         LOGGER.error("[workerId] duplicated ({}: {})", key, value);
-                        result = true;
-                        break;
+                        return true;
                     }
                 } catch (NumberFormatException e) {
                 }
             }
         }
-        return result;
+        return false;
     }
 
     private long parseWorkerId(Map<String, String> properties) {

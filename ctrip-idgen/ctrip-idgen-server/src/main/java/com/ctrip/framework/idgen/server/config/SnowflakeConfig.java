@@ -6,6 +6,8 @@ public interface SnowflakeConfig{
 
     void load(Map<String, String> properties);
 
+    boolean diffs(SnowflakeConfig another);
+
     long getWorkerId();
 
     int getTimestampBits();

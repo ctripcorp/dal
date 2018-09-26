@@ -1,19 +1,16 @@
 package com.ctrip.framework.idgen.server.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 public class CtripConfigManager implements ConfigManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CtripConfigManager.class);
+    private static final String SERVER_CONFIG_FILE_NAME = "server.properties";
+    private static final String WHITELIST_CONFIG_FILE_NAME = "whitelist.properties";
+    private static final String SNOWFLAKE_CONFIG_FILE_NAME = "snowflake.properties";
 
-    private static final String SERVER_QCONFIG_FILE_NAME = "server.properties";
-    private static final String WHITELIST_QCONFIG_FILE_NAME = "whitelist.properties";
-    private static final String SNOWFLAKE_QCONFIG_FILE_NAME = "snowflake.properties";
-
-    private ConfigProvider serverConfigProvider = new MapConfigProvider(SERVER_QCONFIG_FILE_NAME);
-    private ConfigProvider whitelistConfigProvider = new MapConfigProvider(WHITELIST_QCONFIG_FILE_NAME);
-    private ConfigProvider snowflakeConfigProvider = new TableConfigProvider(SNOWFLAKE_QCONFIG_FILE_NAME);
+    private ConfigProvider serverConfigProvider = new MapConfigProvider(SERVER_CONFIG_FILE_NAME);
+    private ConfigProvider whitelistConfigProvider = new MapConfigProvider(WHITELIST_CONFIG_FILE_NAME);
+    private ConfigProvider snowflakeConfigProvider = new TableConfigProvider(SNOWFLAKE_CONFIG_FILE_NAME);
     private Server server = new CtripServer();
     private Whitelist whitelist = new CtripWhitelist();
     private SnowflakeConfigLocator snowflakeConfigLocator;
@@ -23,6 +20,16 @@ public class CtripConfigManager implements ConfigManager {
         whitelist.load(whitelistConfigProvider.getConfig());
         snowflakeConfigLocator = new CtripSnowflakeConfigLocator(server);
         snowflakeConfigLocator.setup(snowflakeConfigProvider.getConfig());
+        addWhitelistChangedListener();
+    }
+
+    private void addWhitelistChangedListener() {
+        whitelistConfigProvider.addConfigChangedListener(new ConfigChangedListener<Map<String, String>>() {
+            @Override
+            public void onConfigChanged(Map<String, String> updatedConfig) {
+                whitelist.load(updatedConfig);
+            }
+        });
     }
 
     public Whitelist getWhitelist() {

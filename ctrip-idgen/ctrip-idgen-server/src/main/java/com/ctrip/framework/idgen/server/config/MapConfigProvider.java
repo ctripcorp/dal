@@ -1,5 +1,8 @@
 package com.ctrip.framework.idgen.server.config;
 
+import com.ctrip.framework.idgen.server.constant.CatConstants;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Configuration;
@@ -40,13 +43,21 @@ public class MapConfigProvider implements ConfigProvider<Map<String, String>> {
             synchronized (this) {
                 mapConfig = configReference.get();
                 if (null == mapConfig) {
+                    Transaction transaction = Cat.newTransaction(CatConstants.CAT_TYPE_IDGEN_SERVER,
+                            CatConstants.CAT_NAME_QCONFIG_LOAD + ":" + configFileName);
                     try {
                         mapConfig = MapConfig.get(configFileName);
+                        if (mapConfig != null) {
+                            configReference.set(mapConfig);
+                            transaction.setStatus(Transaction.SUCCESS);
+                        } else {
+                            transaction.setStatus("Null config");
+                        }
                     } catch (Exception e) {
                         LOGGER.error("Failed to load '{}' from QConfig", configFileName, e);
-                    }
-                    if (mapConfig != null) {
-                        configReference.set(mapConfig);
+                        transaction.setStatus(e);
+                    } finally {
+                        transaction.complete();
                     }
                 }
             }
@@ -58,18 +69,25 @@ public class MapConfigProvider implements ConfigProvider<Map<String, String>> {
         if (null == callback) {
             return;
         }
-
         MapConfig mapConfig = getMapConfig();
         if (null == mapConfig) {
             return;
         }
-
         if (isListenerAdded.compareAndSet(false, true)) {
             mapConfig.addListener(new Configuration.ConfigListener<Map<String, String>>() {
                 @Override
                 public void onLoad(Map<String, String> updatedConfig) {
-                    if (updatedConfig != null) {
-                        callback.onConfigChanged(updatedConfig);
+                    Transaction transaction = Cat.newTransaction(CatConstants.CAT_TYPE_IDGEN_SERVER,
+                            CatConstants.CAT_NAME_QCONFIG_RELOAD + ":" + configFileName);
+                    try {
+                        if (updatedConfig != null) {
+                            callback.onConfigChanged(updatedConfig);
+                        }
+                        transaction.setStatus(Transaction.SUCCESS);
+                    } catch (Exception e) {
+                        transaction.setStatus(e);
+                    } finally {
+                        transaction.complete();
                     }
                 }
             });

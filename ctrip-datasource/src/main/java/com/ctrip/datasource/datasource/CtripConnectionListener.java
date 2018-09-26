@@ -2,91 +2,57 @@ package com.ctrip.datasource.datasource;
 
 import com.ctrip.platform.dal.dao.datasource.AbstractConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
-import com.ctrip.platform.dal.dao.datasource.CreateConnectionCallback;
-import com.ctrip.platform.dal.dao.log.Callback;
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Transaction;
 
 import java.sql.Connection;
 
 public class CtripConnectionListener extends AbstractConnectionListener implements ConnectionListener {
     private static final String DAL = "DAL";
     private static final String CONNECTION_CREATE_CONNECTION = "Connection::createConnection";
+    private static final String CONNECTION_CREATE_CONNECTION_FAILED = "Connection::createConnectionFailed";
     private static final String CONNECTION_RELEASE_CONNECTION = "Connection::releaseConnection";
     private static final String CONNECTION_ABANDON_CONNECTION = "Connection::abandonConnection";
 
     @Override
-    public void doOnCreateConnection(String poolDesc, CreateConnectionCallback callback) {
-        final String tempPoolDesc = poolDesc;
-        final CreateConnectionCallback tempCallback = callback;
+    public void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
+        super.doOnCreateConnection(poolDesc, connection, startTime);
+        logCatTransaction(CONNECTION_CREATE_CONNECTION, poolDesc, connection, startTime);
+    }
 
-        logCatTransaction(CONNECTION_CREATE_CONNECTION, poolDesc, new Callback() {
-            @Override
-            public void execute() throws Exception {
-                CtripConnectionListener.super.doOnCreateConnection(tempPoolDesc, tempCallback);
-            }
-        });
+    @Override
+    public void doOnCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+        super.doOnCreateConnectionFailed(poolDesc, connDesc, exception, startTime);
+        logCatTransaction(CONNECTION_CREATE_CONNECTION_FAILED, poolDesc, connDesc, exception, startTime);
     }
 
     @Override
     public void doOnReleaseConnection(String poolDesc, Connection connection) {
-        final String tempPoolDesc = poolDesc;
-        final Connection tempConnection = connection;
-
-        logCatTransaction(CONNECTION_RELEASE_CONNECTION, poolDesc, connection, new Callback() {
-            @Override
-            public void execute() throws Exception {
-                CtripConnectionListener.super.doOnReleaseConnection(tempPoolDesc, tempConnection);
-            }
-        });
+        super.doOnReleaseConnection(poolDesc, connection);
+        logCatTransaction(CONNECTION_RELEASE_CONNECTION, poolDesc, connection);
     }
 
     @Override
     protected void doOnAbandonConnection(String poolDesc, Connection connection) {
-        final String tempPoolDesc = poolDesc;
-        final Connection tempConnection = connection;
-
-        logCatTransaction(CONNECTION_ABANDON_CONNECTION, poolDesc, connection, new Callback() {
-            @Override
-            public void execute() throws Exception {
-                CtripConnectionListener.super.doOnAbandonConnection(tempPoolDesc, tempConnection);
-            }
-        });
+        super.doOnAbandonConnection(poolDesc, connection);
+        logCatTransaction(CONNECTION_ABANDON_CONNECTION, poolDesc, connection);
     }
 
-    private void logCatTransaction(String typeName, String poolDesc, Callback callback) {
-        String transactionName = String.format("%s:%s", typeName, poolDesc);
-        Transaction transaction = Cat.newTransaction(DAL, transactionName);
-        try {
-            transaction.addData(poolDesc);
-            if (callback != null) {
-                callback.execute();
-            }
-
-            transaction.setStatus(Transaction.SUCCESS);
-        } catch (Throwable e) {
-            transaction.setStatus(e);
-        } finally {
-            transaction.complete();
-        }
+    private void logCatTransaction(String typeName, String poolDesc, Connection connection) {
+        logCatTransaction(typeName, poolDesc, connection, 0);
     }
 
-    private void logCatTransaction(String typeName, String poolDesc, Connection connection, Callback callback) {
-        String connDesc = connectionDesc(connection);
+    private void logCatTransaction(String typeName, String poolDesc, Connection connection, long startTime) {
+        String connectionUrl = getConnectionUrl(connection);
+        String transactionName = String.format("%s:%s", typeName, connectionUrl);
+        String message = String.format("%s,%s", poolDesc, connectionUrl);
+
+        LOGGER.logTransaction(DAL, transactionName, message, startTime);
+    }
+
+    private void logCatTransaction(String typeName, String poolDesc, String connDesc, Throwable exception,
+            long startTime) {
         String transactionName = String.format("%s:%s", typeName, connDesc);
-        Transaction transaction = Cat.newTransaction(DAL, transactionName);
-        try {
-            transaction.addData(String.format("%s,%s", poolDesc, connDesc));
-            if (callback != null) {
-                callback.execute();
-            }
-
-            transaction.setStatus(Transaction.SUCCESS);
-        } catch (Throwable e) {
-            transaction.setStatus(e);
-        } finally {
-            transaction.complete();
-        }
+        String message = String.format("%s,%s", poolDesc, connDesc);
+        LOGGER.logTransaction(DAL, transactionName, message, exception, startTime);
     }
 
     @Override

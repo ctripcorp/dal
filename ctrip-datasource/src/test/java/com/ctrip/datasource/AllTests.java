@@ -2,6 +2,7 @@ package com.ctrip.datasource;
 
 import com.ctrip.datasource.configure.DataSourceConfigureLocatorTest;
 import com.ctrip.datasource.datasource.ConnectionListener.CtripConnectionListenerTest;
+import com.ctrip.datasource.datasource.DataSourceValidatorTest;
 import com.ctrip.datasource.datasource.MockQConfigProvider.ExceptionQConfigPoolPropertiesProviderTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
@@ -39,7 +40,8 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		DataSourceConfigureLocatorTest.class,
 		DalDataSourceFactoryTest.class,
 		QConfigConnectionStringProviderTest.class,
-		CtripConnectionListenerTest.class
+		CtripConnectionListenerTest.class,
+		DataSourceValidatorTest.class
 	})
 
 public class AllTests {

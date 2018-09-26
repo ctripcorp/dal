@@ -1,6 +1,5 @@
 package com.ctrip.datasource.configure.qconfig;
 
-import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
@@ -8,6 +7,7 @@ import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Configuration;
@@ -23,96 +23,145 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     private static final String DATASOURCE_PROPERTIES = "datasource.properties";
     private static final String DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE =
             "An error occured while getting datasource.properties from QConfig.";
-    private static final String POOL_PROPERTIES_CONFIGURATION = "PoolProperties configuration:";
-    private static final String ON_LOAD_EXCEPTION = "Parameter for onLoad event is null.";
+    private static final String POOLPROPERTIES_CONFIGURATION = "PoolProperties configuration: ";
+    private static final String ON_LOAD_PARAMETER_EXCEPTION = "Map parameter of onLoad event is null.";
     private static final String DYNAMIC_POOL_PROPERTIES_NOT_ENABLED =
             "DAL DataSource DynamicPoolProperties does not enabled.";
+    private static final String NULL_MAPCONFIG_EXCEPTION = "MapConfig for datasource.properties is null.";
+
+    private static final String DAL = "DAL";
+    private static final String POOLPROPERTIES_GET_MAPCONFIG = "PoolProperties::getMapConfig";
+    private static final String POOLPROPERTIES_GET_POOLPROPERTIES = "PoolProperties::getPoolProperties";
+    private static final String POOLPROPERTIES_ADD_LISTENER = "PoolProperties::addListener";
+    private static final String POOLPROPERTIES_LISTENER_ON_LOAD = "PoolProperties:listenerOnLoad";
 
     private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
-    private AtomicReference<Boolean> isFirstTime = new AtomicReference<>(true);
-
-    private MapConfig getConfig() {
-        return mapConfigReference.get();
-    }
+    private AtomicReference<Boolean> isFirstTimeLoadReference = new AtomicReference<>(true);
 
     @Override
     public PoolPropertiesConfigure getPoolProperties() {
-        refreshPoolPropertiesMapConfig();
-        return _getPoolProperties();
-    }
-
-    private void refreshPoolPropertiesMapConfig() {
-        if (!Foundation.app().isAppIdSet())
-            return;
+        MapConfig config = getMapConfig();
+        DataSourceConfigure configure;
 
         try {
-            MapConfig config = getMapConfig();
-            if (config != null) {
-                mapConfigReference.set(config);
-            }
-        } catch (Throwable e) {
-            LOGGER.error(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
-            Cat.logError(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
-            throw e;
-        }
-    }
-
-    private MapConfig getMapConfig() {
-        return MapConfig.get(DAL_APPNAME, DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
-    }
-
-    private PoolPropertiesConfigure _getPoolProperties() {
-        DataSourceConfigure configure = null;
-        MapConfig config = mapConfigReference.get();
-        if (config == null)
-            return configure;
-
-        try {
-            Map<String, String> map = config.asMap();
-            String log = POOL_PROPERTIES_CONFIGURATION + PoolPropertiesHelper.getInstance().mapToString(map);
-            LOGGER.info(log);
+            Map<String, String> map = getPoolPropertiesMap(config);
             configure = new DataSourceConfigure("", map);
         } catch (Throwable e) {
-            String message = e.getMessage();
-            LOGGER.error(message, e);
-            Cat.logError(message, e);
+            throw e;
         }
 
         return configure;
     }
 
+    private MapConfig getMapConfig() {
+        MapConfig mapConfig = mapConfigReference.get();
+        if (mapConfig == null) {
+            mapConfig = _getMapConfig();
+            mapConfigReference.set(mapConfig);
+        }
+
+        return mapConfig;
+    }
+
+    private MapConfig _getMapConfig() {
+        MapConfig config = null;
+        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_GET_MAPCONFIG);
+        try {
+            config = MapConfig.get(DAL_APPNAME, DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
+            if (config == null)
+                throw new RuntimeException(NULL_MAPCONFIG_EXCEPTION);
+
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+            Cat.logError(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
+            LOGGER.error(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
+            throw e;
+        } finally {
+            transaction.complete();
+        }
+
+        return config;
+    }
+
+    private Map<String, String> getPoolPropertiesMap(MapConfig config) {
+        Map<String, String> map = null;
+        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_GET_POOLPROPERTIES);
+
+        try {
+            map = config.asMap();
+            String log = POOLPROPERTIES_CONFIGURATION + PoolPropertiesHelper.getInstance().mapToString(map);
+            LOGGER.info(log);
+            transaction.addData(log);
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+            Cat.logError(e);
+            String message = e.getMessage();
+            LOGGER.error(message, e);
+            throw e;
+        } finally {
+            transaction.complete();
+        }
+
+        return map;
+    }
+
     @Override
     public void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback) {
-        MapConfig config = getConfig();
-        if (config == null)
-            return;
+        MapConfig config = getMapConfig();
+        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_ADD_LISTENER);
 
-        _addPoolPropertiesChangedListener(config, callback);
+        try {
+            _addPoolPropertiesChangedListener(config, callback);
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+            Cat.logError(e);
+            throw e;
+        } finally {
+            transaction.complete();
+        }
     }
 
     private void _addPoolPropertiesChangedListener(MapConfig config, final PoolPropertiesChanged callback) {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
-                if (map == null || map.isEmpty())
-                    throw new RuntimeException(ON_LOAD_EXCEPTION);
+                Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_LISTENER_ON_LOAD);
+                try {
+                    if (map == null || map.isEmpty())
+                        throw new RuntimeException(ON_LOAD_PARAMETER_EXCEPTION);
 
-                Boolean firstTime = isFirstTime.get().booleanValue();
-                if (firstTime) {
-                    isFirstTime.compareAndSet(true, false);
-                    return;
+                    if (isFirstTimeLoad())
+                        return;
+
+                    if (!dynamicPoolPropertiesEnabled(map)) {
+                        LOGGER.info(DYNAMIC_POOL_PROPERTIES_NOT_ENABLED);
+                        return;
+                    }
+
+                    DataSourceConfigure configure = new DataSourceConfigure("", map);
+                    callback.onChanged(configure);
+                    transaction.setStatus(Transaction.SUCCESS);
+                } catch (Throwable e) {
+                    transaction.setStatus(e);
+                    Cat.logError(e);
+                    throw e;
+                } finally {
+                    transaction.complete();
                 }
-
-                boolean dynamicEnabled = dynamicPoolPropertiesEnabled(map);
-                if (!dynamicEnabled) {
-                    LOGGER.info(DYNAMIC_POOL_PROPERTIES_NOT_ENABLED);
-                    return;
-                }
-
-                DataSourceConfigure configure = new DataSourceConfigure("", map);
-                callback.onChanged(configure);
             }
         });
+    }
+
+    private boolean isFirstTimeLoad() {
+        Boolean isFirstTime = isFirstTimeLoadReference.get().booleanValue();
+        if (isFirstTime) {
+            isFirstTimeLoadReference.compareAndSet(true, false);
+        }
+
+        return isFirstTime;
     }
 
     private boolean dynamicPoolPropertiesEnabled(Map<String, String> map) {

@@ -4,8 +4,6 @@ import com.ctrip.datasource.datasource.CtripConnectionListener;
 import com.ctrip.datasource.log.ILogger.MockILoggerImpl;
 import com.ctrip.platform.dal.dao.datasource.AbstractConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
-import com.ctrip.platform.dal.dao.datasource.ConnectionMetaDataManager;
-import com.ctrip.platform.dal.dao.datasource.CreateConnectionCallback;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,25 +31,20 @@ public class CtripConnectionListenerTest {
 
     @Test
     public void testCreateConnection() throws SQLException {
-        connectionListener.onCreateConnection(POOL_DESC, new CreateConnectionCallback() {
-            @Override
-            public Connection createConnection() throws Exception {
-                return getConnection();
-            }
-        });
+        long startTime = System.currentTimeMillis();
+        Connection connection = getConnection();
+        connectionListener.onCreateConnection(POOL_DESC, connection, startTime);
     }
 
     @Test
     public void testReleaseConnection() throws SQLException {
         Connection connection = getConnection();
-        ConnectionMetaDataManager.getInstance().put(connection);
         connectionListener.onReleaseConnection(POOL_DESC, connection);
     }
 
     @Test
     public void testAbandomConnection() throws SQLException {
         Connection connection = getConnection();
-        ConnectionMetaDataManager.getInstance().put(connection);
         connectionListener.onAbandonConnection(POOL_DESC, connection);
     }
 

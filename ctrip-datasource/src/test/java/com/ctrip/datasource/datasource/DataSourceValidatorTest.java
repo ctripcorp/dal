@@ -3,35 +3,37 @@ package com.ctrip.datasource.datasource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
 
 import com.ctrip.datasource.log.ILogger.MockILoggerImpl;
-import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceValidator;
+import com.ctrip.platform.dal.dao.datasource.ValidatorProxy;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-
 public class DataSourceValidatorTest {
-    private static final String mySqlName = "mysqldaltest01db_W";
-    private static final String SQL_SERVER_NAME = "dalservicedb";
-    private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
-    private static final String CONNECTION_URL =
+    private static final String SQL_SERVER_DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    private static final String SQL_SERVER_CONNECTION_URL = "jdbc:sqlserver://DST56614:1433;databaseName=daoTest";
+
+    private static final String SQL_SERVER_USER_NAME = "sa";
+    private static final String SQL_SERVER_PASSWORD = "!QAZ@WSX1qaz2wsx";
+
+    private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+    private static final String MYSQL_CONNECTION_URL =
             "jdbc:mysql://DST56614:3306/dao_test?useUnicode=true&characterEncoding=UTF-8";
-    private static final String USER_NAME = "root";
-    private static final String PASSWORD = "!QAZ@WSX1qaz2wsx";
+    private static final String MYSQL_USER_NAME = "root";
+    private static final String MYSQL_PASSWORD = "!QAZ@WSX1qaz2wsx";
+
+    private static final String CORRECT_SQL_SERVER_INIT_SQL = "SELECT 1";
+    private static final String ERROR_SQL_SERVER_INIT_SQL = "SELECT CURDATE()"; // the function is mysql only
+
+    private static final String CORRECT_MYSQL_INIT_SQL = "SELECT 1";
+    private static final String ERROR_MYSQL_INIT_SQL = "SELECT GETDATE()"; // the function is sql server only
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static ILogger MOCK_LOGGER = new MockILoggerImpl();
@@ -47,107 +49,118 @@ public class DataSourceValidatorTest {
     }
 
     @Test
-    public void testMySqlDataSourceValidator() throws Exception {
-        Connection connection = null;
-        try {
-            Class.forName(DRIVER_CLASS_NAME);
-            connection = DriverManager.getConnection(CONNECTION_URL, USER_NAME, PASSWORD);
-        } catch (Throwable e) {
-        }
+    public void testSqlServerValidateInitSuccess() throws SQLException {
+        testSqlServerConnectionValidateSuccess(PooledConnection.VALIDATE_INIT);
+    }
 
-        try {
-            Statement statement1 = connection.createStatement();
-            statement1.setQueryTimeout(5); // set timeout,a timer will be created.
-            statement1.execute("select SLEEP(1)");
-        } catch (Throwable e) {
-            System.out.println("Statement1 exception captured.");
-        }
+    @Test
+    public void testSqlServerValidateBorrowSuccess() throws SQLException {
+        testSqlServerConnectionValidateSuccess(PooledConnection.VALIDATE_BORROW);
+    }
 
-        boolean result = false;
+    @Test
+    public void testSqlServerValidateInitFailure() throws SQLException {
+        testSqlServerConnectionValidFailure(PooledConnection.VALIDATE_INIT);
+    }
+
+    @Test
+    public void testMySqlValidateInitSuccess() throws SQLException {
+        testMySqlConnectionValidateSuccess(PooledConnection.VALIDATE_INIT);
+    }
+
+    @Test
+    public void testMySqlValidateBorrowSuccess() throws SQLException {
+        testMySqlConnectionValidateSuccess(PooledConnection.VALIDATE_BORROW);
+    }
+
+    @Test
+    public void testMySqlValidateInitFailure() throws SQLException {
+        testMySqlConnectionValidateFailure(PooledConnection.VALIDATE_INIT);
+    }
+
+    private void testSqlServerConnectionValidateSuccess(int validateAction) throws SQLException {
+        Connection connection = createNewSqlServerConnection();
+        testConnectionValidateSuccess(validateAction, connection, CORRECT_SQL_SERVER_INIT_SQL);
+    }
+
+    private void testMySqlConnectionValidateSuccess(int validateAction) throws SQLException {
+        Connection connection = createNewMySqlConnection();
+        testConnectionValidateSuccess(validateAction, connection, CORRECT_MYSQL_INIT_SQL);
+    }
+
+    private void testConnectionValidateSuccess(int validateAction, Connection connection, String initSql)
+            throws SQLException {
+        boolean result;
 
         try {
             DataSourceValidator validator = new DataSourceValidator();
-            result = validator.validate(connection, PooledConnection.VALIDATE_BORROW);
-        } catch (Throwable e) {
-            System.out.println(String.format("DataSource validation:%s", result));
-        }
-
-        // emulate connection pool to close the connection.
-        connection.close();
-
-        try {
-            Statement statement2 = connection.createStatement();
-            statement2.execute("select SLEEP(1)");
-            // statement2.execute("select SLEEP(60)");
-        } catch (Throwable e) {
-            System.out.println("Statement2 exception captured.");
-        }
-
-        Thread.sleep(300 * 1000);
-    }
-
-    @Test
-    public void testSqlServerDataSourceValidator() throws Exception {
-        TitanProvider provider = new TitanProvider();
-        Map<String, String> settings = new HashMap<>();
-        provider.initialize(settings);
-
-        Set<String> names = new HashSet<>();
-        names.add(SQL_SERVER_NAME);
-        provider.setup(names);
-
-        DataSourceLocator loc = new DataSourceLocator(provider);
-        DataSource dataSource = loc.getDataSource(SQL_SERVER_NAME);
-        int i = 0;
-        while (true) {
-            Connection connection = dataSource.getConnection();
-            Statement statement = connection.createStatement();
-            statement.setQueryTimeout(3);
-            statement.execute("select 1");
-            connection.close();
-            System.out.println(i);
-            i++;
-            Thread.sleep(100);
-        }
-    }
-
-    @Test
-    public void testDataSourceValidatorValidateInit() throws SQLException {
-        testDataSourceValidate(PooledConnection.VALIDATE_INIT);
-    }
-
-    @Test
-    public void testDataSourceValidatorValidateBorrow() throws SQLException {
-        testDataSourceValidate(PooledConnection.VALIDATE_BORROW);
-    }
-
-    private void testDataSourceValidate(int validateAction) throws SQLException {
-        Connection connection = null;
-        try {
-            Class.forName(DRIVER_CLASS_NAME);
-            connection = DriverManager.getConnection(CONNECTION_URL, USER_NAME, PASSWORD);
-        } catch (Throwable e) {
-        }
-
-        try {
-            Statement statement = connection.createStatement();
-            statement.execute("select SLEEP(1)");
-        } catch (Throwable e) {
-            Assert.fail();
-        }
-
-        boolean result = false;
-
-        try {
-            DataSourceValidator validator = new DataSourceValidator();
+            setPoolProperties(validator, initSql);
             result = validator.validate(connection, validateAction);
             Assert.assertTrue(result);
         } catch (Throwable e) {
+            System.out.println(e.getMessage());
+            Assert.fail();
+        } finally {
+            if (connection != null)
+                connection.close();
+        }
+    }
+
+    private void testSqlServerConnectionValidFailure(int validateAction) throws SQLException {
+        Connection connection = createNewSqlServerConnection();
+        testConnectionValidateFailure(validateAction, connection, ERROR_SQL_SERVER_INIT_SQL);
+    }
+
+    private void testMySqlConnectionValidateFailure(int validateAction) throws SQLException {
+        Connection connection = createNewMySqlConnection();
+        testConnectionValidateFailure(validateAction, connection, ERROR_MYSQL_INIT_SQL);
+    }
+
+    private void testConnectionValidateFailure(int validateAction, Connection connection, String initSql)
+            throws SQLException {
+        boolean result = false;
+
+        try {
+            DataSourceValidator validator = new DataSourceValidator();
+            setPoolProperties(validator, initSql);
+            result = validator.validate(connection, validateAction);
+            Assert.assertFalse(result);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+            Assert.fail();
+        } finally {
+            if (connection != null)
+                connection.close();
+        }
+    }
+
+    private Connection createNewSqlServerConnection() {
+        return createNewConnection(SQL_SERVER_DRIVER_CLASS_NAME, SQL_SERVER_CONNECTION_URL, SQL_SERVER_USER_NAME,
+                SQL_SERVER_PASSWORD);
+    }
+
+    private Connection createNewMySqlConnection() {
+        return createNewConnection(MYSQL_DRIVER_CLASS_NAME, MYSQL_CONNECTION_URL, MYSQL_USER_NAME, MYSQL_PASSWORD);
+    }
+
+    private Connection createNewConnection(String driverClassName, String connectionUrl, String userName,
+            String password) {
+        Connection connection = null;
+        try {
+            Class.forName(driverClassName);
+            connection = DriverManager.getConnection(connectionUrl, userName, password);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
             Assert.fail();
         }
 
-        if (connection != null)
-            connection.close();
+        return connection;
+    }
+
+    private void setPoolProperties(ValidatorProxy validator, String initSql) {
+        PoolProperties properties = new PoolProperties();
+        properties.setInitSQL(initSql);
+        validator.setPoolProperties(properties);
     }
 
 }

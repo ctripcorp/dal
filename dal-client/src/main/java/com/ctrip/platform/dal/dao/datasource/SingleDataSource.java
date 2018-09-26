@@ -4,19 +4,16 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
 import com.ctrip.platform.dal.dao.helper.*;
-import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.tomcat.jdbc.pool.Validator;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SingleDataSource implements DataSourceConfigureConstants {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SingleDataSource.class);
+    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
     private String name;
     private DataSourceConfigure dataSourceConfigure;
@@ -24,10 +21,10 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
     private static final String DAL = "DAL";
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
-    private static ILogger ilogger = DalElementFactory.DEFAULT.getILogger();
 
-    private static ConnectionPhantomReferenceCleaner connectionPhantomReferenceCleaner = new DefaultConnectionPhantomReferenceCleaner();
-    private static AtomicBoolean containsMySQL=new AtomicBoolean(false);
+    private static ConnectionPhantomReferenceCleaner connectionPhantomReferenceCleaner =
+            new DefaultConnectionPhantomReferenceCleaner();
+    private static AtomicBoolean containsMySQL = new AtomicBoolean(false);
     private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
     public String getName() {
@@ -46,32 +43,37 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         if (dataSourceConfigure == null)
             throw new SQLException("Can not find any connection configure for " + name);
 
+        createPool(name, dataSourceConfigure);
+
+        startPhantomReferenceCleaner();
+    }
+
+    private void createPool(String name, DataSourceConfigure dataSourceConfigure) {
         try {
             this.name = name;
             this.dataSourceConfigure = dataSourceConfigure;
 
-            PoolProperties p = poolPropertiesHelper.convert(dataSourceConfigure);
-            PoolPropertiesHolder.getInstance().setPoolProperties(p);
-            final org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(p);
+            PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
+            setPoolPropertiesIntoValidator(poolProperties);
+
+            final org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(poolProperties);
             this.dataSource = dataSource;
 
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
-                    p.getDriverClassName(), dataSourceConfigure.getConnectionUrl());
-            ilogger.logTransaction(DAL, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, new Callback() {
-                @Override
-                public void execute() throws Exception {
-                    dataSource.createPool();
-                }
-            });
-
+                    poolProperties.getDriverClassName(), dataSourceConfigure.getConnectionUrl());
+            long startTime = System.currentTimeMillis();
+            dataSource.createPool();
+            LOGGER.logTransaction(DAL, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
         }
+    }
 
+    private void startPhantomReferenceCleaner() {
         try {
             if (!containsMySQL.get()) {
-                if (dataSourceConfigure.getConnectionUrl().startsWith(MYSQL_URL_PREFIX)){
+                if (dataSourceConfigure.getConnectionUrl().startsWith(MYSQL_URL_PREFIX)) {
                     connectionPhantomReferenceCleaner.start();
                     containsMySQL.set(true);
                 }
@@ -81,23 +83,19 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         }
     }
 
-    private void testConnection(org.apache.tomcat.jdbc.pool.DataSource dataSource) throws SQLException {
-        if (dataSource == null)
+    private void setPoolPropertiesIntoValidator(PoolProperties poolProperties) {
+        if (poolProperties == null)
             return;
 
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-        } finally {
-            if (con != null)
-                try {
-                    con.close();
-                } catch (Throwable e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-        }
+        Validator validator = poolProperties.getValidator();
+        if (validator == null)
+            return;
+
+        if (!(validator instanceof ValidatorProxy))
+            return;
+
+        ValidatorProxy dsValidator = (ValidatorProxy) validator;
+        dsValidator.setPoolProperties(poolProperties);
     }
 
 }

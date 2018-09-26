@@ -1,43 +1,47 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 
 public abstract class AbstractConnectionListener implements ConnectionListener {
     protected static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private String BEFORE_CREATE_CONNECTION_FORMAT = "[beforeCreateConnection]%s";
     private String ON_CREATE_CONNECTION_FORMAT = "[onCreateConnection]%s, %s";
+    private String ON_CREATE_CONNECTION_FAILED_FORMAT = "[onCreateConnectionFailed]%s, %s";
     private String ON_RELEASE_CONNECTION_FORMAT = "[onReleaseConnection]%s, %s";
     private String ON_ABANDON_CONNECTION_FORMAT = "[onAbandonConnection]%s, %s";
 
-    private ConnectionMetaDataManager metaDataManager = ConnectionMetaDataManager.getInstance();
-
     @Override
-    public void onCreateConnection(String poolDesc, CreateConnectionCallback callback) {
-        if (callback == null)
+    public void onCreateConnection(String poolDesc, Connection connection, long startTime) {
+        if (connection == null)
             return;
 
-        doOnCreateConnection(poolDesc, callback);
+        doOnCreateConnection(poolDesc, connection, startTime);
     }
 
-    protected void doOnCreateConnection(String poolDesc, CreateConnectionCallback callback) {
-        try {
-            logInfo(BEFORE_CREATE_CONNECTION_FORMAT, poolDesc);
-            Connection connection = callback.createConnection();
-            putConnectionMetaDataToCache(connection);
-            logInfo(ON_CREATE_CONNECTION_FORMAT, poolDesc, connection);
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+    protected void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
+        logInfo(ON_CREATE_CONNECTION_FORMAT, poolDesc, connection);
+    }
+
+    @Override
+    public void onCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+        if (exception == null)
+            return;
+
+        doOnCreateConnectionFailed(poolDesc, connDesc, exception, startTime);
+    }
+
+    protected void doOnCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+        logError(ON_CREATE_CONNECTION_FAILED_FORMAT, poolDesc, connDesc, exception);
     }
 
     @Override
     public void onReleaseConnection(String poolDesc, Connection connection) {
         if (connection != null) {
             doOnReleaseConnection(poolDesc, connection);
-            removeConnectionUrlFromCache(connection);
         }
     }
 
@@ -55,25 +59,33 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         logInfo(ON_ABANDON_CONNECTION_FORMAT, poolDesc, connection);
     }
 
-    private void logInfo(String format, String poolDesc) {
-        LOGGER.info(String.format(format, poolDesc));
-    }
-
     private void logInfo(String format, String poolDesc, Connection connection) {
-        String connDesc = connectionDesc(connection);
-        LOGGER.info(String.format(format, poolDesc, connDesc));
+        String connectionUrl = getConnectionUrl(connection);
+        String msg = String.format(format, poolDesc, connectionUrl);
+        LOGGER.info(msg);
     }
 
-    protected String connectionDesc(Connection connection) {
-        return metaDataManager.getConnectionUrl(connection);
+    private void logError(String format, String poolDesc, String connectionUrl, Throwable exception) {
+        String msg = String.format(format, poolDesc, connectionUrl);
+        LOGGER.error(msg, exception);
     }
 
-    private void putConnectionMetaDataToCache(Connection connection) {
-        metaDataManager.put(connection);
-    }
+    protected String getConnectionUrl(Connection connection) {
+        String url = "";
+        if (connection == null)
+            return url;
 
-    private void removeConnectionUrlFromCache(Connection connection) {
-        metaDataManager.remove(connection);
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            if (metaData == null)
+                return url;
+
+            url = LoggerHelper.getSimplifiedDBUrl(metaData.getURL());
+        } catch (Throwable e) {
+            return url;
+        }
+
+        return url;
     }
 
     public static void setILogger(ILogger logger) {

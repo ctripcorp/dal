@@ -6,7 +6,7 @@ public class CtripConfigManager implements ConfigManager {
 
     private static final String SERVER_CONFIG_FILE_NAME = "server.properties";
     private static final String WHITELIST_CONFIG_FILE_NAME = "whitelist.properties";
-    private static final String SNOWFLAKE_CONFIG_FILE_NAME = "snowflake.properties";
+    private static final String SNOWFLAKE_CONFIG_FILE_NAME = "snowflake.t";
 
     private ConfigProvider serverConfigProvider = new MapConfigProvider(SERVER_CONFIG_FILE_NAME);
     private ConfigProvider whitelistConfigProvider = new MapConfigProvider(WHITELIST_CONFIG_FILE_NAME);

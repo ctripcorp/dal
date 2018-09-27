@@ -5,15 +5,15 @@ import com.ctrip.framework.idgen.server.config.CtripConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class IdFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdFactory.class);
     private volatile static IdFactory factory = null;
 
-    private final ConcurrentMap<String, IdWorker> workerCache = new ConcurrentHashMap<>();
+    private final Map<String, IdWorker> workerCache = new ConcurrentHashMap<>();
     private final ConfigManager configManager = new CtripConfigManager();
 
     private IdFactory() {}

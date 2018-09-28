@@ -4,6 +4,7 @@ import com.ctrip.framework.idgen.client.common.Version;
 import com.ctrip.framework.idgen.client.constant.CatConstants;
 import com.ctrip.framework.idgen.client.generator.DynamicIdGenerator;
 import com.ctrip.framework.idgen.client.log.IdGenLogger;
+import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorFactory;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
 import com.dianping.cat.Cat;
@@ -12,7 +13,7 @@ import com.dianping.cat.message.Transaction;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class IdGeneratorFactory {
+public class IdGeneratorFactory implements IIdGeneratorFactory {
 
     private volatile static IdGeneratorFactory factory = null;
 
@@ -37,6 +38,7 @@ public class IdGeneratorFactory {
         IdGenLogger.registerVersion();
     }
 
+    @Override
     public IdGenerator getIdGenerator(String sequenceName) {
         return getOrCreateLongIdGenerator(sequenceName);
     }

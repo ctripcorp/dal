@@ -55,11 +55,14 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
     }
 
     public SnowflakeConfig getSnowflakeConfig(String sequenceName) {
-        SnowflakeConfig sequenceConfig = sequenceConfigRef.get().get(sequenceName.trim().toLowerCase());
-        if (null == sequenceConfig) {
-            sequenceConfig = globalConfigRef.get();
+        Map<String, SnowflakeConfig> sequenceConfigMap = sequenceConfigRef.get();
+        if (sequenceConfigMap != null) {
+            SnowflakeConfig sequenceConfig = sequenceConfigMap.get(sequenceName.trim().toLowerCase());
+            if (sequenceConfig != null) {
+                return sequenceConfig;
+            }
         }
-        return sequenceConfig;
+        return globalConfigRef.get();
     }
 
     private void compare(final SnowflakeConfig previous, final SnowflakeConfig updated, String name) {
@@ -86,12 +89,22 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
     private void compare(final Map<String, SnowflakeConfig> previous,
                          final Map<String, SnowflakeConfig> updated) {
         // Added and updated configs
-        for (Map.Entry<String, SnowflakeConfig> entry : updated.entrySet()) {
-            compare(previous.get(entry.getKey()), entry.getValue(), entry.getKey());
-        }
-        // Removed configs
-        for (Map.Entry<String, SnowflakeConfig> entry : previous.entrySet()) {
-            if (!updated.containsKey(entry.getKey())) {
+        if (previous != null && updated != null) {
+            for (Map.Entry<String, SnowflakeConfig> entry : updated.entrySet()) {
+                compare(previous.get(entry.getKey()), entry.getValue(), entry.getKey());
+            }
+            // Removed configs
+            for (Map.Entry<String, SnowflakeConfig> entry : previous.entrySet()) {
+                if (!updated.containsKey(entry.getKey())) {
+                    compare(entry.getValue(), null, entry.getKey());
+                }
+            }
+        } else if (updated != null) {
+            for (Map.Entry<String, SnowflakeConfig> entry : updated.entrySet()) {
+                compare(null, entry.getValue(), entry.getKey());
+            }
+        } else if (previous != null) {
+            for (Map.Entry<String, SnowflakeConfig> entry : previous.entrySet()) {
                 compare(entry.getValue(), null, entry.getKey());
             }
         }

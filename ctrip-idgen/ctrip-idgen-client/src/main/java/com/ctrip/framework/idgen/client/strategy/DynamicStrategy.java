@@ -18,6 +18,7 @@ public class DynamicStrategy extends AbstractStrategy {
     private long lastCount;
     private long lastTime;
     private volatile long qps = 0;
+    private AtomicLong qpsCheckTimes = new AtomicLong(0);
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
 
@@ -32,6 +33,7 @@ public class DynamicStrategy extends AbstractStrategy {
                     long now = System.currentTimeMillis();
                     long count = consumedCount.get();
                     qps = 1000 * (count - lastCount) / (now - lastTime);
+                    qpsCheckTimes.incrementAndGet();
                     lastCount = count;
                     lastTime = now;
                 }
@@ -43,6 +45,9 @@ public class DynamicStrategy extends AbstractStrategy {
 
     @Override
     public int getSuggestedRequestSize() {
+        if (qpsCheckTimes.get() == 0) {
+            return REQUEST_SIZE_DEFAULT_VALUE;
+        }
         long size = qps * PREFETCH_ENDURANCE_MILLIS / 1000;
         if (size > 0 && size <= REQUEST_SIZE_MAX_VALUE) {
             return (int) size;

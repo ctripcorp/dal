@@ -4,11 +4,10 @@ import com.ctrip.framework.idgen.server.exception.InvalidParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
-public class CtripSnowflakeConfig implements SnowflakeConfig {
+public class CtripSnowflakeConfig implements SnowflakeConfig<Map<String, String>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripSnowflakeConfig.class);
 
@@ -58,13 +57,13 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
 
     public void load(Map<String, String> properties) {
         loadDefault();
-        internalLoad(properties);
+        loadProperties(properties);
         timestampShift = workerIdBits + sequenceBits;
         workerIdShift = sequenceBits;
         maxTimestamp = ~(-1L << timestampBits);
         maxWorkerId = ~(-1L << workerIdBits);
         sequenceMask = ~(-1L << sequenceBits);
-        timestampReference = parseTimestampRef(idReference, dateReference);
+        timestampReference = parseTimestampReference(idReference, dateReference);
         validate();
     }
 
@@ -86,7 +85,7 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
         }
     }
 
-    private void internalLoad(Map<String, String> properties) {
+    private void loadProperties(Map<String, String> properties) {
         try {
             timestampBits = Integer.parseInt(properties.get(TIMESTAMP_BITS_PROPERTY_KEY));
         } catch (Exception e) {
@@ -108,10 +107,9 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
             LOGGER.info("[idReference] invalid, use default value: '{}'", idReference, e);
         }
         try {
-            String value = properties.get(DATE_REFERENCE_PROPERTY_KEY);
-            DateFormat format = new SimpleDateFormat(DATE_REFERENCE_FORMAT);
-            format.parse(value);
-            dateReference = value;
+            String dateString = properties.get(DATE_REFERENCE_PROPERTY_KEY);
+            new SimpleDateFormat(DATE_REFERENCE_FORMAT).parse(dateString);
+            dateReference = dateString;
         } catch (Exception e) {
             LOGGER.info("[dateReference] invalid, use default value: '{}'", dateReference, e);
         }
@@ -122,7 +120,7 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
         }
     }
 
-    private long parseTimestampRef(long idReference, String dateReference) {
+    private long parseTimestampReference(long idReference, String dateReference) {
         idReference = idReference < 0 ? 0 : idReference;
         long timestampRefToId = System.currentTimeMillis() - (idReference >> timestampShift) - 1;
 
@@ -130,7 +128,7 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
         try {
             timestampRefToDate = new SimpleDateFormat(DATE_REFERENCE_FORMAT).parse(dateReference).getTime();
         } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
+            LOGGER.warn("Unexpected exception", e);
         }
 
         return (timestampRefToId < timestampRefToDate) ? timestampRefToId : timestampRefToDate;
@@ -164,17 +162,17 @@ public class CtripSnowflakeConfig implements SnowflakeConfig {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("timestampBits: " + timestampBits + ", ");
-        builder.append("workerIdBits: " + workerIdBits + ", ");
-        builder.append("sequenceBits: " + sequenceBits + ", ");
-        builder.append("idReference: " + idReference + ", ");
-        builder.append("dateReference: " + dateReference + ", ");
-        builder.append("sequenceResetRange: " + sequenceResetRange);
+        builder.append(String.format("timestampBits: %d, ", timestampBits));
+        builder.append(String.format("workerIdBits: %d, ", workerIdBits));
+        builder.append(String.format("sequenceBits: %d, ", sequenceBits));
+        builder.append(String.format("idReference: %d, ", idReference));
+        builder.append(String.format("dateReference: %s, ", dateReference));
+        builder.append(String.format("sequenceResetRange: %d", sequenceResetRange));
         return builder.toString();
     }
 
     @Override
-    public boolean diffs(SnowflakeConfig another) {
+    public boolean differs(SnowflakeConfig another) {
         if (null == another) {
             return true;
         }

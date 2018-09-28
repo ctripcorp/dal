@@ -85,6 +85,7 @@ public class TableConfigProvider implements ConfigProvider<QTable> {
                         }
                         transaction.setStatus(Transaction.SUCCESS);
                     } catch (Exception e) {
+                        LOGGER.error("{} changed callback exception", configFileName, e);
                         transaction.setStatus(e);
                     } finally {
                         transaction.complete();

@@ -2,6 +2,9 @@ package com.ctrip.framework.idgen.server.service;
 
 import com.ctrip.framework.idgen.server.config.ConfigManager;
 import com.ctrip.framework.idgen.server.config.CtripConfigManager;
+import com.ctrip.framework.idgen.server.constant.CatConstants;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +38,12 @@ public class IdFactory {
 
     public IdWorker getOrCreateIdWorker(String sequenceName) {
         if (!configManager.getWhitelist().validate(sequenceName)) {
-            String msg = String.format("sequenceName '{}' invalid", sequenceName);
-            LOGGER.error(msg);
+            String msg = String.format("sequenceName '%s' invalid", sequenceName);
+            LOGGER.warn(msg);
             throw new IllegalArgumentException(msg);
         }
 
+        sequenceName = sequenceName.trim().toLowerCase();
         IdWorker worker = workerCache.get(sequenceName);
         if (null == worker) {
             synchronized (this) {
@@ -48,7 +52,10 @@ public class IdFactory {
                     worker = new CASSnowflakeWorker(sequenceName,
                             configManager.getSnowflakeConfig(sequenceName));
                     workerCache.put(sequenceName, worker);
-                    LOGGER.info("Created idWorker (sequenceName: {})", sequenceName);
+                    String msg = String.format("Created worker '%s'", sequenceName);
+                    LOGGER.info(msg);
+                    Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_WORKER_CREATED,
+                            Event.SUCCESS, msg);
                 }
             }
         }

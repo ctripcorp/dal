@@ -147,17 +147,17 @@ public class SnowflakeWorker extends AbstractSnowflakeWorker {
         return new IdSegment(idStart, idEnd);
     }
 
-    // for unit test
+    // For unit test
     protected void setLastTimestamp(long lastTimestamp) {
         this.lastTimestamp = lastTimestamp;
     }
 
-    // for unit test
+    // For unit test
     protected void setFallbackLocked(boolean fallbackLocked) {
         this.fallbackLocked = fallbackLocked;
     }
 
-    // for unit test
+    // For unit test
     protected void setSequence(long sequence) {
         this.sequence = sequence;
     }

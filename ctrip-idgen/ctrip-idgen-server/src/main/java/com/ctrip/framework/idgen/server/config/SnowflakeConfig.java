@@ -1,12 +1,10 @@
 package com.ctrip.framework.idgen.server.config;
 
-import java.util.Map;
+public interface SnowflakeConfig<T> {
 
-public interface SnowflakeConfig{
+    void load(T config);
 
-    void load(Map<String, String> properties);
-
-    boolean diffs(SnowflakeConfig another);
+    boolean differs(SnowflakeConfig another);
 
     long getWorkerId();
 

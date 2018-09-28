@@ -13,43 +13,24 @@ public class SnowflakeIdGenerateService implements IdGenerateService {
 
     @Override
     public IdGenResponseType fetchIdPool(IdGenRequestType request) {
-        if (null == request) {
-            throw new RuntimeException("request is empty");
-        }
-
-        String sequenceName = request.getSequenceName();
-        int requestSize = request.getRequestSize();
-        int timeoutMillis = request.getTimeoutMillis();
-
-        IdWorker idWorker = IdFactory.getInstance().getOrCreateIdWorker(sequenceName);
-        if (null == idWorker) {
-            throw new RuntimeException("Unknown exception");
-        }
-
-        List<IdSegment> idSegments = idWorker.generateIdPool(requestSize, timeoutMillis);
+        validate(request);
+        IdWorker idWorker = IdFactory.getInstance().getOrCreateIdWorker(request.getSequenceName());
+        List<IdSegment> idSegments = idWorker.generateIdPool(request.getRequestSize(), request.getTimeoutMillis());
         return new IdGenResponseType(idSegments);
     }
 
     @Override
     public IdGenResponseType fetchId(IdGenRequestType request) {
+        validate(request);
+        IdWorker idWorker = IdFactory.getInstance().getOrCreateIdWorker(request.getSequenceName());
+        List<IdSegment> idSegments = idWorker.generateIdPool(1, request.getTimeoutMillis());
+        return new IdGenResponseType(idSegments.get(0).getEnd());
+    }
+
+    private void validate(IdGenRequestType request) {
         if (null == request) {
-            throw new RuntimeException("request is empty");
+            throw new IllegalArgumentException("Null request");
         }
-
-        String sequenceName = request.getSequenceName();
-        int timeoutMillis = request.getTimeoutMillis();
-        request = new IdGenRequestType(sequenceName, 1, timeoutMillis);
-
-        IdGenResponseType response = fetchIdPool(request);
-        if (null == response) {
-            throw new RuntimeException("Unknown exception");
-        }
-        List<IdSegment> idSegments = response.getIdSegments();
-        if (null == idSegments || idSegments.isEmpty()) {
-            throw new RuntimeException("Unknown exception");
-        }
-
-        return new IdGenResponseType(idSegments.get(0).getStart());
     }
 
 }

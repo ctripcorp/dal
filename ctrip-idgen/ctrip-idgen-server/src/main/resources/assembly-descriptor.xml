@@ -8,7 +8,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <!--scripts -->
+        <!-- scripts -->
         <fileSet>
             <directory>src/main/resources/scripts</directory>
             <outputDirectory>scripts</outputDirectory>
@@ -34,7 +34,7 @@
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
-        <!--artifact -->
+        <!-- artifact -->
         <fileSet>
             <directory>target</directory>
             <outputDirectory>/</outputDirectory>

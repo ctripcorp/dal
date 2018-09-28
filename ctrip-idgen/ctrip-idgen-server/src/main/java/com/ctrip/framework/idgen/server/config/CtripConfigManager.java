@@ -1,5 +1,7 @@
 package com.ctrip.framework.idgen.server.config;
 
+import qunar.tc.qconfig.client.QTable;
+
 import java.util.Map;
 
 public class CtripConfigManager implements ConfigManager {
@@ -21,6 +23,7 @@ public class CtripConfigManager implements ConfigManager {
         snowflakeConfigLocator = new CtripSnowflakeConfigLocator(server);
         snowflakeConfigLocator.setup(snowflakeConfigProvider.getConfig());
         addWhitelistChangedListener();
+        addSnowflakeConfigChangedListener();
     }
 
     private void addWhitelistChangedListener() {
@@ -28,6 +31,15 @@ public class CtripConfigManager implements ConfigManager {
             @Override
             public void onConfigChanged(Map<String, String> updatedConfig) {
                 whitelist.load(updatedConfig);
+            }
+        });
+    }
+
+    private void addSnowflakeConfigChangedListener() {
+        snowflakeConfigProvider.addConfigChangedListener(new ConfigChangedListener<QTable>() {
+            @Override
+            public void onConfigChanged(QTable updatedConfig) {
+                snowflakeConfigLocator.setup(updatedConfig);
             }
         });
     }

@@ -16,7 +16,6 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripSnowflakeConfigLocator.class);
 
     private static final String GLOBAL_CONFIG_ROW_KEY = "idgen_global_config";
-    private static final String CAT_NAME_SNOWFLAKE_CONFIG_CHANGED = "SnowflakeConfig.changed";
 
     private AtomicReference<SnowflakeConfig> globalConfigRef = new AtomicReference<>();
     private AtomicReference<Map<String, SnowflakeConfig>> sequenceConfigRef = new AtomicReference<>();
@@ -33,7 +32,8 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
         } else {
             globalConfig.load(config.row(GLOBAL_CONFIG_ROW_KEY));
         }
-        globalConfigRef.set(globalConfig);
+        SnowflakeConfig previous = globalConfigRef.getAndSet(globalConfig);
+        compare(previous, globalConfig, GLOBAL_CONFIG_ROW_KEY);
 
         if (config != null) {
             Map<String, Map<String, String>> rowMap = config.rowMap();
@@ -43,12 +43,13 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
                     String key = entry.getKey();
                     Map<String, String> properties = entry.getValue();
                     if (key != null && !GLOBAL_CONFIG_ROW_KEY.equalsIgnoreCase(key.trim())) {
-                        SnowflakeConfig sequenceConfig = new CtripSnowflakeConfig(server, globalConfig);
+                        SnowflakeConfig sequenceConfig = new CtripSnowflakeConfig(server, globalConfigRef.get());
                         sequenceConfig.load(properties);
                         sequenceConfigMap.put(key.trim().toLowerCase(), sequenceConfig);
                     }
                 }
-                sequenceConfigRef.set(sequenceConfigMap);
+                Map<String, SnowflakeConfig> previousMap = sequenceConfigRef.getAndSet(sequenceConfigMap);
+                compare(previousMap, sequenceConfigMap);
             }
         }
     }
@@ -67,19 +68,33 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
         }
         StringBuilder builder = new StringBuilder();
         if (null == previous) {
-            builder.append(String.format("[Add config: %s] ", name));
+            builder.append(String.format("Added snowflake config '%s': ", name));
             builder.append(updated.toString());
         } else if (null == updated) {
-            builder.append(String.format("[Remove config: %s] ", name));
+            builder.append(String.format("Removed snowflake config '%s': ", name));
             builder.append(previous.toString());
-        } else if (updated.diffs(previous)) {
-            builder.append(String.format("[Update config: %s] ", name));
+        } else if (updated.differs(previous)) {
+            builder.append(String.format("Updated snowflake config '%s': ", name));
             builder.append(String.format("%s -> %s", previous.toString(), updated.toString()));
         }
         String message = builder.toString();
         LOGGER.info(message);
-        Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CAT_NAME_SNOWFLAKE_CONFIG_CHANGED,
+        Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_SNOWFLAKE_CONFIG_CHANGED,
                 Event.SUCCESS, message);
+    }
+
+    private void compare(final Map<String, SnowflakeConfig> previous,
+                         final Map<String, SnowflakeConfig> updated) {
+        // Added and updated configs
+        for (Map.Entry<String, SnowflakeConfig> entry : updated.entrySet()) {
+            compare(previous.get(entry.getKey()), entry.getValue(), entry.getKey());
+        }
+        // Removed configs
+        for (Map.Entry<String, SnowflakeConfig> entry : previous.entrySet()) {
+            if (!updated.containsKey(entry.getKey())) {
+                compare(entry.getValue(), null, entry.getKey());
+            }
+        }
     }
 
 }

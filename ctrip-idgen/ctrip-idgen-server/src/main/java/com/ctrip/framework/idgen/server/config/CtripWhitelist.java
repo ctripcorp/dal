@@ -6,10 +6,7 @@ import com.dianping.cat.message.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CtripWhitelist implements Whitelist<Map<String, String>> {
@@ -17,9 +14,8 @@ public class CtripWhitelist implements Whitelist<Map<String, String>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripWhitelist.class);
 
     private static final String WHITELIST_ENABLED_FLAG = "on";
-    private static final String CAT_NAME_WHITELIST_CHANGED = "Whitelist.changed";
 
-    private final AtomicReference<Set<String>> whitelist = new AtomicReference<>();
+    private AtomicReference<Set<String>> whitelist = new AtomicReference<>();
 
     public CtripWhitelist() {
         whitelist.set(new HashSet<String>());
@@ -29,63 +25,59 @@ public class CtripWhitelist implements Whitelist<Map<String, String>> {
         if (null == properties) {
             return;
         }
-
         Set<String> updated = new HashSet<>();
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (key != null && value != null && WHITELIST_ENABLED_FLAG.equalsIgnoreCase(value.trim())) {
-                updated.add(key.trim());
+                updated.add(key.trim().toLowerCase());
             }
         }
-
         Set<String> previous = whitelist.getAndSet(updated);
-
         compare(previous, updated);
     }
 
     public boolean validate(String name) {
-        if (null == name) {
-            return false;
-        }
-        return whitelist.get().contains(name.trim());
+        return whitelist.get().contains(name.trim().toLowerCase());
     }
 
     private void compare(final Set<String> previous, final Set<String> updated) {
-        // Parse removed list
-        Set<String> temp = new HashSet<>(previous);
-        temp.removeAll(updated);
-        if (!temp.isEmpty()) {
-            String removedList = setToString(temp, ", ");
-            LOGGER.info("Removed from whitelist: {}", removedList);
-            Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CAT_NAME_WHITELIST_CHANGED,
-                    Event.SUCCESS, removedList);
-        }
-        // Parse added list
-        temp.clear();
-        temp.addAll(updated);
+        // Added list
+        Set<String> temp = new HashSet<>(updated);
         temp.removeAll(previous);
         if (!temp.isEmpty()) {
-            String addedList = setToString(temp, ", ");
-            LOGGER.info("Added to whitelist: {}", addedList);
-            Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CAT_NAME_WHITELIST_CHANGED,
-                    Event.SUCCESS, addedList);
+            String addedList = join(temp, ", ");
+            String msg = String.format("Added whitelist: %s", addedList);
+            LOGGER.info(msg);
+            Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_WHITELIST_CHANGED,
+                    Event.SUCCESS, msg);
+        }
+        // Removed list
+        temp.clear();
+        temp.addAll(previous);
+        temp.removeAll(updated);
+        if (!temp.isEmpty()) {
+            String removedList = join(temp, ", ");
+            String msg = String.format("Removed whitelist: %s", removedList);
+            LOGGER.info(msg);
+            Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_WHITELIST_CHANGED,
+                    Event.SUCCESS, msg);
         }
     }
 
-    private String setToString(final Set<String> set, String separator) {
-        if (null == set || set.isEmpty()) {
+    private String join(final Collection<String> collection, String separator) {
+        if (null == collection) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        Iterator<String> iterator = set.iterator();
+        StringBuilder builder = new StringBuilder();
+        Iterator<String> iterator = collection.iterator();
         while (iterator.hasNext()) {
-            sb.append(iterator.next());
+            builder.append(iterator.next());
             if (iterator.hasNext()) {
-                sb.append(separator);
+                builder.append(separator);
             }
         }
-        return sb.toString();
+        return builder.toString();
     }
 
 }

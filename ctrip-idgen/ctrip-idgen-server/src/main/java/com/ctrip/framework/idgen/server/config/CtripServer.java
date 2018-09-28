@@ -14,8 +14,10 @@ public class CtripServer implements Server<Map<String, String>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripServer.class);
 
-    private static final String WORKERID_PROPERTY_KEY_FORMAT = "workerId_%s";
-    private static final String WORKERID_PROPERTY_KEY_PATTERN = "workerId_*";
+    private static final String WORKER_ID_PROPERTY_KEY_FORMAT = "workerId_%s";
+    private static final String WORKER_ID_PROPERTY_KEY_PATTERN_STRING = "workerId_*";
+    private static final Pattern WORKER_ID_PROPERTY_KEY_PATTERN =
+            Pattern.compile(WORKER_ID_PROPERTY_KEY_PATTERN_STRING);
 
     private long workerId;
 
@@ -41,7 +43,8 @@ public class CtripServer implements Server<Map<String, String>> {
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            if (key != null && value != null && Pattern.matches(WORKERID_PROPERTY_KEY_PATTERN, key.trim())) {
+            if (key != null && value != null &&
+                    WORKER_ID_PROPERTY_KEY_PATTERN.matcher(key.trim()).matches()) {
                 try {
                     long workerId = Long.parseLong(value.trim());
                     if (!workerIds.add(workerId)) {
@@ -65,7 +68,7 @@ public class CtripServer implements Server<Map<String, String>> {
     }
 
     private String getWorkerIdPropertyKey() {
-        return String.format(WORKERID_PROPERTY_KEY_FORMAT, getWorkerIdPropertyKeySuffix());
+        return String.format(WORKER_ID_PROPERTY_KEY_FORMAT, getWorkerIdPropertyKeySuffix());
     }
 
     private String getWorkerIdPropertyKeySuffix() {

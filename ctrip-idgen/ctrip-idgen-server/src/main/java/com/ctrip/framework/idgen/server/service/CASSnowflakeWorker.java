@@ -1,13 +1,21 @@
 package com.ctrip.framework.idgen.server.service;
 
 import com.ctrip.framework.idgen.server.config.SnowflakeConfig;
+import com.ctrip.framework.idgen.server.constant.CatConstants;
+import com.ctrip.framework.idgen.server.exception.ServiceTimeoutException;
+import com.ctrip.framework.idgen.server.exception.TimeRunOutException;
 import com.ctrip.platform.idgen.service.api.IdSegment;
+import com.dianping.cat.Cat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CASSnowflakeWorker.class);
 
     private final AtomicLong atomLastId = new AtomicLong(0);
 
@@ -19,12 +27,25 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
     public List<IdSegment> generateIdPool(int requestSize, int timeoutMillis) {
         long startNanoTime = getNanoTime();
         List<IdSegment> pool = new LinkedList<>();
-        while (requestSize > 0 && !isTimeout(startNanoTime, timeoutMillis)) {
-            IdSegment segment = getSegment(requestSize);
+        int remainedSize = requestSize;
+        while (remainedSize > 0 && !isTimeout(startNanoTime, timeoutMillis)) {
+            IdSegment segment = getSegment(remainedSize);
             if (segment != null) {
                 pool.add(segment);
-                requestSize -= segment.getEnd().longValue() - segment.getStart().longValue() + 1;
+                remainedSize -= segment.getEnd().longValue() - segment.getStart().longValue() + 1;
             }
+        }
+        if (remainedSize > 0) {
+            String msg = String.format("Generate id pool timeout within %d ms. " +
+                    "Request size: %d, fetch size: %d", timeoutMillis,
+                    requestSize, requestSize - remainedSize);
+            if (pool.isEmpty()) {
+                LOGGER.error(msg);
+                throw new ServiceTimeoutException(msg);
+            }
+            LOGGER.warn(msg);
+            Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_WORKER_TIMEOUT,
+                    CatConstants.CAT_STATUS_WARN, msg);
         }
         return pool;
     }
@@ -38,12 +59,17 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
         long timestamp = getTimestamp();
 
         if (timestamp > config.getMaxTimestamp()) {
-            return null;
+            // Timestamp runs out
+            throw new TimeRunOutException();
         }
 
         if (timestamp > lastTimestamp) {
             startSequence = getRandomSequence();
         } else {
+            if (timestamp < lastTimestamp) {
+                // Clock is moved backwards
+                LOGGER.error("Clock moved backwards");
+            }
             startSequence = (lastSequence + 1) & config.getSequenceMask();
             if (startSequence == 0) {
                 return null;

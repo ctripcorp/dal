@@ -97,7 +97,7 @@ public abstract class AbstractColumnShardStrategy extends AbstractRWSeparationSt
     
     /**
      * Locate table shard value
-     * @param tableName the rawTableName table name template without any sharding separator or shard id suffix 
+     * @param rawTableName table name template without any sharding separator or shard id suffix
      * @param value column or parameter value
      * @return table shard id
      */

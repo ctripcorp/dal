@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalCommand;
@@ -41,12 +42,16 @@ public abstract class ConnectionAction<T> {
     public Throwable e;
     public Set<String> tables;
     private static final String SWITCH_OFF = "SwitchOff";
+    public ShardingCategory shardingCategory;
 
     void populate(DalEventEnum operation, String sql, StatementParameters parameters, DalTaskContext dalTaskContext) {
         this.operation = operation;
         this.sql = sql;
         this.parameters = parameters;
-        this.tables = dalTaskContext == null ? null : dalTaskContext.getTables();
+        if (dalTaskContext != null) {
+            this.tables = dalTaskContext.getTables();
+            this.shardingCategory = dalTaskContext.getShardingCategory();
+        }
     }
 
     void populate(DalEventEnum operation, String sql, StatementParameters parameters) {
@@ -56,7 +61,10 @@ public abstract class ConnectionAction<T> {
     void populate(String[] sqls, DalTaskContext dalTaskContext) {
         this.operation = DalEventEnum.BATCH_UPDATE;
         this.sqls = sqls;
-        this.tables = dalTaskContext == null ? null : dalTaskContext.getTables();
+        if (dalTaskContext != null) {
+            this.tables = dalTaskContext.getTables();
+            this.shardingCategory = dalTaskContext.getShardingCategory();
+        }
     }
 
     void populate(String[] sqls) {
@@ -67,7 +75,10 @@ public abstract class ConnectionAction<T> {
         this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
         this.sql = sql;
         this.parametersList = parametersList;
-        this.tables = dalTaskContext == null ? null : dalTaskContext.getTables();
+        if (dalTaskContext != null) {
+            this.tables = dalTaskContext.getTables();
+            this.shardingCategory = dalTaskContext.getShardingCategory();
+        }
     }
 
     void populate(String sql, StatementParameters[] parametersList) {
@@ -88,7 +99,10 @@ public abstract class ConnectionAction<T> {
         this.operation = DalEventEnum.CALL;
         this.callString = callString;
         this.parameters = parameters;
-        this.tables = dalTaskContext == null ? null : dalTaskContext.getTables();
+        if (dalTaskContext != null) {
+            this.tables = dalTaskContext.getTables();
+            this.shardingCategory = dalTaskContext.getShardingCategory();
+        }
     }
 
     void populateSp(String callString, StatementParameters parameters) {
@@ -99,7 +113,10 @@ public abstract class ConnectionAction<T> {
         this.operation = DalEventEnum.BATCH_CALL;
         this.callString = callString;
         this.parametersList = parametersList;
-        this.tables = dalTaskContext == null ? null : dalTaskContext.getTables();
+        if (dalTaskContext != null) {
+            this.tables = dalTaskContext.getTables();
+            this.shardingCategory = dalTaskContext.getShardingCategory();
+        }
     }
 
     void populateSp(String callString, StatementParameters[] parametersList) {
@@ -136,7 +153,7 @@ public abstract class ConnectionAction<T> {
         entry.setClientVersion(Version.getVersion());
         entry.setSensitive(hints.is(DalHintEnum.sensitive));
         entry.setEvent(operation);
-
+        entry.setShardingCategory(shardingCategory);
         wrapSql();
         entry.setCallString(callString);
         if (sqls != null)

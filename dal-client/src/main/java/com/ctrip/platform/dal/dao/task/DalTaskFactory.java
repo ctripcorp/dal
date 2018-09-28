@@ -1,7 +1,10 @@
 package com.ctrip.platform.dal.dao.task;
 
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.configure.DalComponent;
+
+import java.util.List;
 
 /**
  * All tasks should be staeless
@@ -28,4 +31,12 @@ public interface DalTaskFactory extends DalComponent {
 	<T> DeleteSqlTask<T> createDeleteSqlTask(DalParser<T> parser);
 	
 	<T> UpdateSqlTask<T> createUpdateSqlTask(DalParser<T> parser);
+
+	<T> QuerySqlTask<T> createQuerySqlTask(DalParser<T> parser, DalResultSetExtractor<T> extractor);
+
+	<T> FreeSqlQueryTask<T> createFreeSqlQueryTask(String logicDbName, DalResultSetExtractor<T> extractor);
+
+	FreeSqlUpdateTask createFreeUpdateTask(String logicDbName);
+
+	MultipleQueryTask createMultipleQueryTask(String logicDbName, List<DalResultSetExtractor<?>> extractors);
 }

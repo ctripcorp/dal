@@ -36,8 +36,8 @@ public class SingleUpdateTask<T> extends TaskAdapter<T> implements SingleTask<T>
 			return 0;
 
 		String tableName = getRawTableName(hints, fields);
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		String updateSql = buildUpdateSql(quote(tableName), filted, hints);
 

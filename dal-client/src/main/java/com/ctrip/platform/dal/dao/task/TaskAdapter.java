@@ -1,10 +1,5 @@
 package com.ctrip.platform.dal.dao.task;
 
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.buildShardStr;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.locateTableShardId;
-
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
@@ -20,16 +15,15 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
-import com.ctrip.platform.dal.dao.DalQueryDao;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.UpdatableEntity;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.*;
 
-public class TaskAdapter<T> implements DaoTask<T> {
+public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 	public static final String GENERATED_KEY = "GENERATED_KEY";
 
 	//public static final String TMPL_SQL_FIND_BY = "SELECT * FROM %s WHERE %s";
@@ -42,12 +36,8 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected static final String TMPL_CALL = "{call %s(%s)}";
 
 	public static String findtmp = "SELECT * FROM %s WHERE %s";
-	
-	protected DalClient client;
-	protected DalQueryDao queryDao;
-	protected DalParser<T> parser;
 
-	protected String logicDbName;
+	protected DalParser<T> parser;
 	protected DatabaseCategory dbCategory;
 	protected String pkSql;
 	protected Set<String> pkColumns;
@@ -60,21 +50,16 @@ public class TaskAdapter<T> implements DaoTask<T> {
 	protected boolean hasVersion;
 	protected boolean isVersionUpdatable;
 	protected Set<String> defaultUpdateColumnNames;
-
-	
 	public boolean tableShardingEnabled;
 	protected String rawTableName;
 
 	public void initialize(DalParser<T> parser) {
-		this.client = DalClientFactory.getClient(parser.getDatabaseName());
+		super.initialize(parser.getDatabaseName());
 		this.parser = parser;
-		this.logicDbName = parser.getDatabaseName();
-		queryDao = new DalQueryDao(parser.getDatabaseName());
-
 		rawTableName = parser.getTableName();
 		tableShardingEnabled = isTableShardingEnabled(logicDbName, rawTableName);
+		initShardingCategory();
 		initColumnTypes();
-		
 		dbCategory = getDatabaseSet(logicDbName).getDatabaseCategory();
 		initDbSpecific();
 		initSensitiveColumns();
@@ -446,9 +431,16 @@ public class TaskAdapter<T> implements DaoTask<T> {
 		return quatedColumns;
 	}
 
-	public DefaultTaskContext createTaskContext() throws SQLException {
-		DefaultTaskContext taskContext = new DefaultTaskContext();
-		return taskContext;
+	@Override
+	public void initShardingCategory(){
+		if (shardingEnabled && tableShardingEnabled)
+			this.shardingCategory = ShardingCategory.DBTableShard;
+		else if (shardingEnabled)
+			this.shardingCategory = ShardingCategory.DBShard;
+		else if (tableShardingEnabled)
+			this.shardingCategory = ShardingCategory.TableShard;
+		else
+			this.shardingCategory = ShardingCategory.NoShard;
 	}
 
 }

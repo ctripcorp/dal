@@ -26,8 +26,8 @@ public class BatchDeleteTask<T> extends AbstractIntArrayBulkTask<T> {
 		}
 
 		String tableName = getRawTableName(hints);
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		String deleteSql = buildDeleteSql(quote(tableName));
 

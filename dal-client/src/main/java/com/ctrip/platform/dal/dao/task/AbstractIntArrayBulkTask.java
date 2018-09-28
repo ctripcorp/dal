@@ -11,10 +11,13 @@ public abstract class AbstractIntArrayBulkTask<T> extends TaskAdapter<T> impleme
 	public int[] getEmptyValue() {
 		return new int[0];
 	}
-	
+
 	@Override
-	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException{
-		return new BulkTaskContext<T>(rawPojos);
+	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws DalException {
+		BulkTaskContext context = new BulkTaskContext<T>(rawPojos);
+		if (context instanceof DalContextConfigure)
+			context.setShardingCategory(shardingCategory);
+		return context;
 	}
 	
 	@Override

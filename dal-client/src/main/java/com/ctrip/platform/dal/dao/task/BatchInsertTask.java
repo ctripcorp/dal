@@ -18,14 +18,15 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 		return new int[0];
 	}	
 
-	@Override
-	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
-		BulkTaskContext<T> context = new BulkTaskContext<T>(rawPojos);
-		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
-		context.setUnqualifiedColumns(unqualifiedColumns);
-
-		return context;
-	}
+//	@Override
+//	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
+//		BulkTaskContext<T> context = new BulkTaskContext<T>(rawPojos);
+//		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
+//		context.setUnqualifiedColumns(unqualifiedColumns);
+//		if (context instanceof DalContextConfigure)
+//			context.setShardingCategory(shardingCategory);
+//		return context;
+//	}
 
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, DalBulkTaskContext<T> taskContext) throws SQLException {
@@ -45,8 +46,10 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 		}
 
 		String tableName = getRawTableName(hints);
-		if(taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure)taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure) {
+			((DalContextConfigure) taskContext).addTables(tableName);
+			((DalContextConfigure) taskContext).setShardingCategory(shardingCategory);
+		}
 
 		String batchInsertSql = buildBatchInsertSql(hints, unqualifiedColumns, tableName);
 

@@ -17,8 +17,8 @@ public class SingleDeleteTask<T> extends TaskAdapter<T> implements SingleTask<T>
 		addParameters(parameters, fields, parser.getPrimaryKeyNames());
 
 		String tableName = getRawTableName(hints, parameters, fields);
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		String deleteSql = buildDeleteSql(quote(tableName));
 		if (client instanceof DalContextClient)

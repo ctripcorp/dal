@@ -6,7 +6,7 @@ import java.util.List;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
-public class MultipleQueryTask extends TaskAdapter implements SqlTask<List<?>>{
+public class MultipleQueryTask extends BaseTaskAdapter implements SqlTask<List<?>>{
 	private List<DalResultSetExtractor<?>> extractors;
 	
 	public MultipleQueryTask(List<DalResultSetExtractor<?>> extractors) {

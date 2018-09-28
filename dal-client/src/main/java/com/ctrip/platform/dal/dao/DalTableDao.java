@@ -14,7 +14,6 @@ import com.ctrip.platform.dal.dao.task.DalSingleTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalSqlTaskRequest;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
-import com.ctrip.platform.dal.dao.task.QuerySqlTask;
 import com.ctrip.platform.dal.dao.task.SingleTask;
 import com.ctrip.platform.dal.dao.task.TaskAdapter;
 import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
@@ -373,7 +372,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints) throws SQLException {
         DalSqlTaskRequest<K> request = new DalSqlTaskRequest<K>(logicDbName, populate(builder), hints,
-                new QuerySqlTask<>((DalResultSetExtractor<K>) builder.getResultExtractor(hints)),
+                DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser, (DalResultSetExtractor<K>) builder.getResultExtractor(hints)),
                 (ResultMerger<K>) builder.getResultMerger(hints));
 
         return executor.execute(hints, request, builder.isNullable());

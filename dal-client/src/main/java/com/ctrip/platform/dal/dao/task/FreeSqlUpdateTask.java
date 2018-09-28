@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 
-public class FreeSqlUpdateTask extends TaskAdapter implements SqlTask<Integer>{
+public class FreeSqlUpdateTask extends BaseTaskAdapter implements SqlTask<Integer>{
 	@Override
 	public Integer execute(DalClient client, String sql, StatementParameters parameters, DalHints hints, DalTaskContext taskContext) throws SQLException {
 		if (client instanceof DalContextClient)

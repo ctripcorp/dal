@@ -472,19 +472,25 @@ public class DbUtils {
                 }
             }
 
-            Matcher matcher = pattern.matcher(sql);
-            // Match C# parameters
-            if (matcher.find()) {
-                list = getActualParameters(sql, list);
+            Boolean containsQuestionMark = sql.indexOf("?") > -1;
+            String temp1 = sql;
+
+            if (!containsQuestionMark) {
+                Matcher matcher = pattern.matcher(sql);
+                // Match C# parameters
+                if (matcher.find()) {
+                    list = getActualParameters(sql, list);
+                }
+
+                Matcher m = inRegxPattern.matcher(sql);
+                String temp = sql;
+                while (m.find()) {
+                    temp = temp.replace(m.group(1), String.format("(?) "));
+                }
+                temp1 = temp.replaceAll(expression, "?");
             }
 
-            Matcher m = inRegxPattern.matcher(sql);
-            String temp = sql;
-            while (m.find()) {
-                temp = temp.replace(m.group(1), String.format("(?) "));
-            }
-            String replacedSql = temp.replaceAll(expression, "?");
-            preparedStatement = connection.prepareStatement(replacedSql);
+            preparedStatement = connection.prepareStatement(temp1);
             int index = 0;
             for (Parameter parameter : list) {
                 String name = parameter.getName();

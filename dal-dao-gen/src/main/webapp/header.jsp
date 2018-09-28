@@ -48,7 +48,7 @@
                     class="username">工具</span> <i class="glyphicon glyphicon-menu-down"> </i>
             </a> <span class="dropdown-arrow dropdown-arrow-inverse" style="margin-top: 1px"></span>
                 <ul class="dropdown-menu dropdown-inverse" style="margin-top: 8px !important">
-                    <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">Java DAL 参数解密</a>
+                    <li><a href="javascript:;" onclick="window.open('${decryptionPage}', '_blank');">DAL SQL参数解密</a>
                     </li>
                     <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">DAL 版本统计</a></li>
                     <li><a href="javascript:;" onclick="window.open('${accessPage}', '_blank');">DAL 接入趋势统计</a></li>

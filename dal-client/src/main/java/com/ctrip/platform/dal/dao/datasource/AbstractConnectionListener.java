@@ -1,37 +1,47 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.sql.Connection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.sql.DatabaseMetaData;
 
 public abstract class AbstractConnectionListener implements ConnectionListener {
-    private static Logger LOGGER = LoggerFactory.getLogger(AbstractConnectionListener.class);
-    private String ON_CREATE_CONNECTION_FORMAT = "[onCreateConnection]{}, {}";
-    private String ON_RELEASE_CONNECTION_FORMAT = "[onReleaseConnection]{}, {}";
-    private String ON_ABANDON_CONNECTION_FORMAT = "[onAbandonConnection]{}, {}";
-    private Map<String, String> connectionUrlCache = new ConcurrentHashMap<>();
+    protected static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    private String ON_CREATE_CONNECTION_FORMAT = "[onCreateConnection]%s, %s";
+    private String ON_CREATE_CONNECTION_FAILED_FORMAT = "[onCreateConnectionFailed]%s, %s";
+    private String ON_RELEASE_CONNECTION_FORMAT = "[onReleaseConnection]%s, %s";
+    private String ON_ABANDON_CONNECTION_FORMAT = "[onAbandonConnection]%s, %s";
 
     @Override
-    public void onCreateConnection(String poolDesc, Connection connection) {
-        if (connection != null) {
-            putConnectionUrlToCache(connection);
-            doOnCreateConnection(poolDesc, connection);
-        }
+    public void onCreateConnection(String poolDesc, Connection connection, long startTime) {
+        if (connection == null)
+            return;
+
+        doOnCreateConnection(poolDesc, connection, startTime);
     }
 
-    protected void doOnCreateConnection(String poolDesc, Connection connection) {
+    protected void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
         logInfo(ON_CREATE_CONNECTION_FORMAT, poolDesc, connection);
+    }
+
+    @Override
+    public void onCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+        if (exception == null)
+            return;
+
+        doOnCreateConnectionFailed(poolDesc, connDesc, exception, startTime);
+    }
+
+    protected void doOnCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+        logError(ON_CREATE_CONNECTION_FAILED_FORMAT, poolDesc, connDesc, exception);
     }
 
     @Override
     public void onReleaseConnection(String poolDesc, Connection connection) {
         if (connection != null) {
             doOnReleaseConnection(poolDesc, connection);
-            removeConnectionUrlFromCache(connection);
         }
     }
 
@@ -50,69 +60,36 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
     }
 
     private void logInfo(String format, String poolDesc, Connection connection) {
-        String connDesc = connectionDesc(connection);
-        LOGGER.info(format, poolDesc, connDesc);
+        String connectionUrl = getConnectionUrl(connection);
+        String msg = String.format(format, poolDesc, connectionUrl);
+        LOGGER.info(msg);
     }
 
-    protected String connectionDesc(Connection connection) {
-        if (connection == null) {
-            return "null";
-        }
-
-        return getConnectionUrlFromCache(connection);
-        /*
-         * try { url = connection.getMetaData().getURL(); url = simpleUrl(url); } catch (SQLException e) { url =
-         * getConnectionUrlFromCache(connection); if (url == null) return "null"; }
-         */
+    private void logError(String format, String poolDesc, String connectionUrl, Throwable exception) {
+        String msg = String.format(format, poolDesc, connectionUrl);
+        LOGGER.error(msg, exception);
     }
 
-    private String simpleUrl(String url) {
-        if (url == null || url.isEmpty()) {
-            return "";
-        }
+    protected String getConnectionUrl(Connection connection) {
+        String url = "";
+        if (connection == null)
+            return url;
 
-        int index = url.indexOf("?");
-        if (index > -1) {
-            return url.substring(0, index);
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            if (metaData == null)
+                return url;
+
+            url = LoggerHelper.getSimplifiedDBUrl(metaData.getURL());
+        } catch (Throwable e) {
+            return url;
         }
 
         return url;
     }
 
-    private void putConnectionUrlToCache(Connection connection) {
-        if (connection == null)
-            return;
-
-        try {
-            String connectionId = connection.toString();
-            String url = LoggerHelper.getSimplifiedDBUrl(connection.getMetaData().getURL());
-            if (url == null || url.isEmpty())
-                return;
-
-            connectionUrlCache.put(connectionId, url);
-            LOGGER.info(String.format("%s put to url cache.", connectionId));
-        } catch (Throwable e) {
-        }
-    }
-
-    private void removeConnectionUrlFromCache(Connection connection) {
-        if (connection == null)
-            return;
-
-        try {
-            String connectionId = connection.toString();
-            connectionUrlCache.remove(connectionId);
-            LOGGER.info(String.format("%s removed from url cache.", connectionId));
-        } catch (Throwable e) {
-        }
-    }
-
-    private String getConnectionUrlFromCache(Connection connection) {
-        if (connection == null)
-            return "null";
-
-        String connectionId = connection.toString();
-        return connectionUrlCache.get(connectionId);
+    public static void setILogger(ILogger logger) {
+        AbstractConnectionListener.LOGGER = logger;
     }
 
 }

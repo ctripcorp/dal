@@ -73,7 +73,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
     }
 
     public String propertiesToString(Properties properties) {
-        String result = "";
+        String result = null;
         try {
             if (properties != null && !properties.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
@@ -88,7 +88,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
     }
 
     public String mapToString(Map<String, String> map) {
-        String result = "";
+        String result = null;
         try {
             if (map != null && map.size() > 0) {
                 StringBuilder sb = new StringBuilder();

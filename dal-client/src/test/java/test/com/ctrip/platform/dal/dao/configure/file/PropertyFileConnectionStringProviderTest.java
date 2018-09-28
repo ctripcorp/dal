@@ -1,6 +1,7 @@
 package test.com.ctrip.platform.dal.dao.configure.file;
 
-import com.ctrip.platform.dal.dao.configure.ConnectionString;
+
+import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.file.PropertyFileConnectionStringProvider;
 import org.junit.Assert;
@@ -19,8 +20,8 @@ public class PropertyFileConnectionStringProviderTest implements DataSourceConfi
         PropertyFileConnectionStringProvider provider = new PropertyFileConnectionStringProvider();
         Set<String> names = new HashSet<>();
         names.add(NAME);
-        Map<String, ConnectionString> map = provider.getConnectionStrings(names);
-        ConnectionString connectionString = map.get(NAME);
+        Map<String, DalConnectionString> map = provider.getConnectionStrings(names);
+        DalConnectionString connectionString = map.get(NAME);
         String cs = connectionString.getIPConnectionString();
         String[] array = cs.split(COMMA);
 

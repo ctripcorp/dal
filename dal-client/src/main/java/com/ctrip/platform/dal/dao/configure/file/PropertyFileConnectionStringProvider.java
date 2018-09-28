@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure.file;
 
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
+import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 
@@ -40,11 +41,11 @@ public class PropertyFileConnectionStringProvider implements ConnectionStringPro
     }
 
     @Override
-    public Map<String, ConnectionString> getConnectionStrings(Set<String> names) throws Exception {
+    public Map<String, DalConnectionString> getConnectionStrings(Set<String> names) throws Exception {
         if (names == null || names.isEmpty())
             return null;
 
-        Map<String, ConnectionString> map = new HashMap<>();
+        Map<String, DalConnectionString> map = new HashMap<>();
         for (String name : names) {
             StringBuilder sb = new StringBuilder();
             sb.append(properties.getProperty(name + USER_NAME));
@@ -54,7 +55,7 @@ public class PropertyFileConnectionStringProvider implements ConnectionStringPro
             sb.append(properties.getProperty(name + CONNECTION_URL));
             sb.append(COMMA);
             sb.append(properties.getProperty(name + DRIVER_CLASS_NAME));
-            ConnectionString connectionString = new ConnectionString(name, sb.toString(), sb.toString());
+            DalConnectionString connectionString = new ConnectionString(name, sb.toString(), sb.toString());
             map.put(name, connectionString);
         }
 

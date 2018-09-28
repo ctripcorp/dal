@@ -6,7 +6,8 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-    SlaveFreshnessScannerMysqlTest.class,
+        SlaveFreshnessScannerMysqlTest.class,
+        DataSourceConfigureLocatorTest.class
 })
 public class AllTest {
 

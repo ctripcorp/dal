@@ -12,7 +12,7 @@ public class DataSourceConfigure
     private String name;
     private Properties properties = new Properties();
     private String version;
-    private ConnectionString connectionString;
+    private DalConnectionString connectionString;
 
     public DataSourceConfigure() {}
 
@@ -96,11 +96,11 @@ public class DataSourceConfigure
         this.version = version;
     }
 
-    public ConnectionString getConnectionString() {
+    public DalConnectionString getConnectionString() {
         return connectionString;
     }
 
-    public void setConnectionString(ConnectionString connectionString) {
+    public void setConnectionString(DalConnectionString connectionString) {
         this.connectionString = connectionString;
     }
 
@@ -144,7 +144,7 @@ public class DataSourceConfigure
 
     public String toConnectionUrl() {
         return String.format("{ConnectionUrl:%s,Version:%s,CRC:%s}", getConnectionUrl(),
-                (version == null ? "" : version), getCRC());
+                version, getCRC());
     }
 
     public Properties toProperties() {
@@ -176,7 +176,7 @@ public class DataSourceConfigure
 
     // Rule: username concat password,and then take 8 characters of md5 code from beginning
     private String getCRC() {
-        String crc = "";
+        String crc = null;
         String userName = getUserName();
         String pass = getPassword();
         try {

@@ -1,17 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.dao.task.BulkTask;
-import com.ctrip.platform.dal.dao.task.DalTaskFactory;
-import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import com.ctrip.platform.dal.dao.task.*;
 
 import static com.ctrip.platform.dal.dao.task.DefaultTaskFactory.getDbCategory;
 
-import com.ctrip.platform.dal.dao.task.DeleteSqlTask;
-import com.ctrip.platform.dal.dao.task.SingleTask;
-import com.ctrip.platform.dal.dao.task.UpdateSqlTask;
 import com.ctrip.platform.dal.dao.vi.ConfigBeanFactory;
 
 /**
@@ -173,5 +169,25 @@ public class CtripTaskFactory implements DalTaskFactory {
     @Override
     public <T> UpdateSqlTask<T> createUpdateSqlTask(DalParser<T> parser) {
         return defaultFactory.createUpdateSqlTask(parser);
+    }
+
+    @Override
+    public <T> QuerySqlTask<T> createQuerySqlTask(DalParser<T> parser, DalResultSetExtractor<T> extractor) {
+        return defaultFactory.createQuerySqlTask(parser, extractor);
+    }
+
+    @Override
+    public <T> FreeSqlQueryTask<T> createFreeSqlQueryTask(String logicDbName, DalResultSetExtractor<T> extractor) {
+        return defaultFactory.createFreeSqlQueryTask(logicDbName, extractor);
+    }
+
+    @Override
+    public FreeSqlUpdateTask createFreeUpdateTask(String logicDbName) {
+        return defaultFactory.createFreeUpdateTask(logicDbName);
+    }
+
+    @Override
+    public MultipleQueryTask createMultipleQueryTask(String logicDbName, List<DalResultSetExtractor<?>> extractors) {
+        return defaultFactory.createMultipleQueryTask(logicDbName, extractors);
     }
 }

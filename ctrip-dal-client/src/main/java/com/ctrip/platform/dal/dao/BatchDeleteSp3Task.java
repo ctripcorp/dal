@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import com.ctrip.platform.dal.dao.task.DalBulkTaskContext;
-import com.ctrip.platform.dal.dao.task.DalTableNameConfigure;
+import com.ctrip.platform.dal.dao.task.DalContextConfigure;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 
@@ -31,8 +31,8 @@ public class BatchDeleteSp3Task<T> extends CtripSp3Task<T> {
 			parametersList[i++] = parameters;
 		}
 
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		if (client instanceof DalContextClient)
 			return ((DalContextClient) client).batchCall(callSql, parametersList, hints, taskContext);

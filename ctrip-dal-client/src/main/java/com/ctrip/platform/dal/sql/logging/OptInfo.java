@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.sql.logging;
 
 
+import com.ctrip.platform.dal.common.enums.ShardingCategory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,12 +24,16 @@ public class OptInfo {
 	private static final String OPTTYPE = "OperationType";
 	private String operationType;
 
-	public OptInfo(String databaseSet, String version, String databaseType, String operationType, String tables) {
+	private static final String SHARDINGCATEGORY = "ShardingCatrgory";
+	private String shardingCatrgory;
+
+	public OptInfo(String databaseSet, String version, String databaseType, String operationType, String tables, String shardingCategory) {
 		this.databaseSet = databaseSet;
 		this.version = "Java " + version;
 		this.databaseType = databaseType;
 		this.operationType = operationType;
 		this.tables = tables;
+		this.shardingCatrgory = shardingCategory;
 	}
 	
 	public String getDatabaseSet() {
@@ -56,6 +62,7 @@ public class OptInfo {
 		tag.put(OPTTYPE, this.operationType);
 		tag.put(CLIENT, this.version);
 		tag.put(TABLES, this.tables);
+		tag.put(SHARDINGCATEGORY, this.shardingCatrgory);
 		return tag;
 	}
 }

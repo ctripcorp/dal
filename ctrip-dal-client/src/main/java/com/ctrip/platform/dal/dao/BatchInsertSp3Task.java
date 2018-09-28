@@ -29,8 +29,8 @@ public class BatchInsertSp3Task<T> extends CtripSp3Task<T> {
 			parametersList[i++] = parameters;
 		}
 
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		if (client instanceof DalContextClient)
 			return ((DalContextClient) client).batchCall(callSql, parametersList, hints, taskContext);

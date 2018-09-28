@@ -28,6 +28,7 @@ public class Metrics {
 	private static String FAIL = "fail";
 	private static final String NULL_TABLES="NullTables";
 	private static final String EMPTY_TABLES="EmptyTables";
+	private static final String NUll_SHARDCATEGORY="NullShardCategory";
 
 	public static void report(MarkDownInfo info){
 
@@ -74,8 +75,9 @@ public class Metrics {
 		String tableString = getTableString(entry);
 		String optType = entry.getEvent().name();
 		String version = entry.getClientVersion();
+		String shardCategory = entry.getShardingCategory() == null ? NUll_SHARDCATEGORY : entry.getShardingCategory().toString();
 //		arch.dal.rw.count
-		report(database, version, entry.isMaster() ? "Master" : "Slave", optType, tableString);
+		report(database, version, entry.isMaster() ? "Master" : "Slave", optType, tableString, shardCategory);
 
 //		arch.dal.sql.count & arch.dal.sql.cost
 		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(), entry.getSqlSize(), status, database, tableString, optType);
@@ -83,8 +85,8 @@ public class Metrics {
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}
 
-	private static void report(String databaseSet, String version, String databaseType, String operationType, String tableString) {
-		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType, tableString);
+	private static void report(String databaseSet, String version, String databaseType, String operationType, String tableString ,String shardingCategory) {
+		OptInfo info = new OptInfo(databaseSet, version, databaseType, operationType, tableString, shardingCategory);
 		metric.log(OptInfo.KEY, 1, info.toTag());
 	}
 

@@ -38,8 +38,8 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         int length = daoPojos.size();
         int[] result = new int[length];
 
-        if (taskContext instanceof DalTableNameConfigure)
-            ((DalTableNameConfigure) taskContext).addTables(tableName);
+        if (taskContext instanceof DalContextConfigure)
+            ((DalContextConfigure) taskContext).addTables(tableName);
 
         if (client instanceof DalContextClient) {
             Map<String, ?> map = ((DalContextClient) client).call(execSql, parameters, newHints, taskContext);

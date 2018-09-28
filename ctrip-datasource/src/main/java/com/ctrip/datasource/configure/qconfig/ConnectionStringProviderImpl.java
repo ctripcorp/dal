@@ -98,11 +98,15 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     String errorMessage=String.format(exceptionMessageFormat,name);
                     Cat.logError(errorMessage,e);
                     configures.put(name,new InvalidConnectionString(name,new DalException(errorMessage,e)));
+                    transaction.setStatus(e);
+                    transaction.complete();
                     continue;
                 } catch (Throwable e) {
                     String errorMessage=String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT,name);
                     Cat.logError(errorMessage,e);
                     configures.put(name,new InvalidConnectionString(name,new DalException(errorMessage,e)));
+                    transaction.setStatus(e);
+                    transaction.complete();
                     continue;
                 }
 

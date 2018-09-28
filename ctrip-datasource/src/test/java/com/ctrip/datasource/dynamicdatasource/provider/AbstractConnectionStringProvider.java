@@ -1,6 +1,7 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
+import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 
@@ -16,13 +17,13 @@ public class AbstractConnectionStringProvider implements ConnectionStringProvide
             "Server=DST56614;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
 
     @Override
-    public Map<String, ConnectionString> getConnectionStrings(Set<String> names) throws Exception {
+    public Map<String, DalConnectionString> getConnectionStrings(Set<String> names) throws Exception {
         if (names == null || names.size() == 0)
             return null;
 
-        Map<String, ConnectionString> map = new HashMap<>();
+        Map<String, DalConnectionString> map = new HashMap<>();
         for (String name : names) {
-            ConnectionString connectionString =
+            DalConnectionString connectionString =
                     new ConnectionString(name, connectionString1, connectionString1Failover);
             map.put(name, connectionString);
         }

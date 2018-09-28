@@ -1,11 +1,6 @@
 package com.ctrip.datasource.configure;
 
-import com.ctrip.platform.dal.dao.configure.ConnectionString;
-import com.ctrip.platform.dal.dao.configure.ConnectionStringConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
-import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -19,7 +14,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
     private static final String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
 
     @Override
-    public DataSourceConfigure mergeDataSourceConfigure(ConnectionString connectionString) {
+    public DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString) {
         ConnectionStringConfigure connectionStringConfigure = getConnectionStringConfigure(connectionString);
         if (connectionStringConfigure == null)
             return null;

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import org.junit.After;
 import org.junit.Assert;
@@ -73,9 +74,13 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-            Assert.fail();
         } catch (Exception e) {
+            Assert.fail();
         }
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        Assert.assertEquals(3, locator.getAllConnectionStrings().size());
+        Assert.assertEquals(2, locator.getSuccessfulConnectionStrings().size());
+        Assert.assertEquals(1, locator.getFailedConnectionStrings().size());
     }
 
     @Test
@@ -198,11 +203,11 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-
-            Assert.fail();
         } catch (Exception e) {
-            e.printStackTrace();
+            Assert.fail();
         }
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        Assert.assertEquals(2, locator.getFailedConnectionStrings().size());
     }
 
     @Test

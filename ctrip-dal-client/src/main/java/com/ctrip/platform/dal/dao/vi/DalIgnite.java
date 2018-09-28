@@ -5,22 +5,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.titan.LogEntry;
+import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import qunar.tc.qconfig.client.TypedConfig;
 
 import com.ctrip.framework.vi.IgniteManager.SimpleLogger;
 import com.ctrip.framework.vi.annotation.Ignite;
 import com.ctrip.framework.vi.ignite.AbstractCtripIgnitePlugin;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.configure.CtripDalConfig;
-import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
 
 @Ignite(id = "fx.dal.ignite", type = Ignite.PluginType.Component)
 public class DalIgnite extends AbstractCtripIgnitePlugin {
     private Map<String, String> configs = new HashMap<>();
-
+    private final String HELP_URL = "http://conf.ctripcorp.com/pages/viewpage.action?pageId=143877535";
     @Override
     public Map<String, String> coreConfigs() {
         return configs;
@@ -28,24 +27,24 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
     @Override
     public String helpUrl() {
-        return "http://conf.ctripcorp.com/display/FRAM/Java+Client+FAQ";
+        return HELP_URL;
     }
 
     @Override
     public boolean warmUP(SimpleLogger logger) {
         if (!isDalConfigExist(logger)) {
             logger.warn("Can not find dal.config from either local or remote.");
-            logger.warn("This maybe normal case for those who upgrade from older ctrip-dal-cleint.");
-            logger.warn(
-                    "If app only use dal data source, please change dependecy from ctrip-dal-client to ctrip-datasource.");
-            logger.warn(
-                    "Refer to http://conf.ctripcorp.com/pages/viewpage.action?pageId=136437942 for more infomation");
+            logger.warn("This maybe normal case for those who upgrade from older ctrip-dal-client.");
+            logger.warn("If app only use dal data source, please change dependency from ctrip-dal-client to ctrip-datasource.");
+            logger.warn(String.format("Refer to %s for more information",HELP_URL));
             return true;
         }
 
         try {
             logger.info("Initialize Dal Factory");
             DalClientFactory.initClientFactory();
+
+            validateConnectionStrings();
 
             if (DataSourceConfigureManager.config != null)
                 configs.putAll(DataSourceConfigureManager.config);
@@ -67,7 +66,7 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
             log(logger);
             logger.error("Fail", e);
-            logger.info("Please check http://conf.ctripcorp.com/pages/viewpage.action?pageId=60842135");
+            logger.info(String.format("Please check %s",HELP_URL));
             return false;
         }
     }
@@ -123,4 +122,18 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
         }
     }
 
+    private void validateConnectionStrings() throws Exception {
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        Map<String, DalConnectionString> failedConnectionStringMap = locator.getFailedConnectionStrings();
+        if (failedConnectionStringMap == null || failedConnectionStringMap.isEmpty())
+            return;
+
+        StringBuilder errorMsg = new StringBuilder();
+        for (Map.Entry<String, DalConnectionString> entry : failedConnectionStringMap.entrySet()) {
+            if (entry.getValue() instanceof DalInvalidConnectionString) {
+                errorMsg.append(String.format("[TitanKey: %s, ErrorMessage: %s] ", entry.getKey(), ((DalInvalidConnectionString) entry.getValue()).getConnectionStringException().getMessage()));
+            }
+        }
+        throw new DalRuntimeException(errorMsg.toString());
+    }
 }

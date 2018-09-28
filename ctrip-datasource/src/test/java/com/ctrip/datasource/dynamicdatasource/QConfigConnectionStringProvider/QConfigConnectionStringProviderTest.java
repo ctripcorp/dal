@@ -1,8 +1,7 @@
 package com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider;
 
 import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
-import com.ctrip.platform.dal.dao.configure.ConnectionString;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import org.apache.commons.lang.time.StopWatch;
 import org.junit.Assert;
@@ -10,6 +9,7 @@ import org.junit.Test;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
 
+import javax.validation.constraints.AssertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -164,13 +164,14 @@ public class QConfigConnectionStringProviderTest {
         String name = "non_exist";
         Set<String> names = new HashSet<>();
         names.add(name);
+        Map<String, DalConnectionString> connectionStrings=null;
         try {
-            Map<String, ConnectionString> connectionStrings = connectionStringProvider.getConnectionStrings(names);
-            Assert.fail();
+            connectionStrings = connectionStringProvider.getConnectionStrings(names);
         } catch (Throwable e) {
-            Assert.assertTrue(e.getMessage().equals(
-                    "Titan key non_exist does not exist or has been disabled, please remove it from your Dal.config or code."));
+            Assert.fail();
         }
+        Assert.assertEquals(1, connectionStrings.size());
+        Assert.assertTrue(connectionStrings.get("non_exist") instanceof DalInvalidConnectionString);
     }
 
 }

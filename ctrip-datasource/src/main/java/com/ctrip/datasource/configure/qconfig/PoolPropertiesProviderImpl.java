@@ -82,11 +82,11 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
                 if (map == null || map.isEmpty())
                     throw new RuntimeException("Parameter for onLoad event is null.");
 
-                Boolean firstTime = isFirstTime.get().booleanValue();
+               /* Boolean firstTime = isFirstTime.get().booleanValue();
                 if (firstTime) {
                     isFirstTime.compareAndSet(true, false);
                     return;
-                }
+                }*/
 
                 boolean dynamicEnabled = dynamicPoolPropertiesEnabled(map);
                 if (!dynamicEnabled) {

@@ -7,14 +7,7 @@ import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.datasource.common.enums.SourceType;
-import com.ctrip.platform.dal.dao.configure.ConnectionString;
-import com.ctrip.platform.dal.dao.configure.ConnectionStringConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
@@ -30,11 +23,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -130,7 +119,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         dataSourceConfigureLocator.setIPDomainStatus(status);
 
         // set connection strings
-        Map<String, ConnectionString> connectionStrings = getConnectionStrings(names, sourceType);
+        Map<String, DalConnectionString> connectionStrings = getConnectionStrings(names, sourceType);
         dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
 
         // set pool properties
@@ -138,7 +127,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         dataSourceConfigureLocator.setPoolProperties(poolProperties);
 
         if (sourceType == SourceType.Remote) {
-            dataSourceConfigureLocator.addDataSourceConfigureKeySet(names);
             addConnectionStringChangedListeners(names);
 
             boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get().booleanValue();
@@ -182,8 +170,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return set;
     }
 
-    private Map<String, ConnectionString> getConnectionStrings(Set<String> names, SourceType sourceType) {
-        Map<String, ConnectionString> connectionStrings = null;
+    private Map<String, DalConnectionString> getConnectionStrings(Set<String> names, SourceType sourceType) {
+        Map<String, DalConnectionString> connectionStrings = null;
         if (isDebug) {
             connectionStrings = new HashMap<>();
             if (names == null || names.isEmpty())
@@ -204,7 +192,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         } else {
             try {
                 connectionStrings = connectionStringProvider.getConnectionStrings(names);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 error("Fail to setup Titan Provider", e);
                 throw new RuntimeException(e);
             }
@@ -213,7 +202,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return connectionStrings;
     }
 
-    public DataSourceConfigure mergeDataSourceConfig(ConnectionString connectionString) {
+    public DataSourceConfigure mergeDataSourceConfig(DalConnectionString connectionString) {
         return dataSourceConfigureLocator.mergeDataSourceConfigure(connectionString);
     }
 
@@ -228,7 +217,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
             connectionStringProvider.addConnectionStringChangedListener(name, new ConnectionStringChanged() {
                 @Override
-                public void onChanged(ConnectionString connectionString) {
+                public void onChanged(DalConnectionString connectionString) {
                     addConnectionStringNotifyTask(name, connectionString);
                 }
             });
@@ -237,7 +226,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         }
     }
 
-    private void addConnectionStringNotifyTask(String name, ConnectionString connectionString) {
+    private void addConnectionStringNotifyTask(String name, DalConnectionString connectionString) {
         String ipConnectionString = connectionString.getIPConnectionString();
         if (ipConnectionString == null || ipConnectionString.isEmpty())
             throw new RuntimeException("IP connection string is null.");
@@ -248,12 +237,25 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
 
-        // validate version
         ConnectionStringConfigure connectionStringConfigure = connectionString.getIPConnectionStringConfigure();
         String newVersion = connectionStringConfigure.getVersion();
         DataSourceConfigure oldConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
-        String oldVersion = oldConfigure.getVersion();
 
+        String oldVersion = null;
+        if (oldConfigure != null)
+            oldVersion = oldConfigure.getVersion();
+
+        // set connection string
+        DalConnectionString oldConnectionString = dataSourceConfigureLocator.setConnectionString(keyName,connectionString);
+        if (connectionString.equals(oldConnectionString)) {
+            String msg = String.format("New connection string of %s equals to old connection string.", name);
+            String eventName = String.format("%s:%s", CONNECTIONSTRING_REFRESHCONNECTIONSTRING, name);
+            Cat.logEvent(DAL, eventName, Message.SUCCESS, msg);
+            LOGGER.info(msg);
+            return;
+        }
+
+        // validate version
         if (newVersion != null && oldVersion != null) {
             if (newVersion.equals(oldVersion)) {
                 String msg = String.format("New version of %s equals to old version.", name);
@@ -270,11 +272,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         String encryptedNewIPConnectionString = encrypter.desEncrypt(ipConnectionString);
         String encryptedNewDomainConnectionString = encrypter.desEncrypt(domainConnectionString);
 
-        ConnectionString oldConnectionString = oldConfigure.getConnectionString();
-        ConnectionStringConfigure oldIPConfigure = oldConnectionString.getIPConnectionStringConfigure();
-        ConnectionStringConfigure oldDomainConfigure = oldConnectionString.getDomainConnectionStringConfigure();
-        Cat.logEvent(DAL, OLD_NORMAL_CONNECTIONURL, Message.SUCCESS, oldIPConfigure.getConnectionUrl());
-        Cat.logEvent(DAL, OLD_FAILOVER_CONNECTIONURL, Message.SUCCESS, oldDomainConfigure.getConnectionUrl());
+        ConnectionStringConfigure oldIPConfigure = null;
+        ConnectionStringConfigure oldDomainConfigure = null;
+        String oldNormalUrl = null;
+        String oldFailoverUrl = null;
+        if (oldConnectionString != null) {
+            oldIPConfigure = oldConnectionString.getIPConnectionStringConfigure();
+            oldDomainConfigure = oldConnectionString.getDomainConnectionStringConfigure();
+            oldNormalUrl=oldIPConfigure.getConnectionUrl();
+            oldFailoverUrl=oldDomainConfigure.getConnectionUrl();
+        }
+
+        Cat.logEvent(DAL, OLD_NORMAL_CONNECTIONURL, Message.SUCCESS, oldNormalUrl);
+        Cat.logEvent(DAL, OLD_FAILOVER_CONNECTIONURL, Message.SUCCESS, oldFailoverUrl);
 
         ConnectionStringConfigure newIPConfigure = connectionString.getIPConnectionStringConfigure();
         ConnectionStringConfigure newDomainConfigure = connectionString.getDomainConnectionStringConfigure();
@@ -284,10 +294,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         Cat.logEvent(DAL, ENCRYPTED_NEW_FAILOVER_CONNECTIONSTRING, Message.SUCCESS, encryptedNewDomainConnectionString);
         t.setStatus(Transaction.SUCCESS);
 
-        // set connection string
-        Map<String, ConnectionString> map = new HashMap<>();
-        map.put(keyName, connectionString);
-        dataSourceConfigureLocator.setConnectionStrings(map);
 
         DataSourceConfigure newConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(keyName, newConfigure, oldConfigure);
@@ -318,19 +324,33 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         });
     }
 
+    private boolean isPoolPropertiesChanged(Properties oldProperties, Properties newProperties) {
+        if (oldProperties != null && newProperties != null)
+            if (oldProperties.equals(newProperties))
+                return false;
+        return true;
+    }
+
     private void addPoolPropertiesNotifyTask(PoolPropertiesConfigure configure) {
         Transaction t = Cat.newTransaction(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES);
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
         Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         try {
-            Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
+            Set<String> names = dataSourceConfigureLocator.getSuccessfulConnectionStrings().keySet();
             Map<String, DataSourceConfigure> oldConfigures = getDataSourceConfigureByNames(names);
 
             // set pool properties
-            dataSourceConfigureLocator.setPoolProperties(configure);
+            Properties oldOriginalProperties = dataSourceConfigureLocator.setPoolProperties(configure);
             t.addData(SET_PROPERTIES);
             Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
+
+            if (!isPoolPropertiesChanged(oldOriginalProperties, configure.getProperties())) {
+                String msg = String.format("New pool properties equal to old pool properties.");
+                Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
+                LOGGER.info(msg);
+                return;
+            }
 
             Map<String, DataSourceConfigure> newConfigures = getDataSourceConfigureByNames(names);
             Map<String, DataSourceConfigureChangeEvent> events =
@@ -374,7 +394,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         try {
-            Set<String> names = dataSourceConfigureLocator.getDataSourceConfigureKeySet();
+            Set<String> names = dataSourceConfigureLocator.getSuccessfulConnectionStrings().keySet();
             Map<String, DataSourceConfigure> oldConfigures = getDataSourceConfigureByNames(names);
 
             // set ip domain status
@@ -470,17 +490,21 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             try {
                 // old configure
                 DataSourceConfigure oldConfigure = event.getOldDataSourceConfigure();
-                String oldConnectionUrl = oldConfigure.toConnectionUrl();
-
+                String oldConnectionUrl = null;
+                Properties oldPoolProperties = null;
+                if (oldConfigure != null) {
+                    oldConnectionUrl = oldConfigure.toConnectionUrl();
+                    oldPoolProperties = oldConfigure.toProperties();
+                }
                 // log
                 transaction.addData(CONNECTIONSTRING_OLD_CONNECTIONURL, String.format("%s:%s", name, oldConnectionUrl));
                 Cat.logEvent(DAL, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", CONNECTIONSTRING_OLD_CONNECTIONURL, name, oldConnectionUrl));
                 transaction.addData(DATASOURCECONFIGURE_OLD_CONFIGURE, String.format("%s:%s", name,
-                        poolPropertiesHelper.propertiesToString(oldConfigure.toProperties())));
+                        poolPropertiesHelper.propertiesToString(oldPoolProperties)));
                 Cat.logEvent(DAL, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCECONFIGURE_OLD_CONFIGURE, name,
-                                poolPropertiesHelper.propertiesToString(oldConfigure.toProperties())));
+                                poolPropertiesHelper.propertiesToString(oldPoolProperties)));
 
                 // new configure
                 DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
@@ -562,5 +586,4 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         config = null;
         startUpLog.clear();
     }
-
 }

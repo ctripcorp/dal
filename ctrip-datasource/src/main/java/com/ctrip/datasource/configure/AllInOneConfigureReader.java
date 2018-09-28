@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
+import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.slf4j.Logger;
@@ -35,15 +36,15 @@ public class AllInOneConfigureReader {
 
     private static final String CLASSPATH_LOCATION = "$classpath";
 
-    public Map<String, ConnectionString> getConnectionStrings(Set<String> names, boolean useLocal,
-            String databaseConfigLocation) {
+    public Map<String, DalConnectionString> getConnectionStrings(Set<String> names, boolean useLocal,
+                                                                 String databaseConfigLocation) {
         String location = getAllInOneConfigLocation(databaseConfigLocation);
-        Map<String, ConnectionString> config = parseDBAllInOneConfig(location, names, useLocal);
+        Map<String, DalConnectionString> config = parseDBAllInOneConfig(location, names, useLocal);
         validate(names, config);
         return config;
     }
 
-    private void validate(Set<String> names, Map<String, ConnectionString> config) {
+    private void validate(Set<String> names, Map<String, DalConnectionString> config) {
         if (config == null)
             throw new RuntimeException("Cannot load config");
 
@@ -94,9 +95,9 @@ public class AllInOneConfigureReader {
         return location;
     }
 
-    private Map<String, ConnectionString> parseDBAllInOneConfig(String absolutePath, Set<String> names,
+    private Map<String, DalConnectionString> parseDBAllInOneConfig(String absolutePath, Set<String> names,
             boolean useLocal) {
-        Map<String, ConnectionString> connectionStrings = new HashMap<>();
+        Map<String, DalConnectionString> connectionStrings = new HashMap<>();
         FileInputStream in = null;
 
         try {
@@ -130,7 +131,7 @@ public class AllInOneConfigureReader {
                     continue;
 
                 String cs = getAttribute(databaseEntry, DATABASE_ENTRY_CONNECTIONSTRING);
-                ConnectionString connectionString = new ConnectionString(keyName, cs, cs);
+                DalConnectionString connectionString = new ConnectionString(keyName, cs, cs);
                 connectionStrings.put(keyName, connectionString);
             }
 

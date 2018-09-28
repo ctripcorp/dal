@@ -1,6 +1,5 @@
 package com.ctrip.datasource;
 
-import com.ctrip.datasource.configure.DataSourceConfigureLocatorTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import org.junit.runner.RunWith;
@@ -32,7 +31,7 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
   		ExecutorInterceptorTest.class,
   		StatementHandlerInterceptorTest.class,
   		StatementPrepareHandlerInterceptorTest.class,
-		DataSourceConfigureLocatorTest.class,
+//		DataSourceConfigureLocatorTest.class,
 		DalDataSourceFactoryTest.class,
 		QConfigConnectionStringProviderTest.class,
 		DalPropertiesChangedTest.class

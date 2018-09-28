@@ -11,6 +11,6 @@ public interface CatConstants {
     String CAT_NAME_WORKER_CREATED = "Worker.created";
     String CAT_NAME_WORKER_TIMEOUT = "Worker.timeout";
 
-    String CAT_STATUS_WARN = "warn";
+    String CAT_STATUS_WARN = "Warn";
 
 }

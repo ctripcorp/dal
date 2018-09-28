@@ -1,7 +1,7 @@
 package com.ctrip.framework.idgen.client.generator;
 
 import com.ctrip.framework.idgen.client.constant.CatConstants;
-import com.ctrip.framework.idgen.client.exception.IdGenTimeoutException;
+import com.ctrip.framework.idgen.client.exception.ClientTimeoutException;
 import com.ctrip.framework.idgen.client.log.IdGenLogger;
 import com.ctrip.framework.idgen.client.service.ServiceManager;
 import com.ctrip.framework.idgen.client.strategy.AbstractStrategy;
@@ -23,9 +23,11 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     private static final int PREFETCH_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
     private static final int CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE = 1500;
-    private static final long FETCH_ID_RETRY_BASE_INTERVAL = 1;
+    private static final long FETCH_ID_RETRY_BASE_INTERVAL = 10;
 
     private final String sequenceName;
+    private final String nextIdCatName;
+    private final String prefetchCatName;
     private final Deque<LongIdGenerator> staticGeneratorQueue = new ConcurrentLinkedDeque<>();
     private final PrefetchStrategy strategy;
     private AtomicBoolean isFetching = new AtomicBoolean(false);
@@ -37,6 +39,8 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     public DynamicIdGenerator(String sequenceName, PrefetchStrategy strategy) {
         this.sequenceName = sequenceName;
+        this.nextIdCatName = "nextId:" + sequenceName;
+        this.prefetchCatName = "prefetch:" + sequenceName;
         this.strategy = (strategy != null) ? strategy : new DynamicStrategy();
     }
 
@@ -49,8 +53,8 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     @Override
     public Long nextId() {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_DYNAMIC_GENERATOR, "nextId");
-        logVersionAndSequenceName();
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_DYNAMIC_GENERATOR, nextIdCatName);
+        logVersion();
         try {
             Long id = simpleNextId();
             if (null == id) {
@@ -101,7 +105,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
         IdGenLogger.logSizeEvent(CatConstants.TYPE_ACTIVE_FETCH_RETRIES, retries);
         if (null == id) {
-            throw new IdGenTimeoutException(String.format("IdGen client timeout after %d retries", retries));
+            throw new ClientTimeoutException(String.format("IdGen client timeout after %d retries", retries));
         }
 
         return id;
@@ -125,7 +129,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     protected boolean prefetchIfNecessary() {
         if (!isFetching.get() && strategy.checkIfNeedPrefetch() && isFetching.compareAndSet(false, true)) {
-            final ForkedTransaction transaction = Cat.newForkedTransaction(CatConstants.TYPE_DYNAMIC_GENERATOR, "prefetch");
+            final ForkedTransaction transaction = Cat.newForkedTransaction(CatConstants.TYPE_DYNAMIC_GENERATOR, prefetchCatName);
             prefetchExecutor.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -149,7 +153,6 @@ public class DynamicIdGenerator implements LongIdGenerator {
     }
 
     private void logPoolStatistics() {
-        logVersionAndSequenceName();
         if (strategy instanceof AbstractStrategy) {
             String remainedSize = String.valueOf(((AbstractStrategy) strategy).getRemainedSize());
             IdGenLogger.logEvent(CatConstants.TYPE_REMAINED_POOL_SIZE, remainedSize);
@@ -160,9 +163,8 @@ public class DynamicIdGenerator implements LongIdGenerator {
         }
     }
 
-    private void logVersionAndSequenceName() {
+    private void logVersion() {
         IdGenLogger.logVersion();
-        IdGenLogger.logEvent(CatConstants.TYPE_SEQUENCE_NAME, sequenceName);
     }
 
     private long getMilliTime() {

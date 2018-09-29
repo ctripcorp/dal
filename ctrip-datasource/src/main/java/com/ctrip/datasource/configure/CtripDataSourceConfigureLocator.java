@@ -1,7 +1,7 @@
 package com.ctrip.datasource.configure;
 
-import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.configure.ConnectionStringConfigure;
+import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
@@ -39,7 +39,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
     }
 
     private DataSourceConfigure _mergeDataSourceConfigure(ConnectionStringConfigure connectionStringConfigure,
-            ConnectionString connectionString, String name, String logName) throws DalException {
+            DalConnectionString connectionString, String name, String logName) throws DalException {
         PropertiesWrapper wrapper = propertiesWrapperReference.get();
         if (wrapper == null)
             throw new DalException(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE);

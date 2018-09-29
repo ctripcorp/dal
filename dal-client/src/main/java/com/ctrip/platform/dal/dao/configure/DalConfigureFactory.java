@@ -219,10 +219,14 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node) {
-        String className = getAttribute(node, FACTORY);
-        if (className != null) {
-            return idGenFactoryManager.getOrCreateFactory(className);
-        } else {
+        try {
+            String className = getAttribute(node, FACTORY);
+            if (className != null) {
+                return idGenFactoryManager.getOrCreateFactory(className);
+            } else {
+                return idGenFactoryManager.getOrCreateDefaultFactory();
+            }
+        } catch (NullPointerException e) {
             return idGenFactoryManager.getOrCreateDefaultFactory();
         }
     }

@@ -6,7 +6,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.NullIdGenerator;
-import sun.rmi.rmic.iiop.IDLGenerator;
 
 import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet;
 

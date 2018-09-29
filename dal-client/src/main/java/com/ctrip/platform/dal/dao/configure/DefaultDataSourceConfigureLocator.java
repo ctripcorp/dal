@@ -2,12 +2,12 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -15,20 +15,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLocator {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSourceConfigureLocator.class);
-    private static final String SEPARATOR = "\\.";
+    protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+
     protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
-    private Map<String, ConnectionString> connectionStrings = new ConcurrentHashMap<>();
+    private Map<String, DalConnectionString> connectionStrings = new ConcurrentHashMap<>();
     protected AtomicReference<PropertiesWrapper> propertiesWrapperReference = new AtomicReference<>();
     private AtomicReference<IPDomainStatus> ipDomainStatusReference = new AtomicReference<>(IPDomainStatus.IP);
 
     // user datasource.xml pool properties configure
     private Map<String, PoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
-
     private Map<String, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
 
-    private Set<String> dataSourceConfigureKeySet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    private static final String SEPARATOR = "\\.";
+    protected static final String DAL = "DAL";
+    private static final String DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE =
+            "An error occured while getting datasource properties.";
+    private static final String APP_OVERRIDE_RESULT = "App override result: ";
+    private static final String OVERRIDE_RESULT = " override result: ";
+    private static final String DATASOURCE_XML_OVERRIDE_RESULT = "datasource.xml override result: ";
+    private static final String CONNECTION_URL = "connection url:";
+
+    private String FINAL_OVERRIDE_RESULT_FORMAT = "Final override result: %s";
+    protected String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
 
     @Override
     public void addUserPoolPropertiesConfigure(String name, PoolPropertiesConfigure configure) {
@@ -57,12 +66,15 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
             return configure;
         }
 
-        ConnectionString connectionString = connectionStrings.get(name);
+        DalConnectionString connectionString = connectionStrings.get(name);
+
+        if (connectionString instanceof DalInvalidConnectionString)
+            return configure;
+
         configure = mergeDataSourceConfigure(connectionString);
         if (configure != null) {
             dataSourceConfiguresCache.put(name, configure);
         }
-
         return configure;
     }
 
@@ -71,18 +83,12 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     @Override
-    public void addDataSourceConfigureKeySet(Set<String> names) {
-        if (names == null || names.isEmpty())
-            return;
-
-        for (String name : names) {
-            dataSourceConfigureKeySet.add(name);
-        }
-    }
-
-    @Override
     public Set<String> getDataSourceConfigureKeySet() {
-        return dataSourceConfigureKeySet;
+        Set<String> keySet = new HashSet<>();
+        for (Map.Entry<String, DalConnectionString> entry : connectionStrings.entrySet()) {
+            keySet.add(entry.getKey());
+        }
+        return keySet;
     }
 
     @Override
@@ -97,11 +103,11 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     @Override
-    public void setConnectionStrings(Map<String, ConnectionString> map) {
+    public void setConnectionStrings(Map<String, DalConnectionString> map) {
         if (map == null || map.isEmpty())
             return;
 
-        for (Map.Entry<String, ConnectionString> entry : map.entrySet()) {
+        for (Map.Entry<String, DalConnectionString> entry : map.entrySet()) {
             String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
             connectionStrings.put(keyName, entry.getValue());
             dataSourceConfiguresCache.remove(keyName);
@@ -109,19 +115,55 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     @Override
-    public void setPoolProperties(PoolPropertiesConfigure configure) {
+    public DalConnectionString setConnectionString(String name, DalConnectionString connectionString) {
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
+        DalConnectionString oldConnectionString = connectionStrings.put(keyName, connectionString);
+        dataSourceConfiguresCache.remove(keyName);
+        return (oldConnectionString instanceof DalInvalidConnectionString) ? null : oldConnectionString;
+    }
+
+    public Map<String, DalConnectionString> getAllConnectionStrings() {
+        Map<String, DalConnectionString> copyConnectionStrings = new ConcurrentHashMap<>(connectionStrings);
+        return copyConnectionStrings;
+    }
+
+    public Map<String, DalConnectionString> getSuccessfulConnectionStrings() {
+        Map<String, DalConnectionString> successfulConnectionStrings = new ConcurrentHashMap<>();
+        for (Map.Entry<String, DalConnectionString> entry : connectionStrings.entrySet()) {
+            if (!(entry.getValue() instanceof DalInvalidConnectionString))
+                successfulConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()), entry.getValue());
+        }
+        return successfulConnectionStrings;
+    }
+
+    public Map<String, DalConnectionString> getFailedConnectionStrings() {
+        Map<String, DalConnectionString> failedConnectionStrings = new ConcurrentHashMap<>();
+        for (Map.Entry<String, DalConnectionString> entry : connectionStrings.entrySet()) {
+            if (entry.getValue() instanceof DalInvalidConnectionString)
+                failedConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()), entry.getValue());
+        }
+        return failedConnectionStrings;
+    }
+
+    @Override
+    public Properties setPoolProperties(PoolPropertiesConfigure configure) {
+        PropertiesWrapper oldWrapper = propertiesWrapperReference.get();
+        Properties oldOriginalProperties =
+                oldWrapper == null ? null : deepCopyProperties(oldWrapper.getOriginalProperties());
         if (configure == null)
-            return;
+            return oldOriginalProperties;
 
         Properties properties = configure.getProperties();
-        Properties originalProperties = new Properties(properties);
+        Properties newOriginalProperties = deepCopyProperties(properties);
         Properties appProperties = new Properties(); // app level
         Map<String, Properties> datasourceProperties = new HashMap<>(); // datasource level
         processProperties(properties, appProperties, datasourceProperties);
 
-        PropertiesWrapper wrapper = new PropertiesWrapper(originalProperties, appProperties, datasourceProperties);
+        PropertiesWrapper wrapper = new PropertiesWrapper(newOriginalProperties, appProperties, datasourceProperties);
         propertiesWrapperReference.set(wrapper);
         removeDataSourceConfigures();
+
+        return oldOriginalProperties;
     }
 
     private void processProperties(Properties properties, Properties appProperties,
@@ -146,49 +188,21 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     @Override
-    public DataSourceConfigure mergeDataSourceConfigure(ConnectionString connectionString) {
+    public DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString) {
         ConnectionStringConfigure connectionStringConfigure = getConnectionStringConfigure(connectionString);
         if (connectionStringConfigure == null)
             return null;
 
         String name = connectionStringConfigure.getName();
+        String logName = String.format(POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT, name);
         DataSourceConfigure c = cloneDataSourceConfigure(null);
 
         try {
             PropertiesWrapper wrapper = propertiesWrapperReference.get();
-            // override app-level properties
-            Properties appProperties = wrapper.getAppProperties();
-            if (appProperties != null && !appProperties.isEmpty()) {
-                overrideProperties(c.getProperties(), appProperties);
-                String log = "App 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
-                LOGGER.info(log);
-            }
+            if (wrapper == null)
+                return c;
 
-            // override datasource-level properties
-            Map<String, Properties> datasourceProperties = wrapper.getDatasourceProperties();
-            if (datasourceProperties != null && !datasourceProperties.isEmpty()) {
-                if (name != null) {
-                    Properties p1 = datasourceProperties.get(name);
-                    if (p1 != null && !p1.isEmpty()) {
-                        overrideProperties(c.getProperties(), p1);
-                        String log = name + " 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
-                        LOGGER.info(log);
-                    } else {
-                        String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
-                        possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
-                        Properties p2 = datasourceProperties.get(possibleName);
-                        if (p2 != null && !p2.isEmpty()) {
-                            overrideProperties(c.getProperties(), p2);
-                            String log = possibleName + " 覆盖结果："
-                                    + poolPropertiesHelper.propertiesToString(c.getProperties());
-                            LOGGER.info(log);
-                        }
-                    }
-                }
-            }
-
-            // override config from connection settings,datasource.xml
-            overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
+            overrideProperties(connectionStringConfigure, connectionString, wrapper, c, name, logName);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -196,34 +210,106 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return c;
     }
 
-    protected void overrideConnectionStringConfigureAndDataSourceXml(
-            ConnectionStringConfigure connectionStringConfigure, DataSourceConfigure c,
-            ConnectionString connectionString, String name) {
-        if (connectionStringConfigure != null) {
-            // merge connection string configure
-            mergeConnectionStringConfigure(c, connectionStringConfigure);
-            c.setConnectionString(connectionString);
-            String log = "connection url:" + connectionStringConfigure.getConnectionUrl();
-            LOGGER.info(log);
+    protected void overrideProperties(ConnectionStringConfigure connectionStringConfigure,
+            DalConnectionString connectionString, PropertiesWrapper wrapper, DataSourceConfigure c, String name,
+            String logName) {
+        // override app-level properties
+        overrideAppLevelProperties(wrapper, c, logName);
 
-            // override datasource.xml
-            if (name != null) {
-                PoolPropertiesConfigure dataSourceXml = getUserPoolPropertiesConfigure(name);
-                if (dataSourceXml != null) {
-                    overrideDataSourceXml(c, dataSourceXml);
-                } else {
-                    String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
-                    possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
-                    PoolPropertiesConfigure ppc = getUserPoolPropertiesConfigure(possibleName);
-                    if (ppc != null) {
-                        overrideDataSourceXml(c, ppc);
-                    }
-                }
+        // override datasource-level properties
+        overrideDataSourceLevelProperties(wrapper, c, name, logName);
+
+        // override config from connection settings,datasource.xml
+        overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
+
+        LOGGER.logEvent(DAL, logName,
+                String.format(FINAL_OVERRIDE_RESULT_FORMAT, poolPropertiesHelper.propertiesToString(c.toProperties())));
+    }
+
+    private void overrideAppLevelProperties(PropertiesWrapper wrapper, DataSourceConfigure c, String logName) {
+        Properties appProperties = wrapper.getAppProperties();
+        if (appProperties == null || appProperties.isEmpty())
+            return;
+
+        overrideProperties(c.getProperties(), appProperties);
+        String log = APP_OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+        LOGGER.info(log);
+        LOGGER.logEvent(DAL, logName, log);
+    }
+
+    private void overrideDataSourceLevelProperties(PropertiesWrapper wrapper, DataSourceConfigure c, String name,
+            String logName) {
+        if (name == null || name.isEmpty())
+            return;
+
+        Map<String, Properties> datasourceProperties = wrapper.getDatasourceProperties();
+        if (datasourceProperties == null || datasourceProperties.isEmpty())
+            return;
+
+        _overrideDataSourceLevelProperties(datasourceProperties, c, name, logName);
+    }
+
+    private void _overrideDataSourceLevelProperties(Map<String, Properties> datasourceProperties, DataSourceConfigure c,
+            String name, String logName) {
+        Properties p1 = datasourceProperties.get(name);
+        if (p1 != null && !p1.isEmpty()) {
+            overrideProperties(c.getProperties(), p1);
+            String log = name + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+            LOGGER.info(log);
+            LOGGER.logEvent(DAL, logName, log);
+        } else {
+            String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
+            possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
+            Properties p2 = datasourceProperties.get(possibleName);
+            if (p2 != null && !p2.isEmpty()) {
+                overrideProperties(c.getProperties(), p2);
+                String log =
+                        possibleName + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+                LOGGER.info(log);
+                LOGGER.logEvent(DAL, logName, log);
             }
         }
     }
 
-    protected ConnectionStringConfigure getConnectionStringConfigure(ConnectionString connectionString) {
+    protected void overrideConnectionStringConfigureAndDataSourceXml(
+            ConnectionStringConfigure connectionStringConfigure, DataSourceConfigure c,
+            DalConnectionString connectionString, String name) {
+        if (connectionStringConfigure == null)
+            return;
+
+        // merge connection string configure
+        mergeConnectionStringConfigure(c, connectionStringConfigure, connectionString);
+
+        // override datasource.xml
+        overrideDataSourceXml(name, c);
+    }
+
+    private void mergeConnectionStringConfigure(DataSourceConfigure c,
+            ConnectionStringConfigure connectionStringConfigure, DalConnectionString connectionString) {
+        mergeConnectionStringConfigure(c, connectionStringConfigure);
+        c.setConnectionString(connectionString);
+        String log = CONNECTION_URL + connectionStringConfigure.getConnectionUrl();
+        LOGGER.info(log);
+    }
+
+    private void overrideDataSourceXml(String name, DataSourceConfigure c) {
+        if (name == null || name.isEmpty())
+            return;
+
+        PoolPropertiesConfigure dataSourceXml = getUserPoolPropertiesConfigure(name);
+        if (dataSourceXml != null) {
+            overrideDataSourceXml(c, dataSourceXml);
+        } else {
+            String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
+            possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
+            PoolPropertiesConfigure ppc = getUserPoolPropertiesConfigure(possibleName);
+            if (ppc != null) {
+                overrideDataSourceXml(c, ppc);
+            }
+        }
+    }
+
+    protected ConnectionStringConfigure getConnectionStringConfigure(DalConnectionString connectionString) {
         if (connectionString == null)
             return null;
 
@@ -239,11 +325,9 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     protected void overrideDataSourceXml(DataSourceConfigure c, PoolPropertiesConfigure dataSourceXml) {
-        String originalXml = String.format("datasource.xml 属性：%s",
-                poolPropertiesHelper.propertiesToString(dataSourceXml.getProperties()));
         overrideProperties(c.getProperties(), dataSourceXml.getProperties());
-        String xmlLog = "datasource.xml 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.toProperties());
-        LOGGER.info(xmlLog);
+        String log = DATASOURCE_XML_OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.toProperties());
+        LOGGER.info(log);
     }
 
     protected DataSourceConfigure cloneDataSourceConfigure(DataSourceConfigure configure) {
@@ -275,12 +359,53 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         if (dataSourceConfigure == null || connectionStringConfigure == null)
             return;
 
-        dataSourceConfigure.setName(connectionStringConfigure.getName());
-        dataSourceConfigure.setConnectionUrl(connectionStringConfigure.getConnectionUrl());
-        dataSourceConfigure.setUserName(connectionStringConfigure.getUserName());
-        dataSourceConfigure.setPassword(connectionStringConfigure.getPassword());
-        dataSourceConfigure.setDriverClass(connectionStringConfigure.getDriverClass());
-        dataSourceConfigure.setVersion(connectionStringConfigure.getVersion());
+        setName(dataSourceConfigure, connectionStringConfigure);
+        setConnectionUrl(dataSourceConfigure, connectionStringConfigure);
+        setUserName(dataSourceConfigure, connectionStringConfigure);
+        setPassword(dataSourceConfigure, connectionStringConfigure);
+        setDriverClass(dataSourceConfigure, connectionStringConfigure);
+        setVersion(dataSourceConfigure, connectionStringConfigure);
+    }
+
+    private void setName(DataSourceConfigure dataSourceConfigure, ConnectionStringConfigure connectionStringConfigure) {
+        String name = connectionStringConfigure.getName();
+        if (name != null)
+            dataSourceConfigure.setName(name);
+    }
+
+    private void setConnectionUrl(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String connectionUrl = connectionStringConfigure.getConnectionUrl();
+        if (connectionUrl != null)
+            dataSourceConfigure.setConnectionUrl(connectionUrl);
+    }
+
+    private void setUserName(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String userName = connectionStringConfigure.getUserName();
+        if (userName != null)
+            dataSourceConfigure.setUserName(userName);
+    }
+
+    private void setPassword(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String password = connectionStringConfigure.getPassword();
+        if (password != null)
+            dataSourceConfigure.setPassword(password);
+    }
+
+    private void setDriverClass(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String driverClass = connectionStringConfigure.getDriverClass();
+        if (driverClass != null)
+            dataSourceConfigure.setDriverClass(driverClass);
+    }
+
+    private void setVersion(DataSourceConfigure dataSourceConfigure,
+            ConnectionStringConfigure connectionStringConfigure) {
+        String version = connectionStringConfigure.getVersion();
+        if (version != null)
+            dataSourceConfigure.setVersion(version);
     }
 
     protected void overrideProperties(Properties lowLevel, Properties highLevel) {

@@ -41,7 +41,7 @@ public class DalConnectionPoolTest {
         DalConnectionPool.setConnectionListener(new AbstractConnectionListener() {
 
             @Override
-            public void doOnCreateConnection(String poolDesc, Connection connection) {
+            public void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
                 create.incrementAndGet();
             }
 

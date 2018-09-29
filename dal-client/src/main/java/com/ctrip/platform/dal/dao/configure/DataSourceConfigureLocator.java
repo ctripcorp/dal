@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.helper.Ordered;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 public interface DataSourceConfigureLocator extends Ordered {
@@ -13,18 +14,24 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     DataSourceConfigure getDataSourceConfigure(String name);
 
-    void addDataSourceConfigureKeySet(Set<String> names);
-
     Set<String> getDataSourceConfigureKeySet();
+
+    Map<String, DalConnectionString> getAllConnectionStrings();
+
+    Map<String, DalConnectionString> getSuccessfulConnectionStrings();
+
+    Map<String, DalConnectionString> getFailedConnectionStrings();
 
     void setIPDomainStatus(IPDomainStatus status);
 
     IPDomainStatus getIPDomainStatus();
 
-    void setConnectionStrings(Map<String, ConnectionString> map);
+    void setConnectionStrings(Map<String, DalConnectionString> map);
 
-    void setPoolProperties(PoolPropertiesConfigure configure);
+    DalConnectionString setConnectionString(String name, DalConnectionString connectionString);
 
-    DataSourceConfigure mergeDataSourceConfigure(ConnectionString connectionString);
+    Properties setPoolProperties(PoolPropertiesConfigure configure);
+
+    DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString);
 
 }

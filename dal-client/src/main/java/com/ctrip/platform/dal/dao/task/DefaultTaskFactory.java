@@ -1,10 +1,12 @@
 package com.ctrip.platform.dal.dao.task;
 
+import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 
 public class DefaultTaskFactory implements DalTaskFactory {
 	private Map<String, String> settings;
@@ -90,5 +92,33 @@ public class DefaultTaskFactory implements DalTaskFactory {
 		UpdateSqlTask<T> updateSqlTask = new UpdateSqlTask<T>();
 		updateSqlTask.initialize(parser);
 		return updateSqlTask;
+	}
+
+	@Override
+	public <T> QuerySqlTask<T> createQuerySqlTask(DalParser<T> parser, DalResultSetExtractor<T> extractor) {
+		QuerySqlTask<T> querySqlTask = new QuerySqlTask<>(extractor);
+		querySqlTask.initialize(parser);
+		return querySqlTask;
+	}
+
+	@Override
+	public <T> FreeSqlQueryTask<T> createFreeSqlQueryTask(String logicDbName, DalResultSetExtractor<T> extractor) {
+		FreeSqlQueryTask<T> freeSqlQueryTask = new FreeSqlQueryTask<>(extractor);
+		freeSqlQueryTask.initialize(logicDbName);
+		return freeSqlQueryTask;
+	}
+
+	@Override
+	public  FreeSqlUpdateTask createFreeUpdateTask(String logicDbName) {
+		FreeSqlUpdateTask freeSqlUpdateTask = new FreeSqlUpdateTask();
+		freeSqlUpdateTask.initialize(logicDbName);
+		return freeSqlUpdateTask;
+	}
+
+	@Override
+	public MultipleQueryTask createMultipleQueryTask(String logicDbName, List<DalResultSetExtractor<?>> extractors) {
+		MultipleQueryTask multipleQueryTask = new MultipleQueryTask(extractors);
+		multipleQueryTask.initialize(logicDbName);
+		return multipleQueryTask;
 	}
 }

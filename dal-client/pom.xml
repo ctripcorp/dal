@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client</artifactId>
-    <version>1.16.1</version>
+    <version>1.16.2-SNAPSHOT</version>
     <properties>
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>

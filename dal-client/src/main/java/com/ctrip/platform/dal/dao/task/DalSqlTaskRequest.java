@@ -98,15 +98,21 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 	}
 
 	private Callable<T> create(StatementParameters parameters, DalHints hints, DalTaskContext taskContext) throws SQLException {
-		if (builder instanceof TableSqlBuilder && isTableShardingEnabled(logicDbName, ((TableSqlBuilder) builder).getTableName())) {
+		String tableName = new String();
+		if (builder instanceof TableSqlBuilder) {
 			TableSqlBuilder tableBuilder = (TableSqlBuilder) builder;
-			String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, tableBuilder.getTableName(), hints, parameters, null));
-			String tableName = tableBuilder.getTableName() + tableShardStr;
-			if (taskContext instanceof DalTableNameConfigure)
-				((DalTableNameConfigure) taskContext).addTables(tableName);
-			return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), tableBuilder.build(tableShardStr), parameters, hints, task, taskContext);
+			tableName = tableBuilder.getTableName();
+			if (isTableShardingEnabled(logicDbName, tableName)) {
+				String tableShardStr = buildShardStr(logicDbName, locateTableShardId(logicDbName, tableName, hints, parameters, null));
+				tableName = tableName + tableShardStr;
+				if (taskContext instanceof DalContextConfigure)
+					((DalContextConfigure) taskContext).addTables(tableName);
+				return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), tableBuilder.build(tableShardStr), parameters, hints, task, taskContext);
+			}
 		}
-
+		if (!tableName.isEmpty())
+			if (taskContext instanceof DalContextConfigure)
+				((DalContextConfigure) taskContext).addTables(tableName);
 		return new SqlTaskCallable<>(DalClientFactory.getClient(logicDbName), builder.build(), parameters, hints, task, taskContext);
 	}
 

@@ -25,8 +25,8 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
 
 		String tableName = getRawTableName(hints, fields);
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		/*
 		 * In case fields is empty, the final sql will be like "insert into tableName () values()".

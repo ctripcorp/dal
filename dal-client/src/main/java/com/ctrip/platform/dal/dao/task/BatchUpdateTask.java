@@ -34,6 +34,9 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 
 		taskContext.setPojoFieldStatus(pojoFieldStatus);
 
+		if (taskContext instanceof DalContextConfigure)
+			taskContext.setShardingCategory(shardingCategory);
+
 		return taskContext;
 	}
 
@@ -63,8 +66,10 @@ public class BatchUpdateTask<T> extends AbstractIntArrayBulkTask<T> {
 		}
 
 		String tableName = getRawTableName(hints);
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure) {
+			((DalContextConfigure) taskContext).addTables(tableName);
+			((DalContextConfigure) taskContext).setShardingCategory(shardingCategory);
+		}
 
 		String batchUpdateSql = buildBatchUpdateSql(quote(tableName), pojoFieldStatus);
 		int[] result;

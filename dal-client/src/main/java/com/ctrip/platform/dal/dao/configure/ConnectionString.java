@@ -1,9 +1,10 @@
 package com.ctrip.platform.dal.dao.configure;
 
+
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
-public class ConnectionString {
-    private ConnectionStringParser parser = ConnectionStringParser.getInstance();
+public class ConnectionString implements DalConnectionString{
+    private ConnectionStringParser parser;
 
     private String name;
     private String ipConnectionString;
@@ -12,6 +13,7 @@ public class ConnectionString {
     public ConnectionString() {}
 
     public ConnectionString(String name, String ipConnectionString, String domainConnectionString) {
+        this.parser = ConnectionStringParser.getInstance();
         this.name = name;
         this.ipConnectionString = ipConnectionString;
         this.domainConnectionString = domainConnectionString;
@@ -39,4 +41,16 @@ public class ConnectionString {
         return parser.parse(keyName, domainConnectionString);
     }
 
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (o == null)
+            return false;
+        if (!(o instanceof DalConnectionString))
+            return false;
+        DalConnectionString connectionString = (ConnectionString) o;
+        return name.equals(connectionString.getName())
+                && ipConnectionString.equals(connectionString.getIPConnectionString())
+                && domainConnectionString.equals(connectionString.getDomainConnectionString());
+    }
 }

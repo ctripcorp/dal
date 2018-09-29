@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.helper.DefaultTableParser;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -27,6 +28,7 @@ public class LogEntry {
 	private String databaseName;
 	private String dataBaseKeyName;
 	private boolean isMaster;
+	private ShardingCategory shardingCategory;
 	private String shardId;
 	private String serverAddress;
 	private String dbUrl;
@@ -433,5 +435,13 @@ public class LogEntry {
 
 	public Set<String> getTables(){
 		return tables;
+	}
+
+	public ShardingCategory getShardingCategory() {
+		return shardingCategory;
+	}
+
+	public void setShardingCategory(ShardingCategory shardingCategory) {
+		this.shardingCategory = shardingCategory;
 	}
 }

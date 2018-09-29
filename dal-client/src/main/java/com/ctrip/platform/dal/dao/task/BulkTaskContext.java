@@ -14,7 +14,7 @@ import com.ctrip.platform.dal.dao.UpdatableEntity;
  * what dal internal created for intermediate use.   
  * @author jhhe
  */
-public class BulkTaskContext<T> extends DefaultTaskContext implements DalBulkTaskContext<T>,  DalTableNameConfigure {
+public class BulkTaskContext<T> extends DefaultTaskContext implements DalBulkTaskContext<T>, DalContextConfigure {
 	private List<T> rawPojos;
 	
 	// This is only for batch and combined insert operation
@@ -71,6 +71,8 @@ public class BulkTaskContext<T> extends DefaultTaskContext implements DalBulkTas
 		taskContext.setPojoFieldStatus(newPojoFieldStatus);
 
 		taskContext.tables.addAll(this.tables);
+
+		taskContext.category = this.category;
 
 		return taskContext;
 	}

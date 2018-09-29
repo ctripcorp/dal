@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.task;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,5 +103,14 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		for(String columName: unqualifiedColumns) {
 			pojo.remove(columName);
 		}
+	}
+
+	public BulkTaskContext<T> createTaskContext(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) throws SQLException {
+		BulkTaskContext<T> context = new BulkTaskContext<T>(rawPojos);
+		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, daoPojos, rawPojos);
+		context.setUnqualifiedColumns(unqualifiedColumns);
+		if (context instanceof DalContextConfigure)
+			context.setShardingCategory(shardingCategory);
+		return context;
 	}
 }

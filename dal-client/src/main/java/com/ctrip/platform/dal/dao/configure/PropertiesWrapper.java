@@ -23,4 +23,7 @@ public class PropertiesWrapper {
         return datasourceProperties;
     }
 
+    public Properties getOriginalProperties() {
+        return originalProperties;
+    }
 }

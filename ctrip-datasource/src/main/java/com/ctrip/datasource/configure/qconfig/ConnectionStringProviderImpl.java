@@ -1,8 +1,6 @@
 package com.ctrip.datasource.configure.qconfig;
 
-import com.ctrip.platform.dal.dao.configure.ConnectionString;
-import com.ctrip.platform.dal.dao.configure.ConnectionStringConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
@@ -14,80 +12,48 @@ import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
 import qunar.tc.qconfig.client.exception.ResultUnexpectedException;
-
-import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class ConnectionStringProviderImpl implements ConnectionStringProvider, DataSourceConfigureConstants {
     private static final String TITAN_APP_ID = "100010061";
     private static final String DAL = "DAL";
-    private static final String GET_CONNECTIONSTRING = "ConnectionString::getConnectionString";
+    private String CONNECTION_STRING_GET_MAPCONFIG_FORMAT = "ConnectionString::getMapConfig:%s";
+    private String CONNECTION_STRING_GET_CONNECTIONSTRING_FORMAT = "ConnectionString::getConnectionString:%s";
+    private String CONNECTION_STRING_LISTENER_ON_LOAD_FORMAT = "ConnectionString::listenerOnLoad:%s";
+
     private static final String NORMAL_CONNECTIONSTRING = "Normal ConnectionString";
     private static final String FAILOVER_CONNECTIONSTRING = "Failover ConnectionString";
     private static final int HTTP_STATUS_CODE_404 = 404;
+
+    private String NULL_MAPCONFIG_EXCEPTION_FORMAT = "MapConfig for titan key %s is null.";
     private String QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT =
             "An error occured while getting connection string from QConfig for titan key %s.";
     private String QCONFIG_404_EXCEPTION_MESSAGE_FORMAT =
             "Titan key %s does not exist or has been disabled, please remove it from your Dal.config or code.";
+    private String CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT = "[TitanKey: %s, Exception: %s] ";
+    private String ON_LOAD_PARAMETER_EXCEPTION = "Map parameter for titan key %s of onLoad event is null.";
 
-    private Map<String, MapConfig> configMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, MapConfig> configMap = new ConcurrentHashMap<>();
     private Set<String> keyNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
-    private MapConfig getConfigMap(String name) {
-        String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        return configMap.get(keyName);
-    }
-
-    private void addConfigMap(String name, MapConfig config) {
-        String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        configMap.put(keyName, config);
-    }
-
     @Override
-    public Map<String, ConnectionString> getConnectionStrings(Set<String> dbNames) throws Exception {
-        refreshConnectionStringMapConfig(dbNames);
-        return _getConnectionStrings(dbNames);
-    }
-
-    private void refreshConnectionStringMapConfig(Set<String> dbNames) {
+    public Map<String, DalConnectionString> getConnectionStrings(Set<String> dbNames) throws Exception {
+        Map<String, DalConnectionString> configures = new HashMap<>();
         if (dbNames == null || dbNames.isEmpty())
-            return;
-        for (String name : dbNames) {
-            try {
-                MapConfig config = getTitanMapConfig(name);
-                if (config != null) {
-                    addConfigMap(name, config);
-                }
-            } catch (Throwable e) {
-                throw new RuntimeException(new FileNotFoundException(String
-                        .format("An error occurred while getting titan key %s from QConfig:%s", name, e.getMessage())));
-            }
-        }
-    }
-
-    private MapConfig getTitanMapConfig(String name) {
-        String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        Feature feature = Feature.create().setHttpsEnable(true).build();
-        return MapConfig.get(TITAN_APP_ID, keyName, feature);
-    }
-
-    private Map<String, ConnectionString> _getConnectionStrings(Set<String> names) throws Exception {
-        Map<String, ConnectionString> configures = new HashMap<>();
-        if (names == null || names.isEmpty())
             return configures;
 
-        for (String name : names) {
+        for (String name : dbNames) {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
-            MapConfig config = getConfigMap(name);
-
+            MapConfig config = getMapConfig(name);
             if (config != null) {
                 String ipConnectionString;
                 String domainConnectionString;
-                String transactionName = String.format("%s:%s", GET_CONNECTIONSTRING, name);
+                String transactionName = String.format(CONNECTION_STRING_GET_CONNECTIONSTRING_FORMAT, name);
                 Transaction transaction = Cat.newTransaction(DAL, transactionName);
 
                 try {
@@ -99,13 +65,22 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     if (e.getStatus() == HTTP_STATUS_CODE_404) {
                         exceptionMessageFormat = QCONFIG_404_EXCEPTION_MESSAGE_FORMAT;
                     }
-
-                    throw new DalException(String.format(exceptionMessageFormat, name), e);
+                    String errorMessage = String.format(exceptionMessageFormat, keyName);
+                    Cat.logError(errorMessage, e);
+                    configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
+                    transaction.setStatus(e);
+                    transaction.complete();
+                    continue;
                 } catch (Throwable e) {
-                    throw new DalException(String.format(QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT, name), e);
+                    String errorMessage = String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT, keyName);
+                    Cat.logError(errorMessage, e);
+                    configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
+                    transaction.setStatus(e);
+                    transaction.complete();
+                    continue;
                 }
 
-                ConnectionString connectionString =
+                DalConnectionString connectionString =
                         new ConnectionString(keyName, ipConnectionString, domainConnectionString);
                 ConnectionStringConfigure ipConfigure;
                 ConnectionStringConfigure domainConfigure;
@@ -134,32 +109,75 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         return configures;
     }
 
+    private MapConfig getMapConfig(String name) {
+        String keyName = ConnectionStringKeyHelper.getKeyName(name);
+        if (!configMap.containsKey(keyName)) {
+            MapConfig mapConfig = _getMapConfig(keyName);
+            configMap.put(keyName, mapConfig);
+        }
+
+        return configMap.get(keyName);
+    }
+
+    private MapConfig _getMapConfig(String name) {
+        MapConfig config = null;
+        Transaction transaction = Cat.newTransaction(DAL, String.format(CONNECTION_STRING_GET_MAPCONFIG_FORMAT, name));
+        try {
+            String keyName = ConnectionStringKeyHelper.getKeyName(name);
+            Feature feature = Feature.create().setHttpsEnable(true).build();
+            config = MapConfig.get(TITAN_APP_ID, keyName, feature);
+            if (config == null)
+                throw new RuntimeException(String.format(NULL_MAPCONFIG_EXCEPTION_FORMAT, name));
+
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+            Cat.logError(String.format(QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT, name), e);
+            throw e;
+        } finally {
+            transaction.complete();
+        }
+
+        return config;
+    }
+
     @Override
     public void addConnectionStringChangedListener(final String name, final ConnectionStringChanged callback) {
-        MapConfig config = getConfigMap(name);
-        if (config == null)
-            return;
+        MapConfig config = getMapConfig(name);
+        _addConnectionStringChangedListener(config, name, callback);
+    }
 
+    private void _addConnectionStringChangedListener(MapConfig config, final String name,
+            final ConnectionStringChanged callback) {
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
                 if (map == null || map.isEmpty())
-                    throw new RuntimeException("Parameter for onLoad event is null.");
+                    throw new RuntimeException(String.format(ON_LOAD_PARAMETER_EXCEPTION, name));
 
-                String keyName = ConnectionStringKeyHelper.getKeyName(name);
-                if (!keyNames.contains(keyName)) {
-                    keyNames.add(keyName);
-                    return;
+                Transaction transaction =
+                        Cat.newTransaction(DAL, String.format(CONNECTION_STRING_LISTENER_ON_LOAD_FORMAT, name));
+                try {
+                    String keyName = ConnectionStringKeyHelper.getKeyName(name);
+                    executeCallback(keyName, map, callback);
+                    transaction.setStatus(Transaction.SUCCESS);
+                } catch (Throwable e) {
+                    transaction.setStatus(e);
+                    Cat.logError(e);
+                    throw e;
+                } finally {
+                    transaction.complete();
                 }
-
-                String ipConnectionString = map.get(TITAN_KEY_NORMAL);
-                String domainConnectionString = map.get(TITAN_KEY_FAILOVER);
-                ConnectionString connectionString =
-                        new ConnectionString(keyName, ipConnectionString, domainConnectionString);
-
-                callback.onChanged(connectionString);
             }
         });
+    }
+
+    private void executeCallback(String keyName, Map<String, String> map, final ConnectionStringChanged callback) {
+        String ipConnectionString = map.get(TITAN_KEY_NORMAL);
+        String domainConnectionString = map.get(TITAN_KEY_FAILOVER);
+        DalConnectionString connectionString =
+                new ConnectionString(keyName, ipConnectionString, domainConnectionString);
+        callback.onChanged(connectionString);
     }
 
 }

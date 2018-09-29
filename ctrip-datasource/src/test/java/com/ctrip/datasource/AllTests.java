@@ -1,6 +1,8 @@
 package com.ctrip.datasource;
 
-import com.ctrip.datasource.configure.DataSourceConfigureLocatorTest;
+import com.ctrip.datasource.datasource.ConnectionListener.CtripConnectionListenerTest;
+import com.ctrip.datasource.datasource.DataSourceValidatorTest;
+import com.ctrip.datasource.datasource.MockQConfigProvider.ExceptionQConfigPoolPropertiesProviderTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import org.junit.runner.RunWith;
@@ -21,6 +23,8 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+		ExceptionQConfigPoolPropertiesProviderTest.class,
+		DalPropertiesChangedTest.class,
 		TitanServiceReaderTest.class,
 		AllInOneConfigureReaderTest.class,
 		ConnectionStringParserParserTest.class,
@@ -32,10 +36,10 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
   		ExecutorInterceptorTest.class,
   		StatementHandlerInterceptorTest.class,
   		StatementPrepareHandlerInterceptorTest.class,
-		DataSourceConfigureLocatorTest.class,
 		DalDataSourceFactoryTest.class,
 		QConfigConnectionStringProviderTest.class,
-		DalPropertiesChangedTest.class
+		CtripConnectionListenerTest.class,
+		DataSourceValidatorTest.class
 	})
 
 public class AllTests {

@@ -38,8 +38,8 @@ public class BatchSp3Task<T> extends AbstractIntArrayBulkTask<T> {
             parametersList[i++] = parameters;
         }
 
-        if (taskContext instanceof DalTableNameConfigure)
-            ((DalTableNameConfigure) taskContext).addTables(tableName);
+        if (taskContext instanceof DalContextConfigure)
+            ((DalContextConfigure) taskContext).addTables(tableName);
 
         if (client instanceof DalContextClient)
             return ((DalContextClient) client).batchCall(callSql, parametersList, hints, taskContext);

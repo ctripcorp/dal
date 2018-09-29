@@ -1,8 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
-import com.ctrip.platform.dal.dao.task.DalTableNameConfigure;
+import com.ctrip.platform.dal.dao.task.DalContextConfigure;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
-import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.SQLException;
@@ -22,8 +21,8 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		StatementParameters parameters = new StatementParameters();
 		String callSql = prepareSpCall(updateSPA, parameters, fields);
 
-		if (taskContext instanceof DalTableNameConfigure)
-			((DalTableNameConfigure) taskContext).addTables(tableName);
+		if (taskContext instanceof DalContextConfigure)
+			((DalContextConfigure) taskContext).addTables(tableName);
 
 		if (client instanceof DalContextClient) {
 			Map<String, ?> results = ((DalContextClient) client).call(callSql, parameters, hints.setFields(fields), taskContext);

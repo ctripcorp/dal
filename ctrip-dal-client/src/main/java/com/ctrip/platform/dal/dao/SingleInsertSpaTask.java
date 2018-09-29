@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
-import com.ctrip.platform.dal.dao.task.DalTableNameConfigure;
+import com.ctrip.platform.dal.dao.task.DalContextConfigure;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.dao.task.KeyHolderAwaredTask;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -45,8 +45,8 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolder
 
         register(parameters, fields);
 
-        if (taskContext instanceof DalTableNameConfigure)
-            ((DalTableNameConfigure) taskContext).addTables(tableName);
+        if (taskContext instanceof DalContextConfigure)
+            ((DalContextConfigure) taskContext).addTables(tableName);
 
         if (client instanceof DalContextClient) {
             Map<String, ?> results =

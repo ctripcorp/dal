@@ -70,7 +70,7 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
     }
 
     private TableParseSwitch _getTableParseSwitch() {
-        TableParseSwitch tableParseSwitch = null;
+        TableParseSwitch tableParseSwitch = TableParseSwitch.ON;
         MapConfig config = mapConfigReference.get();
         if (config == null)
             return tableParseSwitch;

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import org.junit.After;
 import org.junit.Assert;
@@ -73,9 +74,13 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-            Assert.fail();
         } catch (Exception e) {
+            Assert.fail();
         }
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        Assert.assertNotNull(locator.getDataSourceConfigure("AbacusDB_INSERT_1"));
+        Assert.assertNotNull(locator.getDataSourceConfigure("CrawlerResultMDB"));
+        Assert.assertNull(locator.getDataSourceConfigure("test"));
     }
 
     @Test
@@ -198,11 +203,12 @@ public class TitanServiceReaderTest {
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
-
-            Assert.fail();
         } catch (Exception e) {
-            e.printStackTrace();
+            Assert.fail();
         }
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        Assert.assertTrue(locator.getFailedConnectionStrings().containsKey("test"));
+        Assert.assertTrue(locator.getFailedConnectionStrings().containsKey("simpleshard_0"));
     }
 
     @Test
@@ -422,44 +428,6 @@ public class TitanServiceReaderTest {
             System.out.println(Foundation.server().getEnvType());
             Assert.fail();
         }
-    }
-
-    // This test simulate _SH case in PROD. You have to hijack TitanProvide to make PROD_SUFFIX = _W
-    // @Test
-    // public void testGetFromTitanService_SH() {
-    // String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
-    // TitanProvider provider = new TitanProvider();
-    // Set<String> dbNames = new HashSet<>();
-    // dbNames.add("PkgWorkflowDB");
-    //
-    // Map<String, String> settings = new HashMap<>();
-    // settings.put(TitanProvider.SERVICE_ADDRESS, fws);
-    // settings.put(TitanProvider.USE_LOCAL_CONFIG, "false");
-    // try {
-    // provider.initialize(settings);
-    // provider.setup(dbNames);
-    //
-    // DataSourceConfigure result = null;
-    //
-    // result = provider.mergeDataSourceConfigure("PkgWorkflowDB");
-    // Assert.assertNotNull(result);
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // Assert.fail();
-    // }
-    // }
-
-    public static void main(String[] args) {
-        TitanServiceReaderTest test = new TitanServiceReaderTest();
-        for (int i = 0; i < 200; i++) {
-            test.testSubEnvironmentService();
-            System.out.println("*");
-            // try {
-            // Thread.sleep(100);
-            // } catch (InterruptedException e) {
-            // }
-        }
-        System.out.println("done");
     }
 
 }

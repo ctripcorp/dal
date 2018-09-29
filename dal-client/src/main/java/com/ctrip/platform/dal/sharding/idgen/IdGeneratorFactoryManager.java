@@ -31,13 +31,13 @@ public class IdGeneratorFactoryManager {
         try {
             factory = (IIdGeneratorFactory) Class.forName(className).newInstance();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         if (null == factory) {
             try {
                 factory = (IIdGeneratorFactory) Class.forName(className).getDeclaredMethod("getInstance").invoke(null);
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
 

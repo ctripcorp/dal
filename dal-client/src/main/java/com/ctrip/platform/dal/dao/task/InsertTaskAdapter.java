@@ -126,4 +126,16 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		}
 		return pojo;
 	}
+
+	protected void processIdentityField(DalHints hints, List<Map<String, ?>> pojos) {
+		if (parser.isAutoIncrement() && !(idGenerator instanceof NullIdGenerator)) {
+			String identityFieldName = parser.getPrimaryKeyNames()[0];
+			boolean identityInsertDisabled = hints.isIdentityInsertDisabled();
+			for (Map pojo : pojos) {
+				if (identityInsertDisabled && !pojo.containsKey(identityFieldName)) {
+					pojo.put(identityFieldName, idGenerator.nextId());
+				}
+			}
+		}
+	}
 }

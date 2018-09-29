@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class IdGeneratorFactoryManager {
 
-    private String defaultFactoryClassName;
+    private String defaultFactoryClassName = "com.ctrip.framework.idgen.client.IdGeneratorFactory";
     private Map<String, IIdGeneratorFactory> factoryCache = new HashMap<>();
 
     public IIdGeneratorFactory getOrCreateNullFactory() {

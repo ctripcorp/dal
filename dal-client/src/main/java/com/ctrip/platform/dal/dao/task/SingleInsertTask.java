@@ -20,7 +20,6 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		pojoList.add(fields);
 		rawPojos.add(rawPojo);
 
-		processIdentityField(hints, pojoList);
 		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, pojoList, rawPojos);
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
 

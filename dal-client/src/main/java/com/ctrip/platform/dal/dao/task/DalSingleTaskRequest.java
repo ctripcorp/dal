@@ -60,23 +60,31 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
 
     @Override
     public void validate() throws SQLException {
+    }
+
+    @Override
+    public void validateAndPrepare() throws SQLException {
         if (isList && null == rawPojos)
             throw new DalException(ErrorCode.ValidatePojoList);
 
-        if (isList == false && null == rawPojo)
+        if (!isList && null == rawPojo)
             throw new DalException(ErrorCode.ValidatePojo);
 
         if (task == null)
             throw new DalException(ErrorCode.ValidateTask);
 
-        if (isList == false) {
+        if (!isList) {
             rawPojos = new ArrayList<>(1);
             rawPojos.add(rawPojo);
         }
 
         daoPojos = task.getPojosFields(rawPojos);
-        dalTaskContext = task.createTaskContext();
         detectDistributedTransaction(logicDbName, hints, daoPojos);
+        dalTaskContext = task.createTaskContext();
+
+        if (task instanceof InsertTaskAdapter) {
+            ((InsertTaskAdapter) task).processIdentityField(hints, daoPojos);
+        }
     }
 
     @Override

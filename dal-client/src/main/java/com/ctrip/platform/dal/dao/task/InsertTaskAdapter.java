@@ -105,29 +105,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		}
 	}
 
-	/**
-	 * Insert auto-generated id if necessary
-	 * @param hints
-	 * @param pojo
-	 * @return processed field map
-	 */
-	public Map<String, ?> processIdentityField(DalHints hints, Map<String, ?> pojo) {
-		if (parser.isAutoIncrement()) {
-			String identityFieldName = parser.getPrimaryKeyNames()[0];
-			if (!(idGenerator instanceof NullIdGenerator) &&
-					(hints.isIdentityInsertDisabled() || !pojo.containsKey(identityFieldName))) {
-				Map<String, Object> newPojo = new LinkedHashMap<>();
-				for (Map.Entry<String, ?> entry : pojo.entrySet()) {
-					newPojo.put(entry.getKey(), entry.getValue());
-				}
-				newPojo.put(identityFieldName, idGenerator.nextId());
-				return newPojo;
-			}
-		}
-		return pojo;
-	}
-
-	protected void processIdentityField(DalHints hints, List<Map<String, ?>> pojos) {
+	public void processIdentityField(DalHints hints, List<Map<String, ?>> pojos) {
 		if (parser.isAutoIncrement() && !(idGenerator instanceof NullIdGenerator)) {
 			String identityFieldName = parser.getPrimaryKeyNames()[0];
 			boolean identityInsertDisabled = hints.isIdentityInsertDisabled();

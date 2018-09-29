@@ -51,6 +51,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	
 	@Override
 	public void validate() throws SQLException {
+	}
+
+	@Override
+	public void validateAndPrepare() throws SQLException {
 		if(null == rawPojos)
 			throw new DalException(ErrorCode.ValidatePojoList);
 
@@ -60,6 +64,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		dbShardMerger = task.createMerger();
 		daoPojos = task.getPojosFields(rawPojos);
 		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
+
+		if (task instanceof InsertTaskAdapter) {
+			((InsertTaskAdapter) task).processIdentityField(hints, daoPojos);
+		}
 	}
 	
 	@Override

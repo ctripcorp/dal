@@ -25,6 +25,11 @@ public interface DalRequest<T> {
     void validate() throws SQLException;
 
 	/**
+	 * Do validation and preparation
+	 */
+	void validateAndPrepare() throws SQLException;
+
+	/**
 	 * @return true if it is cross shard
 	 */
     boolean isCrossShard() throws SQLException;

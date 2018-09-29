@@ -63,11 +63,12 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 		dbShardMerger = task.createMerger();
 		daoPojos = task.getPojosFields(rawPojos);
-		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
 
 		if (task instanceof InsertTaskAdapter) {
 			((InsertTaskAdapter) task).processIdentityField(hints, daoPojos);
 		}
+
+		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
 	}
 	
 	@Override

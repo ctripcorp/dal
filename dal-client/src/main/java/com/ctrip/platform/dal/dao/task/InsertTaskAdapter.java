@@ -132,7 +132,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 			String identityFieldName = parser.getPrimaryKeyNames()[0];
 			boolean identityInsertDisabled = hints.isIdentityInsertDisabled();
 			for (Map pojo : pojos) {
-				if (identityInsertDisabled && !pojo.containsKey(identityFieldName)) {
+				if (identityInsertDisabled || null == pojo.get(identityFieldName)) {
 					pojo.put(identityFieldName, idGenerator.nextId());
 				}
 			}

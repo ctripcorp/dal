@@ -5,10 +5,9 @@ import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.ctrip.platform.dal.exceptions.DalException;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -27,7 +26,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     // user datasource.xml pool properties configure
     private Map<String, PoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
     private Map<String, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
-    private Set<String> dataSourceConfigureKeySet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     private static final String SEPARATOR = "\\.";
     protected static final String DAL = "DAL";
@@ -70,7 +68,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
         DalConnectionString connectionString = connectionStrings.get(name);
 
-        if(connectionString instanceof DalInvalidConnectionString)
+        if (connectionString instanceof DalInvalidConnectionString)
             return configure;
 
         configure = mergeDataSourceConfigure(connectionString);
@@ -88,7 +86,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     public Set<String> getDataSourceConfigureKeySet() {
         Set<String> keySet = new HashSet<>();
         for (Map.Entry<String, DalConnectionString> entry : connectionStrings.entrySet()) {
-                keySet.add(entry.getKey());
+            keySet.add(entry.getKey());
         }
         return keySet;
     }
@@ -130,19 +128,19 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     public Map<String, DalConnectionString> getSuccessfulConnectionStrings() {
-        Map<String, DalConnectionString> successfulConnectionStrings=new ConcurrentHashMap<>();
+        Map<String, DalConnectionString> successfulConnectionStrings = new ConcurrentHashMap<>();
         for (Map.Entry<String, DalConnectionString> entry : connectionStrings.entrySet()) {
             if (!(entry.getValue() instanceof DalInvalidConnectionString))
-                successfulConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()),entry.getValue());
+                successfulConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()), entry.getValue());
         }
         return successfulConnectionStrings;
     }
 
     public Map<String, DalConnectionString> getFailedConnectionStrings() {
-        Map<String, DalConnectionString> failedConnectionStrings=new ConcurrentHashMap<>();
+        Map<String, DalConnectionString> failedConnectionStrings = new ConcurrentHashMap<>();
         for (Map.Entry<String, DalConnectionString> entry : connectionStrings.entrySet()) {
             if (entry.getValue() instanceof DalInvalidConnectionString)
-                failedConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()),entry.getValue());
+                failedConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()), entry.getValue());
         }
         return failedConnectionStrings;
     }
@@ -150,7 +148,8 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     @Override
     public Properties setPoolProperties(PoolPropertiesConfigure configure) {
         PropertiesWrapper oldWrapper = propertiesWrapperReference.get();
-        Properties oldOriginalProperties = oldWrapper == null ? null : deepCopyProperties(oldWrapper.getOriginalProperties());
+        Properties oldOriginalProperties =
+                oldWrapper == null ? null : deepCopyProperties(oldWrapper.getOriginalProperties());
         if (configure == null)
             return oldOriginalProperties;
 
@@ -196,23 +195,13 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
         String name = connectionStringConfigure.getName();
         String logName = String.format(POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT, name);
-        DataSourceConfigure c = null;
+        DataSourceConfigure c = cloneDataSourceConfigure(null);
 
         try {
             PropertiesWrapper wrapper = propertiesWrapperReference.get();
             if (wrapper == null)
                 return c;
-            // override app-level properties
-            Properties appProperties = wrapper.getAppProperties();
-            if (appProperties != null && !appProperties.isEmpty()) {
-                overrideProperties(c.getProperties(), appProperties);
-                String log = "App 覆盖结果:" + poolPropertiesHelper.propertiesToString(c.getProperties());
-                LOGGER.info(log);
-            }
-            if (wrapper == null)
-                throw new DalException(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE);
 
-            c = cloneDataSourceConfigure(null);
             overrideProperties(connectionStringConfigure, connectionString, wrapper, c, name, logName);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
@@ -222,7 +211,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     protected void overrideProperties(ConnectionStringConfigure connectionStringConfigure,
-            ConnectionString connectionString, PropertiesWrapper wrapper, DataSourceConfigure c, String name,
+            DalConnectionString connectionString, PropertiesWrapper wrapper, DataSourceConfigure c, String name,
             String logName) {
         // override app-level properties
         overrideAppLevelProperties(wrapper, c, logName);
@@ -285,13 +274,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     protected void overrideConnectionStringConfigureAndDataSourceXml(
             ConnectionStringConfigure connectionStringConfigure, DataSourceConfigure c,
             DalConnectionString connectionString, String name) {
-        if (connectionStringConfigure != null) {
-            // merge connection string configure
-            mergeConnectionStringConfigure(c, connectionStringConfigure);
-            c.setConnectionString(connectionString);
-            String log = "connection url:" + connectionStringConfigure.getConnectionUrl();
-            LOGGER.info(log);
-            ConnectionString connectionString, String name) {
         if (connectionStringConfigure == null)
             return;
 
@@ -303,7 +285,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     private void mergeConnectionStringConfigure(DataSourceConfigure c,
-            ConnectionStringConfigure connectionStringConfigure, ConnectionString connectionString) {
+            ConnectionStringConfigure connectionStringConfigure, DalConnectionString connectionString) {
         mergeConnectionStringConfigure(c, connectionStringConfigure);
         c.setConnectionString(connectionString);
         String log = CONNECTION_URL + connectionStringConfigure.getConnectionUrl();

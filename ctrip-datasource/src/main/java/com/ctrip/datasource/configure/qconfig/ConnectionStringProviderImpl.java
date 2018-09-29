@@ -65,16 +65,16 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     if (e.getStatus() == HTTP_STATUS_CODE_404) {
                         exceptionMessageFormat = QCONFIG_404_EXCEPTION_MESSAGE_FORMAT;
                     }
-                    String errorMessage = String.format(exceptionMessageFormat, name);
+                    String errorMessage = String.format(exceptionMessageFormat, keyName);
                     Cat.logError(errorMessage, e);
-                    configures.put(name, new InvalidConnectionString(name, new DalException(errorMessage, e)));
+                    configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
                     transaction.setStatus(e);
                     transaction.complete();
                     continue;
                 } catch (Throwable e) {
-                    String errorMessage = String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT, name);
+                    String errorMessage = String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT, keyName);
                     Cat.logError(errorMessage, e);
-                    configures.put(name, new InvalidConnectionString(name, new DalException(errorMessage, e)));
+                    configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
                     transaction.setStatus(e);
                     transaction.complete();
                     continue;

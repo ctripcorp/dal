@@ -78,9 +78,9 @@ public class TitanServiceReaderTest {
             Assert.fail();
         }
         DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
-        Assert.assertEquals(3, locator.getAllConnectionStrings().size());
-        Assert.assertEquals(2, locator.getSuccessfulConnectionStrings().size());
-        Assert.assertEquals(1, locator.getFailedConnectionStrings().size());
+        Assert.assertNotNull(locator.getDataSourceConfigure("AbacusDB_INSERT_1"));
+        Assert.assertNotNull(locator.getDataSourceConfigure("CrawlerResultMDB"));
+        Assert.assertNull(locator.getDataSourceConfigure("test"));
     }
 
     @Test
@@ -207,7 +207,8 @@ public class TitanServiceReaderTest {
             Assert.fail();
         }
         DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
-        Assert.assertEquals(2, locator.getFailedConnectionStrings().size());
+        Assert.assertTrue(locator.getFailedConnectionStrings().containsKey("test"));
+        Assert.assertTrue(locator.getFailedConnectionStrings().containsKey("simpleshard_0"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.ctrip.datasource.log;
 
+import com.ctrip.datasource.util.CatUtil;
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
 import com.ctrip.platform.dal.dao.log.AbstractLogger;
@@ -26,17 +27,53 @@ public class CtripLoggerImpl extends AbstractLogger {
             if (callback != null)
                 callback.execute();
 
-            logEvent(type, name, message);
+            t.setStatus(Message.SUCCESS);
+        } catch (Throwable e) {
+            t.setStatus(e);
+            Cat.logError(e);
+            throw new RuntimeException(e);
+        } finally {
+            t.complete();
+        }
+    }
+
+    @Override
+    public void logTransaction(String type, String name, String message, long startTime) {
+        Transaction t = Cat.newTransaction(type, name);
+
+        try {
+            t.addData(message);
             t.setStatus(Message.SUCCESS);
         } catch (Throwable e) {
             t.setStatus(e);
             Cat.logError(e);
         } finally {
-            t.complete();
+            if (startTime > 0) {
+                CatUtil.completeTransaction(t, startTime);
+            } else {
+                t.complete();
+            }
         }
-
     }
 
+    @Override
+    public void logTransaction(String type, String name, String message, Throwable exception, long startTime) {
+        Transaction t = Cat.newTransaction(type, name);
+
+        try {
+            t.addData(message);
+            t.addData(exception.getMessage());
+            t.setStatus(exception);
+            Cat.logError(exception);
+        } catch (Throwable e) {
+        } finally {
+            if (startTime > 0) {
+                CatUtil.completeTransaction(t, startTime);
+            } else {
+                t.complete();
+            }
+        }
+    }
 
     @Override
     public void warn(final String msg) {
@@ -49,17 +86,17 @@ public class CtripLoggerImpl extends AbstractLogger {
 
     @Override
     public void error(final String msg, final Throwable e) {
-            try {
-                Cat.logError(msg, e);
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-            }
+        try {
+            Cat.logError(msg, e);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
 
-            try {
-                logger.error(TITLE, e);
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-            }
+        try {
+            logger.error(TITLE, e);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -70,4 +107,5 @@ public class CtripLoggerImpl extends AbstractLogger {
             e.printStackTrace();
         }
     }
+
 }

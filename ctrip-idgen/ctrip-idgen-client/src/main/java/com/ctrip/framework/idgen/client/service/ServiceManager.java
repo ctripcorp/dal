@@ -5,10 +5,10 @@ import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.framework.idgen.client.log.CatConstants;
-import com.ctrip.platform.idgen.service.api.IdGenRequestType;
-import com.ctrip.platform.idgen.service.api.IdGenResponseType;
-import com.ctrip.platform.idgen.service.api.IdGenerateService;
-import com.ctrip.platform.idgen.service.api.IdSegment;
+import com.ctrip.framework.idgen.service.api.IdGenRequestType;
+import com.ctrip.framework.idgen.service.api.IdGenResponseType;
+import com.ctrip.framework.idgen.service.api.IdGenerateService;
+import com.ctrip.framework.idgen.service.api.IdSegment;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 

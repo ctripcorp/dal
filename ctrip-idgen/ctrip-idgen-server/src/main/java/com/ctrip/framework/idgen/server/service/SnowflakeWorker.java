@@ -1,7 +1,7 @@
 package com.ctrip.framework.idgen.server.service;
 
 import com.ctrip.framework.idgen.server.config.SnowflakeConfig;
-import com.ctrip.platform.idgen.service.api.IdSegment;
+import com.ctrip.framework.idgen.service.api.IdSegment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

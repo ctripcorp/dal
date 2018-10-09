@@ -1,9 +1,11 @@
 package com.ctrip.framework.idgen.client;
 
 import com.ctrip.framework.idgen.client.common.Version;
-import com.ctrip.framework.idgen.client.constant.CatConstants;
 import com.ctrip.framework.idgen.client.generator.DynamicIdGenerator;
+import com.ctrip.framework.idgen.client.log.CatConstants;
 import com.ctrip.framework.idgen.client.log.IdGenLogger;
+import com.ctrip.framework.idgen.client.service.IServiceManager;
+import com.ctrip.framework.idgen.client.service.ServiceManager;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorFactory;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
@@ -18,6 +20,7 @@ public class IdGeneratorFactory implements IIdGeneratorFactory {
     private volatile static IdGeneratorFactory factory = null;
 
     private final ConcurrentMap<String, LongIdGenerator> idGeneratorCache = new ConcurrentHashMap<>();
+    private final IServiceManager service = new ServiceManager();
 
     private IdGeneratorFactory() {}
 
@@ -46,7 +49,7 @@ public class IdGeneratorFactory implements IIdGeneratorFactory {
     public LongIdGenerator getOrCreateLongIdGenerator(String sequenceName) {
         LongIdGenerator idGenerator = idGeneratorCache.get(sequenceName);
         if (null == idGenerator) {
-            synchronized (this) {
+            synchronized (idGeneratorCache) {
                 idGenerator = idGeneratorCache.get(sequenceName);
                 if (null == idGenerator) {
                     idGenerator = createLongIdGenerator(sequenceName);
@@ -58,13 +61,12 @@ public class IdGeneratorFactory implements IIdGeneratorFactory {
     }
 
     private LongIdGenerator createLongIdGenerator(String sequenceName) {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ID_GENERATOR_FACTORY, "createLongIdGenerator");
-        IdGenLogger.logVersion();
-        IdGenLogger.logEvent(CatConstants.TYPE_SEQUENCE_NAME, sequenceName);
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                CatConstants.NAME_GENERATOR_FACTORY + ":createGenerator:" + sequenceName);
         try {
-            DynamicIdGenerator idGenerator = new DynamicIdGenerator(sequenceName);
+            DynamicIdGenerator idGenerator = new DynamicIdGenerator(sequenceName, service);
             idGenerator.initialize();
-            transaction.setStatus(CatConstants.STATUS_SUCCESS);
+            transaction.setStatus(Transaction.SUCCESS);
             return idGenerator;
         } catch (Exception e) {
             transaction.setStatus(e);

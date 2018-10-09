@@ -6,6 +6,10 @@ public abstract class AbstractStrategy implements PrefetchStrategy {
 
     protected AtomicLong remainedSize = new AtomicLong(0);
 
+    public boolean initialize() {
+        return true;
+    }
+
     @Override
     public int getSuggestedTimeoutMillis() {
         return TIMEOUT_MILLIS_DEFAULT_VALUE;

@@ -1,7 +1,6 @@
 package com.ctrip.framework.idgen.client.log;
 
 import com.ctrip.framework.idgen.client.common.Version;
-import com.ctrip.framework.idgen.client.constant.CatConstants;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
 

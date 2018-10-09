@@ -4,7 +4,7 @@ import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
 import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.framework.idgen.client.constant.CatConstants;
+import com.ctrip.framework.idgen.client.log.CatConstants;
 import com.ctrip.platform.idgen.service.api.IdGenRequestType;
 import com.ctrip.platform.idgen.service.api.IdGenResponseType;
 import com.ctrip.platform.idgen.service.api.IdGenerateService;
@@ -17,12 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ServiceManager {
-
-    private volatile static ServiceManager manager = null;
-
-    private final AtomicReference<ReferenceConfig<IdGenerateService>> refConfigReference = new AtomicReference<>();
-    private final AtomicReference<IdGenerateService> serviceReference = new AtomicReference<>();
+public class ServiceManager implements IServiceManager {
 
     private static final String REGISTRY_ID_VALUE = "artemis";
     private static final String REGISTRY_PROTOCOL_VALUE = "artemis";
@@ -31,29 +26,20 @@ public class ServiceManager {
     private static final int TIMEOUT_DEFAULT_VALUE = 100;
     private static final int RETRIES_DEFAULT_VALUE = 2;
 
-    private ServiceManager() {}
+    private final AtomicReference<ReferenceConfig<IdGenerateService>> refConfigReference = new AtomicReference<>();
+    private final AtomicReference<IdGenerateService> serviceReference = new AtomicReference<>();
 
-    public static ServiceManager getInstance() {
-        if (null == manager) {
-            synchronized (ServiceManager.class) {
-                if (null == manager) {
-                    manager = new ServiceManager();
-                }
-            }
-        }
-        return manager;
-    }
-
+    @Override
     public List<IdSegment> fetchIdPool(String sequenceName, int requestSize, int timeoutMillis) {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_CALL_SERVICE, "fetchIdPool");
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                CatConstants.NAME_CALL_SERVICE + ":fetchIdPool");
         try {
             IdGenRequestType request = new IdGenRequestType(sequenceName, requestSize, timeoutMillis);
-            IdGenResponseType response = getIdGenServiceInstance().fetchIdPool(request);
+            IdGenResponseType response = getOrCreateService().fetchIdPool(request);
             if (null == response) {
-                transaction.setStatus(CatConstants.STATUS_NULL_RESPONSE);
-                return null;
+                throw new NullPointerException("Null response");
             }
-            transaction.setStatus(CatConstants.STATUS_SUCCESS);
+            transaction.setStatus(Transaction.SUCCESS);
             return response.getIdSegments();
         } catch (Exception e) {
             transaction.setStatus(e);
@@ -63,33 +49,13 @@ public class ServiceManager {
         }
     }
 
-    public Number fetchId(String sequenceName, int timeoutMillis) {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_CALL_SERVICE, "fetchId");
-        try {
-            int requestSize = 1;
-            IdGenRequestType request = new IdGenRequestType(sequenceName, requestSize, timeoutMillis);
-            IdGenResponseType response = getIdGenServiceInstance().fetchId(request);
-            if (null == response) {
-                transaction.setStatus(CatConstants.STATUS_NULL_RESPONSE);
-                return null;
-            }
-            transaction.setStatus(CatConstants.STATUS_SUCCESS);
-            return response.getSingleId();
-        } catch (Exception e) {
-            transaction.setStatus(e);
-            throw e;
-        } finally {
-            transaction.complete();
-        }
-    }
-
-    private IdGenerateService getIdGenServiceInstance() {
+    private IdGenerateService getOrCreateService() {
         IdGenerateService service = serviceReference.get();
         if (null == service) {
-            synchronized (this) {
+            synchronized (serviceReference) {
                 service = serviceReference.get();
                 if (null == service) {
-                    service = getRefConfigInstance().get();
+                    service = getOrCreateRefConfig().get();
                     serviceReference.set(service);
                 }
             }
@@ -97,10 +63,10 @@ public class ServiceManager {
         return service;
     }
 
-    private ReferenceConfig<IdGenerateService> getRefConfigInstance() {
+    private ReferenceConfig<IdGenerateService> getOrCreateRefConfig() {
         ReferenceConfig<IdGenerateService> refConfig = refConfigReference.get();
         if (null == refConfig) {
-            synchronized (this) {
+            synchronized (refConfigReference) {
                 refConfig = refConfigReference.get();
                 if (null == refConfig) {
                     refConfig = createRefConfig();

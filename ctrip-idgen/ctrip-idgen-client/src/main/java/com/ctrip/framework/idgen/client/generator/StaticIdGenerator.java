@@ -1,8 +1,8 @@
 package com.ctrip.framework.idgen.client.generator;
 
-import com.ctrip.framework.idgen.client.constant.CatConstants;
+import com.ctrip.framework.idgen.client.log.CatConstants;
 import com.ctrip.framework.idgen.client.log.IdGenLogger;
-import com.ctrip.framework.idgen.client.service.ServiceManager;
+import com.ctrip.framework.idgen.client.service.IServiceManager;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
@@ -21,23 +21,29 @@ public class StaticIdGenerator implements LongIdGenerator {
     private long initialSize = 0;
     private long remainedSize = 0;
     private long currentId = -1;
+    private long maxId = -1;
     private final PrefetchStrategy strategy;
+    private final IServiceManager service;
 
-    public StaticIdGenerator(String sequenceName) {
-        this(sequenceName, new DefaultStrategy());
+    public StaticIdGenerator(String sequenceName, IServiceManager service) {
+        this(sequenceName, new DefaultStrategy(), service);
     }
 
-    public StaticIdGenerator(String sequenceName, final PrefetchStrategy strategy) {
+    public StaticIdGenerator(String sequenceName, final PrefetchStrategy strategy, IServiceManager service) {
         this.sequenceName = sequenceName;
         this.strategy = (strategy != null) ? strategy : new DefaultStrategy();
+        this.service = service;
     }
 
     public void initialize() {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_STATIC_GENERATOR, "initialize");
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                CatConstants.NAME_STATIC_GENERATOR + ":initialize");
         try {
-            importPool(fetchPool());
-            IdGenLogger.logSizeEvent(CatConstants.TYPE_FETCH_POOL_SIZE, initialSize);
-            transaction.setStatus(CatConstants.STATUS_SUCCESS);
+            List<IdSegment> idPool = service.fetchIdPool(sequenceName,
+                    strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
+            importIdPool(idPool);
+            IdGenLogger.logSizeEvent(CatConstants.NAME_STATIC_GENERATOR + ":initialSize", initialSize);
+            transaction.setStatus(Transaction.SUCCESS);
         } catch (Exception e) {
             transaction.setStatus(e);
             throw e;
@@ -46,20 +52,14 @@ public class StaticIdGenerator implements LongIdGenerator {
         }
     }
 
-    protected List<IdSegment> fetchPool() {
-        int requestSize = strategy.getSuggestedRequestSize();
-        int timeoutMillis = strategy.getSuggestedTimeoutMillis();
-        List<IdSegment> pool = ServiceManager.getInstance().fetchIdPool(sequenceName, requestSize, timeoutMillis);
-        if (null == pool || pool.isEmpty()) {
-            throw new RuntimeException("Failed to fetch id pool (sequence name: '" + sequenceName + "')");
+    private void importIdPool(List<IdSegment> idPool) {
+        if (null == idPool) {
+            return;
         }
-        return pool;
-    }
-
-    private void importPool(List<IdSegment> pool) {
-        for (IdSegment segment : pool) {
+        for (IdSegment segment : idPool) {
             idSegments.addLast(segment);
             initialSize += segment.getEnd().longValue() - segment.getStart().longValue() + 1;
+            maxId = segment.getEnd().longValue();
         }
         remainedSize = initialSize;
     }
@@ -88,8 +88,23 @@ public class StaticIdGenerator implements LongIdGenerator {
         return currentId;
     }
 
+    public boolean checkIncrement(StaticIdGenerator generator) {
+        if (null == generator) {
+            return true;
+        }
+        IdSegment firstSegment = this.idSegments.peekFirst();
+        if (null == firstSegment) {
+            return false;
+        }
+        return firstSegment.getStart().longValue() > generator.getMaxId();
+    }
+
     public long getRemainedSize() {
         return remainedSize;
+    }
+
+    public long getMaxId() {
+        return maxId;
     }
 
 }

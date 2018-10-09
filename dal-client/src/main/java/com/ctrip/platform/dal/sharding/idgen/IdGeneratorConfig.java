@@ -32,6 +32,7 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
         if (null == tableFactoryMap) {
             return dbDefaultFactory;
         }
+        tableName = tableName.trim().toLowerCase();
         IIdGeneratorFactory factory = tableFactoryMap.get(tableName);
         if (null == factory) {
             return dbDefaultFactory;
@@ -40,7 +41,7 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
     }
 
     private String getSequenceName(String logicDbName, String tableName) {
-        return logicDbName + "." + tableName;
+        return (logicDbName + "." + tableName).trim().toLowerCase();
     }
 
 }

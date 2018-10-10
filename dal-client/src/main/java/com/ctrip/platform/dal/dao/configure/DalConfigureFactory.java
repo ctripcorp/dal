@@ -203,7 +203,7 @@ public class DalConfigureFactory implements DalConfigConstants {
     private IIdGeneratorConfig getIdGenConfig(Node databaseSetNode) {
         Node rootNode = getChildNode(databaseSetNode, ID_GENERATOR);
         if (null == rootNode) {
-            return new IdGeneratorConfig(idGenFactoryManager.getOrCreateNullFactory());
+            return null;
         }
         IIdGeneratorFactory dbDefaultFactory = getIdGenFactoryForNode(rootNode);
         Node excludesNode = getChildNode(rootNode, EXCLUDES);

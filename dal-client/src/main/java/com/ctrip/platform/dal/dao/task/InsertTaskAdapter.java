@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.NullIdGenerator;
 
@@ -37,7 +38,10 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 		columnsForInsertWithId = combineColumns(validColumnsForInsertWithId, COLUMN_SEPARATOR);
 
-		idGenerator = getDatabaseSet(logicDbName).getIdGenConfig().getIdGenerator(logicDbName, rawTableName);
+		IIdGeneratorConfig idGenConfig = getDatabaseSet(logicDbName).getIdGenConfig();
+		if (idGenConfig != null) {
+			idGenerator = idGenConfig.getIdGenerator(logicDbName, rawTableName);
+		}
 	}
 	
 	private List<String> buildValidColumnsForInsert() {
@@ -63,7 +67,8 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	public Set<String> filterUnqualifiedColumns(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) {
 		Set<String> unqualifiedColumns = new HashSet<>(notInsertableColumns);
 		
-		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled() && idGenerator instanceof NullIdGenerator)
+		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled() &&
+				(null == idGenerator || idGenerator instanceof NullIdGenerator))
 			unqualifiedColumns.add(parser.getPrimaryKeyNames()[0]);
 
 		if(hints.isInsertNullField()) {
@@ -106,7 +111,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	}
 
 	public void processIdentityField(DalHints hints, List<Map<String, ?>> pojos) {
-		if (parser.isAutoIncrement() && !(idGenerator instanceof NullIdGenerator)) {
+		if (parser.isAutoIncrement() && idGenerator != null && !(idGenerator instanceof NullIdGenerator)) {
 			String identityFieldName = parser.getPrimaryKeyNames()[0];
 			boolean identityInsertDisabled = hints.isIdentityInsertDisabled();
 			for (Map pojo : pojos) {

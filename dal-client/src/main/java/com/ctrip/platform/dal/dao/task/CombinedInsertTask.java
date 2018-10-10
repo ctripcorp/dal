@@ -39,13 +39,18 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 		
 		String insertColumns = combineColumns(finalInsertableColumns, COLUMN_SEPARATOR);
 
-		List<Map<String, Object>> identityFields = new ArrayList<>(); //........
+		List<Map<String, Object>> identityFields = new ArrayList<>();
 		
 		int startIndex = 1;
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> pojo = daoPojos.get(index);
 			removeUnqualifiedColumns(pojo, unqualifiedColumns);
-			identityFields.add(getIdentityField(pojo));
+
+			Map<String, Object> identityField = getIdentityField(pojo);
+			if (identityField != null) {
+				identityFields.add(getIdentityField(pojo));
+			}
+
 			int paramCount = addParameters(startIndex, parameters, pojo, finalInsertableColumns);
 			startIndex += paramCount;
 			values.append(String.format("(%s),", combine("?", paramCount, ",")));

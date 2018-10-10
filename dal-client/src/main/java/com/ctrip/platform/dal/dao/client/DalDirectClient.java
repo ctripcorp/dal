@@ -146,16 +146,20 @@ public class DalDirectClient implements DalContextClient {
                 if (generatedKeyHolder == null)
                     return rows;
 
-                rs = preparedStatement.getGeneratedKeys();
+                List<Map<String, Object>> keys = dalTaskContext.getIdentityFields();
                 int actualKeySize = 0;
-                if (rs != null) {
-                    DalRowMapperExtractor<Map<String, Object>> rse =
-                            new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-                    List<Map<String, Object>> keys = rse.extract(rs);
+                if (null == keys) {
+                    rs = preparedStatement.getGeneratedKeys();
+                    if (rs != null) {
+                        DalRowMapperExtractor<Map<String, Object>> rse =
+                                new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
+                        keys = rse.extract(rs);
+                    }
+                }
+                if (keys != null) {
                     generatedKeyHolder.addKeys(keys);
                     actualKeySize = keys.size();
                 }
-
                 generatedKeyHolder.addEmptyKeys(rows - actualKeySize);
 
                 return rows;

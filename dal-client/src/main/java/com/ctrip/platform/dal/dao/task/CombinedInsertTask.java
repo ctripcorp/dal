@@ -48,7 +48,7 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 
 			Map<String, Object> identityField = getIdentityField(pojo);
 			if (identityField != null) {
-				identityFields.add(getIdentityField(pojo));
+				identityFields.add(identityField);
 			}
 
 			int paramCount = addParameters(startIndex, parameters, pojo, finalInsertableColumns);
@@ -56,12 +56,13 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 			values.append(String.format("(%s),", combine("?", paramCount, ",")));
 		}
 
+		// Put identityFields into context
+		if (taskContext instanceof DefaultTaskContext)
+			((DefaultTaskContext) taskContext).setIdentityFields(identityFields);
+
 		String tableName = getRawTableName(hints);
 		if (taskContext instanceof DalTableNameConfigure)
 			((DalTableNameConfigure) taskContext).addTables(tableName);
-
-		if (taskContext instanceof DefaultTaskContext)
-			((DefaultTaskContext) taskContext).setIdentityFields(identityFields);
 
 		String sql = String.format(TMPL_SQL_MULTIPLE_INSERT,
 				quote(tableName), insertColumns,

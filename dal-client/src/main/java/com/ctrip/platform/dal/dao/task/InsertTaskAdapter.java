@@ -11,7 +11,6 @@ import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet
 
 public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
-	private static final String IDENTITY_FIELD_NAME = "Generated_Key";
 
 	protected Set<String> insertableColumns;
 	protected Set<String> notInsertableColumns;
@@ -125,7 +124,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 			return null;
 		}
 		Map<String, Object> key = new HashMap<>();
-		key.put(IDENTITY_FIELD_NAME, identityFieldValue);
+		key.put(identityFieldName, identityFieldValue);
 		return key;
 	}
 }

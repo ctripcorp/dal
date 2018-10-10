@@ -1,4 +1,4 @@
-package com.ctrip.platform.idgen.service.api;
+package com.ctrip.framework.idgen.service.api;
 
 import java.io.Serializable;
 

@@ -1,13 +1,12 @@
 package com.ctrip.framework.idgen.client.generator;
 
-import com.ctrip.framework.idgen.client.constant.CatConstants;
 import com.ctrip.framework.idgen.client.exception.ClientTimeoutException;
+import com.ctrip.framework.idgen.client.log.CatConstants;
 import com.ctrip.framework.idgen.client.log.IdGenLogger;
-import com.ctrip.framework.idgen.client.service.ServiceManager;
+import com.ctrip.framework.idgen.client.service.IServiceManager;
 import com.ctrip.framework.idgen.client.strategy.AbstractStrategy;
 import com.ctrip.framework.idgen.client.strategy.DynamicStrategy;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
-import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.ForkedTransaction;
 import com.dianping.cat.message.Transaction;
@@ -26,44 +25,38 @@ public class DynamicIdGenerator implements LongIdGenerator {
     private static final long FETCH_ID_RETRY_BASE_INTERVAL = 10;
 
     private final String sequenceName;
-    private final String nextIdCatName;
-    private final String prefetchCatName;
     private final Deque<LongIdGenerator> staticGeneratorQueue = new ConcurrentLinkedDeque<>();
-    private final PrefetchStrategy strategy;
+    private final AbstractStrategy strategy;
+    private final IServiceManager service;
     private AtomicBoolean isFetching = new AtomicBoolean(false);
     private ExecutorService prefetchExecutor = Executors.newFixedThreadPool(PREFETCH_THREAD_POOL_SIZE);
 
-    public DynamicIdGenerator(String sequenceName) {
-        this(sequenceName, new DynamicStrategy());
+    public DynamicIdGenerator(String sequenceName, IServiceManager service) {
+        this(sequenceName, new DynamicStrategy(), service);
     }
 
-    public DynamicIdGenerator(String sequenceName, PrefetchStrategy strategy) {
+    public DynamicIdGenerator(String sequenceName, AbstractStrategy strategy, IServiceManager service) {
         this.sequenceName = sequenceName;
-        this.nextIdCatName = "nextId:" + sequenceName;
-        this.prefetchCatName = "prefetch:" + sequenceName;
         this.strategy = (strategy != null) ? strategy : new DynamicStrategy();
+        this.service = service;
     }
 
     public void initialize() {
-        if (strategy instanceof DynamicStrategy) {
-            ((DynamicStrategy) strategy).initialize();
-        }
-        prefetch();
+        strategy.initialize();
+        fetchIdPool();
     }
 
     @Override
     public Long nextId() {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_DYNAMIC_GENERATOR, nextIdCatName);
-        logVersion();
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                CatConstants.NAME_DYNAMIC_GENERATOR + ":nextId:" + sequenceName);
+        IdGenLogger.logVersion();
         try {
-            Long id = simpleNextId();
-            if (null == id) {
-                id = activeFetch(CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE);
-            }
-            transaction.setStatus(CatConstants.STATUS_SUCCESS);
+            Long id = nextIdWithActiveFetch(CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE);
+            transaction.setStatus(Transaction.SUCCESS);
             return id;
         } catch (Exception e) {
-            IdGenLogger.logError("Next id failed", e);
+            IdGenLogger.logError("Get id failed", e);
             transaction.setStatus(e);
             throw e;
         } finally {
@@ -87,23 +80,30 @@ public class DynamicIdGenerator implements LongIdGenerator {
         return id;
     }
 
-    protected Long activeFetch(int timeoutMillis) {
+    protected Long nextIdWithActiveFetch(int timeoutMillis) {
         long endTime = getMilliTime() + timeoutMillis;
-        Long id = null;
+        Long id = simpleNextId();
+        if (id != null) {
+            return id;
+        }
         int retries = 0;
-        do {
+        while (getMilliTime() < endTime) {
             retries++;
             try {
-                id = fetchSingleId();
+                fetchIdPool();
+                id = simpleNextId();
+                if (id != null) {
+                    break;
+                }
                 Thread.sleep(getRetryInterval(FETCH_ID_RETRY_BASE_INTERVAL, retries));
             } catch (InterruptedException e1) {
                 Thread.currentThread().interrupt();
             } catch (Exception e2) {
                 IdGenLogger.logError(null, e2);
             }
-        } while (null == id && getMilliTime() < endTime);
+        }
 
-        IdGenLogger.logSizeEvent(CatConstants.TYPE_ACTIVE_FETCH_RETRIES, retries);
+        IdGenLogger.logSizeEvent(CatConstants.NAME_DYNAMIC_GENERATOR + ":activeFetchRetries", retries);
         if (null == id) {
             throw new ClientTimeoutException(String.format("IdGen client timeout after %d retries", retries));
         }
@@ -111,33 +111,18 @@ public class DynamicIdGenerator implements LongIdGenerator {
         return id;
     }
 
-    protected Long fetchSingleId() {
-        return (Long) ServiceManager.getInstance().fetchId(sequenceName, strategy.getSuggestedTimeoutMillis());
-    }
-
-    private void prefetch() {
-        StaticIdGenerator staticGenerator = createStaticGenerator();
-        strategy.provide(staticGenerator.getRemainedSize());
-        staticGeneratorQueue.addLast(staticGenerator);
-    }
-
-    protected StaticIdGenerator createStaticGenerator() {
-        StaticIdGenerator staticGenerator = new StaticIdGenerator(sequenceName, strategy);
-        staticGenerator.initialize();
-        return staticGenerator;
-    }
-
     protected boolean prefetchIfNecessary() {
         if (!isFetching.get() && strategy.checkIfNeedPrefetch() && isFetching.compareAndSet(false, true)) {
-            final ForkedTransaction transaction = Cat.newForkedTransaction(CatConstants.TYPE_DYNAMIC_GENERATOR, prefetchCatName);
+            final ForkedTransaction transaction = Cat.newForkedTransaction(CatConstants.TYPE_ROOT,
+                    CatConstants.NAME_DYNAMIC_GENERATOR + ":prefetch:" + sequenceName);
             prefetchExecutor.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         transaction.fork();
                         logPoolStatistics();
-                        prefetch();
-                        transaction.setStatus(CatConstants.STATUS_SUCCESS);
+                        fetchIdPool();
+                        transaction.setStatus(Transaction.SUCCESS);
                     } catch (Exception e) {
                         IdGenLogger.logError("Prefetch failed", e);
                         transaction.setStatus(e);
@@ -152,19 +137,22 @@ public class DynamicIdGenerator implements LongIdGenerator {
         return false;
     }
 
-    private void logPoolStatistics() {
-        if (strategy instanceof AbstractStrategy) {
-            String remainedSize = String.valueOf(((AbstractStrategy) strategy).getRemainedSize());
-            IdGenLogger.logEvent(CatConstants.TYPE_REMAINED_POOL_SIZE, remainedSize);
-            if (strategy instanceof DynamicStrategy) {
-                String qps = String.valueOf(((DynamicStrategy) strategy).getQps());
-                IdGenLogger.logEvent(CatConstants.TYPE_POOL_QPS, qps);
-            }
+    private void fetchIdPool() {
+        StaticIdGenerator staticGenerator = new StaticIdGenerator(sequenceName, strategy, service);
+        staticGenerator.initialize();
+        if (staticGenerator.checkIncrement((StaticIdGenerator) staticGeneratorQueue.peekLast())) {
+            strategy.provide(staticGenerator.getRemainedSize());
+            staticGeneratorQueue.addLast(staticGenerator);
         }
     }
 
-    private void logVersion() {
-        IdGenLogger.logVersion();
+    private void logPoolStatistics() {
+        IdGenLogger.logSizeEvent(CatConstants.NAME_DYNAMIC_GENERATOR + ":remainedSize",
+                strategy.getRemainedSize());
+        if (strategy instanceof DynamicStrategy) {
+            IdGenLogger.logSizeEvent(CatConstants.NAME_DYNAMIC_GENERATOR + ":qps",
+                    ((DynamicStrategy) strategy).getQps());
+        }
     }
 
     private long getMilliTime() {

@@ -22,6 +22,7 @@ public class DynamicStrategy extends AbstractStrategy {
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
 
+    @Override
     public boolean initialize() {
         if (!isInitialized.get() && isInitialized.compareAndSet(false, true)) {
             consumedCount.set(0);
@@ -60,6 +61,9 @@ public class DynamicStrategy extends AbstractStrategy {
 
     @Override
     public boolean checkIfNeedPrefetch() {
+        if (remainedSize.get() == 0) {
+            return true;
+        }
         if (qps == 0) {
             return false;
         }

@@ -4,7 +4,7 @@ import com.ctrip.framework.idgen.server.config.SnowflakeConfig;
 import com.ctrip.framework.idgen.server.constant.CatConstants;
 import com.ctrip.framework.idgen.server.exception.ServiceTimeoutException;
 import com.ctrip.framework.idgen.server.exception.TimeRunOutException;
-import com.ctrip.platform.idgen.service.api.IdSegment;
+import com.ctrip.framework.idgen.service.api.IdSegment;
 import com.dianping.cat.Cat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,6 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
             startSequence = getRandomSequence();
         } else {
             if (timestamp < lastTimestamp) {
-                // Clock is moved backwards
                 LOGGER.error("Clock moved backwards");
             }
             startSequence = (lastSequence + 1) & config.getSequenceMask();

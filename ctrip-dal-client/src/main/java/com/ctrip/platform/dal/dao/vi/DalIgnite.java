@@ -5,9 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.titan.LogEntry;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import qunar.tc.qconfig.client.TypedConfig;
 
 import com.ctrip.framework.vi.IgniteManager.SimpleLogger;
@@ -56,6 +61,8 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             logger.info("Start warm up datasources");
             DalClientFactory.warmUpConnections();
             logger.info("success warmed up datasources");
+
+            checkIdGenConfig();
 
             return true;
         } catch (Throwable e) {
@@ -119,6 +126,17 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    private void checkIdGenConfig() {
+        DalConfigure dalConfigure = DalClientFactory.getDalConfigure();
+        Set<String> dbSetNames = dalConfigure.getDatabaseSetNames();
+        for (String dbSetName : dbSetNames) {
+            DatabaseSet dbSet = dalConfigure.getDatabaseSet(dbSetName);
+            if (dbSet.getDatabaseCategory() == DatabaseCategory.SqlServer && dbSet.getIdGenConfig() != null) {
+                throw new DalRuntimeException("Id generator does not support MS Sql Server yet");
             }
         }
     }

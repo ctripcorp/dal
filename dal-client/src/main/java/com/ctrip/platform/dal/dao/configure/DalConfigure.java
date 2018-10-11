@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.exceptions.DalConfigException;
 
 public class DalConfigure {
     private String name;
@@ -129,5 +132,14 @@ public class DalConfigure {
 
     public DatabaseSelector getSelector() {
         return selector;
+    }
+
+    public void validate() throws Exception {
+        for (DatabaseSet dbSet : databaseSets.values()) {
+            if (dbSet.getDatabaseCategory() == DatabaseCategory.SqlServer &&
+                    dbSet.getIdGenConfig() != null) {
+                throw new DalConfigException("Id generator does not support MS SqlServer yet");
+            }
+        }
     }
 }

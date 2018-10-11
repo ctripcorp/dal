@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -135,10 +136,24 @@ public class DalConfigure {
     }
 
     public void validate() throws Exception {
+        Map<String, String> dbMap = new HashMap<>();
         for (DatabaseSet dbSet : databaseSets.values()) {
-            if (dbSet.getDatabaseCategory() == DatabaseCategory.SqlServer &&
-                    dbSet.getIdGenConfig() != null) {
-                throw new DalConfigException("Id generator does not support MS SqlServer yet");
+            if (null == dbSet.getIdGenConfig()) {
+                continue;
+            }
+            String dbSetName = dbSet.getName().trim().toLowerCase();
+            if (dbSet.getDatabaseCategory() == DatabaseCategory.SqlServer) {
+                throw new DalConfigException(String.format("Id generator does not support MS SqlServer yet. Logic db name: %s", dbSetName));
+            }
+            Map<String, DataBase> dbs = dbSet.getDatabases();
+            if (dbs != null) {
+                for (DataBase db : dbs.values()) {
+                    String dbName = db.getConnectionString().trim().toLowerCase();
+                    String previousBbSetName = dbMap.put(dbName, dbSetName);
+                    if (previousBbSetName != null && !previousBbSetName.equals(dbSetName)) {
+                        throw new DalConfigException(String.format("Duplicated database in different logic dbs with id generator. Logic db name: %s", dbSetName));
+                    }
+                }
             }
         }
     }

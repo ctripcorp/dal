@@ -82,7 +82,7 @@ public class CtripSnowflakeConfigLocator implements SnowflakeConfigLocator<QTabl
         }
         String message = builder.toString();
         LOGGER.info(message);
-        Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_SNOWFLAKE_CONFIG_CHANGED,
+        Cat.logEvent(CatConstants.TYPE_ROOT, CatConstants.NAME_SNOWFLAKE_CONFIG_CHANGED,
                 Event.SUCCESS, message);
     }
 

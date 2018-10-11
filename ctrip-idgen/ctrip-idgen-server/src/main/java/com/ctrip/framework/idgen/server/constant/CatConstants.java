@@ -2,15 +2,16 @@ package com.ctrip.framework.idgen.server.constant;
 
 public interface CatConstants {
 
-    String CAT_TYPE_IDGEN_SERVER = "IdGen.server";
+    String TYPE_ROOT = "IdGen.Server";
 
-    String CAT_NAME_QCONFIG_LOAD = "QConfig.load";
-    String CAT_NAME_QCONFIG_RELOAD = "QConfig.reload";
-    String CAT_NAME_WHITELIST_CHANGED = "Whitelist.changed";
-    String CAT_NAME_SNOWFLAKE_CONFIG_CHANGED = "SnowflakeConfig.changed";
-    String CAT_NAME_WORKER_CREATED = "Worker.created";
-    String CAT_NAME_WORKER_TIMEOUT = "Worker.timeout";
+    String NAME_QCONFIG_LOAD = "QConfig.load";
+    String NAME_QCONFIG_RELOAD = "QConfig.reload";
+    String NAME_WHITELIST_CHANGED = "Whitelist.changed";
+    String NAME_SNOWFLAKE_CONFIG_CHANGED = "SnowflakeConfig.changed";
+    String NAME_WORKER_CREATED = "Worker.created";
+    String NAME_WORKER_TIMEOUT = "Worker.timeout";
 
-    String CAT_STATUS_WARN = "Warn";
+    String STATUS_WARN = "WARN";
+    String STATUS_NULL_CONFIG = "NULL_CONFIG";
 
 }

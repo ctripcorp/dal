@@ -40,18 +40,18 @@ public class MapConfigProvider implements ConfigProvider<Map<String, String>> {
     private MapConfig getMapConfig() {
         MapConfig mapConfig = configReference.get();
         if (null == mapConfig) {
-            synchronized (this) {
+            synchronized (configReference) {
                 mapConfig = configReference.get();
                 if (null == mapConfig) {
-                    Transaction transaction = Cat.newTransaction(CatConstants.CAT_TYPE_IDGEN_SERVER,
-                            CatConstants.CAT_NAME_QCONFIG_LOAD + ":" + configFileName);
+                    Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                            CatConstants.NAME_QCONFIG_LOAD + ":" + configFileName);
                     try {
                         mapConfig = MapConfig.get(configFileName);
                         if (mapConfig != null) {
                             configReference.set(mapConfig);
                             transaction.setStatus(Transaction.SUCCESS);
                         } else {
-                            transaction.setStatus("Null config");
+                            transaction.setStatus(CatConstants.STATUS_NULL_CONFIG);
                         }
                     } catch (Exception e) {
                         LOGGER.error("Failed to load '{}' from QConfig", configFileName, e);
@@ -77,15 +77,17 @@ public class MapConfigProvider implements ConfigProvider<Map<String, String>> {
             mapConfig.addListener(new Configuration.ConfigListener<Map<String, String>>() {
                 @Override
                 public void onLoad(Map<String, String> updatedConfig) {
-                    Transaction transaction = Cat.newTransaction(CatConstants.CAT_TYPE_IDGEN_SERVER,
-                            CatConstants.CAT_NAME_QCONFIG_RELOAD + ":" + configFileName);
+                    Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                            CatConstants.NAME_QCONFIG_RELOAD + ":" + configFileName);
                     try {
                         if (updatedConfig != null) {
                             callback.onConfigChanged(updatedConfig);
+                            transaction.setStatus(Transaction.SUCCESS);
+                        } else {
+                            transaction.setStatus(CatConstants.STATUS_NULL_CONFIG);
                         }
-                        transaction.setStatus(Transaction.SUCCESS);
                     } catch (Exception e) {
-                        LOGGER.error("{} changed callback exception", configFileName, e);
+                        LOGGER.error("'{}' changed callback exception", configFileName, e);
                         transaction.setStatus(e);
                     } finally {
                         transaction.complete();

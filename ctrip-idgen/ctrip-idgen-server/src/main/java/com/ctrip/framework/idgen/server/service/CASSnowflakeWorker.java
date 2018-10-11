@@ -44,8 +44,8 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
                 throw new ServiceTimeoutException(msg);
             }
             LOGGER.warn(msg);
-            Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_WORKER_TIMEOUT,
-                    CatConstants.CAT_STATUS_WARN, msg);
+            Cat.logEvent(CatConstants.TYPE_ROOT, CatConstants.NAME_WORKER_TIMEOUT,
+                    CatConstants.STATUS_WARN, msg);
         }
         return pool;
     }
@@ -59,8 +59,9 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
         long timestamp = getTimestamp();
 
         if (timestamp > config.getMaxTimestamp()) {
-            // Timestamp runs out
-            throw new TimeRunOutException();
+            String msg = "Timestamp overflowed";
+            LOGGER.error(msg);
+            throw new TimeRunOutException(msg);
         }
 
         if (timestamp > lastTimestamp) {

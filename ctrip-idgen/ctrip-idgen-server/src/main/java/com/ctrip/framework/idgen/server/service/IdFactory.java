@@ -46,15 +46,14 @@ public class IdFactory {
         sequenceName = sequenceName.trim().toLowerCase();
         IdWorker worker = workerCache.get(sequenceName);
         if (null == worker) {
-            synchronized (this) {
+            synchronized (workerCache) {
                 worker = workerCache.get(sequenceName);
                 if (null == worker) {
-                    worker = new CASSnowflakeWorker(sequenceName,
-                            configManager.getSnowflakeConfig(sequenceName));
+                    worker = new CASSnowflakeWorker(sequenceName, configManager.getSnowflakeConfig(sequenceName));
                     workerCache.put(sequenceName, worker);
                     String msg = String.format("Created worker '%s'", sequenceName);
                     LOGGER.info(msg);
-                    Cat.logEvent(CatConstants.CAT_TYPE_IDGEN_SERVER, CatConstants.CAT_NAME_WORKER_CREATED,
+                    Cat.logEvent(CatConstants.TYPE_ROOT, CatConstants.NAME_WORKER_CREATED,
                             Event.SUCCESS, msg);
                 }
             }

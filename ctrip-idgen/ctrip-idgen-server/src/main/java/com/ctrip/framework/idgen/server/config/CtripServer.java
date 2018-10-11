@@ -16,8 +16,7 @@ public class CtripServer implements Server<Map<String, String>> {
 
     private static final String WORKER_ID_PROPERTY_KEY_FORMAT = "workerId_%s";
     private static final String WORKER_ID_PROPERTY_KEY_PATTERN_STRING = "workerId_*";
-    private static final Pattern WORKER_ID_PROPERTY_KEY_PATTERN =
-            Pattern.compile(WORKER_ID_PROPERTY_KEY_PATTERN_STRING);
+    private static final Pattern WORKER_ID_PROPERTY_KEY_PATTERN = Pattern.compile(WORKER_ID_PROPERTY_KEY_PATTERN_STRING);
 
     private long workerId;
 

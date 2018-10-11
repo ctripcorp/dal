@@ -89,22 +89,22 @@ public class CtripSnowflakeConfig implements SnowflakeConfig<Map<String, String>
         try {
             timestampBits = Integer.parseInt(properties.get(TIMESTAMP_BITS_PROPERTY_KEY));
         } catch (Exception e) {
-            LOGGER.info("[timestampBits] invalid, use default value: '{}'", timestampBits, e);
+            LOGGER.info("[timestampBits] invalid, use default value: {}", timestampBits, e);
         }
         try {
             workerIdBits = Integer.parseInt(properties.get(WORKER_ID_BITS_PROPERTY_KEY));
         } catch (Exception e) {
-            LOGGER.info("[workerIdBits] invalid, use default value: '{}'", workerIdBits, e);
+            LOGGER.info("[workerIdBits] invalid, use default value: {}", workerIdBits, e);
         }
         try {
             sequenceBits = Integer.parseInt(properties.get(SEQUENCE_BITS_PROPERTY_KEY));
         } catch (Exception e) {
-            LOGGER.info("[sequenceBits] invalid, use default value: '{}'", sequenceBits, e);
+            LOGGER.info("[sequenceBits] invalid, use default value: {}", sequenceBits, e);
         }
         try {
             idReference = Long.parseLong(properties.get(ID_REFERENCE_PROPERTY_KEY));
         } catch (Exception e) {
-            LOGGER.info("[idReference] invalid, use default value: '{}'", idReference, e);
+            LOGGER.info("[idReference] invalid, use default value: {}", idReference, e);
         }
         try {
             String dateString = properties.get(DATE_REFERENCE_PROPERTY_KEY);
@@ -116,7 +116,7 @@ public class CtripSnowflakeConfig implements SnowflakeConfig<Map<String, String>
         try {
             sequenceResetRange = Integer.parseInt(properties.get(SEQUENCE_RESET_RANGE_PROPERTY_KEY));
         } catch (Exception e) {
-            LOGGER.info("[sequenceResetRange] invalid, use default value: '{}'", sequenceResetRange, e);
+            LOGGER.info("[sequenceResetRange] invalid, use default value: {}", sequenceResetRange, e);
         }
     }
 
@@ -161,14 +161,9 @@ public class CtripSnowflakeConfig implements SnowflakeConfig<Map<String, String>
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("timestampBits: %d, ", timestampBits));
-        builder.append(String.format("workerIdBits: %d, ", workerIdBits));
-        builder.append(String.format("sequenceBits: %d, ", sequenceBits));
-        builder.append(String.format("idReference: %d, ", idReference));
-        builder.append(String.format("dateReference: %s, ", dateReference));
-        builder.append(String.format("sequenceResetRange: %d", sequenceResetRange));
-        return builder.toString();
+        return String.format("timestampBits: %d, workerIdBits: %d, sequenceBits: %d, idReference: %d, " +
+                "dateReference: '%s', sequenceResetRange: %d", timestampBits, workerIdBits, sequenceBits,
+                idReference, dateReference, sequenceResetRange);
     }
 
     @Override

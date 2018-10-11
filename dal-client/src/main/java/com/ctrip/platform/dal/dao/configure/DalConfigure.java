@@ -173,7 +173,7 @@ public class DalConfigure {
         if (sqlServerSet.size() > 0) {
             errorInfo.append(System.lineSeparator());
             errorInfo.append("> Id generator does not support SqlServer yet. ");
-            errorInfo.append("Below are SqlServer logic databases that have been configured with id generator: ");
+            errorInfo.append("These SqlServer logic databases have been configured with id generator: ");
             errorInfo.append(StringUtils.join(sqlServerSet, ", "));
             errorInfo.append(".");
             sqlServerSetMark = true;
@@ -189,11 +189,11 @@ public class DalConfigure {
                     connStrMapMark = true;
                 }
                 errorInfo.append(System.lineSeparator());
-                errorInfo.append("    ");
+                errorInfo.append("  > ");
                 errorInfo.append(key);
                 errorInfo.append(" (included in logic databases: ");
                 errorInfo.append(StringUtils.join(value, ", "));
-                errorInfo.append(").");
+                errorInfo.append(")");
             }
         }
         if (sqlServerSetMark || connStrMapMark) {

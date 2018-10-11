@@ -62,8 +62,6 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             DalClientFactory.warmUpConnections();
             logger.info("success warmed up datasources");
 
-            checkIdGenConfig();
-
             return true;
         } catch (Throwable e) {
             if (DataSourceConfigureManager.config == null) {
@@ -126,17 +124,6 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
                     break;
                 default:
                     break;
-            }
-        }
-    }
-
-    private void checkIdGenConfig() {
-        DalConfigure dalConfigure = DalClientFactory.getDalConfigure();
-        Set<String> dbSetNames = dalConfigure.getDatabaseSetNames();
-        for (String dbSetName : dbSetNames) {
-            DatabaseSet dbSet = dalConfigure.getDatabaseSet(dbSetName);
-            if (dbSet.getDatabaseCategory() == DatabaseCategory.SqlServer && dbSet.getIdGenConfig() != null) {
-                throw new DalRuntimeException("Id generator does not support MS Sql Server yet");
             }
         }
     }

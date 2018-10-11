@@ -150,15 +150,14 @@ public class DalConfigure {
             }
             Map<String, DataBase> dbs = dbSet.getDatabases();
             if (dbs != null) {
-                String dbSetNameInLowerCase = dbSetName.trim().toLowerCase();
                 for (DataBase db : dbs.values()) {
                     String connStr = db.getConnectionString();
                     Set<String> dbSetsForConnStr = connStrMap.get(connStr);
                     if (dbSetsForConnStr != null) {
-                        dbSetsForConnStr.add(dbSetNameInLowerCase);
+                        dbSetsForConnStr.add(dbSetName);
                     } else {
                         dbSetsForConnStr = new HashSet<>();
-                        dbSetsForConnStr.add(dbSetNameInLowerCase);
+                        dbSetsForConnStr.add(dbSetName);
                         connStrMap.put(connStr, dbSetsForConnStr);
                     }
                 }

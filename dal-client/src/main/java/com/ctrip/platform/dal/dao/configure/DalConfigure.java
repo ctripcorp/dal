@@ -171,7 +171,8 @@ public class DalConfigure {
         StringBuilder errorInfo = new StringBuilder();
         boolean sqlServerSetMark = false;
         if (sqlServerSet.size() > 0) {
-            errorInfo.append("Id generator does not support SqlServer yet.");
+            errorInfo.append(System.lineSeparator());
+            errorInfo.append("> Id generator does not support SqlServer yet. ");
             errorInfo.append("Below are SqlServer logic databases that have been configured with id generator: ");
             errorInfo.append(StringUtils.join(sqlServerSet, ", "));
             errorInfo.append(".");
@@ -182,14 +183,17 @@ public class DalConfigure {
             Set<String> value = connStrMap.get(key);
             if (value.size() > 1) {
                 if (!connStrMapMark) {
-                    errorInfo.append("Duplicated database included in multiple logic databases with id generator.");
+                    errorInfo.append(System.lineSeparator());
+                    errorInfo.append("> Duplicated database included in multiple logic databases with id generator. ");
                     errorInfo.append("Below are the connection strings of the duplicated databases: ");
                     connStrMapMark = true;
                 }
+                errorInfo.append(System.lineSeparator());
+                errorInfo.append("    ");
                 errorInfo.append(key);
                 errorInfo.append(" (included in logic databases: ");
                 errorInfo.append(StringUtils.join(value, ", "));
-                errorInfo.append("), ");
+                errorInfo.append(").");
             }
         }
         if (sqlServerSetMark || connStrMapMark) {

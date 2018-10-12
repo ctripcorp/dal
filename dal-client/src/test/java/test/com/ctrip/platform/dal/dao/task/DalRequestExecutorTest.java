@@ -34,7 +34,7 @@ public class DalRequestExecutorTest {
 		}
 		
 		@Override
-		public void validate() throws SQLException {
+		public void validateAndPrepare() throws SQLException {
 			if(e!= null)
 				throw e;
 		}

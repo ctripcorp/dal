@@ -77,7 +77,7 @@ public class DalSingleTaskRequestTest {
 		try {
 			Integer i = null;
 			test = new DalSingleTaskRequest<>("", new DalHints(), i, new TestSingleTask());
-			test.validate();
+			test.validateAndPrepare();
 			fail();
 		} catch (SQLException e) {
 		}
@@ -85,7 +85,7 @@ public class DalSingleTaskRequestTest {
 		try {
 			List<Integer> pojos = null;
 			test = new DalSingleTaskRequest<>("", new DalHints(), pojos, new TestSingleTask());
-			test.validate();
+			test.validateAndPrepare();
 			fail();
 		} catch (SQLException e) {
 		}
@@ -93,7 +93,7 @@ public class DalSingleTaskRequestTest {
 		try {
 			List<Integer> pojos = new ArrayList<>();
 			test = new DalSingleTaskRequest<>("", new DalHints(), pojos, (TestSingleTask)null);
-			test.validate();
+			test.validateAndPrepare();
 			fail();
 		} catch (SQLException e) {
 		}
@@ -101,7 +101,7 @@ public class DalSingleTaskRequestTest {
 		try {
 			Integer i = 1;
 			test = new DalSingleTaskRequest<>("dao_test_sqlsvr_dbShard", new DalHints(), i, new TestSingleTask());
-			test.validate();
+			test.validateAndPrepare();
 		} catch (SQLException e) {
 			fail();
 		}
@@ -109,7 +109,7 @@ public class DalSingleTaskRequestTest {
 		try {
 			List<Integer> pojos = new ArrayList<>();
 			test = new DalSingleTaskRequest<>("dao_test_sqlsvr_dbShard", new DalHints(), pojos, new TestSingleTask());
-			test.validate();
+			test.validateAndPrepare();
 		} catch (SQLException e) {
 			fail();
 		}
@@ -128,7 +128,7 @@ public class DalSingleTaskRequestTest {
 		DalSingleTaskRequest<Integer> test = null;
 		test = new DalSingleTaskRequest<>("dao_test_sqlsvr_dbShard", new DalHints(), 1, new TestSingleTask());
 		try {
-			test.validate();
+			test.validateAndPrepare();
 			Callable<int[]> task = test.createTask();
 			assertNotNull(task);
 			assertArrayEquals(new int[]{1}, task.call());
@@ -141,7 +141,7 @@ public class DalSingleTaskRequestTest {
 			pojos.add(1);
 			pojos.add(2);
 			test = new DalSingleTaskRequest<>("dao_test_sqlsvr_dbShard", new DalHints(), pojos, new TestSingleTask());
-			test.validate();
+			test.validateAndPrepare();
 			Callable<int[]> task = test.createTask();
 			assertNotNull(task);
 			assertArrayEquals(new int[]{1, 2}, task.call());

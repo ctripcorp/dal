@@ -90,7 +90,7 @@ public class DalBulkTaskContextTest {
             // Empty
             pojos = new ArrayList<TestPojo>();
             test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
-            test.validate();
+            test.validateAndPrepare();
             test.isCrossShard();
             task = test.createTask();
             assertEquals(0, task.call().size());
@@ -100,7 +100,7 @@ public class DalBulkTaskContextTest {
             pojos.add(new TestPojo(0,0));
             pojos.add(new TestPojo(0,0));
             test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints(), pojos, new TestBulkTask());
-            test.validate();
+            test.validateAndPrepare();
             test.isCrossShard();
             task = test.createTask();
             assertNotNull(task);
@@ -113,7 +113,7 @@ public class DalBulkTaskContextTest {
             pojos.add(new TestPojo(0,0));
             test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "", new DalHints().inShard(1), pojos, new TestBulkTask());
             // To create pojos
-            test.validate();
+            test.validateAndPrepare();
             test.isCrossShard();
             task = test.createTask();
             assertNotNull(task);
@@ -126,7 +126,7 @@ public class DalBulkTaskContextTest {
             pojos.add(new TestPojo(0,0));
             test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbTableShard", "dal_client_test", new DalHints(), pojos, new TestBulkTask());
             // To create pojos
-            test.validate();
+            test.validateAndPrepare();
             test.isCrossShard();
             task = test.createTask();
             assertNotNull(task);
@@ -151,7 +151,7 @@ public class DalBulkTaskContextTest {
             pojos.add(new TestPojo(1,2));
             pojos.add(new TestPojo(1,3));
             test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "dal_client_test", new DalHints(), pojos, new TestBulkTask());
-            test.validate();
+            test.validateAndPrepare();
             test.isCrossShard();
             tasks = test.createTasks();
             assertEquals(2, tasks.size());
@@ -167,7 +167,7 @@ public class DalBulkTaskContextTest {
             pojos.add(new TestPojo(0,3));
             pojos.add(new TestPojo(1,1));
             test = new DalBulkTaskRequest<>("dao_test_sqlsvr_dbShard", "dal_client_test", new DalHints(), pojos, new TestBulkTask());
-            test.validate();
+            test.validateAndPrepare();
             test.isCrossShard();
             tasks = test.createTasks();
             assertEquals(2, tasks.size());

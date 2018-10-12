@@ -22,7 +22,7 @@ public interface DalRequest<T> {
 	 * Validate request
 	 * @throws SQLException
 	 */
-    void validate() throws SQLException;
+//    void validate() throws SQLException;
 
 	/**
 	 * Do validation and preparation

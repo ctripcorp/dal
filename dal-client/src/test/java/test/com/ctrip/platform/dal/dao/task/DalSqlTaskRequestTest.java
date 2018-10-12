@@ -83,7 +83,7 @@ public class DalSqlTaskRequestTest {
 		DalSqlTaskRequest<Integer> test = null;
 		try {
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), new DalHints(), new FreeSqlUpdateTask(), null);
-			test.validate();
+			test.validateAndPrepare();
 		} catch (SQLException e) {
 			fail();
 		}
@@ -117,7 +117,7 @@ public class DalSqlTaskRequestTest {
 		
 		DalHints hints = new DalHints();
 		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
-		test.validate();
+		test.validateAndPrepare();
 		try {
 			Callable<Integer> task = test.createTask();
 			assertEquals(1, task.call().intValue());
@@ -136,7 +136,7 @@ public class DalSqlTaskRequestTest {
 			hints = new DalHints();
 			hints.inAllShards();
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
-			test.validate();
+			test.validateAndPrepare();
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
@@ -162,7 +162,7 @@ public class DalSqlTaskRequestTest {
 			shards.add("1");
 			hints.inShards(shards);
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
-			test.validate();
+			test.validateAndPrepare();
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
@@ -196,7 +196,7 @@ public class DalSqlTaskRequestTest {
 			p.set(3, 1);
 			
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder("select * from tablea where id = ? and id in (?) and id = ?", p), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
-			test.validate();
+			test.validateAndPrepare();
 			Map<String, Callable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){

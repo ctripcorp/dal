@@ -58,9 +58,9 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
         return hints.isAsyncExecution();
     }
 
-    @Override
+/*    @Override
     public void validate() throws SQLException {
-    }
+    }*/
 
     @Override
     public void validateAndPrepare() throws SQLException {

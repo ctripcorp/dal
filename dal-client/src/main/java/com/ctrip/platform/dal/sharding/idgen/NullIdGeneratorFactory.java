@@ -4,8 +4,14 @@ public class NullIdGeneratorFactory implements IIdGeneratorFactory {
 
     private IdGenerator nullIdGenerator = new NullIdGeneratorImpl();
 
+    @Override
     public IdGenerator getIdGenerator(String sequenceName) {
         return nullIdGenerator;
+    }
+
+    @Override
+    public int getOrder() {
+        return -1;
     }
 
     class NullIdGeneratorImpl implements NullIdGenerator {

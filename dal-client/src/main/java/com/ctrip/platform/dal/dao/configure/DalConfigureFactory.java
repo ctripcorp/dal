@@ -13,6 +13,8 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.ctrip.platform.dal.sharding.idgen.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -29,6 +31,8 @@ import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
 
 public class DalConfigureFactory implements DalConfigConstants {
     private static DalConfigureFactory factory = new DalConfigureFactory();
+
+    private IdGeneratorFactoryManager idGenFactoryManager = new IdGeneratorFactoryManager();
 
     /**
      * Load from classpath. For historic reason, we support both dal.xml and Dal.config for configure name.
@@ -176,6 +180,8 @@ public class DalConfigureFactory implements DalConfigConstants {
                 shardingStrategy = getAttribute(databaseSetNode, SHARDING_STRATEGY);
         
         shardingStrategy = shardingStrategy.trim();
+
+        IIdGeneratorConfig idGenConfig = getIdGenConfig(databaseSetNode);
         
         List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
         Map<String, DataBase> databases = new HashMap<>();
@@ -186,10 +192,78 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         if (shardingStrategy.isEmpty())
             return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    databases);
+                    databases, idGenConfig);
         else
             return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    shardingStrategy, databases);
+                    shardingStrategy, databases, idGenConfig);
+    }
+
+    private IIdGeneratorConfig getIdGenConfig(Node databaseSetNode) throws Exception {
+        Node rootNode = getChildNode(databaseSetNode, ID_GENERATOR);
+        if (null == rootNode) {
+            return null;
+        }
+        Node includesNode = getChildNode(rootNode, INCLUDES);
+        Node excludesNode = getChildNode(rootNode, EXCLUDES);
+        if (includesNode != null && excludesNode != null) {
+            throw new DalConfigException("<includes> and <excludes> nodes cannot be configured together within <IdGenerator> node");
+        }
+        IIdGeneratorFactory rootNodeFactory = getIdGenFactoryForNode(rootNode);
+        Map<String, IIdGeneratorFactory> tableFactoryMap;
+        if (includesNode != null) {
+            tableFactoryMap = getIdGenFactoriesForNode(includesNode, INCLUDE, rootNodeFactory);
+            if (rootNodeFactory instanceof NullIdGeneratorFactory) {
+                return new IdGeneratorConfig(idGenFactoryManager.getOrCreateDefaultFactory(), tableFactoryMap);
+            } else {
+                return new IdGeneratorConfig(idGenFactoryManager.getOrCreateNullFactory(), tableFactoryMap);
+            }
+        } else if (excludesNode != null) {
+            if (rootNodeFactory instanceof NullIdGeneratorFactory) {
+                tableFactoryMap = getIdGenFactoriesForNode(excludesNode,
+                        EXCLUDE, idGenFactoryManager.getOrCreateDefaultFactory());
+            } else {
+                tableFactoryMap = getIdGenFactoriesForNode(excludesNode,
+                        EXCLUDE, idGenFactoryManager.getOrCreateNullFactory());
+            }
+            return new IdGeneratorConfig(rootNodeFactory, tableFactoryMap);
+        } else {
+            return new IdGeneratorConfig(rootNodeFactory);
+        }
+    }
+
+    private IIdGeneratorFactory getIdGenFactoryForNode(Node node) {
+        return getIdGenFactoryForNode(node, idGenFactoryManager.getOrCreateDefaultFactory());
+    }
+
+    private IIdGeneratorFactory getIdGenFactoryForNode(Node node, final IIdGeneratorFactory defaultFactory) {
+        try {
+            String className = getAttribute(node, FACTORY);
+            if (className != null && !className.trim().isEmpty()) {
+                return idGenFactoryManager.getOrCreateFactory(className);
+            }
+        } catch (NullPointerException e) {
+        }
+        return defaultFactory;
+    }
+
+    private Map<String, IIdGeneratorFactory> getIdGenFactoriesForNode(Node node, String subTag, final IIdGeneratorFactory defaultFactory) {
+        Map<String, IIdGeneratorFactory> factories = new HashMap<>();
+        List<Node> subNodes = getChildNodes(node, subTag);
+        for (Node subNode : subNodes) {
+            Node tablesNode = getChildNode(subNode, TABLES);
+            if (null == tablesNode) {
+                continue;
+            }
+            IIdGeneratorFactory factory = getIdGenFactoryForNode(subNode, defaultFactory);
+            List<Node> tableNodes = getChildNodes(tablesNode, TABLE);
+            for (Node tableNode : tableNodes) {
+                String tableName = tableNode.getTextContent();
+                if (tableName != null && !tableName.trim().isEmpty()) {
+                    factories.put(tableName.trim().toLowerCase(), factory);
+                }
+            }
+        }
+        return factories;
     }
 
     private DataBase readDataBase(Node dataBaseNode, boolean isSharded) {

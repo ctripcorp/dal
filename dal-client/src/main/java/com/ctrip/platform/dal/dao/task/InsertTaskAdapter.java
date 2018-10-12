@@ -9,9 +9,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.*;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
+import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
+import com.ctrip.platform.dal.sharding.idgen.NullIdGenerator;
+
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.getDatabaseSet;
 
 public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	public static final String TMPL_SQL_INSERT = "INSERT INTO %s (%s) VALUES(%s)";
@@ -22,6 +28,8 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	protected String columnsForInsertWithId;
 	protected List<String> validColumnsForInsert;
 	protected List<String> validColumnsForInsertWithId;
+
+	protected IdGenerator idGenerator;
 	
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser);
@@ -38,6 +46,11 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		
 		columnsForInsert = combineColumns(validColumnsForInsert, COLUMN_SEPARATOR);
 		columnsForInsertWithId = combineColumns(validColumnsForInsertWithId, COLUMN_SEPARATOR);
+
+		IIdGeneratorConfig idGenConfig = getDatabaseSet(logicDbName).getIdGenConfig();
+		if (idGenConfig != null) {
+			idGenerator = idGenConfig.getIdGenerator(logicDbName, rawTableName);
+		}
 	}
 	
 	private List<String> buildValidColumnsForInsert() {
@@ -54,16 +67,17 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	}
 	
 	public List<String> buildValidColumnsForInsert(Set<String> unqualifiedColumns) {
-		List<String> finalalidColumnsForInsert = new ArrayList<>(Arrays.asList(parser.getInsertableColumnNames()));
-		finalalidColumnsForInsert.removeAll(unqualifiedColumns);
+		List<String> finalValidColumnsForInsert = new ArrayList<>(Arrays.asList(parser.getInsertableColumnNames()));
+		finalValidColumnsForInsert.removeAll(unqualifiedColumns);
 		
-		return finalalidColumnsForInsert;
+		return finalValidColumnsForInsert;
 	}
 	
 	public Set<String> filterUnqualifiedColumns(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos) {
 		Set<String> unqualifiedColumns = new HashSet<>(notInsertableColumns);
 		
-		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled())
+		if(parser.isAutoIncrement() && hints.isIdentityInsertDisabled() &&
+				(null == idGenerator || idGenerator instanceof NullIdGenerator))
 			unqualifiedColumns.add(parser.getPrimaryKeyNames()[0]);
 
 		if(hints.isInsertNullField()) {
@@ -112,5 +126,28 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 		if (context instanceof DalContextConfigure)
 			context.setShardingCategory(shardingCategory);
 		return context;
+	}
+
+	public void processIdentityField(DalHints hints, List<Map<String, ?>> pojos) {
+		if (parser.isAutoIncrement() && idGenerator != null && !(idGenerator instanceof NullIdGenerator)) {
+			String identityFieldName = parser.getPrimaryKeyNames()[0];
+			boolean identityInsertDisabled = hints.isIdentityInsertDisabled();
+			for (Map pojo : pojos) {
+				if (identityInsertDisabled || null == pojo.get(identityFieldName)) {
+					pojo.put(identityFieldName, idGenerator.nextId());
+				}
+			}
+		}
+	}
+
+	public Map<String, Object> getIdentityField(Map<String, ?> pojo) {
+		String identityFieldName = parser.getPrimaryKeyNames()[0];
+		Object identityFieldValue = pojo.get(identityFieldName);
+		if (null == identityFieldValue) {
+			return null;
+		}
+		Map<String, Object> key = new HashMap<>();
+		key.put(identityFieldName, identityFieldValue);
+		return key;
 	}
 }

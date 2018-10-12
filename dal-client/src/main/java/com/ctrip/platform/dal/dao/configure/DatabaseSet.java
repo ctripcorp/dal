@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
+import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 
 public class DatabaseSet {
 	private static final String CLASS = "class";
@@ -28,6 +29,8 @@ public class DatabaseSet {
 
 	private List<DataBase> masterDbs = new ArrayList<DataBase>();
 	private List<DataBase> slaveDbs = new ArrayList<DataBase>();
+
+	private IIdGeneratorConfig idGenConfig;
 	
 	/**
 	 * The target DB set does not support shard
@@ -37,15 +40,25 @@ public class DatabaseSet {
 	 * @throws Exception
 	 */
 	public DatabaseSet(String name, String provider, Map<String, DataBase> databases) throws Exception {
-		this(name, provider, null, databases);
+		this(name, provider, null, databases, null);
 	}
 	
 	public DatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases) throws Exception {
+		this(name, provider, shardStrategy, databases, null);
+	}
+
+	public DatabaseSet(String name, String provider,
+					   Map<String, DataBase> databases, IIdGeneratorConfig idGenConfig) throws Exception {
+		this(name, provider, null, databases, idGenConfig);
+	}
+
+	public DatabaseSet(String name, String provider, String shardStrategy,
+					   Map<String, DataBase> databases, IIdGeneratorConfig idGenConfig) throws Exception {
 		this.name = name;
 		this.provider = provider;
-		dbCategory = DatabaseCategory.matchWith(provider);
+		this.dbCategory = DatabaseCategory.matchWith(provider);
 		this.databases = databases;
-
+		this.idGenConfig = idGenConfig;
 		initStrategy(shardStrategy);
 		initShards();
 	}
@@ -145,5 +158,9 @@ public class DatabaseSet {
 
 	public List<DataBase> getSlaveDbs(String shard) {
 	    return slaveDbByShard.containsKey(shard) ? new ArrayList<>(slaveDbByShard.get(shard)) : null;
+	}
+
+	public IIdGeneratorConfig getIdGenConfig() {
+		return idGenConfig;
 	}
 }

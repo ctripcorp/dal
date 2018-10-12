@@ -1,14 +1,19 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
+
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.exceptions.DalConfigException;
+import org.apache.commons.lang.StringUtils;
 
 public class DalConfigure {
     private String name;
@@ -129,5 +134,69 @@ public class DalConfigure {
 
     public DatabaseSelector getSelector() {
         return selector;
+    }
+
+    public void validate() throws Exception {
+        Set<String> sqlServerSet = new HashSet<>();
+        Map<String, Set<String>> connStrMap = new HashMap<>();
+        for (DatabaseSet dbSet : databaseSets.values()) {
+            if (null == dbSet.getIdGenConfig()) {
+                continue;
+            }
+            String dbSetName = dbSet.getName();
+            if (dbSet.getDatabaseCategory() == DatabaseCategory.SqlServer) {
+                sqlServerSet.add(dbSetName);
+                continue;
+            }
+            Map<String, DataBase> dbs = dbSet.getDatabases();
+            if (dbs != null) {
+                for (DataBase db : dbs.values()) {
+                    String connStr = db.getConnectionString();
+                    Set<String> dbSetsForConnStr = connStrMap.get(connStr);
+                    if (dbSetsForConnStr != null) {
+                        dbSetsForConnStr.add(dbSetName);
+                    } else {
+                        dbSetsForConnStr = new HashSet<>();
+                        dbSetsForConnStr.add(dbSetName);
+                        connStrMap.put(connStr, dbSetsForConnStr);
+                    }
+                }
+            }
+        }
+        internalCheck(sqlServerSet, connStrMap);
+    }
+
+    private void internalCheck(Set<String> sqlServerSet, Map<String, Set<String>> connStrMap) throws Exception {
+        StringBuilder errorInfo = new StringBuilder();
+        boolean sqlServerSetMark = false;
+        if (sqlServerSet.size() > 0) {
+            errorInfo.append(System.lineSeparator());
+            errorInfo.append("> Id generator does not support SqlServer yet. ");
+            errorInfo.append("These SqlServer logic databases have been configured with id generator: ");
+            errorInfo.append(StringUtils.join(sqlServerSet, ", "));
+            errorInfo.append(".");
+            sqlServerSetMark = true;
+        }
+        boolean connStrMapMark = false;
+        for (String key : connStrMap.keySet()) {
+            Set<String> value = connStrMap.get(key);
+            if (value.size() > 1) {
+                if (!connStrMapMark) {
+                    errorInfo.append(System.lineSeparator());
+                    errorInfo.append("> Duplicated database included in multiple logic databases with id generator. ");
+                    errorInfo.append("Below are the connection strings of the duplicated databases: ");
+                    connStrMapMark = true;
+                }
+                errorInfo.append(System.lineSeparator());
+                errorInfo.append("  > ");
+                errorInfo.append(key);
+                errorInfo.append(" (included in logic databases: ");
+                errorInfo.append(StringUtils.join(value, ", "));
+                errorInfo.append(")");
+            }
+        }
+        if (sqlServerSetMark || connStrMapMark) {
+            throw new DalConfigException(errorInfo.toString());
+        }
     }
 }

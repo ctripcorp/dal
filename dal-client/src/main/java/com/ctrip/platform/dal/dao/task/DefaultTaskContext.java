@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.ShardingCategory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.*;
 
 /**
  * Created by lilj on 2018/7/27.
@@ -11,6 +12,9 @@ import java.util.Set;
 public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     protected Set<String> tables = new HashSet<>();
     protected ShardingCategory category;
+
+    // cc 20181010
+    protected List<Map<String, Object>> identityFields;
 
     @Override
     public Set<String> getTables() {
@@ -33,6 +37,25 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     @Override
     public void setShardingCategory(ShardingCategory category) {
         this.category = category;
+    }
+
+    public List<Map<String, Object>> getIdentityFields() {
+        if (null == identityFields || identityFields.size() == 0) {
+            return null;
+        }
+        List<Map<String, Object>> copyList = new ArrayList<>(identityFields.size());
+        for (Map<String, Object> field : identityFields) {
+            Map<String, Object> copyField = new HashMap<>();
+            for (String key : field.keySet()) {
+                copyField.put(key, field.get(key));
+            }
+            copyList.add(copyField);
+        }
+        return copyList;
+    }
+
+    public void setIdentityFields(List<Map<String, Object>> identityFields) {
+        this.identityFields = identityFields;
     }
 
     @Override

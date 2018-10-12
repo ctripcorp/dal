@@ -37,7 +37,6 @@ public class BatchInsertTask<T> extends InsertTaskAdapter<T> implements BulkTask
 		
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> pojo = daoPojos.get(index);
-			
 			removeUnqualifiedColumns(pojo, unqualifiedColumns);
 			
 			StatementParameters parameters = new StatementParameters();

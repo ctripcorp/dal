@@ -113,7 +113,8 @@ public class DalRequestExecutor {
 		LogContext logContext = logger.start(request);
 		
 		try {
-			request.validate();
+//			request.validate();
+			request.validateAndPrepare();
 			
 			if(request.isCrossShard())
 				result = crossShardExecute(logContext, hints, request);

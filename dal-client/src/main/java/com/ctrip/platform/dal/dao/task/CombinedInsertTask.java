@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,17 +39,27 @@ public class CombinedInsertTask<T> extends InsertTaskAdapter<T> implements BulkT
 		List<String> finalInsertableColumns = buildValidColumnsForInsert(unqualifiedColumns);
 		
 		String insertColumns = combineColumns(finalInsertableColumns, COLUMN_SEPARATOR);
+
+		List<Map<String, Object>> identityFields = new ArrayList<>();
 		
 		int startIndex = 1;
 		for (Integer index :daoPojos.keySet()) {
 			Map<String, ?> pojo = daoPojos.get(index);
-			
 			removeUnqualifiedColumns(pojo, unqualifiedColumns);
-			
+
+			Map<String, Object> identityField = getIdentityField(pojo);
+			if (identityField != null) {
+				identityFields.add(identityField);
+			}
+
 			int paramCount = addParameters(startIndex, parameters, pojo, finalInsertableColumns);
 			startIndex += paramCount;
 			values.append(String.format("(%s),", combine("?", paramCount, ",")));
 		}
+
+		// Put identityFields into context
+		if (taskContext instanceof DefaultTaskContext)
+			((DefaultTaskContext) taskContext).setIdentityFields(identityFields);
 
 		String tableName = getRawTableName(hints);
 		if (taskContext instanceof DalContextConfigure) {

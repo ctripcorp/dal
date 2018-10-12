@@ -24,4 +24,12 @@ public interface DalConfigConstants {
     String LOCATOR = "locator";
     String DATABASE_SELECTOR = "DatabaseSelector";
     String SELECTOR = "selector";
+
+    String ID_GENERATOR = "idGenerator";
+    String INCLUDES = "includes";
+    String INCLUDE = "include";
+    String EXCLUDES = "excludes";
+    String EXCLUDE = "exclude";
+    String TABLES = "tables";
+    String TABLE = "table";
 }

@@ -77,6 +77,7 @@ public class DalClientFactory {
                 config = DalConfigureFactory.load(path);
                 logger.info("Successfully initialized Dal Java Client Factory with " + path);
             }
+            config.validate();
 
             LogEntry.init();
             DalRequestExecutor.init(config.getFactory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),

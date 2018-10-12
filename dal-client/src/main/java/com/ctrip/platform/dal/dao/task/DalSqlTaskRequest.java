@@ -58,6 +58,10 @@ public class DalSqlTaskRequest<T> implements DalRequest<T>{
 
     @Override
 	public void validate() throws SQLException {
+	}
+
+	@Override
+	public void validateAndPrepare() throws SQLException {
 		detectDistributedTransaction(shards);
 		taskContext = task.createTaskContext();
 	}

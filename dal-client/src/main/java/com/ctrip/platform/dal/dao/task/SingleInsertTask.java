@@ -19,10 +19,18 @@ public class SingleInsertTask<T> extends InsertTaskAdapter<T> implements SingleT
 		
 		pojoList.add(fields);
 		rawPojos.add(rawPojo);
-		
+
 		Set<String> unqualifiedColumns = filterUnqualifiedColumns(hints, pojoList, rawPojos);
-		
 		removeUnqualifiedColumns(fields, unqualifiedColumns);
+
+		// Put identityFields into context
+		List<Map<String, Object>> identityFields = new ArrayList<>();
+		Map<String, Object> identityField = getIdentityField(fields);
+		if (identityField != null) {
+			identityFields.add(identityField);
+		}
+		if (taskContext instanceof DefaultTaskContext)
+			((DefaultTaskContext) taskContext).setIdentityFields(identityFields);
 
 		String tableName = getRawTableName(hints, fields);
 		if (taskContext instanceof DalContextConfigure)

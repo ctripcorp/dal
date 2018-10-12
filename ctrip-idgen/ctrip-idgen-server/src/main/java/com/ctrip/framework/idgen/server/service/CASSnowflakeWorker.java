@@ -17,7 +17,7 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CASSnowflakeWorker.class);
 
-    private final AtomicLong atomLastId = new AtomicLong(0);
+    protected final AtomicLong atomLastId = new AtomicLong(0);
 
     public CASSnowflakeWorker(String sequenceName, SnowflakeConfig config) {
         super(sequenceName, config);
@@ -50,7 +50,7 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
         return pool;
     }
 
-    private IdSegment getSegment(int requestSize) {
+    protected IdSegment getSegment(int requestSize) {
         long lastId = atomLastId.get();
         long lastTimestamp = parseTimestamp(lastId);
         long lastSequence = parseSequence(lastId);
@@ -68,7 +68,7 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
             startSequence = getRandomSequence();
         } else {
             if (timestamp < lastTimestamp) {
-                LOGGER.error("Clock moved backwards");
+                LOGGER.error(String.format("Clock moved backwards for %d ms", lastTimestamp - timestamp));
             }
             startSequence = (lastSequence + 1) & config.getSequenceMask();
             if (startSequence == 0) {

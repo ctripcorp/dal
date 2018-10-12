@@ -15,7 +15,7 @@ public class CtripServer implements Server<Map<String, String>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripServer.class);
 
     private static final String WORKER_ID_PROPERTY_KEY_FORMAT = "workerId_%s";
-    private static final String WORKER_ID_PROPERTY_KEY_PATTERN_STRING = "workerId_*";
+    private static final String WORKER_ID_PROPERTY_KEY_PATTERN_STRING = "workerId_+.*";
     private static final Pattern WORKER_ID_PROPERTY_KEY_PATTERN = Pattern.compile(WORKER_ID_PROPERTY_KEY_PATTERN_STRING);
 
     private long workerId;
@@ -34,7 +34,7 @@ public class CtripServer implements Server<Map<String, String>> {
         }
     }
 
-    private boolean checkWorkerIdDuplication(Map<String, String> properties) {
+    protected boolean checkWorkerIdDuplication(Map<String, String> properties) {
         if (null == properties) {
             return false;
         }
@@ -57,7 +57,7 @@ public class CtripServer implements Server<Map<String, String>> {
         return false;
     }
 
-    private long parseWorkerId(Map<String, String> properties) {
+    protected long parseWorkerId(Map<String, String> properties) {
         try {
             return Long.parseLong(properties.get(getWorkerIdPropertyKey()));
         } catch (Exception e) {

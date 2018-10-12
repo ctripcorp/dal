@@ -15,6 +15,7 @@ public class CtripWhitelist implements Whitelist<Map<String, String>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CtripWhitelist.class);
 
     private static final String WHITELIST_ENABLED_FLAG = "on";
+    private static final String SPLIT_SEPARATOR = ".";
 
     private AtomicReference<Set<String>> whitelist = new AtomicReference<Set<String>>(new HashSet<String>());
 
@@ -35,7 +36,25 @@ public class CtripWhitelist implements Whitelist<Map<String, String>> {
     }
 
     public boolean validate(String name) {
-        return whitelist.get().contains(name.trim().toLowerCase());
+        name = name.trim().toLowerCase();
+        String[] splits = StringUtils.split(name, SPLIT_SEPARATOR);
+        return internalValidate(splits);
+    }
+
+    private boolean internalValidate(String[] splits) {
+        StringBuilder builder = new StringBuilder();
+        for (String split : splits) {
+            builder.append(split);
+            if (internalValidate(builder.toString())) {
+                return true;
+            }
+            builder.append(SPLIT_SEPARATOR);
+        }
+        return false;
+    }
+
+    private boolean internalValidate(String name) {
+        return whitelist.get().contains(name);
     }
 
     private void compare(final Set<String> previous, final Set<String> updated) {

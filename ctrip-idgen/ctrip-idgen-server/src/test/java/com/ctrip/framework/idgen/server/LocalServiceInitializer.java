@@ -15,10 +15,7 @@ public class LocalServiceInitializer extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         setEnvironment();
-        IdFactory factory = IdFactory.getInstance();
-        factory.initialize();
-        Long id1 = factory.getOrCreateIdWorker("testName1").generateIdPool(10, 100).get(0).getEnd().longValue();
-        Long id2 = factory.getOrCreateIdWorker("daltestdb1.daltesttb1").generateIdPool(10, 100).get(0).getEnd().longValue();
+        IdFactory.getInstance().initialize();
         SpringApplication.run(LocalServiceInitializer.class);
     }
 

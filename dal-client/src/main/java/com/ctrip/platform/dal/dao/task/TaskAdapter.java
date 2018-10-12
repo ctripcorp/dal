@@ -52,6 +52,7 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 	protected Set<String> defaultUpdateColumnNames;
 	public boolean tableShardingEnabled;
 	protected String rawTableName;
+	private Map<String, String> taskSettings;
 
 	public void initialize(DalParser<T> parser) {
 		super.initialize(parser.getDatabaseName());
@@ -64,7 +65,15 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 		initDbSpecific();
 		initSensitiveColumns();
 	}
-	
+
+	public void initTaskSettings(Map<String, String> settings){
+		taskSettings = settings;
+	}
+
+	public String getTaskSetting(String key){
+		return taskSettings.get(key);
+	}
+
 	public void initDbSpecific() {
 		pkSql = initPkSql();
 		initUpdateColumns();

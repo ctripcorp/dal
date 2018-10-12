@@ -115,14 +115,14 @@ public class DalClientFactory {
         try {
             initClientFactory();
         } catch (Exception e) {
-            throw new IllegalStateException("DalClientFactory initilization fail", e);
+            throw new IllegalStateException("DalClientFactory initialization fail", e);
         }
 
         config = configureRef.get();
         if (config != null)
             return config;
 
-        throw new IllegalStateException("DalClientFactory has not been not initialized or initilization fail");
+        throw new IllegalStateException("DalClientFactory has not been not initialized or initialization fail");
     }
 
     public static DalLogger getDalLogger() {
@@ -158,7 +158,7 @@ public class DalClientFactory {
                 DalStatusManager.shutdown();
 
                 LogEntry.shutdown();
-                logger.info("DalWatcher has been destoryed");
+                logger.info("DalWatcher has been destroyed");
             } catch (Throwable e) {
                 logger.error("Error during shutdown", e);
             }

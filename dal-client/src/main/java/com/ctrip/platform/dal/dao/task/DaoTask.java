@@ -7,6 +7,6 @@ import com.ctrip.platform.dal.dao.DalParser;
 
 public interface DaoTask<T> {
 	void initialize(DalParser<T> parser);
-	
+	void initTaskSettings(Map<String, String> settings);
 	List<Map<String, ?>> getPojosFields(List<T> daoPojos);
 }

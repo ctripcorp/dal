@@ -37,6 +37,10 @@ public class DalSingleTaskRequestTest {
 		}
 
 		@Override
+		public void initTaskSettings(Map<String, String> settings) {
+		}
+
+		@Override
 		public List<Map<String, ?>> getPojosFields(List<Integer> daoPojos) {
 			List<Map<String, ?>> maps = new ArrayList<>(); 
 			for(Integer i: daoPojos){

@@ -33,6 +33,10 @@ public class DalBulkTaskContextTest {
         }
 
         @Override
+        public void initTaskSettings(Map<String, String> settings) {
+        }
+
+        @Override
         public List<Map<String, ?>> getPojosFields(List<TestPojo> daoPojos) {
             List<Map<String, ?>> daoPojoMaps = new ArrayList<>();
             for(TestPojo pojo: daoPojos) {

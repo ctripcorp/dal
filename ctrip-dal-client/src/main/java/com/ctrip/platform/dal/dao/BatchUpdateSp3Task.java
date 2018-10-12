@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class BatchUpdateSp3Task<T> extends CtripSp3Task<T> {
 	private static final String UPDATE_SP3_TPL = "sp3_%s_u";
-	
+
 	@Override
 	public int[] execute(DalHints hints, Map<Integer, Map<String, ?>> daoPojos, DalBulkTaskContext<T> taskContext) throws SQLException {
 		String tableName = getRawTableName(hints);
@@ -23,7 +23,7 @@ public class BatchUpdateSp3Task<T> extends CtripSp3Task<T> {
 		for (Integer index :daoPojos.keySet()) {
 			StatementParameters parameters = new StatementParameters();
 			
-			if(CtripTaskFactory.callSpbyName)
+			if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
 				addParametersByName(parameters, daoPojos.get(index));
 			else
 				addParametersByIndex(parameters, daoPojos.get(index));

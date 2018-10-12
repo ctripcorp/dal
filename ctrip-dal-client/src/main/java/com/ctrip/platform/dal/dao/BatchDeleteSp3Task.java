@@ -23,7 +23,7 @@ public class BatchDeleteSp3Task<T> extends CtripSp3Task<T> {
 		for (Integer index :daoPojos.keySet()) {
 			StatementParameters parameters = new StatementParameters();
 
-			if(CtripTaskFactory.callSpbyName)
+			if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
 				addParametersByName(parameters, daoPojos.get(index), parser.getPrimaryKeyNames());
 			else
 				addParametersByIndex(parameters, daoPojos.get(index), parser.getPrimaryKeyNames());

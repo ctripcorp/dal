@@ -58,7 +58,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolder
     }
 
     private void register(StatementParameters parameters, Map<String, ?> fields) {
-        if (!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
+        if (!Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER)) && Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME))) {
             if (outputIdName != null) {
                 parameters.registerInOut(outputIdName, getColumnType(outputIdName), fields.get(outputIdName));
             }
@@ -78,7 +78,7 @@ public class SingleInsertSpaTask<T> extends CtripSpaTask<T> implements KeyHolder
 
         Map<String, Object> map = new LinkedHashMap<String, Object>();
 
-        if (!CtripTaskFactory.callSpbySqlServerSyntax && CtripTaskFactory.callSpbyName) {
+        if (!Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER)) && Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME))) {
             if (outputIdName != null) {
                 map.put(outputIdName, parameters.get(outputIdName, ParameterDirection.InputOutput).getValue());
             }

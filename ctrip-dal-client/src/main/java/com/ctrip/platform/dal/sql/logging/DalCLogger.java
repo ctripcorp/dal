@@ -134,6 +134,7 @@ public class DalCLogger {
 			switch (level) {
 			case DEBUG:
 				logger.debug(TITLE, msg);
+				break;
 			case INFO:
 				logger.info(TITLE, msg);
 				break;

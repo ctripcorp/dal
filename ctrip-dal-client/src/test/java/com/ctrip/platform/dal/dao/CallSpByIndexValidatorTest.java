@@ -12,7 +12,7 @@ public class CallSpByIndexValidatorTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        CtripTaskFactory.callSpbyName = false;
+        ((CtripTaskFactory)DalClientFactory.getTaskFactory()).setCallSpByName(false);
     }
     
     @Test

@@ -22,6 +22,11 @@ public abstract class BaseBatchDeleteTest {
 	private final static String TABLE_NAME = "People";
 	
 	private static DalClient client;
+
+	private static final String CALL_SP_BY_NAME = "callSpbyName";
+	private static final String CALL_SP_BY_SQLSEVER = "callSpbySqlServerSyntax";
+	private static final String CALL_SPT = "callSpt";
+
 	static {
 		try {
 			DalClientFactory.initClientFactory();
@@ -102,7 +107,16 @@ public abstract class BaseBatchDeleteTest {
 	public abstract void setOptionTest();
 	
     private <T> BulkTask<int[], T> getTest(DalParser<T> parser) {
-        return (BulkTask<int[], T>)new CtripTaskFactory().createBatchDeleteTask(parser);
+		CtripTaskFactory ctripTaskFactory=new CtripTaskFactory();
+		ctripTaskFactory.setCallSpt(false);
+		ctripTaskFactory.setCallSpbySqlServerSyntax(true);
+		ctripTaskFactory.setCallSpByName(false);
+		Map<String,String> settings=new HashMap<>();
+		settings.put(CALL_SP_BY_NAME,"false");
+		settings.put(CALL_SP_BY_SQLSEVER,"true");
+		settings.put(CALL_SPT,"false");
+		ctripTaskFactory.setCtripTaskSettings(settings);
+        return (BulkTask<int[], T>)ctripTaskFactory.createBatchDeleteTask(parser);
     }
         
     @Test

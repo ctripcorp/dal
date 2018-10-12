@@ -5,7 +5,9 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.ctrip.platform.dal.dao.task.DefaultTaskContext;
 import org.junit.After;
@@ -19,9 +21,20 @@ import com.ctrip.platform.dal.dao.task.SingleTask;
 
 public abstract class BaseSingleInsertTest {
     public abstract void setOptionTest();
-    
+	private static final String CALL_SP_BY_NAME = "callSpbyName";
+	private static final String CALL_SP_BY_SQLSEVER = "callSpbySqlServerSyntax";
+	private static final String CALL_SPT = "callSpt";
     private <T> SingleTask<T> getTest(DalParser<T> parser) {
-        return new CtripTaskFactory().createSingleInsertTask(parser);
+		CtripTaskFactory ctripTaskFactory=new CtripTaskFactory();
+		ctripTaskFactory.setCallSpt(false);
+		ctripTaskFactory.setCallSpbySqlServerSyntax(true);
+		ctripTaskFactory.setCallSpByName(false);
+		Map<String,String> settings=new HashMap<>();
+		settings.put(CALL_SP_BY_NAME,"false");
+		settings.put(CALL_SP_BY_SQLSEVER,"true");
+		settings.put(CALL_SPT,"false");
+		ctripTaskFactory.setCtripTaskSettings(settings);
+        return ctripTaskFactory.createSingleInsertTask(parser);
     }
 
 	private final static String DATABASE_NAME = "SimpleShard";

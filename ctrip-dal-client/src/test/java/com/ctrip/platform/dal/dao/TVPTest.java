@@ -16,7 +16,7 @@ public class TVPTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         DalClientFactory.initClientFactory();
-        CtripTaskFactory.callSpt = true;
+        ((CtripTaskFactory)DalClientFactory.getTaskFactory()).setCallSpt(true);
     }
 
     @Test

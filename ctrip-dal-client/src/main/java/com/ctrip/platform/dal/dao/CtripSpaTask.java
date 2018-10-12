@@ -19,20 +19,23 @@ import com.ctrip.platform.dal.dao.task.TaskAdapter;
 public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTask<T> {
 	public static final String RET_CODE = "retcode";
 	private DalScalarExtractor extractor = new DalScalarExtractor();
+	protected static final String CALL_SP_BY_NAME = "callSpbyName";
+	protected static final String CALL_SP_BY_SQLSEVER = "callSpbySqlServerSyntax";
+	protected static final String CALL_SPT = "callSpt";
 
 	public void initialize(DalParser<T> parser) {
         super.initialize(parser);
-        CallSpByIndexValidator.validate(parser, CtripTaskFactory.callSpbyName);        
+        CallSpByIndexValidator.validate(parser, Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)));
     }
 	
 	public String prepareSpCall(String spName, StatementParameters parameters, Map<String, ?> fields) {
 	    String callSql;
-	    if(CtripTaskFactory.callSpbySqlServerSyntax) {
+	    if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER))) {
 	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
 	        addParametersByIndex(parameters, fields);
 	    }else{
 	        callSql = buildCallSql(spName, fields.size());
-            if(CtripTaskFactory.callSpbyName)
+            if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
                 addParametersByName(parameters, fields);
             else
                 addParametersByIndex(parameters, fields);

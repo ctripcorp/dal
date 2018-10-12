@@ -15,7 +15,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.ctrip.platform.dal.sharding.idgen.*;
-import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;

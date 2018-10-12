@@ -11,7 +11,7 @@ public class DynamicStrategy extends AbstractStrategy {
     private static final long QPS_CHECK_PERIOD_MILLIS = 5000;
     private static final long REMAINED_ENDURANCE_MILLIS = 200;
     private static final long PREFETCH_ENDURANCE_MILLIS = 800;
-    private static final int REQUEST_SIZE_MIN_VALUE = 1;
+    private static final int REQUEST_SIZE_MIN_VALUE = 10;
     private static final int REQUEST_SIZE_MAX_VALUE = 5000;
 
     private AtomicLong consumedCount = new AtomicLong();
@@ -38,7 +38,7 @@ public class DynamicStrategy extends AbstractStrategy {
                     lastCount = count;
                     lastTime = now;
                 }
-            }, 0, QPS_CHECK_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+            }, QPS_CHECK_PERIOD_MILLIS, QPS_CHECK_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
             return true;
         }
         return false;

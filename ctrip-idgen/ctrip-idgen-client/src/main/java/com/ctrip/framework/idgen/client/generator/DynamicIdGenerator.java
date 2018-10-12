@@ -22,7 +22,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     private static final int PREFETCH_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
     private static final int CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE = 1500;
-    private static final long FETCH_ID_RETRY_BASE_INTERVAL = 10;
+    private static final long FETCH_ID_RETRY_BASE_INTERVAL = 1;
 
     private final String sequenceName;
     private final Deque<LongIdGenerator> staticGeneratorQueue = new ConcurrentLinkedDeque<>();

@@ -76,4 +76,9 @@ public class IdGeneratorFactory implements IIdGeneratorFactory {
         }
     }
 
+    @Override
+    public int getOrder() {
+        return 100;
+    }
+
 }

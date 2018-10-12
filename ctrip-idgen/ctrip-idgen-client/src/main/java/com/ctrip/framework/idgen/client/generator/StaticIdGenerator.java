@@ -5,8 +5,8 @@ import com.ctrip.framework.idgen.client.log.IdGenLogger;
 import com.ctrip.framework.idgen.client.service.IServiceManager;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
+import com.ctrip.framework.idgen.service.api.IdSegment;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
-import com.ctrip.platform.idgen.service.api.IdSegment;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 

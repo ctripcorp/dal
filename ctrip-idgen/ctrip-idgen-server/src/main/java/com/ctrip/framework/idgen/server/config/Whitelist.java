@@ -1,13 +1,9 @@
 package com.ctrip.framework.idgen.server.config;
 
-import java.util.Map;
+public interface Whitelist<T> {
 
-public interface Whitelist {
+    void load(T config);
 
-    void importConfig(Map<String, String> properties);
-
-    boolean validateSequenceName(String sequenceName);
-
-    void refreshConfig(Map<String, String> properties);
+    boolean validate(String name);
 
 }

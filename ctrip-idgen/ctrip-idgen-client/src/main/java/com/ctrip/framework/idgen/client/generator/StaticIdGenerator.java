@@ -1,15 +1,14 @@
 package com.ctrip.framework.idgen.client.generator;
 
-import com.ctrip.framework.idgen.client.service.ServiceManager;
+import com.ctrip.framework.idgen.client.log.CatConstants;
+import com.ctrip.framework.idgen.client.log.IdGenLogger;
+import com.ctrip.framework.idgen.client.service.IServiceManager;
 import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
+import com.ctrip.framework.idgen.service.api.IdSegment;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
-import com.ctrip.platform.idgen.service.api.IdGenRequestType;
-import com.ctrip.platform.idgen.service.api.IdGenResponseType;
-import com.ctrip.platform.idgen.service.api.IdGenerateService;
-import com.ctrip.platform.idgen.service.api.IdSegment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 
 import java.util.Deque;
 import java.util.List;
@@ -17,63 +16,52 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class StaticIdGenerator implements LongIdGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StaticIdGenerator.class);
-
     private final String sequenceName;
     private final Deque<IdSegment> idSegments = new ConcurrentLinkedDeque<>();
-    private volatile long initialSize = 0;
-    private volatile long remainedSize = 0;
-    private volatile long currentId = -1;
+    private long initialSize = 0;
+    private long remainedSize = 0;
+    private long currentId = -1;
+    private long maxId = -1;
     private final PrefetchStrategy strategy;
+    private final IServiceManager service;
 
-    public StaticIdGenerator(String sequenceName) {
-        this(sequenceName, new DefaultStrategy());
+    public StaticIdGenerator(String sequenceName, IServiceManager service) {
+        this(sequenceName, new DefaultStrategy(), service);
     }
 
-    public StaticIdGenerator(String sequenceName, final PrefetchStrategy strategy) {
+    public StaticIdGenerator(String sequenceName, final PrefetchStrategy strategy, IServiceManager service) {
         this.sequenceName = sequenceName;
         this.strategy = (strategy != null) ? strategy : new DefaultStrategy();
+        this.service = service;
     }
 
     public void initialize() {
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
+                CatConstants.NAME_STATIC_GENERATOR + ":initialize");
         try {
-            importIdPool(fetchPool());
-        } catch (Throwable t) {
-            LOGGER.warn("StaticIdGenerator initialization failed.", t);
-            throw t;
+            List<IdSegment> idPool = service.fetchIdPool(sequenceName,
+                    strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
+            importIdPool(idPool);
+            IdGenLogger.logSizeEvent(CatConstants.NAME_STATIC_GENERATOR + ":initialSize", initialSize);
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Exception e) {
+            transaction.setStatus(e);
+            throw e;
+        } finally {
+            transaction.complete();
         }
     }
 
-    private List<IdSegment> fetchPool() {
-        IdGenRequestType request = new IdGenRequestType(sequenceName,
-                strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
-
-        IdGenerateService service = ServiceManager.getInstance().getIdGenServiceInstance();
-        if (null == service) {
-            throw new RuntimeException("Get IdGenerateService failed");
+    private void importIdPool(List<IdSegment> idPool) {
+        if (null == idPool) {
+            return;
         }
-
-        IdGenResponseType response = service.fetchIdPool(request);
-        if (null == response) {
-            throw new RuntimeException("Get IdGenerateService response failed, sequenceName: [" + sequenceName + "]");
+        for (IdSegment segment : idPool) {
+            idSegments.addLast(segment);
+            initialSize += segment.getEnd().longValue() - segment.getStart().longValue() + 1;
+            maxId = segment.getEnd().longValue();
         }
-
-        List<IdSegment> segments = response.getIdSegments();
-        if (null == segments || segments.isEmpty()) {
-            throw new RuntimeException("Get IdSegments failed, sequenceName: [" + sequenceName + "]");
-        }
-
-        return segments;
-    }
-
-    private void importIdPool(List<IdSegment> segments) {
-        if (segments != null && !segments.isEmpty()) {
-            for (IdSegment segment : segments) {
-                idSegments.addLast(segment);
-                initialSize += segment.getEnd().longValue() - segment.getStart().longValue() + 1;
-            }
-            remainedSize = initialSize;
-        }
+        remainedSize = initialSize;
     }
 
     @Override
@@ -100,19 +88,23 @@ public class StaticIdGenerator implements LongIdGenerator {
         return currentId;
     }
 
-    public long getInitialSize() {
-        return initialSize;
+    public boolean checkIncrement(StaticIdGenerator generator) {
+        if (null == generator) {
+            return true;
+        }
+        IdSegment firstSegment = this.idSegments.peekFirst();
+        if (null == firstSegment) {
+            return false;
+        }
+        return firstSegment.getStart().longValue() > generator.getMaxId();
     }
 
     public long getRemainedSize() {
         return remainedSize;
     }
 
-    public Deque<IdSegment> getIdSegments() {
-        return idSegments;
+    public long getMaxId() {
+        return maxId;
     }
 
-    public long getCurrentId() {
-        return currentId;
-    }
 }

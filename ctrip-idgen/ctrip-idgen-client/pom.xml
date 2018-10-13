@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.ctrip.framework.idgen</groupId>
         <artifactId>idgen-parent</artifactId>
-        <version>1.0.1</version>
+        <version>1.1.0</version>
     </parent>
     <artifactId>idgen-client</artifactId>
 
@@ -28,5 +28,34 @@
             <artifactId>tomcat-embed-websocket</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
 </project>

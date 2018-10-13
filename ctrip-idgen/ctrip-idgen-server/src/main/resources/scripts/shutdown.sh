@@ -1,5 +1,5 @@
 #!/bin/bash
-SERVICE_NAME=redis-console
+SERVICE_NAME=idgen-server
 
 if [[ -z "$JAVA_HOME" && -d /usr/java/latest/ ]]; then
     export JAVA_HOME=/usr/java/latest/

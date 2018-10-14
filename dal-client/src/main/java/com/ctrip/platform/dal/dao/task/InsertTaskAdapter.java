@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.task;
 
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -145,12 +146,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 			return null;
 		}
 		String identityFieldName = parser.getPrimaryKeyNames()[0];
-		Number identityFieldValue = null;
-		try {
-			identityFieldValue = (Long) pojo.get(identityFieldName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Object identityFieldValue = pojo.get(identityFieldName);
 		if (null == identityFieldValue) {
 			return null;
 		}

@@ -146,22 +146,22 @@ public class DalDirectClient implements DalContextClient {
                 if (generatedKeyHolder == null)
                     return rows;
 
-                List<Map<String, Object>> keys = null;
+                List<Map<String, Object>> presetKeys = null;
+                List<Map<String, Object>> returnedKeys = null;
                 if (dalTaskContext != null) {
-                    keys = dalTaskContext.getIdentityFields();
+                    presetKeys = dalTaskContext.getIdentityFields();
+                }
+                rs = preparedStatement.getGeneratedKeys();
+                if (rs != null) {
+                    DalRowMapperExtractor<Map<String, Object>> rse =
+                            new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
+                    returnedKeys = rse.extract(rs);
                 }
                 int actualKeySize = 0;
-                if (null == keys) {
-                    rs = preparedStatement.getGeneratedKeys();
-                    if (rs != null) {
-                        DalRowMapperExtractor<Map<String, Object>> rse =
-                                new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-                        keys = rse.extract(rs);
-                    }
-                }
-                if (keys != null) {
-                    generatedKeyHolder.addKeys(keys);
-                    actualKeySize = keys.size();
+                processGeneratedKeys(returnedKeys, presetKeys);
+                if (returnedKeys != null) {
+                    generatedKeyHolder.addKeys(returnedKeys);
+                    actualKeySize = returnedKeys.size();
                 }
                 generatedKeyHolder.addEmptyKeys(rows - actualKeySize);
 
@@ -567,4 +567,35 @@ public class DalDirectClient implements DalContextClient {
             logger.endStatement(entry, error);
         }
     }
+
+    private void processGeneratedKeys(List<Map<String, Object>> returnedKeyFields,
+                                      List<Map<String, Object>> presetKeyFields) {
+        if (null == returnedKeyFields || null == presetKeyFields) {
+            return;
+        }
+        if (returnedKeyFields.size() != presetKeyFields.size()) {
+            return;
+        }
+        for (int i = 0; i < returnedKeyFields.size(); i++) {
+            Map<String, Object> returnedKeyField = returnedKeyFields.get(i);
+            Map<String, Object> presetKeyField = presetKeyFields.get(i);
+            if (returnedKeyField.size() != 1) {
+                continue;
+            }
+            Object returnedKey = returnedKeyField.values().iterator().next();
+            Object presetKey = presetKeyField.values().iterator().next();
+            if (returnedKey instanceof Integer) {
+                if (presetKey instanceof Integer) {
+                    returnedKey = presetKey;
+                }
+            } else if (returnedKey instanceof Long) {
+                if (presetKey instanceof Long) {
+                    returnedKey = presetKey;
+                } else if (presetKey instanceof Integer) {
+                    returnedKey = (long) ((Integer) presetKey).intValue();
+                }
+            }
+        }
+    }
+
 }

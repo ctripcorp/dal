@@ -40,7 +40,7 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     }
 
     public List<Map<String, Object>> getIdentityFields() {
-        if (null == identityFields || identityFields.size() == 0) {
+        if (null == identityFields) {
             return null;
         }
         List<Map<String, Object>> copyList = new ArrayList<>(identityFields.size());
@@ -63,6 +63,7 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
         DefaultTaskContext taskContext = new DefaultTaskContext();
         taskContext.tables.addAll(this.tables);
         taskContext.category = this.category;
+        taskContext.identityFields = getIdentityFields();
         return taskContext;
     }
 }

@@ -55,7 +55,7 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     }
 
     public void setIdentityFields(List<Map<String, Object>> identityFields) {
-//        this.identityFields = identityFields;
+        this.identityFields = identityFields;
     }
 
     @Override

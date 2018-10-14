@@ -1,16 +1,13 @@
 package com.ctrip.platform.dal.dao.client;
 
+import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.*;
@@ -147,7 +144,7 @@ public class DalDirectClient implements DalContextClient {
                     return rows;
 
                 List<Map<String, Object>> presetKeys = null;
-                List<Map<String, Object>> returnedKeys = null;
+                List<Map<String, Object>> dbReturnedKeys = null;
                 if (dalTaskContext != null) {
                     presetKeys = dalTaskContext.getIdentityFields();
                 }
@@ -155,10 +152,10 @@ public class DalDirectClient implements DalContextClient {
                 if (rs != null) {
                     DalRowMapperExtractor<Map<String, Object>> rse =
                             new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
-                    returnedKeys = rse.extract(rs);
+                    dbReturnedKeys = rse.extract(rs);
                 }
                 int actualKeySize = 0;
-                processGeneratedKeys(returnedKeys, presetKeys);
+                List<Map<String, Object>> returnedKeys = getFinalGeneratedKeys(dbReturnedKeys, presetKeys);
                 if (returnedKeys != null) {
                     generatedKeyHolder.addKeys(returnedKeys);
                     actualKeySize = returnedKeys.size();
@@ -568,34 +565,40 @@ public class DalDirectClient implements DalContextClient {
         }
     }
 
-    private void processGeneratedKeys(List<Map<String, Object>> returnedKeyFields,
-                                      List<Map<String, Object>> presetKeyFields) {
-        if (null == returnedKeyFields || null == presetKeyFields) {
-            return;
+    private List<Map<String, Object>> getFinalGeneratedKeys(List<Map<String, Object>> dbReturnedKeyFields,
+                                                            List<Map<String, Object>> presetKeyFields) {
+        if (null == dbReturnedKeyFields || null == presetKeyFields ||
+                dbReturnedKeyFields.size() != presetKeyFields.size()) {
+            return dbReturnedKeyFields;
         }
-        if (returnedKeyFields.size() != presetKeyFields.size()) {
-            return;
-        }
-        for (int i = 0; i < returnedKeyFields.size(); i++) {
-            Map<String, Object> returnedKeyField = returnedKeyFields.get(i);
+        List<Map<String, Object>> returnedKeyFields = new ArrayList<>();
+        for (int i = 0; i < dbReturnedKeyFields.size(); i++) {
+            Map<String, Object> dbReturnedKeyField = dbReturnedKeyFields.get(i);
             Map<String, Object> presetKeyField = presetKeyFields.get(i);
-            if (returnedKeyField.size() != 1) {
-                continue;
+            if (dbReturnedKeyField.size() != 1) {
+                return dbReturnedKeyFields;
             }
-            Object returnedKey = returnedKeyField.values().iterator().next();
-            Object presetKey = presetKeyField.values().iterator().next();
-            if (returnedKey instanceof Integer) {
-                if (presetKey instanceof Integer) {
-                    returnedKey = presetKey;
-                }
-            } else if (returnedKey instanceof Long) {
-                if (presetKey instanceof Long) {
-                    returnedKey = presetKey;
-                } else if (presetKey instanceof Integer) {
-                    returnedKey = (long) ((Integer) presetKey).intValue();
-                }
+            Object dbReturnedKey = dbReturnedKeyField.values().iterator().next();
+            String keyName = dbReturnedKeyField.keySet().iterator().next();
+            Number presetKey = (Number) presetKeyField.values().iterator().next();
+            Object returnedKey = dbReturnedKey;
+            Class<?> clazz = dbReturnedKey.getClass();
+            if (clazz.equals(Byte.class) || clazz.equals(byte.class)) {
+                returnedKey = presetKey.byteValue();
+            } else if (clazz.equals(Short.class) || clazz.equals(short.class)) {
+                returnedKey = presetKey.shortValue();
+            } else if (clazz.equals(Integer.class) || clazz.equals(int.class)) {
+                returnedKey = presetKey.intValue();
+            } else if (clazz.equals(Long.class) || clazz.equals(long.class)) {
+                returnedKey = presetKey.longValue();
+            } else if (clazz.equals(BigInteger.class)) {
+                returnedKey = BigInteger.valueOf(presetKey.longValue());
             }
+            Map<String, Object> field = new HashMap<>();
+            field.put(keyName, returnedKey);
+            returnedKeyFields.add(field);
         }
+        return returnedKeyFields;
     }
 
 }

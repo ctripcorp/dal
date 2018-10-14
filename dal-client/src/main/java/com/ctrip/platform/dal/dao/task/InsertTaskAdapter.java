@@ -141,6 +141,9 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	}
 
 	public Map<String, Object> getIdentityField(Map<String, ?> pojo) {
+		if (!parser.isAutoIncrement()) {
+			return null;
+		}
 		String identityFieldName = parser.getPrimaryKeyNames()[0];
 		Object identityFieldValue = pojo.get(identityFieldName);
 		if (null == identityFieldValue) {

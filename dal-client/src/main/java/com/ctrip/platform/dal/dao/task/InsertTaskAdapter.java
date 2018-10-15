@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.task;
 
 import java.math.BigInteger;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.*;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalParser;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 import com.ctrip.platform.dal.sharding.idgen.IdGenerator;
 import com.ctrip.platform.dal.sharding.idgen.NullIdGenerator;
@@ -132,12 +134,42 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 	public void processIdentityField(DalHints hints, List<Map<String, ?>> pojos) {
 		if (parser.isAutoIncrement() && idGenerator != null && !(idGenerator instanceof NullIdGenerator)) {
 			String identityFieldName = parser.getPrimaryKeyNames()[0];
+			int identityFieldType = getColumnType(identityFieldName);
 			boolean identityInsertDisabled = hints.isIdentityInsertDisabled();
 			for (Map pojo : pojos) {
 				if (identityInsertDisabled || null == pojo.get(identityFieldName)) {
+					Number id = idGenerator.nextId();
+					checkIdentityTypes(identityFieldType, id);
 					pojo.put(identityFieldName, idGenerator.nextId());
 				}
 			}
+		}
+	}
+
+	private void checkIdentityTypes(int identityFieldType, Number id) {
+		boolean ok = false;
+		switch (identityFieldType) {
+			case Types.BIGINT:
+				if (id instanceof Long || id instanceof Integer || id instanceof Short || id instanceof Byte)
+					ok = true;
+				break;
+			case Types.INTEGER:
+				if (id instanceof Integer || id instanceof Short || id instanceof Byte)
+					ok = true;
+				break;
+			case Types.SMALLINT:
+				if (id instanceof Short || id instanceof Byte)
+					ok = true;
+				break;
+			case Types.TINYINT:
+				if (id instanceof Byte)
+					ok = true;
+				break;
+			default:
+				throw new DalRuntimeException("Unsupported auto-incremental column type");
+		}
+		if (!ok) {
+			throw new DalRuntimeException("The range of the generated id type exceeds that of the auto-incremental column type");
 		}
 	}
 

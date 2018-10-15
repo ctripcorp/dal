@@ -4,7 +4,6 @@ import com.ctrip.platform.dal.application.dao.DALServiceDao;
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

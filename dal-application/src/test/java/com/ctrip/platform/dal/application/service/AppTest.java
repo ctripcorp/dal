@@ -2,12 +2,17 @@ package com.ctrip.platform.dal.application.service;
 
 import com.ctrip.platform.dal.application.AppConfig;
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
+import com.ctrip.platform.dal.dao.DalHints;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.junit.Test;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by lilj on 2018/5/31.
@@ -76,5 +81,25 @@ public class AppTest {
         Assert.assertEquals("testUpdate",dalService.querySqlServer(testPojo).getName());
         dalService.deleteSqlServer(testPojo);
         Assert.assertNull(dalService.querySqlServer(testPojo));
+    }
+
+    @Test
+    public void queryAtPageWithoutOrderBy() throws Exception{
+        dalService.queryAtPageWithoutOrderBy();
+    }
+
+    @Test
+    public void queryAtPageWithOrderBy() throws Exception{
+        dalService.queryAtPageWithOrderBy();
+    }
+
+    @Test
+    public void queryTopWithOrderby() throws Exception{
+        dalService.queryTopWithOrderby();
+    }
+
+    @Test
+    public void queryTopWithNoOrderby() throws Exception{
+        dalService.queryTopWithNoOrderby();
     }
 }

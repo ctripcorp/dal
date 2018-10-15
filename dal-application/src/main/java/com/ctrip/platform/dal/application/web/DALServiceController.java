@@ -2,11 +2,13 @@ package com.ctrip.platform.dal.application.web;
 
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 import com.ctrip.platform.dal.application.service.DALService;
+import com.ctrip.platform.dal.dao.DalHints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -70,5 +72,25 @@ public class DALServiceController {
   @RequestMapping("/deleteSqlServerAll")
   public int deleteSqlServerAll() throws Exception{
     return dalService.deleteSqlServerAll();
+  }
+
+  @RequestMapping("/queryAtPageWithoutOrderBy")
+  public List<DALServiceTable> queryAtPageWithoutOrderBy() throws Exception{
+    return dalService.queryAtPageWithoutOrderBy();
+  }
+
+  @RequestMapping("/queryAtPageWithOrderBy")
+  public List<DALServiceTable> queryAtPageWithOrderBy() throws Exception{
+    return dalService.queryAtPageWithOrderBy();
+  }
+
+  @RequestMapping("/queryTopWithOrderby")
+  public List<String> queryTopWithOrderby() throws Exception{
+    return dalService.queryTopWithOrderby();
+  }
+
+  @RequestMapping("/queryTopWithNoOrderby")
+  public List<String> queryTopWithNoOrderby() throws Exception{
+    return dalService.queryTopWithNoOrderby();
   }
 }

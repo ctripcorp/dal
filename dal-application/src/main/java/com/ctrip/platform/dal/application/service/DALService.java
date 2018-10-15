@@ -4,10 +4,12 @@ import com.ctrip.platform.dal.application.dao.DALServiceDao;
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -69,5 +71,33 @@ public class DALService {
 
   public int deleteSqlServerAll() throws Exception{
     return sqlServerDao.deleteAll();
+  }
+
+  public List<DALServiceTable> queryAtPageWithoutOrderBy() throws Exception{
+    List<Integer> age=new ArrayList<>();
+    age.add(20);
+    age.add(20);
+    return sqlServerDao.queryAtPageWithoutOrderBy(age,new DalHints(),10);
+  }
+
+  public List<DALServiceTable> queryAtPageWithOrderBy() throws Exception{
+    List<Integer> age=new ArrayList<>();
+    age.add(20);
+    age.add(20);
+    return sqlServerDao.queryAtPageWithOrderby(age,new DalHints(),10);
+  }
+
+  public List<String> queryTopWithOrderby() throws Exception{
+    List<Integer> age=new ArrayList<>();
+    age.add(20);
+    age.add(20);
+    return sqlServerDao.queryTopWithOrderby(age,new DalHints(),10);
+  }
+
+  public List<String> queryTopWithNoOrderby() throws Exception{
+    List<Integer> age=new ArrayList<>();
+    age.add(20);
+    age.add(20);
+    return sqlServerDao.queryTopWithNoOrderby(age,new DalHints(),10);
   }
 }

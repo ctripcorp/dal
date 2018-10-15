@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.application.dao;
 
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
+import com.ctrip.platform.dal.application.service.DALService;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
@@ -398,7 +399,49 @@ public class DALServiceDao {
 		hints = DalHints.createIfAbsent(hints);
 		return client.batchUpdate(hints, daoPojos);
 	}
-	
+
+	//	atPage(1,n) but no order by
+	public List<DALServiceTable> queryAtPageWithoutOrderBy(List<Integer> Age, DalHints hints, Integer n) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.selectAllColumns();
+		builder.in("Age", Age, Types.INTEGER, false);
+		builder.atPage(1, n);
+		return client.query(builder, hints);
+	}
+
+	//	atPage(1,n) with order by
+	public List<DALServiceTable> queryAtPageWithOrderby(List<Integer> Age, DalHints hints, Integer n) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.selectAllColumns();
+		builder.in("Age", Age, Types.INTEGER, false);
+		builder.orderBy("ID", true);
+		builder.atPage(1, n);
+		return client.query(builder, hints);
+	}
+
+	//	top n with order by
+	public List<String> queryTopWithOrderby(List<Integer> Age, DalHints hints, Integer n) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.top(n);
+		builder.select("Name");
+		builder.in("Age", Age, Types.INTEGER, false);
+		builder.orderBy("ID", true);
+		return client.query(builder, hints, String.class);
+	}
+
+	//	top n
+	public List<String> queryTopWithNoOrderby(List<Integer> Age, DalHints hints, Integer n) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.top(n);
+		builder.select("Name");
+		builder.in("Age", Age, Types.INTEGER, false);
+		return client.query(builder, hints, String.class);
+	}
+
 	/**
 	 * 构建，查询
 	**/

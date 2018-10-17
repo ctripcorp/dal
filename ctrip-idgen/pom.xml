@@ -25,7 +25,7 @@
         <module>ctrip-idgen-service-api</module>
         <module>ctrip-idgen-server</module>
         <module>ctrip-idgen-client</module>
-		<module>ctrip-idgen-demo</module>
+        <module>ctrip-idgen-demo</module>
         <module>ctrip-idgen-test</module>
     </modules>
 

@@ -259,8 +259,8 @@ public class DalShardingHelper {
 		// Assume the out transaction already handle sharding logic
 		// This may have potential issue if PD think they can do cross DB operation
 		// TODO check here
-		if(DalTransactionManager.isInTransaction())
-			return true;
+//		if(DalTransactionManager.isInTransaction())
+//			return true;
 
 		hints.cleanUp();
 

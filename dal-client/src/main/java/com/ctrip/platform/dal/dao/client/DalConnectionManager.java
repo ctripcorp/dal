@@ -85,8 +85,8 @@ public class DalConnectionManager {
 			shardId = strategy.locateDbShard(config, logicDbName, hints);
 
 		// We allow this happen
-		if(shardId == null)
-			return null;
+//		if(shardId == null)
+//			return null;
 
 		dbSet.validate(shardId);
 

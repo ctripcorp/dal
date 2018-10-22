@@ -19,6 +19,18 @@ public abstract class AbstractSnowflakeWorker implements IdWorker {
         this.config = config;
     }
 
+    protected int regulateRequestSize(int requestSize) {
+        if (requestSize <= 0) {
+            throw new IllegalArgumentException("Request size should be positive");
+        }
+        return requestSize > REQUESTSIZE_MAX_VALUE ? REQUESTSIZE_MAX_VALUE : requestSize;
+    }
+
+    protected int regulateTimeoutMillis(int timeoutMillis) {
+        return timeoutMillis <= 0 ? TIMEOUTMILLIS_DEFAULT_VALUE :
+                (timeoutMillis > TIMEOUTMILLIS_MAX_VALUE ? TIMEOUTMILLIS_MAX_VALUE : timeoutMillis);
+    }
+
     protected long getMilliTime() {
         return System.currentTimeMillis();
     }

@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +19,7 @@ import java.util.ServiceConfigurationError;
 
 public class DalServiceLoader<S> implements Iterable<S> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DalServiceLoader.class);
     private static final String PREFIX = "META-INF/services/";
 
     // The class or interface representing the service being loaded
@@ -41,12 +45,20 @@ public class DalServiceLoader<S> implements Iterable<S> {
         reload();
     }
 
+    private static void error(Class service, String msg, Throwable cause) throws ServiceConfigurationError {
+        LOGGER.error(service.getName() + ": " + msg, cause);
+    }
+
     private static void fail(Class service, String msg, Throwable cause) throws ServiceConfigurationError {
-        throw new ServiceConfigurationError(service.getName() + ": " + msg, cause);
+        msg = service.getName() + ": " + msg;
+        LOGGER.error(msg, cause);
+        throw new ServiceConfigurationError(msg, cause);
     }
 
     private static void fail(Class service, String msg) throws ServiceConfigurationError {
-        throw new ServiceConfigurationError(service.getName() + ": " + msg);
+        msg = service.getName() + ": " + msg;
+        LOGGER.error(msg);
+        throw new ServiceConfigurationError(msg);
     }
 
     private static void fail(Class service, URL u, int line, String msg) throws ServiceConfigurationError {
@@ -160,11 +172,13 @@ public class DalServiceLoader<S> implements Iterable<S> {
             S p = null;
             try {
                 p = service.cast(c.newInstance());
-            } catch (Throwable x) {
+            } catch (Throwable t1) {
                 try {
                     p = service.cast(c.getMethod("getInstance").invoke(null));
-                } catch (Throwable t) {
-                    fail(service, "Provider " + cn + " could not be instantiated", t);  // how to handle x?
+                } catch (Throwable t2) {
+                    error(service, "Provider " + cn + " could not be instantiated by newInstance", t1);
+                    error(service, "Provider " + cn + " could not be instantiated by getInstance", t2);
+                    fail(service, "Provider " + cn + " could not be instantiated");
                 }
             }
             providers.put(cn, p);

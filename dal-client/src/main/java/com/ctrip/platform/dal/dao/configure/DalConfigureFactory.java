@@ -148,6 +148,17 @@ public class DalConfigureFactory implements DalConfigConstants {
         return node.getAttributes().getNamedItem(attributeName).getNodeValue();
     }
 
+    private String getAttribute(Node node, String attributeName, String defaultValue) {
+        String attribute = defaultValue;
+        try {
+            attribute =  node.getAttributes().getNamedItem(attributeName).getNodeValue();
+        } catch (NullPointerException e) {}
+        if (attribute != null && !attribute.trim().isEmpty()) {
+            return attribute;
+        }
+        return defaultValue;
+    }
+
     private Node getChildNode(Node node, String name) {
         NodeList children = node.getChildNodes();
         Node found = null;
@@ -203,19 +214,20 @@ public class DalConfigureFactory implements DalConfigConstants {
         if (null == rootNode) {
             return null;
         }
+        String sequenceDbName = getAttribute(rootNode, ALIAS, getAttribute(databaseSetNode, NAME));
         Node includesNode = getChildNode(rootNode, INCLUDES);
         Node excludesNode = getChildNode(rootNode, EXCLUDES);
         if (includesNode != null && excludesNode != null) {
             throw new DalConfigException("<includes> and <excludes> nodes cannot be configured together within <IdGenerator> node");
         }
         IIdGeneratorFactory rootNodeFactory = getIdGenFactoryForNode(rootNode);
-        Map<String, IIdGeneratorFactory> tableFactoryMap;
+        Map<String, IIdGeneratorFactory> tableFactoryMap = null;
         if (includesNode != null) {
             tableFactoryMap = getIdGenFactoriesForNode(includesNode, INCLUDE, rootNodeFactory);
             if (rootNodeFactory instanceof NullIdGeneratorFactory) {
-                return new IdGeneratorConfig(idGenFactoryManager.getOrCreateDefaultFactory(), tableFactoryMap);
+                rootNodeFactory = idGenFactoryManager.getOrCreateDefaultFactory();
             } else {
-                return new IdGeneratorConfig(idGenFactoryManager.getOrCreateNullFactory(), tableFactoryMap);
+                rootNodeFactory = idGenFactoryManager.getOrCreateNullFactory();
             }
         } else if (excludesNode != null) {
             if (rootNodeFactory instanceof NullIdGeneratorFactory) {
@@ -225,10 +237,8 @@ public class DalConfigureFactory implements DalConfigConstants {
                 tableFactoryMap = getIdGenFactoriesForNode(excludesNode,
                         EXCLUDE, idGenFactoryManager.getOrCreateNullFactory());
             }
-            return new IdGeneratorConfig(rootNodeFactory, tableFactoryMap);
-        } else {
-            return new IdGeneratorConfig(rootNodeFactory);
         }
+        return new IdGeneratorConfig(sequenceDbName, rootNodeFactory, tableFactoryMap);
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node) {
@@ -236,12 +246,9 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node, final IIdGeneratorFactory defaultFactory) {
-        try {
-            String className = getAttribute(node, FACTORY);
-            if (className != null && !className.trim().isEmpty()) {
-                return idGenFactoryManager.getOrCreateFactory(className);
-            }
-        } catch (NullPointerException e) {
+        String className = getAttribute(node, FACTORY, null);
+        if (className != null && !className.trim().isEmpty()) {
+            return idGenFactoryManager.getOrCreateFactory(className);
         }
         return defaultFactory;
     }

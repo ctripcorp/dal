@@ -26,6 +26,7 @@ public interface DalConfigConstants {
     String SELECTOR = "selector";
 
     String ID_GENERATOR = "idGenerator";
+    String ALIAS = "alias";
     String INCLUDES = "includes";
     String INCLUDE = "include";
     String EXCLUDES = "excludes";

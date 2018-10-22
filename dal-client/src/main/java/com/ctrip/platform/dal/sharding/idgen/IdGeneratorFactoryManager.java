@@ -1,18 +1,13 @@
 package com.ctrip.platform.dal.sharding.idgen;
 
+import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.*;
 
 public class IdGeneratorFactoryManager {
 
-    private static final String CONFIG_ROOT_PATH = "META-INF/services/";
-
-    private String defaultFactoryClassName = null;
+    private IIdGeneratorFactory defaultFactory = null;
     private Map<String, IIdGeneratorFactory> factoryCache = new HashMap<>();
 
     public IIdGeneratorFactory getOrCreateNullFactory() {
@@ -20,76 +15,60 @@ public class IdGeneratorFactoryManager {
     }
 
     public IIdGeneratorFactory getOrCreateDefaultFactory() {
-        if (defaultFactoryClassName != null) {
-            return getOrCreateFactory(defaultFactoryClassName);
+        if (defaultFactory != null) {
+            return defaultFactory;
         }
-        IIdGeneratorFactory factory = null;
-        List<String> classNames = getFactoryClassNames();
-        for (String className : classNames) {
-            try {
-                factory = getOrCreateFactory(className);
-                if (factory != null) {
-                    defaultFactoryClassName = className;
-                    break;
-                }
-            } catch (Exception e) {
-            }
+        defaultFactory = ServiceLoaderHelper.getInstanceWithDalServiceLoader(IIdGeneratorFactory.class);
+        if (null == defaultFactory) {
+            throw new DalRuntimeException("Failed to get default factory");
         }
-        return factory;
+        String className = defaultFactory.getClass().getName();
+        IIdGeneratorFactory factory = factoryCache.get(className);
+        if (factory != null) {
+            defaultFactory = factory;
+        } else {
+            factoryCache.put(className, defaultFactory);
+        }
+        return defaultFactory;
     }
 
     public IIdGeneratorFactory getOrCreateFactory(String className) {
         if (null == className) {
             throw new NullPointerException("Factory classname is null");
         }
-
+        className = className.trim();
         IIdGeneratorFactory factory = factoryCache.get(className);
         if (factory != null) {
             return factory;
         }
-
-        try {
-            factory = (IIdGeneratorFactory) Class.forName(className).newInstance();
-        } catch (Exception e) {
-        }
-        if (null == factory) {
-            try {
-                factory = (IIdGeneratorFactory) Class.forName(className).getMethod("getInstance").invoke(null);
-            } catch (Exception e) {
-            }
-        }
-
-        if (null == factory) {
-            throw new DalRuntimeException(String.format("Failed to get or create factory '%s'", className));
-        }
+        factory = createFactory(className);
         factoryCache.put(className, factory);
         return factory;
     }
 
-    public List<String> getFactoryClassNames() {
-        String configFilePath = CONFIG_ROOT_PATH + IIdGeneratorFactory.class.getName();
-        List<String> classNames = new ArrayList<>();
-        Enumeration<URL> urls = null;
+    private IIdGeneratorFactory createFactory(String className) {
+        IIdGeneratorFactory factory = null;
+        Class clazz = null;
         try {
-            urls = IdGeneratorFactoryManager.class.getClassLoader().getResources(configFilePath);
-        } catch (IOException e) {
-            return classNames;
+            clazz = Class.forName(className);
+        } catch (Throwable t) {
+            throw new DalRuntimeException("Failed to load class: " + className, t);
         }
-        if (null == urls) {
-            return classNames;
-        }
-        while (urls.hasMoreElements()) {
+        try {
+            factory = (IIdGeneratorFactory) clazz.newInstance();
+        } catch (Throwable t1) {
             try {
-                URL url = urls.nextElement();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    classNames.add(line);
-                }
-            } catch (Exception e) {
+                factory = (IIdGeneratorFactory) clazz.getMethod("getInstance").invoke(null);
+            } catch (Throwable t2) {
+                String msg = String.format("Failed to create factory: %s. Cause 1: %s; cause 2: %s",
+                        className, t1.getMessage(), t2.getMessage());
+                throw new DalRuntimeException(msg);
             }
         }
-        return classNames;
+        if (null == factory) {
+            throw new DalRuntimeException(String.format("The created factory '%s' is null", className));
+        }
+        return factory;
     }
 
 }

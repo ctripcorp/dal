@@ -4,25 +4,28 @@ import java.util.Map;
 
 public class IdGeneratorConfig implements IIdGeneratorConfig {
 
+    private String sequenceDbName;
     private IIdGeneratorFactory dbDefaultFactory;
     private Map<String, IIdGeneratorFactory> tableFactoryMap;
 
-    public IdGeneratorConfig(IIdGeneratorFactory dbDefaultFactory) {
-        this(dbDefaultFactory, null);
+    public IdGeneratorConfig(String sequenceDbName, IIdGeneratorFactory dbDefaultFactory) {
+        this(sequenceDbName, dbDefaultFactory, null);
     }
     
-    public IdGeneratorConfig(IIdGeneratorFactory dbDefaultFactory,
+    public IdGeneratorConfig(String sequenceDbName, IIdGeneratorFactory dbDefaultFactory,
                              Map<String, IIdGeneratorFactory> tableFactoryMap) {
+        this.sequenceDbName = sequenceDbName;
         this.dbDefaultFactory = dbDefaultFactory;
         this.tableFactoryMap = tableFactoryMap;
     }
 
-    public IdGenerator getIdGenerator(String logicDbName, String tableName) {
+    @Override
+    public IdGenerator getIdGenerator(String tableName) {
         IIdGeneratorFactory factory = getIdGeneratorFactory(tableName);
         if (null == factory) {
             return null;
         }
-        return factory.getIdGenerator(getSequenceName(logicDbName, tableName));
+        return factory.getIdGenerator(getSequenceName(tableName));
     }
 
     private IIdGeneratorFactory getIdGeneratorFactory(String tableName) {
@@ -32,16 +35,15 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
         if (null == tableFactoryMap) {
             return dbDefaultFactory;
         }
-        tableName = tableName.trim().toLowerCase();
-        IIdGeneratorFactory factory = tableFactoryMap.get(tableName);
+        IIdGeneratorFactory factory = tableFactoryMap.get(tableName.trim().toLowerCase());
         if (null == factory) {
             return dbDefaultFactory;
         }
         return factory;
     }
 
-    private String getSequenceName(String logicDbName, String tableName) {
-        return (logicDbName + "." + tableName).trim().toLowerCase();
+    private String getSequenceName(String tableName) {
+        return (sequenceDbName + "." + tableName).trim().toLowerCase();
     }
 
 }

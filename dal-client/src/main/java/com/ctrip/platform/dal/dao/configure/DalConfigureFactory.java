@@ -11,8 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
+import com.ctrip.platform.dal.dao.helper.ClassScanner;
+import com.ctrip.platform.dal.dao.helper.DalClassScanner;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.ctrip.platform.dal.sharding.idgen.*;
 import org.w3c.dom.Document;
@@ -33,6 +39,14 @@ public class DalConfigureFactory implements DalConfigConstants {
     private static DalConfigureFactory factory = new DalConfigureFactory();
 
     private IdGeneratorFactoryManager idGenFactoryManager = new IdGeneratorFactoryManager();
+    private ClassScanner entityScanner = new DalClassScanner(new ClassScanFilter() {
+        @Override
+        public boolean accept(Class<?> clazz) {
+            return clazz.isAnnotationPresent(Entity.class) &&
+                    clazz.isAnnotationPresent(Database.class) &&
+                    !clazz.isInterface();
+        }
+    });
 
     /**
      * Load from classpath. For historic reason, we support both dal.xml and Dal.config for configure name.
@@ -214,7 +228,6 @@ public class DalConfigureFactory implements DalConfigConstants {
         if (null == rootNode) {
             return null;
         }
-        String sequenceDbName = getAttribute(rootNode, ALIAS, getAttribute(databaseSetNode, NAME));
         Node includesNode = getChildNode(rootNode, INCLUDES);
         Node excludesNode = getChildNode(rootNode, EXCLUDES);
         if (includesNode != null && excludesNode != null) {
@@ -238,7 +251,11 @@ public class DalConfigureFactory implements DalConfigConstants {
                         EXCLUDE, idGenFactoryManager.getOrCreateNullFactory());
             }
         }
-        return new IdGeneratorConfig(sequenceDbName, rootNodeFactory, tableFactoryMap);
+        String sequenceDbName = getAttribute(rootNode, ALIAS, getAttribute(databaseSetNode, NAME));
+        IIdGeneratorConfig config = new IdGeneratorConfig(sequenceDbName, rootNodeFactory, tableFactoryMap);
+        String entityPackage = getAttribute(rootNode, ENTITY_PACKAGE, null);
+        addIdGenTables(config, entityPackage);
+        return config;
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node) {
@@ -271,6 +288,29 @@ public class DalConfigureFactory implements DalConfigConstants {
             }
         }
         return factories;
+    }
+
+    private void addIdGenTables(IIdGeneratorConfig config, String entityPackage) {
+        String dbName = config.getDbName();
+        List<Class<?>> entityClasses = entityScanner.getClasses(entityPackage, true);
+        for (Class<?> entityClass : entityClasses) {
+            Database database = entityClass.getAnnotation(Database.class);
+            if (dbName.equals(database.name())) {
+                config.addTable(parseTableName(entityClass));
+            }
+        }
+    }
+
+    private String parseTableName(Class<?> entityClass) {
+        Table table = entityClass.getAnnotation(Table.class);
+        if (table != null && !table.name().trim().isEmpty()) {
+            return table.name().trim();
+        }
+        Entity entity = entityClass.getAnnotation(Entity.class);
+        if (entity != null && !entity.name().trim().isEmpty()) {
+            return entity.name().trim();
+        }
+        return entityClass.getSimpleName();
     }
 
     private DataBase readDataBase(Node dataBaseNode, boolean isSharded) {

@@ -1,10 +1,13 @@
 package com.ctrip.platform.dal.sharding.idgen;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class IdGeneratorConfig implements IIdGeneratorConfig {
 
     private String sequenceDbName;
+    private Set<String> sequenceTables = new HashSet<>();
     private IIdGeneratorFactory dbDefaultFactory;
     private Map<String, IIdGeneratorFactory> tableFactoryMap;
 
@@ -44,6 +47,23 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
 
     private String getSequenceName(String tableName) {
         return (sequenceDbName + "." + tableName).trim().toLowerCase();
+    }
+
+    @Override
+    public String getDbName() {
+        return sequenceDbName;
+    }
+
+    @Override
+    public boolean addTable(String tableName) {
+        return sequenceTables.add(tableName);
+    }
+
+    @Override
+    public void warmUp() {
+        for (String tableName : sequenceTables) {
+            getIdGenerator(tableName);
+        }
     }
 
 }

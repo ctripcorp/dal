@@ -13,6 +13,7 @@ import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 import org.apache.commons.lang.StringUtils;
 
 public class DalConfigure {
@@ -199,4 +200,14 @@ public class DalConfigure {
             throw new DalConfigException(errorInfo.toString());
         }
     }
+
+    public void warmUpIdGenerators() {
+        for (DatabaseSet dbSet : databaseSets.values()) {
+            IIdGeneratorConfig config = dbSet.getIdGenConfig();
+            if (config != null) {
+                config.warmUp();
+            }
+        }
+    }
+
 }

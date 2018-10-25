@@ -27,6 +27,7 @@ public interface DalConfigConstants {
 
     String ID_GENERATOR = "idGenerator";
     String ALIAS = "alias";
+    String ENTITY_PACKAGE = "entityPackage";
     String INCLUDES = "includes";
     String INCLUDE = "include";
     String EXCLUDES = "excludes";

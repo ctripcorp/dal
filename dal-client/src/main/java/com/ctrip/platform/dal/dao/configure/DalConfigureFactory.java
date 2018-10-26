@@ -159,7 +159,11 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private String getAttribute(Node node, String attributeName) {
-        return node.getAttributes().getNamedItem(attributeName).getNodeValue();
+        String attribute =  node.getAttributes().getNamedItem(attributeName).getNodeValue();
+        if (attribute != null) {
+            attribute = attribute.trim();
+        }
+        return attribute;
     }
 
     private String getAttribute(Node node, String attributeName, String defaultValue) {
@@ -168,7 +172,7 @@ public class DalConfigureFactory implements DalConfigConstants {
             attribute =  node.getAttributes().getNamedItem(attributeName).getNodeValue();
         } catch (NullPointerException e) {}
         if (attribute != null && !attribute.trim().isEmpty()) {
-            return attribute;
+            return attribute.trim();
         }
         return defaultValue;
     }
@@ -224,26 +228,26 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private IIdGeneratorConfig getIdGenConfig(Node databaseSetNode) throws Exception {
-        Node rootNode = getChildNode(databaseSetNode, ID_GENERATOR);
-        if (null == rootNode) {
+        Node idGeneratorNode = getChildNode(databaseSetNode, ID_GENERATOR);
+        if (null == idGeneratorNode) {
             return null;
         }
-        Node includesNode = getChildNode(rootNode, INCLUDES);
-        Node excludesNode = getChildNode(rootNode, EXCLUDES);
+        Node includesNode = getChildNode(idGeneratorNode, INCLUDES);
+        Node excludesNode = getChildNode(idGeneratorNode, EXCLUDES);
         if (includesNode != null && excludesNode != null) {
             throw new DalConfigException("<includes> and <excludes> nodes cannot be configured together within <IdGenerator> node");
         }
-        IIdGeneratorFactory rootNodeFactory = getIdGenFactoryForNode(rootNode);
+        IIdGeneratorFactory dbDefaultFactory = getIdGenFactoryForNode(idGeneratorNode);
         Map<String, IIdGeneratorFactory> tableFactoryMap = null;
         if (includesNode != null) {
-            tableFactoryMap = getIdGenFactoriesForNode(includesNode, INCLUDE, rootNodeFactory);
-            if (rootNodeFactory instanceof NullIdGeneratorFactory) {
-                rootNodeFactory = idGenFactoryManager.getOrCreateDefaultFactory();
+            tableFactoryMap = getIdGenFactoriesForNode(includesNode, INCLUDE, dbDefaultFactory);
+            if (dbDefaultFactory instanceof NullIdGeneratorFactory) {
+                dbDefaultFactory = idGenFactoryManager.getOrCreateDefaultFactory();
             } else {
-                rootNodeFactory = idGenFactoryManager.getOrCreateNullFactory();
+                dbDefaultFactory = idGenFactoryManager.getOrCreateNullFactory();
             }
         } else if (excludesNode != null) {
-            if (rootNodeFactory instanceof NullIdGeneratorFactory) {
+            if (dbDefaultFactory instanceof NullIdGeneratorFactory) {
                 tableFactoryMap = getIdGenFactoriesForNode(excludesNode,
                         EXCLUDE, idGenFactoryManager.getOrCreateDefaultFactory());
             } else {
@@ -251,11 +255,11 @@ public class DalConfigureFactory implements DalConfigConstants {
                         EXCLUDE, idGenFactoryManager.getOrCreateNullFactory());
             }
         }
-        String sequenceDbName = getAttribute(rootNode, ALIAS, getAttribute(databaseSetNode, NAME));
-        IIdGeneratorConfig config = new IdGeneratorConfig(sequenceDbName, rootNodeFactory, tableFactoryMap);
-        String entityPackage = getAttribute(rootNode, ENTITY_PACKAGE, null);
-        addIdGenTables(config, entityPackage);
-        return config;
+        String logicDbName = getAttribute(databaseSetNode, NAME);
+        String sequenceDbName = getAttribute(idGeneratorNode, SEQUENCE_DATABASE_NAME, logicDbName);
+        String entityDbName = getAttribute(idGeneratorNode, ENTITY_DATABASE_NAME, logicDbName);
+        String entityPackage = getAttribute(idGeneratorNode, ENTITY_PACKAGE, null);
+        return new IdGeneratorConfig(sequenceDbName, entityDbName, entityPackage, dbDefaultFactory, tableFactoryMap);
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node) {
@@ -288,29 +292,6 @@ public class DalConfigureFactory implements DalConfigConstants {
             }
         }
         return factories;
-    }
-
-    private void addIdGenTables(IIdGeneratorConfig config, String entityPackage) {
-        String dbName = config.getDbName();
-        List<Class<?>> entityClasses = entityScanner.getClasses(entityPackage, true);
-        for (Class<?> entityClass : entityClasses) {
-            Database database = entityClass.getAnnotation(Database.class);
-            if (dbName.equals(database.name())) {
-                config.addTable(parseTableName(entityClass));
-            }
-        }
-    }
-
-    private String parseTableName(Class<?> entityClass) {
-        Table table = entityClass.getAnnotation(Table.class);
-        if (table != null && !table.name().trim().isEmpty()) {
-            return table.name().trim();
-        }
-        Entity entity = entityClass.getAnnotation(Entity.class);
-        if (entity != null && !entity.name().trim().isEmpty()) {
-            return entity.name().trim();
-        }
-        return entityClass.getSimpleName();
     }
 
     private DataBase readDataBase(Node dataBaseNode, boolean isSharded) {

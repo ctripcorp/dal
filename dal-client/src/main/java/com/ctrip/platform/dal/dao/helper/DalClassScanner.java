@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -13,6 +16,8 @@ import java.util.jar.JarFile;
 
 public class DalClassScanner implements ClassScanner {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DalClassScanner.class);
+
     private static final String URL_PROTOCOL_FILE = "file";
     private static final String URL_PROTOCOL_JAR = "jar";
     private static final String CLASS_NAME_SUFFIX = ".class";
@@ -24,6 +29,8 @@ public class DalClassScanner implements ClassScanner {
     private FileFilter classFileOrDirectoryFilter = new ClassFileOrDirectoryFilter();
     private ClassScanFilter classScanFilter;
     private ClassLoader classLoader;
+    private int fileCount;
+    private int jarCount;
 
     public DalClassScanner() {
         this(null, null);
@@ -43,10 +50,14 @@ public class DalClassScanner implements ClassScanner {
     }
 
     public List<Class<?>> getClasses(String packageName, boolean recursive) {
+        fileCount = 0;
+        jarCount = 0;
         List<Class<?>> classList = new ArrayList<>();
+        if (null == packageName || packageName.trim().isEmpty()) {
+            throw new IllegalArgumentException("packageName should not be null or empty");
+        }
         packageName = packageName.trim();
         String packagePath = packageName.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         try {
             Enumeration<URL> urls = classLoader.getResources(packagePath);
             while (urls.hasMoreElements()) {
@@ -62,9 +73,14 @@ public class DalClassScanner implements ClassScanner {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
 
+        LOGGER.info("=========================================================================");
+        LOGGER.info(String.format("%d classes found", classList.size()));
+        LOGGER.info(String.format("%d files scanned", fileCount));
+        LOGGER.info(String.format("%d jars scanned", jarCount));
+        LOGGER.info("=========================================================================");
         return classList;
     }
 
@@ -75,7 +91,9 @@ public class DalClassScanner implements ClassScanner {
                 for (File file : files) {
                     try {
                         String fileName = file.getName();
+                        fileCount++;
                         if (file.isFile()) {
+                            LOGGER.info("Scanning file: " + file.getPath());
                             String className = getClassName(packageName, fileName);
                             tryAddClass(classList, className);
                         } else if (recursive) {
@@ -86,12 +104,12 @@ public class DalClassScanner implements ClassScanner {
                             findClasses(classList, subPackageName, subPath, recursive);
                         }
                     } catch (Throwable t) {
-                        t.printStackTrace();
+                        LOGGER.warn(t.getMessage(), t);
                     }
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOGGER.warn(t.getMessage(), t);
         }
     }
 
@@ -100,6 +118,8 @@ public class DalClassScanner implements ClassScanner {
             JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
             JarFile jarFile = jarURLConnection.getJarFile();
             Enumeration<JarEntry> jarEntries = jarFile.entries();
+            LOGGER.info("Scanning jar: " + jarFile.getName());
+            jarCount++;
             while (jarEntries.hasMoreElements()) {
                 try {
                     JarEntry jarEntry = jarEntries.nextElement();
@@ -113,11 +133,11 @@ public class DalClassScanner implements ClassScanner {
                         }
                     }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LOGGER.warn(t.getMessage(), t);
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOGGER.warn(t.getMessage(), t);
         }
     }
 
@@ -158,7 +178,7 @@ public class DalClassScanner implements ClassScanner {
         try {
             clazz = Class.forName(className, false, classLoader);
         } catch (Throwable t) {
-            t.printStackTrace();
+            LOGGER.warn(String.format("Class '%s' cannot be loaded", className));
         }
         if (clazz != null) {
             if (classScanFilter != null) {

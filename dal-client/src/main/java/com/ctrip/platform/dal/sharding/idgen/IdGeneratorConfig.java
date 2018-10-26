@@ -75,31 +75,34 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
     public void warmUp() {
         scanEntities();
         for (String tableName : sequenceTables) {
-            try {
-                getIdGenerator(tableName).nextId();
-            } catch (Throwable t) {}
+            getIdGenerator(tableName).nextId();
         }
     }
 
     private void scanEntities() {
         if (entityDbName!= null && !entityDbName.isEmpty() &&
                 entityPackage != null && !entityPackage.isEmpty()) {
-            List<Class<?>> entities = new DalClassScanner(new ClassScanFilter() {
-                @Override
-                public boolean accept(Class<?> clazz) {
-                    return clazz.isAnnotationPresent(Entity.class) &&
-                            clazz.isAnnotationPresent(Database.class) &&
-                            !clazz.isInterface();
+            try {
+                List<Class<?>> entities = new DalClassScanner(new ClassScanFilter() {
+                    @Override
+                    public boolean accept(Class<?> clazz) {
+                        return clazz.isAnnotationPresent(Entity.class) &&
+                                clazz.isAnnotationPresent(Database.class) &&
+                                !clazz.isInterface();
+                    }
+                }).getClasses(entityPackage, true);
+                for (Class<?> entity : entities) {
+                    Database database = entity.getAnnotation(Database.class);
+                    if (entityDbName.equals(database.name())) {
+                        sequenceTables.add(parseEntityTableName(entity));
+                    }
                 }
-            }).getClasses(entityPackage, true);
-            for (Class<?> entity : entities) {
-                Database database = entity.getAnnotation(Database.class);
-                if (entityDbName.equals(database.name())) {
-                    sequenceTables.add(parseEntityTableName(entity));
+                if (sequenceTables.isEmpty()) {
+                    LOGGER.logEvent(TYPE_DAL, NAME_NO_ENTITY_FOUND, null);
                 }
-            }
-            if (sequenceTables.isEmpty()) {
-                LOGGER.logEvent(TYPE_DAL, NAME_NO_ENTITY_FOUND, null);
+            } catch (Throwable t) {
+                LOGGER.error(String.format("Entity scan exception (entityDbName: %s, entityPackage: %s)",
+                        entityDbName, entityPackage), t);
             }
         }
     }

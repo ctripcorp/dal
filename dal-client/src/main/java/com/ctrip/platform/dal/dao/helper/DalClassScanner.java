@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,7 @@ public class DalClassScanner implements ClassScanner {
                 }
             }
         } catch (IOException e) {
-            LOGGER.warn(e.getMessage(), e);
+            throw new DalRuntimeException(e);
         }
 
         LOGGER.info("=========================================================================");

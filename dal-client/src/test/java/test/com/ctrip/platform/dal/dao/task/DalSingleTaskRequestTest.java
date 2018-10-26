@@ -72,7 +72,7 @@ public class DalSingleTaskRequestTest {
 	}
 
 	@Test
-	public void testValidate() {
+	public void testValidateAndPrepare() {
 		DalSingleTaskRequest<Integer> test = null;
 		try {
 			Integer i = null;

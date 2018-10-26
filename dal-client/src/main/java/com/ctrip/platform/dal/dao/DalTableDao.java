@@ -22,7 +22,7 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 /**
  * Base table DAO wraps common CRUD for particular table. The generated table DAO should use this DAO to perform CRUD.
- * All operations support corss-shard case. Including DB, table or DB + table sharding combination.
+ * All operations support cross-shard case. Including DB, table or DB + table sharding combination.
  * 
  * @author jhhe
  */

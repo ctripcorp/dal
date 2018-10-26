@@ -1,11 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isAlreadySharded;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isShardingEnabled;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.isTableShardingEnabled;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffle;
-import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.shuffleByTable;
 import static com.ctrip.platform.dal.dao.KeyHolder.*;
+import static com.ctrip.platform.dal.dao.helper.DalShardingHelper.*;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -68,9 +64,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			((InsertTaskAdapter) task).processIdentityField(hints, daoPojos);
 		}
 
+		detectBulkTaskDistributedTransaction(logicDbName, hints, daoPojos);
 		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
 	}
-	
+
 	@Override
 	public boolean isCrossShard() throws SQLException {		
 		if(isAlreadySharded(logicDbName, rawTableName, hints))

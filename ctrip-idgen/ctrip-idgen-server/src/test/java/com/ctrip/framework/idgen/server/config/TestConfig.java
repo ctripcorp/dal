@@ -18,7 +18,7 @@ public class TestConfig {
 
     public static Server mockServer() {
         Server config = new CtripServer();
-        ((CtripServer) config).workerId = 1;
+//        ((CtripServer) config).workerId = 1;
         return config;
     }
 

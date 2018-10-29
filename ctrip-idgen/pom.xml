@@ -10,22 +10,22 @@
     </parent>
     <groupId>com.ctrip.framework.idgen</groupId>
     <artifactId>idgen-parent</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <frameworkbom.version>2.32.0</frameworkbom.version>
+        <frameworkbom.version>2.37.0</frameworkbom.version>
         <springboot.version>1.4.3.RELEASE</springboot.version>
-        <dal-client.version>1.16.3</dal-client.version>
+        <dal-client.version>1.16.4-idgen-SNAPSHOT</dal-client.version>
     </properties>
 
     <modules>
         <module>ctrip-idgen-service-api</module>
         <module>ctrip-idgen-server</module>
         <module>ctrip-idgen-client</module>
-		<module>ctrip-idgen-demo</module>
+        <module>ctrip-idgen-demo</module>
         <module>ctrip-idgen-test</module>
     </modules>
 
@@ -47,7 +47,7 @@
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
-                <artifactId>dal-client</artifactId>
+                <artifactId>ctrip-dal-client</artifactId>
                 <version>${dal-client.version}</version>
             </dependency>
             <dependency>

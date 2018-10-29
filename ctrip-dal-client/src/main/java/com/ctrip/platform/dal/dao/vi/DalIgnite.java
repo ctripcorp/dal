@@ -56,6 +56,10 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             DalClientFactory.warmUpConnections();
             logger.info("success warmed up datasources");
 
+            logger.info("Start warm up id generators");
+            DalClientFactory.warmUpIdGenerators();
+            logger.info("Success warmed up id generators");
+
             return true;
         } catch (Throwable e) {
             if (DataSourceConfigureManager.config == null) {

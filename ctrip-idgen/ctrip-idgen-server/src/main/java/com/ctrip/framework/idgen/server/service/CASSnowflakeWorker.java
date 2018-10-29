@@ -26,6 +26,8 @@ public class CASSnowflakeWorker extends AbstractSnowflakeWorker {
     @Override
     public List<IdSegment> generateIdPool(int requestSize, int timeoutMillis) {
         long startNanoTime = getNanoTime();
+        requestSize = regulateRequestSize(requestSize);
+        timeoutMillis = regulateTimeoutMillis(timeoutMillis);
         List<IdSegment> pool = new LinkedList<>();
         int remainedSize = requestSize;
         while (remainedSize > 0 && !isTimeout(startNanoTime, timeoutMillis)) {

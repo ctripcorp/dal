@@ -47,7 +47,7 @@
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
-                <artifactId>dal-client</artifactId>
+                <artifactId>ctrip-dal-client</artifactId>
                 <version>${dal-client.version}</version>
             </dependency>
             <dependency>

@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
-            <artifactId>dal-client</artifactId>
+            <artifactId>ctrip-dal-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework.cdubbo</groupId>

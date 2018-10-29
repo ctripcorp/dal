@@ -84,7 +84,7 @@ public class DalBulkTaskRequestTest {
 
 	@Test
 	public void testValidate() {
-		DalBulkTaskRequest<Integer, TestPojo> test = new DalBulkTaskRequest<>("", "", null, new ArrayList<TestPojo>(), new TestBulkTask());
+		DalBulkTaskRequest<Integer, TestPojo> test = new DalBulkTaskRequest<>("dao_test", "", null, new ArrayList<TestPojo>(), new TestBulkTask());
 		try {
 			test.validateAndPrepare();
 		} catch (SQLException e) {
@@ -92,7 +92,7 @@ public class DalBulkTaskRequestTest {
 		}
 		
 		// Null pojos
-		test = new DalBulkTaskRequest<>("", "", null, null, new TestBulkTask());
+		test = new DalBulkTaskRequest<>("dao_test", "", null, null, new TestBulkTask());
 		try {
 			test.validateAndPrepare();
 			fail();
@@ -100,7 +100,7 @@ public class DalBulkTaskRequestTest {
 		}
 
 		// Null task
-		test = new DalBulkTaskRequest<>("", "", null, new ArrayList<TestPojo>(), null);
+		test = new DalBulkTaskRequest<>("dao_test", "", null, new ArrayList<TestPojo>(), null);
 		try {
 			test.validateAndPrepare();
 			fail();

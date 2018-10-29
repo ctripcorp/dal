@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,15 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.platform.dal.dao.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ctrip.platform.dal.dao.DalClient;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalCommand;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 
@@ -150,7 +147,7 @@ public class DalShardingHelperTest {
 			assertFalse(DalTransactionManager.isInTransaction());
 			client.execute(new DalCommand(){
 				public boolean execute(DalClient client) throws SQLException {
-					DalShardingHelper.shuffle(logicDbName, "0", daoPojos);
+					DalShardingHelper.detectDistributedTransaction(DalShardingHelper.shuffle(logicDbName, "0", daoPojos).keySet());
 					return false;
 				}
 				
@@ -165,7 +162,7 @@ public class DalShardingHelperTest {
 		try {
 			client.execute(new DalCommand(){
 				public boolean execute(DalClient client) throws SQLException {
-					DalShardingHelper.shuffle(logicDbName, null, daoPojos);
+					DalShardingHelper.detectDistributedTransaction(DalShardingHelper.shuffle(logicDbName, null, daoPojos).keySet());
 					return false;
 				}
 				
@@ -179,7 +176,7 @@ public class DalShardingHelperTest {
 		try {
 			client.execute(new DalCommand(){
 				public boolean execute(DalClient client) throws SQLException {
-					DalShardingHelper.shuffle(logicDbName, "1", daoPojos);
+					DalShardingHelper.detectDistributedTransaction(DalShardingHelper.shuffle(logicDbName, "1", daoPojos).keySet());
 					return false;
 				}
 				
@@ -431,5 +428,60 @@ public class DalShardingHelperTest {
 			e.printStackTrace();
 			fail();
 		}		
+	}
+
+	@Test
+	public void testGroupPojosByShardID() throws Exception{
+		final List<Map<String, ?>> daoPojos = new ArrayList<>();
+		String shardId;
+		final String logicDbName = "dao_test_mod";//;columns=id;mod=2
+		Map<String, Object> pojo = new HashMap<>();
+		pojo.put("name", "test");
+		daoPojos.add(pojo);
+
+		pojo = new HashMap<>();
+		pojo.put("id", 1);
+		daoPojos.add(pojo);
+
+		try {
+			shardId = null;
+			Map<String, Map<Integer, Map<String, ?>>> groupedPojos=DalShardingHelper.getPojosGroupedByShardId(logicDbName, shardId, daoPojos);
+			assertEquals(2,groupedPojos.keySet().size());
+		} catch (SQLException e) {
+			fail();
+		}
+
+		try {
+			shardId = null;
+			DalShardingHelper.shuffle(logicDbName, shardId, daoPojos);
+			fail();
+		} catch (SQLException e) {
+			assertEquals("No shard defined for id: null",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testGroupParametersByShardId() throws Exception{
+		final List<Map<String, ?>> daoPojos = new ArrayList<>();
+		final String logicDbName = "dao_test_mod";//;columns=id;mod=2
+		List<Integer> ids=new ArrayList<>();
+		ids.add(1);
+		ids.add(2);
+		StatementParameter statementParameter=new StatementParameter("ID", Types.INTEGER,ids);
+		statementParameter.setInParam(true);
+
+		try {
+			Map<String,?> groupedParams=DalShardingHelper.getParamsGroupedByShardId(logicDbName, (List)statementParameter.getValue());
+			assertEquals(2,groupedParams.keySet().size());
+		} catch (SQLException e) {
+			fail();
+		}
+
+		try {
+			Map<String,?> groupedParams=DalShardingHelper.shuffle(logicDbName, (List)statementParameter.getValue());
+			assertEquals(2,groupedParams.keySet().size());
+		} catch (SQLException e) {
+			fail();
+		}
 	}
 }

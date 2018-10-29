@@ -58,10 +58,6 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
         return hints.isAsyncExecution();
     }
 
-/*    @Override
-    public void validate() throws SQLException {
-    }*/
-
     @Override
     public void validateAndPrepare() throws SQLException {
         if (isList && null == rawPojos)

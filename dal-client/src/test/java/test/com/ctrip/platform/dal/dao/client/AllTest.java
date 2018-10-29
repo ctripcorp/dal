@@ -12,6 +12,7 @@ import test.com.ctrip.platform.dal.dao.client.DalCommand.DalCommandTest;
 		DalConnectionTest.class,
 		DalTransactionManagerTest.class,
 		DalTransactionTest.class,
+		DalShardingInTransactionTest.class,
 		DalShardingHelperTest.class,
 		DalConfigureFactoryTest.class,
 		DalCommandTest.class

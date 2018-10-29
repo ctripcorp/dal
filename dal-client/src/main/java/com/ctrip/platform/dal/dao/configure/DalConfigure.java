@@ -13,6 +13,8 @@ import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 import org.apache.commons.lang.StringUtils;
 
 public class DalConfigure {
@@ -140,7 +142,8 @@ public class DalConfigure {
         Set<String> sqlServerSet = new HashSet<>();
         Map<String, Set<String>> connStrMap = new HashMap<>();
         for (DatabaseSet dbSet : databaseSets.values()) {
-            if (null == dbSet.getIdGenConfig()) {
+            IIdGeneratorConfig idGenConfig = dbSet.getIdGenConfig();
+            if (null == idGenConfig) {
                 continue;
             }
             String dbSetName = dbSet.getName();
@@ -148,16 +151,17 @@ public class DalConfigure {
                 sqlServerSet.add(dbSetName);
                 continue;
             }
+            String sequenceDbName = idGenConfig.getSequenceDbName();
             Map<String, DataBase> dbs = dbSet.getDatabases();
             if (dbs != null) {
                 for (DataBase db : dbs.values()) {
                     String connStr = db.getConnectionString();
                     Set<String> dbSetsForConnStr = connStrMap.get(connStr);
                     if (dbSetsForConnStr != null) {
-                        dbSetsForConnStr.add(dbSetName);
+                        dbSetsForConnStr.add(sequenceDbName);
                     } else {
                         dbSetsForConnStr = new HashSet<>();
-                        dbSetsForConnStr.add(dbSetName);
+                        dbSetsForConnStr.add(sequenceDbName);
                         connStrMap.put(connStr, dbSetsForConnStr);
                     }
                 }
@@ -183,14 +187,14 @@ public class DalConfigure {
             if (value.size() > 1) {
                 if (!connStrMapMark) {
                     errorInfo.append(System.lineSeparator());
-                    errorInfo.append("> Duplicated database included in multiple logic databases with id generator. ");
+                    errorInfo.append("> Duplicated databases found in multiple logic databases with different sequenceDbNames. ");
                     errorInfo.append("Below are the connection strings of the duplicated databases: ");
                     connStrMapMark = true;
                 }
                 errorInfo.append(System.lineSeparator());
                 errorInfo.append("  > ");
                 errorInfo.append(key);
-                errorInfo.append(" (included in logic databases: ");
+                errorInfo.append(" (sequenceDbNames: ");
                 errorInfo.append(StringUtils.join(value, ", "));
                 errorInfo.append(")");
             }
@@ -199,4 +203,29 @@ public class DalConfigure {
             throw new DalConfigException(errorInfo.toString());
         }
     }
+
+    public void warmUpIdGenerators() {
+        Map<String, Future<Integer>> futures = new HashMap<>();
+        for (DatabaseSet dbSet : databaseSets.values()) {
+            final IIdGeneratorConfig config = dbSet.getIdGenConfig();
+            if (config != null) {
+                futures.put(dbSet.getName(), executor.submit(new Callable<Integer>() {
+                    @Override
+                    public Integer call() throws Exception {
+                        return config.warmUp();
+                    }
+                }));
+            }
+        }
+        for (Map.Entry<String, Future<Integer>> entry : futures.entrySet()) {
+            try {
+                entry.getValue().get();
+            } catch (Throwable t) {
+                String msg = String.format("warm up id generator error for databaseSet '%s'", entry.getKey());
+                dalLogger.error(msg, t);
+                throw new DalRuntimeException(msg, t);
+            }
+        }
+    }
+
 }

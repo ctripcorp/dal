@@ -96,6 +96,13 @@ public class DalClientFactory {
         getDalConfigure().warmUpConnections();
     }
 
+    /**
+     * Prefetch for id generators
+     */
+    public static void warmUpIdGenerators() {
+        getDalConfigure().warmUpIdGenerators();
+    }
+
     public static DalClient getClient(String logicDbName) {
         if (logicDbName == null)
             throw new NullPointerException("Database Set name can not be null");

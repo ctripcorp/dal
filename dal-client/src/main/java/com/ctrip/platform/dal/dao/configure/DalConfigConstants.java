@@ -26,6 +26,10 @@ public interface DalConfigConstants {
     String SELECTOR = "selector";
 
     String ID_GENERATOR = "idGenerator";
+    String ID_GENERATOR_FACTORY = "factory";
+    String SEQUENCE_DATABASE_NAME = "sequenceDbName";
+    String ENTITY_DATABASE_NAME = "entityDbName";
+    String ENTITY_PACKAGE = "entityPackage";
     String INCLUDES = "includes";
     String INCLUDE = "include";
     String EXCLUDES = "excludes";

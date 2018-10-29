@@ -1,2 +1,6 @@
-com.ctrip.framework.idgen.client.IdGeneratorFactory
+#com.ctrip.framework.idgen.client.IdGeneratorFactory
+test.com.ctrip.platform.dal.dao.sharding.idgen.TestIdGeneratorFactory4
 com.ctrip.platform.dal.sharding.idgen.NullIdGeneratorFactory
+test.com.ctrip.platform.dal.dao.sharding.idgen.TestIdGeneratorFactory2
+test.com.ctrip.platform.dal.dao.sharding.idgen.TestIdGeneratorFactory1
+test.com.ctrip.platform.dal.dao.sharding.idgen.TestIdGeneratorFactory3

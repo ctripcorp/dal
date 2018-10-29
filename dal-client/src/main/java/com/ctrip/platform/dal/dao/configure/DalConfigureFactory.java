@@ -11,8 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
+import com.ctrip.platform.dal.dao.helper.ClassScanner;
+import com.ctrip.platform.dal.dao.helper.DalClassScanner;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.ctrip.platform.dal.sharding.idgen.*;
 import org.w3c.dom.Document;
@@ -33,6 +39,14 @@ public class DalConfigureFactory implements DalConfigConstants {
     private static DalConfigureFactory factory = new DalConfigureFactory();
 
     private IdGeneratorFactoryManager idGenFactoryManager = new IdGeneratorFactoryManager();
+    private ClassScanner entityScanner = new DalClassScanner(new ClassScanFilter() {
+        @Override
+        public boolean accept(Class<?> clazz) {
+            return clazz.isAnnotationPresent(Entity.class) &&
+                    clazz.isAnnotationPresent(Database.class) &&
+                    !clazz.isInterface();
+        }
+    });
 
     /**
      * Load from classpath. For historic reason, we support both dal.xml and Dal.config for configure name.
@@ -145,7 +159,22 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private String getAttribute(Node node, String attributeName) {
-        return node.getAttributes().getNamedItem(attributeName).getNodeValue();
+        String attribute =  node.getAttributes().getNamedItem(attributeName).getNodeValue();
+        if (attribute != null) {
+            attribute = attribute.trim();
+        }
+        return attribute;
+    }
+
+    private String getAttribute(Node node, String attributeName, String defaultValue) {
+        String attribute = defaultValue;
+        try {
+            attribute =  node.getAttributes().getNamedItem(attributeName).getNodeValue();
+        } catch (NullPointerException e) {}
+        if (attribute != null && !attribute.trim().isEmpty()) {
+            return attribute.trim();
+        }
+        return defaultValue;
     }
 
     private Node getChildNode(Node node, String name) {
@@ -199,36 +228,38 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private IIdGeneratorConfig getIdGenConfig(Node databaseSetNode) throws Exception {
-        Node rootNode = getChildNode(databaseSetNode, ID_GENERATOR);
-        if (null == rootNode) {
+        Node idGeneratorNode = getChildNode(databaseSetNode, ID_GENERATOR);
+        if (null == idGeneratorNode) {
             return null;
         }
-        Node includesNode = getChildNode(rootNode, INCLUDES);
-        Node excludesNode = getChildNode(rootNode, EXCLUDES);
+        Node includesNode = getChildNode(idGeneratorNode, INCLUDES);
+        Node excludesNode = getChildNode(idGeneratorNode, EXCLUDES);
         if (includesNode != null && excludesNode != null) {
             throw new DalConfigException("<includes> and <excludes> nodes cannot be configured together within <IdGenerator> node");
         }
-        IIdGeneratorFactory rootNodeFactory = getIdGenFactoryForNode(rootNode);
-        Map<String, IIdGeneratorFactory> tableFactoryMap;
+        IIdGeneratorFactory dbDefaultFactory = getIdGenFactoryForNode(idGeneratorNode);
+        Map<String, IIdGeneratorFactory> tableFactoryMap = null;
         if (includesNode != null) {
-            tableFactoryMap = getIdGenFactoriesForNode(includesNode, INCLUDE, rootNodeFactory);
-            if (rootNodeFactory instanceof NullIdGeneratorFactory) {
-                return new IdGeneratorConfig(idGenFactoryManager.getOrCreateDefaultFactory(), tableFactoryMap);
+            tableFactoryMap = getIdGenFactoriesForNode(includesNode, INCLUDE, dbDefaultFactory);
+            if (dbDefaultFactory instanceof NullIdGeneratorFactory) {
+                dbDefaultFactory = idGenFactoryManager.getOrCreateDefaultFactory();
             } else {
-                return new IdGeneratorConfig(idGenFactoryManager.getOrCreateNullFactory(), tableFactoryMap);
+                dbDefaultFactory = idGenFactoryManager.getOrCreateNullFactory();
             }
         } else if (excludesNode != null) {
-            if (rootNodeFactory instanceof NullIdGeneratorFactory) {
+            if (dbDefaultFactory instanceof NullIdGeneratorFactory) {
                 tableFactoryMap = getIdGenFactoriesForNode(excludesNode,
                         EXCLUDE, idGenFactoryManager.getOrCreateDefaultFactory());
             } else {
                 tableFactoryMap = getIdGenFactoriesForNode(excludesNode,
                         EXCLUDE, idGenFactoryManager.getOrCreateNullFactory());
             }
-            return new IdGeneratorConfig(rootNodeFactory, tableFactoryMap);
-        } else {
-            return new IdGeneratorConfig(rootNodeFactory);
         }
+        String logicDbName = getAttribute(databaseSetNode, NAME);
+        String sequenceDbName = getAttribute(idGeneratorNode, SEQUENCE_DATABASE_NAME, logicDbName);
+        String entityDbName = getAttribute(idGeneratorNode, ENTITY_DATABASE_NAME, logicDbName);
+        String entityPackage = getAttribute(idGeneratorNode, ENTITY_PACKAGE, null);
+        return new IdGeneratorConfig(sequenceDbName, entityDbName, entityPackage, dbDefaultFactory, tableFactoryMap);
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node) {
@@ -236,12 +267,9 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private IIdGeneratorFactory getIdGenFactoryForNode(Node node, final IIdGeneratorFactory defaultFactory) {
-        try {
-            String className = getAttribute(node, FACTORY);
-            if (className != null && !className.trim().isEmpty()) {
-                return idGenFactoryManager.getOrCreateFactory(className);
-            }
-        } catch (NullPointerException e) {
+        String className = getAttribute(node, FACTORY, null);
+        if (className != null && !className.trim().isEmpty()) {
+            return idGenFactoryManager.getOrCreateFactory(className);
         }
         return defaultFactory;
     }

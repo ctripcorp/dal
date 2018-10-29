@@ -11,7 +11,7 @@ public class NullIdGeneratorFactory implements IIdGeneratorFactory {
 
     @Override
     public int getOrder() {
-        return -1;
+        return 200;
     }
 
     class NullIdGeneratorImpl implements NullIdGenerator {

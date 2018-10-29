@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.task;
 
-import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 
 		IIdGeneratorConfig idGenConfig = getDatabaseSet(logicDbName).getIdGenConfig();
 		if (idGenConfig != null) {
-			idGenerator = idGenConfig.getIdGenerator(logicDbName, rawTableName);
+			idGenerator = idGenConfig.getIdGenerator(rawTableName);
 		}
 	}
 	

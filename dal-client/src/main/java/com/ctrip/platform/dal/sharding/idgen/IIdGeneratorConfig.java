@@ -4,6 +4,8 @@ public interface IIdGeneratorConfig {
 
     IdGenerator getIdGenerator(String name);
 
-    void warmUp();
+    String getSequenceDbName();
+
+    int warmUp();
 
 }

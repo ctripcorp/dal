@@ -67,16 +67,22 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
         return factory;
     }
 
+    @Override
+    public String getSequenceDbName() {
+        return sequenceDbName;
+    }
+
     private String getSequenceName(String tableName) {
         return (sequenceDbName + "." + tableName).trim().toLowerCase();
     }
 
     @Override
-    public void warmUp() {
+    public int warmUp() {
         scanEntities();
         for (String tableName : sequenceTables) {
             getIdGenerator(tableName).nextId();
         }
+        return sequenceTables.size();
     }
 
     private void scanEntities() {

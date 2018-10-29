@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
 import com.ctrip.platform.dal.dao.helper.ClassScanner;
 import com.ctrip.platform.dal.dao.helper.DalClassScanner;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.persistence.Entity;
@@ -25,6 +26,7 @@ public class DalClassScannerTest {
         pkgName = "org.junit";
 //        pkgName = "";
         List<Class<?>> list = scanner.getClasses(pkgName, true);
+        Assert.assertTrue(list.size() > 0);
     }
 
 }

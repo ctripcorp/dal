@@ -104,7 +104,9 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
                     }
                 }
                 if (sequenceTables.isEmpty()) {
-                    LOGGER.logEvent(TYPE_DAL, NAME_NO_ENTITY_FOUND, null);
+                    String name = String.format("%s::entityDbName=%s,entityPackage=%s",
+                            NAME_NO_ENTITY_FOUND, entityDbName, entityPackage);
+                    LOGGER.logEvent(TYPE_DAL, name, null);
                 }
             } catch (Throwable t) {
                 LOGGER.error(String.format("Entity scan exception (entityDbName: %s, entityPackage: %s)",

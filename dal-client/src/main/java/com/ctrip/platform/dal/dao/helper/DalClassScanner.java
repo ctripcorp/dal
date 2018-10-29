@@ -33,13 +33,13 @@ public class DalClassScanner implements ClassScanner {
     private static final String PACKAGE_SEPARATOR = ".";
     private static final String PATH_SEPARATOR = "/";
     private static final String EMPTY_PACKAGE = "";
-    private static final long URL_SCAN_TIMEOUT_SECONDS = 1;
+    private static final long URL_SCAN_TIMEOUT_SECONDS = 5L;
 
     private FileFilter classFileOrDirectoryFilter = new ClassFileOrDirectoryFilter();
     private ClassScanFilter classScanFilter;
     private ClassLoader classLoader;
-    private AtomicInteger fileCount = new AtomicInteger(0);
-    private AtomicInteger jarCount = new AtomicInteger(0);
+//    private AtomicInteger fileCount = new AtomicInteger(0);
+//    private AtomicInteger jarCount = new AtomicInteger(0);
 
     private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -63,8 +63,8 @@ public class DalClassScanner implements ClassScanner {
     @Override
     public List<Class<?>> getClasses(String packageName, boolean recursive) {
         long startTime = System.currentTimeMillis();
-        fileCount.set(0);
-        jarCount.set(0);
+//        fileCount.set(0);
+//        jarCount.set(0);
         List<Class<?>> classList = new Vector<>();
         if (null == packageName || packageName.trim().isEmpty()) {
             throw new IllegalArgumentException("packageName should not be null or empty");
@@ -89,8 +89,8 @@ public class DalClassScanner implements ClassScanner {
         LOGGER.info("=========================================================================");
         LOGGER.info(String.format("Time cost: %d ms", endTime - startTime));
         LOGGER.info(String.format("%d classes found", classList.size()));
-        LOGGER.info(String.format("%d files scanned", fileCount.get()));
-        LOGGER.info(String.format("%d jars scanned", jarCount.get()));
+//        LOGGER.info(String.format("%d files scanned", fileCount.get()));
+//        LOGGER.info(String.format("%d jars scanned", jarCount.get()));
         LOGGER.info("=========================================================================");
         return classList;
     }
@@ -134,7 +134,7 @@ public class DalClassScanner implements ClassScanner {
             for (File file : files) {
                 try {
                     String fileName = file.getName();
-                    fileCount.incrementAndGet();
+//                    fileCount.incrementAndGet();
                     if (file.isFile()) {
 //                        LOGGER.info("Scanning file: " + file.getPath());
                         String className = getClassName(packageName, fileName);
@@ -157,7 +157,7 @@ public class DalClassScanner implements ClassScanner {
         JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
         JarFile jarFile = jarURLConnection.getJarFile();
         Enumeration<JarEntry> jarEntries = jarFile.entries();
-        jarCount.incrementAndGet();
+//        jarCount.incrementAndGet();
 //        LOGGER.info("Scanning jar: " + jarFile.getName());
         while (jarEntries.hasMoreElements()) {
             try {

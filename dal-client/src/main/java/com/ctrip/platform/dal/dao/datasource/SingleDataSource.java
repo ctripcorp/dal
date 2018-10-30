@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
@@ -25,7 +26,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private static ConnectionPhantomReferenceCleaner connectionPhantomReferenceCleaner =
             new DefaultConnectionPhantomReferenceCleaner();
     private static AtomicBoolean containsMySQL = new AtomicBoolean(false);
-    private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
     public String getName() {
         return name;
@@ -44,7 +44,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             throw new SQLException("Can not find any connection configure for " + name);
 
         createPool(name, dataSourceConfigure);
-
         startPhantomReferenceCleaner();
     }
 
@@ -73,7 +72,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private void startPhantomReferenceCleaner() {
         try {
             if (!containsMySQL.get()) {
-                if (dataSourceConfigure.getConnectionUrl().startsWith(MYSQL_URL_PREFIX)) {
+                if (dataSourceConfigure.getDatabaseCategory().equals(DatabaseCategory.MySql)) { // dataSourceConfigure.getConnectionUrl().startsWith(MYSQL_URL_PREFIX)
                     connectionPhantomReferenceCleaner.start();
                     containsMySQL.set(true);
                 }

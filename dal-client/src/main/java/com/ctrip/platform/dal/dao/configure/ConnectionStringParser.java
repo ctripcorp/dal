@@ -107,7 +107,9 @@ public class ConnectionStringParser {
         config.setPassword(password);
         config.setDriverClass(driverClass);
         config.setVersion(version);
+        config.setHostName(dbhost);
 
         return config;
     }
+
 }

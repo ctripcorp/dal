@@ -11,13 +11,18 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.DatabaseDomainChecker;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
+    private static DatabaseDomainChecker domainChecker = DalElementFactory.DEFAULT.getDatabaseDomainChecker();
+
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
         dataSourceReference.set(dataSource);
+        domainChecker.startCheckingTask(name, dataSource);
     }
 
     @Override
@@ -30,8 +35,6 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     private void close(SingleDataSource oldDataSource) {
-
-
         DataSourceTerminator.getInstance().close(oldDataSource);
     }
 

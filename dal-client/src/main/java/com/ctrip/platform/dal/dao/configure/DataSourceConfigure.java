@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 
 import java.util.HashSet;
@@ -13,6 +14,8 @@ public class DataSourceConfigure
     private Properties properties = new Properties();
     private String version;
     private DalConnectionString connectionString;
+
+    private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
     public DataSourceConfigure() {}
 
@@ -92,6 +95,15 @@ public class DataSourceConfigure
         return version;
     }
 
+    public void setHostName(String hostName) {
+        setProperty(HOST_NAME, hostName);
+    }
+
+    @Override
+    public String getHostName() {
+        return getProperty(HOST_NAME);
+    }
+
     public void setVersion(String version) {
         this.version = version;
     }
@@ -143,8 +155,7 @@ public class DataSourceConfigure
     }
 
     public String toConnectionUrl() {
-        return String.format("{ConnectionUrl:%s,Version:%s,CRC:%s}", getConnectionUrl(),
-                version, getCRC());
+        return String.format("{ConnectionUrl:%s,Version:%s,CRC:%s}", getConnectionUrl(), version, getCRC());
     }
 
     public Properties toProperties() {
@@ -172,6 +183,14 @@ public class DataSourceConfigure
             return false;
 
         return Boolean.parseBoolean(value);
+    }
+
+    public DatabaseCategory getDatabaseCategory() {
+        if (getConnectionUrl().startsWith(MYSQL_URL_PREFIX)) {
+            return DatabaseCategory.MySql;
+        }
+
+        return DatabaseCategory.SqlServer;
     }
 
     // Rule: username concat password,and then take 8 characters of md5 code from beginning

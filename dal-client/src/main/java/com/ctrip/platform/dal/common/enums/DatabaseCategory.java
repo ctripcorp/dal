@@ -3,19 +3,25 @@ package com.ctrip.platform.dal.common.enums;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import com.ctrip.platform.dal.dao.StatementParameter;
+import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
+import com.ctrip.platform.dal.dao.configure.SqlServerDalPropertiesConfigureProvider;
 import com.ctrip.platform.dal.dao.markdown.ErrorContext;
 import com.ctrip.platform.dal.exceptions.DalParameterException;
 import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
+import com.sun.org.apache.xerces.internal.impl.xpath.XPath;
 
 public enum DatabaseCategory {
 	MySql("%s=IFNULL(?,%s) ", "CURRENT_TIMESTAMP", new int[] {1043, 1159, 1161},
-			new int[] {1021, 1037, 1038, 1039, 1040, 1041, 1154, 1158, 1160, 1189, 1190, 1205, 1218, 1219, 1220}) {
+			new int[] {1021, 1037, 1038, 1039, 1040, 1041, 1154, 1158, 1160, 1189, 1190, 1205, 1218, 1219, 1220},
+			new int[] {-1}) {
+
 		public String quote(String fieldName) {
 			return "`" + fieldName + "`";
 		}
@@ -43,7 +49,10 @@ public enum DatabaseCategory {
 	},
 
 	SqlServer("%s=ISNULL(?,%s) ", "getDate()", new int[] {-2, 233, 845, 846, 847, 1421},
-			new int[] {2, 53, 701, 802, 945, 1204, 1222}) {
+			new int[] {2, 53, 701, 802, 945, 1204, 1222}, new int[] {3906}) {
+
+		private SqlServerDalPropertiesConfigureProvider sqlServerDalPropertiesConfigureProvider =
+				new SqlServerDalPropertiesConfigureProvider();
 
 		public String quote(String fieldName) {
 			return "[" + fieldName + "]";
@@ -82,7 +91,8 @@ public enum DatabaseCategory {
 		}
 	},
 
-	Oracle("%s=NVL(?,%s) ", "SYSTIMESTAMP", new int[] {-1}, new int[] {-1}) {
+	Oracle("%s=NVL(?,%s) ", "SYSTIMESTAMP", new int[] {-1}, new int[] {-1}, new int[] {-1}) {
+
 		public String quote(String fieldName) {
 			return fieldName;// "\"" + fieldName + "\"";
 		}
@@ -117,12 +127,16 @@ public enum DatabaseCategory {
 	private String timestampExp;
 	private Set<Integer> retriableCodeSet;
 	private Set<Integer> failOverableCodeSet;
+	private Map<Integer, ErrorCodeInfo> readOnlyErrorCodeSet;
 
 	public static final String SQL_PROVIDER = "sqlProvider";
 	public static final String MYSQL_PROVIDER = "mySqlProvider";
 	public static final String ORACLE_PROVIDER = "oracleProvider";
 
 	public static final int SQL_SERVER_TYPE_TVP = -1000;
+
+	private SqlServerDalPropertiesConfigureProvider sqlServerDalPropertiesConfigureProvider =
+			new SqlServerDalPropertiesConfigureProvider();
 
 	public static DatabaseCategory matchWith(String provider) {
 		if (provider == null || provider.trim().length() == 0)
@@ -171,6 +185,32 @@ public enum DatabaseCategory {
 				// The default connection related error codes are start with "08"
 				return sqlState.startsWith("08");
 		}
+	}
+
+	public boolean isReadonlyError(SQLException exception) {
+		if (exception == null)
+			return false;
+
+		switch (this) {
+			case SqlServer:
+				boolean result = false;
+				if (readOnlyErrorCodeSet != null) {
+					ErrorCodeInfo info = readOnlyErrorCodeSet.get(exception.getErrorCode());
+					if (info != null) {
+						int errorCode = info.getErrorCode();
+						int interval = info.getIntervalInSeconds();
+						result = clearTimeReached(errorCode, interval);
+					}
+				}
+				return result;
+			default:
+				return false;
+		}
+	}
+
+	private boolean clearTimeReached(int errorCode, int interval) {
+		// TODO
+		return true;
 	}
 
 	public String getTimestampExp() {
@@ -249,8 +289,8 @@ public enum DatabaseCategory {
 		return nullableUpdateTpl;
 	}
 
-	private DatabaseCategory(String nullableUpdateTpl, String timestampExp, int[] retriableCodes,
-							 int[] failOverableCodes) {
+	DatabaseCategory(String nullableUpdateTpl, String timestampExp, int[] retriableCodes, int[] failOverableCodes,
+					 int[] readOnlyErrorCodes) {
 		this.nullableUpdateTpl = nullableUpdateTpl;
 		this.timestampExp = timestampExp;
 		this.retriableCodeSet = parseErrorCodes(retriableCodes);

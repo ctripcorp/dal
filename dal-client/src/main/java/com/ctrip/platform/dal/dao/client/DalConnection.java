@@ -50,14 +50,14 @@ public class DalConnection {
 	}
 
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		if(conn.getAutoCommit() != autoCommit)
+		if (conn.getAutoCommit() != autoCommit)
 			conn.setAutoCommit(autoCommit);
 	}
 
 	public void applyHints(DalHints hints) throws SQLException {
 		Integer level = hints.getInt(DalHintEnum.isolationLevel);
 
-		if(level == null || oldIsolationLevel.equals(level))
+		if (level == null || oldIsolationLevel.equals(level))
 			return;
 
 		newIsolationLevel = level;
@@ -66,25 +66,26 @@ public class DalConnection {
 
 	public void error(Throwable e) {
 		needDiscard |= isDisconnectionException(e);
+		needDiscard |= isReadOnlyException(e);
 	}
 
 	public void close() {
 		try {
-			if(conn == null || conn.isClosed())
+			if (conn == null || conn.isClosed())
 				return;
 		} catch (Throwable e) {
 			logger.error("Restore connection isolation level failed!", e);
 		}
 
 		try {
-			if(newIsolationLevel != null)
+			if (newIsolationLevel != null)
 				conn.setTransactionIsolation(oldIsolationLevel);
 		} catch (Throwable e) {
 			logger.error("Restore connection isolation level failed!", e);
 		}
 
 		try {
-			if(needDiscard) {
+			if (needDiscard) {
 				markDiscard(conn);
 			}
 
@@ -96,27 +97,51 @@ public class DalConnection {
 	}
 
 	private boolean isDisconnectionException(Throwable e) {
-		//Filter wrapping exception
-		while(e!= null && e instanceof DalException) {
-			e = e.getCause();
-		}
+        /*
+         * // Filter wrapping exception while (e != null && e instanceof DalException) { e = e.getCause(); }
+         *
+         * while (e != null && !(e instanceof SQLException)) { e = e.getCause(); }
+         */
 
-		while(e!= null && !(e instanceof SQLException)) {
-			e = e.getCause();
-		}
-
-		if(e == null)
+		e = getRootCause(e);
+		if (e == null)
 			return false;
 
-		SQLException se = (SQLException)e;
-		if(meta.getDatabaseCategory().isDisconnectionError(se.getSQLState()))
+		SQLException se = (SQLException) e;
+		if (meta.getDatabaseCategory().isDisconnectionError(se.getSQLState()))
 			return true;
 
 		return isDisconnectionException(se.getNextException());
 	}
 
+	private boolean isReadOnlyException(Throwable e) {
+		e = getRootCause(e);
+		if (e == null)
+			return false;
+
+		SQLException se = (SQLException) e;
+		if (meta.getDatabaseCategory().isReadonlyError(se))
+			return true;
+
+		return isReadOnlyException(se.getNextException());
+	}
+
+	private Throwable getRootCause(Throwable e) {
+		// Filter wrapping exception
+		while (e != null && e instanceof DalException) {
+			e = e.getCause();
+		}
+
+		while (e != null && !(e instanceof SQLException)) {
+			e = e.getCause();
+		}
+
+		return e;
+	}
+
 	private void markDiscard(Connection conn) throws SQLException {
-		PooledConnection pConn = (PooledConnection)conn.unwrap(PooledConnection.class);
+		PooledConnection pConn = (PooledConnection) conn.unwrap(PooledConnection.class);
 		pConn.setDiscarded(true);
 	}
+
 }

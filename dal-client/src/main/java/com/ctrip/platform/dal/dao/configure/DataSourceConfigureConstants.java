@@ -38,7 +38,8 @@ public interface DataSourceConfigureConstants {
     // JDBC interceptors
     String JDBC_INTERCEPTORS = "jdbcInterceptors";
 
-
+    // Host name
+    String HOST_NAME = "hostName";
 
     // **********Pool properties default value**********
     boolean DEFAULT_TESTWHILEIDLE = false;

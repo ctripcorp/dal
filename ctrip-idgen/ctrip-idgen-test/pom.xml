@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.ctrip.framework.idgen</groupId>
         <artifactId>idgen-parent</artifactId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>1.1.2</version>
     </parent>
     <artifactId>idgen-test</artifactId>
 

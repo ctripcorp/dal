@@ -16,7 +16,7 @@ public class TVPTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         DalClientFactory.initClientFactory();
-        ((CtripTaskFactory)DalClientFactory.getTaskFactory()).setCallSpt(true);
+        ((CtripTaskFactory) DalClientFactory.getTaskFactory()).setCallSpt(true);
     }
 
     @Test
@@ -82,6 +82,93 @@ public class TVPTest {
         DalHints hints = DalHints.createIfAbsent(null);
         SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
         List<Person> list = client.query(builder, hints);
+        if (list == null || list.size() == 0)
+            Assert.assertTrue(false);
+
+        int[] result = client.batchDelete(hints, list);
+        int length = list.size();
+        int[] expected = new int[length];
+        for (int i = 0; i < length; i++) {
+            expected[i] = 0;
+        }
+        Assert.assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testTVPColumnsWithUnderline() throws Exception {
+        testTVPColumnsWithUnderlineBatchInsert();
+        testTVPColumnsWithUnderlineBatchUpdate();
+        testTVPColumnsWithUnderlineBatchDelete();
+    }
+
+    private void testTVPColumnsWithUnderlineBatchInsert() throws SQLException {
+        DalTableDao<PTicketNo> client = new DalTableDao<>(new DalDefaultJpaParser<>(PTicketNo.class));
+        DalHints hints = DalHints.createIfAbsent(null);
+        List<PTicketNo> daoPojos = new ArrayList<>();
+        PTicketNo p1 = new PTicketNo();
+        p1.setTicketNo("1");
+        p1.setTicketType("1");
+        p1.setFlightIntl("1");
+        p1.setFlightAgency(1);
+        p1.setSendSite(1);
+        p1.setStatus("1");
+        Short s1 = 1;
+        p1.setPaidStatus(s1);
+        p1.setBSPChecked("1");
+        p1.setAirLineChecked("1");
+        p1.setAirLine("1");
+
+        daoPojos.add(p1);
+
+        PTicketNo p2 = new PTicketNo();
+        p2.setTicketNo("2");
+        p2.setTicketType("2");
+        p2.setFlightIntl("2");
+        p2.setFlightAgency(2);
+        p2.setSendSite(2);
+        p2.setStatus("2");
+        Short s2 = 2;
+        p2.setPaidStatus(s2);
+        p2.setBSPChecked("2");
+        p2.setAirLineChecked("2");
+        p2.setAirLine("2");
+        daoPojos.add(p2);
+
+        int[] result = client.batchInsert(hints, daoPojos);
+        int length = 2;
+        int[] expected = new int[length];
+        for (int i = 0; i < length; i++) {
+            expected[i] = 0;
+        }
+        Assert.assertArrayEquals(expected, result);
+    }
+
+    private void testTVPColumnsWithUnderlineBatchUpdate() throws SQLException {
+        DalTableDao<PTicketNo> client = new DalTableDao<>(new DalDefaultJpaParser<>(PTicketNo.class));
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+        List<PTicketNo> list = client.query(builder, hints);
+        if (list == null || list.size() == 0)
+            Assert.assertTrue(false);
+
+        for (PTicketNo p : list) {
+            p.setPassenger("testUpdate");
+        }
+
+        int[] result = client.batchUpdate(hints, list);
+        int length = list.size();
+        int[] expected = new int[length];
+        for (int i = 0; i < length; i++) {
+            expected[i] = 0;
+        }
+        Assert.assertArrayEquals(expected, result);
+    }
+
+    private void testTVPColumnsWithUnderlineBatchDelete() throws SQLException {
+        DalTableDao<PTicketNo> client = new DalTableDao<>(new DalDefaultJpaParser<>(PTicketNo.class));
+        DalHints hints = DalHints.createIfAbsent(null);
+        SelectSqlBuilder builder = new SelectSqlBuilder().selectAll();
+        List<PTicketNo> list = client.query(builder, hints);
         if (list == null || list.size() == 0)
             Assert.assertTrue(false);
 

@@ -24,6 +24,7 @@ public class TVPTest {
         testTVPBatchInsert();
         testTVPBatchUpdate();
         testTVPBatchDelete();
+        //Thread.sleep(60 * 1000);
     }
 
     private void testTVPBatchInsert() throws SQLException {
@@ -99,6 +100,7 @@ public class TVPTest {
         testTVPColumnsWithUnderlineBatchInsert();
         testTVPColumnsWithUnderlineBatchUpdate();
         testTVPColumnsWithUnderlineBatchDelete();
+        //Thread.sleep(60 * 1000);
     }
 
     private void testTVPColumnsWithUnderlineBatchInsert() throws SQLException {

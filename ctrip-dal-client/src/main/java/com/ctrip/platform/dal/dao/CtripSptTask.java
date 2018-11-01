@@ -21,6 +21,8 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     private static final String TVP_TPL = "TVP_%s";
     private static final String TVP_EXEC = "exec %s %s";
     private static final String TVP_LEGACY_ORDER_MODE = "TVP.legacyOrderMode";
+    private static final String DAL_VALIDATION = "DAL.validation";
+    private static final String USE_LEGACY_TVP_ORDER_MODE = "UseLegacyTVPOrderMode";
 
     private String sptTpl;
     private TVPHelper tvpHelper;
@@ -85,6 +87,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
             Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             map.putAll(columnTypes);
             orderedColumns = new ArrayList<>(map.keySet());
+            LOGGER.logEvent(DAL_VALIDATION, USE_LEGACY_TVP_ORDER_MODE, tvpName);
             LOGGER.logEvent(TVP_LEGACY_ORDER_MODE, tvpName, String.format("TVP %s uses legacy order mode.", tvpName));
         }
 

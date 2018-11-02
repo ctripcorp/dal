@@ -15,14 +15,19 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TVPMetaInfo {
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String DAL = "DAL";
     private String GET_TVP_COLUMNS_FORMAT = "TVP::getTVPColumns:%s";
+
+    private static final String TVP_LEGACY_ORDER_MODE = "TVP.legacyOrderMode";
+    private static final String DAL_VALIDATION = "DAL.validation";
+    private static final String USE_LEGACY_TVP_ORDER_MODE = "UseLegacyTVPOrderMode";
 
     private final int FIRST_COLUMN_INDEX = 1;
     private String tvpColumnSql = "SELECT clmns.NAME AS [Name] FROM sys.table_types AS tt "
@@ -32,12 +37,8 @@ public class TVPMetaInfo {
 
     private final Object LOCK = new Object();
     private ConcurrentMap<String, List<String>> map = new ConcurrentHashMap<>();
-    private AtomicBoolean metaInfoFetched = new AtomicBoolean(false);
 
-    public List<String> getTVPColumns(String tvpName, DalClient client) {
-        if (metaInfoFetched.get())
-            return map.get(tvpName);
-
+    public List<String> getTVPColumns(String tvpName, Map<String, Integer> columnTypes, DalClient client) {
         List<String> list = map.get(tvpName);
         if (list == null) {
             synchronized (LOCK) {
@@ -45,8 +46,11 @@ public class TVPMetaInfo {
                 if (list == null) {
                     try {
                         list = fetchTVPColumnsBySql(tvpName, client);
+                        // legacy mode
+                        if (list == null) {
+                            list = fetchTVPColumnsByLegacyMode(tvpName, columnTypes);
+                        }
                         map.putIfAbsent(tvpName, list);
-                        metaInfoFetched.set(true);
                     } catch (Throwable e) {
                         LOGGER.error(String.format("An error occured while fetching TVP columns for %s", tvpName), e);
                     }
@@ -87,6 +91,16 @@ public class TVPMetaInfo {
             t.complete();
         }
         return list;
+    }
+
+    private List<String> fetchTVPColumnsByLegacyMode(String tvpName, Map<String, Integer> columnTypes) {
+        // If we can't get TVP metadata from DB,then use legacy order mode.
+        Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        map.putAll(columnTypes);
+        List<String> orderedColumns = new ArrayList<>(map.keySet());
+        LOGGER.logEvent(DAL_VALIDATION, USE_LEGACY_TVP_ORDER_MODE, tvpName);
+        LOGGER.logEvent(TVP_LEGACY_ORDER_MODE, tvpName, String.format("TVP %s uses legacy order mode.", tvpName));
+        return orderedColumns;
     }
 
     private String listToString(List<String> list) {

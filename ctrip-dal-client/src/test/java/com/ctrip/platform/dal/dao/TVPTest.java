@@ -21,10 +21,16 @@ public class TVPTest {
 
     @Test
     public void testTVP() throws Exception {
+        // column names without underline
         testTVPBatchInsert();
         testTVPBatchUpdate();
         testTVPBatchDelete();
-        //Thread.sleep(60 * 1000);
+
+        // column names with underline
+        testTVPColumnsWithUnderlineBatchInsert();
+        testTVPColumnsWithUnderlineBatchUpdate();
+        testTVPColumnsWithUnderlineBatchDelete();
+        // Thread.sleep(60 * 1000);
     }
 
     private void testTVPBatchInsert() throws SQLException {
@@ -93,14 +99,6 @@ public class TVPTest {
             expected[i] = 0;
         }
         Assert.assertArrayEquals(expected, result);
-    }
-
-    @Test
-    public void testTVPColumnsWithUnderline() throws Exception {
-        testTVPColumnsWithUnderlineBatchInsert();
-        testTVPColumnsWithUnderlineBatchUpdate();
-        testTVPColumnsWithUnderlineBatchDelete();
-        //Thread.sleep(60 * 1000);
     }
 
     private void testTVPColumnsWithUnderlineBatchInsert() throws SQLException {

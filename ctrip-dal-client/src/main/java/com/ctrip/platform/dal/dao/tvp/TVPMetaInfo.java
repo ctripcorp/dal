@@ -97,6 +97,9 @@ public class TVPMetaInfo {
     }
 
     private List<String> fetchTVPColumnsByLegacyMode(Map<String, Integer> columnTypes) {
+        if (columnTypes == null || columnTypes.isEmpty())
+            return new ArrayList<>();
+
         // If we can't get TVP metadata from DB,then use legacy order mode.
         Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         map.putAll(columnTypes);

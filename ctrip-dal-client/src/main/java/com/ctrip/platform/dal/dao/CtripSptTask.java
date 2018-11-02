@@ -8,7 +8,6 @@ import com.ctrip.platform.dal.dao.task.*;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -69,17 +68,15 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
 
     private SQLServerDataTable getDataTableByMetadata(String tvpName, Map<Integer, Map<String, ?>> daoPojos)
             throws SQLException {
-        SQLServerDataTable dataTable = null;
-        List<String> orderedColumns = null;
+        SQLServerDataTable dataTable;
+        List<String> orderedColumns;
         try {
             orderedColumns = tvpHelper.getTVPColumns(logicDbName, tvpName, columnTypes, client);
         } catch (Throwable e) {
-            LOGGER.error(String.format("An error occured while getting tvp columns,logic db name: %s,tvp name: %s,",
-                    logicDbName, tvpName), e);
-        }
-
-        if (orderedColumns == null || orderedColumns.isEmpty()) {
-            throw new DalException(String.format("Columns of TVP %s are null or empty.", tvpName));
+            String msg = String.format("An error occured while getting tvp columns,logic db name: %s,tvp name: %s,",
+                    logicDbName, tvpName);
+            LOGGER.error(msg, e);
+            throw new DalException(msg, e);
         }
 
         dataTable = new SQLServerDataTable();

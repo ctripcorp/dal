@@ -48,7 +48,10 @@ public class TVPMetaInfo {
                         list = fetchTVPColumnsBySql(tvpName, client);
                         // legacy mode
                         if (list == null) {
-                            list = fetchTVPColumnsByLegacyMode(tvpName, columnTypes);
+                            list = fetchTVPColumnsByLegacyMode(columnTypes);
+                            LOGGER.logEvent(DAL_VALIDATION, USE_LEGACY_TVP_ORDER_MODE, tvpName);
+                            LOGGER.logEvent(TVP_LEGACY_ORDER_MODE, tvpName,
+                                    String.format("TVP %s uses legacy order mode.", tvpName));
                         }
                         map.putIfAbsent(tvpName, list);
                     } catch (Throwable e) {
@@ -93,13 +96,11 @@ public class TVPMetaInfo {
         return list;
     }
 
-    private List<String> fetchTVPColumnsByLegacyMode(String tvpName, Map<String, Integer> columnTypes) {
+    private List<String> fetchTVPColumnsByLegacyMode(Map<String, Integer> columnTypes) {
         // If we can't get TVP metadata from DB,then use legacy order mode.
         Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         map.putAll(columnTypes);
         List<String> orderedColumns = new ArrayList<>(map.keySet());
-        LOGGER.logEvent(DAL_VALIDATION, USE_LEGACY_TVP_ORDER_MODE, tvpName);
-        LOGGER.logEvent(TVP_LEGACY_ORDER_MODE, tvpName, String.format("TVP %s uses legacy order mode.", tvpName));
         return orderedColumns;
     }
 

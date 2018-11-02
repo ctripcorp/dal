@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.TVPHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.task.*;
+import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
@@ -58,8 +59,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
             throw new DalRuntimeException("The client is not instance of DalClient");
     }
 
-    private SQLServerDataTable getDataTable(String tvpName, Map<Integer, Map<String, ?>> daoPojos)
-            throws SQLServerException {
+    private SQLServerDataTable getDataTable(String tvpName, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
         if (daoPojos == null || daoPojos.size() == 0)
             return null;
 
@@ -68,7 +68,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
     }
 
     private SQLServerDataTable getDataTableByMetadata(String tvpName, Map<Integer, Map<String, ?>> daoPojos)
-            throws SQLServerException {
+            throws SQLException {
         SQLServerDataTable dataTable = null;
         List<String> orderedColumns = null;
         try {
@@ -76,6 +76,10 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         } catch (Throwable e) {
             LOGGER.error(String.format("An error occured while getting tvp columns,logic db name: %s,tvp name: %s,",
                     logicDbName, tvpName), e);
+        }
+
+        if (orderedColumns == null || orderedColumns.isEmpty()) {
+            throw new DalException(String.format("Columns of TVP %s are null or empty.", tvpName));
         }
 
         dataTable = new SQLServerDataTable();

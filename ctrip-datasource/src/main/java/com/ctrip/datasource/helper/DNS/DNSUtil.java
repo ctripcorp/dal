@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DNSUtil {
     private static final String DAL = "DAL";
@@ -21,16 +23,21 @@ public class DNSUtil {
     private String DOMAIN_URL_FORMAT = "Domain Url:%s, IP:%s";
     private final int DNS_RESOLVE_TIMEOUT_IN_MILLIS = 1 * 1000;
     private final TimeUnit TIME_UNIT_IN_MILLIS = TimeUnit.MILLISECONDS;
+    private static final Pattern pattern = Pattern.compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
 
-    private ConcurrentMap<String, com.ctrip.datasource.helper.DNS.DNSInfo> map = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, DNSInfo> map = new ConcurrentHashMap<>();
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public String resolveDNS(String domain) {
         if (domain == null || domain.isEmpty())
             return "";
 
+        boolean isIP = isValidIP(domain);
+        if (isIP)
+            return "";
+
         String ip = "";
-        com.ctrip.datasource.helper.DNS.DNSInfo info = null;
+        DNSInfo info = null;
         Transaction t = Cat.newTransaction(DAL, String.format(RESOLVE_DOMAIN_URL_FORMAT, domain));
 
         try {
@@ -57,20 +64,25 @@ public class DNSUtil {
         return ip;
     }
 
-    private com.ctrip.datasource.helper.DNS.DNSInfo getDNSInfo(String domain) {
-        com.ctrip.datasource.helper.DNS.DNSInfo info = null;
+    private boolean isValidIP(String domain) {
+        Matcher match = pattern.matcher(domain);
+        return match.find();
+    }
+
+    private DNSInfo getDNSInfo(String domain) {
+        DNSInfo info = null;
         map.get(domain);
         if (info != null)
             return info;
 
-        info = new com.ctrip.datasource.helper.DNS.DNSInfo();
+        info = new DNSInfo();
         map.putIfAbsent(domain, info);
         return info;
     }
 
     private String resolveDNSWithTimeout(String domain) throws Exception {
         Future<String> future = executor.submit(new ResolveDNS(domain));
-        String result = "";
+        String result;
         try {
             result = future.get(DNS_RESOLVE_TIMEOUT_IN_MILLIS, TIME_UNIT_IN_MILLIS);
         } catch (Throwable e) {

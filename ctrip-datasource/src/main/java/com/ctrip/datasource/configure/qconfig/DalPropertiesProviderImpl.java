@@ -1,14 +1,13 @@
 package com.ctrip.datasource.configure.qconfig;
 
-import com.ctrip.datasource.datasource.DalPropertiesChanged;
-import com.ctrip.datasource.datasource.DalPropertiesProvider;
-import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.platform.dal.common.enums.TableParseSwitch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesChanged;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,76 +15,117 @@ import java.util.concurrent.atomic.AtomicReference;
  * Created by lilj on 2018/7/22.
  */
 public class DalPropertiesProviderImpl implements DalPropertiesProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DalPropertiesProviderImpl.class);
-    private static final String SWITCH_KEYNAME = "TableParseSwitch";
     private static final String DAL_APPNAME = "dal";
     private static final String DAL_PROPERTIES = "dal.properties";
 
-    private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
+    private static final String DAL = "DAL";
+    private static final String DALPROPERTIES_GET_MAPCONFIG = "DalProperties::getMapConfig";
+    private static final String DALPROPERTIES_GET_PROPERTIES = "DalProperties::getProperties";
+    private static final String DALPROPERTIES_ADD_LISTENER = "DalProperties::addListener";
+    private static final String DALPROPERTIES_PROPERTIES_CHANGED = "DalProperties::propertiesChanged";
 
-    private MapConfig getConfig() {
-        return mapConfigReference.get();
-    }
+    private static final Object LOCK = new Object();
+    private volatile MapConfig mapConfig = null;
+
+    private AtomicReference<Map<String, String>> propertiesRef = new AtomicReference<>();
 
     @Override
-    public TableParseSwitch getTableParseSwitch() {
-        refreshDalPropertiesMapConfig();
-        return _getTableParseSwitch();
-    }
-
-    private void refreshDalPropertiesMapConfig() {
-        if (!Foundation.app().isAppIdSet())
-            return;
+    public Map<String, String> getProperties() {
+        Map<String, String> map = new HashMap<>();
+        Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_GET_PROPERTIES);
 
         try {
             MapConfig config = getMapConfig();
-            if (config != null) {
-                mapConfigReference.set(config);
+            Map<String, String> temp = config.asMap();
+            for (Map.Entry<String, String> entry : temp.entrySet()) {
+                map.put(entry.getKey(), entry.getValue());
             }
+
+            propertiesRef.set(map);
+            transaction.addData(mapToString(map));
+            transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
-            String msg = "从QConfig读取dal.properties配置时发生异常，如果您没有使用配置中心，可以忽略这个异常:" + e.getMessage();
-            LOGGER.warn(msg, e);
+            transaction.setStatus(e);
+            Cat.logError("An error occurred while getting dal.properties from QConfig.", e);
+        } finally {
+            transaction.complete();
+        }
+
+        return map;
+    }
+
+    @Override
+    public void addPropertiesChangedListener(final DalPropertiesChanged callback) {
+        Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_ADD_LISTENER);
+
+        try {
+            MapConfig config = getMapConfig();
+            config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
+                @Override
+                public void onLoad(Map<String, String> map) {
+                    Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_PROPERTIES_CHANGED);
+
+                    try {
+                        callback.onChanged(map);
+                        String oldProperties = mapToString(propertiesRef.get());
+                        String newProperties = mapToString(map);
+                        propertiesRef.set(map);
+                        transaction.addData(String.format("Old dal.properties:%s", oldProperties));
+                        transaction.addData(String.format("New dal.properties:%s", newProperties));
+                        transaction.setStatus(Transaction.SUCCESS);
+                    } catch (Throwable e) {
+                        transaction.setStatus(e);
+                        Cat.logError(e);
+                    } finally {
+                        transaction.complete();
+                    }
+                }
+            });
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable e) {
+            transaction.setStatus(e);
+            Cat.logError("An error occurred while adding listener for dal.properties.", e);
+        } finally {
+            transaction.complete();
         }
     }
 
     private MapConfig getMapConfig() {
-        return MapConfig.get(DAL_APPNAME, DAL_PROPERTIES, null); // get dal.properties from QConfig
-    }
+        if (mapConfig == null) {
+            synchronized (LOCK) {
+                if (mapConfig == null) {
+                    Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_GET_MAPCONFIG);
 
-    @Override
-    public void addTableParseSwitchChangedListener(final DalPropertiesChanged callback) {
-        final MapConfig config = getConfig();
-        if (config == null)
-            return;
-        config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
-            @Override
-            public void onLoad(Map<String, String> map) {
-                if (map == null || map.isEmpty())
-                    throw new RuntimeException("Parameter for onLoad event is null.");
-
-                TableParseSwitch status = _getTableParseSwitch();
-                callback.onTableParseSwitchChanged(status);
+                    try {
+                        mapConfig = MapConfig.get(DAL_APPNAME, DAL_PROPERTIES, null);
+                        transaction.setStatus(Transaction.SUCCESS);
+                    } catch (Throwable e) {
+                        transaction.setStatus(e);
+                        Cat.logError("An error occurred while getting MapConfig from QConfig.", e);
+                    } finally {
+                        transaction.complete();
+                    }
+                }
             }
-        });
-    }
-
-    private TableParseSwitch _getTableParseSwitch() {
-        TableParseSwitch tableParseSwitch = TableParseSwitch.ON;
-        MapConfig config = mapConfigReference.get();
-        if (config == null)
-            return tableParseSwitch;
-
-        try {
-            Map<String, String> map = config.asMap();
-            Boolean status = Boolean.parseBoolean(map.get(SWITCH_KEYNAME));
-            String log = "dal.properties 中 TableParseSwitch 配置: " + status.toString();
-            LOGGER.info(log);
-            tableParseSwitch = status ? TableParseSwitch.ON : TableParseSwitch.OFF;
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
         }
 
-        return tableParseSwitch;
+        return mapConfig;
+    }
+
+    private String mapToString(Map<String, String> map) {
+        if (map == null || map.isEmpty())
+            return "";
+
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                sb.append(String.format("%s:%s", entry.getKey(), entry.getValue()));
+                sb.append(System.lineSeparator());
+            }
+        } catch (Throwable e) {
+        }
+
+        return sb.toString();
     }
 
 }

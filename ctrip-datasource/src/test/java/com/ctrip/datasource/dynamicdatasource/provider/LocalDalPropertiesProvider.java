@@ -1,8 +1,10 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
-import com.ctrip.datasource.datasource.DalPropertiesChanged;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesChanged;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -13,16 +15,16 @@ public class LocalDalPropertiesProvider extends AbstractDalPropertiesProvider {
     private DalPropertiesChanged callback;
 
     public void setOn() {
-        defaultStatus = TableParseSwitch.ON;
+        defaultStatus = true;
     }
 
     public void setOff() {
-        defaultStatus = TableParseSwitch.OFF;
+        defaultStatus = false;
     }
 
     public void initStatus() {
-        TableParseSwitch status = getTableParseSwitch();
-        boolean value = status.equals(TableParseSwitch.ON) ? true : false;
+        Map<String, String> map = getProperties();
+        boolean value = Boolean.parseBoolean(map.get(SWITCH_KEYNAME));
         atomicStatus.set(value);
     }
 
@@ -33,14 +35,18 @@ public class LocalDalPropertiesProvider extends AbstractDalPropertiesProvider {
 
         TableParseSwitch status = value ? TableParseSwitch.ON : TableParseSwitch.OFF;
         System.out.println(String.format("********** Current status: %s **********", status.toString()));
-        callback.onTableParseSwitchChanged(status);
+
+        Map<String, String> map = new HashMap<>();
+        map.put(SWITCH_KEYNAME, new Boolean(value).toString());
+        callback.onChanged(map);
     }
 
     @Override
-    public void addTableParseSwitchChangedListener(final DalPropertiesChanged callback) {
+    public void addPropertiesChangedListener(final DalPropertiesChanged callback) {
         if (callback == null)
             return;
 
         this.callback = callback;
     }
+
 }

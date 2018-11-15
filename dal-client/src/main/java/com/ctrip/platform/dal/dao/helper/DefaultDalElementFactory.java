@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import com.ctrip.platform.dal.dao.configure.DalPropertiesLocator;
-import com.ctrip.platform.dal.dao.configure.DefaultDalPropertiesLocator;
-import com.ctrip.platform.dal.dao.configure.DefaultDalPropertiesProvider;
-import com.ctrip.platform.dal.dao.configure.IDalPropertiesProvider;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesProvider;
+import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
+import com.ctrip.platform.dal.dao.datasource.DefaultDatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.log.DefaultLoggerImpl;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.slf4j.Logger;
@@ -17,32 +17,17 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DefaultDalElementFactory implements DalElementFactory {
     private static Logger log = LoggerFactory.getLogger(DefaultDalElementFactory.class);
+
     private volatile ILogger iLogger;
-    private volatile DalPropertiesLocator dalPropertiesLocator;
-    private Lock dalPropertiesLocatorLock = new ReentrantLock();
     private Lock iLoggerLock = new ReentrantLock();
 
-    private volatile DatabaseDomainChecker domainChecker;
-    private Lock domainCheckerLock = new ReentrantLock();
-
-    private volatile IDalPropertiesProvider dalPropertiesProvider;
+    private volatile DalPropertiesProvider dalPropertiesProvider;
     private Lock dalPropertiesProviderLock = new ReentrantLock();
 
-    public DalPropertiesLocator getDalPropertiesLocator() {
-        if (dalPropertiesLocator == null) {
-            dalPropertiesLocatorLock.lock();
-            try {
-                if (dalPropertiesLocator == null)
-                    dalPropertiesLocator = new DefaultDalPropertiesLocator();
-            } catch (Exception e) {
-                log.error("Get DalPropertiesLocator Error!", e);
-            } finally {
-                dalPropertiesLocatorLock.unlock();
-            }
-        }
-        return dalPropertiesLocator;
-    }
+    private volatile DatasourceBackgroundExecutor datasourceBackgroundExecutor;
+    private Lock datasourceBackgroundExecutorLock = new ReentrantLock();
 
+    @Override
     public ILogger getILogger() {
         if (iLogger == null) {
             iLoggerLock.lock();
@@ -60,25 +45,7 @@ public class DefaultDalElementFactory implements DalElementFactory {
     }
 
     @Override
-    public DatabaseDomainChecker getDatabaseDomainChecker() {
-        if (domainChecker == null) {
-            domainCheckerLock.lock();
-            try {
-                if (domainChecker == null) {
-                    domainChecker = new DefaultDatabaseDomainChecker();
-                }
-            } catch (Throwable e) {
-                log.error("An error occured while getting DefaultDatabaseDomainChecker", e);
-            } finally {
-                domainCheckerLock.unlock();
-            }
-        }
-
-        return domainChecker;
-    }
-
-    @Override
-    public IDalPropertiesProvider getDalPropertiesProvider() {
+    public DalPropertiesProvider getDalPropertiesProvider() {
         if (dalPropertiesProvider == null) {
             dalPropertiesProviderLock.lock();
             try {
@@ -86,13 +53,30 @@ public class DefaultDalElementFactory implements DalElementFactory {
                     dalPropertiesProvider = new DefaultDalPropertiesProvider();
                 }
             } catch (Throwable e) {
-                log.error("An error occured while getting DefaultDatabaseDomainChecker", e);
+                log.error("An error occurred while getting DalPropertiesProvider.", e);
             } finally {
                 dalPropertiesProviderLock.unlock();
             }
         }
 
         return dalPropertiesProvider;
+    }
+
+    public DatasourceBackgroundExecutor getDatasourceBackgroundExecutor() {
+        if (datasourceBackgroundExecutor == null) {
+            datasourceBackgroundExecutorLock.lock();
+            try {
+                if (datasourceBackgroundExecutor == null) {
+                    datasourceBackgroundExecutor = new DefaultDatasourceBackgroundExecutor();
+                }
+            } catch (Throwable e) {
+                log.error("An error occurred while getting DefaultDalBackgroundExecutor.", e);
+            } finally {
+                datasourceBackgroundExecutorLock.unlock();
+            }
+        }
+
+        return datasourceBackgroundExecutor;
     }
 
     @Override

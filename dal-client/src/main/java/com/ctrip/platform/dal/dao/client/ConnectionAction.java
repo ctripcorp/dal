@@ -14,8 +14,8 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.Version;
-import com.ctrip.platform.dal.dao.configure.DalPropertiesLocator;
-import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 
@@ -36,7 +36,7 @@ public abstract class ConnectionAction<T> {
     public CallableStatement callableStatement;
     public ResultSet rs;
     public long start;
-    private DalPropertiesLocator dalPropertiesLocator = DalElementFactory.DEFAULT.getDalPropertiesLocator();
+    private DalPropertiesLocator dalPropertiesLocator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
     public DalLogger logger = DalClientFactory.getDalLogger();
     public LogEntry entry;
     public Throwable e;
@@ -71,7 +71,7 @@ public abstract class ConnectionAction<T> {
         populate(sqls, null);
     }
 
-    void populate(String sql, StatementParameters[] parametersList,DalTaskContext dalTaskContext) {
+    void populate(String sql, StatementParameters[] parametersList, DalTaskContext dalTaskContext) {
         this.operation = DalEventEnum.BATCH_UPDATE_PARAM;
         this.sql = sql;
         this.parametersList = parametersList;
@@ -265,9 +265,8 @@ public abstract class ConnectionAction<T> {
     }
 
     private void closeStatement() {
-        Statement _statement = statement != null ?
-                statement : preparedStatement != null ?
-                preparedStatement : callableStatement;
+        Statement _statement =
+                statement != null ? statement : preparedStatement != null ? preparedStatement : callableStatement;
 
         statement = null;
         preparedStatement = null;
@@ -283,7 +282,7 @@ public abstract class ConnectionAction<T> {
     }
 
     private void closeConnection() {
-        //do nothing for connection in transaction
+        // do nothing for connection in transaction
         if (DalTransactionManager.isInTransaction())
             return;
 

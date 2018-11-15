@@ -9,299 +9,303 @@ import java.util.TreeSet;
 
 import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
-import com.ctrip.platform.dal.dao.configure.SqlServerDalPropertiesConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.dalproperties.AbstractDalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.markdown.ErrorContext;
 import com.ctrip.platform.dal.exceptions.DalParameterException;
 import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath;
 
 public enum DatabaseCategory {
-	MySql("%s=IFNULL(?,%s) ", "CURRENT_TIMESTAMP", new int[] {1043, 1159, 1161},
-			new int[] {1021, 1037, 1038, 1039, 1040, 1041, 1154, 1158, 1160, 1189, 1190, 1205, 1218, 1219, 1220},
-			new int[] {-1}) {
+    MySql("%s=IFNULL(?,%s) ", "CURRENT_TIMESTAMP", new int[] {1043, 1159, 1161},
+            new int[] {1021, 1037, 1038, 1039, 1040, 1041, 1154, 1158, 1160, 1189, 1190, 1205, 1218, 1219, 1220}) {
 
-		public String quote(String fieldName) {
-			return "`" + fieldName + "`";
-		}
+        private AbstractDalPropertiesLocator mySqlDalPropertiesLocator =
+                DalPropertiesManager.getInstance().getMySqlDalPropertiesLocator();
 
-		public boolean isTimeOutException(ErrorContext ctx) {
-			return ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString());
-		}
+        public String quote(String fieldName) {
+            return "`" + fieldName + "`";
+        }
 
-		public String buildList(String effectiveTableName, String columns, String whereExp) {
-			return String.format("SELECT %s FROM %s WHERE %s", columns, effectiveTableName, whereExp);
-		}
+        public boolean isTimeOutException(ErrorContext ctx) {
+            return ctx.getExType().toString().equalsIgnoreCase(MySQLTimeoutException.class.toString());
+        }
 
-		public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
-			return String.format("SELECT %s FROM %s WHERE %s LIMIT %d", columns, effectiveTableName, whereExp, count);
-		}
+        public String buildList(String effectiveTableName, String columns, String whereExp) {
+            return String.format("SELECT %s FROM %s WHERE %s", columns, effectiveTableName, whereExp);
+        }
 
-		public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
-			return String.format("SELECT %s FROM %s WHERE %s LIMIT %d, %d", columns, effectiveTableName, whereExp,
-					start, count);
-		}
+        public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
+            return String.format("SELECT %s FROM %s WHERE %s LIMIT %d", columns, effectiveTableName, whereExp, count);
+        }
 
-		public String buildPage(String selectSqlTemplate, int start, int count) {
-			return String.format(selectSqlTemplate + " limit %d, %d", start, count);
-		}
-	},
+        public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
+            return String.format("SELECT %s FROM %s WHERE %s LIMIT %d, %d", columns, effectiveTableName, whereExp,
+                    start, count);
+        }
 
-	SqlServer("%s=ISNULL(?,%s) ", "getDate()", new int[] {-2, 233, 845, 846, 847, 1421},
-			new int[] {2, 53, 701, 802, 945, 1204, 1222}, new int[] {3906}) {
+        public String buildPage(String selectSqlTemplate, int start, int count) {
+            return String.format(selectSqlTemplate + " limit %d, %d", start, count);
+        }
 
-		private SqlServerDalPropertiesConfigureProvider sqlServerDalPropertiesConfigureProvider =
-				new SqlServerDalPropertiesConfigureProvider();
+        // SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
+        public boolean isSpecificException(SQLException exception) {
+            Map<String, ErrorCodeInfo> map = mySqlDalPropertiesLocator.getErrorCodes();
+            return matchSpecificError(exception, map);
+        }
+    },
 
-		public String quote(String fieldName) {
-			return "[" + fieldName + "]";
-		}
+    SqlServer("%s=ISNULL(?,%s) ", "getDate()", new int[] {-2, 233, 845, 846, 847, 1421},
+            new int[] {2, 53, 701, 802, 945, 1204, 1222}) {
 
-		public String buildList(String effectiveTableName, String columns, String whereExp) {
-			return String.format("SELECT %s FROM %s WITH (NOLOCK) WHERE %s", columns, effectiveTableName, whereExp);
-		}
+        private AbstractDalPropertiesLocator sqlServerDalPropertiesLocator =
+                DalPropertiesManager.getInstance().getSqlServerDalPropertiesLocator();
 
-		public boolean isTimeOutException(ErrorContext ctx) {
-			return ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时");
-		}
+        public String quote(String fieldName) {
+            return "[" + fieldName + "]";
+        }
 
-		public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
-			return String.format("SELECT TOP %d %s FROM %s WITH (NOLOCK) WHERE %s", count, columns, effectiveTableName,
-					whereExp);
-		}
+        public String buildList(String effectiveTableName, String columns, String whereExp) {
+            return String.format("SELECT %s FROM %s WITH (NOLOCK) WHERE %s", columns, effectiveTableName, whereExp);
+        }
 
-		public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
-			return String.format("SELECT %s FROM %s WITH (NOLOCK) WHERE %s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY",
-					columns, effectiveTableName, whereExp, start, count);
-		}
+        public boolean isTimeOutException(ErrorContext ctx) {
+            return ctx.getMsg().startsWith("The query has timed out") || ctx.getMsg().startsWith("查询超时");
+        }
 
-		public String buildPage(String selectSqlTemplate, int start, int count) {
-			return String.format(selectSqlTemplate + " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", start, count);
-		}
+        public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
+            return String.format("SELECT TOP %d %s FROM %s WITH (NOLOCK) WHERE %s", count, columns, effectiveTableName,
+                    whereExp);
+        }
 
-		public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {
-			if (parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP) {
-				SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement) statement;
-				sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(),
-						(SQLServerDataTable) parameter.getValue());
-			} else {
-				super.setObject(statement, parameter);
-			}
-		}
-	},
+        public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
+            return String.format("SELECT %s FROM %s WITH (NOLOCK) WHERE %s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY",
+                    columns, effectiveTableName, whereExp, start, count);
+        }
 
-	Oracle("%s=NVL(?,%s) ", "SYSTIMESTAMP", new int[] {-1}, new int[] {-1}, new int[] {-1}) {
+        public String buildPage(String selectSqlTemplate, int start, int count) {
+            return String.format(selectSqlTemplate + " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", start, count);
+        }
 
-		public String quote(String fieldName) {
-			return fieldName;// "\"" + fieldName + "\"";
-		}
+        public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {
+            if (parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP) {
+                SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement) statement;
+                sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(),
+                        (SQLServerDataTable) parameter.getValue());
+            } else {
+                super.setObject(statement, parameter);
+            }
+        }
 
-		public boolean isTimeOutException(ErrorContext ctx) {
-			return false;
-		}
+        // SQLServerException.EXCEPTION_XOPEN_CONNECTION_FAILURE
+        public boolean isSpecificException(SQLException exception) {
+            Map<String, ErrorCodeInfo> map = sqlServerDalPropertiesLocator.getErrorCodes();
+            return matchSpecificError(exception, map);
+        }
+    },
 
-		public String buildList(String effectiveTableName, String columns, String whereExp) {
-			return String.format("SELECT %s FROM %s WHERE %s", columns, effectiveTableName, whereExp);
-		}
+    Oracle("%s=NVL(?,%s) ", "SYSTIMESTAMP", new int[] {-1}, new int[] {-1}) {
 
-		public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
-			return String.format("SELECT * FROM (SELECT %s FROM %s WHERE %s) WHERE ROWNUM <= %d", columns,
-					effectiveTableName, whereExp, count);
-		}
+        public String quote(String fieldName) {
+            return fieldName;// "\"" + fieldName + "\"";
+        }
 
-		public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
-			return String.format(
-					"SELECT * FROM (SELECT ROWNUM RN, T1.* FROM (SELECT %s FROM %s WHERE %s)T1 WHERE ROWNUM <= %d)T2 WHERE T2.RN >=%d",
-					columns, effectiveTableName, whereExp, start + count, start);
-		}
+        public boolean isTimeOutException(ErrorContext ctx) {
+            return false;
+        }
 
-		public String buildPage(String selectSqlTemplate, int start, int count) {
-			return String.format(
-					"SELECT * FROM (SELECT ROWNUM RN, T1.* FROM (%s)T1 WHERE ROWNUM <= %d)T2 WHERE T2.RN >=%d",
-					selectSqlTemplate, start + count, start);
-		}
-	};
+        public String buildList(String effectiveTableName, String columns, String whereExp) {
+            return String.format("SELECT %s FROM %s WHERE %s", columns, effectiveTableName, whereExp);
+        }
 
-	private String nullableUpdateTpl;
-	private String timestampExp;
-	private Set<Integer> retriableCodeSet;
-	private Set<Integer> failOverableCodeSet;
-	private Map<Integer, ErrorCodeInfo> readOnlyErrorCodeSet;
+        public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
+            return String.format("SELECT * FROM (SELECT %s FROM %s WHERE %s) WHERE ROWNUM <= %d", columns,
+                    effectiveTableName, whereExp, count);
+        }
 
-	public static final String SQL_PROVIDER = "sqlProvider";
-	public static final String MYSQL_PROVIDER = "mySqlProvider";
-	public static final String ORACLE_PROVIDER = "oracleProvider";
+        public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
+            return String.format(
+                    "SELECT * FROM (SELECT ROWNUM RN, T1.* FROM (SELECT %s FROM %s WHERE %s)T1 WHERE ROWNUM <= %d)T2 WHERE T2.RN >=%d",
+                    columns, effectiveTableName, whereExp, start + count, start);
+        }
 
-	public static final int SQL_SERVER_TYPE_TVP = -1000;
+        public String buildPage(String selectSqlTemplate, int start, int count) {
+            return String.format(
+                    "SELECT * FROM (SELECT ROWNUM RN, T1.* FROM (%s)T1 WHERE ROWNUM <= %d)T2 WHERE T2.RN >=%d",
+                    selectSqlTemplate, start + count, start);
+        }
 
-	private SqlServerDalPropertiesConfigureProvider sqlServerDalPropertiesConfigureProvider =
-			new SqlServerDalPropertiesConfigureProvider();
+        public boolean isSpecificException(SQLException exception) {
+            if (exception == null)
+                return false;
 
-	public static DatabaseCategory matchWith(String provider) {
-		if (provider == null || provider.trim().length() == 0)
-			throw new RuntimeException("The provider value can not be NULL or empty!");
+            String errorCode = Integer.toString(exception.getErrorCode());
+            if (errorCode == null || errorCode.isEmpty())
+                return false;
 
-		provider = provider.trim();
-		if (provider.equalsIgnoreCase(SQL_PROVIDER))
-			return DatabaseCategory.SqlServer;
+            return errorCode.startsWith("08");
+        }
+    };
 
-		if (provider.equalsIgnoreCase(MYSQL_PROVIDER))
-			return DatabaseCategory.MySql;
+    private String nullableUpdateTpl;
+    private String timestampExp;
+    private Set<Integer> retriableCodeSet;
+    private Set<Integer> failOverableCodeSet;
 
-		if (provider.equalsIgnoreCase(ORACLE_PROVIDER))
-			return DatabaseCategory.Oracle;
+    public static final String SQL_PROVIDER = "sqlProvider";
+    public static final String MYSQL_PROVIDER = "mySqlProvider";
+    public static final String ORACLE_PROVIDER = "oracleProvider";
 
-		throw new RuntimeException("The provider: " + provider + " can not be recoganized");
-	}
+    public static final int SQL_SERVER_TYPE_TVP = -1000;
 
-	public Set<Integer> getDefaultRetriableErrorCodes() {
-		return new TreeSet<Integer>(retriableCodeSet);
-	}
+    public static DatabaseCategory matchWith(String provider) {
+        if (provider == null || provider.trim().length() == 0)
+            throw new RuntimeException("The provider value can not be NULL or empty!");
 
-	public Set<Integer> getDefaultFailOverableErrorCodes() {
-		return new TreeSet<Integer>(failOverableCodeSet);
-	}
+        provider = provider.trim();
+        if (provider.equalsIgnoreCase(SQL_PROVIDER))
+            return DatabaseCategory.SqlServer;
 
-	public Set<Integer> getDefaultErrorCodes() {
-		Set<Integer> errorCodes = getDefaultRetriableErrorCodes();
-		errorCodes.addAll(retriableCodeSet);
-		errorCodes.addAll(failOverableCodeSet);
-		return errorCodes;
-	}
+        if (provider.equalsIgnoreCase(MYSQL_PROVIDER))
+            return DatabaseCategory.MySql;
 
-	public boolean isDisconnectionError(String sqlState) {
-		if (sqlState == null)
-			return false;
+        if (provider.equalsIgnoreCase(ORACLE_PROVIDER))
+            return DatabaseCategory.Oracle;
 
-		switch (this) {
-			case MySql:
-				// SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
-				return sqlState.equals("08S01");
-			case SqlServer:
-				// SQLServerException.EXCEPTION_XOPEN_CONNECTION_FAILURE
-				return sqlState.equals("08S01") || sqlState.equals("08006");
-			default:
-				// The default connection related error codes are start with "08"
-				return sqlState.startsWith("08");
-		}
-	}
+        throw new RuntimeException("The provider: " + provider + " can not be recoganized");
+    }
 
-	public boolean isReadonlyError(SQLException exception) {
-		if (exception == null)
-			return false;
+    public Set<Integer> getDefaultRetriableErrorCodes() {
+        return new TreeSet<Integer>(retriableCodeSet);
+    }
 
-		switch (this) {
-			case SqlServer:
-				boolean result = false;
-				if (readOnlyErrorCodeSet != null) {
-					ErrorCodeInfo info = readOnlyErrorCodeSet.get(exception.getErrorCode());
-					if (info != null) {
-						int errorCode = info.getErrorCode();
-						int interval = info.getIntervalInSeconds();
-						result = clearTimeReached(errorCode, interval);
-					}
-				}
-				return result;
-			default:
-				return false;
-		}
-	}
+    public Set<Integer> getDefaultFailOverableErrorCodes() {
+        return new TreeSet<Integer>(failOverableCodeSet);
+    }
 
-	private boolean clearTimeReached(int errorCode, int interval) {
-		// TODO
-		return true;
-	}
+    public Set<Integer> getDefaultErrorCodes() {
+        Set<Integer> errorCodes = getDefaultRetriableErrorCodes();
+        errorCodes.addAll(retriableCodeSet);
+        errorCodes.addAll(failOverableCodeSet);
+        return errorCodes;
+    }
 
-	public String getTimestampExp() {
-		return timestampExp;
-	}
+    public String getTimestampExp() {
+        return timestampExp;
+    }
 
-	/**
-	 * This is for compatible with code generated for dal 1.4.1 and previouse version. Such code is like:
-	 *
-	 * SelectSqlBuilder builder = new SelectSqlBuilder("person", dbCategory, true); ... int index =
-	 * builder.getStatementParameterIndex(); parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
-	 * parameters.set(index++, Types.INTEGER, pageSize); return queryDao.query(sql, parameters, hints, parser);
-	 */
-	public String getPageSuffixTpl() {
-		switch (this) {
-			case MySql:
-				return " limit ?, ?";
-			case SqlServer:
-				return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-			default:
-				return null;
-		}
-	}
+    /**
+     * This is for compatible with code generated for dal 1.4.1 and previouse version. Such code is like:
+     *
+     * SelectSqlBuilder builder = new SelectSqlBuilder("person", dbCategory, true); ... int index =
+     * builder.getStatementParameterIndex(); parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize);
+     * parameters.set(index++, Types.INTEGER, pageSize); return queryDao.query(sql, parameters, hints, parser);
+     */
+    public String getPageSuffixTpl() {
+        switch (this) {
+            case MySql:
+                return " limit ?, ?";
+            case SqlServer:
+                return " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            default:
+                return null;
+        }
+    }
 
-	public abstract boolean isTimeOutException(ErrorContext ctx);
+    public abstract boolean isTimeOutException(ErrorContext ctx);
 
-	public abstract String quote(String fieldName);
+    public abstract String quote(String fieldName);
 
-	public abstract String buildList(String effectiveTableName, String columns, String whereExp);
+    public abstract String buildList(String effectiveTableName, String columns, String whereExp);
 
-	public abstract String buildTop(String effectiveTableName, String columns, String whereExp, int count);
+    public abstract String buildTop(String effectiveTableName, String columns, String whereExp, int count);
 
-	public abstract String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count);
+    public abstract String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count);
 
-	public abstract String buildPage(String selectSqlTemplate, int start, int count);
+    public abstract String buildPage(String selectSqlTemplate, int start, int count);
 
-	public void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException {
-		try {
-			if (parameter.isDefaultType()) {
-				statement.setObject(parameter.getIndex(), parameter.getValue());
-			} else {
-				statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-			}
-		} catch (Throwable e) {
-			throw new DalParameterException(e, parameter);
-		}
-	}
+    public abstract boolean isSpecificException(SQLException exception);
 
-	public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {
-		try {
-			if (parameter.getValue() == null) {
-				if (parameter.isDefaultType()) {
-					statement.setObject(parameter.getIndex(), null);
-				} else {
-					if (parameter.getName() == null)
-						statement.setNull(parameter.getIndex(), parameter.getSqlType());
-					else
-						statement.setNull(parameter.getName(), parameter.getSqlType());
-				}
-			} else {
-				if (parameter.isDefaultType()) {
-					statement.setObject(parameter.getIndex(), parameter.getValue());
-				} else {
-					if (parameter.getName() == null)
-						statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
-					else
-						statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
-				}
-			}
-		} catch (Throwable e) {
-			throw new DalParameterException(e, parameter);
-		}
-	}
+    public boolean matchSpecificError(SQLException exception, Map<String, ErrorCodeInfo> map) {
+        boolean result = false;
 
-	public String getNullableUpdateTpl() {
-		return nullableUpdateTpl;
-	}
+        if (exception == null)
+            return result;
 
-	DatabaseCategory(String nullableUpdateTpl, String timestampExp, int[] retriableCodes, int[] failOverableCodes,
-					 int[] readOnlyErrorCodes) {
-		this.nullableUpdateTpl = nullableUpdateTpl;
-		this.timestampExp = timestampExp;
-		this.retriableCodeSet = parseErrorCodes(retriableCodes);
-		this.failOverableCodeSet = parseErrorCodes(failOverableCodes);
-	}
+        if (map == null || map.isEmpty())
+            return result;
 
-	private Set<Integer> parseErrorCodes(int[] codes) {
-		Set<Integer> temp = new TreeSet<Integer>();
-		for (int value : codes)
-			temp.add(value);
+        String sqlState = exception.getSQLState();
+        if (sqlState != null && !sqlState.isEmpty()) {
+            if (map.containsKey(sqlState))
+                result = true;
+        }
 
-		return temp;
-	}
+        String errorCode = Integer.toString(exception.getErrorCode());
+        if (errorCode != null && !errorCode.isEmpty()) {
+            if (map.containsKey(errorCode))
+                result = true;
+        }
+
+        return result;
+    }
+
+    public void setObject(PreparedStatement statement, StatementParameter parameter) throws SQLException {
+        try {
+            if (parameter.isDefaultType()) {
+                statement.setObject(parameter.getIndex(), parameter.getValue());
+            } else {
+                statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+            }
+        } catch (Throwable e) {
+            throw new DalParameterException(e, parameter);
+        }
+    }
+
+    public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {
+        try {
+            if (parameter.getValue() == null) {
+                if (parameter.isDefaultType()) {
+                    statement.setObject(parameter.getIndex(), null);
+                } else {
+                    if (parameter.getName() == null)
+                        statement.setNull(parameter.getIndex(), parameter.getSqlType());
+                    else
+                        statement.setNull(parameter.getName(), parameter.getSqlType());
+                }
+            } else {
+                if (parameter.isDefaultType()) {
+                    statement.setObject(parameter.getIndex(), parameter.getValue());
+                } else {
+                    if (parameter.getName() == null)
+                        statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
+                    else
+                        statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());
+                }
+            }
+        } catch (Throwable e) {
+            throw new DalParameterException(e, parameter);
+        }
+    }
+
+    public String getNullableUpdateTpl() {
+        return nullableUpdateTpl;
+    }
+
+    DatabaseCategory(String nullableUpdateTpl, String timestampExp, int[] retriableCodes, int[] failOverableCodes) {
+        this.nullableUpdateTpl = nullableUpdateTpl;
+        this.timestampExp = timestampExp;
+        this.retriableCodeSet = parseErrorCodes(retriableCodes);
+        this.failOverableCodeSet = parseErrorCodes(failOverableCodes);
+    }
+
+    private Set<Integer> parseErrorCodes(int[] codes) {
+        Set<Integer> temp = new TreeSet<Integer>();
+        for (int value : codes)
+            temp.add(value);
+
+        return temp;
+    }
+
 }

@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class PropertyFileConfigureProvider implements DataSourceConfigureProvider {
@@ -86,6 +87,8 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
     @Override
     public void setup(Set<String> dbNames) {
+        DalPropertiesManager.getInstance().setup();
+
         for (String name : dbNames) {
             for (String item : MUST_HAVES) {
                 if (properties.getProperty(name + item) == null)

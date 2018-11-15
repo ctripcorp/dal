@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,8 @@ public class DataSourceLocator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceLocator.class);
 
     private static final ConcurrentHashMap<String, DataSource> cache = new ConcurrentHashMap<>();
+
+    private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
 
     private DataSourceConfigureProvider provider;
 
@@ -78,6 +81,7 @@ public class DataSourceLocator {
 
         RefreshableDataSource rds = new RefreshableDataSource(name, config);
         provider.register(name, rds);
+        executor.execute(rds);
 
         return rds;
     }

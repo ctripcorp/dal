@@ -1,14 +1,14 @@
 package com.ctrip.platform.dal.dao.configure;
 
 public class ErrorCodeInfo {
-    private int errorCode;
+    private String errorCode;
     private int intervalInSeconds;
 
-    public int getErrorCode() {
+    public String getErrorCode() {
         return errorCode;
     }
 
-    public void setErrorCode(int errorCode) {
+    public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
     }
 
@@ -19,4 +19,5 @@ public class ErrorCodeInfo {
     public void setIntervalInSeconds(int intervalInSeconds) {
         this.intervalInSeconds = intervalInSeconds;
     }
+
 }

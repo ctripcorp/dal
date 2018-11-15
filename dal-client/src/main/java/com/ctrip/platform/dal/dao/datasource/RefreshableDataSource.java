@@ -11,25 +11,24 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.DatabaseDomainChecker;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
-    private static DatabaseDomainChecker domainChecker = DalElementFactory.DEFAULT.getDatabaseDomainChecker();
-
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
         dataSourceReference.set(dataSource);
-        domainChecker.startCheckingTask(name, dataSource);
     }
 
     @Override
     public synchronized void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
         String name = event.getName();
         DataSourceConfigure newConfigure = event.getNewDataSourceConfigure();
-        SingleDataSource newDataSource = new SingleDataSource(name, newConfigure);
+        refreshDataSource(name, newConfigure);
+    }
+
+    public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
+        SingleDataSource newDataSource = new SingleDataSource(name, configure);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
     }
@@ -38,10 +37,19 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         DataSourceTerminator.getInstance().close(oldDataSource);
     }
 
+    public SingleDataSource getSingleDataSource() {
+        return dataSourceReference.get();
+    }
+
     private DataSource getDataSource() {
-        DataSource dataSource = dataSourceReference.get().getDataSource();
+        SingleDataSource singleDataSource = getSingleDataSource();
+        if (singleDataSource == null)
+            throw new IllegalStateException("SingleDataSource can't be null.");
+
+        DataSource dataSource = singleDataSource.getDataSource();
         if (dataSource == null)
-            throw new IllegalStateException("DataSource cannot be null.");
+            throw new IllegalStateException("DataSource can't be null.");
+
         return dataSource;
     }
 

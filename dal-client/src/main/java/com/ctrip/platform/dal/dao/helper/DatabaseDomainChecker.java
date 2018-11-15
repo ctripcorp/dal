@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 
 public interface DatabaseDomainChecker {
-    void startCheckingTask(String name, SingleDataSource dataSource);
+    void start(RefreshableDataSource dataSource);
 }

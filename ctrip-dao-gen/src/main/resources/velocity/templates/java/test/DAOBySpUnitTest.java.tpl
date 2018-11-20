@@ -43,19 +43,19 @@ public class ${host.getDbSetName()}SpDaoUnitTest {
 	//Test batch call ${h.getSpName()} method
 	@Test
 	public void testCall${h.getPojoClassName()}() throws Exception {
-		${h.getPojoClassName()} params = null;// TODO: Test data
-		int[] ret = dao.batchCall${h.getPojoClassName()}(params, new DalHints()));
-		assertTrue(ret != null);
+//		${h.getPojoClassName()} params = null;
+//		int[] ret = dao.batchCall${h.getPojoClassName()}(params, new DalHints()));
+//		assertTrue(ret != null);
 	}
 #end	
 	//Test call ${h.getSpName()} method
 	@Test
 	public void testCall${h.getPojoClassName()}() throws Exception {
-		${h.getPojoClassName()} param = new ${h.getPojoClassName()}();	
+//		${h.getPojoClassName()} param = new ${h.getPojoClassName()}();
 		// Set test value here
 		//param.setXXX(value);
-		Map<String, ?> result = dao.call${h.getPojoClassName()}(param, new DalHints());
-		assertTrue(result != null && result.size() >= 0);
+//		Map<String, ?> result = dao.call${h.getPojoClassName()}(param, new DalHints());
+//		assertTrue(result != null && result.size() >= 0);
 	}
 #end
 }

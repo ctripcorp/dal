@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.helper.TVPHelper;
 import com.ctrip.platform.dal.dao.task.*;
 
 import static com.ctrip.platform.dal.dao.task.DefaultTaskFactory.getDbCategory;
@@ -46,6 +47,8 @@ public class CtripTaskFactory implements DalTaskFactory {
 
     private Map<String, String> ctripTaskSettings;
 
+    private TVPHelper tvpHelper = null;
+
     @Override
     public void initialize(Map<String, String> settings) {
         defaultFactory = new DefaultTaskFactory();
@@ -72,6 +75,8 @@ public class CtripTaskFactory implements DalTaskFactory {
         ctripTaskSettings.put(CALL_SPT, String.valueOf(callSpt));
 
         this.ctripTaskSettings = ctripTaskSettings;
+
+        this.tvpHelper = new TVPHelper();
     }
 
     @Override
@@ -133,7 +138,7 @@ public class CtripTaskFactory implements DalTaskFactory {
             else
                 bulkTask = new BatchInsertSp3Task<>();
         } else {
-            bulkTask = new CtripSptTask<>(INSERT_SPT_TPL);
+            bulkTask = new CtripSptTask<>(INSERT_SPT_TPL, tvpHelper);
         }
         bulkTask.initTaskSettings(ctripTaskSettings);
         bulkTask.initialize(parser);
@@ -152,7 +157,7 @@ public class CtripTaskFactory implements DalTaskFactory {
             else
                 bulkTask = new BatchDeleteSp3Task<>();
         } else {
-            bulkTask = new CtripSptTask<>(DELETE_SPT_TPL);
+            bulkTask = new CtripSptTask<>(DELETE_SPT_TPL, tvpHelper);
         }
         bulkTask.initTaskSettings(ctripTaskSettings);
         bulkTask.initialize(parser);
@@ -171,7 +176,7 @@ public class CtripTaskFactory implements DalTaskFactory {
             else
                 bulkTask = new BatchUpdateSp3Task<>();
         } else {
-            bulkTask = new CtripSptTask<>(UPDATE_SPT_TPL);
+            bulkTask = new CtripSptTask<>(UPDATE_SPT_TPL, tvpHelper);
         }
         bulkTask.initTaskSettings(ctripTaskSettings);
         bulkTask.initialize(parser);

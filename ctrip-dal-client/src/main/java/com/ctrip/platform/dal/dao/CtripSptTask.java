@@ -1,25 +1,31 @@
 package com.ctrip.platform.dal.dao;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.TVPHelper;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.task.*;
+import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String TVP_TPL = "TVP_%s";
     private static final String TVP_EXEC = "exec %s %s";
 
     private String sptTpl;
+    private TVPHelper tvpHelper;
 
-    public CtripSptTask(String sptTpl) {
+    public CtripSptTask(String sptTpl, TVPHelper tvpHelper) {
         this.sptTpl = sptTpl;
+        this.tvpHelper = tvpHelper;
     }
 
     @Override
@@ -29,7 +35,7 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
         String tvpName = buildTvpName(tableName);
         String spName = String.format(sptTpl, tableName);
         String execSql = buildExecSql(spName);
-        SQLServerDataTable dataTable = getDataTable(daoPojos);
+        SQLServerDataTable dataTable = getDataTable(tvpName, daoPojos);
         StatementParameters parameters = new StatementParameters();
         int index = 1;
         parameters.set(index, tvpName, DatabaseCategory.SQL_SERVER_TYPE_TVP, dataTable);
@@ -52,25 +58,44 @@ public class CtripSptTask<T> extends AbstractIntArrayBulkTask<T> {
             throw new DalRuntimeException("The client is not instance of DalClient");
     }
 
-    private SQLServerDataTable getDataTable(Map<Integer, Map<String, ?>> daoPojos) throws SQLServerException {
+    private SQLServerDataTable getDataTable(String tvpName, Map<Integer, Map<String, ?>> daoPojos) throws SQLException {
         if (daoPojos == null || daoPojos.size() == 0)
             return null;
-        Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER); // match with the case insensitive rule
-                                                                                 // of ctrip sql server
-        map.putAll(columnTypes);
-        if (map == null || map.size() == 0)
-            return null;
 
-        SQLServerDataTable dataTable = new SQLServerDataTable();
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-            dataTable.addColumnMetadata(entry.getKey(), entry.getValue().intValue());
+        SQLServerDataTable dataTable = getDataTableByMetadata(tvpName, daoPojos);
+        return dataTable;
+    }
+
+    private SQLServerDataTable getDataTableByMetadata(String tvpName, Map<Integer, Map<String, ?>> daoPojos)
+            throws SQLException {
+        SQLServerDataTable dataTable;
+        List<String> orderedColumns;
+        try {
+            orderedColumns = tvpHelper.getTVPColumns(logicDbName, tvpName, columnTypes, client);
+        } catch (Throwable e) {
+            String msg = String.format("An error occured while getting tvp columns,logic db name: %s,tvp name: %s,",
+                    logicDbName, tvpName);
+            LOGGER.error(msg, e);
+            throw new DalException(msg, e);
         }
 
+        dataTable = new SQLServerDataTable();
+        Map<String, Integer> map = new HashMap<>(columnTypes);
+        // add column metadata
+        for (String column : orderedColumns) {
+            Integer value = map.get(column);
+            if (value == null)
+                continue;
+
+            dataTable.addColumnMetadata(column, value);
+        }
+
+        // add actual data
         for (Map.Entry<Integer, Map<String, ?>> entry : daoPojos.entrySet()) {
             Map<String, ?> temp = entry.getValue();
             List<Object> list = new ArrayList<>();
-            for (String key : map.keySet()) {
-                Object value = temp.get(key);
+            for (String column : orderedColumns) {
+                Object value = temp.get(column);
                 list.add(value); // if value==null ?
             }
             dataTable.addRow(list.toArray());

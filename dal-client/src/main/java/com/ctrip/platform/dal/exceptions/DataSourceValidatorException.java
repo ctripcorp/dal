@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.exceptions;
 
-public class DataSourceValidatorException extends Exception {
+public class DataSourceValidatorException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public DataSourceValidatorException() {

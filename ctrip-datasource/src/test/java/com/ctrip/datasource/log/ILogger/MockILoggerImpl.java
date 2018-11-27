@@ -52,6 +52,15 @@ public class MockILoggerImpl extends CtripLoggerImpl {
     }
 
     @Override
+    public void warn(Throwable throwable) {
+        if (throwable == null)
+            Assert.fail();
+
+        super.warn(throwable);
+        Assert.assertTrue(true);
+    }
+
+    @Override
     public void error(final String msg, final Throwable e) {
         if (msg == null)
             Assert.fail();

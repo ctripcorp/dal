@@ -3,7 +3,7 @@ package com.ctrip.datasource.titan;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.datasource.configure.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;

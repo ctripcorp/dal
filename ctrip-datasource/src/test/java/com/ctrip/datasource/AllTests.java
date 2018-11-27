@@ -1,10 +1,12 @@
 package com.ctrip.datasource;
 
+import com.ctrip.datasource.datasource.BackgroundExecutor.DatasourceBackgroundExecutorTest;
 import com.ctrip.datasource.datasource.ConnectionListener.CtripConnectionListenerTest;
 import com.ctrip.datasource.datasource.DataSourceValidatorTest;
 import com.ctrip.datasource.datasource.MockQConfigProvider.ExceptionQConfigPoolPropertiesProviderTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
+import com.ctrip.datasource.readonly.SqlServerReadonlyTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -39,7 +41,9 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		DalDataSourceFactoryTest.class,
 		QConfigConnectionStringProviderTest.class,
 		CtripConnectionListenerTest.class,
-		DataSourceValidatorTest.class
+		DataSourceValidatorTest.class,
+		SqlServerReadonlyTest.class,
+		DatasourceBackgroundExecutorTest.class
 	})
 
 public class AllTests {

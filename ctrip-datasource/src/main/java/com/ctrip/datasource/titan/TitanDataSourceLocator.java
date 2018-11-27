@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
 
-import com.ctrip.datasource.configure.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import org.apache.commons.codec.binary.Base64;

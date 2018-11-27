@@ -15,7 +15,6 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-//import com.ctrip.platform.dal.daogen.enums.ParameterDirection;
 
 public class NoShardOnSqlServerDao {
 	private static final boolean ASC = true;
@@ -349,6 +348,23 @@ public class NoShardOnSqlServerDao {
 //		int i = 1;
 //		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, CityID);
 		builder.mapWith(noShardOnSqlServerGenRowMapper);
+
+		return queryDao.query(builder, parameters, hints);
+	}
+
+	/**
+	 * 自定义，查询
+	 **/
+	public String select_servername_timeout(int delay,DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		FreeSelectSqlBuilder<String> builder = new FreeSelectSqlBuilder<>();
+		builder.setTemplate("select @@SERVERNAME waitfor delay '00:00:" + delay + "'");
+		StatementParameters parameters = new StatementParameters();
+
+//		int i = 1;
+//		i = parameters.setSensitiveInParameter(i, "CityID", Types.INTEGER, CityID);
+		builder.simpleType().requireSingle().nullable();
 
 		return queryDao.query(builder, parameters, hints);
 	}

@@ -97,6 +97,7 @@ public class IpDomainSwitchTest {
             url = dataSourceConfigure.getConnectionUrl();
             log.info(String.format("the url before set failover is: %s", url));
             Assert.assertNotEquals(-1, url.indexOf("10.2.74"));
+//          get initial ip
             if (url.indexOf("10.2.74.111") != -1)
                 ip = "10.2.74.111";
             else
@@ -122,7 +123,7 @@ public class IpDomainSwitchTest {
             Thread.sleep(5000);
             log.info(String.format("check connection string switch in domain mode"));
 
-            //check connection string switch in domain mode
+            //check connection string switch in domain mode, qconfig will not notify dal to refresh connection string
             dataSourceConfigureLocator = DataSourceConfigureLocatorManager.getInstance();
             dataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure("mysqldaltest01db_W");
             url = dataSourceConfigure.getConnectionUrl();
@@ -143,9 +144,12 @@ public class IpDomainSwitchTest {
 
             log.info(String.format("the url after set normal is: %s", url));
             Assert.assertNotEquals(-1,url.indexOf("10.2.74"));
-            Assert.assertEquals(-1, url.indexOf(ip));
 
-            //connection string switch in ip mode
+            //            get ip from locator but not qconfig
+            log.info(String.format("the current ip is: %s",ip));
+            Assert.assertNotEquals(-1, url.indexOf(ip));
+
+            //connection string switch in ip mode, qconfig will notify dal to refresh connection string
             log.info(String.format("connection string switch in ip mode start"));
             connectionStringSwitch.postByMHA(isPro);
             log.info(String.format("connection string switch in ip mode done"));

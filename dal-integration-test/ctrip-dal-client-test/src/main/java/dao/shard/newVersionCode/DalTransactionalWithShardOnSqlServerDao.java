@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.dao.annotation.Shard;
 import entity.SqlServerPeopleTable;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by lilj on 2017/7/24.
@@ -442,6 +443,34 @@ public class DalTransactionalWithShardOnSqlServerDao extends TransactionWithShar
             ret.setName("transFail");
             update(hints.inTableShard(1),ret);
             throw new SQLException();
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void transSingleTaskWithNoShardIdInTransaction(@Shard int shardid) throws Exception{
+        SqlServerPeopleTable ret=queryByPk(1,new DalHints().inTableShard(0));
+        ret.setCityID(null);
+        delete(new DalHints().inTableShard(0),ret);
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void testSingleTaskWithShardidInDistributedTrasaction(@Shard int shardid) throws Exception{
+        SqlServerPeopleTable ret=queryByPk(1,new DalHints().inTableShard(0));
+        ret.setCityID(21);
+        delete(new DalHints().inTableShard(0),ret);
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void testSingleTaskWithCorssShardInTrasaction(@Shard int shardid) throws Exception{
+        List<SqlServerPeopleTable> list=queryAll(new DalHints().inTableShard(0));
+        list.get(0).setCityID(21);
+        delete(new DalHints().inTableShard(0),list);
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void testBulkTaskWithCorssShardInTrasaction(@Shard int shardid) throws Exception{
+        List<SqlServerPeopleTable> list=queryAll(new DalHints().inTableShard(0));
+        list.get(0).setCityID(21);
+        batchDelete(new DalHints().inTableShard(0),list);
     }
 
 }

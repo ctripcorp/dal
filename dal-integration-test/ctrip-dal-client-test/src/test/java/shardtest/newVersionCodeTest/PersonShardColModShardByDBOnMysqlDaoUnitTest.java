@@ -9,6 +9,7 @@ import entity.MysqlPersonTable;
 import org.junit.*;
 import testUtil.DalHintsChecker;
 
+
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -191,7 +192,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(10, daoPojo.getID().intValue());
 
         MysqlKeyholderTestTable ret = keyholderTestOnMysqlDao.queryByPk(10, new DalHints().inShard(0));
-        assertEquals(10,ret.getID().intValue());
+        assertEquals(10, ret.getID().intValue());
         ret = keyholderTestOnMysqlDao.queryByPk(10, new DalHints().inShard(1));
         assertNull(ret);
 
@@ -2862,6 +2863,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(20, ret.get(0).get("age"));
         assertEquals("Initial_Shard_00", ret.get(0).get("name"));
     }
+
     //	@Test
 //	public void test_queryInMultipleAllShards() throws SQLException {
 //		List<Integer> Age=new ArrayList<Integer>(3);
@@ -2946,6 +2948,251 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(1, ret2.size());
         for (int i = 0; i < ret2.size(); i++)
             System.out.println("timestamp:" + ret2.get(i).toString());
+    }
+
+   /* @Test
+    public void testDalClientTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                client.update("update person set name = 'test' where age=20", new StatementParameters(), new DalHints().inShard(0));
+                return true;
+            }
+        };
+        client.execute(command, new DalHints().inShard(0));
+    }
+
+    @Test
+    public void testBulkRequestTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+//                bulkTask
+                List<MysqlPersonTable> pojoList = new ArrayList<>();
+                MysqlPersonTable pojo1 = new MysqlPersonTable();
+                pojo1.setAge(20);
+                MysqlPersonTable pojo2 = new MysqlPersonTable();
+                pojo2.setAge(20);
+                pojoList.add(pojo1);
+                pojoList.add(pojo2);
+
+                dao.batchUpdate(new DalHints(), pojoList);
+                return true;
+            }
+        };
+        client.execute(command, new DalHints().inShard(0));
+    }
+
+    @Test
+    public void testSingleRequestTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                List<MysqlPersonTable> ret = dao.queryAll(new DalHints());
+                ret.get(0).setAge(21);
+                ret.get(0).setName("update1");
+                ret.get(1).setName("update2");
+                dao.update(new DalHints(), ret);
+                return true;
+            }
+        };
+        client.execute(command, new DalHints().inShard(0));
+    }
+
+    @Test
+    public void testSqlRequestTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                List<Integer> Age = new ArrayList<Integer>();
+                Age.add(20);
+                Age.add(23);
+                Age.add(22);
+
+//                cross shard: inAllShards
+                List<MysqlPersonTable> ret = dao.test_build_query_list(Age, new DalHints().inAllShards());
+                assertEquals(3, ret.size());
+
+//                cross shard: inShards
+                Set<String> shards = new HashSet<>();
+                shards.add("0");
+                shards.add("1");
+                ret = dao.test_build_query_list(Age, new DalHints().inShards(shards));
+                assertEquals(3, ret.size());
+
+//                cross shard: shardby
+                ret = dao.test_build_query_list(Age, new DalHints().shardBy("Age"));
+                assertEquals(3, ret.size());
+
+
+//                nonCrossShard：inShard
+                ret = dao.test_build_query_list(Age, new DalHints().inShard(0));
+                assertEquals(2, ret.size());
+
+//                nonCrossShard：setShardValue
+                ret = dao.test_build_query_list(Age, new DalHints().setShardValue(20));
+                assertEquals(2, ret.size());
+
+//                nonCrossShard：setShardColValue
+                ret = dao.test_build_query_list(Age, new DalHints().setShardColValue("Age", 20));
+                assertEquals(2, ret.size());
+
+//                nonCrossShard：parameters
+                ret = dao.test_build_query_list_equal(20, new DalHints());
+                assertEquals(2, ret.size());
+
+                return true;
+            }
+        };
+        client.execute(command, new DalHints().inShard(0));
+    }*/
+
+    @Test
+    public void testSingleTaskWithNoShardInPassTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                MysqlPersonTable ret = new MysqlPersonTable();
+                ret.setID(1);
+                ret.setName("testSingleTaskWithNoShardInTransaction");
+                MysqlPersonTable ret2 = new MysqlPersonTable();
+                ret2.setID(2);
+                ret2.setAge(80);
+                ret2.setName("testSingleTaskWithNoShardInTransaction2");
+                List<MysqlPersonTable> list = new ArrayList<>();
+                list.add(ret);
+                list.add(ret2);
+                dao.update(new DalHints(), list);
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints().inShard(0));
+        }catch (Exception e){
+
+        }
+        assertEquals("testSingleTaskWithNoShardInTransaction", dao.queryByPk(1l, new DalHints().inShard(0)).getName());
+        assertEquals(20,dao.queryByPk(1l,new DalHints().inShard(0)).getAge().intValue());
+        assertEquals("testSingleTaskWithNoShardInTransaction2", dao.queryByPk(2l, new DalHints().inShard(0)).getName());
+        assertEquals(80,dao.queryByPk(2l,new DalHints().inShard(0)).getAge().intValue());
+    }
+
+    @Test
+    public void testSingleTaskWithNoShardInFailedTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                MysqlPersonTable ret = new MysqlPersonTable();
+                ret.setID(1);
+                ret.setName("testSingleTaskWithNoShardInTransaction");
+                dao.update(new DalHints(), ret);
+                dao.insert(new DalHints().enableIdentityInsert(), ret);
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints().inShard(0));
+        } catch (Exception e) {
+
+        }
+        assertEquals("Initial_Shard_00", dao.queryByPk(1l, new DalHints().inShard(0)).getName());
+        assertNotEquals("testSingleTaskWithNoShardInTransaction", dao.queryByPk(1l, new DalHints().inShard(1)).getName());
+    }
+
+    @Test
+    public void testSingleTaskWithShardInDistributedTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                MysqlPersonTable ret = new MysqlPersonTable();
+                ret.setID(1);
+                ret.setAge(21);
+                ret.setName("testSingleTaskWithNoShardInTransaction");
+                dao.update(new DalHints(), ret);
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints().inShard(0));
+        } catch (Exception e) {
+        }
+        assertEquals("Initial_Shard_00", dao.queryByPk(1l, new DalHints().inShard(0)).getName());
+        assertNotEquals("testSingleTaskWithNoShardInTransaction", dao.queryByPk(1l, new DalHints().inShard(1)).getName());
+    }
+
+    @Test
+    public void testBulkTaskWithNoShardInPassTransaction() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                MysqlPersonTable ret = new MysqlPersonTable();
+                ret.setID(1);
+                ret.setAge(80);
+                ret.setName("testSingleTaskWithNoShardInTransaction");
+                MysqlPersonTable ret2 = new MysqlPersonTable();
+                ret2.setID(2);
+                ret2.setAge(81);
+                ret2.setName("testSingleTaskWithNoShardInTransaction2");
+                List<MysqlPersonTable> list = new ArrayList<>();
+                list.add(ret);
+                list.add(ret2);
+                dao.batchUpdate(new DalHints(), list);
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints().inShard(0));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+        assertEquals("testSingleTaskWithNoShardInTransaction", dao.queryByPk(1l, new DalHints().inShard(0)).getName());
+        assertEquals(80, dao.queryByPk(1l, new DalHints().inShard(0)).getAge().intValue());
+        assertEquals("testSingleTaskWithNoShardInTransaction2", dao.queryByPk(2l, new DalHints().inShard(0)).getName());
+        assertEquals(81, dao.queryByPk(2l, new DalHints().inShard(0)).getAge().intValue());
+    }
+
+    @Test
+    public void testSQLTaskWithNoShardInTrans() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                List<MysqlPersonTable> list = dao.queryAll();
+                for (MysqlPersonTable pojo : list)
+                    pojo.setAge(null);
+                dao.batchInsert(list);
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints().inShard(0));
+        } catch (Exception e) {
+            fail();
+        }
+        assertEquals(6, dao.count(new DalHints().inShard(0)));
+
+    }
+
+    @Test
+    public void testSQLTaskWithNoShardInDistributedTrans() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                List<MysqlPersonTable> list = dao.queryAll(new DalHints().inAllShards());
+                for (MysqlPersonTable pojo : list)
+                    pojo.setAge(null);
+                dao.batchInsert(list);
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints().inShard(0));
+            fail();
+        } catch (Exception e) {
+
+        }
+        assertEquals(3, dao.count(new DalHints().inShard(0)));
+
     }
 
     @Test

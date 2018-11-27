@@ -19,8 +19,9 @@ public class ConnectionPhantomReferenceCleanerOnDalClientTest {
     private static Logger log = LoggerFactory.getLogger(ConnectionPhantomReferenceCleanerOnDalClientTest.class);
     private static Class<?> defaultConnectionPhantomReferenceCleaner;
     private static Class<?> nonRegisteringDriver;
-    private static Class<?> singleDatasource;
+//    private static Class<?> singleDatasource;
     private static Class<?> dataSourceLocator;
+    private static Class<?> defaultDatasourceBackgroundExecutor;
     private static Field driverClassName;
     private static Field containsMySQL;
     private static Field connectionPhantomReference;
@@ -55,8 +56,9 @@ public class ConnectionPhantomReferenceCleanerOnDalClientTest {
         shutdownMethod.setAccessible(true);
 
 //        获取containsMySQL，用于每个case之前的复原
-        singleDatasource = Class.forName("com.ctrip.platform.dal.dao.datasource.SingleDataSource");
-        containsMySQL = singleDatasource.getDeclaredField("containsMySQL");
+        defaultConnectionPhantomReferenceCleaner=Class.forName("com.ctrip.platform.dal.dao.datasource.DefaultDatasourceBackgroundExecutor");
+//        singleDatasource = Class.forName("com.ctrip.platform.dal.dao.datasource.SingleDataSource");
+        containsMySQL = defaultConnectionPhantomReferenceCleaner.getDeclaredField("containsMySQL");
         containsMySQL.setAccessible(true);
 
 //        获取DataSourceLocator中的数据源缓存，以便于每次case前清理
@@ -77,7 +79,7 @@ public class ConnectionPhantomReferenceCleanerOnDalClientTest {
         shutdownMethod.invoke(defaultConnectionPhantomReferenceCleaner);
         Thread.sleep(2000);
 //        将singleDataSource中的containsMySQL还原为false
-        ((AtomicBoolean) containsMySQL.get(singleDatasource)).getAndSet(false);
+        ((AtomicBoolean) containsMySQL.get(defaultConnectionPhantomReferenceCleaner)).getAndSet(false);
 
 //        清理数据源缓存
         ((ConcurrentHashMap) cache.get(dataSourceLocator)).clear();

@@ -30,6 +30,14 @@ public class FreeShardingStrategyByTableOnMysqlGenDao {
 		this.baseClient = DalClientFactory.getClient(DATA_BASE);
 	}
 
+	public FreeShardingStrategyByTableOnMysqlGenDao(String DATA_BASE) throws SQLException {
+		parser = new DalDefaultJpaParser<>(MysqlPersonTable.class,DATA_BASE);
+		this.client = new DalTableDao<MysqlPersonTable>(parser);
+		dbCategory = this.client.getDatabaseCategory();
+		this.queryDao = new DalQueryDao(DATA_BASE);
+		this.baseClient = DalClientFactory.getClient(DATA_BASE);
+	}
+
 	/**
 	 * Query PersonGen by the specified ID
 	 * The ID must be a number

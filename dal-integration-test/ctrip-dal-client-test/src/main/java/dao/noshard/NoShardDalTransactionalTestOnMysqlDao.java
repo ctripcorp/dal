@@ -8,6 +8,8 @@ import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import entity.MysqlPersonTable;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by lilj on 2017/7/24.
@@ -1209,25 +1211,26 @@ public void firstLevelTransaction(Integer firstlevelId,Boolean firstLevelThrowEx
         }
     }
 
-//    @DalTransactional(logicDbName = DATA_BASE)
-//    public void test() throws Exception{
-//        List<MysqlPersonTable> list=new ArrayList<>();
-//        MysqlPersonTable pojo1=new MysqlPersonTable();
-//        pojo1.setID(1);
-//        pojo1.setName("he");
-//        list.add(pojo1);
-//        MysqlPersonTable pojo2=new MysqlPersonTable();
-//        pojo2.setID(2);
-//        pojo1.setName("she");
-//        list.add(pojo2);
-//
-////        try {
-//            batchInsert(new DalHints().enableIdentityInsert(), list);
-////        }catch (Exception e){
-////            e.printStackTrace();
-////            throw e;
-////        }
-//
+    /*@DalTransactional(logicDbName = DATA_BASE)
+    public void test() throws Exception{
+        List<MysqlPersonTable> list=new ArrayList<>();
+        MysqlPersonTable pojo1=new MysqlPersonTable();
+        pojo1.setID(1);
+        pojo1.setName("heffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        list.add(pojo1);
+        MysqlPersonTable pojo2=new MysqlPersonTable();
+        pojo2.setID(2);
+        pojo1.setName("she");
+        list.add(pojo2);
+
+//        try {
+            batchInsert(new DalHints().enableIdentityInsert(), list);
+
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            throw e;
+//        }
+
 //        insert(new DalHints().enableIdentityInsert(),list);
-//    }
+    }*/
 }

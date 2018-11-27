@@ -1,6 +1,7 @@
 package noshardtest;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import dao.noshard.NoShardDalTransactionalTestOnSqlServerDao;
 import dao.noshard.SqlServerDalTransactionalConfig;
 import entity.SqlServerPeopleTable;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -169,4 +171,16 @@ public class NoShardDalTransactionalTestOnSqlServerSpringTest {
         }
         Assert.assertEquals(6,dao.count(null));
     }
+
+    /*@Test
+    public void test() throws Exception {
+        try {
+            dao.test();
+        }catch (SQLException e){
+            e.getErrorCode();
+        }
+//        dao.thirdLevelTransaction(10,false,
+//                1,true);
+        Assert.assertEquals(6,dao.count(null));
+    }*/
 }

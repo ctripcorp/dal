@@ -311,7 +311,7 @@ public class ConnectionTest {
                     log.info("90s query with leak connection start.");
                     connection = singleDataSource.getDataSource().getConnection();
                     connection.createStatement().execute("select name from testTable where sleep(90) = 0 limit 1");
-                    log.info("90s query with leak connection passed.");
+                    log.info("90s query with leak connection end.");
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.info("90s query with leak connection test failed because of interruption");

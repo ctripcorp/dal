@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -176,12 +177,16 @@ public class NoShardDalTransactionalTestOnMysqlSpringTest {
         Assert.assertEquals(6,dao.count(null));
     }
 
-//    @Test
-//    public void test() throws Exception {
-//        dao.test();
-////        dao.thirdLevelTransaction(10,false,
-////                1,true);
-//        Assert.assertEquals(6,dao.count(null));
-//    }
+   /* @Test
+    public void test() throws Exception {
+        try {
+            dao.test();
+        }catch (SQLException e){
+            e.getErrorCode();
+        }
+//        dao.thirdLevelTransaction(10,false,
+//                1,true);
+        Assert.assertEquals(6,dao.count(null));
+    }*/
 
 }

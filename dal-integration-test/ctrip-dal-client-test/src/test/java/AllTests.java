@@ -79,6 +79,7 @@ import testUtil.NetStatChecker;
             NoShardTransactionalTestOnSqlServerNotSpringTest.class,
             RWTestOnSQLServer.class,
             SpTestDaoUnitTest.class,
+            TVPColumnsOrderDaoUnitTest.class,
             TestFor414.class,
     })
     public class AllTests {

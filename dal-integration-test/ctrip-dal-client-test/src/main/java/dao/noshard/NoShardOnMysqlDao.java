@@ -1213,7 +1213,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 自定义，查询
 	 **/
-	public List<MysqlPersonExtendsUpdatableEntity> test_timeout(int delay, DalHints hints) throws Exception {
+	public List<MysqlPersonExtendsUpdatableEntity> test_timeout(int delay, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);

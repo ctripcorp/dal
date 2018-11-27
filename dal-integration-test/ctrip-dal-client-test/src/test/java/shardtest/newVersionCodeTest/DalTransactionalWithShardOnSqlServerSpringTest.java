@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -393,5 +394,47 @@ public class DalTransactionalWithShardOnSqlServerSpringTest {
         assertNotEquals("transFail",dao.queryByPk(3,new DalHints().inShard(0).inTableShard(1)).getName());
         assertEquals(3,dao.count(new DalHints().inShard(0).inTableShard(0)));
 
+    }
+
+    @Test
+    public void transSingleTaskWithNoShardIdInTransaction() throws Exception{
+        try{
+            dao.transSingleTaskWithNoShardIdInTransaction(0);
+        }catch (Exception e){
+           fail();
+        }
+        assertEquals(2,dao.count(new DalHints().inShard(0).inTableShard(0)));
+    }
+
+    @Test
+    public void testSingleTaskWithShardIdInDistributedTransaction() throws Exception{
+        try{
+            dao.testSingleTaskWithShardidInDistributedTrasaction(0);
+            fail();
+        }catch (Exception e){
+
+        }
+        assertEquals(3,dao.count(new DalHints().inShard(0).inTableShard(0)));
+    }
+
+    @Test
+    public void testSingleTaskWithCrossShardInTransaction() throws Exception{
+        try{
+            dao.testSingleTaskWithCorssShardInTrasaction(0);
+            fail();
+        }catch (Exception e){
+
+        }
+        assertEquals(3,dao.count(new DalHints().inShard(0).inTableShard(0)));
+    }
+
+    @Test
+    public void testBulkTaskWithCrossShardInTransaction() throws Exception{
+        try{
+            dao.testBulkTaskWithCorssShardInTrasaction(0);
+        }catch (Exception e){
+            fail();
+        }
+        assertEquals(0,dao.count(new DalHints().inShard(0).inTableShard(0)));
     }
 }

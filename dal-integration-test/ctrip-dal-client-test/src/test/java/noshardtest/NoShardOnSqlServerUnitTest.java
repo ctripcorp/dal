@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,6 +102,43 @@ public class NoShardOnSqlServerUnitTest {
 //		dao.test_def_update(new DalHints());
 //		Thread.sleep(5000);
     }
+
+    /*@Test
+    public void testExecInsertWithIndex() throws SQLException {
+        Map<String, ?> result = null;
+        String callSql = "exec spA_people_i @PeopleID=?, @Name=?, @CityID=?";
+
+        StatementParameters parameter = new StatementParameters();
+        int index = 1;
+        parameter.registerInOut(index++, Types.BIGINT, null);
+        parameter.set(index++, Types.VARCHAR, "testExecInsertWithIndex");
+        parameter.set(index++, Types.INTEGER, 123);
+
+        DalHints hints = new DalHints();
+        result = client.call(callSql, parameter, hints);
+        assertEquals(1, result.size());
+        assertEquals("testExecInsertWithIndex", dao.queryByPk(7L,null).getName());
+        assertEquals(7l,parameter.get(0).getValue());
+    }
+
+    @Test
+    public void testExecInsertWithName() throws SQLException {
+        Map<String, ?> result = null;
+        String callSql = "exec spA_people_i @PeopleID=?, @Name=?, @CityID=?";
+
+        StatementParameters parameter = new StatementParameters();
+        parameter.set("Name", Types.VARCHAR, "testExecInsertWithName");
+        parameter.registerInOut("PeopleID", Types.BIGINT, null);
+        parameter.set("CityID", Types.INTEGER, 123);
+
+        DalHints hints = new DalHints();
+        result = client.call(callSql, parameter, hints);
+        assertEquals(1, result.size());
+        assertEquals(7l, result.get("PeopleID"));
+        assertEquals("testExecInsertWithName", dao.queryByPk(7l,null).getName());
+        assertEquals(7l,parameter.get(1).getValue());
+    }*/
+
 
     @Test
     public void testDalTableDaoQueryTop() throws Exception{

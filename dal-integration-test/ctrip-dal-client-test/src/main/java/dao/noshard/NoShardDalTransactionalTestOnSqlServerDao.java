@@ -6,6 +6,8 @@ import entity.SqlServerPeopleTable;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by lilj on 2017/7/24.
@@ -395,4 +397,25 @@ public class NoShardDalTransactionalTestOnSqlServerDao extends NoShardTransactio
         }
     }
 
+    /*@DalTransactional(logicDbName = DATA_BASE)
+    public void test() throws Exception{
+        List<SqlServerPeopleTable> list=new ArrayList<>();
+        SqlServerPeopleTable pojo1=new SqlServerPeopleTable();
+        pojo1.setPeopleID(1L);
+        pojo1.setName("he");
+        list.add(pojo1);
+        SqlServerPeopleTable pojo2=new SqlServerPeopleTable();
+        pojo2.setPeopleID(2L);
+        pojo1.setName("she");
+        list.add(pojo2);
+
+//        try {
+        batchInsert(new DalHints().enableIdentityInsert(), list);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            throw e;
+//        }
+
+//        insert(new DalHints().enableIdentityInsert(),list);
+    }*/
 }

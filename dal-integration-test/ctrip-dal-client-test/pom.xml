@@ -67,10 +67,10 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.ctrip.framework.idgen</groupId>
             <artifactId>idgen-client</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- qmq start -->
         <dependency>

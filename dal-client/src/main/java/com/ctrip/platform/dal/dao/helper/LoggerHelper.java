@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao.helper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.LogEntry;
@@ -14,6 +16,8 @@ public class LoggerHelper {
 	public static final String SQLHIDDENString = "*";
 	private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 	private static final String SQLSERVER_URL_PREFIX = "jdbc:sqlserver://";
+	public static final String NULL_SET = "NullSet";
+	public static final String EMPTY_SET = "EmptySet";
 
 	private static class ObjectMapperHolder{
 		private static ObjectMapper objectMapperInstance=new ObjectMapper();
@@ -253,5 +257,18 @@ public class LoggerHelper {
 
 		return url;
 
+	}
+
+	public static String setToOrderedString(Set<String> origin) {
+		if (origin == null)
+			return NULL_SET;
+
+		if (origin.size()==0)
+			return EMPTY_SET;
+
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.addAll(origin);
+
+		return StringUtils.join(treeSet.toArray(), ",");
 	}
 }

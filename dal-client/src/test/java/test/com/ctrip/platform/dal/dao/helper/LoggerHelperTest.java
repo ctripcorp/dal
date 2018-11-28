@@ -3,10 +3,13 @@ package test.com.ctrip.platform.dal.dao.helper;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -94,5 +97,48 @@ public class LoggerHelperTest {
         }
     }
 
+    @Test
+    public void testSetToString() {
+        try {
+            Set<String> set1 = new HashSet<>();
+            set1.add("aa");
+            set1.add("bb");
+            set1.add("cc");
+            String str1 = LoggerHelper.setToOrderedString(set1);
+
+            Set<String> set2 = new HashSet<>();
+            set2.add("bb");
+            set2.add("aa");
+            set2.add("cc");
+            String str2 = LoggerHelper.setToOrderedString(set2);
+
+            Set<String> set3 = new HashSet<>();
+            set3.add("cc");
+            set3.add("aa");
+            set3.add("bb");
+            String str3 = LoggerHelper.setToOrderedString(set3);
+            assertTrue(str1.equals(str2));
+            assertTrue(str3.equals(str2));
+
+            Set<String> set4 = new HashSet<>();
+            set4.add("SwitchOff");
+            String str4 = LoggerHelper.setToOrderedString(set4);
+            assertTrue("SwitchOff".equals(str4));
+
+            String str5 = LoggerHelper.setToOrderedString(null);
+            assertTrue("NullSet".equals(str5));
+
+            String str7 = LoggerHelper.setToOrderedString(new HashSet<String>());
+            assertTrue("EmptySet".equals(str7));
+
+            Set<String> set6 = new HashSet<>();
+            set6.add("NotFound");
+            String str6 = LoggerHelper.setToOrderedString(set6);
+            assertTrue("NotFound".equals(str6));
+        } catch (Throwable e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 
 }

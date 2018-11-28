@@ -144,16 +144,15 @@
 	  	<samplingHigh>1</samplingHigh>
 	  	<sampleMaxNum>5000</sampleMaxNum>
 	  	<sampleClearInterval>30</sampleClearInterval>
+        <samplingRate>5</samplingRate>
         <asyncLogging>false</asyncLogging>
       </settings>
   </LogListener>
   <ConnectionLocator>
       <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
       <settings>
-        <!--
-          <path>/opt/settings/dal/database.properties</path>
-         -->
-        <path>D:\dal\database.properties</path>
+        <path>/opt/settings/dal/database.properties</path>
+        <!--<path>D:\dal\database.properties</path>-->
          <dataSourceConfigureProvider>com.ctrip.platform.dal.dao.configure.PropertyFileConfigureProvider</dataSourceConfigureProvider>
       </settings>
   </ConnectionLocator>

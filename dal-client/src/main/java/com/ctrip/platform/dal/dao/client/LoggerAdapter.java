@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
+
+
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,8 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.ctrip.platform.dal.dao.helper.LoggerHelper;
-
 /**
  *
  * Implements the common logic.
@@ -22,7 +22,7 @@ import com.ctrip.platform.dal.dao.helper.LoggerHelper;
  *
  */
 public abstract class LoggerAdapter implements DalLogger {
-	public static final String DEFAULT_SECERET_KEY = "dalctripcn";
+	public static final String DEFAULT_SECRET_KEY = "dalctripcn";
 
 	private static final String SAMPLING = "sampling";
 	private static final String ENCRYPT = "encrypt";
@@ -34,17 +34,21 @@ public abstract class LoggerAdapter implements DalLogger {
 	private static final String  SAMPLINGLOW = "samplingLow";
 	private static final String  SAMPLINGHIGH = "samplingHigh";
 	private static final String  SAMPLEMAXNUM = "sampleMaxNum";
+    private static final String SAMPLINGRATE = "samplingRate";
 
 	private static final String  SAMPLECLEARINTERVAL = "sampleClearInterval";
 	protected static boolean simplifyLogging = false;
 	protected static boolean encryptLogging = true;
-	public static String secretKey = DEFAULT_SECERET_KEY;
-	protected static boolean samplingLogging = false;
+	public static String secretKey = DEFAULT_SECRET_KEY;
+	protected static boolean samplingLogging = true;
+	protected static int samplingRate=5;
 	protected static long samplingLow = 60 * 60 * 1000;//milliseconds
 	protected static long samplingHigh = 5 * 60 * 1000;//milliseconds
 	//key is the sql hash code
 	private static final ConcurrentHashMap<Integer, Long> logEntryCache = new ConcurrentHashMap<Integer, Long>();
-	protected static int sampleMaxNum = 5000;
+    protected ILogSamplingStrategy logSamplingStrategy;
+
+    protected static int sampleMaxNum = 5000;
 	protected static int sampleClearInterval = 30;
 
 	private static ScheduledExecutorService scheduler = null;
@@ -55,7 +59,7 @@ public abstract class LoggerAdapter implements DalLogger {
 	protected static ExecutorService executor = null;
 
 	/**
-	 * Helper method to unify asyn and sync invocation
+	 * Helper method to unify async and sync invocation
 	 * @param task
 	 */
 	public void call(Runnable task) {
@@ -101,8 +105,12 @@ public abstract class LoggerAdapter implements DalLogger {
 		if(settings.containsKey(SAMPLINGHIGH))
 			samplingHigh = Integer.parseInt(settings.get(SAMPLINGHIGH)) * 60 * 1000;
 
+		if(settings.containsKey(SAMPLINGRATE))
+		    samplingRate=Integer.parseInt(settings.get(SAMPLINGRATE));
+
 		if (samplingLogging) {
-			scheduler = Executors.newScheduledThreadPool(1);
+			logSamplingStrategy = new DefaultLogSamplingStrategy();
+            scheduler = Executors.newScheduledThreadPool(1);
 			scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
@@ -156,36 +164,38 @@ public abstract class LoggerAdapter implements DalLogger {
 
 
 	/**
-	 * 1. If log level is Warning/Error/Fatal, then immediately write with out validate.
+	 * 1. If log level is Warning/Error/Fatal, then immediately write without validate.
 	 * 2. If log level is Info or less-than Info, validate according the below
 	 *    a. If the SQL have parameters, the log will send only once in the low interval minutes default is sixty minutes.
 	 *    b. If the SQL do not have any parameters, the log will send only once in the high interval minutes default is five minutes.
 	 * @param entry
 	 * @return  The log can be sent only when returning value is true
 	 */
-	protected boolean validate(LogEntry entry) {
-		if ( isClearingCache.get() )
-			return false;
-		String sqlTpl = LoggerHelper.getSqlTpl(entry);
-		if (LoggerHelper.SQLHIDDENString.equals(sqlTpl) || "".equals(sqlTpl) )
-			return true;
-		int hashCode = LoggerHelper.getHashCode(sqlTpl);
-		long now = System.currentTimeMillis();
-		Long old = logEntryCache.putIfAbsent(hashCode, now);
-		if (old == null) {
-			if (logEntryCache.size() > sampleMaxNum)
-				logEntryCache.remove(hashCode);
-			return true;
-		}
-		boolean userLow = useLow(entry);
-		if ( (now - old) < (userLow ? samplingLow : samplingHigh) ) {
-			return false;
-		} else {
-			//update the old timestamp associated the sqlTpl to now
-			logEntryCache.put(hashCode, System.currentTimeMillis());
-			return true;
-		}
-	}
+    /*protected boolean validate(LogEntry entry) {
+
+
+        if (isClearingCache.get())
+            return false;
+        String sqlTpl = LoggerHelper.getSqlTpl(entry);
+        if (LoggerHelper.SQLHIDDENString.equals(sqlTpl) || "".equals(sqlTpl))
+            return true;
+        int hashCode = LoggerHelper.getHashCode(sqlTpl);
+        long now = System.currentTimeMillis();
+        Long old = logEntryCache.putIfAbsent(hashCode, now);
+        if (old == null) {
+            if (logEntryCache.size() > sampleMaxNum)
+                logEntryCache.remove(hashCode);
+            return true;
+        }
+        boolean userLow = useLow(entry);
+        if ((now - old) < (userLow ? samplingLow : samplingHigh)) {
+            return false;
+        } else {
+            //update the old timestamp associated the sqlTpl to now
+            logEntryCache.put(hashCode, System.currentTimeMillis());
+            return true;
+        }
+    }*/
 
 	private boolean useLow(LogEntry entry) {
 		String[] pramemters = entry.getPramemters();
@@ -194,5 +204,7 @@ public abstract class LoggerAdapter implements DalLogger {
 			return false;
 		return true;
 	}
+
+
 
 }

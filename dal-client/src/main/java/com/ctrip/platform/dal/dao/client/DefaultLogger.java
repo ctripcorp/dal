@@ -98,7 +98,7 @@ public class DefaultLogger extends LoggerAdapter implements DalLogger {
 
 	@Override
 	public void success(final LogEntry entry, final int count) {
-		if (samplingLogging && !validate(entry) )
+		if (samplingLogging && !logSamplingStrategy.validate(entry) )
 			return;
         call(new Runnable() {public void run() {
             recordSuccess(entry, count);

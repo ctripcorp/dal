@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class DalShardingInTransactionTest {
@@ -155,7 +156,7 @@ public class DalShardingInTransactionTest {
             client.execute(command, new DalHints().inShard(0));
             fail();
         } catch (Exception e) {
-            assertEquals("Potential distributed operation detected in shards: [1, 0]",e.getMessage());
+            assertTrue(e.getMessage().contains("Potential distributed operation detected in shards"));
         }
         assertEquals(0, dao.queryBy(pojo1, new DalHints().inShard(0)).size());
         assertEquals(0, dao.queryBy(pojo2, new DalHints().inShard(0)).size());
@@ -324,7 +325,7 @@ public class DalShardingInTransactionTest {
             client.execute(command, new DalHints().inShard(0));
             fail();
         } catch (Exception e) {
-            assertEquals("Potential distributed operation detected in shards: [1, 0]",e.getMessage());
+            assertTrue(e.getMessage().contains("Potential distributed operation detected in shards"));
         }
         TestTable testTable=new TestTable();
         testTable.setName("testSqlTaskCrossShardIdInTransaction");

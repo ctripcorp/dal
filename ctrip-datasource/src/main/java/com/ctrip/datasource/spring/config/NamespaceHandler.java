@@ -42,7 +42,7 @@ public class NamespaceHandler extends NamespaceHandlerSupport {
               Strings.isNullOrEmpty(encryptParametersAttr) ? true : Boolean.valueOf(encryptParametersAttr.trim());
 
           String encryptionKey =
-              Strings.isNullOrEmpty(encryptionKeyAttr) ? LoggerAdapter.DEFAULT_SECERET_KEY : encryptionKeyAttr.trim();
+              Strings.isNullOrEmpty(encryptionKeyAttr) ? LoggerAdapter.DEFAULT_SECRET_KEY : encryptionKeyAttr.trim();
 
           builder.addPropertyValue("encryptParameters", encryptParameters);
           builder.addPropertyValue("encryptionKey", encryptionKey);

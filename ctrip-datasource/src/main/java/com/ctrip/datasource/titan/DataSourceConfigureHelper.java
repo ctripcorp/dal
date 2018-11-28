@@ -109,7 +109,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     protected synchronized DalEncrypter getEncrypter() {
         if (dalEncrypter == null) {
             try {
-                dalEncrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECERET_KEY);
+                dalEncrypter = new DalEncrypter(LoggerAdapter.DEFAULT_SECRET_KEY);
             } catch (Throwable e) {
                 LOGGER.warn("DalEncrypter initialization failed.");
             }

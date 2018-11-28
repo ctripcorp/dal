@@ -46,7 +46,7 @@ public class StatementHandlerInterceptorTest {
   @Before
   public void setUp() throws Exception {
     needEncryptParam = false;
-    encryptKey = LoggerAdapter.DEFAULT_SECERET_KEY;
+    encryptKey = LoggerAdapter.DEFAULT_SECRET_KEY;
 
     //just in case
     DalMybatisContextHolder.getContext().clearContext();

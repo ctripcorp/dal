@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.AssertionFailedError;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,6 +27,8 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 
+import javax.security.auth.login.FailedLoginException;
+
 public class DalDirectClientTestStub extends BaseTestStub {
 	public DalDirectClientTestStub(String dbName, DatabaseDifference diff) {
 		super(dbName, diff);
@@ -37,7 +40,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	 * @throws SQLException
 	 */
 	@Test
-	public void quryTestWithoutParameters() throws SQLException {
+	public void queryTestWithoutParameters() throws SQLException {
 		String querySql = "SELECT * FROM " + TABLE_NAME;
 		StatementParameters parameters = new StatementParameters();
 		ClientTestDalRowMapper mapper = new ClientTestDalRowMapper();
@@ -57,7 +60,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	 * @throws SQLException
 	 */
 	@Test
-	public void quryTestWithParameters() throws SQLException {
+	public void queryTestWithParameters() throws SQLException {
 		String querySql = "SELECT * FROM " + TABLE_NAME + " WHERE type = ?";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.SMALLINT, 1);
@@ -495,7 +498,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 		List<ClientTestModel> models = this.queryModelsByIds();
 		Assert.assertEquals(10, models.size());
 	}
-	
+
 	/**
 	 * Test the call function with out parameters
 	 * @throws SQLException

@@ -77,7 +77,7 @@ public class DatabaseSelectorTest {
 	
 	private String assertSelector(SelectionContext context, String... matched) {
 		try {
-			String selected = selector.select(context);
+			String selected = selector.select(context).getConnectionString();
 			Assert.assertNotNull(selected);
 				
 			for(String v: matched)
@@ -93,7 +93,7 @@ public class DatabaseSelectorTest {
 	
 	private String assertSelector(SelectionContext context, Set<String> matched) {
 		try {
-			String selected = selector.select(context);
+			String selected = selector.select(context).getConnectionString();
 			Assert.assertNotNull(selected);
 				
 				if(matched.contains(selected)) {
@@ -127,28 +127,28 @@ public class DatabaseSelectorTest {
         SelectionContext context;
         
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
-		Assert.assertEquals(S1, selector.select(context));
+		Assert.assertEquals(S1, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
-		Assert.assertEquals(S2, selector.select(context));
+		Assert.assertEquals(S2, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().inDatabase(S3), ms, ss, false, true);
-		Assert.assertEquals(S3, selector.select(context));
+		Assert.assertEquals(S3, selector.select(context).getConnectionString());
 
 		autoMarkdown(M1);
 		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 		
 		autoMarkdown(S1);
 		autoMarkdown(S2);
 		context = getContext(new DalHints().inDatabase(S3), ms, ss, false, true);
-		Assert.assertEquals(S3, selector.select(context));
+		Assert.assertEquals(S3, selector.select(context).getConnectionString());
 	}
 
 	@Test
@@ -466,21 +466,21 @@ public class DatabaseSelectorTest {
         SelectionContext context;
 
 		context = getContext(null, ms, ss, false, true);
-		String dbName = selector.select(context);
+		String dbName = selector.select(context).getConnectionString();
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 		
 		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
-		Assert.assertTrue(selector.select(context).equals(S1));
+		Assert.assertTrue(selector.select(context).getConnectionString().equals(S1));
 
 		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
-		Assert.assertTrue(selector.select(context).equals(S2));
+		Assert.assertTrue(selector.select(context).getConnectionString().equals(S2));
 		
 		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, true);
 		assertSelector(context, M2);
 		
 		// masterOnly
 		context = getContext(null, ms, ss, true, true);
-		dbName = selector.select(context);
+		dbName = selector.select(context).getConnectionString();
 		assertSelector(context, M2, M1);
 		
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, true);
@@ -504,28 +504,28 @@ public class DatabaseSelectorTest {
         SelectionContext context;
 
 		context = getContext(new DalHints(), ms, ss, false, false);
-		String dbName = selector.select(context);
+		String dbName = selector.select(context).getConnectionString();
 		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, false);
-		Assert.assertTrue(selector.select(context).equals(M1));
+		Assert.assertTrue(selector.select(context).getConnectionString().equals(M1));
 		
 		context = getContext(new DalHints().inDatabase(M2), ms, ss, false, false);
-		Assert.assertTrue(selector.select(context).equals(M2));
+		Assert.assertTrue(selector.select(context).getConnectionString().equals(M2));
 		
 		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, false);
 		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
 		
 		// masterOnly
 		context = getContext(null, ms, ss, true, false);
-		dbName = selector.select(context);
+		dbName = selector.select(context).getConnectionString();
 		Assert.assertTrue(dbName.equals(M1) || dbName.equals(M2));
 		
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, false);
-		Assert.assertTrue(selector.select(context).equals(M1));
+		Assert.assertTrue(selector.select(context).getConnectionString().equals(M1));
 
 		context = getContext(new DalHints().inDatabase(M2), ms, ss, true, false);
-		Assert.assertTrue(selector.select(context).equals(M2));
+		Assert.assertTrue(selector.select(context).getConnectionString().equals(M2));
 		
 		context = getContext(new DalHints().inDatabase(S2), ms, ss, true, false);
 		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
@@ -725,17 +725,17 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(null, dbs, null,
 				false, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(null, dbs, null, false, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		// masterOnly
 		context = getContext(null, dbs, null, true, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(null, dbs, null, true, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 	}
 
 	// The rest tests are all original tests, that I don't think well organized
@@ -801,11 +801,11 @@ public class DatabaseSelectorTest {
 		dbs.add(db);
 		SelectionContext context = getContext(null, null, dbs,
 				false, true);
-		Assert.assertEquals(S1, selector.select(context));
+		Assert.assertEquals(S1, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(S1), null, dbs, 
 				false, true);
-		Assert.assertEquals(S1, selector.select(context));
+		Assert.assertEquals(S1, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().inDatabase(M1), null, dbs, false, true);
 		assertSelector(context, ErrorCode.InvalidDatabaseKeyName);
@@ -867,11 +867,11 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(new DalHints(), null, dbs,
 				false, true);
-		Assert.assertEquals(S2, selector.select(context));
+		Assert.assertEquals(S2, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(S2), null, dbs,
 				false, true);
-		Assert.assertEquals(S2, selector.select(context));
+		Assert.assertEquals(S2, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(S1), null, dbs,
 				false, true);
@@ -901,32 +901,32 @@ public class DatabaseSelectorTest {
 		autoMarkdown(S2);
 
 		SelectionContext context = getContext(null, ms, ss, false, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
 		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		// masterOnly
 		context = getContext(null, ms, ss, true, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, true);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(null, ms, ss, true, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, true, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 
 		context = getContext(null, ms, ss, false, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 	}
 
 	@Test
@@ -941,17 +941,17 @@ public class DatabaseSelectorTest {
 		autoMarkdown(M1);
 
 		SelectionContext context = getContext(null, ms, ss, false, true);
-		String dbName = selector.select(context);
+		String dbName = selector.select(context).getConnectionString();
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
 		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		context = getContext(new DalHints().inDatabase(S1), ms, ss, false, true);
-		Assert.assertEquals(S1, selector.select(context));
+		Assert.assertEquals(S1, selector.select(context).getConnectionString());
 		
 		context = getContext(new DalHints().inDatabase(S2), ms, ss, false, true);
-		Assert.assertEquals(S2, selector.select(context));
+		Assert.assertEquals(S2, selector.select(context).getConnectionString());
 		
 		// masterOnly
 		context = getContext(null, ms, ss, true, true);
@@ -981,18 +981,18 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(new DalHints(), ms, ss, false,
 				true);
-		String dbName = selector.select(context);
+		String dbName = selector.select(context).getConnectionString();
 		Assert.assertTrue(dbName.equals(S1) || dbName.equals(S2));
 
 		// masterOnly
 		context = getContext(null, ms, ss, true, true);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		context = getContext(null, ms, ss, true, false);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		context = getContext(null, ms, ss, false, false);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 	}
 
 	@Test
@@ -1008,26 +1008,26 @@ public class DatabaseSelectorTest {
 		autoMarkdown(M1);
 		
 		SelectionContext context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, true);
-		Assert.assertEquals(S2, selector.select(context));
+		Assert.assertEquals(S2, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(S1), ms, ss, false, true);
 		assertSelector(context, ErrorCode.NoMoreConnectionToFailOver);
 		
 		// masterOnly
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, true, true);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(M1), ms, ss, true, true);
 		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, true, false);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)).inDatabase(M1), ms, ss, true, false);
 		assertSelector(context, ErrorCode.MarkdownConnection);
 		
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, false);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		autoMarkdown(M2);
 		context = getContext(new DalHints().setHA(new DalHA().addDB(S1)), ms, ss, false, false);
@@ -1050,24 +1050,24 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(new DalHints().setHA(ha), ms, ss, false,
 				true);
-		String dbName = selector.select(context);
+		String dbName = selector.select(context).getConnectionString();
 		Assert.assertTrue(dbName.equals(S2));
 
 		// masterOnly
 		ha = new DalHA();
 		ha.addDB(M1);
 		context = getContext(new DalHints().setHA(ha), ms, ss, true, true);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		ha = new DalHA();
 		ha.addDB(M1);
 		context = getContext(new DalHints().setHA(ha), ms, ss, true, false);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 
 		ha = new DalHA();
 		ha.addDB(M1);
 		context = getContext(new DalHints().setHA(ha), ms, ss, false, false);
-		Assert.assertEquals(M2, selector.select(context));
+		Assert.assertEquals(M2, selector.select(context).getConnectionString());
 		
 		ha = new DalHA();
 		ha.addDB(M1);
@@ -1079,7 +1079,7 @@ public class DatabaseSelectorTest {
 		ha.addDB(M1);
 		autoMarkdown(M2);
 		context = getContext(new DalHints().setHA(ha), ms, ss, false, false);
-		Assert.assertEquals(M1, selector.select(context));
+		Assert.assertEquals(M1, selector.select(context).getConnectionString());
 	}
 
 	@Test
@@ -1093,7 +1093,7 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false,
 				true);
-		Assert.assertEquals(S2, selector.select(context));
+		Assert.assertEquals(S2, selector.select(context).getConnectionString());
 
 		// masterOnly
 		ha = new DalHA();
@@ -1146,7 +1146,7 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false,
 				true);
-		Assert.assertEquals(S1, selector.select(context));
+		Assert.assertEquals(S1, selector.select(context).getConnectionString());
 
 		// masterOnly
 		ha = new DalHA();
@@ -1171,7 +1171,7 @@ public class DatabaseSelectorTest {
 
 		SelectionContext context = getContext(new DalHints().setHA(ha), null, ss, false,
 				true);
-		Assert.assertEquals(S3, selector.select(context));
+		Assert.assertEquals(S3, selector.select(context).getConnectionString());
 
 		// masterOnly
 		ha = new DalHA();

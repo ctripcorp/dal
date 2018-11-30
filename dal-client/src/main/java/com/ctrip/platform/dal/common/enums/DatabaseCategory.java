@@ -225,7 +225,7 @@ public enum DatabaseCategory {
 				if (parameter.isDefaultType()) {
 					statement.setObject(parameter.getIndex(), null);
 				} else {
-					if (parameter.getName() == null)
+					if (parameter.getName() == null || parameter.isTSQLParameter())
 						statement.setNull(parameter.getIndex(), parameter.getSqlType());
 					else
 						statement.setNull(parameter.getName(), parameter.getSqlType());
@@ -234,7 +234,7 @@ public enum DatabaseCategory {
 				if (parameter.isDefaultType()) {
 					statement.setObject(parameter.getIndex(), parameter.getValue());
 				} else {
-					if (parameter.getName() == null)
+					if (parameter.getName() == null || parameter.isTSQLParameter())
 						statement.setObject(parameter.getIndex(), parameter.getValue(), parameter.getSqlType());
 					else
 						statement.setObject(parameter.getName(), parameter.getValue(), parameter.getSqlType());

@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DataBase;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.configure.SelectionContext;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
@@ -96,7 +97,6 @@ public class DalConnectionManager {
 	private DalConnection getConnectionFromDSLocator(DalHints hints,
 													 boolean isMaster, boolean isSelect) throws SQLException {
 		Connection conn;
-		String allInOneKey;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		String shardId = null;
 
@@ -113,18 +113,19 @@ public class DalConnectionManager {
 			dbSet.validate(shardId);
 		}
 
-		allInOneKey = select(logicDbName, dbSet, hints, shardId, isMaster, isSelect);
+		DataBase selectedDataBase = select(logicDbName, dbSet, hints, shardId, isMaster, isSelect);
+		String allInOneKey = selectedDataBase.getConnectionString();
 
 		try {
 			conn = locator.getConnection(allInOneKey);
 			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
-			return new DalConnection(conn, isMaster, shardId, meta);
+			return new DalConnection(conn, selectedDataBase.isMaster(), shardId, meta);
 		} catch (Throwable e) {
 			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
 		}
 	}
 
-	private String select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
+	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
 		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
 
 		if(shard == null) {

@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.List;
 
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
+import com.ctrip.platform.dal.common.enums.ParametersType;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class StatementParameters {
@@ -398,8 +399,12 @@ public class StatementParameters {
 		return (parameterIndex < 0) ? ParametersType.noIndex : ParametersType.index;
 	}
 
-	enum ParametersType {
+	public ParametersType getExistingParametersType() {
+		return existingParametersType;
+	}
+
+	/*enum ParametersType {
 		noIndex,
 		index
-	}
+	}*/
 }

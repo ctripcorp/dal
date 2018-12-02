@@ -89,11 +89,11 @@ public class DalStatementCreator {
 
 		Map<Integer, String> paramsInSql = null;
 		boolean needReorderParameters = needReorderParameters(sql, parametersList);
+		if(needReorderParameters)
+			paramsInSql = extractParamsFromCallString(sql);
 
 		for (StatementParameters parameters : parametersList) {
 			if (needReorderParameters) {
-				if (paramsInSql == null)
-					paramsInSql = extractParamsFromCallString(sql);
 				reorderParameters(parameters, paramsInSql);
 			}
 			setParameter(statement, parameters);

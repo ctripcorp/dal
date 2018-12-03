@@ -8,9 +8,15 @@ public class DefaultLogSamplingStrategy implements ILogSamplingStrategy {
     private LogCacheForDatabaseSetAndTables logCacheForDatabaseSetAndTables;
 
     @Override
-    public boolean validate(LogEntry entry) {
+    public boolean validate(ILogEntry entry) {
+        if (LoggerAdapter.samplingRate == 0)
+            return false;
         if (started.compareAndSet(false, true))
             logCacheForDatabaseSetAndTables = new LogCacheForDatabaseSetAndTables();
         return logCacheForDatabaseSetAndTables.validateDatabaseSetAndTablesCache(entry);
+    }
+
+    protected LogCacheForDatabaseSetAndTables getLogCacheForDatabaseSetAndTables() {
+        return logCacheForDatabaseSetAndTables;
     }
 }

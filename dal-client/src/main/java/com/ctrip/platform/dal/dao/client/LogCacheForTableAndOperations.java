@@ -1,26 +1,29 @@
 package com.ctrip.platform.dal.dao.client;
 
+
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LogCacheForTableAndOperations {
-    private ConcurrentHashMap<String, LogCacheForOperationAndDaoMethods> tableAndOperationCache = new ConcurrentHashMap<>();
+    private Map<String, LogCacheForOperationAndDaoMethods> tableAndOperationCache = new ConcurrentHashMap<>();
 
+    public boolean validateTableAndOperationCache(String table, ILogEntry entry) {
+        LogCacheForOperationAndDaoMethods operationAndDaoMethodsCache = tableAndOperationCache.get(table);
 
-    public boolean validateTableAndOperationCache(String table, LogEntry entry) {
-        if (!tableAndOperationCache.containsKey(table)) {
-            addTableAndOperationCache(table);
-            return true;
+        if (operationAndDaoMethodsCache == null) {
+            synchronized (tableAndOperationCache) {
+                operationAndDaoMethodsCache = tableAndOperationCache.get(table);
+                if (operationAndDaoMethodsCache == null) {
+                    operationAndDaoMethodsCache = new LogCacheForOperationAndDaoMethods();
+                    tableAndOperationCache.put(table, operationAndDaoMethodsCache);
+                }
+            }
         }
 
-        LogCacheForOperationAndDaoMethods operationAndDaoMethodsCache = getOperationAndDaoMethodsCache(table);
         return operationAndDaoMethodsCache.validateOperationAndDaoMethodsCache(entry);
     }
 
-    public void addTableAndOperationCache(String tableName) {
-        tableAndOperationCache.put(tableName, new LogCacheForOperationAndDaoMethods());
-    }
-
-    private LogCacheForOperationAndDaoMethods getOperationAndDaoMethodsCache(String tableName) {
-        return tableAndOperationCache.get(tableName);
+    protected Map<String, LogCacheForOperationAndDaoMethods> getTableAndOperationCache() {
+        return tableAndOperationCache;
     }
 }

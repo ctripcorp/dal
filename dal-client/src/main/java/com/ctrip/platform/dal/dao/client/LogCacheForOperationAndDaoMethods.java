@@ -2,36 +2,46 @@ package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LogCacheForOperationAndDaoMethods {
-    private ConcurrentHashMap<String, LogCacheForDaoMethodsAndCount> operationAndDaoMethodCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, LogCacheForDaoMethodsAndRandomNum> operationAndDaoMethodCache = new ConcurrentHashMap<>();
     private final static String QUERY = "query";
     private final static String UPDATE = "update";
     private final static String CALL = "call";
     private final static String OTHERS = "others";
 
 
-    public LogCacheForOperationAndDaoMethods() {
-        operationAndDaoMethodCache.put(QUERY, new LogCacheForDaoMethodsAndCount());
-        operationAndDaoMethodCache.put(UPDATE, new LogCacheForDaoMethodsAndCount());
-        operationAndDaoMethodCache.put(CALL, new LogCacheForDaoMethodsAndCount());
-        operationAndDaoMethodCache.put(OTHERS, new LogCacheForDaoMethodsAndCount());
-    }
+    public boolean validateOperationAndDaoMethodsCache(ILogEntry entry) {
+        String operation = getOperation(entry.getEvent());
+        LogCacheForDaoMethodsAndRandomNum daoMethodsAndCountCache = operationAndDaoMethodCache.get(operation);
 
-    public boolean validateOperationAndDaoMethodsCache(LogEntry entry) {
-        LogCacheForDaoMethodsAndCount daoMethodsAndCountCache = getDaoMethod(entry.getEvent());
+        if (daoMethodsAndCountCache == null) {
+            synchronized (operationAndDaoMethodCache) {
+                daoMethodsAndCountCache = operationAndDaoMethodCache.get(operation);
+                if (daoMethodsAndCountCache == null) {
+                    daoMethodsAndCountCache = new LogCacheForDaoMethodsAndRandomNum();
+                    operationAndDaoMethodCache.put(operation, daoMethodsAndCountCache);
+                }
+            }
+        }
+
         return daoMethodsAndCountCache.validateMethodAndCountCache(entry);
     }
 
-    private LogCacheForDaoMethodsAndCount getDaoMethod(DalEventEnum eventEnum) {
+    private String getOperation(DalEventEnum eventEnum) {
         if (eventEnum == DalEventEnum.QUERY) {
-            return operationAndDaoMethodCache.get(QUERY);
+            return QUERY;
         } else if (eventEnum == DalEventEnum.UPDATE_SIMPLE || eventEnum == DalEventEnum.UPDATE_KH || eventEnum == DalEventEnum.BATCH_UPDATE || eventEnum == DalEventEnum.BATCH_UPDATE_PARAM) {
-            return operationAndDaoMethodCache.get(UPDATE);
+            return UPDATE;
         } else if (eventEnum == DalEventEnum.CALL || eventEnum == DalEventEnum.BATCH_CALL) {
-            return operationAndDaoMethodCache.get(CALL);
+            return CALL;
         } else
-            return operationAndDaoMethodCache.get(OTHERS);
+            return OTHERS;
+    }
+
+    protected Map<String, LogCacheForDaoMethodsAndRandomNum> getOperationAndDaoMethodCache() {
+        return operationAndDaoMethodCache;
     }
 }

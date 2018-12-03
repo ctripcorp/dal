@@ -1,28 +1,32 @@
 package com.ctrip.platform.dal.dao.client;
 
-import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 public class LogCacheForDatabaseSetAndTables {
-    private ConcurrentHashMap<String, LogCacheForTableAndOperations> databaseSetAndTableMap = new ConcurrentHashMap<>();
+    final private Map<String, LogCacheForTableAndOperations> databaseSetAndTableCache = new ConcurrentHashMap<>();
 
-    public LogCacheForDatabaseSetAndTables() {
-        for (String databaseSetName : DalClientFactory.getDalConfigure().getDatabaseSetNames()) {
-            databaseSetAndTableMap.put(databaseSetName, new LogCacheForTableAndOperations());
+    public boolean validateDatabaseSetAndTablesCache(ILogEntry entry) {
+        String logicDbName = entry.getLogicDbName();
+        LogCacheForTableAndOperations tableAndOperationCache = databaseSetAndTableCache.get(logicDbName);
+
+        if (tableAndOperationCache == null) {
+            synchronized (databaseSetAndTableCache) {
+                tableAndOperationCache = databaseSetAndTableCache.get(logicDbName);
+                if (tableAndOperationCache == null) {
+                    tableAndOperationCache = new LogCacheForTableAndOperations();
+                    databaseSetAndTableCache.put(logicDbName, tableAndOperationCache);
+                }
+            }
         }
+
+        return tableAndOperationCache.validateTableAndOperationCache(LoggerHelper.setToOrderedString(entry.getTables()), entry);
     }
 
-    public boolean validateDatabaseSetAndTablesCache(LogEntry entry) {
-        String table = LoggerHelper.setToOrderedString(entry.getTables());
-        LogCacheForTableAndOperations tableAndOperationCache = getTableAndOperationCache(entry.getLogicDbName());
-
-        return tableAndOperationCache.validateTableAndOperationCache(table, entry);
-    }
-
-    private LogCacheForTableAndOperations getTableAndOperationCache(String logicDBName) {
-        return databaseSetAndTableMap.get(logicDBName);
+    protected Map<String, LogCacheForTableAndOperations> getDatabaseSetAndTableCache() {
+        return databaseSetAndTableCache;
     }
 }

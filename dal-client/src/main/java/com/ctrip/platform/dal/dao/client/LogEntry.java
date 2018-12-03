@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.dao.helper.TableParser;
 
 import java.util.*;
 
-public class LogEntry {
+public class LogEntry implements ILogEntry{
     private static volatile ThreadLocal<String> currentCaller;
 
 	private static String execludedPackageSpace = "com.ctrip.platform.dal.dao.";

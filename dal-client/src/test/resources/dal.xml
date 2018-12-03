@@ -139,12 +139,7 @@
         <encrypt>false</encrypt>
         <secretKey>dalctripcn</secretKey>
         <simplified>false</simplified>
-        <sampling>true</sampling>
-        <samplingLow>2</samplingLow>
-	  	<samplingHigh>1</samplingHigh>
-	  	<sampleMaxNum>5000</sampleMaxNum>
-	  	<sampleClearInterval>30</sampleClearInterval>
-        <samplingRate>5</samplingRate>
+        <samplingRate>10</samplingRate>
         <asyncLogging>false</asyncLogging>
       </settings>
   </LogListener>
@@ -164,7 +159,7 @@
   <DatabaseSelector>
       <selector>com.ctrip.platform.dal.dao.configure.FreshnessSelector</selector>
       <settings>
-         <freshnessReader>test.com.ctrip.platform.dal.dao.configure.TestFreshnessReader</freshnessReader>
+         <freshnessReader>com.ctrip.platform.dal.dao.configure.TestFreshnessReader</freshnessReader>
          <updateInterval>2</updateInterval>
       </settings>
   </DatabaseSelector>

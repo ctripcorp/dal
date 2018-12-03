@@ -103,7 +103,7 @@ public class NoShardOnSqlServerUnitTest {
 //		Thread.sleep(5000);
     }
 
-    /*@Test
+    @Test
     public void testExecInsertWithIndex() throws SQLException {
         Map<String, ?> result = null;
         String callSql = "exec spA_people_i @PeopleID=?, @Name=?, @CityID=?";
@@ -137,7 +137,7 @@ public class NoShardOnSqlServerUnitTest {
         assertEquals(7l, result.get("PeopleID"));
         assertEquals("testExecInsertWithName", dao.queryByPk(7l,null).getName());
         assertEquals(7l,parameter.get(1).getValue());
-    }*/
+    }
 
 
     @Test

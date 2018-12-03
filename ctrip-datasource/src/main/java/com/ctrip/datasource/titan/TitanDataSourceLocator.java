@@ -14,9 +14,12 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
 
-import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.configure.DalConnectionString;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.exceptions.DalException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,9 +46,6 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
-import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 
 public class TitanDataSourceLocator {

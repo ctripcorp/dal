@@ -11,6 +11,8 @@ import com.ctrip.platform.dal.dao.helper.SqlTypeHelper;
 public class StatementParameter implements Comparable<StatementParameter> {
 	private boolean defaultType;
 
+	private boolean isTSQLParameter = false;
+
 	private DbType dbType;
 
 	private int sqlType;
@@ -266,6 +268,14 @@ public class StatementParameter implements Comparable<StatementParameter> {
 	public String getSqlTypeName(){
 		String sqlTypeName = SqlTypeHelper.getInstance().getSqlTypeName(sqlType);
 		return sqlTypeName == null ? "" : sqlTypeName;
+	}
+
+	public boolean isTSQLParameter() {
+		return isTSQLParameter;
+	}
+
+	public void setTSQLParameter(boolean TSQLParameter) {
+		isTSQLParameter = TSQLParameter;
 	}
 
 	@Override

@@ -9,5 +9,5 @@ import com.ctrip.platform.dal.exceptions.DalException;
  *
  */
 public interface DatabaseSelector extends DalComponent {
-    String select(SelectionContext context) throws DalException;
+    DataBase select(SelectionContext context) throws DalException;
 }

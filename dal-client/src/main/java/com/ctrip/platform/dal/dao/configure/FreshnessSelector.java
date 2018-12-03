@@ -150,7 +150,7 @@ public class FreshnessSelector implements DatabaseSelector {
     }
 
     @Override
-    public String select(SelectionContext context) throws DalException {
+    public DataBase select(SelectionContext context) throws DalException {
         // Will check if already initialized
         initialize();
 

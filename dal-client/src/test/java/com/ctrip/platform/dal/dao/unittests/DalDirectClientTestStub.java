@@ -18,6 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
+import com.ctrip.platform.dal.dao.DalClient;
+import com.ctrip.platform.dal.dao.DalCommand;
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.KeyHolder;
+import com.ctrip.platform.dal.dao.StatementParameters;
+
 public class DalDirectClientTestStub extends BaseTestStub {
 	public DalDirectClientTestStub(String dbName, DatabaseDifference diff) {
 		super(dbName, diff);
@@ -29,7 +37,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	 * @throws SQLException
 	 */
 	@Test
-	public void quryTestWithoutParameters() throws SQLException {
+	public void queryTestWithoutParameters() throws SQLException {
 		String querySql = "SELECT * FROM " + TABLE_NAME;
 		StatementParameters parameters = new StatementParameters();
 		ClientTestDalRowMapper mapper = new ClientTestDalRowMapper();
@@ -49,7 +57,7 @@ public class DalDirectClientTestStub extends BaseTestStub {
 	 * @throws SQLException
 	 */
 	@Test
-	public void quryTestWithParameters() throws SQLException {
+	public void queryTestWithParameters() throws SQLException {
 		String querySql = "SELECT * FROM " + TABLE_NAME + " WHERE type = ?";
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.SMALLINT, 1);

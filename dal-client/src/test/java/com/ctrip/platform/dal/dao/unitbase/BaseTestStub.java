@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class BaseTestStub {
 	public static class DatabaseDifference {
 		/**
-		 * This for very strange issue about diffrence of sql server and oracle
+		 * This for very strange issue about difference of sql server and oracle
 		 * 		String callSql = diff.category == DatabaseCategory.SqlServer ?
 				"{call " + SP_D_NAME + "(?,?)}":
 					"call " + SP_D_NAME + "(?,?)";
@@ -22,7 +22,7 @@ public class BaseTestStub {
 		public boolean validateBatchInsertCount;
 		public boolean validateReturnCount;
 		public boolean supportGetGeneratedKeys;
-		public boolean supportMIxOfHardCodeValueAndPlaceholder;
+		public boolean supportMixOfHardCodeValueAndPlaceholder;
 		public boolean supportInsertValues;
 		public boolean supportSpIntermediateResult;
 		public boolean supportBatchSpWithOutParameter;

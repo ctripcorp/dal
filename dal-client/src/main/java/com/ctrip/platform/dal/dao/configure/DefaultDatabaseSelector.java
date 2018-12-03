@@ -20,8 +20,8 @@ public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
     }
 
     @Override
-	public String select(SelectionContext context) throws DalException {
-        String designatedDatasource = context.getDesignatedDatabase();
+	public DataBase select(SelectionContext context) throws DalException {
+        String designatedDataBaseString = context.getDesignatedDatabase();
         DalHA ha = context.getHa();
         
         List<DataBase> primary;
@@ -34,40 +34,42 @@ public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
 		    primary = context.getMasters();
 		} else {
 		    primary = context.getSlaves();
-		    secondary = context.getMasters();
+			secondary = context.getMasters();
 		}
 
 		if(isNullOrEmpty(primary) && isNullOrEmpty(secondary))
 			throw new DalException(ErrorCode.NullLogicDbName);
 		
-		if(designatedDatasource != null){
-			if(!DalStatusManager.containsDataSourceStatus(designatedDatasource))
-				throw new DalException(ErrorCode.InvalidDatabaseKeyName, designatedDatasource);
+		if(designatedDataBaseString != null){
+			if(!DalStatusManager.containsDataSourceStatus(designatedDataBaseString))
+				throw new DalException(ErrorCode.InvalidDatabaseKeyName, designatedDataBaseString);
 		
-			if(MarkdownManager.isMarkdown(designatedDatasource))
-				throw new DalException(ErrorCode.MarkdownConnection, designatedDatasource);
+			if(MarkdownManager.isMarkdown(designatedDataBaseString))
+				throw new DalException(ErrorCode.MarkdownConnection, designatedDataBaseString);
 			
-			if(ha != null && ha.contains(designatedDatasource)) {
+			if(ha != null && ha.contains(designatedDataBaseString)) {
 				ha.setOver(true);
 				throw new DalException(ErrorCode.NoMoreConnectionToFailOver);
 			}
-			
-			if(containsDesignatedDatasource(designatedDatasource, primary))
-				return designatedDatasource;
 
-			if(containsDesignatedDatasource(designatedDatasource, secondary))
-				return designatedDatasource;
+			DataBase designatedDataBase = getDesignatedDataBase(designatedDataBaseString, primary);
+			if (designatedDataBase != null)
+				return designatedDataBase;
+
+			designatedDataBase = getDesignatedDataBase(designatedDataBaseString, secondary);
+			if (designatedDataBase != null)
+				return designatedDataBase;
 			
-			throw new DalException(ErrorCode.InvalidDatabaseKeyName, designatedDatasource);
+			throw new DalException(ErrorCode.InvalidDatabaseKeyName, designatedDataBaseString);
 		}
-		
-		String dbName = getAvailableDb(ha, primary);
-		if(dbName != null)
-			return dbName;
 
-		dbName = getAvailableDb(ha, secondary);
-		if(dbName != null)
-			return dbName;
+		DataBase db = getAvailableDb(ha, primary);
+		if(db != null)
+			return db;
+
+		db = getAvailableDb(ha, secondary);
+		if(db != null)
+			return db;
 		
 		if(ha != null) {
 			ha.setOver(true);
@@ -81,61 +83,61 @@ public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
 		throw new DalException(ErrorCode.MarkdownConnection, sb.toString());
 	}
 	
-	private String getAvailableDb(DalHA ha, List<DataBase> candidates) throws DalException{
+	private DataBase getAvailableDb(DalHA ha, List<DataBase> candidates) throws DalException{
 		if(isNullOrEmpty(candidates))
 			return null;
-		List<String> dbNames = this.selectValidDbNames(candidates);
-		if(dbNames.isEmpty())
+		List<DataBase> availableDbs = this.selectValidDataBases(candidates);
+		if(availableDbs.isEmpty())
 			return null;
-		return this.getRandomRealDbName(ha, dbNames);
+		return this.getRandomRealDbName(ha, availableDbs);
 	}
 	
-	private String getRandomRealDbName(DalHA ha, List<String> dbs) throws DalException{
+	private DataBase getRandomRealDbName(DalHA ha, List<DataBase> dbs) throws DalException{
 		if(ha == null|| dbs.size() == 1){
 			return choseByRandom(dbs);
 		}else{
-			List<String> dbNames = new ArrayList<String>();
-			for (String database : dbs) {
-				if(!ha.contains(database))
-					dbNames.add(database);
+			List<DataBase> databases = new ArrayList<>();
+			for (DataBase database : dbs) {
+				if(!ha.contains(database.getConnectionString()))
+					databases.add(database);
 			}
-			if(dbNames.isEmpty()){
+			if(databases.isEmpty()){
 				return null;
 			}else{
-				String selected = choseByRandom(dbNames);
-				ha.addDB(selected);
+				DataBase selected = choseByRandom(databases);
+				ha.addDB(selected.getConnectionString());
 				return selected;
 			}
 		}
 	}
 	
-	private String choseByRandom(List<String> dbs) throws DalException {
+	private DataBase choseByRandom(List<DataBase> dbs) throws DalException {
 		int index = (int)(Math.random() * dbs.size());	
 		return dbs.get(index);
 	}
 	
-	private List<String> selectValidDbNames(List<DataBase> dbs){
-		List<String> dbNames = new ArrayList<String>();
+	private List<DataBase> selectValidDataBases(List<DataBase> dbs){
+		List<DataBase> validDbs = new ArrayList<>();
 		if(!this.isNullOrEmpty(dbs)){
 			for (DataBase database : dbs) {
 				if(MarkdownManager.isMarkdown(database.getConnectionString()))
 					continue;
 
-				dbNames.add(database.getConnectionString());
+				validDbs.add(database);
 			}
 		}
-		return dbNames;
+		return validDbs;
 	}
 	
-	private boolean containsDesignatedDatasource(String designatedDatasource, List<DataBase> dbs){
+	private DataBase getDesignatedDataBase(String designatedDataBaseString, List<DataBase> dbs){
 		if(isNullOrEmpty(dbs))
-			return false;
+			return null;
 
 		for (DataBase database : dbs)
-			if(designatedDatasource.equals(database.getConnectionString()))
-				return true;
+			if(designatedDataBaseString.equals(database.getConnectionString()))
+				return database;
 
-		return false;
+		return null;
 	}
 	
 	private String toDbNames(List<DataBase> dbs){

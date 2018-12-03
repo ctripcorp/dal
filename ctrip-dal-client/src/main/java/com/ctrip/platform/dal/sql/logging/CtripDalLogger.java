@@ -26,15 +26,20 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     private Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
     public static final String DAL_VERSION = "DAL.version";
+    private static final String DAL_VALIDATION = "DAL.validation";
+    private static final String LOG_SAMPLING_DISABLED="LogSamplingDisabled";
     private static final AtomicReference<String> version = new AtomicReference<>();
 
     @Override
     public void initialize(Map<String, String> settings) {
         super.initialize(settings);
+        if (samplingLogging == false)
+            DalCatLogger.logEvent(DAL_VALIDATION, LOG_SAMPLING_DISABLED);
         version.set(initVersion());
         ProductVersionManager.getInstance().register(DAL_VERSION, "java-" + version.get());
         DalCLogger.setEncryptLogging(encryptLogging);
         DalCLogger.setSimplifyLogging(simplifyLogging);
+
     }
 
     public static String getDalVersion() {
@@ -113,10 +118,10 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
     private void recordSuccess(final LogEntry entry, final int count) {
         try {
             DalCatLogger.catTransactionSuccess((CtripLogEntry) entry, count);
-            if (samplingLogging && !validate(entry))
+            Metrics.success((CtripLogEntry) entry, entry.getDuration());
+            if (samplingLogging && !logSamplingStrategy.validate(entry))
                 return;
             DalCLogger.success((CtripLogEntry) entry, count);
-            Metrics.success((CtripLogEntry) entry, entry.getDuration());
         } catch (Throwable e) {
             e.printStackTrace();
         }

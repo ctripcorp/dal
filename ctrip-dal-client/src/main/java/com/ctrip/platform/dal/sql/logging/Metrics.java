@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 
@@ -91,10 +92,10 @@ public class Metrics {
 	}
 
 	private static String getTableString(CtripLogEntry entry) {
-		String tableString = CommonUtil.setToOrderedString(entry.getTables());
-		if (tableString.equalsIgnoreCase(CommonUtil.EMPTY_SET))
+		String tableString = LoggerHelper.setToOrderedString(entry.getTables());
+		if (tableString.equalsIgnoreCase(LoggerHelper.EMPTY_SET))
 			return EMPTY_TABLES;
-		if (tableString.equalsIgnoreCase(CommonUtil.NULL_SET))
+		if (tableString.equalsIgnoreCase(LoggerHelper.NULL_SET))
 			return NULL_TABLES;
 		return tableString;
 	}

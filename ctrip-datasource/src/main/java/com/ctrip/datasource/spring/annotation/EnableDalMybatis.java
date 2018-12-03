@@ -42,5 +42,5 @@ public @interface EnableDalMybatis {
   /**
    * set a customized encryption key, please note that the key's length must be 8, e.g. abcd1234
    */
-  String encryptionKey() default LoggerAdapter.DEFAULT_SECERET_KEY;
+  String encryptionKey() default LoggerAdapter.DEFAULT_SECRET_KEY;
 }

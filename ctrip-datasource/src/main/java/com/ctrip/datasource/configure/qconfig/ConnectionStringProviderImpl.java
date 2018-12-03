@@ -4,6 +4,8 @@ import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -22,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ConnectionStringProviderImpl implements ConnectionStringProvider, DataSourceConfigureConstants {
     private static final String TITAN_APP_ID = "100010061";
     private static final String DAL = "DAL";
+    private ILogger logger= DalElementFactory.DEFAULT.getILogger();
     private String CONNECTION_STRING_GET_MAPCONFIG_FORMAT = "ConnectionString::getMapConfig:%s";
     private String CONNECTION_STRING_GET_CONNECTIONSTRING_FORMAT = "ConnectionString::getConnectionString:%s";
     private String CONNECTION_STRING_LISTENER_ON_LOAD_FORMAT = "ConnectionString::listenerOnLoad:%s";
@@ -61,19 +64,18 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     ipConnectionString = map.get(TITAN_KEY_NORMAL);
                     domainConnectionString = map.get(TITAN_KEY_FAILOVER);
                 } catch (ResultUnexpectedException e) {
-                    String exceptionMessageFormat = QCONFIG_COMMON_EXCEPTION_MESSAGE_FORMAT;
+                    String errorMessage = e.getMessage();
                     if (e.getStatus() == HTTP_STATUS_CODE_404) {
-                        exceptionMessageFormat = QCONFIG_404_EXCEPTION_MESSAGE_FORMAT;
+                        errorMessage = String.format(QCONFIG_404_EXCEPTION_MESSAGE_FORMAT, keyName);
                     }
-                    String errorMessage = String.format(exceptionMessageFormat, keyName);
-                    Cat.logError(errorMessage, e);
+                    logger.error(errorMessage,e);
                     configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
                     transaction.setStatus(e);
                     transaction.complete();
                     continue;
                 } catch (Throwable e) {
                     String errorMessage = String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT, keyName);
-                    Cat.logError(errorMessage, e);
+                    logger.error(errorMessage,e);
                     configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
                     transaction.setStatus(e);
                     transaction.complete();

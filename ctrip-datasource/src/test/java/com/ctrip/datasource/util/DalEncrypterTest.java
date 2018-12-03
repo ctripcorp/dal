@@ -10,7 +10,7 @@ import org.junit.Test;
  * @author Jason Song(song_s@ctrip.com)
  */
 public class DalEncrypterTest {
-  private String someEncryptionKey = LoggerAdapter.DEFAULT_SECERET_KEY;
+  private String someEncryptionKey = LoggerAdapter.DEFAULT_SECRET_KEY;
   private DalEncrypter dalEncrypter;
 
   @Before

@@ -20,7 +20,7 @@ public class CommonUtilTest {
 		Assert.assertEquals("key1=value1", CommonUtil.desDecrypt("VnsVK8ZdnkmTwqXTP+zi1g=="));
 	}
 
-	@Test
+	/*@Test
 	public void testSetToString() {
 		try {
 			Set<String> set1 = new HashSet<>();
@@ -62,5 +62,5 @@ public class CommonUtilTest {
 			e.printStackTrace();
 			fail();
 		}
-	}
+	}*/
 }

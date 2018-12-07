@@ -7,8 +7,6 @@ import com.ctrip.framework.idgen.client.strategy.DefaultStrategy;
 import com.ctrip.framework.idgen.client.strategy.PrefetchStrategy;
 import com.ctrip.framework.idgen.service.api.IdSegment;
 import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Transaction;
 
 import java.util.Deque;
 import java.util.List;
@@ -36,20 +34,10 @@ public class StaticIdGenerator implements LongIdGenerator {
     }
 
     public void initialize() {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
-                CatConstants.NAME_STATIC_GENERATOR + ":initialize");
-        try {
-            List<IdSegment> idPool = service.fetchIdPool(sequenceName,
-                    strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
-            importIdPool(idPool);
-            IdGenLogger.logSizeEvent(CatConstants.NAME_STATIC_GENERATOR + ":initialSize", initialSize);
-            transaction.setStatus(Transaction.SUCCESS);
-        } catch (Exception e) {
-            transaction.setStatus(e);
-            throw e;
-        } finally {
-            transaction.complete();
-        }
+        List<IdSegment> idPool = service.fetchIdPool(sequenceName,
+                strategy.getSuggestedRequestSize(), strategy.getSuggestedTimeoutMillis());
+        importIdPool(idPool);
+        IdGenLogger.logSizeEvent(CatConstants.TYPE_ID_POOL + ":providedSize", initialSize);
     }
 
     private void importIdPool(List<IdSegment> idPool) {

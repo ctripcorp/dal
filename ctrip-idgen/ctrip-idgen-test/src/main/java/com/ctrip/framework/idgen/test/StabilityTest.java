@@ -23,7 +23,7 @@ public class StabilityTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StabilityTest.class);
 
-    private String sequenceName = System.getProperty("sequenceName", "testName1");
+    private String sequenceName = System.getProperty("sequenceName", "testName1.t2");
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private int expectedQPS = Integer.parseInt(System.getProperty("expectedQPS", "50000"));
     private int qpsCheckPeriod = Integer.parseInt(System.getProperty("qpsCheckPeriodSeconds", "5"));
@@ -39,7 +39,8 @@ public class StabilityTest {
 
     public static void main(String[] args) {
         StabilityTest test = new StabilityTest();
-        test.specifyServer("localhost");
+//        test.specifyServer("localhost");
+        test.setEnvironment();
         test.initWorkerMap();
         test.start();
     }
@@ -157,6 +158,17 @@ public class StabilityTest {
     private void specifyServer(String ip) {
         System.setProperty("com.ctrip.framework.idgen.service.api.IdGenerateService",
                 String.format("dubbo://%s:20880", ip));
+    }
+
+    private void setEnvironment() {
+        System.setProperty("java.awt.headless", "false");
+        overrideArtemisUrl("10.2.35.218");
+    }
+
+    private void overrideArtemisUrl(String ip) {
+        String url = String.format("http://%s:8080/artemis-service/", ip);
+        System.setProperty("artemis.client.cdubbo.service.service.domain.url", url);
+        System.setProperty("artemis.client.cdubbo.client.service.domain.url", url);
     }
 
 }

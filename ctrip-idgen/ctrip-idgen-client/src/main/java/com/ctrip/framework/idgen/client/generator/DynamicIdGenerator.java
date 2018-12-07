@@ -22,7 +22,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     private static final int PREFETCH_THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
     private static final int CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE = 1500;
-    private static final long FETCH_ID_RETRY_BASE_INTERVAL = 1;
+    private static final long FETCH_ID_RETRY_BASE_INTERVAL = 10;
 
     private final String sequenceName;
     private final Deque<LongIdGenerator> staticGeneratorQueue = new ConcurrentLinkedDeque<>();
@@ -48,8 +48,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     @Override
     public Long nextId() {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
-                CatConstants.NAME_DYNAMIC_GENERATOR + ":nextId:" + sequenceName);
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_NEXT_ID, sequenceName);
         IdGenLogger.logVersion();
         try {
             Long id = nextIdWithActiveFetch(CLIENT_TIMEOUT_MILLIS_DEFAULT_VALUE);
@@ -86,26 +85,36 @@ public class DynamicIdGenerator implements LongIdGenerator {
         if (id != null) {
             return id;
         }
-        int retries = 0;
-        while (getMilliTime() < endTime) {
-            retries++;
-            try {
-                fetchIdPool();
-                id = simpleNextId();
-                if (id != null) {
-                    break;
-                }
-                Thread.sleep(getRetryInterval(FETCH_ID_RETRY_BASE_INTERVAL, retries));
-            } catch (InterruptedException e1) {
-                Thread.currentThread().interrupt();
-            } catch (Exception e2) {
-                IdGenLogger.logError(null, e2);
-            }
-        }
 
-        IdGenLogger.logSizeEvent(CatConstants.NAME_DYNAMIC_GENERATOR + ":activeFetchRetries", retries);
-        if (null == id) {
-            throw new ClientTimeoutException(String.format("IdGen client timeout after %d retries", retries));
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ACTIVE_FETCH, sequenceName);
+        try {
+            int retries = 0;
+            while (getMilliTime() < endTime) {
+                retries++;
+                try {
+                    fetchIdPool();
+                    id = simpleNextId();
+                    if (id != null) {
+                        break;
+                    }
+                    Thread.sleep(getRetryInterval(FETCH_ID_RETRY_BASE_INTERVAL, retries));
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e2) {
+                    IdGenLogger.logError(null, e2);
+                }
+            }
+
+            IdGenLogger.logSizeEvent(CatConstants.TYPE_ACTIVE_FETCH + ":attempts", retries);
+            if (null == id) {
+                throw new ClientTimeoutException(String.format("IdGen client timeout after %d retries", retries));
+            }
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable t) {
+            transaction.setStatus(t);
+            throw t;
+        } finally {
+            transaction.complete();
         }
 
         return id;
@@ -113,14 +122,12 @@ public class DynamicIdGenerator implements LongIdGenerator {
 
     protected boolean prefetchIfNecessary() {
         if (!isFetching.get() && strategy.checkIfNeedPrefetch() && isFetching.compareAndSet(false, true)) {
-            final ForkedTransaction transaction = Cat.newForkedTransaction(CatConstants.TYPE_ROOT,
-                    CatConstants.NAME_DYNAMIC_GENERATOR + ":prefetch:" + sequenceName);
+            final ForkedTransaction transaction = Cat.newForkedTransaction(CatConstants.TYPE_PREFETCH, sequenceName);
             prefetchExecutor.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         transaction.fork();
-                        logPoolStatistics();
                         fetchIdPool();
                         transaction.setStatus(Transaction.SUCCESS);
                     } catch (Exception e) {
@@ -138,6 +145,7 @@ public class DynamicIdGenerator implements LongIdGenerator {
     }
 
     private void fetchIdPool() {
+        logPoolStatistics();
         StaticIdGenerator staticGenerator = new StaticIdGenerator(sequenceName, strategy, service);
         staticGenerator.initialize();
         if (staticGenerator.checkIncrement((StaticIdGenerator) staticGeneratorQueue.peekLast())) {
@@ -147,10 +155,10 @@ public class DynamicIdGenerator implements LongIdGenerator {
     }
 
     private void logPoolStatistics() {
-        IdGenLogger.logSizeEvent(CatConstants.NAME_DYNAMIC_GENERATOR + ":remainedSize",
+        IdGenLogger.logSizeEvent(CatConstants.TYPE_ID_POOL + ":remainedSize",
                 strategy.getRemainedSize());
         if (strategy instanceof DynamicStrategy) {
-            IdGenLogger.logSizeEvent(CatConstants.NAME_DYNAMIC_GENERATOR + ":qps",
+            IdGenLogger.logSizeEvent(CatConstants.TYPE_ID_POOL + ":qps",
                     ((DynamicStrategy) strategy).getQps());
         }
     }

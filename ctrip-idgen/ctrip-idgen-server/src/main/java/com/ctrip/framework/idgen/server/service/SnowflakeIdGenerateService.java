@@ -8,7 +8,7 @@ import com.ctrip.framework.idgen.service.api.IdSegment;
 
 import java.util.List;
 
-@Service(timeout=260, retries=2)
+@Service
 public class SnowflakeIdGenerateService implements IdGenerateService {
 
     @Override

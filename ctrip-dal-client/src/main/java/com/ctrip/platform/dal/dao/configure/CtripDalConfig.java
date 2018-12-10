@@ -1,23 +1,25 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.ProductVersionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.IOUtils;
 import qunar.tc.qconfig.client.TypedConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class CtripDalConfig implements DalConfigLoader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CtripDalConfig.class);
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     public static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final String DAL_CONFIG_LOG = "DAL";
@@ -36,6 +38,7 @@ public class CtripDalConfig implements DalConfigLoader {
         try {
             String log = null;
             if (url != null) {
+                logDalConfig(url);
                 configure = DalConfigureFactory.load(url);
                 log = "从本地读取dal.config, path: " + url.getPath();
             } else {
@@ -55,6 +58,28 @@ public class CtripDalConfig implements DalConfigLoader {
         }
         return configure;
     }
+
+    private void logDalConfig(URL url) {
+        InputStream in = null;
+        try {
+            in = url.openStream();
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(in, writer, CHARSET);
+            String content = writer.toString();
+            LOGGER.logTransaction(DAL_CONFIG_LOG, DAL_CONFIG_LOAD + DAL_CONFIG_LOCAL, content, null);
+        } catch (Exception e) {
+            LOGGER.error("Read local dal.config error", e);
+        } finally {
+            if (in != null)
+                try {
+                    in.close();
+                } catch (Throwable e1) {
+
+                }
+        }
+    }
+
+
 
     private DalConfigure getConfigure() throws Exception {
         DalConfigure configure = null;

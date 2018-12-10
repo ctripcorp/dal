@@ -1,12 +1,13 @@
-package dao.noshard;
+package IDAutoGenerator;
 
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+
 import com.ctrip.platform.dal.dao.*;
-import com.ctrip.platform.dal.dao.helper.*;
-import com.ctrip.platform.dal.dao.sqlbuilder.*;
-import entity.MysqlPersonExtendsUpdatableEntity;
-import entity.MysqlPersonTable;
-import entity.TestAlias;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.MatchPattern;
+import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -15,57 +16,50 @@ import java.util.List;
 import java.util.Set;
 
 
-public class NoShardOnMysqlDao {
+public class AutoGenIntegerIDDao {
 	private static final boolean ASC = true;
-	private DalTableDao<MysqlPersonExtendsUpdatableEntity> client;
-	private static final String DATA_BASE = "noShardTestOnMysql";
-	private static final DatabaseCategory dbCategory = DatabaseCategory.MySql;
+	private DalTableDao<TableWithIntegerIdentity> client;
 	private DalQueryDao queryDao = null;
-	
-	private DalRowMapper<MysqlPersonExtendsUpdatableEntity> personGenRowMapper = null;
-	private DalRowMapper<TestAlias> testPojoRowMapper = null;
+	private DalRowMapper<TableWithIntegerIdentity> personGenRowMapper = null;
 
-	public NoShardOnMysqlDao() throws SQLException {
-		this.testPojoRowMapper = new DalDefaultJpaMapper<>(TestAlias.class);
-		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(MysqlPersonExtendsUpdatableEntity.class));
-		this.personGenRowMapper = new DalDefaultJpaMapper<>(MysqlPersonExtendsUpdatableEntity.class);
+	public AutoGenIntegerIDDao(String DATA_BASE) throws SQLException {
+		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(TableWithIntegerIdentity.class, DATA_BASE));
+		this.personGenRowMapper = new DalDefaultJpaMapper<>(TableWithIntegerIdentity.class);
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
 
-	public NoShardOnMysqlDao(String tableName) throws SQLException {
-		this.testPojoRowMapper = new DalDefaultJpaMapper<>(TestAlias.class);
-		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(MysqlPersonExtendsUpdatableEntity.class,DATA_BASE,tableName));
-		this.personGenRowMapper = new DalDefaultJpaMapper<>(MysqlPersonExtendsUpdatableEntity.class);
+	public AutoGenIntegerIDDao(String DATA_BASE, String tableName) throws SQLException {
+		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(TableWithIntegerIdentity.class, DATA_BASE,tableName));
+		this.personGenRowMapper = new DalDefaultJpaMapper<>(TableWithIntegerIdentity.class);
 		this.queryDao = new DalQueryDao(DATA_BASE);
 	}
-
 
 //	/**
 //	 * Query PersonGen by the specified ID
 //	 * The ID must be a number
 //	**/
-//	public MysqlPersonExtendsUpdatableEntity queryByPk(Number id, DalHints hints)
+//	public TableWithIntegerIdentity queryByPk(Number id, DalHints hints)
 //			throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //		return client.queryByPk(id, hints);
 //	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> queryTop(Integer age, Integer count, DalHints hints) throws SQLException{
-		hints=DalHints.createIfAbsent(hints);
+	public List<TableWithIntegerIdentity> queryTop(Integer age, Integer count, DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
 		StatementParameters statementParameters=new StatementParameters();
 		statementParameters.set(1,"age",Types.INTEGER,age);
 		return client.queryTop("age=?",statementParameters,hints,count);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> queryFromWithOrderBy(Integer age, Integer start, Integer count, DalHints hints) throws SQLException{
-		hints=DalHints.createIfAbsent(hints);
+	public List<TableWithIntegerIdentity> queryFromWithOrderBy(Integer age, Integer start, Integer count, DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
 		StatementParameters statementParameters=new StatementParameters();
 		statementParameters.set(1,"age",Types.INTEGER,age);
 		return client.queryFrom("age=? order by id",statementParameters,hints,start,count);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> queryFromWithoutOrderBy(Integer age, Integer start, Integer count, DalHints hints) throws SQLException{
-		hints=DalHints.createIfAbsent(hints);
+	public List<TableWithIntegerIdentity> queryFromWithoutOrderBy(Integer age, Integer start, Integer count, DalHints hints) throws SQLException{
+		hints= DalHints.createIfAbsent(hints);
 		StatementParameters statementParameters=new StatementParameters();
 		statementParameters.set(1,"age",Types.INTEGER,age);
 		return client.queryFrom("age=?",statementParameters,hints,start,count);
@@ -74,10 +68,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * Query Person by complex primary key
 	**/
-	public MysqlPersonExtendsUpdatableEntity queryByPk(Integer iD, DalHints hints)
+	public TableWithIntegerIdentity queryByPk(Integer iD, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
-		MysqlPersonExtendsUpdatableEntity pk = new MysqlPersonExtendsUpdatableEntity();
+		TableWithIntegerIdentity pk = new TableWithIntegerIdentity();
 		pk.setID(iD);
 		return client.queryByPk(pk, hints);
 	}
@@ -85,7 +79,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * Query PersonGen by PersonGen instance which the primary key is set
 	**/
-	public MysqlPersonExtendsUpdatableEntity queryByPk(MysqlPersonExtendsUpdatableEntity pk, DalHints hints)
+	public TableWithIntegerIdentity queryByPk(TableWithIntegerIdentity pk, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryByPk(pk, hints);
@@ -95,13 +89,13 @@ public class NoShardOnMysqlDao {
 	 * Query against sample pojo. All not null attributes of the passed in pojo
 	 * will be used as search criteria.
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> queryLike(MysqlPersonExtendsUpdatableEntity sample, DalHints hints)
+	public List<TableWithIntegerIdentity> queryLike(TableWithIntegerIdentity sample, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryLike(sample, hints);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> queryBy(MysqlPersonExtendsUpdatableEntity sample, DalHints hints)
+	public List<TableWithIntegerIdentity> queryBy(TableWithIntegerIdentity sample, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		return client.queryBy(sample, hints);
@@ -116,7 +110,7 @@ public class NoShardOnMysqlDao {
 		return client.count(builder, hints).intValue();
 	}
 	
-	public int countWhereCondition(String RightsName,DalHints hints) throws SQLException {
+	public int countWhereCondition(String RightsName, DalHints hints) throws SQLException {
 		String whereCondition ="1=1 and Age in (select Age from person where Name like ?)";
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
@@ -128,7 +122,7 @@ public class NoShardOnMysqlDao {
 	 * Query Person with paging function
 	 * The pageSize and pageNo must be greater than zero.
 	 */
-	public List<MysqlPersonExtendsUpdatableEntity> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
+	public List<TableWithIntegerIdentity> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -140,7 +134,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * Get all records from table
 	 */
-	public List<MysqlPersonExtendsUpdatableEntity> queryAll(DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> queryAll(DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		
 		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("ID,Name,Age", ASC);
@@ -152,7 +146,7 @@ public class NoShardOnMysqlDao {
 //	 * Query PersonGen with paging function
 //	 * The pageSize and pageNo must be greater than zero.
 //	 */
-//	public List<MysqlPersonExtendsUpdatableEntity> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
+//	public List<TableWithIntegerIdentity> queryAllByPage(int pageNo, int pageSize, DalHints hints)  throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //
 //		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -164,7 +158,7 @@ public class NoShardOnMysqlDao {
 //	/**
 //	 * Get all records from table
 //	 */
-//	public List<MysqlPersonExtendsUpdatableEntity> queryAll(DalHints hints) throws SQLException {
+//	public List<TableWithIntegerIdentity> queryAll(DalHints hints) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //		
 //		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("ID", ASC);
@@ -184,7 +178,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int insert(DalHints hints, MysqlPersonExtendsUpdatableEntity daoPojo) throws SQLException {
+	public int insert(DalHints hints, TableWithIntegerIdentity daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
@@ -204,7 +198,7 @@ public class NoShardOnMysqlDao {
 	 *            list of pojos to be inserted
 	 * @return how many rows been affected
 	 */
-	public int[] insert(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] insert(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -225,7 +219,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int insert(DalHints hints, KeyHolder keyHolder, MysqlPersonExtendsUpdatableEntity daoPojo) throws SQLException {
+	public int insert(DalHints hints, KeyHolder keyHolder, TableWithIntegerIdentity daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
@@ -249,7 +243,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int[] insert(DalHints hints, KeyHolder keyHolder, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] insert(DalHints hints, KeyHolder keyHolder, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -265,7 +259,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected for inserting each of the pojo
 	 * @throws SQLException
 	 */
-	public int[] batchInsert(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] batchInsert(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -283,7 +277,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int combinedInsert(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int combinedInsert(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
@@ -302,7 +296,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
@@ -317,7 +311,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int delete(DalHints hints, MysqlPersonExtendsUpdatableEntity daoPojo) throws SQLException {
+	public int delete(DalHints hints, TableWithIntegerIdentity daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
@@ -332,7 +326,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int[] delete(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] delete(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -348,7 +342,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected for deleting each of the pojo
 	 * @throws SQLException
 	 */
-	public int[] batchDelete(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] batchDelete(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -368,7 +362,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int update(DalHints hints, MysqlPersonExtendsUpdatableEntity daoPojo) throws SQLException {
+	public int update(DalHints hints, TableWithIntegerIdentity daoPojo) throws SQLException {
 		if(null == daoPojo)
 			return 0;
 		hints = DalHints.createIfAbsent(hints);
@@ -388,7 +382,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int[] update(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] update(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -401,7 +395,7 @@ public class NoShardOnMysqlDao {
 	 * @return how many rows been affected
 	 * @throws SQLException
 	 */
-	public int[] batchUpdate(DalHints hints, List<MysqlPersonExtendsUpdatableEntity> daoPojos) throws SQLException {
+	public int[] batchUpdate(DalHints hints, List<TableWithIntegerIdentity> daoPojos) throws SQLException {
 		if(null == daoPojos || daoPojos.size() <= 0)
 			return new int[0];
 		hints = DalHints.createIfAbsent(hints);
@@ -518,7 +512,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_ClientQueryFrom_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_ClientQueryFrom_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		
 		StatementParameters parameters = new StatementParameters();
@@ -528,7 +522,7 @@ public class NoShardOnMysqlDao {
 		return client.queryFrom("Age in (?)", parameters, hints, start, count);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testTableBuilderParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints, int start, int count) throws Exception{
+	public List<TableWithIntegerIdentity> testTableBuilderParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints, int start, int count) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
 
 		StatementParameters parameters = new StatementParameters();
@@ -540,7 +534,7 @@ public class NoShardOnMysqlDao {
 		return client.queryFrom("Name=? and Age in (?) and ID=?", parameters, hints, start, count);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testTableBuilderParameterIndexNoIn(String Name, Integer Age, Integer ID, DalHints hints, int start, int count) throws Exception{
+	public List<TableWithIntegerIdentity> testTableBuilderParameterIndexNoIn(String Name, Integer Age, Integer ID, DalHints hints, int start, int count) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
 
 		StatementParameters parameters = new StatementParameters();
@@ -557,7 +551,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_ClientQueryFromPartialFieldsSet_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_ClientQueryFromPartialFieldsSet_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		
 		StatementParameters parameters = new StatementParameters();
@@ -574,7 +568,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_ClientQueryFromPartialFieldsStrings_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_ClientQueryFromPartialFieldsStrings_list(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		
 		StatementParameters parameters = new StatementParameters();
@@ -591,7 +585,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_query_list_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_query_list_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -611,7 +605,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_query_list_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_query_list_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -630,7 +624,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询部分字段
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_queryPartial_list_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_queryPartial_list_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -645,7 +639,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询部分字段
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_queryPartial_list_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_queryPartial_list_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -661,15 +655,14 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_query_listByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_query_listByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
 		builder.select("Birth","Name","Age","ID");
 		builder.inNullable("Age", Age, Types.INTEGER, false);
-		 builder.orderBy("Age", false);
-	        builder.orderBy("ID", true);
-//		builder.range(start, count)
+		builder.orderBy("Age", false);
+	    builder.orderBy("ID", true);
 		builder.atPage(pageNo, pageSize);
 		return client.query(builder, hints);
 	}
@@ -677,7 +670,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_query_listByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_query_listByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -694,7 +687,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询部分字段
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_queryPartial_listByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_queryPartial_listByPage_multipleOrderBy(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -710,7 +703,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询部分字段
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_build_queryPartial_listByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_build_queryPartial_listByPage_multipleOrderByReverse(List<Integer> Age, int pageNo, int pageSize, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -727,7 +720,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_build_query_single(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_build_query_single(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -741,7 +734,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询部分字段
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_build_queryPartial_single(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_build_queryPartial_single(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -755,7 +748,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_build_query_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_build_query_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -770,7 +763,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_build_query_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_build_query_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -786,7 +779,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_build_queryPartial_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_build_queryPartial_first_multipleOrderBy(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -803,7 +796,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_build_queryPartial_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_build_queryPartial_first_multipleOrderByReverse(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -821,7 +814,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	 **/
-	public List<MysqlPersonExtendsUpdatableEntity> testBuildQueryLikeWithMatchPattern(String Name, MatchPattern pattern, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> testBuildQueryLikeWithMatchPattern(String Name, MatchPattern pattern, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -837,7 +830,7 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 构建，查询
 	 **/
-	public List<MysqlPersonExtendsUpdatableEntity> testBuildQueryLikeNullableWithMatchPattern(String Name, MatchPattern pattern, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> testBuildQueryLikeNullableWithMatchPattern(String Name, MatchPattern pattern, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -852,10 +845,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 自定义，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_def_query(List<Integer> Age, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_def_query(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-//		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+//		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
 //		builder.setTemplate("select * from person where Age in (?)");
 		String sql="select * from person where Age in (?)";
 		StatementParameters parameters = new StatementParameters();
@@ -864,16 +857,16 @@ public class NoShardOnMysqlDao {
 		
 //		builder.mapWith(personGenRowMapper);
 
-		return queryDao.query(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.query(sql, parameters, hints, TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_def_partialQuery(List<Integer> Age, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_def_partialQuery(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-//		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+//		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
 //		builder.setTemplate("select * from person where Age in (?)");
 		String sql="select * from person where Age in (?)";
 		StatementParameters parameters = new StatementParameters();
@@ -882,13 +875,13 @@ public class NoShardOnMysqlDao {
 		
 //		builder.mapWith(personGenRowMapper);
 
-		return queryDao.query(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.query(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_queryForObject(List<Integer> ID, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_queryForObject(List<Integer> ID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where ID in (?)";
@@ -896,13 +889,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "ID", Types.INTEGER, ID);
 
-		return queryDao.queryForObject(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryForObject(sql, parameters, hints, TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_partialQueryForObject(List<Integer> ID, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_partialQueryForObject(List<Integer> ID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where ID in (?)";
@@ -910,13 +903,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "ID", Types.INTEGER, ID);
 
-		return queryDao.queryForObject(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryForObject(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_queryForObjectNullable(List<Integer> ID, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_queryForObjectNullable(List<Integer> ID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where ID in (?)";
@@ -924,13 +917,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "ID", Types.INTEGER, ID);
 
-		return queryDao.queryForObjectNullable(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryForObjectNullable(sql, parameters, hints, TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_partialQueryForObjectNullable(List<Integer> ID, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_partialQueryForObjectNullable(List<Integer> ID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where ID in (?)";
@@ -938,13 +931,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "ID", Types.INTEGER, ID);
 
-		return queryDao.queryForObjectNullable(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryForObjectNullable(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_queryFirst(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_queryFirst(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -952,13 +945,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryFirst(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryFirst(sql, parameters, hints, TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_partialQueryFirst(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_partialQueryFirst(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -966,13 +959,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryFirst(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryFirst(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_queryFirstNullable(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_queryFirstNullable(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -980,13 +973,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryFirstNullable(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryFirstNullable(sql, parameters, hints, TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public MysqlPersonExtendsUpdatableEntity test_def_partialQueryFirstNullable(List<Integer> Age, DalHints hints) throws SQLException {
+	public TableWithIntegerIdentity test_def_partialQueryFirstNullable(List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -994,13 +987,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryFirstNullable(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class);
+		return queryDao.queryFirstNullable(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_def_queryTop(List<Integer> Age, DalHints hints, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_def_queryTop(List<Integer> Age, DalHints hints, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -1008,13 +1001,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryTop(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class,count);
+		return queryDao.queryTop(sql, parameters, hints, TableWithIntegerIdentity.class,count);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_def_partialQueryTop(List<Integer> Age, DalHints hints, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_def_partialQueryTop(List<Integer> Age, DalHints hints, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -1022,13 +1015,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryTop(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class,count);
+		return queryDao.queryTop(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class,count);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_def_queryFrom(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_def_queryFrom(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -1036,13 +1029,13 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryFrom(sql, parameters, hints, MysqlPersonExtendsUpdatableEntity.class,start,count);
+		return queryDao.queryFrom(sql, parameters, hints, TableWithIntegerIdentity.class,start,count);
 	}
 	
 	/**
 	 * 自定义，查询
 	**/
-	public List<MysqlPersonExtendsUpdatableEntity> test_def_partialQueryFrom(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
+	public List<TableWithIntegerIdentity> test_def_partialQueryFrom(List<Integer> Age, DalHints hints, int start, int count) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
 		String sql="select * from person where Age in (?) order by ID desc";
@@ -1050,7 +1043,7 @@ public class NoShardOnMysqlDao {
 		int i = 1;
 		i = parameters.setInParameter(i, "Age", Types.INTEGER, Age);
 
-		return queryDao.queryFrom(sql, parameters, hints.partialQuery("Name"), MysqlPersonExtendsUpdatableEntity.class,start,count);
+		return queryDao.queryFrom(sql, parameters, hints.partialQuery("Name"), TableWithIntegerIdentity.class,start,count);
 	}
 	
 	/**
@@ -1059,14 +1052,15 @@ public class NoShardOnMysqlDao {
 	public int test_def_update (DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
-		builder.setTemplate("truncate person");
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
+		builder.setTemplate("truncate table testtable");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 
 		return queryDao.update(builder, parameters, hints);
 	}
-	
+
+
 	/**
 	 * mysql, dao.noshardtest
 	**/
@@ -1084,10 +1078,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * ss
 	**/
-//	public List<MysqlPersonExtendsUpdatableEntity> test_def_query(DalHints hints) throws SQLException {
+//	public List<TableWithIntegerIdentity> test_def_query(DalHints hints) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
 //
-//		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+//		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
 //		builder.setTemplate("select * from person");
 //		StatementParameters parameters = new StatementParameters();
 //		builder.mapWith(personGenRowMapper);
@@ -1095,9 +1089,9 @@ public class NoShardOnMysqlDao {
 //		return queryDao.query(builder, parameters, hints);
 //	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testFreeSqlBuilderParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints) throws Exception{
+	public List<TableWithIntegerIdentity> testFreeSqlBuilderParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Name=? and Age in (?) and ID=?");
 		StatementParameters parameters = new StatementParameters();
 		int i = 2;
@@ -1108,9 +1102,9 @@ public class NoShardOnMysqlDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testFreeSqlBuilderMultipleInParams(String Name, List<Integer> Age, List<Integer> ID, DalHints hints) throws Exception{
+	public List<TableWithIntegerIdentity> testFreeSqlBuilderMultipleInParams(String Name, List<Integer> Age, List<Integer> ID, DalHints hints) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Name=? and Age in (?) and ID in(?)");
 		StatementParameters parameters = new StatementParameters();
 		int i = 2;
@@ -1121,9 +1115,9 @@ public class NoShardOnMysqlDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testFreeSqlBuilderWithDuplicateParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints) throws Exception{
+	public List<TableWithIntegerIdentity> testFreeSqlBuilderWithDuplicateParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Name=? and Age in (?) and ID=?");
 		StatementParameters parameters = new StatementParameters();
 		int i = 2;
@@ -1134,9 +1128,9 @@ public class NoShardOnMysqlDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testFreeSqlBuilderWithDiscontinuedParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints) throws Exception{
+	public List<TableWithIntegerIdentity> testFreeSqlBuilderWithDiscontinuedParameterIndex(String Name, List<Integer> Age, Integer ID, DalHints hints) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Name=? and Age in (?) and ID=?");
 		StatementParameters parameters = new StatementParameters();
 		int i = 5;
@@ -1147,9 +1141,9 @@ public class NoShardOnMysqlDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testFreeSqlBuilderParameterIndexNotIn(String Name, Integer Age, Integer ID, DalHints hints) throws Exception{
+	public List<TableWithIntegerIdentity> testFreeSqlBuilderParameterIndexNotIn(String Name, Integer Age, Integer ID, DalHints hints) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Name=? and Age = ? and ID=?");
 		StatementParameters parameters = new StatementParameters();
 
@@ -1160,9 +1154,9 @@ public class NoShardOnMysqlDao {
 		return queryDao.query(builder, parameters, hints);
 	}
 
-	public List<MysqlPersonExtendsUpdatableEntity> testFreeSqlBuilderWithNoParameter(DalHints hints) throws Exception{
+	public List<TableWithIntegerIdentity> testFreeSqlBuilderWithNoParameter(DalHints hints) throws Exception{
 		hints = DalHints.createIfAbsent(hints);
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where Name='Initial_Shard_02' and Age = 20 and ID=3");
 		StatementParameters parameters = new StatementParameters();
 		builder.mapWith(personGenRowMapper);
@@ -1172,10 +1166,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * mysql, dao.noshardtest
 	**/
-	public int test_def_update_ParameterIndex (String Name,Integer Age,Integer ID,DalHints hints) throws SQLException {
+	public int test_def_update_ParameterIndex (String Name, Integer Age, Integer ID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("delete from person where Name=? and Age = ? and ID=?");
 		StatementParameters parameters = new StatementParameters();
 
@@ -1189,10 +1183,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * mysql, dao.noshardtest
 	 **/
-	public int test_def_update_InParameterIndex (String Name,List<Integer> Age,Integer ID,DalHints hints) throws SQLException {
+	public int test_def_update_InParameterIndex (String Name, List<Integer> Age, Integer ID, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("delete from person where Name=? and Age in (?) and ID=?");
 		StatementParameters parameters = new StatementParameters();
 		int i = 2;
@@ -1206,25 +1200,11 @@ public class NoShardOnMysqlDao {
 	/**
 	 * mysql, dao.noshardtest
 	**/
-	public int test_def_update (DalHints hints,String tableShardID) throws SQLException {
+	public int test_def_update (DalHints hints, String tableShardID) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
-		builder.setTemplate("truncate person_"+tableShardID);
-		StatementParameters parameters = new StatementParameters();
-		int i = 1;
-
-		return queryDao.update(builder, parameters, hints);
-	}
-
-	/**
-	 * mysql, dao.noshardtest
-	 **/
-	public int test_def_truncate_replace (DalHints hints) throws SQLException {
-		hints = DalHints.createIfAbsent(hints);
-
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
-		builder.setTemplate("truncate testreplace");
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
+		builder.setTemplate("truncate table testtable_"+tableShardID);
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
 
@@ -1234,10 +1214,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * 自定义，查询
 	 **/
-	public List<MysqlPersonExtendsUpdatableEntity> test_timeout(int delay, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> test_timeout(int delay, DalHints hints) throws Exception {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person where sleep(?) = 0 limit 1");
 		StatementParameters parameters = new StatementParameters();
 		parameters.set(1, Types.INTEGER,delay);
@@ -1249,10 +1229,10 @@ public class NoShardOnMysqlDao {
 	/**
 	 * test alias
 	 **/
-	public List<MysqlPersonTable> testColumnParameter(String colunmName, DalHints hints) throws SQLException {
+	public List<TableWithIntegerIdentity> testColumnParameter(String colunmName, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeSelectSqlBuilder<List<MysqlPersonTable>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TableWithIntegerIdentity>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select * from person order by ?");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
@@ -1264,11 +1244,11 @@ public class NoShardOnMysqlDao {
 
 	/**
 	 * test alias
-	 **/
+	 **//*
 	public List<TestAlias> test(Integer id, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeSelectSqlBuilder<List<TestAlias>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+		FreeSelectSqlBuilder<List<TestAlias>> builder = new FreeSelectSqlBuilder<>();
 		builder.setTemplate("select name as myName, count(*) as num from person where id=?");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
@@ -1276,7 +1256,7 @@ public class NoShardOnMysqlDao {
 		builder.mapWith(testPojoRowMapper);
 
 		return queryDao.query(builder, parameters, hints);
-	}
+	}*/
 
 	/**
 	 * test free sql insert with keyholder
@@ -1291,7 +1271,7 @@ public class NoShardOnMysqlDao {
 	public int testFreeSqlInsertWithKeyHolder (String name, Integer age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("insert into person (name,age) values (?,?)");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;

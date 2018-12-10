@@ -39,7 +39,8 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
         ProductVersionManager.getInstance().register(DAL_VERSION, "java-" + version.get());
         DalCLogger.setEncryptLogging(encryptLogging);
         DalCLogger.setSimplifyLogging(simplifyLogging);
-
+        DalCLogger.setSamplingLogging(samplingLogging);
+        DalCLogger.setSamplingStrategy(logSamplingStrategy);
     }
 
     public static String getDalVersion() {
@@ -105,7 +106,7 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
 
     private void recordStart(final LogEntry entry) {
         DalCatLogger.start((CtripLogEntry) entry);
-        DalCLogger.start((CtripLogEntry) entry);
+//        DalCLogger.start((CtripLogEntry) entry);
     }
 
     @Override
@@ -119,8 +120,6 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
         try {
             DalCatLogger.catTransactionSuccess((CtripLogEntry) entry, count);
             Metrics.success((CtripLogEntry) entry, entry.getDuration());
-            if (samplingLogging && !logSamplingStrategy.validate(entry))
-                return;
             DalCLogger.success((CtripLogEntry) entry, count);
         } catch (Throwable e) {
             e.printStackTrace();

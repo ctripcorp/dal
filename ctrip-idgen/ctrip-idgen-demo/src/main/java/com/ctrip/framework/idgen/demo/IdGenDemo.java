@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 public class IdGenDemo {
 
     public static void main(String[] args) {
+        setEnvironment();
         demo1();
     }
 
@@ -53,6 +54,17 @@ public class IdGenDemo {
         }
 
         System.exit(0);
+    }
+
+    private static void setEnvironment() {
+        System.setProperty("java.awt.headless", "false");
+        overrideArtemisUrl("10.2.35.218");
+    }
+
+    private static void overrideArtemisUrl(String ip) {
+        String url = String.format("http://%s:8080/artemis-service/", ip);
+        System.setProperty("artemis.client.cdubbo.service.service.domain.url", url);
+        System.setProperty("artemis.client.cdubbo.client.service.domain.url", url);
     }
 
 }

@@ -12,14 +12,14 @@ import com.ctrip.platform.dal.sharding.idgen.LongIdGenerator;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class IdGeneratorFactory implements IIdGeneratorFactory {
 
     private volatile static IdGeneratorFactory factory = null;
 
-    private final ConcurrentMap<String, LongIdGenerator> idGeneratorCache = new ConcurrentHashMap<>();
+    private final Map<String, LongIdGenerator> idGeneratorCache = new ConcurrentHashMap<>();
     private final IServiceManager service = new ServiceManager();
 
     private IdGeneratorFactory() {}
@@ -61,8 +61,7 @@ public class IdGeneratorFactory implements IIdGeneratorFactory {
     }
 
     private LongIdGenerator createLongIdGenerator(String sequenceName) {
-        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_ROOT,
-                CatConstants.NAME_GENERATOR_FACTORY + ":createGenerator:" + sequenceName);
+        Transaction transaction = Cat.newTransaction(CatConstants.TYPE_CREATE, sequenceName);
         try {
             DynamicIdGenerator idGenerator = new DynamicIdGenerator(sequenceName, service);
             idGenerator.initialize();

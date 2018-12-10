@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.sql.logging;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
@@ -13,13 +14,15 @@ import com.ctrip.framework.clogging.domain.thrift.SpanType;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.DalWatcher;
+import com.ctrip.platform.dal.dao.client.ILogSamplingStrategy;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 
 public class DalCLogger {
 	public static final String TITLE = "Dal Fx";
 	public static AtomicBoolean simplifyLogging = new AtomicBoolean(false);
+	public static AtomicBoolean samplingLogging = new AtomicBoolean(true);
 	public static AtomicBoolean encryptLogging = new AtomicBoolean(true);
-
+    public static AtomicReference<ILogSamplingStrategy> samplingStrategyAtomicReference=new AtomicReference<>();
 	public static ThreadLocal<DalWatcher> watcher = new ThreadLocal<DalWatcher>();
 
 	private static ILog logger;
@@ -45,24 +48,42 @@ public class DalCLogger {
 	public static boolean isEncryptLogging() {
 		return encryptLogging.get();
 	}
-	
+
+	public static boolean isSamplingLogging() {
+		return samplingLogging.get();
+	}
+
+	public static void setSamplingLogging(boolean sampling) {
+		samplingLogging.set(sampling);
+	}
+
+	public static ILogSamplingStrategy getSamplingStrategy() {
+		return samplingStrategyAtomicReference.get();
+	}
+
+	public static void setSamplingStrategy(ILogSamplingStrategy samplingStrategy) {
+		samplingStrategyAtomicReference.set(samplingStrategy);
+	}
+
 	public static void start(CtripLogEntry entry) {
 		try {
 			if (isSimplifyLogging())
 				return;
 			
-			// Trace is no longer work according to clog team
+//			 Trace is no longer work according to clog team
 			ISpan urlSpan = trace.startSpan("DAL", "DAL", SpanType.SQL);
 			entry.setUrlSpan(urlSpan);
 		} catch (Throwable e) {
 			logger.error(e);
 		}
 	}
-	
+
 	public static void success(CtripLogEntry entry, int count) {
 		try {
 			entry.setSuccess(true);
 			entry.setResultCount(count);
+			if (isSamplingLogging() && !getSamplingStrategy().validate(entry))
+				return;
 			log(entry);
 		} catch (Throwable e) {
 			logger.error(e);
@@ -92,8 +113,8 @@ public class DalCLogger {
 			LogLevel level = entry.getException() == null ? LogLevel.INFO : LogLevel.ERROR;
 			trace.log(LogType.SQL, level, TITLE, entry.toJson(isEncryptLogging(), entry),
 					entry.getTag());
-			ISpan urlSpan = entry.getUrlSpan();
-			urlSpan.stop();
+//			ISpan urlSpan = entry.getUrlSpan();
+//			urlSpan.stop();
 		}
 	}
 

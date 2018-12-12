@@ -4,6 +4,7 @@ package com.ctrip.platform.dal.dao.client;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
@@ -24,10 +25,47 @@ public class LogSamplingTest {
 
 
     @Test
-    public void testSamplingSettings() throws Exception{
+    public void testSamplingSettings() throws Exception {
         DalClientFactory.initClientFactory();
-        assertEquals(10,LoggerAdapter.samplingRate);
+        assertEquals(10, LoggerAdapter.samplingRate);
         assertTrue(LoggerAdapter.samplingLogging);
+    }
+
+    @Test
+    public void testDefaultLogSamplingStrategyConcurrent() throws Exception {
+        String logicDB = "logicDB";
+        Set<String> tables = new HashSet<>();
+        tables.add("table");
+        DalEventEnum event = DalEventEnum.UPDATE_SIMPLE;
+        String method = "method";
+        final MockLogEntry logEntry = createLogEntry(logicDB, tables, event, method);
+        for (int j = 0; j < 100; j++) {
+            int requireSize = 500;
+            final CountDownLatch latch = new CountDownLatch(requireSize);
+            final AtomicBoolean result = new AtomicBoolean(true);
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(500);
+            for (int i = 0; i < requireSize; i++) {
+                executor.submit(new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            strategy.validate(logEntry);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            result.set(false);
+                        } finally {
+                            latch.countDown();
+                        }
+                    }
+                }));
+            }
+            latch.await();
+            try {
+                Assert.assertTrue(result.get());
+            }catch (Throwable e){
+                fail("test DefaultLogSamplingStrategyConcurrent fail!");
+            }
+        }
     }
 
     @Test

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LogCacheForOperationAndDaoMethods {
-    private ConcurrentHashMap<String, LogCacheForDaoMethodsAndRandomNum> operationAndDaoMethodCache = new ConcurrentHashMap<>();
+    private Map<String, LogCacheForDaoMethodsAndRandomNum> operationAndDaoMethodCache = new ConcurrentHashMap<>();
     private final static String QUERY = "query";
     private final static String UPDATE = "update";
     private final static String CALL = "call";

@@ -32,6 +32,10 @@ public class DalCatLogger {
     private static final String TYPE_SQL_GET_CONNECTION_COST = "DAL.getConnectionCost";
     private static final String TYPE_SQL_START_TASK_POOL_SIZE = "DAL.startTaskPoolSize";
     private static final String TYPE_SQL_END_TASK_POOL_SIZE = "DAL.endTaskPoolSize";
+    private static final int[] connectionCostSegment = new int[]{
+            0, 2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+            200, 300, 400, 500, 600, 700, 800, 900, 1000,
+            2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
 
     public static void logEvent(String type, String name) {
         try {
@@ -174,7 +178,7 @@ public class DalCatLogger {
     }
 
     public static void startStatement(CtripLogEntry entry) {
-        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST, String.valueOf(entry.getConnectionCost()) + " ms");
+        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST, getConnectionCostString(entry.getConnectionCost()) + "ms");
         String sqlType = entry.getCaller();
         entry.setStatementTransaction(Cat.newTransaction(TYPE_SQL_STATEMENT_EXECUTION, sqlType));
     }
@@ -196,5 +200,23 @@ public class DalCatLogger {
     private static void logSqlTable(CtripLogEntry entry) {
         for (String table : entry.getTables())
             Cat.logEvent(TYPE_SQL_TABLE, table);
+    }
+
+    protected static String getConnectionCostString(long cost) {
+        int start = 0;
+        int end = connectionCostSegment.length - 1;
+        int mid;
+        while (start < end) {
+            mid = (start + end) / 2;
+            if (cost < connectionCostSegment[mid])
+                end = mid - 1;
+            else if (cost > connectionCostSegment[mid])
+                start = mid + 1;
+            else
+                return String.valueOf(connectionCostSegment[mid]);
+        }
+        if ((connectionCostSegment[start] < cost) && (start < (connectionCostSegment.length - 1)))
+            return String.valueOf(connectionCostSegment[start + 1]);
+        return String.valueOf(connectionCostSegment[start]);
     }
 }

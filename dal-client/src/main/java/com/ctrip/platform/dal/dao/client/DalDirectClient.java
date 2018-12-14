@@ -143,9 +143,11 @@ public class DalDirectClient implements DalContextClient {
                 if (generatedKeyHolder == null)
                     return rows;
 
+                int pojosCount=0;
                 List<Map<String, Object>> presetKeys = null;
                 List<Map<String, Object>> dbReturnedKeys = null;
                 if (dalTaskContext != null) {
+                    pojosCount = dalTaskContext.getPojosCount();
                     presetKeys = dalTaskContext.getIdentityFields();
                 }
                 rs = preparedStatement.getGeneratedKeys();
@@ -154,13 +156,14 @@ public class DalDirectClient implements DalContextClient {
                             new DalRowMapperExtractor<Map<String, Object>>(new DalColumnMapRowMapper());
                     dbReturnedKeys = rse.extract(rs);
                 }
+
                 int actualKeySize = 0;
-                List<Map<String, Object>> returnedKeys = getFinalGeneratedKeys(dbReturnedKeys, presetKeys);
+                List<Map<String, Object>> returnedKeys = getFinalGeneratedKeys(dbReturnedKeys, presetKeys, pojosCount);
                 if (returnedKeys != null) {
                     generatedKeyHolder.addKeys(returnedKeys);
                     actualKeySize = returnedKeys.size();
                 }
-                generatedKeyHolder.addEmptyKeys(rows - actualKeySize);
+                generatedKeyHolder.addEmptyKeys(pojosCount - actualKeySize);
 
                 return rows;
             }
@@ -566,23 +569,41 @@ public class DalDirectClient implements DalContextClient {
     }
 
     private List<Map<String, Object>> getFinalGeneratedKeys(List<Map<String, Object>> dbReturnedKeyFields,
-                                                            List<Map<String, Object>> presetKeyFields) {
-        if (null == dbReturnedKeyFields || null == presetKeyFields ||
-                dbReturnedKeyFields.size() != presetKeyFields.size()) {
+                                                            List<Map<String, Object>> presetKeyFields, int pojosCount) {
+
+//        invoke dalclient.update directly
+        if (pojosCount == 0)
+            return dbReturnedKeyFields;
+
+//        not autoIncrement key or autoIncrement key and no value
+        if (null == presetKeyFields || presetKeyFields.size() == 0) {
+             //  maybe replace conflict
+            if (null == dbReturnedKeyFields || (dbReturnedKeyFields.size() != pojosCount))
+                return null;
+             //  no conflict
             return dbReturnedKeyFields;
         }
+
         List<Map<String, Object>> returnedKeyFields = new ArrayList<>();
-        for (int i = 0; i < dbReturnedKeyFields.size(); i++) {
-            Map<String, Object> dbReturnedKeyField = dbReturnedKeyFields.get(i);
+
+//        autoIncrement key with user value ,  driver returned empty generated keys because of conflict
+//        we use user's key
+        if (null == dbReturnedKeyFields || dbReturnedKeyFields.size() == 0) {
+            returnedKeyFields.addAll(presetKeyFields);
+            return returnedKeyFields;
+        }
+
+//        autoIncrement key with user value ,  driver returned not empty generated keys
+//        we use the value of user's key but the type of dbReturnedKeyFields
+        Map<String, Object> dbReturnedKeyField = dbReturnedKeyFields.get(0);
+        String keyName = dbReturnedKeyField.keySet().iterator().next();
+        Object dbReturnedKey = dbReturnedKeyField.values().iterator().next();
+        Class<?> clazz = dbReturnedKey.getClass();
+
+        for (int i = 0; i < presetKeyFields.size(); i++) {
             Map<String, Object> presetKeyField = presetKeyFields.get(i);
-            if (dbReturnedKeyField.size() != 1) {
-                return dbReturnedKeyFields;
-            }
-            Object dbReturnedKey = dbReturnedKeyField.values().iterator().next();
-            String keyName = dbReturnedKeyField.keySet().iterator().next();
             Number presetKey = (Number) presetKeyField.values().iterator().next();
-            Object returnedKey = dbReturnedKey;
-            Class<?> clazz = dbReturnedKey.getClass();
+            Object returnedKey = presetKey;
             if (clazz.equals(Byte.class) || clazz.equals(byte.class)) {
                 returnedKey = presetKey.byteValue();
             } else if (clazz.equals(Short.class) || clazz.equals(short.class)) {

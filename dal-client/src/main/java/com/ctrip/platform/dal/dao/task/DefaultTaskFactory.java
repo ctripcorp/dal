@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalParser;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class DefaultTaskFactory implements DalTaskFactory {
 	private Map<String, String> settings;
@@ -30,6 +31,17 @@ public class DefaultTaskFactory implements DalTaskFactory {
 		SingleInsertTask<T> singleInsertTask = new SingleInsertTask<T>();
 		singleInsertTask.initialize(parser);
 		return singleInsertTask;
+	}
+
+	@Override
+	public <T> SingleTask<T> createSingleReplaceTask(DalParser<T> parser) {
+		if(DatabaseCategory.MySql == getDbCategory(parser)) {
+			SingleReplaceTask<T> singleReplaceTask = new SingleReplaceTask<T>();
+			singleReplaceTask.initialize(parser);
+			return singleReplaceTask;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -60,10 +72,32 @@ public class DefaultTaskFactory implements DalTaskFactory {
 	}
 
 	@Override
+	public <T> BulkTask<Integer, T> createCombinedReplaceTask(DalParser<T> parser) {
+		if(DatabaseCategory.MySql == getDbCategory(parser)) {
+			CombinedReplaceTask<T> combinedReplaceTask = new CombinedReplaceTask<T>();
+			combinedReplaceTask.initialize(parser);
+			return combinedReplaceTask;
+		}
+
+		return null;
+	}
+
+	@Override
 	public <T> BulkTask<int[], T> createBatchInsertTask(DalParser<T> parser) {
 		BatchInsertTask<T> batchInsertTask = new BatchInsertTask<T>();
 		batchInsertTask.initialize(parser);
 		return batchInsertTask;
+	}
+
+	@Override
+	public <T> BulkTask<int[], T> createBatchReplaceTask(DalParser<T> parser) {
+		if (DatabaseCategory.MySql == getDbCategory(parser)) {
+			BatchReplaceTask<T> batchReplaceTask = new BatchReplaceTask<T>();
+			batchReplaceTask.initialize(parser);
+			return batchReplaceTask;
+		}
+
+		return null;
 	}
 
 	@Override

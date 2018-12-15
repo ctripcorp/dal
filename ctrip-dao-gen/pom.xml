@@ -10,21 +10,21 @@
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.16.5</version>
+    <version>1.16.6</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
         <file_encoding>UTF-8</file_encoding>
         <framework-bom.version>2.30.0</framework-bom.version>
-        <ctrip-dal-client-version>1.16.5</ctrip-dal-client-version>
-        <ctrip-datasource-version>1.16.5</ctrip-datasource-version>
-        <dao-gen-core-version>1.16.5</dao-gen-core-version>
-        <dal-dao-gen-version>1.16.5</dal-dao-gen-version>
+        <ctrip-dal-client-version>1.16.6</ctrip-dal-client-version>
+        <ctrip-datasource-version>1.16.6</ctrip-datasource-version>
+        <dao-gen-core-version>1.16.6</dao-gen-core-version>
+        <dal-dao-gen-version>1.16.6</dal-dao-gen-version>
         <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
         <mysql-connector-version>5.1.41</mysql-connector-version>
         <javax-mail-version>1.4.7</javax-mail-version>
         <cas-version>3.1.15-30Days-no-jsessionid</cas-version>
-        <credis-version>3.0.5</credis-version>
+        <credis-version>3.1.9</credis-version>
         <hickwall-sdk-version>0.0.2</hickwall-sdk-version>
     </properties>
     <dependencyManagement>

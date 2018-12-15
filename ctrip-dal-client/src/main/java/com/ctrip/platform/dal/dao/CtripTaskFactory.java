@@ -96,6 +96,11 @@ public class CtripTaskFactory implements DalTaskFactory {
     }
 
     @Override
+    public <T> SingleTask<T> createSingleReplaceTask(DalParser<T> parser) {
+        return defaultFactory.createSingleReplaceTask(parser);
+    }
+
+    @Override
     public <T> SingleTask<T> createSingleDeleteTask(DalParser<T> parser) {
         if (DatabaseCategory.MySql == getDbCategory(parser))
             return defaultFactory.createSingleDeleteTask(parser);
@@ -127,6 +132,11 @@ public class CtripTaskFactory implements DalTaskFactory {
     }
 
     @Override
+    public <T> BulkTask<Integer, T> createCombinedReplaceTask(DalParser<T> parser) {
+        return defaultFactory.createCombinedReplaceTask(parser);
+    }
+
+    @Override
     public <T> BulkTask<int[], T> createBatchInsertTask(DalParser<T> parser) {
         if (DatabaseCategory.MySql == getDbCategory(parser))
             return defaultFactory.createBatchInsertTask(parser);
@@ -143,6 +153,11 @@ public class CtripTaskFactory implements DalTaskFactory {
         bulkTask.initTaskSettings(ctripTaskSettings);
         bulkTask.initialize(parser);
         return bulkTask;
+    }
+
+    @Override
+    public <T> BulkTask<int[], T> createBatchReplaceTask(DalParser<T> parser) {
+        return defaultFactory.createBatchReplaceTask(parser);
     }
 
     @Override

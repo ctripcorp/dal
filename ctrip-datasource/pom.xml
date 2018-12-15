@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>1.16.10</version>
+    <version>1.16.11-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <dal-client.version>1.16.10</dal-client.version>

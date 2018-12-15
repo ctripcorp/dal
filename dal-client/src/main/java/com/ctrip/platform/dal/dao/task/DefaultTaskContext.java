@@ -13,6 +13,7 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     protected Set<String> tables = new HashSet<>();
     protected ShardingCategory category;
 
+    protected int pojosCount = 0;
     // cc 20181010
     protected List<Map<String, Object>> identityFields;
 
@@ -58,12 +59,21 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
         this.identityFields = identityFields;
     }
 
+    public int getPojosCount() {
+        return pojosCount;
+    }
+
+    public void setPojosCount(int pojosCount) {
+        this.pojosCount = pojosCount;
+    }
+
     @Override
     public DefaultTaskContext fork() {
         DefaultTaskContext taskContext = new DefaultTaskContext();
         taskContext.tables.addAll(this.tables);
         taskContext.category = this.category;
         taskContext.identityFields = getIdentityFields();
+        taskContext.pojosCount = this.pojosCount;
         return taskContext;
     }
 }

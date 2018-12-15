@@ -32,12 +32,15 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     private SingleTask<T> singleInsertTask;
     private SingleTask<T> singleDeleteTask;
     private SingleTask<T> singleUpdateTask;
+    private SingleTask<T> singleReplaceTask;
 
     private BulkTask<Integer, T> combinedInsertTask;
+    private BulkTask<Integer, T> combinedReplaceTask;
 
     private BulkTask<int[], T> batchInsertTask;
     private BulkTask<int[], T> batchDeleteTask;
     private BulkTask<int[], T> batchUpdateTask;
+    private BulkTask<int[], T> batchReplaceTask;
 
     private DeleteSqlTask<T> deleteSqlTask;
     private UpdateSqlTask<T> updateSqlTask;
@@ -78,12 +81,15 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         singleInsertTask = factory.createSingleInsertTask(parser);
         singleDeleteTask = factory.createSingleDeleteTask(parser);
         singleUpdateTask = factory.createSingleUpdateTask(parser);
+        singleReplaceTask = factory.createSingleReplaceTask(parser);
 
         combinedInsertTask = factory.createCombinedInsertTask(parser);
+        combinedReplaceTask = factory.createCombinedReplaceTask(parser);
 
         batchInsertTask = factory.createBatchInsertTask(parser);
         batchDeleteTask = factory.createBatchDeleteTask(parser);
         batchUpdateTask = factory.createBatchUpdateTask(parser);
+        batchReplaceTask = factory.createBatchReplaceTask(parser);
 
         deleteSqlTask = factory.createDeleteSqlTask(parser);
         updateSqlTask = factory.createUpdateSqlTask(parser);
@@ -627,6 +633,38 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     public int update(UpdateSqlBuilder updateBuilder, DalHints hints) throws SQLException {
         return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, populate(updateBuilder),
                 hints, updateSqlTask, new ResultMerger.IntSummary())));
+    }
+
+    public int replace(DalHints hints, T daoPojo) throws SQLException {
+        return replace(hints, hints.getKeyHolder(), daoPojo);
+    }
+
+    public int replace(DalHints hints, KeyHolder keyHolder, T daoPojo) throws SQLException {
+        return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojo),
+                new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleReplaceTask)));
+    }
+
+    public int[] replace(DalHints hints, List<T> daoPojos) throws SQLException {
+        return replace(hints, hints.getKeyHolder(), daoPojos);
+    }
+
+    public int[] replace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
+        return executor.execute(setSize(hints, keyHolder, daoPojos),
+                new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleReplaceTask));
+    }
+
+    public int combinedReplace(DalHints hints, List<T> daoPojos) throws SQLException {
+        return combinedReplace(hints, hints.getKeyHolder(), daoPojos);
+    }
+
+    public int combinedReplace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
+        return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojos),
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedReplaceTask)));
+    }
+
+    public int[] batchReplace(DalHints hints, List<T> daoPojos) throws SQLException {
+        return executor.execute(hints,
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchReplaceTask));
     }
 
     private SqlBuilder populate(TableSqlBuilder builder) throws SQLException {

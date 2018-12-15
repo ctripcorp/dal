@@ -13,5 +13,6 @@ public interface DalTaskContext {
     Set<String> getTables();
     ShardingCategory getShardingCategory();
     List<Map<String, Object>> getIdentityFields();
+    int getPojosCount();
     DalTaskContext fork();
 }

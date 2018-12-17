@@ -207,7 +207,7 @@ public class DalCatLogger {
         int end = connectionCostSegment.length - 1;
         int mid;
         while (start < end) {
-            mid = (start + end)>>>1;
+            mid = end - ((end - start) >> 1);
             if (cost < connectionCostSegment[mid])
                 end = mid - 1;
             else if (cost > connectionCostSegment[mid])

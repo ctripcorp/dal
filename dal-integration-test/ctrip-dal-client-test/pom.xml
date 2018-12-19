@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ctrip-dal-client-test</artifactId>
+    <packaging>war</packaging>
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>

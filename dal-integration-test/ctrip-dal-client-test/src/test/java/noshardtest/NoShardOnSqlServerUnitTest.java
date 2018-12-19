@@ -118,7 +118,7 @@ public class NoShardOnSqlServerUnitTest {
         result = client.call(callSql, parameter, hints);
         assertEquals(1, result.size());
         assertEquals("testExecInsertWithIndex", dao.queryByPk(7L,null).getName());
-        assertEquals(7l,parameter.get(0).getValue());
+        assertEquals(7L,(long)parameter.get(0).getValue());
     }
 
     @Test
@@ -136,7 +136,7 @@ public class NoShardOnSqlServerUnitTest {
         assertEquals(1, result.size());
         assertEquals(7l, result.get("PeopleID"));
         assertEquals("testExecInsertWithName", dao.queryByPk(7l,null).getName());
-        assertEquals(7l,parameter.get(1).getValue());
+        assertEquals(7L,(long)parameter.get(1).getValue());
     }
 
 

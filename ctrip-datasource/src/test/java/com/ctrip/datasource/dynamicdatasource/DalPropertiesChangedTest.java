@@ -36,18 +36,18 @@ public class DalPropertiesChangedTest {
         Assert.assertEquals(TableParseSwitch.OFF, locator.getTableParseSwitch());
     }
 
-    @Test
-    public void testTableParseSwitchChange() throws Exception {
-        localDalPropertiesProvider.initStatus();
-        dalPropertiesManager.setup();
-        for (int i = 0; i < 10; i++) {
-            TableParseSwitch initStatus = locator.getTableParseSwitch();
-            localDalPropertiesProvider.triggerTableParseSwitchChanged();
-            Thread.sleep(1 * 1000);
-            TableParseSwitch switchStatus = locator.getTableParseSwitch();
-            Assert.assertNotEquals(initStatus, switchStatus);
-        }
-    }
+//    @Test
+//    public void testTableParseSwitchChange() throws Exception {
+//        localDalPropertiesProvider.initStatus();
+//        dalPropertiesManager.setup();
+//        for (int i = 0; i < 10; i++) {
+//            TableParseSwitch initStatus = locator.getTableParseSwitch();
+//            localDalPropertiesProvider.triggerTableParseSwitchChanged();
+//            Thread.sleep(1 * 1000);
+//            TableParseSwitch switchStatus = locator.getTableParseSwitch();
+//            Assert.assertNotEquals(initStatus, switchStatus);
+//        }
+//    }
 
 
 }

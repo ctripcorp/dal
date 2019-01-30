@@ -66,7 +66,7 @@ public class CtripUserInfo implements UserInfo {
             db.setDb_address("devdb.dev.sh.ctriptravel.com");
             db.setDb_port("28747");
             db.setDb_user("uws_AllInOneKey_dev");
-            db.setDb_password("!QAZ@WSX1qaz2wsx");
+            db.setDb_password("nrqtsekx6chyql5ppAX");
         } else {
             db.setDb_address("");
             db.setDb_port("");

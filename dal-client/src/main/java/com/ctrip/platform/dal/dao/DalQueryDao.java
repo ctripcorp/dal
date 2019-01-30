@@ -398,16 +398,18 @@ public final class DalQueryDao extends BaseTaskAdapter {
 			throws SQLException {
 		return query(new FreeSelectSqlBuilder<T>().setTemplate(sql).mapWith(mapper).requireFirst().setNullable(nullable), parameters, hints);
 	}
-	
-	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) 
+
+	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count)
 			throws SQLException {
 		FreeSelectSqlBuilder<List<T>> builder = new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(mapper);
-		
-		if(hints.isAllShards() || hints.isInShards()) {
-			builder.mergerWith(new DalRangedResultMerger<>((Comparator<T>)hints.getSorter(), start, count));
+
+		if (hints.isAllShards() || hints.isInShards()) {
+			builder.range(0, (count + start));
+			builder.mergerWith(new DalRangedResultMerger<>((Comparator<T>) hints.getSorter(), start, count));
 			builder.extractorWith(new DalRowMapperExtractor<T>(mapper));
 		} else {
-			builder.extractorWith(new DalRowMapperExtractor<T>(mapper, start, count));
+			builder.range(start, count);
+			builder.extractorWith(new DalRowMapperExtractor<T>(mapper));
 		}
 
 		return query(builder, parameters, hints);

@@ -42,7 +42,7 @@ public abstract class DalQueryDaoTest {
 	public abstract void insertBack();
 
 	private String sqlList = "select * from " + TABLE_NAME + " order by id";
-	private String sqlListQuantity = "select quantity from " + TABLE_NAME;
+	private String sqlListQuantity = "select quantity from " + TABLE_NAME + " order by id";
 	private String sqlObject = "select * from " + TABLE_NAME + " where id = ? and type=0";
 	private String sqlFirst = "select * from " + TABLE_NAME + " where id = ?";
 	private String sqlNoResult = "select * from " + TABLE_NAME + " where id = -1";

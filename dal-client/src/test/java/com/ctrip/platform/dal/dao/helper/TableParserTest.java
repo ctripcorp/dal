@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.*;
 
@@ -237,7 +239,9 @@ public class TableParserTest {
         int threadCount = 1000;
         final CountDownLatch latch = new CountDownLatch(threadCount);
         final List<Integer> ret = Collections.synchronizedList(new ArrayList<Integer>());
+        ScheduledExecutorService executor= Executors.newScheduledThreadPool(100);
         for (int i = 0; i < threadCount; i++) {
+            executor.submit(
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -256,7 +260,7 @@ public class TableParserTest {
                         latch.countDown();
                     }
                 }
-            }).start();
+            }));
         }
         latch.await();
         if (ret.contains(1))

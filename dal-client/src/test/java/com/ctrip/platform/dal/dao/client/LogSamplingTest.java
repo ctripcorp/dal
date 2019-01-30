@@ -39,7 +39,6 @@ public class LogSamplingTest {
         DalEventEnum event = DalEventEnum.UPDATE_SIMPLE;
         String method = "method";
         final MockLogEntry logEntry = createLogEntry(logicDB, tables, event, method);
-        for (int j = 0; j < 100; j++) {
             int requireSize = 500;
             final CountDownLatch latch = new CountDownLatch(requireSize);
             final AtomicBoolean result = new AtomicBoolean(true);
@@ -49,7 +48,8 @@ public class LogSamplingTest {
                     @Override
                     public void run() {
                         try {
-                            strategy.validate(logEntry);
+                            for (int i = 0; i < 500; i++)
+                                strategy.validate(logEntry);
                         } catch (Exception e) {
                             e.printStackTrace();
                             result.set(false);
@@ -65,7 +65,6 @@ public class LogSamplingTest {
             }catch (Throwable e){
                 fail("test DefaultLogSamplingStrategyConcurrent fail!");
             }
-        }
     }
 
     @Test

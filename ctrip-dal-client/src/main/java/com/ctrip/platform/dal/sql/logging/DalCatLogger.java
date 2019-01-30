@@ -30,6 +30,7 @@ public class DalCatLogger {
     private static final String TYPE_SQL_TASK_COUNT = "DAL.shardCount";
     private static final String TYPE_SQL_SHARDS = "DAL.shards";
     private static final String TYPE_SQL_GET_CONNECTION_COST = "DAL.getConnectionCost";
+    private static final String TYPE_SQL_GET_CONNECTION_COST_RANGE = "DAL.getConnectionCostRange";
     private static final String TYPE_SQL_START_TASK_POOL_SIZE = "DAL.startTaskPoolSize";
     private static final String TYPE_SQL_END_TASK_POOL_SIZE = "DAL.endTaskPoolSize";
     private static final int[] connectionCostSegment = new int[]{
@@ -178,7 +179,7 @@ public class DalCatLogger {
     }
 
     public static void startStatement(CtripLogEntry entry) {
-        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST, getConnectionCostString(entry.getConnectionCost()) + "ms");
+        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST_RANGE, getConnectionCostString(entry.getConnectionCost()) + "ms");
         String sqlType = entry.getCaller();
         entry.setStatementTransaction(Cat.newTransaction(TYPE_SQL_STATEMENT_EXECUTION, sqlType));
     }
@@ -213,10 +214,19 @@ public class DalCatLogger {
             else if (cost > connectionCostSegment[mid])
                 start = mid + 1;
             else
-                return String.valueOf(connectionCostSegment[mid]);
+                return String.format("(%s,%s]", String.valueOf(connectionCostSegment[mid]), String.valueOf(connectionCostSegment[mid + 1]));
         }
+//      cost less or equal than 0ms
+        if ((start == 0) && (connectionCostSegment[start] >= cost))
+            return String.format("(%s,%s]", "-∞", String.valueOf(connectionCostSegment[start]));
+//      cost greater than 10000ms
+        if ((start == (connectionCostSegment.length - 1)) && (connectionCostSegment[start] < cost))
+            return String.format("(%s,%s)", String.valueOf(connectionCostSegment[start]), "+∞");
+
         if ((connectionCostSegment[start] < cost) && (start < (connectionCostSegment.length - 1)))
-            return String.valueOf(connectionCostSegment[start + 1]);
-        return String.valueOf(connectionCostSegment[start]);
+            return String.format("(%s,%s]", String.valueOf(connectionCostSegment[start]), String.valueOf(connectionCostSegment[start + 1]));
+
+        return String.format("(%s,%s]", String.valueOf(connectionCostSegment[start - 1]), String.valueOf(connectionCostSegment[start]));
     }
+
 }

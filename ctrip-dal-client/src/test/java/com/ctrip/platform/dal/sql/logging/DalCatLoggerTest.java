@@ -152,142 +152,142 @@ public class DalCatLoggerTest {
 
 	@Test
 	public void testGetConnectionCost() throws Exception{
-		for(long i=0;i<50000l;i++){
-			long cost=Long.valueOf(DalCatLogger.getConnectionCostString(i));
+		for(long i=10000l;i<50000l;i++){
+			String cost=DalCatLogger.getConnectionCostString(i);
 			if(i<=0) {
-				assertEquals(String.format("current i: %d",i),0, cost);
+				assertEquals(String.format("current i: %d",i),"(-∞,0]", cost);
 				continue;
 			}
 			if(i<=2) {
-				assertEquals(String.format("current i: %d",i),2, cost);
+				assertEquals(String.format("current i: %d",i),"(0,2]", cost);
 				continue;
 			}
 			if(i<=4) {
-				assertEquals(String.format("current i: %d",i),4, cost);
+				assertEquals(String.format("current i: %d",i),"(2,4]", cost);
 				continue;
 			}
 			if(i<=6) {
-				assertEquals(String.format("current i: %d",i),6, cost);
+				assertEquals(String.format("current i: %d",i),"(4,6]", cost);
 				continue;
 			}
 			if(i<=8) {
-				assertEquals(String.format("current i: %d",i),8, cost);
+				assertEquals(String.format("current i: %d",i),"(6,8]", cost);
 				continue;
 			}
 			if(i<=10) {
-				assertEquals(String.format("current i: %d",i),10, cost);
+				assertEquals(String.format("current i: %d",i),"(8,10]", cost);
 				continue;
 			}
 			if(i<=20) {
-				assertEquals(String.format("current i: %d",i),20, cost);
+				assertEquals(String.format("current i: %d",i),"(10,20]", cost);
 				continue;
 			}
 			if(i<=30) {
-				assertEquals(String.format("current i: %d",i),30, cost);
+				assertEquals(String.format("current i: %d",i),"(20,30]", cost);
 				continue;
 			}
 			if(i<=40) {
-				assertEquals(String.format("current i: %d",i),40, cost);
+				assertEquals(String.format("current i: %d",i),"(30,40]", cost);
 				continue;
 			}
 			if(i<=50) {
-				assertEquals(String.format("current i: %d",i),50, cost);
+				assertEquals(String.format("current i: %d",i),"(40,50]", cost);
 				continue;
 			}
 			if(i<=60) {
-				assertEquals(String.format("current i: %d",i),60, cost);
+				assertEquals(String.format("current i: %d",i),"(50,60]", cost);
 				continue;
 			}
 			if(i<=70) {
-				assertEquals(String.format("current i: %d",i),70, cost);
+				assertEquals(String.format("current i: %d",i),"(60,70]", cost);
 				continue;
 			}
 			if(i<=80) {
-				assertEquals(String.format("current i: %d",i),80, cost);
+				assertEquals(String.format("current i: %d",i),"(70,80]", cost);
 				continue;
 			}
 			if(i<=90){
-				assertEquals(String.format("current i: %d",i),90,cost);
+				assertEquals(String.format("current i: %d",i),"(80,90]",cost);
 				continue;
 			}
 			if(i<=100) {
-				assertEquals(String.format("current i: %d",i),100, cost);
+				assertEquals(String.format("current i: %d",i),"(90,100]", cost);
 				continue;
 			}
 			if(i<=200) {
-				assertEquals(String.format("current i: %d",i),200, cost);
+				assertEquals(String.format("current i: %d",i),"(100,200]", cost);
 				continue;
 			}
 			if(i<=300) {
-				assertEquals(String.format("current i: %d",i),300, cost);
+				assertEquals(String.format("current i: %d",i),"(200,300]", cost);
 				continue;
 			}
 			if(i<=400) {
-				assertEquals(String.format("current i: %d",i),400, cost);
+				assertEquals(String.format("current i: %d",i),"(300,400]", cost);
 				continue;
 			}
 			if(i<=500) {
-				assertEquals(String.format("current i: %d",i),500, cost);
+				assertEquals(String.format("current i: %d",i),"(400,500]", cost);
 				continue;
 			}
 			if(i<=600) {
-				assertEquals(String.format("current i: %d",i),600, cost);
+				assertEquals(String.format("current i: %d",i),"(500,600]", cost);
 				continue;
 			}
 			if(i<=700) {
-				assertEquals(String.format("current i: %d",i),700, cost);
+				assertEquals(String.format("current i: %d",i),"(600,700]", cost);
 				continue;
 			}
 			if(i<=800) {
-				assertEquals(String.format("current i: %d",i),800, cost);
+				assertEquals(String.format("current i: %d",i),"(700,800]", cost);
 				continue;
 			}
 			if(i<=900) {
-				assertEquals(String.format("current i: %d",i),900, cost);
+				assertEquals(String.format("current i: %d",i),"(800,900]", cost);
 				continue;
 			}
 			if(i<=1000) {
-				assertEquals(String.format("current i: %d",i),1000, cost);
+				assertEquals(String.format("current i: %d",i),"(900,1000]", cost);
 				continue;
 			}
 			if(i<=2000) {
-				assertEquals(String.format("current i: %d",i),2000, cost);
+				assertEquals(String.format("current i: %d",i),"(1000,2000]", cost);
 				continue;
 			}
 			if(i<=3000) {
-				assertEquals(String.format("current i: %d",i),3000, cost);
+				assertEquals(String.format("current i: %d",i),"(2000,3000]", cost);
 				continue;
 			}
 			if(i<=4000) {
-				assertEquals(String.format("current i: %d",i),4000, cost);
+				assertEquals(String.format("current i: %d",i),"(3000,4000]", cost);
 				continue;
 			}
 			if(i<=5000) {
-				assertEquals(String.format("current i: %d",i),5000, cost);
+				assertEquals(String.format("current i: %d",i),"(4000,5000]", cost);
 				continue;
 			}
 			if(i<=6000) {
-				assertEquals(String.format("current i: %d",i),6000, cost);
+				assertEquals(String.format("current i: %d",i),"(5000,6000]", cost);
 				continue;
 			}
 			if(i<=7000) {
-				assertEquals(String.format("current i: %d",i),7000, cost);
+				assertEquals(String.format("current i: %d",i),"(6000,7000]", cost);
 				continue;
 			}
 			if(i<=8000) {
-				assertEquals(String.format("current i: %d",i),8000, cost);
+				assertEquals(String.format("current i: %d",i),"(7000,8000]", cost);
 				continue;
 			}
 			if(i<=9000) {
-				assertEquals(String.format("current i: %d",i),9000, cost);
+				assertEquals(String.format("current i: %d",i),"(8000,9000]", cost);
 				continue;
 			}
 			if(i<=10000) {
-				assertEquals(String.format("current i: %d",i),10000, cost);
+				assertEquals(String.format("current i: %d",i),"(9000,10000]", cost);
 				continue;
 			}
 			if(i>10000) {
-				assertEquals(String.format("current i: %d",i),10000, cost);
+				assertEquals(String.format("current i: %d",i),"(10000,+∞)", cost);
 				continue;
 			}
 		}

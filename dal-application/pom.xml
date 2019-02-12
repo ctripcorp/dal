@@ -24,17 +24,17 @@
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-dal-client</artifactId>
-                <version>1.16.10</version>
+                <version>1.16.12-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.16.10</version>
+                <version>1.16.12-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
-                <version>2.45.1</version>
+                <version>3.3.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

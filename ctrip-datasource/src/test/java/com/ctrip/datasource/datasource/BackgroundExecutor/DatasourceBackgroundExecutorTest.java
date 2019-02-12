@@ -23,11 +23,11 @@ import java.util.Properties;
 public class DatasourceBackgroundExecutorTest {
     private static final String SELECT_SQL = "select 1";
     private static final String CONNECTION_STRING =
-            "Data Source=DST56614,1433;Initial Catalog=PerformanceTest;UID=sa;password=!QAZ@WSX1qaz2wsx;";
+            "Data Source=dst56614.cn1.global.ctrip.com,1433;Initial Catalog=PerformanceTest;UID=sa;password=!QAZ@WSX1qaz2wsx;";
 
     private static final String USER_NAME = "sa";
     private static final String PASSWORD = "!QAZ@WSX1qaz2wsx";
-    private static final String CONNECTION_URL = "jdbc:sqlserver://DST56614:1433;DatabaseName=PerformanceTest";
+    private static final String CONNECTION_URL = "jdbc:sqlserver://dst56614.cn1.global.ctrip.com:1433;DatabaseName=PerformanceTest";
     private static final String DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
     private static final String CONNECTION_URL_2 = "jdbc:sqlserver://10.32.21.149:1433;DatabaseName=daoTest";
@@ -35,11 +35,11 @@ public class DatasourceBackgroundExecutorTest {
     private static final String NETWORK_ADDRESS_CACHE_TTL = "networkaddress.cache.ttl";
     private static final String NETWORK_ADDRESS_CACHE_TTL_VALUE_IN_SECONDS = "1";
 
-    private static final String DOMAIN = "DST56614";
+    private static final String DOMAIN = "dst56614.cn1.global.ctrip.com";
     private static final String INVALID_IP = "10.10.10.10";
 
     private String getIP() {
-        String domain = "DST56614";
+        String domain = "dst56614.cn1.global.ctrip.com";
         String result = "";
         try {
             InetAddress address = InetAddress.getByName(domain);
@@ -59,7 +59,7 @@ public class DatasourceBackgroundExecutorTest {
         // ensure no IP be set.
         setIPToValid();
 
-        String name = "DST56614";
+        String name = "dst56614.cn1.global.ctrip.com";
         Properties properties = new Properties();
         properties.setProperty("userName", USER_NAME);
         properties.setProperty("password", PASSWORD);

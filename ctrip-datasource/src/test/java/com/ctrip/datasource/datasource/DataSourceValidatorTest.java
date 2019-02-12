@@ -18,14 +18,14 @@ import org.junit.Test;
 
 public class DataSourceValidatorTest {
     private static final String SQL_SERVER_DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    private static final String SQL_SERVER_CONNECTION_URL = "jdbc:sqlserver://DST56614:1433;databaseName=daoTest";
+    private static final String SQL_SERVER_CONNECTION_URL = "jdbc:sqlserver://dst56614.cn1.global.ctrip.com:1433;databaseName=daoTest";
 
     private static final String SQL_SERVER_USER_NAME = "sa";
     private static final String SQL_SERVER_PASSWORD = "!QAZ@WSX1qaz2wsx";
 
     private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
     private static final String MYSQL_CONNECTION_URL =
-            "jdbc:mysql://DST56614:3306/dao_test?useUnicode=true&characterEncoding=UTF-8";
+            "jdbc:mysql://dst56614.cn1.global.ctrip.com:3306/dao_test?useUnicode=true&characterEncoding=UTF-8";
     private static final String MYSQL_USER_NAME = "root";
     private static final String MYSQL_PASSWORD = "!QAZ@WSX1qaz2wsx";
 

@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
 
+import com.ctrip.platform.dal.dao.log.DalLogType;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.util.TablesNamesFinder;
@@ -14,19 +15,23 @@ import java.util.regex.Pattern;
 /**
  * Created by lilj on 2018/7/26.
  */
-public class DefaultTableParser implements TableParser{
+public class DefaultTableParser implements TableParser {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
-    private static final String DAL="DAL";
+    // private static final String DAL="DAL";
     private static final String TABLEPARSE_ERROR = "TABLEPARSE::ERROR";
-    private static final Set<String> callStringElements = new HashSet<String>() {{
-        add("{call");
-        add("exec");
-    }};
-    private static final Set<String> spElements = new HashSet<String>() {{
-        add("spa");
-        add("sp3");
-        add("spt");
-    }};
+    private static final Set<String> callStringElements = new HashSet<String>() {
+        {
+            add("{call");
+            add("exec");
+        }
+    };
+    private static final Set<String> spElements = new HashSet<String>() {
+        {
+            add("spa");
+            add("sp3");
+            add("spt");
+        }
+    };
     private TablesNamesFinder finder = new TablesNamesFinder();
     private Lock finderLock = new ReentrantLock();
     private static final Pattern pattern = Pattern.compile("(with)*\\s*\\(nolock\\)");
@@ -36,21 +41,21 @@ public class DefaultTableParser implements TableParser{
         Set<String> tableSet = new HashSet<>();
         if (sqls == null || sqls.length == 0)
             return tableSet;
-        //	parse batch sqls
+        // parse batch sqls
         for (String sql : sqls) {
             if (StringUtils.isBlank(sql))
                 continue;
-            //  parse multiple sqls in one sql string
+            // parse multiple sqls in one sql string
             String[] subSqls = sql.trim().toLowerCase().split(";");
             for (String sqlString : subSqls) {
                 if (StringUtils.isBlank(sqlString))
                     continue;
 
                 if (isCallString(sqlString))
-                    //	parse call string
+                    // parse call string
                     tableSet.addAll(extractTablesFromCallString(sqlString));
                 else
-                    //	parse sql string
+                    // parse sql string
                     tableSet.addAll(extractTablesFromSql(sqlString));
             }
         }
@@ -81,28 +86,30 @@ public class DefaultTableParser implements TableParser{
             try {
                 tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
             } catch (Throwable e) {
-                logger.logTransaction(DAL, TABLEPARSE_ERROR, e.getMessage(), null);
+                // logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), null);
+                logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), System.currentTimeMillis());
             } finally {
                 finderLock.unlock();
             }
         } catch (Throwable e) {
-            logger.logTransaction(DAL, TABLEPARSE_ERROR, e.getMessage(), null);
+            // logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), null);
+            logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), System.currentTimeMillis());
             return Collections.emptyList();
         }
-//			remove mysql quote "``" or sqlserver quote "[]" and db prefix like "dbname.tablename"
+        // remove mysql quote "``" or sqlserver quote "[]" and db prefix like "dbname.tablename"
         return removePrefixAndQuote(tableList);
     }
 
     private String ignoreUnsupportedSyntax(String sql) {
-//		 the jsqlparser can not parse "with (nolock)" or "(nolock)"
+        // the jsqlparser can not parse "with (nolock)" or "(nolock)"
         sql = ignoreWithNolock(sql);
-//       the jsqlparser can not parse "isnull"
+        // the jsqlparser can not parse "isnull"
         sql = sql.replace("isnull", " ");
         return sql;
     }
 
     private String ignoreWithNolock(String sql) {
-//		you can not simply remove "with" because of "with as" syntax
+        // you can not simply remove "with" because of "with as" syntax
         String proccessedSql;
 
         // create matcher
@@ -121,11 +128,11 @@ public class DefaultTableParser implements TableParser{
         if (sqlElements.length < 2)
             return tables;
 
-//		check begin with "call" or "exec"
+        // check begin with "call" or "exec"
         String firstElement = sqlElements[0];
         if (callStringElements.contains(firstElement)) {
             String spName = sqlElements[1];
-            //	check begin with "sp3" or "spt" or "spa"
+            // check begin with "sp3" or "spt" or "spa"
             if (isStandardSp(spName)) {
                 int startIndex = spName.indexOf("_");
                 int endIndex = spName.lastIndexOf("_");
@@ -142,18 +149,18 @@ public class DefaultTableParser implements TableParser{
         List<String> processedTables = new ArrayList<>();
         try {
             for (String quoteTable : quoteTables) {
-//				remove db prefix
+                // remove db prefix
                 if (quoteTable.contains(".")) {
                     String[] tableString = quoteTable.split("[.]");
                     quoteTable = tableString[tableString.length - 1];
                 }
-//				remove mysql quote
+                // remove mysql quote
                 if (quoteTable.startsWith("`")) {
                     int begin = quoteTable.indexOf("`");
                     int end = quoteTable.indexOf("`", begin + 1);
                     quoteTable = quoteTable.substring(begin + 1, end);
                 }
-//				remove sqlserver quote
+                // remove sqlserver quote
                 if (quoteTable.startsWith("[")) {
                     int begin = quoteTable.indexOf("[");
                     int end = quoteTable.indexOf("]", begin + 1);

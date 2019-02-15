@@ -12,15 +12,15 @@ public abstract class AbstractLogger implements ILogger {
     }
 
     @Override
-    public void logTransaction(String type, String name, String message, Callback callback) {
+    public void logTransaction(String type, String name, String message, Callback callback) throws Exception {
         info(String.format("Type:%s, Name:%s, Message:%s", type, name, message));
 
         if (callback != null) {
             try {
                 callback.execute();
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 error(e.getMessage(), e);
-                throw new RuntimeException(e);
+                throw e;
             }
         }
     }

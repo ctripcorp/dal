@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
 
+import com.ctrip.platform.dal.dao.helper.EntityManagerTest.EntityManagerTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -24,6 +25,6 @@ import org.junit.runners.Suite.SuiteClasses;
 		 */
 		com.ctrip.platform.dal.dao.markdown.AllTests.class,
 		com.ctrip.platform.dal.dao.sharding.idgen.AllTests.class,
-
+		EntityManagerTest.class
 })
 public class AllTest {}

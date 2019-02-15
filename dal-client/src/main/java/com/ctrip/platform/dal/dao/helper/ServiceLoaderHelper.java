@@ -79,12 +79,12 @@ public class ServiceLoaderHelper {
     }
 
     private static <T> Iterator<T> getIterator(Class<T> clazz) {
-        ServiceLoader<T> loader = ServiceLoader.load(clazz);
+        ServiceLoader<T> loader = ServiceLoader.load(clazz, ServiceLoaderHelper.class.getClassLoader());
         return loader.iterator();
     }
 
     private static <T> Iterator<T> getIteratorWithDalServiceLoader(Class<T> clazz) {
-        DalServiceLoader<T> loader = DalServiceLoader.load(clazz);
+        DalServiceLoader<T> loader = DalServiceLoader.load(clazz, ServiceLoaderHelper.class.getClassLoader());
         return loader.iterator();
     }
 

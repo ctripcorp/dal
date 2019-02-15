@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.datasource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
-import com.ctrip.platform.dal.dao.log.DalLogType;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.mysql.jdbc.MySQLConnection;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -16,7 +15,8 @@ import java.sql.Statement;
 public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final int DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS = 5;
-    private static final String VALIDATE_CONNECTION_FORMAT = "ValidateConnection:%s";
+    private static final String DAL = "DAL";
+    private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
     private String IS_VALID_FORMAT = "isValid: %s";
     private String VALIDATE_ERROR_FORMAT = "Connection validation error:%s";
@@ -32,10 +32,9 @@ public class DataSourceValidator implements ValidatorProxy {
 
         try {
             connectionUrl = LoggerHelper.getSimplifiedDBUrl(connection.getMetaData().getURL());
-            transactionName = String.format(VALIDATE_CONNECTION_FORMAT, connectionUrl);
+            transactionName = String.format(CONNECTION_VALIDATE_CONNECTION_FORMAT, connectionUrl);
             isValid = validateConnection(connection, validateAction);
-            LOGGER.logTransaction(DalLogType.DATASOURCE_VALIDATE_CONNECTION, transactionName,
-                    String.format(IS_VALID_FORMAT, isValid), startTime);
+            LOGGER.logTransaction(DAL, transactionName, String.format(IS_VALID_FORMAT, isValid), startTime);
 
             if (!isValid) {
                 LOGGER.warn(IS_VALID_RETURN_INFO);
@@ -48,8 +47,7 @@ public class DataSourceValidator implements ValidatorProxy {
             }
             sb.append(String.format(VALIDATE_ERROR_FORMAT, e.getMessage()));
             LOGGER.warn(sb.toString());
-            LOGGER.logTransaction(DalLogType.DATASOURCE_VALIDATE_CONNECTION, transactionName, sb.toString(), e,
-                    startTime);
+            LOGGER.logTransaction(DAL, transactionName, sb.toString(), e, startTime);
         }
 
         return isValid;

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.helper;
 
-
-import com.ctrip.platform.dal.dao.log.DalLogType;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.util.TablesNamesFinder;
@@ -17,7 +15,7 @@ import java.util.regex.Pattern;
  */
 public class DefaultTableParser implements TableParser {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
-    // private static final String DAL="DAL";
+    private static final String DAL = "DAL";
     private static final String TABLEPARSE_ERROR = "TABLEPARSE::ERROR";
     private static final Set<String> callStringElements = new HashSet<String>() {
         {
@@ -86,14 +84,12 @@ public class DefaultTableParser implements TableParser {
             try {
                 tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
             } catch (Throwable e) {
-                // logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), null);
-                logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), System.currentTimeMillis());
+                logger.logTransaction(DAL, TABLEPARSE_ERROR, e.getMessage(), System.currentTimeMillis());
             } finally {
                 finderLock.unlock();
             }
         } catch (Throwable e) {
-            // logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), null);
-            logger.logTransaction(DalLogType.DAL, TABLEPARSE_ERROR, e.getMessage(), System.currentTimeMillis());
+            logger.logTransaction(DAL, TABLEPARSE_ERROR, e.getMessage(), System.currentTimeMillis());
             return Collections.emptyList();
         }
         // remove mysql quote "``" or sqlserver quote "[]" and db prefix like "dbname.tablename"

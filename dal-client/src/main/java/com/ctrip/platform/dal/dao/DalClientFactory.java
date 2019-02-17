@@ -2,8 +2,11 @@ package com.ctrip.platform.dal.dao;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.Callback;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
+
 
 import com.ctrip.platform.dal.dao.client.DalDirectClient;
 import com.ctrip.platform.dal.dao.client.DalLogger;
@@ -17,10 +20,10 @@ import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 
 public class DalClientFactory {
-    private static Logger logger = LoggerFactory.getLogger(Version.getLoggerName());
-
+    private static ILogger iLogger = DalElementFactory.DEFAULT.getILogger();
     private static AtomicReference<DalConfigure> configureRef = new AtomicReference<DalConfigure>();
-
+    private static final String INIT_DAL_JAVA_CLIENT = "Initialize";
+    private static final String ALREADY_INITIALIZED = "Dal Java Client Factory is already initialized.";
     private static final String THREAD_NAME = "DAL-DalClientFactory-ShutdownHook";
 
     static {
@@ -54,38 +57,45 @@ public class DalClientFactory {
         internalInitClientFactory(path);
     }
 
-    private static void internalInitClientFactory(String path) throws Exception {
+    private static void internalInitClientFactory(final String path) throws Exception {
         if (configureRef.get() != null) {
-            logger.warn("Dal Java Client Factory is already initialized.");
+            iLogger.warn(ALREADY_INITIALIZED);
+            iLogger.logEvent(DalLogTypes.DAL, INIT_DAL_JAVA_CLIENT, ALREADY_INITIALIZED);
             return;
         }
 
         synchronized (DalClientFactory.class) {
             if (configureRef.get() != null) {
+                iLogger.warn(ALREADY_INITIALIZED);
+                iLogger.logEvent(DalLogTypes.DAL, INIT_DAL_JAVA_CLIENT, ALREADY_INITIALIZED);
                 return;
             }
+            iLogger.logTransaction(DalLogTypes.DAL, INIT_DAL_JAVA_CLIENT, "Initialize Dal Java Client", new Callback() {
+                @Override
+                public void execute() throws Exception {
+                    DalConfigure config = null;
+                    if (path == null) {
+                        DalConfigLoader loader = ServiceLoaderHelper.getInstance(DalConfigLoader.class);
+                        if (loader == null)
+                            config = DalConfigureFactory.load();
+                        else
+                            config = loader.load();
+                        iLogger.info("Successfully initialized Dal Java Client Factory");
+                    } else {
+                        config = DalConfigureFactory.load(path);
+                        iLogger.info("Successfully initialized Dal Java Client Factory with " + path);
+                    }
+                    config.validate();
 
-            DalConfigure config = null;
-            if (path == null) {
-                DalConfigLoader loader = ServiceLoaderHelper.getInstance(DalConfigLoader.class);
-                if (loader == null)
-                    config = DalConfigureFactory.load();
-                else
-                    config = loader.load();
-                logger.info("Successfully initialized Dal Java Client Factory");
-            } else {
-                config = DalConfigureFactory.load(path);
-                logger.info("Successfully initialized Dal Java Client Factory with " + path);
-            }
-            config.validate();
+                    LogEntry.init();
+                    DalRequestExecutor.init(config.getFactory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
+                            config.getFactory().getProperty(DalRequestExecutor.KEEP_ALIVE_TIME));
 
-            LogEntry.init();
-            DalRequestExecutor.init(config.getFactory().getProperty(DalRequestExecutor.MAX_POOL_SIZE),
-                    config.getFactory().getProperty(DalRequestExecutor.KEEP_ALIVE_TIME));
+                    DalStatusManager.initialize(config);
 
-            DalStatusManager.initialize(config);
-
-            configureRef.set(config);
+                    configureRef.set(config);
+                }
+            });
         }
     }
 
@@ -146,7 +156,7 @@ public class DalClientFactory {
      */
     public static void shutdownFactory() {
         if (configureRef.get() == null) {
-            logger.warn("Dal Java Client Factory is already shutdown.");
+            iLogger.warn("Dal Java Client Factory is already shutdown.");
             return;
         }
 
@@ -156,19 +166,19 @@ public class DalClientFactory {
             }
 
             try {
-                logger.info("Start shutdown Dal Java Client Factory");
+                iLogger.info("Start shutdown Dal Java Client Factory");
                 getDalLogger().shutdown();
-                logger.info("Dal Logger is shutdown");
+                iLogger.info("Dal Logger is shutdown");
 
                 DalRequestExecutor.shutdown();
-                logger.info("Dal Java Client Factory is shutdown");
+                iLogger.info("Dal Java Client Factory is shutdown");
 
                 DalStatusManager.shutdown();
 
                 LogEntry.shutdown();
-                logger.info("DalWatcher has been destroyed");
+                iLogger.info("DalWatcher has been destroyed");
             } catch (Throwable e) {
-                logger.error("Error during shutdown", e);
+                iLogger.error("Error during shutdown", e);
             }
 
             configureRef.set(null);

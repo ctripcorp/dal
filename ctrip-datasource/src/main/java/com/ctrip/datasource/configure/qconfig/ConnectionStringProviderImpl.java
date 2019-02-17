@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
@@ -23,7 +24,6 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ConnectionStringProviderImpl implements ConnectionStringProvider, DataSourceConfigureConstants {
     private static final String TITAN_APP_ID = "100010061";
-    private static final String DAL = "DAL";
     private ILogger logger= DalElementFactory.DEFAULT.getILogger();
     private String CONNECTION_STRING_GET_MAPCONFIG_FORMAT = "ConnectionString::getMapConfig:%s";
     private String CONNECTION_STRING_GET_CONNECTIONSTRING_FORMAT = "ConnectionString::getConnectionString:%s";
@@ -57,7 +57,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                 String ipConnectionString;
                 String domainConnectionString;
                 String transactionName = String.format(CONNECTION_STRING_GET_CONNECTIONSTRING_FORMAT, name);
-                Transaction transaction = Cat.newTransaction(DAL, transactionName);
+                Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, transactionName);
 
                 try {
                     Map<String, String> map = config.asMap();
@@ -95,7 +95,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     transaction.addData(NORMAL_CONNECTIONSTRING, ipConfigure.getConnectionUrl());
                     transaction.addData(FAILOVER_CONNECTIONSTRING, domainConfigure.getConnectionUrl());
                     transaction.setStatus(Transaction.SUCCESS);
-                    Cat.logEvent(DAL, transactionName, Message.SUCCESS, msg);
+                    Cat.logEvent(DalLogTypes.DAL_CONFIGURE, transactionName, Message.SUCCESS, msg);
                 } catch (Throwable e) {
                     transaction.setStatus(e);
                     throw new IllegalArgumentException(
@@ -123,7 +123,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
 
     private MapConfig _getMapConfig(String name) {
         MapConfig config = null;
-        Transaction transaction = Cat.newTransaction(DAL, String.format(CONNECTION_STRING_GET_MAPCONFIG_FORMAT, name));
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, String.format(CONNECTION_STRING_GET_MAPCONFIG_FORMAT, name));
         try {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
             Feature feature = Feature.create().setHttpsEnable(true).build();
@@ -158,7 +158,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     throw new RuntimeException(String.format(ON_LOAD_PARAMETER_EXCEPTION, name));
 
                 Transaction transaction =
-                        Cat.newTransaction(DAL, String.format(CONNECTION_STRING_LISTENER_ON_LOAD_FORMAT, name));
+                        Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, String.format(CONNECTION_STRING_LISTENER_ON_LOAD_FORMAT, name));
                 try {
                     String keyName = ConnectionStringKeyHelper.getKeyName(name);
                     executeCallback(keyName, map, callback);

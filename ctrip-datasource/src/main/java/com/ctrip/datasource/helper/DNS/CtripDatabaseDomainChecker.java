@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DatabaseDomainChecker;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.util.HashMap;
@@ -34,7 +35,6 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
     private ConcurrentMap<String, String> ipMap = new ConcurrentHashMap<>();
     private DNSUtil dnsUtil = new DNSUtil();
 
-    private static final String DAL = "DAL";
     private static final String IP_OF_DOMAIN_URL_CHANGED_FORMAT = "IPOfDomainUrlChanged:%s";
 
     private static final String NETWORKADDRESS_CACHE_TTL = "networkaddress.cache.ttl";
@@ -144,7 +144,7 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
     private void writeLog(String key, String domainUrl, String ip, String currentIP) {
         String data = String.format("Domain URL: %s, Origin IP: %s, Current IP: %s", domainUrl, ip, currentIP);
         String eventName = String.format(IP_OF_DOMAIN_URL_CHANGED_FORMAT, key);
-        LOGGER.logEvent(DAL, eventName, data);
+        LOGGER.logEvent(DalLogTypes.DAL, eventName, data);
         LOGGER.info(data);
     }
 

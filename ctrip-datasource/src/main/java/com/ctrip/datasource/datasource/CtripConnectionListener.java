@@ -2,11 +2,11 @@ package com.ctrip.datasource.datasource;
 
 import com.ctrip.platform.dal.dao.datasource.AbstractConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 
 import java.sql.Connection;
 
 public class CtripConnectionListener extends AbstractConnectionListener implements ConnectionListener {
-    private static final String DAL = "DAL";
     private static final String CONNECTION_CREATE_CONNECTION = "Connection::createConnection";
     private static final String CONNECTION_CREATE_CONNECTION_FAILED = "Connection::createConnectionFailed";
     private static final String CONNECTION_RELEASE_CONNECTION = "Connection::releaseConnection";
@@ -45,14 +45,14 @@ public class CtripConnectionListener extends AbstractConnectionListener implemen
         String transactionName = String.format("%s:%s", typeName, connectionUrl);
         String message = String.format("%s,%s", poolDesc, connectionUrl);
 
-        LOGGER.logTransaction(DAL, transactionName, message, startTime);
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, message, startTime);
     }
 
     private void logCatTransaction(String typeName, String poolDesc, String connDesc, Throwable exception,
             long startTime) {
         String transactionName = String.format("%s:%s", typeName, connDesc);
         String message = String.format("%s,%s", poolDesc, connDesc);
-        LOGGER.logTransaction(DAL, transactionName, message, exception, startTime);
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, message, exception, startTime);
     }
 
     @Override

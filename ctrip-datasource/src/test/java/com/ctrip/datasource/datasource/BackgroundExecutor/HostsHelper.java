@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.io.FileUtils;
 
 public class HostsHelper {
     public static String getHostFile() {
@@ -26,7 +25,7 @@ public class HostsHelper {
         String fileName = getHostFile();
         List<?> hostFileDataLines = null;
         try {
-            hostFileDataLines = FileUtils.readLines(new File(fileName));
+            hostFileDataLines = FileUtil.readLines(new File(fileName));
         } catch (IOException e) {
             System.out.println("Reading host file occurs error: " + e.getMessage());
             return false;
@@ -54,7 +53,7 @@ public class HostsHelper {
 
         if (updateFlag) {
             try {
-                FileUtils.writeLines(new File(fileName), newLinesList);
+                FileUtil.writeLines(new File(fileName), newLinesList);
             } catch (IOException e) {
                 System.out.println("Updating host file occurs error: " + e.getMessage());
                 return false;
@@ -71,7 +70,7 @@ public class HostsHelper {
         String fileName = getHostFile();
         List<?> hostFileDataLines = null;
         try {
-            hostFileDataLines = FileUtils.readLines(new File(fileName));
+            hostFileDataLines = FileUtil.readLines(new File(fileName));
         } catch (IOException e) {
             System.out.println("Reading host file occurs error: " + e.getMessage());
             return false;
@@ -123,7 +122,7 @@ public class HostsHelper {
 
         if (updateFlag || !findFlag) {
             try {
-                FileUtils.writeLines(new File(fileName), newLinesList);
+                FileUtil.writeLines(new File(fileName), newLinesList);
             } catch (IOException e) {
                 System.out.println("Updating host file occurs error: " + e.getMessage());
                 return false;

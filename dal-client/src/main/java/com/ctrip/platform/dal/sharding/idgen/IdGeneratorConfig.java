@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
 import com.ctrip.platform.dal.dao.helper.DalClassScanner;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import javax.persistence.Entity;
@@ -16,7 +17,6 @@ import java.util.Set;
 public class IdGeneratorConfig implements IIdGeneratorConfig {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String TYPE_DAL = "DAL";
     private static final String NAME_NO_ENTITY_FOUND = "NO_ENTITY_FOUND";
 
     private String sequenceDbName;
@@ -106,7 +106,7 @@ public class IdGeneratorConfig implements IIdGeneratorConfig {
                 if (sequenceTables.isEmpty()) {
                     String name = String.format("%s::entityDbName=%s,entityPackage=%s",
                             NAME_NO_ENTITY_FOUND, entityDbName, entityPackage);
-                    LOGGER.logEvent(TYPE_DAL, name, null);
+                    LOGGER.logEvent(DalLogTypes.DAL, name, null);
                 }
             } catch (Throwable t) {
                 LOGGER.error(String.format("Entity scan exception (entityDbName: %s, entityPackage: %s)",

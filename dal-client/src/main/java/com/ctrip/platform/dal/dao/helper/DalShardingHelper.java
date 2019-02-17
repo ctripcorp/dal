@@ -9,14 +9,16 @@ import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 
 public class DalShardingHelper {
     public static ILogger logger = DalElementFactory.DEFAULT.getILogger();
-    private static final String DAL_VALIDATION = "DAL.validation";
-    private static final String CROSSSHARD_BULKTASK_IN_TRANSACTION = "CrossShardBulkTaskInTransaction";
+
+    private static final String CROSSSHARD_BULKREQUEST_IN_TRANSACTION = "CrossShardBulkRequestInTransaction";
+    private static final String CROSSSHARD_BULKREQUEST = "CrossShardBulkRequest";
 
     public static boolean isShardingEnabled(String logicDbName) {
         return getDatabaseSet(logicDbName).isShardingSupported();
@@ -299,11 +301,15 @@ public class DalShardingHelper {
         if (!isShardingEnabled(logicDbName))
             return;
 
+        Set<String> notNullShardIds = getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos).keySet());
+        if (notNullShardIds.size() > 1)
+            logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST, "");
+
         if (!DalTransactionManager.isInTransaction())
             return;
 
-        if (getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos).keySet()).size() > 1)
-            logger.logEvent(DAL_VALIDATION, CROSSSHARD_BULKTASK_IN_TRANSACTION, "");
+        if (notNullShardIds.size() > 1)
+            logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST_IN_TRANSACTION, "");
     }
 
     public static void detectDistributedTransaction(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {

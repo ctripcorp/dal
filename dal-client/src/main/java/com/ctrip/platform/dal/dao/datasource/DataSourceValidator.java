@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.mysql.jdbc.MySQLConnection;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -15,7 +16,6 @@ import java.sql.Statement;
 public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final int DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS = 5;
-    private static final String DAL = "DAL";
     private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
     private String IS_VALID_FORMAT = "isValid: %s";
@@ -34,7 +34,7 @@ public class DataSourceValidator implements ValidatorProxy {
             connectionUrl = LoggerHelper.getSimplifiedDBUrl(connection.getMetaData().getURL());
             transactionName = String.format(CONNECTION_VALIDATE_CONNECTION_FORMAT, connectionUrl);
             isValid = validateConnection(connection, validateAction);
-            LOGGER.logTransaction(DAL, transactionName, String.format(IS_VALID_FORMAT, isValid), startTime);
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, String.format(IS_VALID_FORMAT, isValid), startTime);
 
             if (!isValid) {
                 LOGGER.warn(IS_VALID_RETURN_INFO);
@@ -47,7 +47,7 @@ public class DataSourceValidator implements ValidatorProxy {
             }
             sb.append(String.format(VALIDATE_ERROR_FORMAT, e.getMessage()));
             LOGGER.warn(sb.toString());
-            LOGGER.logTransaction(DAL, transactionName, sb.toString(), e, startTime);
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, sb.toString(), e, startTime);
         }
 
         return isValid;

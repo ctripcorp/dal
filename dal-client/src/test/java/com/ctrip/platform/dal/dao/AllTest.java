@@ -20,11 +20,12 @@ import org.junit.runners.Suite.SuiteClasses;
 		com.ctrip.platform.dal.dao.unittests.AllTest.class,
 		com.ctrip.platform.dal.dao.annotation.AllTest.class,
 		com.ctrip.platform.dal.dao.configure.AllTest.class,
+        com.ctrip.platform.dal.dao.sharding.idgen.AllTests.class,
+        EntityManagerTest.class,
 		/**
 		 * IMPORTANT NOTE! markdown test must be the last one to avoid interfere other test
 		 */
 		com.ctrip.platform.dal.dao.markdown.AllTests.class,
-		com.ctrip.platform.dal.dao.sharding.idgen.AllTests.class,
-		EntityManagerTest.class
+
 })
 public class AllTest {}

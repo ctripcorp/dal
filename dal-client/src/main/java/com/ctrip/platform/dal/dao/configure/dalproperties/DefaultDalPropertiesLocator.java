@@ -3,8 +3,8 @@ package com.ctrip.platform.dal.dao.configure.dalproperties;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
-
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String SWITCH_KEYNAME = "TableParseSwitch";
-    private static final String DAL = "DAL";
     private static final String DAL_PROPERTIES_SET_TABLE_PARSE_SWITCH = "DalProperties::setTableParseSwitch";
 
     private AtomicReference<TableParseSwitch> tableParseSwitchRef = new AtomicReference<>(TableParseSwitch.ON);
@@ -36,7 +35,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
         TableParseSwitch tableParseSwitch = status ? TableParseSwitch.ON : TableParseSwitch.OFF;
         tableParseSwitchRef.set(tableParseSwitch);
         String message = String.format("TableParseSwitch status:%s", tableParseSwitch.toString());
-        LOGGER.logEvent(DAL, DAL_PROPERTIES_SET_TABLE_PARSE_SWITCH, message);
+        LOGGER.logEvent(DalLogTypes.DAL, DAL_PROPERTIES_SET_TABLE_PARSE_SWITCH, message);
     }
 
     @Override

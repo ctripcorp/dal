@@ -17,7 +17,6 @@
         <javax.servlet-version>3.0.0.v201103241009</javax.servlet-version>
         <slf4j-api-version>1.7.2</slf4j-api-version>
         <commons-lang-version>2.5</commons-lang-version>
-        <commons-io-version>2.5</commons-io-version>
         <junit-version>4.12</junit-version>
         <easymock-version>2.3</easymock-version>
         <spring-version>4.3.8.RELEASE</spring-version>
@@ -90,11 +89,6 @@
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>${commons-lang-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io-version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

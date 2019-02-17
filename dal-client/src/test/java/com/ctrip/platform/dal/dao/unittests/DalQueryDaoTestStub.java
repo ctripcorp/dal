@@ -341,7 +341,7 @@ public class DalQueryDaoTestStub extends BaseTestStub {
 	 */
 	@Test
 	public void testQueryTopSuccess() throws SQLException{
-		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE quantity = 10";
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE quantity = 10 order by id";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
 		List<ClientTestModel> models = client.queryTop(sql, param, hints, mapper, 10);
@@ -372,7 +372,7 @@ public class DalQueryDaoTestStub extends BaseTestStub {
 	 */
 	@Test
 	public void testQueryObjectTopSuccess() throws SQLException{
-		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE quantity = 10";
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " WHERE quantity = 10 order by id";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
 		List<Integer> models = client.queryTop(sql, param, hints, Integer.class, 10);
@@ -403,7 +403,7 @@ public class DalQueryDaoTestStub extends BaseTestStub {
 	 */
 	@Test
 	public void testQueryFromSuccess() throws SQLException{
-		String sql = "SELECT * FROM " + TABLE_NAME;
+		String sql = "SELECT * FROM " + TABLE_NAME + " order by id";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
 		List<ClientTestModel> models = client.queryFrom(sql, param, hints, mapper, 0, 10);
@@ -438,7 +438,7 @@ public class DalQueryDaoTestStub extends BaseTestStub {
 	 */
 	@Test
 	public void testQueryObjectFromSuccess() throws SQLException{
-		String sql = "SELECT quantity FROM " + TABLE_NAME;
+		String sql = "SELECT quantity FROM " + TABLE_NAME + " order by id";
 		StatementParameters param = new StatementParameters();
 		DalHints hints = new DalHints();
 		List<Integer> models = client.queryFrom(sql, param, hints, Integer.class, 0, 10);

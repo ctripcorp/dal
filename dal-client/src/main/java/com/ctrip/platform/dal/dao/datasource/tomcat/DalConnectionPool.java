@@ -66,6 +66,17 @@ public class DalConnectionPool extends ConnectionPool {
         super.abandon(con);
     }
 
+    @Override
+    protected PooledConnection borrowConnection(long now, PooledConnection con, String username, String password) throws SQLException {
+        try {
+            connectionListener.onBorrowConnection(getName(), getConnection(con));
+        } catch (Exception e) {
+            logger.error("[borrow]" + this, e);
+        }
+
+        return super.borrowConnection(now, con, username, password);
+    }
+
     public static void setConnectionListener(ConnectionListener connectionListener) {
         DalConnectionPool.connectionListener = connectionListener;
     }

@@ -3,6 +3,10 @@ package com.ctrip.platform.dal.dao.helper.EntityManagerTest;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.EntityManager;
 import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Dao.ChildwithallfieldsDao;
+import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.DatabaseAnnotation.ChildWithDatabaseAnnotation;
+import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.DatabaseAnnotation.ChildWithDatabaseAnnotation2;
+import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.DatabaseAnnotation.ChildWithoutDatabaseAnnotation;
+import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.DatabaseAnnotation.ParentWithoutDatabaseAnnotationExtendsWith;
 import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.Inheritance.Child;
 import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.Inheritance.ChildWithAllFields;
 import com.ctrip.platform.dal.dao.helper.EntityManagerTest.Entity.MultiAutoIncrementInDifferentClass.ChildWithAutoIncrement;
@@ -604,7 +608,7 @@ public class EntityManagerTest {
         }
     }
 
-    //子类没有自增主键，父类有自增主键，去父类的自增主键
+    // 子类没有自增主键，父类有自增主键，去父类的自增主键
     @Test
     public void testAutoIncrementOnlyInParentClass() throws SQLException {
         try {
@@ -612,6 +616,79 @@ public class EntityManagerTest {
             Field[] fields = entity.getIdentity();
             Assert.assertTrue(fields.length == 1);
             Assert.assertTrue(fields[0].getName().equals("grandParentId"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    // 子类，父类都没有Database annotation，抛出异常
+    @Test
+    public void testWithoutAnyDatabaseAnnotation() throws SQLException {
+        try {
+            EntityManager entity = EntityManager.getEntityManager(ChildWithoutDatabaseAnnotation.class);
+            String databaseName = entity.getDatabaseName();
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage().equals("The entity must configure Database annotation."));
+        }
+    }
+
+    // 子类，父类都没有Table annotation，使用class name(原先的默认行为)
+    @Test
+    public void testWithoutAnyTableAnnotation() throws SQLException {
+        try {
+            EntityManager entity = EntityManager.getEntityManager(ChildWithoutDatabaseAnnotation.class);
+            Assert.assertTrue(entity.getTableName().equals("ChildWithoutDatabaseAnnotation"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    // 子类没有Database annotation， 取父类中的
+    @Test
+    public void testDatabaseAnnotationExistInParentClass() throws SQLException {
+        try {
+            EntityManager entity = EntityManager.getEntityManager(ParentWithoutDatabaseAnnotationExtendsWith.class);
+            Assert.assertTrue(entity.getDatabaseName().equals("GrandParentDatabase"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    // 子类没有Table annotation，取父类中的
+    @Test
+    public void testTableAnnotationExistInParentClass() throws SQLException {
+        try {
+            EntityManager entity = EntityManager.getEntityManager(ParentWithoutDatabaseAnnotationExtendsWith.class);
+            Assert.assertTrue(entity.getTableName().equals("GrandParentTable"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    // 子类中有Database annotation，取子类中的
+    @Test
+    public void testDatabaseAnnotationExistInChildClass() throws SQLException {
+        try {
+            EntityManager entity = EntityManager.getEntityManager(ChildWithDatabaseAnnotation.class);
+            Assert.assertTrue(entity.getDatabaseName().equals("ChildDatabase"));
+
+            EntityManager entity1 = EntityManager.getEntityManager(ChildWithDatabaseAnnotation2.class);
+            Assert.assertTrue(entity1.getDatabaseName().equals("ChildDatabase"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    // 子类中有Table annotation，取子类中的
+    @Test
+    public void testTableAnnotationExistInChildClass() throws SQLException {
+        try {
+            EntityManager entity = EntityManager.getEntityManager(ChildWithDatabaseAnnotation.class);
+            Assert.assertTrue(entity.getTableName().equals("ChildTable"));
+
+            EntityManager entity1 = EntityManager.getEntityManager(ChildWithDatabaseAnnotation2.class);
+            Assert.assertTrue(entity1.getTableName().equals("ChildTable"));
         } catch (Exception e) {
             Assert.fail();
         }

@@ -44,6 +44,9 @@ public class EntityManager {
 	private List<String> updatableColumnList = new ArrayList<>();
 	private List<String> primaryKeyNameList = new ArrayList<String>();
 	private List<Field> identityList = new ArrayList<>();
+
+	private String databaseName = null;
+	private String tableName = null;
 	private String versionColumn = null;
 
 	public static <T> EntityManager getEntityManager(Class<T> clazz) throws SQLException {
@@ -73,6 +76,8 @@ public class EntityManager {
 		boolean containsFields = false;
 
 		while (currentClass != null) {
+			processClassAnnotation(currentClass);
+
 			String currentClassName = currentClass.getName();
 			Field[] allFields = currentClass.getDeclaredFields();
 
@@ -91,6 +96,39 @@ public class EntityManager {
 		// If child class and its all parent classes(if exist) don't contain any field,then we throw an exception.
 		if (!containsFields)
 			throw new SQLException("The entity[" + clazz.getName() + "] has no fields.");
+	}
+
+	private void processClassAnnotation(Class<?> clazz) {
+		processDatabaseAnnotation(clazz);
+		processTableAnnotation(clazz);
+	}
+
+	private void processDatabaseAnnotation(Class<?> clazz) {
+		Database database = clazz.getAnnotation(Database.class);
+		if (database == null)
+			return;
+
+		String name = database.name();
+		if (name == null)
+			return;
+
+		if (databaseName == null) {
+			databaseName = name;
+		}
+	}
+
+	private void processTableAnnotation(Class<?> clazz) {
+		Table table = clazz.getAnnotation(Table.class);
+		if (table == null)
+			return;
+
+		String name = table.name();
+		if (name == null)
+			return;
+
+		if (tableName == null) {
+			tableName = name;
+		}
 	}
 
 	private void processAllFields(String currentClassName, Field[] allFields, Map<String, String> columnNamesMap,
@@ -209,16 +247,17 @@ public class EntityManager {
 	}
 
 	public String getDatabaseName() throws DalException {
-		Database db = clazz.getAnnotation(Database.class);
-		if (db != null && db.name() != null)
-			return db.name();
+		if (databaseName != null) {
+			return databaseName;
+		}
+
 		throw new DalException(ErrorCode.NoDatabaseDefined);
 	}
 
 	public <T> String getTableName() {
-		Table table = clazz.getAnnotation(Table.class);
-		if (table != null && table.name() != null)
-			return table.name();
+		if (tableName != null)
+			return tableName;
+
 		Entity entity = clazz.getAnnotation(Entity.class);
 		if (entity != null && (!entity.name().isEmpty()))
 			return entity.name();

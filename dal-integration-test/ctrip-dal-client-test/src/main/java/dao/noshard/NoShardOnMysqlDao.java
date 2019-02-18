@@ -595,17 +595,11 @@ public class NoShardOnMysqlDao {
 		hints = DalHints.createIfAbsent(hints);
 
 		SelectSqlBuilder builder = new SelectSqlBuilder();
-		builder.select("Birth","Name","Age","ID");
-//		builder.selectAll();
-//		builder.equalNullable("1", 1, Types.INTEGER, false);
-//		builder.and();
+		builder.select("Birth", "Name", "Age", "ID");
 		builder.inNullable("Age", Age, Types.INTEGER, false);
-		 builder.orderBy("Age", false);
-	        builder.orderBy("ID", true);
-//		builder.and();
+		builder.orderBy("Age", false);
+		builder.orderBy("ID", true);
 		return client.query(builder, hints);
-		
-		
 	}
 	
 	/**

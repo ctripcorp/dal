@@ -2,6 +2,7 @@ package noshardtest;
 
 
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import dao.noshard.NoShardOnSqlServerDao;
 import entity.SqlServerPeopleTable;
 import org.junit.*;
@@ -538,6 +539,33 @@ public class NoShardOnSqlServerUnitTest {
     }
 
     @Test
+    public void testTransSetRollback() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                SqlServerPeopleTable pojo = new SqlServerPeopleTable();
+                pojo.setPeopleID(2l);
+                dao.delete(new DalHints(), pojo);
+//                DalTransactionManager.setRollbackOnly();
+                SqlServerPeopleTable ret = dao.queryByPk(1,
+                        new DalHints());
+                ret.setCityID(2000);
+                dao.update(new DalHints(), ret);
+                dao.insert(new DalHints(), pojo);
+
+				return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints());
+        } catch (Exception e) {
+        }
+
+        assertEquals(21, dao.queryByPk(2, new DalHints()).getCityID().intValue());
+        assertEquals(6, dao.count(new DalHints()));
+    }
+
+    @Test
     public void testTransFail() throws Exception {
         DalCommand command = new DalCommand() {
             @Override
@@ -606,6 +634,45 @@ public class NoShardOnSqlServerUnitTest {
         assertEquals(1000, dao.queryByPk(1, new DalHints()).getCityID().intValue());
         assertEquals(2000, dao.queryByPk(3, new DalHints()).getCityID().intValue());
         assertEquals(100, dao.queryByPk(7, new DalHints()).getCityID().intValue());
+        assertEquals(6, dao.count(new DalHints()));
+    }
+
+    @Test
+    public void testTransCommandSetRollback() throws Exception {
+        List<DalCommand> cmds = new LinkedList<DalCommand>();
+        cmds.add(new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                SqlServerPeopleTable ret = dao.queryByPk(1,
+                        new DalHints());
+                ret.setCityID(1000);
+                dao.update(new DalHints(), ret);
+                return true;
+            }
+        });
+        cmds.add(new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                SqlServerPeopleTable pojo = new SqlServerPeopleTable();
+                pojo.setPeopleID(2l);
+                dao.delete(new DalHints(), pojo);
+//                DalTransactionManager.setRollbackOnly();
+                SqlServerPeopleTable ret = dao.queryByPk(3,
+                        new DalHints());
+                ret.setCityID(2000);
+                dao.update(new DalHints(), ret);
+                dao.insert(new DalHints(), pojo);
+
+				return true;
+            }
+        });
+        try {
+            client.execute(cmds, new DalHints());
+        } catch (Exception e) {
+        }
+        assertEquals(20, dao.queryByPk(1, new DalHints()).getCityID().intValue());
+        assertEquals(21, dao.queryByPk(2, new DalHints()).getCityID().intValue());
+        assertEquals(22, dao.queryByPk(3, new DalHints()).getCityID().intValue());
         assertEquals(6, dao.count(new DalHints()));
     }
 

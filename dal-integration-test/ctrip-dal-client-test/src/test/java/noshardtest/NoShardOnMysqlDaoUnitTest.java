@@ -2,6 +2,7 @@ package noshardtest;
 
 
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.sqlbuilder.MatchPattern;
 import dao.noshard.NoShardOnMysqlDao;
 import entity.MysqlPersonExtendsUpdatableEntity;
@@ -1312,6 +1313,31 @@ public class NoShardOnMysqlDaoUnitTest {
     }
 
     @Test
+    public void testTransSetRollback() throws Exception {
+        DalCommand command = new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                try {
+                    MysqlPersonExtendsUpdatableEntity pojo = new MysqlPersonExtendsUpdatableEntity();
+                    pojo.setID(2);
+                    dao.delete(new DalHints(), pojo);
+//                    DalTransactionManager.setRollbackOnly();
+                }catch (Exception e){
+                    throw e;
+                }
+                return true;
+            }
+        };
+        try {
+            client.execute(command, new DalHints());
+        } catch (Exception e) {
+//			e.printStackTrace();
+        }
+        assertEquals(21, dao.queryByPk(2, new DalHints()).getAge().intValue());
+        assertEquals(6, dao.count(new DalHints()));
+    }
+
+    @Test
     public void testTransFail() throws Exception {
         DalCommand command = new DalCommand() {
             @Override
@@ -1361,6 +1387,41 @@ public class NoShardOnMysqlDaoUnitTest {
                 ret.setAge(2000);
                 ret.setID(3);
                 dao.insert(new DalHints().enableIdentityInsert(), ret);//主键冲突
+                return true;
+            }
+        });
+
+        try {
+            client.execute(cmds, new DalHints());
+        } catch (Exception e) {
+//			e.printStackTrace();
+        }
+
+        assertEquals(20, dao.queryByPk(1, new DalHints()).getAge().intValue());
+        assertEquals(21, dao.queryByPk(2, new DalHints()).getAge().intValue());
+        assertEquals(6, dao.count(new DalHints()));
+
+    }
+
+    @Test
+    public void testTransCommandsSetRollback() throws SQLException {
+        List<DalCommand> cmds = new LinkedList<>();
+        cmds.add(new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                MysqlPersonExtendsUpdatableEntity ret = dao.queryByPk(1, new DalHints());
+                ret.setAge(1000);
+                dao.update(new DalHints(), ret);
+                return true;
+            }
+        });
+        cmds.add(new DalCommand() {
+            @Override
+            public boolean execute(DalClient client) throws SQLException {
+                MysqlPersonExtendsUpdatableEntity pojo = new MysqlPersonExtendsUpdatableEntity();
+                pojo.setID(2);
+                dao.delete(new DalHints(), pojo);
+//                DalTransactionManager.setRollbackOnly();
                 return true;
             }
         });

@@ -17,11 +17,8 @@
   <properties>
     <java.version>1.8</java.version>
     <framework-bom.version>2.46.0</framework-bom.version>
-    <!--<dal.version>1.16.9</dal.version>
-    <ctrip-datasource.version>1.16.9</ctrip-datasource.version>
--->
-    <!--<dal.version>1.16.3</dal.version>
-    <ctrip-datasource.version>1.16.3</ctrip-datasource.version>-->
+    <dal.version>1.16.12-SNAPSHOT</dal.version>
+    <ctrip-datasource.version>1.16.12-SNAPSHOT</ctrip-datasource.version>
   </properties>
 
   <modules>
@@ -31,14 +28,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <!-- Third Party-->
-      <dependency>
-        <groupId>com.ctrip.thirdparty</groupId>
-        <artifactId>ctrip-thirdparty-bom</artifactId>
-        <version>0.3.0</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-bom</artifactId>
@@ -46,7 +35,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-     <!-- <dependency>
+      <dependency>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-dal-client</artifactId>
         <version>${dal.version}</version>
@@ -55,7 +44,7 @@
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-datasource</artifactId>
         <version>${ctrip-datasource.version}</version>
-      </dependency>-->
+      </dependency>
       <!--<dependency>
         <groupId>com.ctrip.framework.idgen</groupId>
         <artifactId>idgen-client</artifactId>

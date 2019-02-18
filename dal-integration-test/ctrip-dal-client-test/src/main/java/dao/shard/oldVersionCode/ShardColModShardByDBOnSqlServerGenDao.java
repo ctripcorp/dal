@@ -475,6 +475,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 				false);
 		builder.select("CityID", "Name", "ProvinceID", "PeopleID", "CountryID");
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		builder.orderBy("PeopleID",true);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 //		return queryDao.query(sql, parameters, hints, parser);
@@ -491,6 +492,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 				false);
 		builder.select("CityID", "Name", "ProvinceID", "PeopleID", "CountryID");
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		builder.orderBy("PeopleID",true);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 //		return queryDao.query(sql, parameters, hints, parser);
@@ -507,6 +509,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 				false);
 		builder.select("CityID", "Name", "ProvinceID", "PeopleID", "CountryID");
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		builder.orderBy("PeopleID",true);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 //		return queryDao.query(sql, parameters, hints, parser);
@@ -576,7 +579,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	 **/
 	public List<SqlServerPeopleTable> test_def_queryFrom_pojoList(
 			List<Integer> CityID, DalHints hints,int start,int count) throws SQLException {
-		String sql = "select * from People with(nolock) where CityID in (?)";
+		String sql = "select * from People with(nolock) where CityID in (?) order by peopleid";
 		sql = SQLParser.parse(sql, CityID);
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
@@ -593,7 +596,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	 **/
 	public List<SqlServerPeopleTable> test_def_queryFromPartialFieldsSet_pojoList(
 			List<Integer> CityID, DalHints hints,int start,int count) throws SQLException {
-		String sql = "select * from People with(nolock) where CityID in (?)";
+		String sql = "select * from People with(nolock) where CityID in (?) order by peopleid";
 		sql = SQLParser.parse(sql, CityID);
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);
@@ -613,7 +616,7 @@ public class ShardColModShardByDBOnSqlServerGenDao {
 	 **/
 	public List<SqlServerPeopleTable> test_def_queryFromPartialFieldsStrings_pojoList(
 			List<Integer> CityID, DalHints hints,int start,int count) throws SQLException {
-		String sql = "select * from People with(nolock) where CityID in (?)";
+		String sql = "select * from People with(nolock) where CityID in (?) order by peopleid";
 		sql = SQLParser.parse(sql, CityID);
 		StatementParameters parameters = new StatementParameters();
 		hints = DalHints.createIfAbsent(hints);

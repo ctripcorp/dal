@@ -81,6 +81,7 @@ import testUtil.NetStatChecker;
             SpTestDaoUnitTest.class,
             TVPColumnsOrderDaoUnitTest.class,
             TestFor414.class,
+            EntityExtendsOnMysqlTest.class,
     })
     public class AllTests {
         @BeforeClass

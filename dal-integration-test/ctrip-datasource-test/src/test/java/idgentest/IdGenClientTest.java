@@ -37,7 +37,6 @@ public class IdGenClientTest {
 
     @Test
     public void testIdGenConcurrent() throws Exception {
-        for (int j = 0; j < 100; j++) {
             final IdGenerator idGenerator = IdGeneratorFactory.getInstance().getOrCreateLongIdGenerator("testName1");
             final List<Long> idList = Collections.synchronizedList(new ArrayList<Long>());
             int requireSize = 50000;
@@ -50,7 +49,9 @@ public class IdGenClientTest {
                     @Override
                     public void run() {
                         try {
-                            idList.add(idGenerator.nextId().longValue());
+                            for (int j = 0; j < 100; j++) {
+                                idList.add(idGenerator.nextId().longValue());
+                            }
                         } catch (Exception e) {
                             logger.info(e.toString());
                             result.set(false);
@@ -66,21 +67,11 @@ public class IdGenClientTest {
             long cost = end - start;
             int idSize = idList.size();
             logger.info(idSize + " cost " + cost + " ms");
-            Assert.assertEquals(requireSize, idSize);
-//            Assert.assertTrue(cost <= 1000);
-//            if (result.get() == false)
-//                try {
-//                    Deque<IdGenerator> queue = ((DynamicIdGenerator) idGenerator).getIdGeneratorQueue();
-//                    Thread.sleep(1000);
-//                } catch (Exception e) {
-//
-//                }
+            Assert.assertEquals(requireSize*100, idSize);
 //            check duplicate
             Set<Long> idSet = new HashSet<>();
             idSet.addAll(idList);
             Assert.assertEquals(idSize, idSet.size());
-        }
-
     }
 
    /* @Test

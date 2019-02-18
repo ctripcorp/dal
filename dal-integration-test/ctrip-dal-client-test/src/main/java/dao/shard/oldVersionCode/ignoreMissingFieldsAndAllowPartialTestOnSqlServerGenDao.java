@@ -519,6 +519,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerGenDao {
 				false);
 		builder.selectAll();
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		builder.orderBy("PeopleID",true);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 
@@ -535,6 +536,7 @@ public class ignoreMissingFieldsAndAllowPartialTestOnSqlServerGenDao {
 				false);
 		builder.selectAll();
 		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		builder.orderBy("PeopleID",true);
 		String sql = builder.build();
 		StatementParameters parameters = builder.buildParameters();
 

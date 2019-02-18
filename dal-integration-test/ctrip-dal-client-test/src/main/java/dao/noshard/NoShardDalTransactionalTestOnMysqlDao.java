@@ -1108,6 +1108,10 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
         delete(hints, ret);
     }
 
+    public void test() throws Exception{
+        transFail();
+    }
+
     @DalTransactional(logicDbName = DATA_BASE)
     public void transFail() throws Exception {
         DalTransactionManager.register(new DalTransactionListener() {
@@ -1142,6 +1146,41 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
         ret.setAge(99);
         update(null, ret);
         throw new SQLException();
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void transSetRollback() throws Exception {
+        DalTransactionManager.register(new DalTransactionListener() {
+            @Override
+            public void beforeCommit() throws SQLException {
+                System.out.println("beforeTransFailCommit");
+//                Assert.assertTrue(DalTransactionManager.isInTransaction());
+            }
+
+            @Override
+            public void beforeRollback() {
+                System.out.println("beforeTransFailRollback");
+//                Assert.assertTrue(DalTransactionManager.isInTransaction());
+            }
+
+            @Override
+            public void afterCommit() {
+                System.out.println("afterTransFailCommit");
+//                Assert.assertFalse(DalTransactionManager.isInTransaction());
+            }
+
+            @Override
+            public void afterRollback() {
+                System.out.println("afterTransFailRollback");
+//                Assert.assertFalse(DalTransactionManager.isInTransaction());
+            }
+        });
+        MysqlPersonTable ret = queryByPk(1, null);
+        delete(null, ret);
+        ret.setID(3);
+        ret.setAge(99);
+        update(null, ret);
+//        DalTransactionManager.setRollbackOnly();
     }
 
 @DalTransactional(logicDbName = DATA_BASE)
@@ -1207,6 +1246,37 @@ public void firstLevelTransaction(Integer firstlevelId,Boolean firstLevelThrowEx
             System.out.println("forth level done");
         } catch (Exception e) {
             if (throwException)
+                throw e;
+        }
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void forthLevelTransactionSetRollback(Integer id,Boolean throwException) throws Exception{
+        try {
+            MysqlPersonTable ret = new MysqlPersonTable();
+            ret.setID(id);
+            ret.setName("forthLevelSetRollback");
+            insert(new DalHints().enableIdentityInsert(), ret);
+//            DalTransactionManager.setRollbackOnly();
+            System.out.println("forth level done");
+        } catch (Exception e) {
+            if (throwException)
+                throw e;
+        }
+    }
+
+    @DalTransactional(logicDbName = DATA_BASE)
+    public void thirdLevelTransactionSetRollback(Integer thirdlevelId,Boolean thirdLevelthrowException,
+                                      Integer forthlevelId,Boolean forthLevelthrowException) throws Exception{
+        try {
+            MysqlPersonTable ret = new MysqlPersonTable();
+            ret.setID(thirdlevelId);
+            ret.setName("thirdLevelSetRollback");
+            insert(new DalHints().enableIdentityInsert(), ret);
+            forthLevelTransactionSetRollback(forthlevelId,forthLevelthrowException);
+            System.out.println("third level done");
+        } catch (Exception e) {
+            if (thirdLevelthrowException)
                 throw e;
         }
     }

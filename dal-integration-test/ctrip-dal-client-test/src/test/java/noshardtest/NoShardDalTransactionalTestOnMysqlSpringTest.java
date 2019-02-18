@@ -84,6 +84,18 @@ public class NoShardDalTransactionalTestOnMysqlSpringTest {
         Assert.assertEquals(20,dao.queryByPk(3,null).getAge().intValue());
     }
 
+    @Test
+    public void transSetRollbackTest() throws Exception{
+        try {
+            dao.transSetRollback();
+        }
+        catch (Exception e){
+
+        }
+        Assert.assertEquals(6,dao.count(null));
+        Assert.assertEquals(20,dao.queryByPk(3,null).getAge().intValue());
+    }
+
     //    第四层异常，自己吞掉，其它层都成功，则除了自身没有操作成功，其他层都成功提交
     @Test
     public void nestTransactionTest1() throws Exception{
@@ -171,6 +183,18 @@ public class NoShardDalTransactionalTestOnMysqlSpringTest {
                     1, true,
                     10, true);
             Assert.fail();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Assert.assertEquals(6,dao.count(null));
+    }
+
+    @Test
+    public void nestTransactionSetRollback() throws Exception{
+        try {
+            dao.thirdLevelTransactionSetRollback(30, true,
+                    20, true);
+//            Assert.fail();
         }catch (Exception e){
             e.printStackTrace();
         }

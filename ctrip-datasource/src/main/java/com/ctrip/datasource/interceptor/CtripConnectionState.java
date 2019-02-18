@@ -1,5 +1,6 @@
 package com.ctrip.datasource.interceptor;
 
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.JdbcInterceptor;
@@ -11,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CtripConnectionState extends JdbcInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(CtripConnectionState.class);
-    private static final String DAL = "DAL";
     private static final String DAL_CREATE_CONNECTION = "DataSource::createConnection:%s";
     private static final String DAL_DESTROY_CONNECTION = "DataSource::destroyConnection:%s";
     private static final String QUESTION_MARK = "?";
@@ -36,7 +36,7 @@ public class CtripConnectionState extends JdbcInterceptor {
             String info = String.format("%s of url %s has been created for the first time,connection pool name:%s.",
                     connectionName, url, poolName);
             logger.info(info);
-            Cat.logEvent(DAL, String.format(DAL_CREATE_CONNECTION, url));
+            Cat.logEvent(DalLogTypes.DAL, String.format(DAL_CREATE_CONNECTION, url));
         } catch (Throwable e) {
             String aaa = e.getMessage();
         }
@@ -55,7 +55,7 @@ public class CtripConnectionState extends JdbcInterceptor {
             String info = String.format("%s of url %s has been destroyed,connection pool name:%s.", connectionName, url,
                     poolName);
             logger.info(info);
-            Cat.logEvent(DAL, String.format(DAL_DESTROY_CONNECTION, url));
+            Cat.logEvent(DalLogTypes.DAL, String.format(DAL_DESTROY_CONNECTION, url));
         } catch (Throwable e) {
         }
     }

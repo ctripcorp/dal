@@ -1,6 +1,7 @@
 package com.ctrip.datasource.helper.DNS;
 
 import com.ctrip.platform.dal.dao.helper.Action;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -18,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DNSUtil {
-    private static final String DAL = "DAL";
     private String RESOLVE_DOMAIN_URL_FORMAT = "ResolveDomainUrl:%s";
     private String DOMAIN_URL_FORMAT = "Domain Url:%s, IP:%s";
     private final int DNS_RESOLVE_TIMEOUT_IN_MILLIS = 1 * 1000;
@@ -38,7 +38,7 @@ public class DNSUtil {
 
         String ip = "";
         DNSInfo info = null;
-        Transaction t = Cat.newTransaction(DAL, String.format(RESOLVE_DOMAIN_URL_FORMAT, domain));
+        Transaction t = Cat.newTransaction(DalLogTypes.DAL, String.format(RESOLVE_DOMAIN_URL_FORMAT, domain));
 
         try {
             info = getDNSInfo(domain);

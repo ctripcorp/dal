@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -41,7 +42,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return manager;
     }
 
-    private static final String DAL = "DAL";
     private static final String DATASOURCE_NOTIFY_LISTENER_START = "DataSource.notifyListener.start";
     private static final String DATASOURCE_NOTIFY_LISTENER_END = "DataSource.notifyListener.end";
 
@@ -250,7 +250,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         if (connectionString.equals(oldConnectionString)) {
             String msg = String.format("New connection string of %s equals to old connection string.", name);
             String eventName = String.format("%s:%s", CONNECTIONSTRING_REFRESHCONNECTIONSTRING, name);
-            Cat.logEvent(DAL, eventName, Message.SUCCESS, msg);
+            Cat.logEvent(DalLogTypes.DAL_CONFIGURE, eventName, Message.SUCCESS, msg);
             LOGGER.info(msg);
             return;
         }
@@ -260,14 +260,14 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             if (newVersion.equals(oldVersion)) {
                 String msg = String.format("New version of %s equals to old version.", name);
                 String eventName = String.format("%s:%s", CONNECTIONSTRING_REFRESHCONNECTIONSTRING, name);
-                Cat.logEvent(DAL, eventName, Message.SUCCESS, msg);
+                Cat.logEvent(DalLogTypes.DAL_CONFIGURE, eventName, Message.SUCCESS, msg);
                 LOGGER.info(msg);
                 return;
             }
         }
 
         String transactionName = String.format("%s:%s", CONNECTIONSTRING_REFRESHCONNECTIONSTRING, name);
-        Transaction t = Cat.newTransaction(DAL, transactionName);
+        Transaction t = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, transactionName);
         DalEncrypter encrypter = getEncrypter();
         String encryptedNewIPConnectionString = encrypter.desEncrypt(ipConnectionString);
         String encryptedNewDomainConnectionString = encrypter.desEncrypt(domainConnectionString);
@@ -283,15 +283,15 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             oldFailoverUrl=oldDomainConfigure.getConnectionUrl();
         }
 
-        Cat.logEvent(DAL, OLD_NORMAL_CONNECTIONURL, Message.SUCCESS, oldNormalUrl);
-        Cat.logEvent(DAL, OLD_FAILOVER_CONNECTIONURL, Message.SUCCESS, oldFailoverUrl);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, OLD_NORMAL_CONNECTIONURL, Message.SUCCESS, oldNormalUrl);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, OLD_FAILOVER_CONNECTIONURL, Message.SUCCESS, oldFailoverUrl);
 
         ConnectionStringConfigure newIPConfigure = connectionString.getIPConnectionStringConfigure();
         ConnectionStringConfigure newDomainConfigure = connectionString.getDomainConnectionStringConfigure();
-        Cat.logEvent(DAL, NEW_NORMAL_CONNECTIONURL, Message.SUCCESS, newIPConfigure.getConnectionUrl());
-        Cat.logEvent(DAL, NEW_FAILOVER_CONNECTIONURL, Message.SUCCESS, newDomainConfigure.getConnectionUrl());
-        Cat.logEvent(DAL, ENCRYPTED_NEW_NORMAL_CONNECTIONSTRING, Message.SUCCESS, encryptedNewIPConnectionString);
-        Cat.logEvent(DAL, ENCRYPTED_NEW_FAILOVER_CONNECTIONSTRING, Message.SUCCESS, encryptedNewDomainConnectionString);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, NEW_NORMAL_CONNECTIONURL, Message.SUCCESS, newIPConfigure.getConnectionUrl());
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, NEW_FAILOVER_CONNECTIONURL, Message.SUCCESS, newDomainConfigure.getConnectionUrl());
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, ENCRYPTED_NEW_NORMAL_CONNECTIONSTRING, Message.SUCCESS, encryptedNewIPConnectionString);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, ENCRYPTED_NEW_FAILOVER_CONNECTIONSTRING, Message.SUCCESS, encryptedNewDomainConnectionString);
         t.setStatus(Transaction.SUCCESS);
 
 
@@ -332,9 +332,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     private void addPoolPropertiesNotifyTask(PoolPropertiesConfigure configure) {
-        Transaction t = Cat.newTransaction(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES);
+        Transaction t = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES);
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
-        Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         try {
             Set<String> names = dataSourceConfigureLocator.getSuccessfulConnectionStrings().keySet();
@@ -343,11 +343,11 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             // set pool properties
             Properties oldOriginalProperties = dataSourceConfigureLocator.setPoolProperties(configure);
             t.addData(SET_PROPERTIES);
-            Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
+            Cat.logEvent(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
 
             if (!isPoolPropertiesChanged(oldOriginalProperties, configure.getProperties())) {
                 String msg = String.format("New pool properties equal to old pool properties.");
-                Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
+                Cat.logEvent(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, SET_PROPERTIES);
                 LOGGER.info(msg);
                 return;
             }
@@ -359,7 +359,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             addNotifyTask(names, events);
             t.addData(DATASOURCE_NOTIFY_LISTENER_END);
             t.setStatus(Transaction.SUCCESS);
-            Cat.logEvent(DAL, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
+            Cat.logEvent(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
         } catch (Throwable e) {
             String msg = "DataSourceConfigureManager addPoolPropertiesChangedListener warn:" + e.getMessage();
             LOGGER.warn(msg, e);
@@ -375,7 +375,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
                 IPDomainStatus currentStatus = dataSourceConfigureLocator.getIPDomainStatus();
                 if (currentStatus.equals(status)) {
                     String msg = String.format("New status equals to current status:%s", status.toString());
-                    Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, msg);
+                    Cat.logEvent(DalLogTypes.DAL_CONFIGURE, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, msg);
                     LOGGER.info(msg);
                     return;
                 }
@@ -386,12 +386,12 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     private void addIPDomainStatusNotifyTask(IPDomainStatus status) {
-        Transaction t = Cat.newTransaction(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS);
+        Transaction t = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS);
         String switchStatus = String.format("Switch status:%s", status.toString());
         t.addData(switchStatus);
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
-        Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, switchStatus);
-        Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, switchStatus);
+        Cat.logEvent(DalLogTypes.DAL_CONFIGURE, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_START);
 
         try {
             Set<String> names = dataSourceConfigureLocator.getSuccessfulConnectionStrings().keySet();
@@ -400,7 +400,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             // set ip domain status
             dataSourceConfigureLocator.setIPDomainStatus(status);
             t.addData(SET_IP_DOMAIN_STATUS);
-            Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, SET_IP_DOMAIN_STATUS);
+            Cat.logEvent(DalLogTypes.DAL_CONFIGURE, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, SET_IP_DOMAIN_STATUS);
 
             Map<String, DataSourceConfigure> newConfigures = getDataSourceConfigureByNames(names);
             Map<String, DataSourceConfigureChangeEvent> events =
@@ -409,7 +409,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             addNotifyTask(names, events);
             t.addData(DATASOURCE_NOTIFY_LISTENER_END);
             t.setStatus(Transaction.SUCCESS);
-            Cat.logEvent(DAL, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
+            Cat.logEvent(DalLogTypes.DAL_CONFIGURE, IPDOMAINSTATUS_REFRESH_IPDOMAINSTATUS, Message.SUCCESS, DATASOURCE_NOTIFY_LISTENER_END);
         } catch (Throwable e) {
             DalConfigException exception = new DalConfigException(e);
             t.setStatus(exception);
@@ -481,7 +481,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         for (String name : names) {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
             String transactionName = String.format("%s:%s", DATASOURCECONFIGURE_REFRESH_DATASOURCECONFIG, name);
-            Transaction transaction = Cat.newTransaction(DAL, transactionName);
+            Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, transactionName);
 
             DataSourceConfigureChangeEvent event = events.get(keyName);
             if (event == null)
@@ -498,11 +498,11 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
                 }
                 // log
                 transaction.addData(CONNECTIONSTRING_OLD_CONNECTIONURL, String.format("%s:%s", name, oldConnectionUrl));
-                Cat.logEvent(DAL, transactionName, Message.SUCCESS,
+                Cat.logEvent(DalLogTypes.DAL_CONFIGURE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", CONNECTIONSTRING_OLD_CONNECTIONURL, name, oldConnectionUrl));
                 transaction.addData(DATASOURCECONFIGURE_OLD_CONFIGURE, String.format("%s:%s", name,
                         poolPropertiesHelper.propertiesToString(oldPoolProperties)));
-                Cat.logEvent(DAL, transactionName, Message.SUCCESS,
+                Cat.logEvent(DalLogTypes.DAL_CONFIGURE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCECONFIGURE_OLD_CONFIGURE, name,
                                 poolPropertiesHelper.propertiesToString(oldPoolProperties)));
 
@@ -512,11 +512,11 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
                 // log
                 transaction.addData(CONNECTIONSTRING_NEW_CONNECTIONURL, String.format("%s:%s", name, newConnectionUrl));
-                Cat.logEvent(DAL, transactionName, Message.SUCCESS,
+                Cat.logEvent(DalLogTypes.DAL_CONFIGURE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", CONNECTIONSTRING_NEW_CONNECTIONURL, name, newConnectionUrl));
                 transaction.addData(DATASOURCECONFIGURE_NEW_CONFIGURE, String.format("%s:%s", name,
                         poolPropertiesHelper.propertiesToString(newConfigure.toProperties())));
-                Cat.logEvent(DAL, transactionName, Message.SUCCESS,
+                Cat.logEvent(DalLogTypes.DAL_CONFIGURE, transactionName, Message.SUCCESS,
                         String.format("%s:%s:%s", DATASOURCECONFIGURE_NEW_CONFIGURE, name,
                                 poolPropertiesHelper.propertiesToString(newConfigure.toProperties())));
 

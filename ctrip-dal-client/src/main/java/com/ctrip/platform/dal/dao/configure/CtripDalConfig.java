@@ -2,18 +2,16 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.ProductVersionManager;
-import org.apache.commons.io.IOUtils;
 import qunar.tc.qconfig.client.TypedConfig;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +20,6 @@ public class CtripDalConfig implements DalConfigLoader {
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     public static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
-    private static final String DAL_CONFIG_LOG = "DAL";
     private static final String DAL_CONFIG_LOAD = "dal.config::";
     private static final String DAL_CONFIG_LOCAL = "readLocal";
     private static final String DAL_CONFIG_REMOTE = "readRemote";
@@ -49,7 +46,7 @@ public class CtripDalConfig implements DalConfigLoader {
                 log = "从QConfig读取dal.config";
             }
 
-            Cat.logEvent(DAL_CONFIG_LOG, location, Message.SUCCESS, log);
+            Cat.logEvent(DalLogTypes.DAL, location, Message.SUCCESS, log);
             LOGGER.info(log);
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
@@ -60,13 +57,15 @@ public class CtripDalConfig implements DalConfigLoader {
     }
 
     private void logDalConfig(URL url) {
+        long startTime=System.currentTimeMillis();
         InputStream in = null;
+        byte[] bytes ;
         try {
             in = url.openStream();
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(in, writer, CHARSET);
-            String content = writer.toString();
-            LOGGER.logTransaction(DAL_CONFIG_LOG, DAL_CONFIG_LOAD + DAL_CONFIG_LOCAL, content, null);
+            bytes = new byte[in.available()];
+            in.read(bytes);
+            String content = new String(bytes);
+            LOGGER.logTransaction(DalLogTypes.DAL, DAL_CONFIG_LOAD + DAL_CONFIG_LOCAL, content, startTime);
         } catch (Exception e) {
             LOGGER.error("Read local dal.config error", e);
         } finally {
@@ -96,7 +95,7 @@ public class CtripDalConfig implements DalConfigLoader {
     }
 
     private String getRemoteConfig() throws Exception {
-        Transaction transaction = Cat.newTransaction(DAL_CONFIG_LOG, DAL_CONFIG_LOAD + DAL_CONFIG_REMOTE);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DAL_CONFIG_LOAD + DAL_CONFIG_REMOTE);
         String content = null;
         try {
             TypedConfig<String> config = TypedConfig.get(DAL_CONFIG, new TypedConfig.Parser<String>() {

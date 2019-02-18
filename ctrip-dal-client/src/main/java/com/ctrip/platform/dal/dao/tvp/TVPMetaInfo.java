@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
@@ -22,11 +23,9 @@ import java.util.concurrent.ConcurrentMap;
 
 public class TVPMetaInfo {
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String DAL = "DAL";
     private String GET_TVP_COLUMNS_FORMAT = "TVP::getTVPColumns:%s";
 
     private static final String TVP_LEGACY_ORDER_MODE = "TVP.legacyOrderMode";
-    private static final String DAL_VALIDATION = "DAL.validation";
     private static final String USE_LEGACY_TVP_ORDER_MODE = "UseLegacyTVPOrderMode";
 
     private final int FIRST_COLUMN_INDEX = 1;
@@ -52,7 +51,7 @@ public class TVPMetaInfo {
                     // legacy mode
                     if (list == null) {
                         list = fetchTVPColumnsByLegacyMode(columnTypes);
-                        LOGGER.logEvent(DAL_VALIDATION, USE_LEGACY_TVP_ORDER_MODE, tvpName);
+                        LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, USE_LEGACY_TVP_ORDER_MODE, tvpName);
                         LOGGER.logEvent(TVP_LEGACY_ORDER_MODE, tvpName,
                                 String.format("TVP %s uses legacy order mode.", tvpName));
                     }
@@ -69,7 +68,7 @@ public class TVPMetaInfo {
         int index = 1;
         parameters.set(index++, Types.NVARCHAR, tvpName);
         List<String> list = null;
-        Transaction t = Cat.newTransaction(DAL, String.format(GET_TVP_COLUMNS_FORMAT, tvpName));
+        Transaction t = Cat.newTransaction(DalLogTypes.DAL, String.format(GET_TVP_COLUMNS_FORMAT, tvpName));
 
         try {
             list = client.query(tvpColumnSql, parameters, new DalHints(), new DalResultSetExtractor<List<String>>() {

@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 import com.dianping.cat.Cat;
@@ -22,7 +23,7 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
 
         String name = connectionStringConfigure.getName();
         String logName = String.format(POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT, name);
-        Transaction transaction = Cat.newTransaction(DAL, logName);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, logName);
         DataSourceConfigure c = null;
 
         try {

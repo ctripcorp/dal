@@ -22,7 +22,7 @@ public class MockILoggerImpl extends CtripLoggerImpl {
     }
 
     @Override
-    public void logTransaction(String type, String name, String message, Callback callback) {
+    public void logTransaction(String type, String name, String message, Callback callback) throws Exception {
         if (type == null || type.isEmpty())
             Assert.fail();
 

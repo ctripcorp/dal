@@ -19,7 +19,7 @@ public class CtripLoggerImpl extends AbstractLogger {
     }
 
     @Override
-    public void logTransaction(String type, String name, String message, Callback callback) {
+    public void logTransaction(String type, String name, String message, Callback callback) throws Exception {
         Transaction t = Cat.newTransaction(type, name);
         try {
             t.addData(message);
@@ -28,10 +28,10 @@ public class CtripLoggerImpl extends AbstractLogger {
                 callback.execute();
 
             t.setStatus(Message.SUCCESS);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             t.setStatus(e);
             Cat.logError(e);
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             t.complete();
         }
@@ -66,6 +66,7 @@ public class CtripLoggerImpl extends AbstractLogger {
             t.setStatus(exception);
             Cat.logError(exception);
         } catch (Throwable e) {
+            logger.error(e);
         } finally {
             if (startTime > 0) {
                 CatUtil.completeTransaction(t, startTime);

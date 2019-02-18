@@ -144,7 +144,7 @@ public class DataSourceValidatorTest {
     }
 
     private Connection createNewConnection(String driverClassName, String connectionUrl, String userName,
-            String password) {
+                                           String password) {
         Connection connection = null;
         try {
             Class.forName(driverClassName);

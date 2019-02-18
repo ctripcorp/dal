@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
@@ -29,7 +30,6 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
             "DAL DataSource DynamicPoolProperties does not enabled.";
     private static final String NULL_MAPCONFIG_EXCEPTION = "MapConfig for datasource.properties is null.";
 
-    private static final String DAL = "DAL";
     private static final String POOLPROPERTIES_GET_MAPCONFIG = "PoolProperties::getMapConfig";
     private static final String POOLPROPERTIES_GET_POOLPROPERTIES = "PoolProperties::getPoolProperties";
     private static final String POOLPROPERTIES_ADD_LISTENER = "PoolProperties::addListener";
@@ -65,7 +65,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
 
     private MapConfig _getMapConfig() {
         MapConfig config = null;
-        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_GET_MAPCONFIG);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_GET_MAPCONFIG);
         try {
             config = MapConfig.get(DAL_APPNAME, DATASOURCE_PROPERTIES, null); // get datasource.properties from QConfig
             if (config == null)
@@ -86,7 +86,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
 
     private Map<String, String> getPoolPropertiesMap(MapConfig config) {
         Map<String, String> map = null;
-        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_GET_POOLPROPERTIES);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_GET_POOLPROPERTIES);
 
         try {
             map = config.asMap();
@@ -110,7 +110,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     @Override
     public void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback) {
         MapConfig config = getMapConfig();
-        Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_ADD_LISTENER);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_ADD_LISTENER);
 
         try {
             _addPoolPropertiesChangedListener(config, callback);
@@ -128,7 +128,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> map) {
-                Transaction transaction = Cat.newTransaction(DAL, POOLPROPERTIES_LISTENER_ON_LOAD);
+                Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_LISTENER_ON_LOAD);
                 try {
                     if (map == null || map.isEmpty())
                         throw new RuntimeException(ON_LOAD_PARAMETER_EXCEPTION);

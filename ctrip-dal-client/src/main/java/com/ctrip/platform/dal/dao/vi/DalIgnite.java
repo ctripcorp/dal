@@ -8,7 +8,11 @@ import java.util.Map;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.titan.LogEntry;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.TypedConfig;
 
 import com.ctrip.framework.vi.IgniteManager.SimpleLogger;
@@ -20,6 +24,9 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 public class DalIgnite extends AbstractCtripIgnitePlugin {
     private Map<String, String> configs = new HashMap<>();
     private final String HELP_URL = "http://conf.ctripcorp.com/pages/viewpage.action?pageId=143877535";
+    private final String IGNITE = "Ignite";
+    private final String IGNITING_DAL_CLIENT = "Igniting Dal Client";
+
     @Override
     public Map<String, String> coreConfigs() {
         return configs;
@@ -32,6 +39,23 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
     @Override
     public boolean warmUP(SimpleLogger logger) {
+        Transaction t = Cat.newTransaction(DalLogTypes.DAL, IGNITE);
+        boolean result = true;
+        try {
+            result = ignite(logger);
+            Cat.logEvent(DalLogTypes.DAL, IGNITE, Message.SUCCESS, IGNITING_DAL_CLIENT);
+            t.setStatus(Message.SUCCESS);
+        } catch (Exception e) {
+            t.setStatus(e);
+            Cat.logError(e);
+        } finally {
+            t.complete();
+        }
+
+        return result;
+    }
+
+    private boolean ignite(SimpleLogger logger){
         if (!isDalConfigExist(logger)) {
             logger.warn("Can not find dal.config from either local or remote.");
             logger.warn("This maybe normal case for those who upgrade from older ctrip-dal-client.");

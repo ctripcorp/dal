@@ -2,6 +2,7 @@ package com.ctrip.datasource.configure.qconfig;
 
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesChanged;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.Configuration;
@@ -18,7 +19,6 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
     private static final String DAL_APPNAME = "dal";
     private static final String DAL_PROPERTIES = "dal.properties";
 
-    private static final String DAL = "DAL";
     private static final String DALPROPERTIES_GET_MAPCONFIG = "DalProperties::getMapConfig";
     private static final String DALPROPERTIES_GET_PROPERTIES = "DalProperties::getProperties";
     private static final String DALPROPERTIES_ADD_LISTENER = "DalProperties::addListener";
@@ -32,7 +32,7 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
     @Override
     public Map<String, String> getProperties() {
         Map<String, String> map = new HashMap<>();
-        Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_GET_PROPERTIES);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DALPROPERTIES_GET_PROPERTIES);
 
         try {
             MapConfig config = getMapConfig();
@@ -56,14 +56,14 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
 
     @Override
     public void addPropertiesChangedListener(final DalPropertiesChanged callback) {
-        Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_ADD_LISTENER);
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DALPROPERTIES_ADD_LISTENER);
 
         try {
             MapConfig config = getMapConfig();
             config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
                 @Override
                 public void onLoad(Map<String, String> map) {
-                    Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_PROPERTIES_CHANGED);
+                    Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DALPROPERTIES_PROPERTIES_CHANGED);
 
                     try {
                         callback.onChanged(map);
@@ -94,7 +94,7 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
         if (mapConfig == null) {
             synchronized (LOCK) {
                 if (mapConfig == null) {
-                    Transaction transaction = Cat.newTransaction(DAL, DALPROPERTIES_GET_MAPCONFIG);
+                    Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DALPROPERTIES_GET_MAPCONFIG);
 
                     try {
                         mapConfig = MapConfig.get(DAL_APPNAME, DAL_PROPERTIES, null);

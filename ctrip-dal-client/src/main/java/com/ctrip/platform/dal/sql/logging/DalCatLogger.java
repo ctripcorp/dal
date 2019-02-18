@@ -30,10 +30,11 @@ public class DalCatLogger {
     private static final String TYPE_SQL_TASK_COUNT = "DAL.shardCount";
     private static final String TYPE_SQL_SHARDS = "DAL.shards";
     private static final String TYPE_SQL_GET_CONNECTION_COST = "DAL.getConnectionCost";
+    private static final String TYPE_SQL_GET_CONNECTION_COST_INTERVAL = "DAL.getConnectionCostInterval";
     private static final String TYPE_SQL_START_TASK_POOL_SIZE = "DAL.startTaskPoolSize";
     private static final String TYPE_SQL_END_TASK_POOL_SIZE = "DAL.endTaskPoolSize";
     private static final int[] connectionCostSegment = new int[]{
-            0, 2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+            0, 1, 2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
             200, 300, 400, 500, 600, 700, 800, 900, 1000,
             2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
 
@@ -178,7 +179,7 @@ public class DalCatLogger {
     }
 
     public static void startStatement(CtripLogEntry entry) {
-        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST, getConnectionCostString(entry.getConnectionCost()) + "ms");
+        Cat.logEvent(TYPE_SQL_GET_CONNECTION_COST_INTERVAL, getConnectionCostStringInterval(entry.getConnectionCost()) + "ms");
         String sqlType = entry.getCaller();
         entry.setStatementTransaction(Cat.newTransaction(TYPE_SQL_STATEMENT_EXECUTION, sqlType));
     }
@@ -202,7 +203,7 @@ public class DalCatLogger {
             Cat.logEvent(TYPE_SQL_TABLE, table);
     }
 
-    protected static String getConnectionCostString(long cost) {
+    protected static String getConnectionCostStringInterval(long cost) {
         int start = 0;
         int end = connectionCostSegment.length - 1;
         int mid;
@@ -213,10 +214,17 @@ public class DalCatLogger {
             else if (cost > connectionCostSegment[mid])
                 start = mid + 1;
             else
-                return String.valueOf(connectionCostSegment[mid]);
+                return String.format("[%s,%s)", String.valueOf(connectionCostSegment[mid]), String.valueOf(connectionCostSegment[mid + 1]));
         }
-        if ((connectionCostSegment[start] < cost) && (start < (connectionCostSegment.length - 1)))
-            return String.valueOf(connectionCostSegment[start + 1]);
-        return String.valueOf(connectionCostSegment[start]);
+
+//      cost greater than 10000ms
+        if ((start == (connectionCostSegment.length - 1)) && (connectionCostSegment[start] <= cost))
+            return String.format("[%s,%s)", String.valueOf(connectionCostSegment[start]), "+∞");
+
+        if ((connectionCostSegment[start] <= cost) && (start < (connectionCostSegment.length - 1)))
+            return String.format("[%s,%s)", String.valueOf(connectionCostSegment[start]), String.valueOf(connectionCostSegment[start + 1]));
+
+        return String.format("[%s,%s)", String.valueOf(connectionCostSegment[start - 1]), String.valueOf(connectionCostSegment[start]));
     }
+
 }

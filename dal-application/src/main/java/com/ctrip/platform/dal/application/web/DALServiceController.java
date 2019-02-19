@@ -32,7 +32,6 @@ public class DALServiceController {
 
   @RequestMapping("/updateMySql")
   public DALServiceTable updateMysql() throws Exception{
-    DalClientFactory.warmUpConnections();
     DALServiceTable pojo=new DALServiceTable();
     pojo.setID(1);
     pojo.setName("updateMySqlTest");

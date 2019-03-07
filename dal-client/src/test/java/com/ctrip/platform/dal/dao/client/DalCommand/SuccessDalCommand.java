@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao.client.DalCommand;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.entity.TestTable;
+import com.ctrip.platform.dal.dao.client.DalCommand.entity.TestTableDao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

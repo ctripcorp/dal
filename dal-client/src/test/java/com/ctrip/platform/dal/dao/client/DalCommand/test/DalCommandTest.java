@@ -1,9 +1,17 @@
-package com.ctrip.platform.dal.dao.client.DalCommand;
+package com.ctrip.platform.dal.dao.client.DalCommand.test;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.client.DalCommand.nesting.*;
+import com.ctrip.platform.dal.dao.client.DalCommand.SuccessDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.SwallowExceptionDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.ThrowExceptionDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal.OneLayerConflictDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal.OneLayerExceptionDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal.OneLayerSuccessDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal.TwoLayerConflictDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal.TwoLayerExceptionDalCommand;
+import com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal.TwoLayerSucessDalCommand;
 import com.ctrip.platform.dal.dao.client.DalTransaction;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import org.junit.Assert;
@@ -61,6 +69,9 @@ public class DalCommandTest {
             client.execute(new SwallowExceptionDalCommand(), new DalHints());
             Assert.fail();
         } catch (Throwable e) {
+            if (e.getCause() != null) {
+                e = e.getCause();
+            }
             System.out.println(e.getMessage());
             Assert.assertTrue(e.getMessage().equals(
                     "The state of nesting transactions are conflicted,transaction has been rollbacked. Transaction level 1 conflicted with level 2, original error message:[Data truncation: Data too long for column 'Name' at row 1] , all levels of transaction status:[level 1, status:Conflict, actual status:Commit] [level 2, status:Rollback, actual status:Rollback] ."));
@@ -76,6 +87,9 @@ public class DalCommandTest {
             client.execute(new ThrowExceptionDalCommand(), new DalHints());
             Assert.fail();
         } catch (Throwable e) {
+            if (e.getCause() != null) {
+                e = e.getCause();
+            }
             System.out.println(e.getMessage());
             Assert.assertTrue(e instanceof BatchUpdateException);
             Assert.assertTrue(e.getMessage().equals("Data truncation: Data too long for column 'Name' at row 1"));
@@ -105,6 +119,9 @@ public class DalCommandTest {
             client.execute(new TwoLayerConflictDalCommand(), new DalHints());
             Assert.fail();
         } catch (Throwable e) {
+            if (e.getCause() != null) {
+                e = e.getCause();
+            }
             System.out.println(e.getMessage());
             Assert.assertTrue(e.getMessage().equals(
                     "The state of nesting transactions are conflicted,transaction has been rollbacked. Transaction level 3 conflicted with level 4, original error message:[Data truncation: Data too long for column 'Name' at row 1] , all levels of transaction status:[level 1, status:Conflict, actual status:Commit] [level 2, status:Conflict, actual status:Commit] [level 3, status:Conflict, actual status:Commit] [level 4, status:Rollback, actual status:Rollback] ."));
@@ -134,6 +151,9 @@ public class DalCommandTest {
             client.execute(new TwoLayerExceptionDalCommand(), new DalHints());
             Assert.fail();
         } catch (Throwable e) {
+            if (e.getCause() != null) {
+                e = e.getCause();
+            }
             System.out.println(e.getMessage());
             Assert.assertTrue(e instanceof BatchUpdateException);
             Assert.assertTrue(e.getMessage().equals("Data truncation: Data too long for column 'Name' at row 1"));
@@ -149,6 +169,9 @@ public class DalCommandTest {
             client.execute(new OneLayerConflictDalCommand(), new DalHints());
             Assert.fail();
         } catch (Throwable e) {
+            if (e.getCause() != null) {
+                e = e.getCause();
+            }
             System.out.println(e.getMessage());
             Assert.assertTrue(e.getMessage().equals(
                     "The state of nesting transactions are conflicted,transaction has been rollbacked. Transaction level 2 conflicted with level 3, original error message:[Data truncation: Data too long for column 'Name' at row 1] , all levels of transaction status:[level 1, status:Conflict, actual status:Commit] [level 2, status:Conflict, actual status:Commit] [level 3, status:Rollback, actual status:Rollback] ."));
@@ -178,6 +201,9 @@ public class DalCommandTest {
             client.execute(new OneLayerExceptionDalCommand(), new DalHints());
             Assert.fail();
         } catch (Throwable e) {
+            if (e.getCause() != null) {
+                e = e.getCause();
+            }
             System.out.println(e.getMessage());
             Assert.assertTrue(e instanceof BatchUpdateException);
             Assert.assertTrue(e.getMessage().equals("Data truncation: Data too long for column 'Name' at row 1"));

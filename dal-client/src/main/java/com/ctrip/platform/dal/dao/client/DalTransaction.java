@@ -136,7 +136,7 @@ public class DalTransaction {
         List<RollbackOnlyWrapper> list = new ArrayList<>(rollbackOnlyWrapperList);
         for (RollbackOnlyWrapper wrapper : list) {
             if (wrapper.isRollbackOnly()) {
-                rollbackOnlyIfNeeded();
+                rollbackOnlyIfNeeded(wrapper.getLevel());
             } else if (wrapper.hasError()) {
                 rollbackIfNeeded();
                 Throwable e = wrapper.getError();
@@ -189,24 +189,15 @@ public class DalTransaction {
             return;
         }
 
-        try {
-            processRollbackOnlyIfExist();
-        } catch (Throwable e) {
-            throw new DalException(e.getMessage(), e);
-        }
-
         if (status == DalTransactionStatus.Commit || status == DalTransactionStatus.Conflict) {
             setTransactionStatusOnRollback();
             logExceptionOnRollbackConflicted();
         }
 
-        // rollback transaction on user's request
-        if (rollbackOnly) {
-            try {
-                rollbackOnlyIfNeeded();
-            } catch (Exception e) {
-                throw new SQLException(e);
-            }
+        try {
+            processRollbackOnlyIfExist();
+        } catch (Throwable e) {
+            throw new DalException(e.getMessage(), e);
         }
 
         rollbackIfNeeded();
@@ -359,26 +350,27 @@ public class DalTransaction {
         setRollbackOnlyWrapper();
         iLogger.logEvent(SQL_Transaction,
                 String.format(DAL_TRANSACTION_SET_ROLLBACK_ONLY, logicDbName == null ? "" : logicDbName),
-                getRollbackOnlyMessage());
+                getRollbackOnlyMessage(level));
     }
 
     private void setRollbackOnlyWrapper() {
         RollbackOnlyWrapper wrapper = new RollbackOnlyWrapper();
         wrapper.setRollbackOnly();
+        wrapper.setLevel(level);
         rollbackOnlyWrapperList.add(wrapper);
     }
 
-    private void rollbackOnlyIfNeeded() throws Exception {
+    private void rollbackOnlyIfNeeded(int level) throws Exception {
         if (rolledBack)
             return;
 
-        rollbackOnly();
+        rollbackOnly(level);
     }
 
-    private void rollbackOnly() throws Exception {
+    private void rollbackOnly(int level) throws Exception {
         final String name =
                 String.format(DAL_TRANSACTION_EXECUTE_ROLLBACK_ONLY, logicDbName == null ? "" : logicDbName);
-        final String msg = getRollbackOnlyMessage();
+        final String msg = getRollbackOnlyMessage(level);
 
         iLogger.logTransaction(SQL_Transaction, name, msg, new Callback() {
             @Override
@@ -386,10 +378,10 @@ public class DalTransaction {
                 rollback();
                 iLogger.logEvent(SQL_Transaction, name, msg);
             }
-        });
+        }, new DalException(msg));
     }
 
-    private String getRollbackOnlyMessage() {
+    private String getRollbackOnlyMessage(int level) {
         String dbName = logicDbName == null ? "" : logicDbName;
         String connectionId = "";
         if (connHolder != null) {
@@ -399,7 +391,7 @@ public class DalTransaction {
             }
         }
 
-        return String.format("LogicDbName:%s, ConnectionId:%s", dbName, connectionId);
+        return String.format("LogicDbName:%s, Level:%s, ConnectionId:%s", dbName, level, connectionId);
     }
 
 }

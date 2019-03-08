@@ -5,6 +5,8 @@ public class RollbackOnlyWrapper {
 
     private Throwable error;
 
+    private int level;
+
     public boolean isRollbackOnly() {
         return rollbackOnly;
     }
@@ -23,6 +25,14 @@ public class RollbackOnlyWrapper {
 
     public boolean hasError() {
         return error != null;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 
 }

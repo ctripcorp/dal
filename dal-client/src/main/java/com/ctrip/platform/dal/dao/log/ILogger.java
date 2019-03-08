@@ -5,7 +5,7 @@ public interface ILogger {
 
     void logTransaction(String type, String name, String message, Callback callback) throws Exception;
 
-    void logTransaction(String type, String name, String message, Callback callback, Throwable exception)
+    void logTransaction(String type, String name, String message, Callback callback, String failMessage)
             throws Exception;
 
     void logTransaction(String type, String name, String message, long startTime);

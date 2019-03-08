@@ -378,7 +378,7 @@ public class DalTransaction {
                 rollback();
                 iLogger.logEvent(SQL_Transaction, name, msg);
             }
-        }, new DalException(msg));
+        }, msg);
     }
 
     private String getRollbackOnlyMessage(int level) {

@@ -26,7 +26,7 @@ public abstract class AbstractLogger implements ILogger {
     }
 
     @Override
-    public void logTransaction(String type, String name, String message, Callback callback, Throwable exception)
+    public void logTransaction(String type, String name, String message, Callback callback, String failMessage)
             throws Exception {
         logTransaction(type, name, message, callback);
     }

@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.annotation.javaConfig;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 

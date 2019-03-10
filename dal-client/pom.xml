@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client</artifactId>
-    <version>1.16.12</version>
+    <version>poollog</version>
     <properties>
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
@@ -121,6 +121,12 @@
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
             <version>${jsqlparser-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring-version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

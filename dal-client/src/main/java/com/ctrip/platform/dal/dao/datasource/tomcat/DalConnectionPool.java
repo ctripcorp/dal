@@ -1,25 +1,51 @@
 package com.ctrip.platform.dal.dao.datasource.tomcat;
 
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DalConnectionPool extends ConnectionPool {
-    private static Logger logger = LoggerFactory.getLogger(DalConnectionPool.class);
-
+    private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
+    private static final String CONNECTION_WAIT = "ConnectionWait";
     private static ConnectionListener connectionListener = ServiceLoaderHelper.getInstance(ConnectionListener.class);
+
+    private static ThreadLocal<Long> poolWaitTime = new ThreadLocal<>();
 
     public DalConnectionPool(PoolConfiguration prop) throws SQLException {
         super(prop);
     }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        poolWaitTime.set(System.currentTimeMillis());
+        return super.getConnection();
+    }
+
+    @Override
+    protected PooledConnection borrowConnection(long now, PooledConnection con, String username, String password) throws SQLException {
+        try {
+            long waitTime = System.currentTimeMillis() - poolWaitTime.get().longValue();
+            if (waitTime > 1) {
+                connectionListener.onWaitConnection(getName(), getConnection(con), poolWaitTime.get().longValue());
+//                logger.logEvent(DalLogTypes.DAL_VALIDATION, CONNECTION_WAIT, String.format("wait time: %d ms", waitTime));
+            }
+
+
+        } catch (Exception e) {
+            logger.error("[borrow]" + this, e);
+        }
+
+        return super.borrowConnection(now, con, username, password);
+    }
+
 
     @Override
     protected PooledConnection createConnection(long now, PooledConnection notUsed, String username, String password)
@@ -66,16 +92,6 @@ public class DalConnectionPool extends ConnectionPool {
         super.abandon(con);
     }
 
-    @Override
-    protected PooledConnection borrowConnection(long now, PooledConnection con, String username, String password) throws SQLException {
-        try {
-            connectionListener.onBorrowConnection(getName(), getConnection(con));
-        } catch (Exception e) {
-            logger.error("[borrow]" + this, e);
-        }
-
-        return super.borrowConnection(now, con, username, password);
-    }
 
     public static void setConnectionListener(ConnectionListener connectionListener) {
         DalConnectionPool.connectionListener = connectionListener;

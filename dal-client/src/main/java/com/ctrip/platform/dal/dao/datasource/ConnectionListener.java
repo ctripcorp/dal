@@ -15,4 +15,6 @@ public interface ConnectionListener extends Ordered {
 
     void onBorrowConnection(String poolDesc, Connection connection);
 
+    void onWaitConnection(String poolDEsc, Connection connection, long startTime);
+
 }

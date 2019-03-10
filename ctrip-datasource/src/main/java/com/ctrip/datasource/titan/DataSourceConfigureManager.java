@@ -104,6 +104,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     public synchronized void setup(Set<String> dbNames, SourceType sourceType) {
+        keyNameMap.clear();
         Set<String> names = null;
         try {
             names = getFilteredNames(dbNames, sourceType);

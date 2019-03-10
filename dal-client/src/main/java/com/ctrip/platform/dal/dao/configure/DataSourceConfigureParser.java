@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,7 +21,7 @@ public class DataSourceConfigureParser implements DataSourceConfigureConstants {
         return dataSourceConfigureParser;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceConfigureParser.class);
+    private static final ILogger logger = DalElementFactory.DEFAULT.getILogger();
     private static DataSourceConfigureParser dataSourceConfigureParser = null;
     private static final String DBPOOL_CONFIG = "datasource.xml";
     private static final String LOCATION = "location";

@@ -9,15 +9,14 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
 public class DataSourceLocator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceLocator.class);
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private static final ConcurrentHashMap<String, DataSource> cache = new ConcurrentHashMap<>();
 

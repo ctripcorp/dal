@@ -18,7 +18,8 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
-public class DalTransactionManager {
+public class
+DalTransactionManager {
 	private DalConnectionManager connManager;
 
 	private static final ThreadLocal<DalTransaction> transactionHolder = new ThreadLocal<DalTransaction>();

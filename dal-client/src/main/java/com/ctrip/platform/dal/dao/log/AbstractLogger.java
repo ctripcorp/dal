@@ -60,6 +60,15 @@ public abstract class AbstractLogger implements ILogger {
     }
 
     @Override
+    public void warn(final String msg, final Throwable throwable) {
+        try {
+            LOGGER.warn(msg, throwable);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void error(final String msg, final Throwable e) {
         try {
             LOGGER.error(e.getMessage(), e);

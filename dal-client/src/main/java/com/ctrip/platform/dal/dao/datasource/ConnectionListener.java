@@ -13,6 +13,6 @@ public interface ConnectionListener extends Ordered {
 
     void onAbandonConnection(String poolDesc, Connection connection);
 
-    void onBorrowConnection(String poolDesc, Connection connection);
+    void onWaitConnection(String poolDEsc, Connection connection, long startTime);
 
 }

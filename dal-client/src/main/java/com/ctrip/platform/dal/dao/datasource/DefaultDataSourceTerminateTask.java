@@ -2,9 +2,9 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.Date;
@@ -12,7 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateTask {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSourceTerminateTask.class);
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private static final int MAX_RETRY_TIMES = 3;
     private static final int FIXED_DELAY = 5 * 1000; // milliseconds

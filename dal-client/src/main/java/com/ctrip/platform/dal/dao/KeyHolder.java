@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-import com.ctrip.platform.dal.dao.helper.DefaultDalElementFactory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EntityManager;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.task.DaoTask;
@@ -38,7 +38,7 @@ public class KeyHolder {
 
     private AtomicBoolean merged = new AtomicBoolean(false);
 
-    private static ILogger ilogger = DefaultDalElementFactory.DEFAULT.getILogger();
+    private static ILogger ilogger = DalElementFactory.DEFAULT.getILogger();
 
     public KeyHolder() {
 

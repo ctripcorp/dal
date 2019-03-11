@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.annotation.javaConfig;
+package com.ctrip.platform.dal.dao.annotation.javaConfig.normal;
 
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import com.ctrip.platform.dal.dao.annotation.Transactional;

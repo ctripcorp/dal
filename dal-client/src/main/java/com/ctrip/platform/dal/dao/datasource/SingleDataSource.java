@@ -59,7 +59,6 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             LOGGER.info(message);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
-            throw new RuntimeException(e);
         }
     }
 

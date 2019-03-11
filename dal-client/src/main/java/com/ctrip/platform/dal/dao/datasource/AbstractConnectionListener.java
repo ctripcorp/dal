@@ -13,7 +13,7 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
     private String ON_CREATE_CONNECTION_FAILED_FORMAT = "[onCreateConnectionFailed]%s, %s";
     private String ON_RELEASE_CONNECTION_FORMAT = "[onReleaseConnection]%s, %s";
     private String ON_ABANDON_CONNECTION_FORMAT = "[onAbandonConnection]%s, %s";
-    private String ON_BORROW_CONNECTION_FORMAT="[onBorrowConnection]%s, %s";
+    private String ON_WAIT_CONNECTION_FORMAT="[onWaitConnection]%s, %s";
 
     @Override
     public void onCreateConnection(String poolDesc, Connection connection, long startTime) {
@@ -60,14 +60,24 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         logInfo(ON_ABANDON_CONNECTION_FORMAT, poolDesc, connection);
     }
 
+//    @Override
+//    public void onBorrowConnection(String poolDesc, Connection connection) {
+//        if (connection != null)
+//            doOnBorrowConnection(poolDesc, connection);
+//    }
+//
+//    protected void doOnBorrowConnection(String poolDesc, Connection connection) {
+//        logInfo(ON_BORROW_CONNECTION_FORMAT, poolDesc, connection);
+//    }
+
     @Override
-    public void onBorrowConnection(String poolDesc, Connection connection) {
+    public void onWaitConnection(String poolDesc, Connection connection, long startTime) {
         if (connection != null)
-            doOnBorrowConnection(poolDesc, connection);
+            doOnWaitConnection(poolDesc, connection,startTime);
     }
 
-    protected void doOnBorrowConnection(String poolDesc, Connection connection) {
-        logInfo(ON_BORROW_CONNECTION_FORMAT, poolDesc, connection);
+    protected void doOnWaitConnection(String poolDesc, Connection connection,long startTime) {
+        logInfo(ON_WAIT_CONNECTION_FORMAT, poolDesc, connection);
     }
 
     private void logInfo(String format, String poolDesc, Connection connection) {

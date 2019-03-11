@@ -139,8 +139,8 @@ public class DalTransaction {
                 rollbackOnlyIfNeeded(wrapper.getLevel());
             } else if (wrapper.hasError()) {
                 rollbackIfNeeded();
-                Throwable e = wrapper.getError();
-                throw e;
+                // Throwable e = wrapper.getError();
+                // throw e;
             }
         }
     }

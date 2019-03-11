@@ -73,28 +73,51 @@ public class NoShardDalTransactionalTestOnMysqlSpringTest {
     }
 
     @Test
-    public void transFailTest() throws Exception{
+    public void transFailTest() throws Exception {
         try {
             dao.transFail();
-        }
-        catch (Exception e){
+            Assert.fail();
+        } catch (Exception e) {
 
         }
-        Assert.assertEquals(6,dao.count(null));
-        Assert.assertEquals(20,dao.queryByPk(3,null).getAge().intValue());
+        Assert.assertEquals(6, dao.count(null));
+        Assert.assertEquals(20, dao.queryByPk(3, null).getAge().intValue());
     }
 
-   /* @Test
-    public void transSetRollbackTest() throws Exception{
+    @Test
+    public void transSetRollbackTest() throws Exception {
         try {
             dao.transSetRollback();
+        } catch (Exception e) {
+            Assert.fail();
         }
-        catch (Exception e){
+        Assert.assertEquals(6, dao.count(null));
+        Assert.assertEquals(20, dao.queryByPk(3, null).getAge().intValue());
+    }
 
+    @Test
+    public void testTransSetRollbackAndThrowException() throws Exception {
+        try {
+            dao.transSetRollbackAndThrowException();
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage().contains("transSetRollbackAndThrowException"));
         }
-        Assert.assertEquals(6,dao.count(null));
-        Assert.assertEquals(20,dao.queryByPk(3,null).getAge().intValue());
-    }*/
+        Assert.assertEquals(6, dao.count(null));
+        Assert.assertEquals(20, dao.queryByPk(3, null).getAge().intValue());
+    }
+
+    @Test
+    public void testTransThrowExceptionAndAndSetRollback() throws Exception{
+        try {
+            dao.transThrowExceptionAndAndSetRollback();
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage().contains("Duplicate entry"));
+        }
+        Assert.assertEquals(6, dao.count(null));
+        Assert.assertEquals(20, dao.queryByPk(3, null).getAge().intValue());
+    }
 
     //    第四层异常，自己吞掉，其它层都成功，则除了自身没有操作成功，其他层都成功提交
     @Test
@@ -189,17 +212,30 @@ public class NoShardDalTransactionalTestOnMysqlSpringTest {
         Assert.assertEquals(6,dao.count(null));
     }
 
-    /*@Test
-    public void nestTransactionSetRollback() throws Exception{
+    @Test
+    public void nestTransactionSetRollbackAndThrowException() throws Exception{
         try {
             dao.thirdLevelTransactionSetRollback(30, true,
-                    20, true);
-//            Assert.fail();
+                    30, true);
+            Assert.fail();
         }catch (Exception e){
             e.printStackTrace();
         }
         Assert.assertEquals(6,dao.count(null));
-    }*/
+    }
+
+    @Test
+    public void nestTransactionThrowExceptionAndSetRollback() throws Exception{
+        try {
+            dao.thirdLevelTransactionSetRollback2(30, true,
+                    100, true);
+            Assert.fail();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Assert.assertEquals(6,dao.count(null));
+    }
+
 
    /* @Test
     public void test() throws Exception {

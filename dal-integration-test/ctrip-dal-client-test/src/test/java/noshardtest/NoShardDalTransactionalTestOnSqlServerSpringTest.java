@@ -2,6 +2,7 @@ package noshardtest;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
+import dao.noshard.DalTransactionalModifierTestDao;
 import dao.noshard.NoShardDalTransactionalTestOnSqlServerDao;
 import dao.noshard.SqlServerDalTransactionalConfig;
 import entity.SqlServerPeopleTable;
@@ -10,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import sun.tools.util.ModifierFilter;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,6 +27,9 @@ import java.util.List;
 public class NoShardDalTransactionalTestOnSqlServerSpringTest {
     @Autowired
     private NoShardDalTransactionalTestOnSqlServerDao dao;
+
+    @Autowired
+    private DalTransactionalModifierTestDao modifierTestDao;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -76,6 +81,42 @@ public class NoShardDalTransactionalTestOnSqlServerSpringTest {
        }
         Assert.assertEquals(6,dao.count(null));
        Assert.assertEquals(22,dao.queryByPk(3,null).getCityID().intValue());
+    }
+
+   /* @Test
+    public void callPrivateTransFailTest() throws Exception{
+        try {
+            modifierTestDao.callPrivateTransFail();
+        }
+        catch (Exception e){
+
+        }
+        Assert.assertEquals(5,dao.count(null));
+        Assert.assertEquals(99,dao.queryByPk(3,null).getCityID().intValue());
+    }*/
+
+    @Test
+    public void callProtectedTransFailTest() throws Exception{
+        try {
+            modifierTestDao.callProtectedTransFail();
+        }
+        catch (Exception e){
+
+        }
+        Assert.assertEquals(6,dao.count(null));
+        Assert.assertEquals(22,dao.queryByPk(3,null).getCityID().intValue());
+    }
+
+    @Test
+    public void callDefaultTransFail() throws Exception{
+        try {
+            modifierTestDao.callDefaultTransFail();
+        }
+        catch (Exception e){
+
+        }
+        Assert.assertEquals(6,dao.count(null));
+        Assert.assertEquals(22,dao.queryByPk(3,null).getCityID().intValue());
     }
 
     //    第四层异常，自己吞掉，其它层都成功，则除了自身没有操作成功，其他层都成功提交

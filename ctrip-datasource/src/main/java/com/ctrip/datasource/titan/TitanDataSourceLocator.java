@@ -19,6 +19,8 @@ import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
@@ -40,8 +42,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.datasource.common.enums.SourceType;
@@ -49,7 +49,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.dianping.cat.Cat;
 
 public class TitanDataSourceLocator {
-    private static final Logger logger = LoggerFactory.getLogger(TitanDataSourceLocator.class);
+    private static final ILogger logger = DalElementFactory.DEFAULT.getILogger();
     public static final String DB_NAME = "DBKeyName";
     private static final int DEFAULT_TIMEOUT = 15 * 1000;
 

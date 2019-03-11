@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         ConnectionPhantomReferenceCleanerOnDalDatasourceTest.class,
-        QConfigTest1.class,
+     //   QConfigTest1.class,
         IdGenClientTest.class
 })
 public class AllTests {

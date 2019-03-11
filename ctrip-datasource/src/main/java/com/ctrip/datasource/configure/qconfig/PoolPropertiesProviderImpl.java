@@ -5,12 +5,12 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataSourceConfigureConstants {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PoolPropertiesProviderImpl.class);
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private static final String DAL_APPNAME = "dal";
     private static final String DATASOURCE_PROPERTIES = "datasource.properties";
@@ -74,7 +74,6 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);
-            Cat.logError(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
             LOGGER.error(DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE, e);
             throw e;
         } finally {
@@ -96,7 +95,6 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
             transaction.setStatus(e);
-            Cat.logError(e);
             String message = e.getMessage();
             LOGGER.error(message, e);
             throw e;

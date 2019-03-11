@@ -20,7 +20,7 @@ import com.ctrip.framework.vi.annotation.Ignite;
 import com.ctrip.framework.vi.ignite.AbstractCtripIgnitePlugin;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 
-@Ignite(id = "fx.dal.ignite", type = Ignite.PluginType.Component)
+@Ignite(id = "fx.dal.ignite", type = Ignite.PluginType.Component, after = "vi.ignite")
 public class DalIgnite extends AbstractCtripIgnitePlugin {
     private Map<String, String> configs = new HashMap<>();
     private final String HELP_URL = "http://conf.ctripcorp.com/pages/viewpage.action?pageId=143877535";
@@ -40,27 +40,11 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
     @Override
     public boolean warmUP(SimpleLogger logger) {
         Transaction t = Cat.newTransaction(DalLogTypes.DAL, IGNITE);
-        boolean result = true;
-        try {
-            result = ignite(logger);
-            Cat.logEvent(DalLogTypes.DAL, IGNITE, Message.SUCCESS, IGNITING_DAL_CLIENT);
-            t.setStatus(Message.SUCCESS);
-        } catch (Exception e) {
-            t.setStatus(e);
-            Cat.logError(e);
-        } finally {
-            t.complete();
-        }
-
-        return result;
-    }
-
-    private boolean ignite(SimpleLogger logger){
         if (!isDalConfigExist(logger)) {
             logger.warn("Can not find dal.config from either local or remote.");
             logger.warn("This maybe normal case for those who upgrade from older ctrip-dal-client.");
             logger.warn("If app only use dal data source, please change dependency from ctrip-dal-client to ctrip-datasource.");
-            logger.warn(String.format("Refer to %s for more information",HELP_URL));
+            logger.warn(String.format("Refer to %s for more information", HELP_URL));
             return true;
         }
 
@@ -84,6 +68,9 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             DalClientFactory.warmUpIdGenerators();
             logger.info("Success warmed up id generators");
 
+            Cat.logEvent(DalLogTypes.DAL, IGNITE, Message.SUCCESS, IGNITING_DAL_CLIENT);
+            t.setStatus(Message.SUCCESS);
+
             return true;
         } catch (Throwable e) {
             if (DataSourceConfigureManager.config == null) {
@@ -94,10 +81,17 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
             log(logger);
             logger.error("Fail", e);
-            logger.info(String.format("Please check %s",HELP_URL));
+            logger.info(String.format("Please check %s", HELP_URL));
+
+            t.setStatus(e);
+            Cat.logError(e);
+
             return false;
+        } finally {
+            t.complete();
         }
     }
+
 
     private boolean isDalConfigExist(SimpleLogger logger) {
         logger.info("Try to locate dal.config from local");

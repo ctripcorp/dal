@@ -538,7 +538,7 @@ public class NoShardOnSqlServerUnitTest {
         assertEquals(1000, dao.queryByPk(1l, new DalHints()).getCityID().intValue());
     }
 
-    @Test
+    /*@Test
     public void testTransSetRollback() throws Exception {
         DalCommand command = new DalCommand() {
             @Override
@@ -563,7 +563,7 @@ public class NoShardOnSqlServerUnitTest {
 
         assertEquals(21, dao.queryByPk(2, new DalHints()).getCityID().intValue());
         assertEquals(6, dao.count(new DalHints()));
-    }
+    }*/
 
     @Test
     public void testTransFail() throws Exception {
@@ -637,7 +637,7 @@ public class NoShardOnSqlServerUnitTest {
         assertEquals(6, dao.count(new DalHints()));
     }
 
-    @Test
+    /*@Test
     public void testTransCommandSetRollback() throws Exception {
         List<DalCommand> cmds = new LinkedList<DalCommand>();
         cmds.add(new DalCommand() {
@@ -674,7 +674,7 @@ public class NoShardOnSqlServerUnitTest {
         assertEquals(21, dao.queryByPk(2, new DalHints()).getCityID().intValue());
         assertEquals(22, dao.queryByPk(3, new DalHints()).getCityID().intValue());
         assertEquals(6, dao.count(new DalHints()));
-    }
+    }*/
 
     @Test
     public void testTransCommandsFail() throws Exception {

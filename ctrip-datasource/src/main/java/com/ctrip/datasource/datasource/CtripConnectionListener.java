@@ -11,6 +11,8 @@ public class CtripConnectionListener extends AbstractConnectionListener implemen
     private static final String CONNECTION_CREATE_CONNECTION_FAILED = "Connection::createConnectionFailed";
     private static final String CONNECTION_RELEASE_CONNECTION = "Connection::releaseConnection";
     private static final String CONNECTION_ABANDON_CONNECTION = "Connection::abandonConnection";
+    private static final String CONNECTION_WAIT_CONNECTION = "Connection::waitConnection";
+
 
     @Override
     public void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
@@ -35,6 +37,16 @@ public class CtripConnectionListener extends AbstractConnectionListener implemen
         super.doOnAbandonConnection(poolDesc, connection);
         logCatTransaction(CONNECTION_ABANDON_CONNECTION, poolDesc, connection);
     }
+
+    @Override
+    public void doOnWaitConnection(String poolDesc, Connection connection, long startTime) {
+        super.doOnWaitConnection(poolDesc, connection, startTime);
+        String connectionUrl = getConnectionUrl(connection);
+        String transactionName = String.format("%s:%s", CONNECTION_WAIT_CONNECTION, connectionUrl);
+        String message = String.format("%s,%s", poolDesc, connectionUrl);
+        LOGGER.logTransaction(DalLogTypes.DAL_ALERT_POOL_WAIT, transactionName, message, startTime);
+    }
+
 
     private void logCatTransaction(String typeName, String poolDesc, Connection connection) {
         logCatTransaction(typeName, poolDesc, connection, 0);

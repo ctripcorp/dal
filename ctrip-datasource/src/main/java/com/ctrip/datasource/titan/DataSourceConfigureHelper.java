@@ -7,11 +7,11 @@ import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(DataSourceConfigureHelper.class);
+    protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private static final String EMPTY_ID = "999999";
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";

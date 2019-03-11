@@ -1312,7 +1312,7 @@ public class NoShardOnMysqlDaoUnitTest {
         assertEquals(1000, dao.queryByPk(1, new DalHints()).getAge().intValue());
     }
 
-    @Test
+    /*@Test
     public void testTransSetRollback() throws Exception {
         DalCommand command = new DalCommand() {
             @Override
@@ -1335,7 +1335,7 @@ public class NoShardOnMysqlDaoUnitTest {
         }
         assertEquals(21, dao.queryByPk(2, new DalHints()).getAge().intValue());
         assertEquals(6, dao.count(new DalHints()));
-    }
+    }*/
 
     @Test
     public void testTransFail() throws Exception {
@@ -1403,7 +1403,7 @@ public class NoShardOnMysqlDaoUnitTest {
 
     }
 
-    @Test
+    /*@Test
     public void testTransCommandsSetRollback() throws SQLException {
         List<DalCommand> cmds = new LinkedList<>();
         cmds.add(new DalCommand() {
@@ -1436,7 +1436,7 @@ public class NoShardOnMysqlDaoUnitTest {
         assertEquals(21, dao.queryByPk(2, new DalHints()).getAge().intValue());
         assertEquals(6, dao.count(new DalHints()));
 
-    }
+    }*/
 
     @Test
     public void testTransCommandsPass() throws SQLException {

@@ -115,6 +115,15 @@ public class CtripLoggerImpl extends AbstractLogger {
     }
 
     @Override
+    public void warn(final String msg, final Throwable throwable) {
+        try {
+            logger.warn(msg, throwable);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void error(final String msg, final Throwable e) {
         try {
             Cat.logError(msg, e);

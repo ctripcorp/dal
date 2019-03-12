@@ -1,7 +1,6 @@
 package noshardtest;
 
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import dao.noshard.DalTransactionalModifierTestDao;
 import dao.noshard.NoShardDalTransactionalTestOnSqlServerDao;
 import dao.noshard.SqlServerDalTransactionalConfig;
@@ -11,9 +10,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import sun.tools.util.ModifierFilter;
-
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 

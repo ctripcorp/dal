@@ -13,7 +13,6 @@ import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
-
 public class DalShardingHelper {
     public static ILogger logger = DalElementFactory.DEFAULT.getILogger();
 
@@ -68,7 +67,8 @@ public class DalShardingHelper {
      * @return
      * @throws SQLException
      */
-    private static boolean locateTableShardId(String logicDbName, String tableName, DalHints hints) throws SQLException {
+    private static boolean locateTableShardId(String logicDbName, String tableName, DalHints hints)
+            throws SQLException {
         DalConfigure config = DalClientFactory.getDalConfigure();
         DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
 
@@ -90,7 +90,8 @@ public class DalShardingHelper {
      * @throws SQLException
      * @deprecated use below locateTableShardId method with tableName parameter
      */
-    public static String locateTableShardId(String logicDbName, DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+    public static String locateTableShardId(String logicDbName, DalHints hints, StatementParameters parameters,
+            Map<String, ?> fields) throws SQLException {
         return locateTableShardId(logicDbName, null, hints, parameters, fields);
     }
 
@@ -102,7 +103,8 @@ public class DalShardingHelper {
      * @return
      * @throws SQLException
      */
-    public static String locateTableShardId(String logicDbName, String tableName, DalHints hints, StatementParameters parameters, Map<String, ?> fields) throws SQLException {
+    public static String locateTableShardId(String logicDbName, String tableName, DalHints hints,
+            StatementParameters parameters, Map<String, ?> fields) throws SQLException {
         DalConfigure config = DalClientFactory.getDalConfigure();
         DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
 
@@ -111,7 +113,8 @@ public class DalShardingHelper {
         if (shard != null)
             return shard;
 
-        shard = strategy.locateTableShard(config, logicDbName, tableName, new DalHints().setParameters(parameters).setFields(fields));
+        shard = strategy.locateTableShard(config, logicDbName, tableName,
+                new DalHints().setParameters(parameters).setFields(fields));
         if (shard != null)
             return shard;
 
@@ -128,13 +131,15 @@ public class DalShardingHelper {
      * @return Grouped pojos
      * @throws SQLException In case locate shard id faild
      */
-    public static Map<String, Map<Integer, Map<String, ?>>> shuffle(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
+    public static Map<String, Map<Integer, Map<String, ?>>> shuffle(String logicDbName, String shardId,
+            List<Map<String, ?>> daoPojos) throws SQLException {
         Map<String, Map<Integer, Map<String, ?>>> shuffled = getPojosGroupedByShardId(logicDbName, shardId, daoPojos);
         validateShardIdsExistInDBSet(logicDbName, shuffled.keySet());
         return shuffled;
     }
 
-    public static Map<String, Map<Integer, Map<String, ?>>> getPojosGroupedByShardId(String logicDbName, String shardId, List<Map<String, ?>> daoPojos) throws SQLException {
+    public static Map<String, Map<Integer, Map<String, ?>>> getPojosGroupedByShardId(String logicDbName, String shardId,
+            List<Map<String, ?>> daoPojos) throws SQLException {
         Map<String, Map<Integer, Map<String, ?>>> shuffled = new HashMap<>();
         DalConfigure config = DalClientFactory.getDalConfigure();
         DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
@@ -143,9 +148,8 @@ public class DalShardingHelper {
         for (int i = 0; i < daoPojos.size(); i++) {
             Map<String, ?> pojo = daoPojos.get(i);
 
-            String tmpShardId = shardId == null ?
-                    strategy.locateDbShard(config, logicDbName, tmpHints.setFields(pojo)) :
-                    shardId;
+            String tmpShardId =
+                    shardId == null ? strategy.locateDbShard(config, logicDbName, tmpHints.setFields(pojo)) : shardId;
 
             Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(tmpShardId);
             if (pojosInShard == null) {
@@ -183,7 +187,8 @@ public class DalShardingHelper {
         return shuffled;
     }
 
-    public static Map<String, List<?>> getParamsGroupedByShardId(String logicDbName, List<?> parameters) throws SQLException {
+    public static Map<String, List<?>> getParamsGroupedByShardId(String logicDbName, List<?> parameters)
+            throws SQLException {
         Map<String, List<?>> shuffled = new HashMap<>();
 
         DalConfigure config = DalClientFactory.getDalConfigure();
@@ -211,16 +216,17 @@ public class DalShardingHelper {
         return shuffled;
     }
 
-        /**
-         * Shuffle by table shard id.
-         *
-         * @param logicDbName
-         * @param pojos
-         * @return
-         * @throws SQLException
-         * @deprecated use below shuffleByTable method with tableName parameter
-         */
-    public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId, Map<Integer, Map<String, ?>> pojos) throws SQLException {
+    /**
+     * Shuffle by table shard id.
+     *
+     * @param logicDbName
+     * @param pojos
+     * @return
+     * @throws SQLException
+     * @deprecated use below shuffleByTable method with tableName parameter
+     */
+    public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableShardId,
+            Map<Integer, Map<String, ?>> pojos) throws SQLException {
         return shuffleByTable(logicDbName, null, tableShardId, pojos);
     }
 
@@ -232,7 +238,8 @@ public class DalShardingHelper {
      * @return
      * @throws SQLException
      */
-    public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableName, String tableShardId, Map<Integer, Map<String, ?>> pojos) throws SQLException {
+    public static Map<String, Map<Integer, Map<String, ?>>> shuffleByTable(String logicDbName, String tableName,
+            String tableShardId, Map<Integer, Map<String, ?>> pojos) throws SQLException {
         Map<String, Map<Integer, Map<String, ?>>> shuffled = new HashMap<>();
         DalConfigure config = DalClientFactory.getDalConfigure();
 
@@ -243,9 +250,9 @@ public class DalShardingHelper {
         for (Integer index : pojos.keySet()) {
             Map<String, ?> fields = pojos.get(index);
 
-            String shardId = tableShardId == null ?
-                    strategy.locateTableShard(config, logicDbName, tableName, tmpHints.setFields(fields)) :
-                    tableShardId;
+            String shardId = tableShardId == null
+                    ? strategy.locateTableShard(config, logicDbName, tableName, tmpHints.setFields(fields))
+                    : tableShardId;
 
             Map<Integer, Map<String, ?>> pojosInShard = shuffled.get(shardId);
             if (pojosInShard == null) {
@@ -259,13 +266,37 @@ public class DalShardingHelper {
         return shuffled;
     }
 
+    // for DalHints.tableShardBy
+    public static Map<String, List<?>> shuffleByTable(String logicDbName, String tableName, String tablerShardId,
+            List<?> parameters) throws SQLException {
+        Map<String, List<?>> shuffled = new HashMap<>();
+        DalConfigure configure = DalClientFactory.getDalConfigure();
+        DatabaseSet databaseSet = configure.getDatabaseSet(logicDbName);
+        DalShardingStrategy strategy = databaseSet.getStrategy();
+
+        for (int i = 0; i < parameters.size(); i++) {
+            Object value = parameters.get(i);
+
+            DalHints tempHints = new DalHints();
+            String tableShardId = tablerShardId != null ? tablerShardId
+                    : strategy.locateTableShard(configure, logicDbName, tableName, tempHints.setTableShardValue(value));
+            List pojosInTableShard = shuffled.get(tableShardId);
+            if (pojosInTableShard == null) {
+                pojosInTableShard = new LinkedList();
+                shuffled.put(tableShardId, pojosInTableShard);
+            }
+
+            pojosInTableShard.add(value);
+        }
+
+        return shuffled;
+    }
+
     /**
-     * Verify if shard id is already set for potential corss shard batch operation.
-     * This includes combined insert, batch insert and batch delete.
-     * It will first check if sharding is enabled. Then detect if necessary sharding id can be located.
-     * This applies to both db and table shard.
-     * If all meet, then allow the operation
-     * TODO do more analyze of the logic here
+     * Verify if shard id is already set for potential corss shard batch operation. This includes combined insert, batch
+     * insert and batch delete. It will first check if sharding is enabled. Then detect if necessary sharding id can be
+     * located. This applies to both db and table shard. If all meet, then allow the operation TODO do more analyze of
+     * the logic here
      *
      * @param logicDbName
      * @param tableName
@@ -297,11 +328,13 @@ public class DalShardingHelper {
         return true;
     }
 
-    public static void detectBulkTaskDistributedTransaction(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+    public static void detectBulkTaskDistributedTransaction(String logicDbName, DalHints hints,
+            List<Map<String, ?>> daoPojos) throws SQLException {
         if (!isShardingEnabled(logicDbName))
             return;
 
-        Set<String> notNullShardIds = getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos).keySet());
+        Set<String> notNullShardIds =
+                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos).keySet());
         if (notNullShardIds.size() > 1)
             logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST, "");
 
@@ -312,7 +345,8 @@ public class DalShardingHelper {
             logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST_IN_TRANSACTION, "");
     }
 
-    public static void detectDistributedTransaction(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos) throws SQLException {
+    public static void detectDistributedTransaction(String logicDbName, DalHints hints, List<Map<String, ?>> daoPojos)
+            throws SQLException {
         if (!isShardingEnabled(logicDbName))
             return;
 
@@ -360,6 +394,17 @@ public class DalShardingHelper {
 
     private static void isSameShard(String shardId) throws SQLException {
         if (!shardId.equals(DalTransactionManager.getCurrentShardId()))
-            throw new SQLException("Operation is not allowed in different database shard within current transaction. Current shardId: " + DalTransactionManager.getCurrentShardId() + ". Requested shardId: " + shardId);
+            throw new SQLException(
+                    "Operation is not allowed in different database shard within current transaction. Current shardId: "
+                            + DalTransactionManager.getCurrentShardId() + ". Requested shardId: " + shardId);
     }
+
+    public static Set<String> getAllShards(String logicDbName) {
+        return DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getAllShards();
+    }
+
+    public static Set<String> getAllTableShards(String logicDbName, String tableName) throws SQLException {
+        return DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getAllTableShards(tableName);
+    }
+
 }

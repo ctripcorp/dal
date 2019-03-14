@@ -64,18 +64,16 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
     private boolean isPagination = false;
 
     /**
-     * Important Note: In this case, the generated code with set page info into statement parameters.
-     * You are recommended to re-generate code using the code generator. The new code will use the other two constructor instead
+     * Important Note: In this case, the generated code with set page info into statement parameters. You are
+     * recommended to re-generate code using the code generator. The new code will use the other two constructor instead
      *
-     * @param tableName    表名
-     * @param dbCategory   数据库类型
+     * @param tableName 表名
+     * @param dbCategory 数据库类型
      * @param isPagination 是否分页. If it is true, it means the code is running with old generated code
      * @throws SQLException
      * @deprecated If you see this, please regenerate dal code with code gen
      */
-    public SelectSqlBuilder(String tableName,
-                            DatabaseCategory dbCategory, boolean isPagination)
-            throws SQLException {
+    public SelectSqlBuilder(String tableName, DatabaseCategory dbCategory, boolean isPagination) throws SQLException {
         this();
         from(tableName).setDatabaseCategory(dbCategory);
         this.isPagination = isPagination;
@@ -185,8 +183,7 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
      * @param pageSize
      * @throws SQLException
      */
-    public SelectSqlBuilder atPage(int pageNo, int pageSize)
-            throws SQLException {
+    public SelectSqlBuilder atPage(int pageNo, int pageSize) throws SQLException {
         if (pageNo < 1 || pageSize < 1)
             throw new SQLException("Illigal pagesize or pageNo, please check");
 
@@ -250,10 +247,23 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
         if (merger != null)
             return merger;
 
-        if (isRequireSingle() || isRequireFirst())
-            return isRequireSingle() ? new DalSingleResultMerger() : new DalFirstResultMerger((Comparator) hints.getSorter());
+        return createResultMerger(hints);
+    }
 
-        return count > 0 ? new DalRangedResultMerger((Comparator) hints.getSorter(), count) : new DalListMerger((Comparator) hints.getSorter());
+    public <T> ResultMerger<T> createNewResultMerger(DalHints hints) {
+        if (hints.is(DalHintEnum.resultMerger))
+            return (ResultMerger<T>) hints.get(DalHintEnum.resultMerger);
+
+        return createResultMerger(hints);
+    }
+
+    private <T> ResultMerger<T> createResultMerger(DalHints hints) {
+        if (isRequireSingle() || isRequireFirst())
+            return isRequireSingle() ? new DalSingleResultMerger()
+                    : new DalFirstResultMerger((Comparator) hints.getSorter());
+
+        return count > 0 ? new DalRangedResultMerger((Comparator) hints.getSorter(), count)
+                : new DalListMerger((Comparator) hints.getSorter());
     }
 
     @Override
@@ -314,21 +324,15 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
     }
 
     /**
-     * This method has to be backward compatible. The old generator will generated like
-     * String sql = builder.build();
+     * This method has to be backward compatible. The old generator will generated like String sql = builder.build();
      * <p>
-     * For page:
-     * StatementParameters parameters = builder.buildParameters();
-     * int index =  builder.getStatementParameterIndex();
-     * parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize + 1);
-     * parameters.set(index++, Types.INTEGER, pageSize * pageNo);
-     * return queryDao.query(sql, parameters, hints, parser);
+     * For page: StatementParameters parameters = builder.buildParameters(); int index =
+     * builder.getStatementParameterIndex(); parameters.set(index++, Types.INTEGER, (pageNo - 1) * pageSize + 1);
+     * parameters.set(index++, Types.INTEGER, pageSize * pageNo); return queryDao.query(sql, parameters, hints, parser);
      * <p>
-     * Or for first result
-     * return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
+     * Or for first result return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
      * <p>
-     * Or for single result
-     * return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
+     * Or for single result return queryDao.queryForObjectNullable(sql, builder.buildParameters(), hints, parser);
      *
      * @return
      */
@@ -343,8 +347,7 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
     }
 
     /**
-     * For backward compatible
-     * 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
+     * For backward compatible 对于select first，会在语句中追加limit 0,1(MySQL)或者top 1(SQL Server)：
      *
      * @return
      */
@@ -458,4 +461,5 @@ public class SelectSqlBuilder extends AbstractTableSqlBuilder implements SelectB
         // This will be an exceptional case
         return SPACE;
     }
+
 }

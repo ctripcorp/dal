@@ -2,8 +2,11 @@ package com.ctrip.platform.dal.dao.shard;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.Expressions;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.UpdateSqlBuilder;
@@ -35,7 +38,9 @@ public abstract class BaseDalTabelDaoShardByTableTest {
             DalParser<ClientTestModel> clientTestParser = new ClientTestDalParser(databaseName);
             dao = new DalTableDao<ClientTestModel>(clientTestParser);
             ASSERT_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;
-            INSERT_PK_BACK_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;;
+            INSERT_PK_BACK_ALLOWED = dao.getDatabaseCategory() == DatabaseCategory.MySql;
+
+            queryDao = new DalQueryDao(databaseName);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -45,6 +50,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
     private final static int mod = 4;
 
     private static DalTableDao<ClientTestModel> dao;
+    private static DalQueryDao queryDao;
 
     public void assertResEquals(int exp, int res) {
         if (ASSERT_ALLOWED)
@@ -3811,6 +3817,25 @@ public abstract class BaseDalTabelDaoShardByTableTest {
     }
 
     @Test
+    public void testCountTableShardBy2() throws SQLException {
+        int index = 1;
+        List<Integer> list = new ArrayList<>();
+        list.add(0);
+        list.add(1);
+
+        StatementParameters parameters = new StatementParameters();
+        parameters.setInParameter(index, "tableIndex", Types.BIGINT, list);
+
+        SelectSqlBuilder ssb1 = new SelectSqlBuilder();
+        ssb1.selectAll().from(TABLE_NAME).where(" tableIndex in (?) ").with(parameters).selectCount();
+
+        Number count1 = dao.count(ssb1, new DalHints().tableShardBy("tableIndex"));
+
+        assertEquals(3L, count1);
+
+    }
+
+    @Test
     public void testImplicitQueryListInAllTableShards() throws SQLException {
         SelectSqlBuilder ssb1 = new SelectSqlBuilder();
         ssb1.selectAll().from(TABLE_NAME);
@@ -3913,28 +3938,41 @@ public abstract class BaseDalTabelDaoShardByTableTest {
 
     }
 
-    //UpdateSqlBuilder can not support tableShardBy due to lacking of setInParameter related interface.
-    /*
     @Test
     public void testUpdateTableShardBy() throws SQLException {
-        UpdateSqlBuilder usb = new UpdateSqlBuilder(TABLE_NAME, dao.getDatabaseCategory());
-        usb.update("address", "TableShardBy", Types.VARCHAR);
-        // usb.equal("id", "1", Types.INTEGER);
-
         List<Integer> list = new ArrayList<>();
+        list.add(2);
         list.add(3);
-        list.add(4);
+
+        UpdateSqlBuilder usb = new UpdateSqlBuilder();
+        usb.from(TABLE_NAME);
+        usb.update("address", "TableShardBy", Types.VARCHAR);
         usb.in("id", list, Types.INTEGER);
 
         try {
             dao.update(usb, new DalHints().tableShardBy("id"));
         } catch (Throwable e) {
+            e.printStackTrace();
             Assert.fail();
         }
 
-        ClientTestModel model = dao.queryByPk(1, new DalHints().inAllTableShards());
+        ClientTestModel model2 = dao.queryByPk(2, new DalHints().inTableShard("2"));
+        Assert.assertEquals(2, model2.getId().intValue());
+        Assert.assertEquals(11, model2.getQuantity().intValue());
+        Assert.assertEquals(1, model2.getDbIndex().intValue());
+        Assert.assertEquals(2, model2.getTableIndex().intValue());
+        Assert.assertEquals(1, model2.getType().shortValue());
+        Assert.assertEquals("TableShardBy", model2.getAddress());
+
+        ClientTestModel model3 = dao.queryByPk(3, new DalHints().inTableShard("3"));
+        Assert.assertEquals(3, model3.getId().intValue());
+        Assert.assertEquals(12, model3.getQuantity().intValue());
+        Assert.assertEquals(1, model3.getDbIndex().intValue());
+        Assert.assertEquals(3, model3.getTableIndex().intValue());
+        Assert.assertEquals(1, model3.getType().shortValue());
+        Assert.assertEquals("TableShardBy", model3.getAddress());
+
     }
-    */
 
     // endregion
 
@@ -4251,6 +4289,178 @@ public abstract class BaseDalTabelDaoShardByTableTest {
         List<ClientTestModel> modelList3 = dao.queryBy(pojo, new DalHints().inTableShards(shard3));
         assertEquals(0, modelList3.size());
     }
+
+    // endregion
+
+    // region FreeSelectSqlBuilder
+
+    @Test
+    public void testFreeSelectSqlBuilderInTableShardWithTableName() throws SQLException {
+        List<Integer> list = new ArrayList<>();
+        list.add(3);
+        list.add(4);
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            result = queryDao.query(builder, new DalHints().inTableShard(3));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testFreeSelectSqlBuilderInAllTableShardsWithTableName() throws SQLException {
+        List<Integer> list = new ArrayList<>();
+        list.add(2);
+        list.add(3);
+        list.add(4);
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            result = queryDao.query(builder, new DalHints().inAllTableShards());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(6, result.size());
+    }
+
+    @Test
+    public void testFreeSelectSqlBuilderInTableShardsWithTableName() throws SQLException {
+        List<Integer> list = new ArrayList<>();
+        list.add(3);
+        list.add(4);
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            Set<String> tableShards = new HashSet<>();
+            tableShards.add("2");
+            tableShards.add("3");
+            result = queryDao.query(builder, new DalHints().inTableShards(tableShards));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+
+        Assert.assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testFreeSelectSqlBuilderInOneTableShardWithTableName() throws SQLException {
+        List<Integer> list = new ArrayList<>();
+        list.add(4);
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            Set<String> tableShards = new HashSet<>();
+            tableShards.add("3");
+            result = queryDao.query(builder, new DalHints().inTableShards(tableShards));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(1, result.size());
+
+        ClientTestModel model = result.get(0);
+        Assert.assertEquals(4, model.getId().intValue());
+        Assert.assertEquals(13, model.getQuantity().intValue());
+        Assert.assertEquals(1, model.getDbIndex().intValue());
+        Assert.assertEquals(3, model.getTableIndex().intValue());
+        Assert.assertEquals("SH INFO", model.getAddress());
+    }
+
+    @Test
+    public void testFreeSelectSqlBuilderTableShardByWithTableName() throws SQLException {
+        List<Integer> list = new ArrayList<>();
+        list.add(3);
+        list.add(4);
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            result = queryDao.query(builder, new DalHints().tableShardBy("id"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(1, result.size());
+
+        ClientTestModel model = result.get(0);
+        Assert.assertEquals(3, model.getId().intValue());
+        Assert.assertEquals(12, model.getQuantity().intValue());
+        Assert.assertEquals(1, model.getDbIndex().intValue());
+        Assert.assertEquals(3, model.getTableIndex().intValue());
+        Assert.assertEquals(1, model.getType().shortValue());
+        Assert.assertEquals("SH INFO", model.getAddress());
+
+
+        // multiple
+        List<Integer> list2 = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        list.add(4);
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder2 = new FreeSelectSqlBuilder<>();
+        builder2.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder2.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result2 = null;
+        try {
+            result2 = queryDao.query(builder2, new DalHints().tableShardBy("id"));
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(3, result2.size());
+    }
+
+    @Test
+    public void testFreeSelectSqlBuilderWithFreeSql() throws SQLException {
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.setTemplate("select * from dal_client_test_0");
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            result = queryDao.query(builder, new DalHints().inTableShard(3)); // inTableShard actually invalid here
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(1, result.size());
+
+        ClientTestModel model = result.get(0);
+        Assert.assertEquals(model.getId().intValue(), 1);
+        Assert.assertEquals(model.getQuantity().intValue(), 10);
+        Assert.assertEquals(model.getDbIndex().intValue(), 1);
+        Assert.assertEquals(model.getTableIndex().intValue(), 0);
+        Assert.assertEquals(model.getType().shortValue(), 1);
+        Assert.assertEquals(model.getAddress(), "SH INFO");
+
+    }
+
     // endregion
 
 }

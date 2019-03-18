@@ -11,11 +11,16 @@ import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogContext;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.sqlbuilder.AbstractFreeSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
+import com.ctrip.platform.dal.exceptions.DalException;
+import org.apache.commons.lang.StringUtils;
 
 public class DalSqlTaskRequest<T> implements DalRequest<T> {
     private String caller;
@@ -128,13 +133,33 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             shards = parametersByShard.keySet();
         }
 
-        if (shards != null && shards.size() > 1)
-            logger.warn("Execute on multiple shards detected: " + builder.build());
+        if (shards != null && shards.size() > 1) {
+            logOnMultipleShards(shards, builder);
+        }
 
         return shards;
     }
 
+    private void logOnMultipleShards(Set<String> shards, SqlBuilder builder) {
+        String dbShards = StringUtils.join(shards, ",");
+
+        if (builder instanceof AbstractFreeSqlBuilder) {
+            AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
+            logger.warn(
+                    String.format("Execute on multiple shards %s detected: %s", dbShards, freeSqlBuilder.build(" "))); // space
+                                                                                                                       // used
+                                                                                                                       // for
+                                                                                                                       // placeholder
+        } else {
+            logger.warn(String.format("Execute on multiple shards %s detected: %s", dbShards, builder.build()));
+        }
+    }
+
     private static class SqlTaskCallable<T> implements Callable<T> {
+        private ILogger iLogger = DalElementFactory.DEFAULT.getILogger();
+        private static final String SQL_CROSSSHARD = "SQL.crossShard";
+        private static final String IMPLICIT_IN_ALL_TABLE_SHARDS = "implicitInAllTableShards";
+
         private DalClient client;
         private StatementParameters parameters;
         private DalHints hints;
@@ -175,14 +200,31 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         }
 
         private String getTableName() {
+            String tableName = "";
+
             if (builder == null)
+                return tableName;
+
+            if (builder instanceof TableSqlBuilder) {
+                TableSqlBuilder tableSqlBuilder = (TableSqlBuilder) builder;
+                tableName = tableSqlBuilder.getTableName();
+            } else if (builder instanceof AbstractFreeSqlBuilder) {
+                AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
+                tableName = getTableNameFromAbstractFreeSqlBuilder(freeSqlBuilder);
+            }
+
+            return tableName;
+        }
+
+        private String getTableNameFromAbstractFreeSqlBuilder(AbstractFreeSqlBuilder freeSqlBuilder) {
+            List<AbstractFreeSqlBuilder.Table> tables = freeSqlBuilder.getTables();
+            if (tables == null || tables.isEmpty())
                 return "";
 
-            if (!(builder instanceof TableSqlBuilder))
-                return "";
+            if (tables.size() == 1)
+                return tables.get(0).getTableName();
 
-            TableSqlBuilder tableSqlBuilder = (TableSqlBuilder) builder;
-            return tableSqlBuilder.getTableName();
+            return "";
         }
 
         private Set<String> getTableShards() throws SQLException {
@@ -201,10 +243,28 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 tableShards = parametersByTableShard.keySet();
             }
 
-            if (tableShards != null && tableShards.size() > 1)
-                logger.warn("Execute on multiple table shards detected: " + builder.build());
+            if (tableShards != null && tableShards.size() > 1) {
+                logOnMultipleTableShards(tableShards, builder);
+            }
 
             return tableShards;
+        }
+
+        private void logOnMultipleTableShards(Set<String> tableShards, SqlBuilder builder) throws SQLException {
+            if (builder instanceof AbstractFreeSqlBuilder) {
+                if (rawTableName == null || rawTableName.isEmpty()) {
+                    throw new DalException(
+                            "Cannot execute on muliple table shards by AbstractFreeSqlBuilder without a table name.");
+                }
+
+                AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
+                for (String tableShard : tableShards) {
+                    String tableShardStr = getTableShardString(tableShard, rawTableName, null, null);
+                    logger.warn("Execute on multiple table shards detected: " + freeSqlBuilder.build(tableShardStr));
+                }
+            } else {
+                logger.warn("Execute on multiple table shards detected: " + builder.build());
+            }
         }
 
         @Override
@@ -285,12 +345,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             StatementParameters originalParameters = parameters.duplicate();
             StatementParameters compiledParameters = compileParameters(parameters.duplicate());
 
-            if (builder instanceof TableSqlBuilder) {
-                TableSqlBuilder tableBuilder = (TableSqlBuilder) builder;
+            if (builder instanceof TableSqlBuilder || builder instanceof AbstractFreeSqlBuilder) {
                 tableName = rawTableName;
                 if (isTableShardingEnabled) {
-                    return executeWithTableSqlBuilder(tableShardId, tableName, client, originalParameters,
-                            compiledParameters, hints, taskContext, builder, tableBuilder, merger);
+                    return executeWithSqlBuilder(tableShardId, tableName, client, originalParameters,
+                            compiledParameters, hints, taskContext, builder, merger);
                 }
             }
 
@@ -302,10 +361,54 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext.fork());
         }
 
-        private T executeWithTableSqlBuilder(String tableShardId, String tableName, DalClient client,
+        private T executeWithSqlBuilder(String tableShardId, String tableName, DalClient client,
                 StatementParameters originalParameters, StatementParameters compiledParameters, DalHints hints,
-                DalTaskContext taskContext, SqlBuilder builder, TableSqlBuilder tableBuilder, ResultMerger<T> merger)
-                throws SQLException {
+                DalTaskContext taskContext, SqlBuilder builder, ResultMerger<T> merger) throws SQLException {
+            String tempTableName = tableName;
+            String tableShardStr = getTableShardStr(tableShardId, tempTableName, hints, compiledParameters);
+            if (tableShardStr == null || tableShardStr.isEmpty()) {
+                if (hints.isImplicitInAllTableShards()) {
+                    return executeOnImplicitInAllTableShards(tempTableName, client, originalParameters, hints,
+                            taskContext, builder, merger);
+                } else {
+                    if (builder instanceof TableSqlBuilder) {
+                        throw new SQLException("Can not locate table shard for " + logicDbName);
+                    } else if (builder instanceof AbstractFreeSqlBuilder) {
+                        AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
+                        String compiledSql = compileSql(freeSqlBuilder.build(), originalParameters);
+                        return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext.fork());
+                    }
+                }
+            }
+
+            tempTableName = tempTableName + tableShardStr;
+            String sql = null;
+            if (builder instanceof TableSqlBuilder) {
+                TableSqlBuilder tableBuilder = (TableSqlBuilder) builder;
+                sql = tableBuilder.build(tableShardStr);
+            } else if (builder instanceof AbstractFreeSqlBuilder) {
+                AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
+                sql = freeSqlBuilder.build(tableShardStr);
+            }
+
+            return executeTask(taskContext, tempTableName, client, sql, originalParameters, compiledParameters, hints);
+        }
+
+        private T executeOnImplicitInAllTableShards(String tempTableName, DalClient client,
+                StatementParameters originalParameters, DalHints hints, DalTaskContext taskContext, SqlBuilder builder,
+                ResultMerger<T> merger) throws SQLException {
+            logger.warn("Try to execute on all table shards due to implicit inAllTableShards hints.");
+            iLogger.logEvent(SQL_CROSSSHARD, IMPLICIT_IN_ALL_TABLE_SHARDS,
+                    String.format("LogicDbName:%s, TableName:%s", logicDbName, tempTableName));
+
+            // implicit execute in all table shards
+            Set<String> allTableShards = DalShardingHelper.getAllTableShards(logicDbName, rawTableName);
+            return executeByGivenTableShards(allTableShards, client, originalParameters, hints, taskContext, builder,
+                    merger);
+        }
+
+        private String getTableShardStr(String tableShardId, String tableName, DalHints hints,
+                StatementParameters compiledParameters) {
             String tempTableName = tableName;
             String tableShardStr = null;
             try {
@@ -314,24 +417,16 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 logger.warn(e.getMessage());
             }
 
-            if (tableShardStr == null || tableShardStr.isEmpty()) {
-                if (hints.isImplicitInAllTableShards()) {
-                    logger.warn("Try to execute on all table shards due to implicit inAllTableShards hints.");
-                    // implicit execute in all table shards
-                    Set<String> allTableShards = DalShardingHelper.getAllTableShards(logicDbName, rawTableName);
-                    return executeByGivenTableShards(allTableShards, client, originalParameters, hints, taskContext,
-                            builder, merger);
-                } else {
-                    throw new SQLException("Can not locate table shard for " + logicDbName);
-                }
-            }
+            return tableShardStr;
+        }
 
-            tempTableName = tempTableName + tableShardStr;
-
+        private T executeTask(DalTaskContext taskContext, String tempTableName, DalClient client, String sql,
+                StatementParameters originalParameters, StatementParameters compiledParameters, DalHints hints)
+                throws SQLException {
             if (taskContext instanceof DalContextConfigure)
                 ((DalContextConfigure) taskContext).addTables(tempTableName);
 
-            String compiledSql = compileSql(tableBuilder.build(tableShardStr), originalParameters);
+            String compiledSql = compileSql(sql, originalParameters);
             return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext.fork());
         }
 
@@ -364,7 +459,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         }
 
         private ResultMerger createResultMerger(boolean isTableShardingEnabled, ResultMerger<T> merger,
-                SqlBuilder builder, DalHints hints) throws SQLException {
+                SqlBuilder builder, DalHints hints) {
             if (merger == null)
                 return null;
 

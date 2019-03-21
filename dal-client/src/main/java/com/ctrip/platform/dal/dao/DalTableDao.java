@@ -201,6 +201,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     /**
      * Query by given selectBuilder
+     * 
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @return List of pojos that meet the search criteria
@@ -212,6 +213,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     /**
      * Query by given selectBuilder
+     * 
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param clazz the return type, not the pojo, but simple type
@@ -225,11 +227,13 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     /**
      * Query by given selectBuilder
+     * 
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @return List of pojos that meet the search criteria
      * @throws SQLException
-     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #query(SelectSqlBuilder , DalHints )}
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use
+     *             {@link #query(SelectSqlBuilder , DalHints )}
      */
     @Deprecated
     public List<T> query(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
@@ -238,12 +242,14 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     /**
      * Query by given selectBuilder
+     * 
      * @param selectBuilder
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param clazz the return type, not the pojo, but simple type
      * @return List of pojos that meet the search criteria
      * @throws SQLException
-     * @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #query(SelectSqlBuilder , DalHints, Class<K>)}
+     * @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use
+     *             {@link #query(SelectSqlBuilder , DalHints, Class<K>)}
      */
     @Deprecated
     public <K> List<K> query(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
@@ -262,6 +268,18 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      */
     public T queryFirst(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
         return queryObject(new SelectSqlBuilder().where(whereClause).with(parameters).requireFirst().nullable(), hints);
+    }
+
+    /**
+     * Query the first row of the given SelectSqlBuilder.
+     *
+     * @param selectBuilder select builder which represents the query criteria
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @return Null if no result found.
+     * @throws SQLException
+     */
+    public T queryFirst(SelectSqlBuilder selectBuilder, DalHints hints) throws SQLException {
+        return queryObject(selectBuilder.requireFirst().nullable(), hints);
     }
 
     /**
@@ -297,11 +315,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @return
      * @throws SQLException
-     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #queryObject(SelectSqlBuilder , DalHints )}
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use
+     *             {@link #queryObject(SelectSqlBuilder , DalHints )}
      */
     @Deprecated
     public T queryObject(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
-        return queryObject((SelectSqlBuilder)selectBuilder, hints);
+        return queryObject((SelectSqlBuilder) selectBuilder, hints);
     }
 
     /**
@@ -313,11 +332,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @param clazz the class which the returned result belongs to.
      * @return
      * @throws SQLException
-     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #queryObject(SelectSqlBuilder , DalHints , Class<K> )}
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use
+     *             {@link #queryObject(SelectSqlBuilder , DalHints , Class<K> )}
      */
     @Deprecated
     public <K> K queryObject(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz) throws SQLException {
-        return queryObject((SelectSqlBuilder)selectBuilder, hints, clazz);
+        return queryObject((SelectSqlBuilder) selectBuilder, hints, clazz);
     }
 
 
@@ -336,11 +356,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @param hints
      * @return
      * @throws SQLException
-     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use {@link #count(SelectSqlBuilder , DalHints )}
+     ** @deprecated just keep compatibility with previous version, use SelectSqlBuilder as argument, use
+     *             {@link #count(SelectSqlBuilder , DalHints )}
      */
     @Deprecated
     public Number count(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
-        return count((SelectSqlBuilder)selectBuilder, hints);
+        return count((SelectSqlBuilder) selectBuilder, hints);
     }
 
     /**
@@ -378,7 +399,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints) throws SQLException {
         DalSqlTaskRequest<K> request = new DalSqlTaskRequest<K>(logicDbName, populate(builder), hints,
-                DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser, (DalResultSetExtractor<K>) builder.getResultExtractor(hints)),
+                DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser,
+                        (DalResultSetExtractor<K>) builder.getResultExtractor(hints)),
                 (ResultMerger<K>) builder.getResultMerger(hints));
 
         return executor.execute(hints, request, builder.isNullable());
@@ -636,9 +658,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation
      * @param daoPojo pojo to be repalced
@@ -650,9 +672,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param keyHolder holder for generated primary keys
@@ -666,9 +688,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      *        DalHintEnum.continueOnError can be used to indicate that the inserting can be go on if there is any
@@ -681,9 +703,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      *        DalHintEnum.continueOnError can be used to indicate that the inserting can be go on if there is any
@@ -700,9 +722,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param daoPojos list of pojos to be replaced
@@ -714,9 +736,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param keyHolder holder for generated primary keys
@@ -730,9 +752,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     /**
-     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
-     * Because the auto_increment value in slave with row-based replication may not be updated
-     * if you replace with a duplicate unique key but without specific the primary key column value
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
+     * duplicate key by free sql. Because the auto_increment value in slave with row-based replication may not be
+     * updated if you replace with a duplicate unique key but without specific the primary key column value
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
      * @param daoPojos list of pojos to be replaced

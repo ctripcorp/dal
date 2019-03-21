@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import com.ctrip.platform.dal.dao.annotation.Transactional;
 
+@Deprecated
 @Component(DalAnnotationValidator.VALIDATOR_NAME)
 public class DalAnnotationValidator implements BeanPostProcessor {
     public static final String VALIDATOR_NAME = "com.ctrip.platform.dal.dao.client.DalAnnotationValidator";

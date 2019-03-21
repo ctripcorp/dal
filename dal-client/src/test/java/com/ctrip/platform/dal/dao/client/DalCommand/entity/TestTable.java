@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client.DalCommand;
+package com.ctrip.platform.dal.dao.client.DalCommand.entity;
 
 import com.ctrip.platform.dal.dao.DalPojo;
 import com.ctrip.platform.dal.dao.annotation.Database;

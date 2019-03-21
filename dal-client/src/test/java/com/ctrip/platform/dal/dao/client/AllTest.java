@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
-import com.ctrip.platform.dal.dao.client.DalCommand.DalCommandTest;
+import com.ctrip.platform.dal.dao.client.DalCommand.test.DalCommandRollbackOnlyTest;
+import com.ctrip.platform.dal.dao.client.DalCommand.test.DalCommandTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -16,6 +17,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		DalShardingHelperTest.class,
 		DalConfigureFactoryTest.class,
 		DalCommandTest.class,
+		DalCommandRollbackOnlyTest.class,
 		LogSamplingTest.class
 })
 public class AllTest {

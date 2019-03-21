@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.dao.*;
-import com.ctrip.platform.dal.dao.client.DalCommand.TestTable;
+import com.ctrip.platform.dal.dao.client.DalCommand.entity.TestTable;
 import com.ctrip.platform.dal.dao.sqlbuilder.InsertSqlBuilder;
 import org.junit.*;
 

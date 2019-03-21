@@ -26,6 +26,12 @@ public abstract class AbstractLogger implements ILogger {
     }
 
     @Override
+    public void logTransaction(String type, String name, String message, Callback callback, String failMessage)
+            throws Exception {
+        logTransaction(type, name, message, callback);
+    }
+
+    @Override
     public void logTransaction(String type, String name, String message, long startTime) {
         info(String.format("Type:%s, Name:%s, Message:%s, StartTime:%s", type, name, message, startTime));
     }
@@ -48,6 +54,15 @@ public abstract class AbstractLogger implements ILogger {
     public void warn(final Throwable throwable) {
         try {
             LOGGER.warn("", throwable);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void warn(final String msg, final Throwable throwable) {
+        try {
+            LOGGER.warn(msg, throwable);
         } catch (Throwable e) {
             e.printStackTrace();
         }

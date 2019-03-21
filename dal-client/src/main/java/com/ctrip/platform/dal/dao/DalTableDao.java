@@ -635,33 +635,110 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
                 hints, updateSqlTask, new ResultMerger.IntSummary())));
     }
 
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation
+     * @param daoPojo pojo to be repalced
+     * @return how many rows been affected
+     * @throws SQLException
+     */
     public int replace(DalHints hints, T daoPojo) throws SQLException {
         return replace(hints, hints.getKeyHolder(), daoPojo);
     }
 
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param keyHolder holder for generated primary keys
+     * @param daoPojo pojo to be replaced
+     * @return how many rows been affected
+     * @throws SQLException
+     */
     public int replace(DalHints hints, KeyHolder keyHolder, T daoPojo) throws SQLException {
         return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojo),
                 new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleReplaceTask)));
     }
 
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     *        DalHintEnum.continueOnError can be used to indicate that the inserting can be go on if there is any
+     *        failure.
+     * @param daoPojos list of pojos to be replaced
+     * @return how many rows been affected
+     */
     public int[] replace(DalHints hints, List<T> daoPojos) throws SQLException {
         return replace(hints, hints.getKeyHolder(), daoPojos);
     }
 
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     *        DalHintEnum.continueOnError can be used to indicate that the inserting can be go on if there is any
+     *        failure.
+     * @param keyHolder holder for generated primary keys
+     * @param daoPojos list of pojos to be replaced
+     * @return how many rows been affected
+     * @throws SQLException
+     */
     public int[] replace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
         return executor.execute(setSize(hints, keyHolder, daoPojos),
                 new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleReplaceTask));
     }
 
+
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param daoPojos list of pojos to be replaced
+     * @return how many rows been affected
+     * @throws SQLException
+     */
     public int combinedReplace(DalHints hints, List<T> daoPojos) throws SQLException {
         return combinedReplace(hints, hints.getKeyHolder(), daoPojos);
     }
 
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param keyHolder holder for generated primary keys
+     * @param daoPojos list of pojos to be replaced
+     * @return how many rows been affected
+     * @throws SQLException
+     */
     public int combinedReplace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
         return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojos),
                 new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedReplaceTask)));
     }
 
+    /**
+     * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on duplicate key by free sql.
+     * Because the auto_increment value in slave with row-based replication may not be updated
+     * if you replace with a duplicate unique key but without specific the primary key column value
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param daoPojos list of pojos to be replaced
+     * @return how many rows been affected for inserting each of the pojo
+     * @throws SQLException
+     */
     public int[] batchReplace(DalHints hints, List<T> daoPojos) throws SQLException {
         return executor.execute(hints,
                 new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchReplaceTask));

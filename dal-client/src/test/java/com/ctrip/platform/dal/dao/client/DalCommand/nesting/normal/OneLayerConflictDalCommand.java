@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client.DalCommand.nesting;
+package com.ctrip.platform.dal.dao.client.DalCommand.nesting.normal;
 
 import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalCommand;

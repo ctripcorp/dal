@@ -143,27 +143,29 @@ public class DatabaseSet {
 
     // Currently,we are only consider the ShardColModShardStrategy case.
     public Set<String> getAllTableShards(String tableName) throws SQLException {
+        String errorMsg = "Can't locate all table shards: ";
+
         if (tableName == null || tableName.isEmpty())
-            throw new DalException("Table name is null or empty.");
+            throw new DalException(errorMsg + "Table name is null or empty.");
 
         if (strategy == null)
-            throw new DalException(String.format("There is no sharding strategy for DatabaseSet %s.", name));
+            throw new DalException(errorMsg + String.format("There is no sharding strategy for DatabaseSet %s.", name));
 
         if (!(strategy instanceof ShardColModShardStrategy)) {
-            throw new DalException(
-                    String.format("The sharding strategy of DatabaseSet %s is not ShardColModShardStrategy.", name));
+            throw new DalException(errorMsg
+                    + String.format("The sharding strategy of DatabaseSet %s is not ShardColModShardStrategy.", name));
         }
 
         ShardColModShardStrategy modStrategy = (ShardColModShardStrategy) strategy;
         boolean isShardingEnabled = modStrategy.isShardingEnable(tableName);
         if (!isShardingEnabled) {
-            throw new DalException(String.format("Table sharding is not enabled for table %.", tableName));
+            throw new DalException(errorMsg + String.format("Table sharding is not enabled for table %.", tableName));
         }
 
         Integer tableMod = modStrategy.getTableMod();
         if (tableMod == null) {
-            throw new DalException(
-                    String.format("There is no table mod for ShardColModShardStrategy of DatabaseSet %s", name));
+            throw new DalException(errorMsg
+                    + String.format("There is no table mod for ShardColModShardStrategy of DatabaseSet %s", name));
         }
 
         Set<String> set = new HashSet<>();

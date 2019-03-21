@@ -273,7 +273,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 return executeByTableSharding(tableShards, client, parameters, hints, dalTaskContext, builder, merger);
             }
 
-            return execute(null, client, parameters, hints, dalTaskContext, builder, merger);
+            return execute(null, client, parameters, hints, dalTaskContext, builder, merger, tableShards);
         }
 
         private T executeByTableSharding(Set<String> tableShards, DalClient client, StatementParameters parameters,
@@ -284,7 +284,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             if (parametersByTableShard == null) {
                 // Not cross table shards, table id can be inferred.
                 if (tableShards == null || tableShards.size() == 0) {
-                    return execute(null, client, parameters, hints, taskContext, builder, merger);
+                    return execute(null, client, parameters, hints, taskContext, builder, merger, tableShards);
                 }
 
                 // By given table shards
@@ -293,7 +293,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             } else {
                 // By table sharded values
                 result = executeByShardedParameterValues(parametersByTableShard, client, parameters, hints, taskContext,
-                        builder, merger);
+                        builder, merger, tableShards);
             }
 
             return result;
@@ -306,7 +306,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             for (String tableShard : tableShards) {
                 Throwable error = null;
                 try {
-                    T partial = execute(tableShard, client, parameters, hints, taskContext, builder, merger);
+                    T partial =
+                            execute(tableShard, client, parameters, hints, taskContext, builder, merger, tableShards);
                     merger.addPartial(tableShard, partial);
                 } catch (Throwable e) {
                     error = e;
@@ -320,14 +321,14 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
 
         private T executeByShardedParameterValues(Map<String, List<?>> parametersByTableShard, DalClient client,
                 StatementParameters parameters, DalHints hints, DalTaskContext taskContext, SqlBuilder builder,
-                ResultMerger<T> merger) throws SQLException {
+                ResultMerger<T> merger, Set<String> tableShards) throws SQLException {
 
             for (Map.Entry<String, ?> tableShard : parametersByTableShard.entrySet()) {
                 Throwable error = null;
                 try {
                     T partial = execute(tableShard.getKey(), client,
                             parameters.duplicateWith(hints.getTableShardBy(), (List) tableShard.getValue()), hints,
-                            taskContext, builder, merger);
+                            taskContext, builder, merger, tableShards);
                     merger.addPartial(tableShard.getKey(), partial);
                 } catch (Throwable e) {
                     error = e;
@@ -340,7 +341,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         }
 
         private T execute(String tableShardId, DalClient client, StatementParameters parameters, DalHints hints,
-                DalTaskContext taskContext, SqlBuilder builder, ResultMerger<T> merger) throws SQLException {
+                DalTaskContext taskContext, SqlBuilder builder, ResultMerger<T> merger, Set<String> tableShards)
+                throws SQLException {
             String tableName = "";
             StatementParameters originalParameters = parameters.duplicate();
             StatementParameters compiledParameters = compileParameters(parameters.duplicate());
@@ -349,7 +351,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 tableName = rawTableName;
                 if (isTableShardingEnabled) {
                     return executeWithSqlBuilder(tableShardId, tableName, client, originalParameters,
-                            compiledParameters, hints, taskContext, builder, merger);
+                            compiledParameters, hints, taskContext, builder, merger, tableShards);
                 }
             }
 
@@ -363,20 +365,26 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
 
         private T executeWithSqlBuilder(String tableShardId, String tableName, DalClient client,
                 StatementParameters originalParameters, StatementParameters compiledParameters, DalHints hints,
-                DalTaskContext taskContext, SqlBuilder builder, ResultMerger<T> merger) throws SQLException {
+                DalTaskContext taskContext, SqlBuilder builder, ResultMerger<T> merger, Set<String> tableShards)
+                throws SQLException {
             String tempTableName = tableName;
-            String tableShardStr = getTableShardStr(tableShardId, tempTableName, hints, compiledParameters);
-            if (tableShardStr == null || tableShardStr.isEmpty()) {
-                if (hints.isImplicitInAllTableShards()) {
-                    return executeOnImplicitInAllTableShards(tempTableName, client, originalParameters, hints,
-                            taskContext, builder, merger);
-                } else {
-                    if (builder instanceof TableSqlBuilder) {
-                        throw new SQLException("Can not locate table shard for " + logicDbName);
-                    } else if (builder instanceof AbstractFreeSqlBuilder) {
-                        AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
-                        String compiledSql = compileSql(freeSqlBuilder.build(), originalParameters);
-                        return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext.fork());
+            String tableShardStr = null;
+            try {
+                tableShardStr = getTableShardStr(tableShardId, tempTableName, hints, originalParameters); // compiledParameters
+            } catch (Exception e) {
+                if (tableShardStr == null || tableShardStr.isEmpty()) {
+                    if (hints.isImplicitInAllTableShards()) {
+                        return executeOnImplicitInAllTableShards(tempTableName, client, originalParameters, hints,
+                                taskContext, builder, merger);
+                    } else {
+                        if (builder instanceof TableSqlBuilder) {
+                            throw new DalException("Can not locate table shard for " + logicDbName, e);
+                        } else if (builder instanceof AbstractFreeSqlBuilder) {
+                            AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
+                            String compiledSql = compileSql(freeSqlBuilder.build(), originalParameters);
+                            return task.execute(client, compiledSql, compiledParameters, hints.clone(),
+                                    taskContext.fork());
+                        }
                     }
                 }
             }
@@ -388,7 +396,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 sql = tableBuilder.build(tableShardStr);
             } else if (builder instanceof AbstractFreeSqlBuilder) {
                 AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
-                sql = freeSqlBuilder.build(tableShardStr);
+                if (tableShards == null || tableShards.isEmpty()) { // non-cross table sharding
+                    sql = freeSqlBuilder.build();
+                } else {
+                    sql = freeSqlBuilder.build(tableShardStr);
+                }
             }
 
             return executeTask(taskContext, tempTableName, client, sql, originalParameters, compiledParameters, hints);
@@ -408,15 +420,9 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         }
 
         private String getTableShardStr(String tableShardId, String tableName, DalHints hints,
-                StatementParameters compiledParameters) {
+                StatementParameters compiledParameters) throws SQLException {
             String tempTableName = tableName;
-            String tableShardStr = null;
-            try {
-                tableShardStr = getTableShardString(tableShardId, tempTableName, hints, compiledParameters);
-            } catch (SQLException e) {
-                logger.warn(e.getMessage());
-            }
-
+            String tableShardStr = getTableShardString(tableShardId, tempTableName, hints, compiledParameters);
             return tableShardStr;
         }
 

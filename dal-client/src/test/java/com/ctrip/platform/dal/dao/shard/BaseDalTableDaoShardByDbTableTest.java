@@ -4230,6 +4230,26 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
     }
 
     @Test
+    public void testFreeSelectSqlBuilderInAllDBAndImplicitInAllTableShards() throws SQLException {
+        List<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        builder.selectAll().from(TABLE_NAME).where(Expressions.in("id", list, Types.INTEGER));
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        try {
+            List<ClientTestModel> result = queryDao.query(builder, new DalHints().inAllShards());
+            Assert.assertEquals(20, result.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
     public void testFreeSelectSqlBuilderInAllDBAndTableShards() throws SQLException {
         List<String> list = new ArrayList<>();
         list.add("1");

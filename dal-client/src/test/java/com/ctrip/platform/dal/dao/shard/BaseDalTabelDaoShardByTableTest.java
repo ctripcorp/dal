@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
+import com.ctrip.platform.dal.dao.sqlbuilder.AbstractFreeSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.Expressions;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
@@ -4459,6 +4460,56 @@ public abstract class BaseDalTabelDaoShardByTableTest {
         Assert.assertEquals(model.getType().shortValue(), 1);
         Assert.assertEquals(model.getAddress(), "SH INFO");
 
+    }
+
+    @Test
+    public void testFreeSelectBuilderWithTableEntity() throws SQLException {
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        AbstractFreeSqlBuilder.Table table = new AbstractFreeSqlBuilder.Table("dal_client_test");
+        builder.selectAll().from(table);
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            result = queryDao.query(builder, new DalHints().inTableShard(3)); // inTableShard actually invalid here
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(4, result.size());
+
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder2 = new FreeSelectSqlBuilder();
+        AbstractFreeSqlBuilder.Table table2 = new AbstractFreeSqlBuilder.Table("dal_client_test");
+        table2.inShard("0");
+        builder2.selectAll().from(table2);
+        builder2.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result2 = null;
+        try {
+            result2 = queryDao.query(builder2, new DalHints().inTableShard(3)); // inTableShard actually invalid here
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(1, result2.size());
+
+    }
+
+    @Test
+    public void testFreeSelectBuilderWithTableEntityImplicitInAllTableShards() throws SQLException {
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        AbstractFreeSqlBuilder.Table table = new AbstractFreeSqlBuilder.Table("dal_client_test");
+        builder.selectAll().from(table);
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        List<ClientTestModel> result = null;
+        try {
+            result = queryDao.query(builder, new DalHints().inAllShards());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(10, result.size());
     }
 
     // endregion

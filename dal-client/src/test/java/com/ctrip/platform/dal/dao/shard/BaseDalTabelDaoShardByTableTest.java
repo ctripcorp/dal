@@ -4512,6 +4512,22 @@ public abstract class BaseDalTabelDaoShardByTableTest {
         Assert.assertEquals(10, result.size());
     }
 
+    @Test
+    public void testFreeSelectBuilderWithTableEntityThrowsException() throws SQLException {
+        FreeSelectSqlBuilder<List<ClientTestModel>> builder = new FreeSelectSqlBuilder();
+        AbstractFreeSqlBuilder.Table table = new AbstractFreeSqlBuilder.Table("dal_client_test");
+        builder.selectAll().from(table);
+        builder.mapWith(new DalDefaultJpaMapper<>(ClientTestModel.class));
+
+        try {
+            List<ClientTestModel> result = queryDao.query(builder, new DalHints());
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertEquals("java.sql.SQLException: Can not locate table shard for dao_test_mysql_tableShard",
+                    e.getCause().getMessage());
+        }
+    }
+
     // endregion
 
 }

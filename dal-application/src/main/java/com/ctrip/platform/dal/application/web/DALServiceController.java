@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.application.web;
 
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 import com.ctrip.platform.dal.application.service.DALService;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

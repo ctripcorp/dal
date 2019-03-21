@@ -45,7 +45,7 @@ public class IdGenClientTest {
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
             long start = System.currentTimeMillis();
             for (int i = 0; i < requireSize; i++) {
-                executor.submit(new Thread(new Runnable() {
+                executor.submit(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -59,7 +59,7 @@ public class IdGenClientTest {
                             latch.countDown();
                         }
                     }
-                }));
+                });
             }
             latch.await();
             Assert.assertTrue(result.get());

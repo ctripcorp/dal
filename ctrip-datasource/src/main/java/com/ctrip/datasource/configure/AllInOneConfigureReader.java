@@ -15,15 +15,16 @@ import com.ctrip.platform.dal.dao.configure.ConnectionString;
 import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class AllInOneConfigureReader {
-    private static final Logger logger = LoggerFactory.getLogger(AllInOneConfigureReader.class);
+    private static final ILogger logger = DalElementFactory.DEFAULT.getILogger();
     private static final String CONFIG_FILE = "Database.Config";
     private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/" + CONFIG_FILE;
     private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/" + CONFIG_FILE;
@@ -53,8 +54,9 @@ public class AllInOneConfigureReader {
             return;
 
         names.removeAll(dbConfigNames);
-        logger.error("Cannot load config for the following DB: " + names.toString());
-        throw new RuntimeException("Cannot load config for the following DB: " + names.toString());
+        RuntimeException exception = new DalRuntimeException("Cannot load config for the following DB: " + names.toString());
+        logger.error("Cannot load config for the following DB: " + names.toString(), exception);
+        throw exception;
     }
 
     private String getAllInOneConfigLocation(String databaseConfigLocation) {
@@ -78,7 +80,7 @@ public class AllInOneConfigureReader {
             try {
                 osName = System.getProperty("os.name");
             } catch (SecurityException ex) {
-                logger.error(ex.getMessage());
+                logger.error(ex.getMessage(), ex);
                 throw new RuntimeException(ex.getMessage(), ex);
             }
             location = osName != null && osName.startsWith("Windows") ? WIN_DB_CONFIG_FILE : LINUX_DB_CONFIG_FILE;

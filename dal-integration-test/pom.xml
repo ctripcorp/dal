@@ -16,9 +16,8 @@
 
   <properties>
     <java.version>1.8</java.version>
-    <framework-bom.version>3.4.0</framework-bom.version>
-    <!--<dal.version>1.16.12</dal.version>
-    <ctrip-datasource.version>1.16.12</ctrip-datasource.version>-->
+    <framework-bom.version>3.6.0</framework-bom.version>
+    <dal.version>1.16.13-SNAPSHOT</dal.version>
   </properties>
 
   <modules>
@@ -28,13 +27,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>com.ctrip.framework</groupId>
-        <artifactId>framework-bom</artifactId>
-        <version>${framework-bom.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <!--<dependency>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-dal-client</artifactId>
@@ -43,8 +35,16 @@
       <dependency>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-datasource</artifactId>
-        <version>${ctrip-datasource.version}</version>
+        <version>${dal.version}</version>
       </dependency>-->
+      <dependency>
+        <groupId>com.ctrip.framework</groupId>
+        <artifactId>framework-bom</artifactId>
+        <version>${framework-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <!--<dependency>
         <groupId>com.ctrip.framework.idgen</groupId>
         <artifactId>idgen-client</artifactId>

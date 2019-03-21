@@ -1572,4 +1572,44 @@ public class NoShardOnMysqlDaoUnitTest {
         assertEquals("Initial_Shard_00", ret.get(0).getMyName());
         assertEquals(1, ret.size());
     }
+
+//    @Test
+//    public void testWaitConnection() throws Exception {
+//        Thread t1 = new Thread() {
+//            @Override
+//            public void run() {
+//                try{
+//                    System.out.println("t1 start");
+//                    dao.test_timeout(10,new DalHints());
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }finally {
+//                    System.out.println("t1 end");
+//                }
+//            }
+//        };
+//
+//        t1.start();
+//
+//        Thread.sleep(2000);
+//
+//        Thread t2 = new Thread() {
+//            @Override
+//            public void run() {
+//                try{
+//                    System.out.println("t2 start");
+//                    dao.test_timeout(10,new DalHints());
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }finally {
+//                    System.out.println("t2 end");
+//                }
+//            }
+//        };
+//
+//        t2.start();
+//
+//        Thread.sleep(60000);
+//         System.out.println("Done");
+//    }
 }

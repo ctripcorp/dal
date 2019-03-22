@@ -77,6 +77,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		assertEquals(6, affected);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -608,6 +609,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude= new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.fields);//queryLike没有clean up fields
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -636,6 +638,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		assertEquals(6, ret.size());
 		List<DalHintEnum> exclude= new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -949,6 +952,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		assertEquals(3, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 		List<MysqlPersonTable> pojos=dao.queryAll(new DalHints().inShard(0));
@@ -991,6 +995,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    assertEquals(2, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    pojo=dao.queryByPk(5, new DalHints().inShard(0));
@@ -1014,6 +1019,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    assertEquals(3, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    MysqlPersonTable pojo=dao.queryByPk(1, new DalHints().inShard(0));
@@ -1050,6 +1056,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    assertEquals(3, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    MysqlPersonTable pojo=dao.queryByPk(1, new DalHints().inShard(0));
@@ -1098,6 +1105,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    ret = dao.test_ClientQueryFrom_list(Age, new DalHints().setShardColValue("Age", 20),0,1);
@@ -1124,6 +1132,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    exclude.add(DalHintEnum.allShards);
 	    exclude.add(DalHintEnum.partialQuery);
 	    exclude.add(DalHintEnum.resultSorter);
+	    exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    ret = dao.test_ClientQueryFromPartialFieldsSet_list(Age, new DalHints().setShardColValue("Age", 20),0,1);
@@ -1150,6 +1159,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.partialQuery);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    ret = dao.test_ClientQueryFromPartialFieldsStrings_list(Age, new DalHints().setShardColValue("Age", 20),0,1);
@@ -1183,6 +1193,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -1244,6 +1255,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    assertEquals(0, ret.size());
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	}
@@ -1284,6 +1296,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	}
@@ -1433,6 +1446,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 
@@ -1566,6 +1580,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    dao.test_def_truncate(hints.inAllShards());
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    int count=dao.count(new DalHints().inAllShards());
@@ -1646,6 +1661,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 	    exclude.add(DalHintEnum.partialQuery);
 	    exclude.add(DalHintEnum.allShards);
 	    exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 	    DalHintsChecker.checkEquals(original,hints,exclude);
 	    
 	    Age.clear();
@@ -2159,6 +2175,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultMerger);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -2178,6 +2195,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -2189,6 +2207,7 @@ public class FreeShardingStrategyByDBOnMysqlDaoUnitTest {
 //	   assertEquals(16, ret.size());
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 	   DalHintsChecker.checkEquals(original,hints,exclude);
 
 	   List<MysqlPersonTable> ret1=(List<MysqlPersonTable>) ret.get(0);

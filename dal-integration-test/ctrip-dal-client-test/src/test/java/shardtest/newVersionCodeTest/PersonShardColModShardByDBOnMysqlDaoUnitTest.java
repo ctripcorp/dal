@@ -96,6 +96,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(6, affected);
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -997,6 +998,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.fields);//queryLike没有clean up fields
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -1025,6 +1027,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(6, ret.size());
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -1338,6 +1341,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(3, ret);
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         List<MysqlPersonTable> pojos = dao.queryAll(new DalHints().inShard(0));
@@ -1380,6 +1384,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(2, ret);
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         pojo = dao.queryByPk(5, new DalHints().inShard(0));
@@ -1403,6 +1408,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(3, ret);
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         MysqlPersonTable pojo = dao.queryByPk(1, new DalHints().inShard(0));
@@ -1439,6 +1445,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(3, ret);
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         MysqlPersonTable pojo = dao.queryByPk(1, new DalHints().inShard(0));
@@ -1487,6 +1494,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         ret = dao.test_ClientQueryFrom_list(Age, new DalHints().setShardColValue("Age", 20), 0, 1);
@@ -1528,6 +1536,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.partialQuery);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         ret = dao.test_ClientQueryFromPartialFieldsSet_list(Age, new DalHints().setShardColValue("Age", 20), 0, 1);
@@ -1554,6 +1563,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.partialQuery);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         ret = dao.test_ClientQueryFromPartialFieldsStrings_list(Age, new DalHints().setShardColValue("Age", 20), 0, 1);
@@ -1587,6 +1597,63 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
+        DalHintsChecker.checkEquals(original, hints, exclude);
+    }
+
+    @Test
+    public void testtest_query_first() throws Exception {
+        //cross dao.noshardtest.shardtest
+        List<Integer> Age = new ArrayList<Integer>();
+        Age.add(20);
+        Age.add(23);
+        Age.add(22);
+        MysqlPersonTable ret = dao.test_query_first(Age, new DalHints().inAllShards());
+        assertEquals("Initial_Shard_00", ret.getName());
+
+        //single dao.noshardtest.shardtest
+        ret = dao.test_query_first(Age, new DalHints().setShardColValue("Age", 21));
+        assertEquals("Initial_Shard_13", ret.getName());
+
+        //return null
+        Age.clear();
+        Age.add(100);
+        DalHints hints = new DalHints();
+        DalHints original = hints.clone();
+        ret = dao.test_query_first(Age, hints.inAllShards());
+        assertNull(ret);
+        List<DalHintEnum> exclude = new ArrayList<>();
+        exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
+        DalHintsChecker.checkEquals(original, hints, exclude);
+    }
+
+    @Test
+    public void testtest_query_first_noRequireFist() throws Exception {
+        //cross dao.noshardtest.shardtest
+        List<Integer> Age = new ArrayList<Integer>();
+        Age.add(20);
+        Age.add(23);
+        Age.add(22);
+        MysqlPersonTable ret = dao.test_query_first_noRequireFirst(Age, new DalHints().inAllShards());
+        assertEquals("Initial_Shard_00", ret.getName());
+
+        //single dao.noshardtest.shardtest
+        ret = dao.test_query_first_noRequireFirst(Age, new DalHints().setShardColValue("Age", 21));
+        assertEquals("Initial_Shard_13", ret.getName());
+
+        //return null
+        Age.clear();
+        Age.add(100);
+        DalHints hints = new DalHints();
+        DalHints original = hints.clone();
+        ret = dao.test_query_first_noRequireFirst(Age, hints.inAllShards());
+        assertNull(ret);
+        List<DalHintEnum> exclude = new ArrayList<>();
+        exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -1648,6 +1715,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         assertEquals(0, ret.size());
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
     }
@@ -1688,6 +1756,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
     }
@@ -1837,6 +1906,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -1969,6 +2039,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         dao.test_def_truncate(hints.inAllShards());
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         int count = dao.count(new DalHints().inAllShards());
@@ -2049,6 +2120,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         exclude.add(DalHintEnum.partialQuery);
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         Age.clear();
@@ -2562,6 +2634,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultMerger);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -2581,6 +2654,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
         exclude.add(DalHintEnum.resultSorter);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
     }
 
@@ -2593,6 +2667,7 @@ public class PersonShardColModShardByDBOnMysqlDaoUnitTest {
 //	   assertEquals(16, ret.size());
         List<DalHintEnum> exclude = new ArrayList<>();
         exclude.add(DalHintEnum.allShards);
+        exclude.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original, hints, exclude);
 
         List<MysqlPersonTable> ret1 = (List<MysqlPersonTable>) ret.get(0);

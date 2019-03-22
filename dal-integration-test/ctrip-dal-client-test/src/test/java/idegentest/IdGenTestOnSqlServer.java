@@ -1,4 +1,4 @@
-package idegentest;//package IDGenTest;
+//package idegentest;
 //
 //
 //import IDAutoGenerator.AutoGenIDDao;

@@ -646,6 +646,36 @@ public class PeopleShardColModShardByDBOnSqlServerDaoUnitTest {
     }
 
     @Test
+    public void testtest_query_first() throws Exception {
+        //Integer CityID = null;// Test value here
+        //SqlServerPeopleTableWithDiffColumns ret = dao.test_build_query_first(CityID, new DalHints());
+        List<Integer> CityID = new ArrayList<Integer>();
+        CityID.add(20);
+        CityID.add(23);
+        CityID.add(22);
+        SqlServerPeopleTable ret = dao.test_query_first_with_requireFirst(CityID, new DalHints().inAllShards());
+        assertEquals("Initial_Shard_00", ret.getName());
+
+        ret = dao.test_query_first_with_requireFirst(CityID, new DalHints().setShardColValue("CityID", 20));
+        assertEquals("Initial_Shard_00", ret.getName());
+    }
+
+    @Test
+    public void testtest_query_first_noRequireFirst() throws Exception {
+        //Integer CityID = null;// Test value here
+        //SqlServerPeopleTableWithDiffColumns ret = dao.test_build_query_first(CityID, new DalHints());
+        List<Integer> CityID = new ArrayList<Integer>();
+        CityID.add(20);
+        CityID.add(23);
+        CityID.add(22);
+        SqlServerPeopleTable ret = dao.test_query_first_without_requireFirst(CityID, new DalHints().inAllShards());
+        assertEquals("Initial_Shard_00", ret.getName());
+
+        ret = dao.test_query_first_without_requireFirst(CityID, new DalHints().setShardColValue("CityID", 20));
+        assertEquals("Initial_Shard_00", ret.getName());
+    }
+
+    @Test
     public void testtest_build_queryPartial_first() throws Exception {
         //Integer CityID = null;// Test value here
         //SqlServerPeopleTableWithDiffColumns ret = dao.test_build_query_first(CityID, new DalHints());

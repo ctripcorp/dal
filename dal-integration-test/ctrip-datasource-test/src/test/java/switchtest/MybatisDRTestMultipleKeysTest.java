@@ -49,7 +49,7 @@ public class MybatisDRTestMultipleKeysTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-//        Thread.sleep(5000);
+        Thread.sleep(5000);
 
     }
 

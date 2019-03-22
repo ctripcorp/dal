@@ -94,6 +94,7 @@ public class IgnoreMissingFieldsAndAllowPartialTestOnMysqlGenDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.partialQuery);
 		exclude.add(DalHintEnum.ignoreMissingFields);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
        	ret = dao.test_build_queryIgnoreMissingFields_first(Age, new DalHints().setShardColValue("Age", 20).ignoreMissingFields());
@@ -305,6 +306,7 @@ public class IgnoreMissingFieldsAndAllowPartialTestOnMysqlGenDaoUnitTest {
 		exclued.add(DalHintEnum.resultSorter);
 		exclued.add(DalHintEnum.allShards);
 		exclued.add(DalHintEnum.allowPartial);
+		exclued.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclued);
 	}
 	

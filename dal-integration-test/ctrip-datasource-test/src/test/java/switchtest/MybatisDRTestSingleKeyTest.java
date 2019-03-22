@@ -43,7 +43,7 @@ public class MybatisDRTestSingleKeyTest {
     @Before
     public void setUp() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-//        Thread.sleep(5000);
+        Thread.sleep(5000);
 //        poolPropertiesSwitch.resetPoolProperties();
     }
 

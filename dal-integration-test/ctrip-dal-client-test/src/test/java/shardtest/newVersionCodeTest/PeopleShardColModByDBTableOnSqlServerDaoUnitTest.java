@@ -8,8 +8,11 @@ import dao.shard.newVersionCode.PeopleShardColModByDBTableOnSqlServerDao;
 import entity.SqlServerPeopleTable;
 import org.junit.*;
 
+import javax.swing.text.TabableView;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -125,6 +128,18 @@ public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
 	}
 
 	@Test
+	public void testCountCrossTableShard() throws Exception {
+		int affected = dao.count(new DalHints().inAllShards());
+		assertEquals(12, affected);
+		affected = dao.count(new DalHints().inAllShards().inAllTableShards());
+		assertEquals(12, affected);
+		Set<String> tableShards=new HashSet<>();
+		tableShards.add("0");
+		affected = dao.count(new DalHints().inAllShards().inTableShards(tableShards));
+		assertEquals(6, affected);
+	}
+
+	@Test
 	public void testDelete1() throws Exception {
 		DalHints hints = new DalHints();
 		SqlServerPeopleTable daoPojo = createPojo(1);
@@ -230,6 +245,20 @@ public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
 
 		list = dao.queryAll(new DalHints().inShard(1).inTableShard(1));
 		assertEquals(3, list.size());
+	}
+
+	@Test
+	public void testQueryAllCrossTableShard() throws Exception {
+		List<SqlServerPeopleTable> list = dao.queryAll(new DalHints().inAllShards());
+		assertEquals(12, list.size());
+
+		list = dao.queryAll(new DalHints().inAllShards().inAllTableShards());
+		assertEquals(12, list.size());
+
+		Set<String> tableShards=new HashSet<>();
+		tableShards.add("0");
+		list = dao.queryAll(new DalHints().inAllShards().inTableShards(tableShards));
+		assertEquals(6, list.size());
 	}
 
 	@Test
@@ -528,5 +557,32 @@ public class PeopleShardColModByDBTableOnSqlServerDaoUnitTest {
 
 		ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().setShardValue(200).setTableShardValue(0));
 		assertEquals(2, ret.size());
+	}
+
+	@Test
+	public void testFreeSqlQueryListCrossTableShard() throws Exception {
+		List<Integer> CityID=new ArrayList<>(2);
+		CityID.add(200);
+		CityID.add(201);
+
+		List<Integer> ProvinceID=new ArrayList<>(2);
+		ProvinceID.add(20);
+		ProvinceID.add(21);
+		ProvinceID.add(22);
+		ProvinceID.add(23);
+
+		List<SqlServerPeopleTable> ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().inAllShards().inAllTableShards());
+		assertEquals(8, ret.size());
+
+		ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().inAllShards());
+		assertEquals(8, ret.size());
+
+		Set<String> tableShard=new HashSet<>();
+		tableShard.add("1");
+		ret = dao.testFreeSqlQueryList(CityID, ProvinceID,new DalHints().inAllShards().inTableShards(tableShard));
+		assertEquals(4, ret.size());
+
+		ret = dao.testFreeSqlQueryList(CityID, ProvinceID, new DalHints().shardBy("CityID").tableShardBy("ProvinceID"));
+		assertEquals(8, ret.size());
 	}
 }

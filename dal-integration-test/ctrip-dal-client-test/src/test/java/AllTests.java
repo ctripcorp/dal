@@ -1,3 +1,5 @@
+import idegentest.IdGenPrefetchTest;
+import idegentest.IdGenTestOnMysql;
 import noshardtest.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -82,6 +84,8 @@ import testUtil.NetStatChecker;
             TVPColumnsOrderDaoUnitTest.class,
             TestFor414.class,
             EntityExtendsOnMysqlTest.class,
+            IdGenTestOnMysql.class,
+            IdGenPrefetchTest.class
     })
     public class AllTests {
         @BeforeClass

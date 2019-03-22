@@ -130,20 +130,20 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
 //
 //		return client.query(builder, hints);
 //	}
-//	
+//
 //	*//**
      //	 * Get all records from table
      //	 *//*
 //	public List<ShardTestTransactionTestOnMysql> queryAll(DalHints hints) throws SQLException {
 //		hints = DalHints.createIfAbsent(hints);
-//		
+//
 //		SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("ID", ASC);
-//		
+//
 //		return client.query(builder, hints);
 //	}
 
     *//**
-     * Insert pojo and get the generated PK back in keyHolder. 
+     * Insert pojo and get the generated PK back in keyHolder.
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
      *
@@ -182,7 +182,7 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
     }
 
     *//**
-     * Insert pojo and get the generated PK back in keyHolder. 
+     * Insert pojo and get the generated PK back in keyHolder.
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
      *
@@ -203,7 +203,7 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
     }
 
     *//**
-     * Insert pojos and get the generated PK back in keyHolder. 
+     * Insert pojos and get the generated PK back in keyHolder.
      * If the "set no count on" for MS SqlServer is set(currently set in Ctrip), the operation may fail.
      * Please don't pass keyholder for MS SqlServer to avoid the failure.
      *
@@ -227,7 +227,7 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
     }
 
     *//**
-     * Insert pojos in batch mode. 
+     * Insert pojos in batch mode.
      * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the dao.noshardtest.shardtest.
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
@@ -310,7 +310,7 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
     }
 
     *//**
-     * Delete the given pojo list in batch. 
+     * Delete the given pojo list in batch.
      * The DalDetailResults will be set in hints to allow client know how the operation performed in each of the dao.noshardtest.shardtest.
      *
      * @param hints Additional parameters that instruct how DAL Client perform database operation.
@@ -366,7 +366,7 @@ public class NoShardDalTransactionalTestOnMysqlDao extends NoShardTransactionTes
     }
 
     *//**
-     * Update the given pojo list in batch. 
+     * Update the given pojo list in batch.
      *
      * @return how many rows been affected
      * @throws SQLException

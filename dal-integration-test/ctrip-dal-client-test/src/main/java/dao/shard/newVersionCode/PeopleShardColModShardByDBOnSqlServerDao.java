@@ -519,6 +519,26 @@ public class PeopleShardColModShardByDBOnSqlServerDao {
 		return client.queryObject(builder, hints.sortBy(new SqlServerPeopleTableComparator()));
 	}
 
+	public SqlServerPeopleTable test_query_first_with_requireFirst(List<Integer> CityID, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
+		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		builder.requireFirst();
+
+		return client.queryFirst(builder, hints.sortBy(new SqlServerPeopleTableComparator()));
+	}
+
+	public SqlServerPeopleTable test_query_first_without_requireFirst(List<Integer> CityID, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("CityID","Name","ProvinceID","PeopleID","CountryID");
+		builder.inNullable("CityID", CityID, Types.INTEGER, false);
+		return client.queryFirst(builder, hints.sortBy(new SqlServerPeopleTableComparator()));
+	}
+
 	/**
 	 * 构建，查询部分字段
 	 **/

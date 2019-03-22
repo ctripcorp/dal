@@ -277,6 +277,7 @@ public class NewHintsOfCodeGenOnMysqlDaoUnitTest {
 		notNullItems.add(DalHintEnum.futureResult);
 		notNullItems.add(DalHintEnum.asyncExecution);
 //		DalHintsChecker.checkNull(hints,notNullItems);
+		notNullItems.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,notNullItems);
 	}
 	
@@ -471,6 +472,7 @@ public class NewHintsOfCodeGenOnMysqlDaoUnitTest {
 		notNullItems.add(DalHintEnum.futureResult);
 		notNullItems.add(DalHintEnum.asyncExecution);
 //		DalHintsChecker.checkNull(hints,notNullItems);
+		notNullItems.add(DalHintEnum.implicitAllTableShards);
         DalHintsChecker.checkEquals(original,hints,notNullItems);
 	}
 }

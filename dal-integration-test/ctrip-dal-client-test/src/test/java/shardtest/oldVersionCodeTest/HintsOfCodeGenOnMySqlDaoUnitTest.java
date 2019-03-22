@@ -217,6 +217,7 @@ public class HintsOfCodeGenOnMySqlDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.asyncExecution);
 		exclude.add(DalHintEnum.futureResult);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 
@@ -376,6 +377,7 @@ public class HintsOfCodeGenOnMySqlDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.asyncExecution);
 		exclude.add(DalHintEnum.futureResult);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 

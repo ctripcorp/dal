@@ -17,7 +17,7 @@
   <properties>
     <java.version>1.8</java.version>
     <framework-bom.version>3.6.0</framework-bom.version>
-    <dal.version>1.16.13-SNAPSHOT</dal.version>
+    <dal.version>1.16.14</dal.version>
   </properties>
 
   <modules>
@@ -27,7 +27,7 @@
 
   <dependencyManagement>
     <dependencies>
-      <!--<dependency>
+      <dependency>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-dal-client</artifactId>
         <version>${dal.version}</version>
@@ -36,7 +36,7 @@
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-datasource</artifactId>
         <version>${dal.version}</version>
-      </dependency>-->
+      </dependency>
       <dependency>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-bom</artifactId>

@@ -78,6 +78,12 @@ public class PeopleShardColModShardByDBTableOnMysqlDao {
 		return client.queryLike(sample, hints);
 	}
 
+	public List<MysqlPeopleTable> queryBy(MysqlPeopleTable sample, DalHints hints)
+			throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+		return client.queryBy(sample, hints);
+	}
+
 	/**
 	 * Get the all records count
 	 */

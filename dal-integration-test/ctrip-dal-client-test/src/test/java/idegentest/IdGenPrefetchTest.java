@@ -30,20 +30,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.Assert.*;
 
 
-public class IgGenPrefetchTest {
-    private static Logger logger = LoggerFactory.getLogger(IgGenPrefetchTest.class);
+public class IdGenPrefetchTest {
+    private static Logger logger = LoggerFactory.getLogger(IdGenPrefetchTest.class);
 
-    //    @BeforeClass
+//    @BeforeClass
 //    public static void setUpBeforeClass() throws Exception {
-//        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "IdGen/Dal.config");
+////        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "IdGen/Dal.config");
+//        DalClientFactory.shutdownFactory();
 //    }
 //
+//    //
 //    @AfterClass
 //    public static void tearDownAfterClass() throws Exception {
 //        DalClientFactory.shutdownFactory();
 //    }
+
     @Before
     public void setUp() throws Exception {
+        DalClientFactory.shutdownFactory();
         DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "IdGen/Dal.config");
     }
 
@@ -53,15 +57,15 @@ public class IgGenPrefetchTest {
     }
 
 
-    @Test
-    public void testMyIdGeneratorFactory() throws Exception {
-        AutoGenIDDao dao = new AutoGenIDDao("noShardTestOnMysql");
-        dao.test_def_update(new DalHints());
-        TableWithIdentity pojo = new TableWithIdentity();
-        pojo.setName("testMyIdGeneratorFactory");
-        dao.insert(new DalHints().setIdentityBack(), pojo);
-        assertEquals(50L, pojo.getID().longValue());
-    }
+//    @Test
+//    public void testMyIdGeneratorFactory() throws Exception {
+//        AutoGenIDDao dao = new AutoGenIDDao("noShardTestOnMysql");
+//        dao.test_def_update(new DalHints());
+//        TableWithIdentity pojo = new TableWithIdentity();
+//        pojo.setName("testMyIdGeneratorFactory");
+//        dao.insert(new DalHints().setIdentityBack(), pojo);
+//        assertEquals(50L, pojo.getID().longValue());
+//    }
 
     @Test
     public void testSequenceDbNameInSingleDbSet() throws Exception {

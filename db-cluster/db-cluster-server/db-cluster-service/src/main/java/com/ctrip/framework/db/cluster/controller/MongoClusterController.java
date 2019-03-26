@@ -1,6 +1,6 @@
 package com.ctrip.framework.db.cluster.controller;
 
-import com.ctrip.framework.db.cluster.domain.MongoAddRequestBody;
+import com.ctrip.framework.db.cluster.domain.MongoClusterAddRequestBody;
 import com.ctrip.framework.db.cluster.domain.ResponseModel;
 import com.ctrip.framework.db.cluster.domain.TitanAddRequestBody;
 import com.ctrip.framework.db.cluster.domain.TitanAddResponseBody;
@@ -8,12 +8,10 @@ import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.TitanSyncService;
 import com.ctrip.framework.db.cluster.util.IpUtil;
 import com.ctrip.framework.db.cluster.util.ValidityChecker;
+import com.dianping.cat.Cat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,14 +27,25 @@ public class MongoClusterController {
     private TitanSyncService titanSyncService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseModel add(@RequestBody MongoAddRequestBody requestBody, HttpServletRequest request) {
+    public ResponseModel add(@RequestBody MongoClusterAddRequestBody requestBody,
+                             @RequestParam(name = "env", required = false) String env,
+                             @RequestParam(name = "operator", required = false) String operator, HttpServletRequest request) {
         try {
-            String requestIp = IpUtil.getRequestIp(request);
-            if (!ValidityChecker.checkAllowedIp(requestIp)) {
+            if (!ValidityChecker.checkAllowedIp(IpUtil.getRequestIp(request))) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            return ResponseModel.successResponse(requestBody);
+            env = ValidityChecker.checkAndGetEnv(env);
+            ValidityChecker.checkOperator(operator);
+
+            ValidityChecker.checkMongoCluster(requestBody);
+
+            Cat.logEvent("DB.Cluster.Service.Mongo.Cluster.Add", String.format("%s:%s:%s", requestBody.getClusterName(), env, operator));
+            return ResponseModel.successResponse();
+        } catch (NullPointerException e) {
+            return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             log.error("Add mongo cluster info failed.", e);
             return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());

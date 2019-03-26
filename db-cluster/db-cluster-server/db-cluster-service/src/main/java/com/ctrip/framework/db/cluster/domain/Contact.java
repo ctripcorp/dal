@@ -8,7 +8,8 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class Node {
-    private String host;
-    private Integer port;
+public class Contact {
+    private String user;
+    private String email;
+    private String phone;
 }

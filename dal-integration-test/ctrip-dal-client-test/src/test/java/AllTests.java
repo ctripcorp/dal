@@ -14,6 +14,9 @@ import testUtil.NetStatChecker;
  */
     @RunWith(Suite.class)
     @Suite.SuiteClasses({
+            IdGenTestOnMysql.class,
+            IdGenPrefetchTest.class,
+            EntityExtendsOnMysqlTest.class,
             ConnectionPhantomReferenceCleanerOnDalClientTest.class,
             MysqlAllTypesTableDaoUnitTest.class,
             DesignatedDatabaseOnMysqlGenDaoUnitTest.class,
@@ -83,9 +86,6 @@ import testUtil.NetStatChecker;
             SpTestDaoUnitTest.class,
             TVPColumnsOrderDaoUnitTest.class,
             TestFor414.class,
-            EntityExtendsOnMysqlTest.class,
-            IdGenTestOnMysql.class,
-            IdGenPrefetchTest.class
     })
     public class AllTests {
         @BeforeClass

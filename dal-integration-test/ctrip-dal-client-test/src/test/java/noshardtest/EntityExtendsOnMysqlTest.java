@@ -39,6 +39,7 @@ public class EntityExtendsOnMysqlTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        DalClientFactory.shutdownFactory();
         client = DalClientFactory.getClient(DATA_BASE);
         dao=new NoShardOnMysqlDao();
         dao1 = new EntityExtendsOnMysqlDao(MysqlPersonTable1.class);
@@ -48,7 +49,7 @@ public class EntityExtendsOnMysqlTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-
+        DalClientFactory.shutdownFactory();
     }
 
     @Before

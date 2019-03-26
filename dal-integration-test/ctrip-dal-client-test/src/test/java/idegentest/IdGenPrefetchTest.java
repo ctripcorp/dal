@@ -35,15 +35,16 @@ public class IdGenPrefetchTest {
 
 //    @BeforeClass
 //    public static void setUpBeforeClass() throws Exception {
-////        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "IdGen/Dal.config");
 //        DalClientFactory.shutdownFactory();
+//        DalClientFactory.initClientFactory(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "IdGen/Dal.config");
+//
 //    }
 //
-//    //
-//    @AfterClass
-//    public static void tearDownAfterClass() throws Exception {
-//        DalClientFactory.shutdownFactory();
-//    }
+//
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        DalClientFactory.shutdownFactory();
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -53,7 +54,7 @@ public class IdGenPrefetchTest {
 
     @After
     public void tearDown() throws Exception {
-        DalClientFactory.shutdownFactory();
+//        DalClientFactory.shutdownFactory();
     }
 
 
@@ -210,8 +211,7 @@ public class IdGenPrefetchTest {
 
     @Test
     public void testPrefetchFail() throws Exception {
-        if (DalClientFactory.getDalConfigure() != null)
-            DalClientFactory.shutdownFactory();
+        DalClientFactory.shutdownFactory();
         try {
             MockIgnite(ClassLoader.getSystemClassLoader().getResource(".").getPath() + "IdGenPrefetch/Dal.config");
             fail();

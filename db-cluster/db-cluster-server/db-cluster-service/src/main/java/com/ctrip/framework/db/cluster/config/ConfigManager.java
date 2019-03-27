@@ -21,6 +21,8 @@ public class ConfigManager {
     // qconfig key
     private static final String KEY_TITAN_PLUGIN_URL = "titanPluginUrl";
     private static final String KEY_ALLOWED_IPS = "allowedIps";
+    private static final String KEY_SECRET_SERVICE_URL = "secretServiceUrl";
+    private static final String KEY_SSL_CODE = "sslCode";
 
     // qconfig default value
     private static final String DEFAULT_TITAN_PLUGIN_URL = "http://qconfig.ctripcorp.com/plugins/titan/config?appid=100010061";
@@ -28,6 +30,8 @@ public class ConfigManager {
     // qconfig key
     private volatile String titanPluginUrl;
     private volatile Set<String> allowedIps;
+    private volatile String secretServiceUrl;
+    private volatile String sslCode;
 
     private ConfigManager() {
         // init for config
@@ -49,6 +53,8 @@ public class ConfigManager {
         Conf configMap = Conf.fromMap(conf);
         titanPluginUrl = configMap.getString(KEY_TITAN_PLUGIN_URL, DEFAULT_TITAN_PLUGIN_URL);
         allowedIps = string2Set(configMap.getString(KEY_ALLOWED_IPS, ""));
+        secretServiceUrl = configMap.getString(KEY_SECRET_SERVICE_URL, "");
+        sslCode = configMap.getString(KEY_SSL_CODE, "");
     }
 
     private Set<String> string2Set(String s) {
@@ -58,12 +64,21 @@ public class ConfigManager {
         return null;
     }
 
-    public String getKeyTitanPluginUrl() {
+    public String getTitanPluginUrl() {
         return titanPluginUrl;
     }
 
     public Set<String> getAllowedIps() {
         return allowedIps;
     }
+
+    public String getSecretServiceUrl() {
+        return secretServiceUrl;
+    }
+
+    public String getSslCode() {
+        return sslCode;
+    }
+
 
 }

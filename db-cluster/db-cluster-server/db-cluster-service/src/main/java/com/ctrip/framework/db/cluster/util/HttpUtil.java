@@ -20,6 +20,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import static com.ctrip.framework.db.cluster.util.Constants.DEFAULT_TIMEOUT_MS;
+
 /**
  * Created by shenjie on 2019/3/18.
  */
@@ -27,7 +29,6 @@ import java.util.Map;
 public class HttpUtil {
 
     private static final CloseableHttpClient httpClient = HttpClients.createDefault();
-    private static final int DEFAULT_TIMEOUT = 10000;
     private static final HttpUtil instance = new HttpUtil();
 
     public static HttpUtil getInstance() {
@@ -37,7 +38,7 @@ public class HttpUtil {
     public String sendPost(String url, List<NameValuePair> urlParams, String message) throws Exception {
         Map<String, String> headers = Maps.newHashMapWithExpectedSize(1);
         headers.put("Content-Type", "application/json");
-        return sendPost(url, headers, urlParams, message, DEFAULT_TIMEOUT);
+        return sendPost(url, headers, urlParams, message, DEFAULT_TIMEOUT_MS);
     }
 
     public String sendPost(String url, Map<String, String> headers, List<NameValuePair> urlParams, String message, int timeout) throws Exception {
@@ -79,7 +80,7 @@ public class HttpUtil {
         }
 
         if (urlParams != null && !urlParams.isEmpty()) {
-            httpGet.setURI(new URI(httpGet.getURI().toString() + EntityUtils.toString(new UrlEncodedFormEntity(urlParams))));
+            httpGet.setURI(new URI(httpGet.getURI().toString() + "&" + EntityUtils.toString(new UrlEncodedFormEntity(urlParams))));
         }
 
         CloseableHttpResponse response = httpClient.execute(httpGet);

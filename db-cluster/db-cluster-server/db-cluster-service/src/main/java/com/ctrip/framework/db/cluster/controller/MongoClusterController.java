@@ -1,5 +1,6 @@
 package com.ctrip.framework.db.cluster.controller;
 
+import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.MongoClusterAddRequestBody;
 import com.ctrip.framework.db.cluster.domain.ResponseModel;
 import com.ctrip.framework.db.cluster.domain.TitanAddRequestBody;
@@ -25,6 +26,8 @@ public class MongoClusterController {
 
     @Autowired
     private TitanSyncService titanSyncService;
+    @Autowired
+    private CipherService cipherService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ResponseModel add(@RequestBody MongoClusterAddRequestBody requestBody,
@@ -39,6 +42,12 @@ public class MongoClusterController {
             ValidityChecker.checkOperator(operator);
 
             ValidityChecker.checkMongoCluster(requestBody);
+
+            // 加密用户名和密码
+            String userId = cipherService.encrypt(requestBody.getUserId());
+            String password = cipherService.encrypt(requestBody.getPassword());
+            requestBody.setUserId(userId);
+            requestBody.setPassword(password);
 
             Cat.logEvent("DB.Cluster.Service.Mongo.Cluster.Add", String.format("%s:%s:%s", requestBody.getClusterName(), env, operator));
             return ResponseModel.successResponse();

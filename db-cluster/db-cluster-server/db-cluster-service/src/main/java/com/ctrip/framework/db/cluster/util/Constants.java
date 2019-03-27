@@ -6,4 +6,6 @@ package com.ctrip.framework.db.cluster.util;
 public class Constants {
 
     public static final String CONFIG_FILE_NAME = "db-cluster-service.properties";
+
+    public static final int DEFAULT_TIMEOUT_MS = 10000;
 }

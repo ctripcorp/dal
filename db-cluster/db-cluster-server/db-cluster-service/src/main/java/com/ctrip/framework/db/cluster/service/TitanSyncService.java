@@ -33,7 +33,7 @@ public class TitanSyncService {
             urlParams.add(new BasicNameValuePair("titankey", titanAddRequestBody.getKeyName()));
             urlParams.add(new BasicNameValuePair("env", Foundation.server().getEnvFamily().getName()));
             String request = Util.gson.toJson(titanAddRequestBody);
-            String response = HttpUtil.getInstance().sendPost(ConfigManager.getInstance().getKeyTitanPluginUrl(), urlParams, request);
+            String response = HttpUtil.getInstance().sendPost(ConfigManager.getInstance().getTitanPluginUrl(), urlParams, request);
             titanAddResponseBody = Util.gson.fromJson(response, TitanAddResponseBody.class);
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {

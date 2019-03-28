@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @Data
 @Builder
-public class MongoClusterAddRequestBody {
+public class MongoCluster {
     private String clusterName;
     private String clusterType;
     private String dbName;

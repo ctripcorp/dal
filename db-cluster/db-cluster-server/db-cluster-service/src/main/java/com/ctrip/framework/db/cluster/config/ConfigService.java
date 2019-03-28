@@ -3,20 +3,22 @@ package com.ctrip.framework.db.cluster.config;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
 import qunar.agile.Conf;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by shenjie on 2019/3/5.
  */
-public class ConfigManager {
+@Service
+public class ConfigService {
 
     private static final String DELIMITER = ",";
-    private static final ConfigManager instance = new ConfigManager();
 
     // qconfig key
     private static final String KEY_TITAN_PLUGIN_URL = "titanPluginUrl";
@@ -33,7 +35,8 @@ public class ConfigManager {
     private volatile String secretServiceUrl;
     private volatile String sslCode;
 
-    private ConfigManager() {
+    @PostConstruct
+    private void init() {
         // init for config
         MapConfig config = MapConfig.get(Constants.CONFIG_FILE_NAME);
         configInit(config.asMap());
@@ -43,10 +46,6 @@ public class ConfigManager {
                 configInit(conf);
             }
         });
-    }
-
-    public static ConfigManager getInstance() {
-        return instance;
     }
 
     private void configInit(Map<String, String> conf) {
@@ -79,6 +78,5 @@ public class ConfigManager {
     public String getSslCode() {
         return sslCode;
     }
-
 
 }

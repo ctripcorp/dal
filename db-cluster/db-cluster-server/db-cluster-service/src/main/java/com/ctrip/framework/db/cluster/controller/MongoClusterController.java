@@ -1,10 +1,11 @@
 package com.ctrip.framework.db.cluster.controller;
 
+import com.ctrip.framework.db.cluster.config.ConfigService;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
-import com.ctrip.framework.db.cluster.domain.MongoClusterAddRequestBody;
+import com.ctrip.framework.db.cluster.domain.MongoCluster;
 import com.ctrip.framework.db.cluster.domain.ResponseModel;
-import com.ctrip.framework.db.cluster.domain.TitanAddRequestBody;
-import com.ctrip.framework.db.cluster.domain.TitanAddResponseBody;
+import com.ctrip.framework.db.cluster.domain.TitanAddRequest;
+import com.ctrip.framework.db.cluster.domain.TitanAddResponse;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.TitanSyncService;
 import com.ctrip.framework.db.cluster.util.IpUtil;
@@ -28,28 +29,30 @@ public class MongoClusterController {
     private TitanSyncService titanSyncService;
     @Autowired
     private CipherService cipherService;
+    @Autowired
+    private ConfigService configService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseModel add(@RequestBody MongoClusterAddRequestBody requestBody,
+    public ResponseModel add(@RequestBody MongoCluster mongoCluster,
                              @RequestParam(name = "env", required = false) String env,
                              @RequestParam(name = "operator", required = false) String operator, HttpServletRequest request) {
         try {
-            if (!ValidityChecker.checkAllowedIp(IpUtil.getRequestIp(request))) {
+            if (!ValidityChecker.checkAllowedIp(IpUtil.getRequestIp(request), configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
             env = ValidityChecker.checkAndGetEnv(env);
             ValidityChecker.checkOperator(operator);
 
-            ValidityChecker.checkMongoCluster(requestBody);
+            ValidityChecker.checkMongoCluster(mongoCluster);
 
             // 加密用户名和密码
-            String userId = cipherService.encrypt(requestBody.getUserId());
-            String password = cipherService.encrypt(requestBody.getPassword());
-            requestBody.setUserId(userId);
-            requestBody.setPassword(password);
+            String userId = cipherService.encrypt(mongoCluster.getUserId());
+            String password = cipherService.encrypt(mongoCluster.getPassword());
+            mongoCluster.setUserId(userId);
+            mongoCluster.setPassword(password);
 
-            Cat.logEvent("DB.Cluster.Service.Mongo.Cluster.Add", String.format("%s:%s:%s", requestBody.getClusterName(), env, operator));
+            Cat.logEvent("DB.Cluster.Service.Mongo.Cluster.Add", String.format("%s:%s:%s", mongoCluster.getClusterName(), env, operator));
             return ResponseModel.successResponse();
         } catch (NullPointerException e) {
             return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, e.getMessage());
@@ -62,16 +65,16 @@ public class MongoClusterController {
     }
 
     @RequestMapping(value = "/titan/add", method = RequestMethod.POST)
-    public ResponseModel addTitan(@RequestBody TitanAddRequestBody requestBody, HttpServletRequest request) {
+    public ResponseModel addTitan(@RequestBody TitanAddRequest requestBody, HttpServletRequest request) {
         try {
             String requestIp = IpUtil.getRequestIp(request);
-            if (!ValidityChecker.checkAllowedIp(requestIp)) {
+            if (!ValidityChecker.checkAllowedIp(requestIp, configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            TitanAddResponseBody titanAddResponseBody = titanSyncService.add(requestBody);
+            TitanAddResponse titanAddResponse = titanSyncService.add(requestBody);
 
-            return ResponseModel.successResponse(titanAddResponseBody);
+            return ResponseModel.successResponse(titanAddResponse);
         } catch (Exception e) {
             log.error("Sync titan key info failed.", e);
             return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());

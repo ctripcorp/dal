@@ -1,11 +1,12 @@
 package com.ctrip.framework.db.cluster.crypto;
 
-import com.ctrip.framework.db.cluster.config.ConfigManager;
+import com.ctrip.framework.db.cluster.config.ConfigService;
 import com.ctrip.framework.db.cluster.util.HttpUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -13,12 +14,14 @@ import javax.annotation.PostConstruct;
 @Service
 public class SecretService {
 
-    private static ConfigManager configManager = ConfigManager.getInstance();
+    @Autowired
+    private ConfigService configService;
+
     private String signature;
 
     @PostConstruct
     void init() throws Exception {
-        String sslCode = configManager.getSslCode();
+        String sslCode = configService.getSslCode();
         signature = getSignatureService(sslCode);
     }
 
@@ -30,7 +33,7 @@ public class SecretService {
         Transaction t = Cat.newTransaction("DB.Cluster.Service.SecretKey.Load", sslCode);
         String signature;
         try {
-            String keyServiceUri = configManager.getSecretServiceUrl();
+            String keyServiceUri = configService.getSecretServiceUrl();
             t.addData("url", keyServiceUri);
             t.addData("sslcode", keyServiceUri);
 

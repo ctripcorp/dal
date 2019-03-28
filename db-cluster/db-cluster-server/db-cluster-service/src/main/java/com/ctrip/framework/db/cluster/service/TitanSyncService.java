@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.service;
 
-import com.ctrip.framework.db.cluster.config.ConfigManager;
-import com.ctrip.framework.db.cluster.domain.TitanAddRequestBody;
-import com.ctrip.framework.db.cluster.domain.TitanAddResponseBody;
+import com.ctrip.framework.db.cluster.config.ConfigService;
+import com.ctrip.framework.db.cluster.domain.TitanAddRequest;
+import com.ctrip.framework.db.cluster.domain.TitanAddResponse;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.util.HttpUtil;
 import com.ctrip.framework.db.cluster.util.Util;
@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,26 +26,29 @@ import java.util.List;
 @Service
 public class TitanSyncService {
 
-    public TitanAddResponseBody add(TitanAddRequestBody titanAddRequestBody) throws DBClusterServiceException {
-        Transaction t = Cat.newTransaction("DAL.Cluster.Server.Titan.Plugin.Add", titanAddRequestBody.getKeyName());
-        TitanAddResponseBody titanAddResponseBody;
+    @Autowired
+    private ConfigService configService;
+
+    public TitanAddResponse add(TitanAddRequest titanAddRequest) throws DBClusterServiceException {
+        Transaction t = Cat.newTransaction("DAL.Cluster.Server.Titan.Plugin.Add", titanAddRequest.getKeyName());
+        TitanAddResponse titanAddResponse;
         try {
             List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
-            urlParams.add(new BasicNameValuePair("titankey", titanAddRequestBody.getKeyName()));
+            urlParams.add(new BasicNameValuePair("titankey", titanAddRequest.getKeyName()));
             urlParams.add(new BasicNameValuePair("env", Foundation.server().getEnvFamily().getName()));
-            String request = Util.gson.toJson(titanAddRequestBody);
-            String response = HttpUtil.getInstance().sendPost(ConfigManager.getInstance().getTitanPluginUrl(), urlParams, request);
-            titanAddResponseBody = Util.gson.fromJson(response, TitanAddResponseBody.class);
+            String request = Util.gson.toJson(titanAddRequest);
+            String response = HttpUtil.getInstance().sendPost(configService.getTitanPluginUrl(), urlParams, request);
+            titanAddResponse = Util.gson.fromJson(response, TitanAddResponse.class);
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {
-            log.error("Add titan key[" + titanAddRequestBody.getKeyName() + "] to titan plugin encounter error.", e);
+            log.error("Add titan key[" + titanAddRequest.getKeyName() + "] to titan plugin encounter error.", e);
             t.setStatus(e);
             Cat.logError(e);
             throw new DBClusterServiceException(e);
         } finally {
             t.complete();
         }
-        return titanAddResponseBody;
+        return titanAddResponse;
     }
 
 }

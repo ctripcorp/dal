@@ -1,7 +1,7 @@
 package com.ctrip.framework.db.cluster.service;
 
-import com.ctrip.framework.db.cluster.domain.TitanAddRequestBody;
-import com.ctrip.framework.db.cluster.domain.TitanAddResponseBody;
+import com.ctrip.framework.db.cluster.domain.TitanAddRequest;
+import com.ctrip.framework.db.cluster.domain.TitanAddResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class TitanSyncServiceTest {
 
     @Test
     public void add() throws Exception {
-        TitanAddRequestBody titanKey = TitanAddRequestBody.builder()
+        TitanAddRequest titanKey = TitanAddRequest.builder()
                 .keyName("titantest_shenjie_v_25")
                 .providerName("MySql.Data.MySqlClient")
                 .serverName("mysqldaltest01.mysql.db.fat.qa.nt.ctripcorp.com")
@@ -34,7 +34,7 @@ public class TitanSyncServiceTest {
                 .createUser("shenjie")
                 .updateUser("shenjie")
                 .build();
-        TitanAddResponseBody response = titanSyncService.add(titanKey);
+        TitanAddResponse response = titanSyncService.add(titanKey);
         assert response.getStatus() == 0;
 
     }

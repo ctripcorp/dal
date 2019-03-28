@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class TitanAddRequestBody {
+public class TitanAddRequest {
     private String keyName;
     private String providerName;
     private String serverName;

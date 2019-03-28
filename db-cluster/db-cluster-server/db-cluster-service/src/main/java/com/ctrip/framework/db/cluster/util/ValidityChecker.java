@@ -1,7 +1,6 @@
 package com.ctrip.framework.db.cluster.util;
 
-import com.ctrip.framework.db.cluster.config.ConfigManager;
-import com.ctrip.framework.db.cluster.domain.MongoClusterAddRequestBody;
+import com.ctrip.framework.db.cluster.domain.MongoCluster;
 import com.ctrip.framework.db.cluster.domain.Node;
 import com.ctrip.framework.db.cluster.enums.ClusterType;
 import com.ctrip.framework.db.cluster.enums.Env;
@@ -17,12 +16,10 @@ import java.util.Set;
  */
 public class ValidityChecker {
 
-    public static boolean checkAllowedIp(String ip) {
+    public static boolean checkAllowedIp(String ip, Set<String> allowedIps) {
         if (StringUtils.isEmpty(ip)) {
             return false;
         }
-
-        Set<String> allowedIps = ConfigManager.getInstance().getAllowedIps();
         if (allowedIps == null) {
             return false;
         }
@@ -42,17 +39,17 @@ public class ValidityChecker {
         Preconditions.checkArgument(StringUtils.isNotBlank(operator), "Operator为空");
     }
 
-    public static void checkMongoCluster(MongoClusterAddRequestBody requestBody) {
-        Preconditions.checkNotNull(requestBody, "Cluster信息为空");
-        Preconditions.checkArgument(StringUtils.isNotBlank(requestBody.getClusterName()), "ClusterName为空");
-        checkClusterType(requestBody.getClusterType());
-        Preconditions.checkArgument(StringUtils.isNotBlank(requestBody.getDbName()), "DBName为空");
-        Preconditions.checkArgument(StringUtils.isNotBlank(requestBody.getUserId()), "UserId为空");
-        Preconditions.checkArgument(StringUtils.isNotBlank(requestBody.getPassword()), "Password为空");
-        checkNodes(requestBody.getNodes());
+    public static void checkMongoCluster(MongoCluster mongoCluster) {
+        Preconditions.checkNotNull(mongoCluster, "Cluster信息为空");
+        Preconditions.checkArgument(StringUtils.isNotBlank(mongoCluster.getClusterName()), "ClusterName为空");
+        checkClusterType(mongoCluster.getClusterType());
+        Preconditions.checkArgument(StringUtils.isNotBlank(mongoCluster.getDbName()), "DBName为空");
+        Preconditions.checkArgument(StringUtils.isNotBlank(mongoCluster.getUserId()), "UserId为空");
+        Preconditions.checkArgument(StringUtils.isNotBlank(mongoCluster.getPassword()), "Password为空");
+        checkNodes(mongoCluster.getNodes());
 
-        if (requestBody.getEnabled() == null) {
-            requestBody.setEnabled(true);
+        if (mongoCluster.getEnabled() == null) {
+            mongoCluster.setEnabled(true);
         }
     }
 

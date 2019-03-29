@@ -18,7 +18,7 @@ public abstract class PluginProxy implements Plugin {
         return qconfigService;
     }
 
-    private void setQconfigService(QconfigService qconfigService) {
+    protected void setQconfigService(QconfigService qconfigService) {
         this.qconfigService = qconfigService;
     }
 

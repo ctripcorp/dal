@@ -56,16 +56,16 @@ public class MongoClusterControllerTest {
 
     private MongoCluster generateMongoCluster() {
         Node node = Node.builder()
-                .host("node.host")
-                .port(11111)
+                .host("bridge.soa.uat.qa.nt.ctripcorp.com")
+                .port(65535)
                 .build();
 
         MongoCluster mongoCluster = MongoCluster.builder()
-                .clusterName("MongoClusterControllerTest")
+                .clusterName("diuserprofile-diuserprofiledb")
                 .clusterType(ClusterType.REPLICATION.name())
-                .dbName("testDBName")
-                .userId("testUserId")
-                .password("testPassword")
+                .dbName("testDBtestDBtestDBtestDB")
+                .userId("testName")
+                .password("qwe123")
                 .nodes(Lists.newArrayList(node))
                 .build();
 

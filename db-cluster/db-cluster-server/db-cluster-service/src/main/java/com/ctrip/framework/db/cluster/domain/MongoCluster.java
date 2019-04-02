@@ -23,5 +23,6 @@ public class MongoCluster {
     private String prodLine;
     private List<Contact> contacts;
     private Boolean enabled;
+    private Integer version;
 
 }

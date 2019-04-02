@@ -3,14 +3,14 @@ package com.ctrip.framework.db.cluster.controller;
 import com.ctrip.framework.db.cluster.config.ConfigService;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.MongoCluster;
+import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.domain.ResponseModel;
 import com.ctrip.framework.db.cluster.domain.TitanAddRequest;
-import com.ctrip.framework.db.cluster.domain.TitanAddResponse;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
-import com.ctrip.framework.db.cluster.service.TitanSyncService;
+import com.ctrip.framework.db.cluster.service.PluginMongoService;
+import com.ctrip.framework.db.cluster.service.PluginTitanService;
 import com.ctrip.framework.db.cluster.util.IpUtil;
 import com.ctrip.framework.db.cluster.util.ValidityChecker;
-import com.dianping.cat.Cat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,25 +26,30 @@ import javax.servlet.http.HttpServletRequest;
 public class MongoClusterController {
 
     @Autowired
-    private TitanSyncService titanSyncService;
+    private PluginTitanService pluginTitanService;
+    @Autowired
+    private PluginMongoService pluginMongoService;
     @Autowired
     private CipherService cipherService;
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private ValidityChecker validityChecker;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ResponseModel add(@RequestBody MongoCluster mongoCluster,
                              @RequestParam(name = "env", required = false) String env,
-                             @RequestParam(name = "operator", required = false) String operator, HttpServletRequest request) {
+                             @RequestParam(name = "operator", required = false) String operator,
+                             HttpServletRequest request) {
         try {
-            if (!ValidityChecker.checkAllowedIp(IpUtil.getRequestIp(request), configService.getAllowedIps())) {
+            if (!validityChecker.checkAllowedIp(IpUtil.getRequestIp(request), configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            env = ValidityChecker.checkAndGetEnv(env);
-            ValidityChecker.checkOperator(operator);
+            env = validityChecker.checkAndGetEnv(env);
+            validityChecker.checkOperator(operator);
 
-            ValidityChecker.checkMongoCluster(mongoCluster);
+            validityChecker.checkMongoCluster(mongoCluster);
 
             // 加密用户名和密码
             String userId = cipherService.encrypt(mongoCluster.getUserId());
@@ -52,8 +57,19 @@ public class MongoClusterController {
             mongoCluster.setUserId(userId);
             mongoCluster.setPassword(password);
 
-            Cat.logEvent("DB.Cluster.Service.Mongo.Cluster.Add", String.format("%s:%s:%s", mongoCluster.getClusterName(), env, operator));
-            return ResponseModel.successResponse();
+            // 新增cluster，version=1
+            mongoCluster.setVersion(1);
+            mongoCluster.setBu(null);
+            mongoCluster.setProdLine(null);
+            mongoCluster.setContacts(null);
+
+            PluginResponse response = pluginMongoService.add(mongoCluster, env, operator);
+            if (response.getStatus() == 0) {
+                return ResponseModel.successResponse();
+            } else {
+                return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, response.getMessage());
+            }
+
         } catch (NullPointerException e) {
             return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -65,18 +81,26 @@ public class MongoClusterController {
     }
 
     @RequestMapping(value = "/titan/add", method = RequestMethod.POST)
-    public ResponseModel addTitan(@RequestBody TitanAddRequest requestBody, HttpServletRequest request) {
+    public ResponseModel addTitan(@RequestBody TitanAddRequest requestBody,
+                                  @RequestParam(name = "env", required = false) String env,
+                                  HttpServletRequest request) {
         try {
             String requestIp = IpUtil.getRequestIp(request);
-            if (!ValidityChecker.checkAllowedIp(requestIp, configService.getAllowedIps())) {
+            if (!validityChecker.checkAllowedIp(requestIp, configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            TitanAddResponse titanAddResponse = titanSyncService.add(requestBody);
+            env = validityChecker.checkAndGetEnv(env);
 
-            return ResponseModel.successResponse(titanAddResponse);
+            PluginResponse response = pluginTitanService.add(requestBody, env);
+            if (response.getStatus() == 0) {
+                return ResponseModel.successResponse();
+            } else {
+                return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, response.getMessage());
+            }
+
         } catch (Exception e) {
-            log.error("Sync titan key info failed.", e);
+            log.error("Add titan key failed.", e);
             return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
         }
     }

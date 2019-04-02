@@ -56,7 +56,7 @@ public class HttpUtil {
         }
 
         if (urlParams != null && !urlParams.isEmpty()) {
-            httpPost.setURI(new URI(httpPost.getURI().toString() + "&" + EntityUtils.toString(new UrlEncodedFormEntity(urlParams))));
+            httpPost.setURI(new URI(httpPost.getURI().toString() + "?" + EntityUtils.toString(new UrlEncodedFormEntity(urlParams))));
         }
 
         StringEntity entityRequest = new StringEntity(message);
@@ -80,7 +80,7 @@ public class HttpUtil {
         }
 
         if (urlParams != null && !urlParams.isEmpty()) {
-            httpGet.setURI(new URI(httpGet.getURI().toString() + "&" + EntityUtils.toString(new UrlEncodedFormEntity(urlParams))));
+            httpGet.setURI(new URI(httpGet.getURI().toString() + "?" + EntityUtils.toString(new UrlEncodedFormEntity(urlParams))));
         }
 
         CloseableHttpResponse response = httpClient.execute(httpGet);
@@ -90,6 +90,7 @@ public class HttpUtil {
     private String getContent(CloseableHttpResponse response) throws IOException {
         String content = "";
         try {
+//            int statusCode = response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
             content = EntityUtils.toString(entity, Charsets.UTF_8);
             EntityUtils.consume(entity);

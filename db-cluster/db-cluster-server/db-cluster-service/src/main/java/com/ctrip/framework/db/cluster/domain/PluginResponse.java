@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TitanAddResponse {
+public class PluginResponse {
     private int status;
     private String message;
     private Object data;

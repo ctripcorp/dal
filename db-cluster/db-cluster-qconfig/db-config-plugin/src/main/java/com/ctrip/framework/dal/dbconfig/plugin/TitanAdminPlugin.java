@@ -1,12 +1,9 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
-import com.ctrip.framework.dal.dbconfig.plugin.context.RequestContext;
-import com.ctrip.framework.dal.dbconfig.plugin.context.ResultContext;
-import com.ctrip.framework.dal.dbconfig.plugin.dispatcher.AdminHandlerDispatcher;
-import com.ctrip.framework.dal.dbconfig.plugin.dispatcher.HandlerDispatcher;
-import com.ctrip.framework.dal.dbconfig.plugin.handler.PluginHandler;
-import com.ctrip.framework.dal.dbconfig.plugin.proxy.AdminPluginProxy;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
 import qunar.tc.qconfig.plugin.PluginRegisterPoint;
+import qunar.tc.qconfig.plugin.PluginResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -14,22 +11,23 @@ import java.util.List;
 /**
  * @author c7ch23en
  */
-public class TitanAdminPlugin extends AdminPluginProxy {
+public class TitanAdminPlugin extends AdminPluginAdapter {
 
-    private HandlerDispatcher handlerDispatcher = new AdminHandlerDispatcher();
+    private AdminHandlerDispatcher dispatcher;
 
     @Override
     public void init() {
+        dispatcher = new AdminHandlerDispatcher();
     }
 
     @Override
-    public ResultContext preHandle(HttpServletRequest request) {
-        PluginHandler handler = handlerDispatcher.getHandler(request);
+    public PluginResult preHandle(HttpServletRequest request) {
+        AdminHandler handler = dispatcher.getHandler(request);
         return null;
     }
 
     @Override
-    public ResultContext postHandle(RequestContext requestCtx) {
+    public PluginResult postHandle(HttpServletRequest request) {
         return null;
     }
 

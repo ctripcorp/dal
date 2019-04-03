@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author c7ch23en
  */
-public abstract class BaseAdminHandler implements CommonConstants {
+public abstract class BaseAdminHandler implements AdminHandler, CommonConstants {
 
     private QconfigService qconfigService;
 
@@ -37,7 +37,7 @@ public abstract class BaseAdminHandler implements CommonConstants {
     }
 
     private boolean checkPermission(String whitelist, String ip) {
-        if(!Strings.isNullOrEmpty(whitelist) && !Strings.isNullOrEmpty(ip)) {
+        if (!Strings.isNullOrEmpty(whitelist) && !Strings.isNullOrEmpty(ip)) {
             String[] whitelistArray = whitelist.split(",");
             List<String> whitelistList = Arrays.asList(whitelistArray);
             return whitelistList.contains(ip);

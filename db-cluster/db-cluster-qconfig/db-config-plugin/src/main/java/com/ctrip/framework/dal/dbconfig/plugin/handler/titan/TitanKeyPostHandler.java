@@ -5,7 +5,6 @@ import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.SiteInputEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
-import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.BaseAdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.service.*;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
@@ -25,43 +24,46 @@ import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This handler is to add/update titan key.
- *  Notice: 'dbName' set to lowercase.
+ * Notice: 'dbName' set to lowercase.
  * Sample:
- *  [POST]   http://qconfig.uat.qa.nt.ctripcorp.com/plugins/titan/config?appid=100010061&titankey=test1DB_W&env=uat&operator=lzyan
- *              &subenv=fat1
- *
+ * [POST]   http://qconfig.uat.qa.nt.ctripcorp.com/plugins/titan/config?appid=100010061&titankey=test1DB_W&env=uat&operator=lzyan
+ * &subenv=fat1
+ * <p>
  * [body] sample as bellow:
- *
- {
-     "keyName": "test1DB_W",
-     "providerName": "MySql.Data.MySqlClient",
-     "serverName": "127.0.0.1",
-     "serverIp": "127.0.0.1",
-     "port": "28747",
-     "uid": "tt_daltest_1",
-     "password": "111111",
-     "dbName": "test1DB",
-     "extParam": "useUnicode=true;",
-     "timeOut": 15,
-     "enabled": true,
-     "createUser": "testUser",
-     "updateUser": "testUser",
-
-     # optional
-     "whiteList": "111111,222222",
-     "blackList": "333333,444444",
-     "id": 1
- }
-
- *
+ * <p>
+ * {
+ * "keyName": "test1DB_W",
+ * "providerName": "MySql.Data.MySqlClient",
+ * "serverName": "127.0.0.1",
+ * "serverIp": "127.0.0.1",
+ * "port": "28747",
+ * "uid": "tt_daltest_1",
+ * "password": "111111",
+ * "dbName": "test1DB",
+ * "extParam": "useUnicode=true;",
+ * "timeOut": 15,
+ * "enabled": true,
+ * "createUser": "testUser",
+ * "updateUser": "testUser",
+ * <p>
+ * # optional
+ * "whiteList": "111111,222222",
+ * "blackList": "333333,444444",
+ * "id": 1
+ * }
+ * <p>
+ * <p>
  * Created by lzyan on 2017/08/18, 2018/06/01.
  */
-public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandler, TitanConstants {
+public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TitanKeyPostHandler.class);
 
@@ -128,13 +130,13 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
              "updateUser": "testUser"
              }
              */
-            if(!Strings.isNullOrEmpty(body)){
+            if (!Strings.isNullOrEmpty(body)) {
                 SiteInputEntity siteInputEntity = GsonUtils.json2T(body, SiteInputEntity.class);
                 LOGGER.info("postHandleDetail(): siteInputEntity=" + siteInputEntity);
-                if(siteInputEntity != null){
+                if (siteInputEntity != null) {
                     //set 'dbName' to lowercase
                     String dbName = siteInputEntity.getDbName();
-                    if(dbName != null){
+                    if (dbName != null) {
                         siteInputEntity.setDbName(dbName.toLowerCase());
                     }
 
@@ -142,19 +144,19 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                     boolean permitted = checkPermission(clientIp, profile);
 
-                    if(permitted){
+                    if (permitted) {
                         //更新TitanKey文件内容
                         update(request, siteInputEntity);
-                    }else{
+                    } else {
                         t.addData("postHandleDetail(): sitePermission=false, not allow to update!");
                         Cat.logEvent("TitanKeyPostPlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to update! clientIp=" + clientIp);
                         pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_WRITE, "Access ip whitelist check fail! clientIp=" + clientIp);
                     }
 
-                }else{
+                } else {
                     t.addData("postHandleDetail(): siteInputEntity=null, no need to add/update!");
                 }
-            }else{
+            } else {
                 t.addData("postHandleDetail(): site body is null or empty, no need to add/update!");
             }
 
@@ -187,7 +189,7 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
         String env = envProfile.formatEnv();
 
         //build updateConf from <siteInputEntity>
-        Properties rawProp  = format2Properties(siteInputEntity);
+        Properties rawProp = format2Properties(siteInputEntity);
 
         PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
         CryptoManager cryptoManager = new CryptoManager(config);
@@ -197,7 +199,7 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
         ConfigField cm = new ConfigField(group, dataId, profile);
         List<ConfigField> configFieldList = Lists.newArrayList(cm);
         List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeyPostHandler", configFieldList);
-        if(configDetailList != null && !configDetailList.isEmpty()){
+        if (configDetailList != null && !configDetailList.isEmpty()) {
             //已经存在，更新
             ConfigDetail configDetail = configDetailList.get(0);    //get first
             String encryptOldConf = configDetail.getContent();
@@ -226,12 +228,12 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
             // 更新索引文件 [2018-09-26]
             boolean indexUpdateEnabled = false;
             String indexUpdateEnabledStr = config.getParamValue(INDEX_FILE_UPDATE_ENABLED);
-            if(!Strings.isNullOrEmpty(indexUpdateEnabledStr)) {
+            if (!Strings.isNullOrEmpty(indexUpdateEnabledStr)) {
                 indexUpdateEnabled = Boolean.parseBoolean(indexUpdateEnabledStr);
             }
-            if(indexUpdateEnabled) {
+            if (indexUpdateEnabled) {
                 String enabled_old = oldDecryptProp.getProperty(ENABLED);
-                String enabled_input = rawProp.get(ENABLED)==null ? null : rawProp.get(ENABLED).toString();
+                String enabled_input = rawProp.get(ENABLED) == null ? null : rawProp.get(ENABLED).toString();
                 if (!Strings.isNullOrEmpty(enabled_input) && !enabled_input.equalsIgnoreCase(enabled_old)) {
                     IndexManager indexManager = new IndexManager(getQconfigService(), config);
                     String dbName = mergeProp.getProperty(CONNECTIONSTRING_DB_NAME);
@@ -245,7 +247,7 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
                     }
                 }
             }
-        }else{
+        } else {
             //新增
 
             //field 'version' increase one    [2017-09-01]
@@ -267,10 +269,10 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
             // 更新索引文件 [2018-09-26]
             boolean indexUpdateEnabled = false;
             String indexUpdateEnabledStr = config.getParamValue(INDEX_FILE_UPDATE_ENABLED);
-            if(!Strings.isNullOrEmpty(indexUpdateEnabledStr)) {
+            if (!Strings.isNullOrEmpty(indexUpdateEnabledStr)) {
                 indexUpdateEnabled = Boolean.parseBoolean(indexUpdateEnabledStr);
             }
-            if(indexUpdateEnabled) {
+            if (indexUpdateEnabled) {
                 IndexManager indexManager = new IndexManager(getQconfigService(), config);
                 String dbName = rawProp.getProperty(CONNECTIONSTRING_DB_NAME);
                 String key = rawProp.getProperty(CONNECTIONSTRING_KEY_NAME);
@@ -283,8 +285,8 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
     private Properties format2Properties(SiteInputEntity siteInputEntity) throws Exception {
         Properties properties = new Properties();
         HashMap<String, Object> map = CommonHelper.getFieldMap(siteInputEntity);
-        if(map != null && !map.isEmpty()){
-            for(Map.Entry entry : map.entrySet()){
+        if (map != null && !map.isEmpty()) {
+            for (Map.Entry entry : map.entrySet()) {
                 properties.put(entry.getKey(), entry.getValue());
             }
         }
@@ -297,14 +299,14 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements AdminHandle
 
         //no need check when enabled=false  [2018-01-19]
         Object enabledObj = properties.get(ENABLED);
-        if(enabledObj != null){
+        if (enabledObj != null) {
             needCheck = Boolean.valueOf(enabledObj.toString());
         }
 
-        if(needCheck) {
+        if (needCheck) {
             boolean forMHA = false;
             boolean validResult = new DbAccessManager(config).validConnection(properties, env, forMHA);
-            if(!validResult){
+            if (!validResult) {
                 throw new Exception("checkDbConnection(): validResult=false, db connection check failure!");
             }
         }

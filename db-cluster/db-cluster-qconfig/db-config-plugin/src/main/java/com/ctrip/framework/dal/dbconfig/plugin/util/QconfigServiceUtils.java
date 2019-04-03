@@ -4,13 +4,16 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import qunar.tc.qconfig.common.bean.PaginationResult;
 import qunar.tc.qconfig.common.exception.QServiceException;
 import qunar.tc.qconfig.plugin.ConfigDetail;
 import qunar.tc.qconfig.plugin.ConfigField;
 import qunar.tc.qconfig.plugin.QconfigService;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by lzyan on 2019/1/14.
@@ -23,11 +26,11 @@ public class QconfigServiceUtils {
     public static int batchSave(QconfigService qconfigService, String handlerName, List<ConfigDetail> configDetails, boolean isPublic, String operator, String ip) throws QServiceException {
         checkParameter(qconfigService, handlerName);
         int result = 0;
-        if(configDetails != null && !configDetails.isEmpty()) {
+        if (configDetails != null && !configDetails.isEmpty()) {
             Transaction t = Cat.newTransaction(TITAN_PLUGIN_TRANSACTION_WRITE, handlerName);
             try {
                 t.addData("*count", configDetails.size());
-                if(!Strings.isNullOrEmpty(operator) && !Strings.isNullOrEmpty(ip)) {
+                if (!Strings.isNullOrEmpty(operator) && !Strings.isNullOrEmpty(ip)) {
                     result = qconfigService.batchSave(configDetails, isPublic, operator, ip);
                 } else {
                     result = qconfigService.batchSave(configDetails, isPublic);
@@ -122,12 +125,27 @@ public class QconfigServiceUtils {
 
     // check parameter
     private static void checkParameter(QconfigService qconfigService, String handlerName) {
-        if(qconfigService == null) {
+        if (qconfigService == null) {
             throw new IllegalArgumentException("qconfigService=null, can't operate ...");
         }
-        if(Strings.isNullOrEmpty(handlerName)) {
+        if (Strings.isNullOrEmpty(handlerName)) {
             throw new IllegalArgumentException("handlerName is null or empty, can't operate ...");
         }
+    }
+
+    //query and get latest config file content
+    public static Properties currentConfigWithPriority(QconfigService qconfigService, String handlerName, ConfigField configField) throws QServiceException, IOException {
+        Properties contentProp = null;
+        List<ConfigDetail> cdList = currentConfigWithoutPriority(qconfigService, handlerName, Lists.newArrayList(configField));
+        if (cdList != null && !cdList.isEmpty()) {
+            String contentText = cdList.get(0).getContent();
+            contentProp = CommonHelper.parseString2Properties(contentText);
+        }
+
+        if (contentProp == null) {
+            contentProp = new Properties();
+        }
+        return contentProp;
     }
 
 }

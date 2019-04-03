@@ -8,8 +8,10 @@ public interface CommonConstants {
     String REQ_PARAM_ENV = "env";
     String REQ_PARAM_SUB_ENV = "subenv";
     String REQ_PARAM_OPERATOR = "operator";
+    String REQ_PARAM_TARGET_APPID = "appid";
 
     String REQ_ATTR_ENV_PROFILE = "attr_env_profile";
+    String REQ_ATTR_OPERATOR = "attr_operator";
 
     String REQUEST_SCHEMA_HTTPS = "https";
     String ENV_PRO = "PRO";

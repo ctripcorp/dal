@@ -2,7 +2,7 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
-import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.TitanKeyPostHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.mongo.MongoClusterPostHandler;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.PluginRegisterPoint;
@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * @author c7ch23en
+ * Created by shenjie on 2019/4/3.
  */
-public class TitanAdminPlugin extends AdminPluginAdapter {
+public class MongoAdminPlugin extends AdminPluginAdapter {
 
     private AdminHandlerDispatcher dispatcher;
 
@@ -23,7 +23,7 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
     public void init() {
         dispatcher = new AdminHandlerDispatcher();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
-        adminHandlers.add(new TitanKeyPostHandler(getQconfigService()));
+        adminHandlers.add(new MongoClusterPostHandler(getQconfigService()));
 
         for (AdminHandler handler : adminHandlers) {
             dispatcher.register(handler);
@@ -64,6 +64,7 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
         return pluginResult;
     }
 
+
     @Override
     public List<PluginRegisterPoint> registerPoints() {
         List<PluginRegisterPoint> registerPointList = new ImmutableList.Builder<PluginRegisterPoint>()
@@ -74,5 +75,4 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
                 .build();
         return registerPointList;
     }
-
 }

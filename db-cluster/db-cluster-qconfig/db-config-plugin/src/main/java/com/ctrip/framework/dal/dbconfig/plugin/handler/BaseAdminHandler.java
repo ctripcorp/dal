@@ -26,6 +26,7 @@ public abstract class BaseAdminHandler implements AdminHandler, CommonConstants 
         return qconfigService;
     }
 
+    // todo: 不同plugin配置
     protected boolean checkPermission(String clientIp, EnvProfile profile) {
         PluginConfig config = new PluginConfig(qconfigService, profile);
         try {

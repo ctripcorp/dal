@@ -15,7 +15,6 @@ public interface TitanConstants extends CommonConstants {
     String KEY_TRAIL_SH = "_SH";
 
     String REQ_PARAM_TITAN_KEY = "titankey";
-    String REQ_PARAM_TARGET_APPID = "appid";
 
     String REQ_ATTR_TITAN_KEY = "attr_titankey";
 

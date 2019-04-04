@@ -41,7 +41,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     private KeyService keyService = Soa2KeyService.getInstance();
 
     //whether allow to process this request
-    protected boolean canProcess(HttpServletRequest request) {
+    private boolean canProcess(HttpServletRequest request) {
         boolean canDo = false;
         String group = request.getParameter(Constants.GROUP_NAME);
         if (TITAN_QCONFIG_KEYS_APPID.equals(group)) {
@@ -108,7 +108,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         return pluginResult;
     }
 
-    public PluginResult preHandleDetail(WrappedRequest wrappedRequest) throws Exception {
+    private PluginResult preHandleDetail(WrappedRequest wrappedRequest) throws Exception {
         HttpServletRequest request = wrappedRequest.getRequest();
         ConfigDetail configDetail = wrappedRequest.getConfigs().get(0);
         ConfigField cf = configDetail.getConfigField();
@@ -139,7 +139,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     }
 
 
-    public PluginResult postHandleDetail(WrappedRequest wrappedRequest) throws Exception {
+    private PluginResult postHandleDetail(WrappedRequest wrappedRequest) throws Exception {
         Stopwatch stopwatch = Stopwatch.createStarted();
         PluginResult pluginResult = PluginResult.oK();
         String result = "";
@@ -169,17 +169,17 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             //checkHttps(request, config);
 
             //noParent check [2017-10-31]
-            String profile_raw = (String) request.getAttribute(REQ_ATTR_TITAN_KEY);
-            String subEnv_input = CommonHelper.getSubEnvFromProfile(profile_raw);
+            EnvProfile profile_raw = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
+            String subEnv_input = profile_raw.formatSubEnv();
             String noParentSuffix = config.getParamValue(NO_PARENT_SUFFIX);
             boolean isPro = CommonHelper.checkPro(profile);
             boolean noParent = CommonHelper.checkSubEnvNoParent(subEnv_input, noParentSuffix, isPro);//use 'subEnv_input'
             if (noParent) {
                 //compare used subEnv is just user input one
-                String subEnv_actual = CommonHelper.getSubEnvFromProfile(profile);
+                String subEnv_actual = envProfile.formatSubEnv();
                 if (subEnv_input != null && !subEnv_input.equalsIgnoreCase(subEnv_actual)) {
                     //let it go when profile is like 'LPT:xxx'  [2018-02-23]
-                    String topEnv = CommonHelper.formatEnvFromProfile(profile);
+                    String topEnv = envProfile.formatEnv();
                     if (!CommonHelper.checkLptEnv(topEnv)) {
                         throw new IllegalArgumentException("dataId=" + dataId + ", noParent=true, subEnv not match! subEnv_input=" + subEnv_input + ", subEnv_actual=" + subEnv_actual);
                     }

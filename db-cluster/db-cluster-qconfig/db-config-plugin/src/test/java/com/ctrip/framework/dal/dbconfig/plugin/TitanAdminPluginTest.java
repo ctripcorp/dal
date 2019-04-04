@@ -1,6 +1,5 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
-import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
@@ -17,12 +16,14 @@ import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
+
 /**
  * Created by shenjie on 2019/4/2.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TitanAdminPlugin.class})
-public class TitanAdminPluginTest implements TitanConstants {
+public class TitanAdminPluginTest {
 
     @Autowired
     TitanAdminPlugin titanAdminPlugin;

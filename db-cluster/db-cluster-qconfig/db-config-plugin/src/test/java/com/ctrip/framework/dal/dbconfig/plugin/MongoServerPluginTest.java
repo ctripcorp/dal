@@ -4,7 +4,6 @@ import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.MockQconfigService;
-import com.google.common.base.Strings;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,46 +15,48 @@ import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.*;
+
 
 /**
- * Created by shenjie on 2019/4/3.
+ * Created by shenjie on 2019/4/4.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {TitanServerPlugin.class})
-public class TitanServerPluginTest {
+@ContextConfiguration(classes = {MongoServerPlugin.class})
+public class MongoServerPluginTest {
 
-    private TitanServerPlugin titanServerPlugin = new TitanServerPlugin();
+    private MongoServerPlugin mongoServerPlugin = new MongoServerPlugin();
     private HttpServletRequest request;
-    private String titanKey = "titantest_lzyan_v_01";
+    private String clusterName = "diuserprofile-diuserprofiledb";
     private String env = "fat";
 
     @Before
     public void init() throws Exception {
         QconfigService qconfigService = new MockQconfigService();
-        titanServerPlugin.init(qconfigService);
+        mongoServerPlugin.init(qconfigService);
 
         //创建request的Mock
         request = EasyMock.createMock(HttpServletRequest.class);
-        EasyMock.expect(request.getParameter(Constants.GROUP_NAME)).andReturn(TITAN_QCONFIG_KEYS_APPID).anyTimes();
+        EasyMock.expect(request.getParameter(Constants.GROUP_NAME)).andReturn(MONGO_CLIENT_APP_ID).anyTimes();
 
         initForGetConfig();
 //        initForForceLoad();
     }
 
+
     @Test
     public void preHandle() throws Exception {
-        request.setAttribute(EasyMock.eq(REQ_ATTR_TITAN_KEY), EasyMock.anyString());
+        request.setAttribute(EasyMock.eq(REQ_ATTR_CLUSTER_NAME), EasyMock.anyString());
         request.setAttribute(EasyMock.eq(REQ_ATTR_ENV_PROFILE), EasyMock.anyString());
         EasyMock.expect(request.getScheme()).andReturn(REQUEST_SCHEMA_HTTPS).anyTimes();
         EasyMock.replay(request);   //保存期望结果
 
-        String groupId = TITAN_QCONFIG_KEYS_APPID;
-        String dataId = "titantest_lzyan_v_01";
+        String groupId = MONGO_CLIENT_APP_ID;
+        String dataId = clusterName;
         String profile = "fat:LPT10";
         ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile);
         WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
-        PluginResult pluginResult = titanServerPlugin.preHandle(wrappedRequest);
+        PluginResult pluginResult = mongoServerPlugin.preHandle(wrappedRequest);
         assert (pluginResult != null);
         System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
         assert (pluginResult.getCode() == PluginStatusCode.OK);
@@ -69,22 +70,18 @@ public class TitanServerPluginTest {
         EasyMock.replay(request);   //保存期望结果
         EasyMock.verify(request);
 
-        String groupId = TITAN_QCONFIG_KEYS_APPID;
-        String dataId = "titantest_lzyan_v_01";
+        String groupId = MONGO_CLIENT_APP_ID;
+        String dataId = clusterName;
         //String profile = "fat:LPT10";
         long version = 1L;
-        String content = buildTitanKeyContent(titanKey);
+        String content = buildMongoClusterContent();
         ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
         WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
-        PluginResult pluginResult = titanServerPlugin.postHandle(wrappedRequest);
+        PluginResult pluginResult = mongoServerPlugin.postHandle(wrappedRequest);
         assert (pluginResult != null);
         System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
         //assert(pluginResult.getAttribute() != null);
         System.out.println("pluginResult.attribute=" + GsonUtils.Object2Json(pluginResult.getAttribute()));
-    }
-
-    @Test
-    public void registerPoints() throws Exception {
     }
 
     //init for <>
@@ -99,30 +96,25 @@ public class TitanServerPluginTest {
         EasyMock.expect(request.getMethod()).andReturn("GET").anyTimes();
     }
 
-    //build test titanKey content
-    private String buildTitanKeyContent(String keyName) {
-        if (Strings.isNullOrEmpty(keyName)) {
-            keyName = "titantest_lzyan_v_01";
-        }
-        String returnFlag = "\n";
-        StringBuilder sb = new StringBuilder();
-        sb.append("sslCode=VZ00000000000441").append(returnFlag);
-        sb.append("keyName=").append(keyName).append(returnFlag);
-        sb.append("serverName=mysqldaltest01.mysql.db.fat.qa.nt.ctripcorp.com").append(returnFlag);
-        sb.append("serverIp=10.2.74.111").append(returnFlag);
-        sb.append("port=55111").append(returnFlag);
-        sb.append("uid=DD326CA3D8F038641D6A7FF9D3948BD0").append(returnFlag);
-        sb.append("password=1A08EF1DDB2951B79EBA0839072FBEBB02A9A77FCF74D09CCDA2ECC6C7E6C17B").append(returnFlag);
-        sb.append("dbName=mysqldaltest01db").append(returnFlag);
-        sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
-        sb.append("enabled=true").append(returnFlag);
-        sb.append("permissions=100007326").append(returnFlag);
-        sb.append("updateUser=lzyan").append(returnFlag);
-        sb.append("createUser=lzyan").append(returnFlag);
-        sb.append("timeOut=30").append(returnFlag);
-        sb.append("extParam=").append(returnFlag);
-        sb.append("version=2").append(returnFlag);
-        return sb.toString();
+    //build test content
+    private String buildMongoClusterContent() {
+        return "{\n" +
+                "  \"clusterName\": \"diuserprofile-diuserprofiledb\",\n" +
+                "  \"clusterType\": \"REPLICATION\",\n" +
+                "  \"dbName\": \"testDBtestDBtestDBtestDB\",\n" +
+                "  \"userId\": \"DD326CA3D8F038641D6A7FF9D3948BD0\",\n" +
+                "  \"password\": \"1A08EF1DDB2951B79EBA0839072FBEBB02A9A77FCF74D09CCDA2ECC6C7E6C17B\",\n" +
+                "  \"nodes\": [\n" +
+                "    {\n" +
+                "      \"host\": \"bridge.soa.uat.qa.nt.ctripcorp.com\",\n" +
+                "      \"port\": 65535\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+    }
+
+    @Test
+    public void registerPoints() throws Exception {
     }
 
 }

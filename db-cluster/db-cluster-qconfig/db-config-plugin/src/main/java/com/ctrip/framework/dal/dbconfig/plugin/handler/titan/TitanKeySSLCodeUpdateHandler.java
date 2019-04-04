@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements TitanConstants {
 
     private static final String URI = "/plugins/titan/sslcode";
-    private static final String METHOD = "GET";
+    private static final String METHOD = "POST";
 
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();

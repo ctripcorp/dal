@@ -16,7 +16,6 @@ import qunar.tc.qconfig.plugin.*;
 import javax.servlet.http.HttpServletRequest;
 
 import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.*;
-import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.TITAN_QCONFIG_KEYS_APPID;
 
 
 /**

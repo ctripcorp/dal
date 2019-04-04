@@ -9,7 +9,6 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import qunar.tc.qconfig.common.util.Constants;
@@ -26,8 +25,7 @@ import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
 @ContextConfiguration(classes = {TitanServerPlugin.class})
 public class TitanServerPluginTest {
 
-    @Autowired
-    private TitanServerPlugin titanServerPlugin;
+    private TitanServerPlugin titanServerPlugin = new TitanServerPlugin();
     private HttpServletRequest request;
     private String titanKey = "titantest_lzyan_v_01";
     private String env = "fat";

@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin.entity.mongo;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,24 @@ public class MongoClusterEntity {
     private List<Node> nodes;
     private Map<String, String> extraProperties;
     private Boolean enabled = true;
+    private String operator;
+    private Date updateTime;
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
 
     public String getClusterName() {
         return clusterName;
@@ -92,6 +111,8 @@ public class MongoClusterEntity {
                 ", nodes=" + nodes +
                 ", extraProperties=" + extraProperties +
                 ", enabled=" + enabled +
+                ", operator='" + operator + '\'' +
+                ", updateTime=" + updateTime +
                 '}';
     }
 }

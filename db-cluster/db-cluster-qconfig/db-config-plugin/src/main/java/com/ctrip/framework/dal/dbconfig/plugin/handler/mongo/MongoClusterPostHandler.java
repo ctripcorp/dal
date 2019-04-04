@@ -23,10 +23,7 @@ import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
@@ -84,10 +81,15 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
 
             if (!Strings.isNullOrEmpty(body)) {
                 MongoClusterEntity mongoClusterEntity = GsonUtils.json2T(body, MongoClusterEntity.class);
+                String operator = (String) request.getAttribute(REQ_ATTR_OPERATOR);
+                mongoClusterEntity.setOperator(operator);
+                mongoClusterEntity.setUpdateTime(new Date());
+
                 LOGGER.info("postHandleDetail(): mongoClusterEntity=" + mongoClusterEntity);
                 if (mongoClusterEntity != null) {
                     // todo: set 'dbName' to lowercase?
                     EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
+
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                     boolean permitted = checkPermission(clientIp, profile);
 
@@ -162,7 +164,7 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
 
     private void add(Properties rawProp, ConfigField configField, CryptoManager cryptoManager) throws Exception {
         Properties encProp = cryptoManager.encrypt(dataSourceCrypto, keyService, rawProp);
-        String encryptText = CommonHelper.parseProperties2String(encProp);
+        String encryptText = GsonUtils.t2Json(encProp);
 
         ConfigDetail configDetail = new ConfigDetail();
         configDetail.setConfigField(configField);

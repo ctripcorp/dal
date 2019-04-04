@@ -8,11 +8,13 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.mock.web.DelegatingServletInputStream;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
 
 import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.*;
 
@@ -81,6 +83,30 @@ public class MongoAdminPluginTest {
         EasyMock.expect(request.getRequestURI()).andReturn("/plugins/mongo/config").anyTimes();
         EasyMock.expect(request.getMethod()).andReturn("POST").anyTimes();
         EasyMock.expect(request.getParameter(REQ_PARAM_SUB_ENV)).andReturn("FAT1").anyTimes();
-        EasyMock.expect(request.getContentLength()).andReturn(0).anyTimes();
+
+
+        try {
+            String body = "{\n" +
+                    "  \"clusterName\": \"diuserprofile-diuserprofiledb\",\n" +
+                    "  \"clusterType\": \"REPLICATION\",\n" +
+                    "  \"dbName\": \"testDBtestDBtestDBtestDB\",\n" +
+                    "  \"userId\": \"testName\",\n" +
+                    "  \"password\": \"qwe123\",\n" +
+                    "  \"nodes\": [\n" +
+                    "    {\n" +
+                    "      \"host\": \"bridge.soa.uat.qa.nt.ctripcorp.com\",\n" +
+                    "      \"port\": 65535\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+
+            EasyMock.expect(request.getContentLength()).andReturn(body.length()).anyTimes();
+            EasyMock.expect(request.getInputStream()).andReturn(
+                    new DelegatingServletInputStream(new ByteArrayInputStream(body.getBytes())
+                    )).anyTimes();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

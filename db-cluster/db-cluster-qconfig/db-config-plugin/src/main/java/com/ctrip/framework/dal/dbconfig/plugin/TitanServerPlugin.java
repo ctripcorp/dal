@@ -56,11 +56,6 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     }
 
     @Override
-    public List<PluginRegisterPoint> registerPoints() {
-        return Lists.newArrayList(PluginRegisterPoint.SERV_GET_CONFIG_FOR_TITAN, PluginRegisterPoint.SERV_FORCE_LOAD_FOR_TITAN);
-    }
-
-    @Override
     public PluginResult preHandle(WrappedRequest wrappedRequest) {
         PluginResult pluginResult = null;
         try {
@@ -382,6 +377,11 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         return parentPermission;
     }
 
-
+    @Override
+    public List<PluginRegisterPoint> registerPoints() {
+        return Lists.newArrayList(
+                PluginRegisterPoint.SERV_GET_CONFIG_FOR_TITAN,
+                PluginRegisterPoint.SERV_FORCE_LOAD_FOR_TITAN);
+    }
 
 }

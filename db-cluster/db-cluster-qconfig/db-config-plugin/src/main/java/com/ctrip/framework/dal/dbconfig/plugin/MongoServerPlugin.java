@@ -47,11 +47,6 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
     }
 
     @Override
-    public List<PluginRegisterPoint> registerPoints() {
-        return Lists.newArrayList(PluginRegisterPoint.SERV_GET_CONFIG_FOR_MONGO, PluginRegisterPoint.SERV_FORCE_LOAD_FOR_MONGO);
-    }
-
-    @Override
     public PluginResult preHandle(WrappedRequest wrappedRequest) {
         PluginResult pluginResult = null;
         try {
@@ -213,5 +208,11 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
         }
     }
 
+    @Override
+    public List<PluginRegisterPoint> registerPoints() {
+        return Lists.newArrayList(
+                PluginRegisterPoint.SERV_GET_CONFIG_FOR_MONGO,
+                PluginRegisterPoint.SERV_FORCE_LOAD_FOR_MONGO);
+    }
 
 }

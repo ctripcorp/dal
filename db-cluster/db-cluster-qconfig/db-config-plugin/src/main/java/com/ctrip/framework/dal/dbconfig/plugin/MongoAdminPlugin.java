@@ -64,15 +64,15 @@ public class MongoAdminPlugin extends AdminPluginAdapter {
         return pluginResult;
     }
 
-
     @Override
     public List<PluginRegisterPoint> registerPoints() {
         List<PluginRegisterPoint> registerPointList = new ImmutableList.Builder<PluginRegisterPoint>()
-                .add(PluginRegisterPoint.ADM_TITAN_GET)
-                .add(PluginRegisterPoint.ADM_TITAN_POST)
-                .add(PluginRegisterPoint.ADM_TITAN_PUT)
-                .add(PluginRegisterPoint.ADM_TITAN_DELETE)
+                .add(PluginRegisterPoint.ADM_MONGO_GET)
+                .add(PluginRegisterPoint.ADM_MONGO_POST)
+                .add(PluginRegisterPoint.ADM_MONGO_PUT)
+                .add(PluginRegisterPoint.ADM_MONGO_DELETE)
                 .build();
         return registerPointList;
     }
+
 }

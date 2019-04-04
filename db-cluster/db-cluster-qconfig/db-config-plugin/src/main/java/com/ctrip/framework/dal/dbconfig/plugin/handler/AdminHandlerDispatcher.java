@@ -18,8 +18,11 @@ public class AdminHandlerDispatcher {
             return;
         String uri = handler.getUri();
         String method = handler.getMethod();
-        if (handlers.put(uri, method, handler) != null)
-            throw new DbConfigPluginException("AdminHandler registration conflicts");
+        AdminHandler previous = handlers.put(uri, method, handler);
+        if (previous != null)
+            throw new DbConfigPluginException(String.format("AdminHandler registration conflicts: " +
+                            "uri: %s, method: %s; previous class: %s, current class: %s",
+                    uri, method, previous.getClass().getSimpleName(), handler.getClass().getSimpleName()));
     }
 
     public AdminHandler getHandler(HttpServletRequest request) {

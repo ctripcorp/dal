@@ -6,6 +6,7 @@ import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.MockQconfigService;
 import org.easymock.EasyMock;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +22,21 @@ import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
 /**
  * Created by shenjie on 2019/4/2.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {TitanAdminPlugin.class})
 public class TitanAdminPluginTest {
 
-    @Autowired
-    TitanAdminPlugin titanAdminPlugin;
+    private static TitanAdminPlugin titanAdminPlugin = new TitanAdminPlugin();
     private HttpServletRequest request;
     private String titanKey = "titantest_lzyan_v_01";
     private String env = "fat";
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void initClass() {
         QconfigService qconfigService = new MockQconfigService();
         titanAdminPlugin.init(qconfigService);
+    }
 
+    @Before
+    public void init() throws Exception {
         //创建request的Mock
         request = EasyMock.createMock(HttpServletRequest.class);
         EasyMock.expect(request.getParameter(REQ_PARAM_ENV)).andReturn(env).anyTimes();

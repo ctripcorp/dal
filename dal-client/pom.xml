@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client</artifactId>
-    <version>1.16.14</version>
+    <version>1.16.15-SNAPSHOT</version>
     <properties>
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
         <commons-codec-version>1.8</commons-codec-version>
-        <sqljdbc-version>6.2.2.jre7.ctrip</sqljdbc-version>
+        <sqljdbc-version>6.4.0.jre7.ctrip</sqljdbc-version>
         <mysql-connector-version>5.1.38</mysql-connector-version>
         <tomcat-jdbc-version>7.0.52</tomcat-jdbc-version>
         <dal-common-version>1.1.4</dal-common-version>

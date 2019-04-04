@@ -3,8 +3,10 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.service.*;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
+import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.MongoUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.NetworkUtil;
 import com.dianping.cat.Cat;
@@ -19,7 +21,9 @@ import qunar.tc.qconfig.common.util.Constants;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -167,9 +171,11 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
             }
 
             //decrypt in value
-            Properties encryptProp = CommonHelper.parseString2Properties(encryptText);
-            Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, encryptProp);
-            String originalText = CommonHelper.parseProperties2String(originalProp);
+            MongoClusterEntity mongoClusterEntity = GsonUtils.json2T(encryptText, MongoClusterEntity.class);
+            Properties rawProp = format2Properties(mongoClusterEntity);
+
+            Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, rawProp);
+            String originalText = GsonUtils.Object2Json(originalProp);
 
             //黑白名单检查
             String clientAppId = getQconfigService().getClientAppid();  //client appId
@@ -208,11 +214,24 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
         }
     }
 
+
     @Override
     public List<PluginRegisterPoint> registerPoints() {
         return Lists.newArrayList(
                 PluginRegisterPoint.SERV_GET_CONFIG_FOR_MONGO,
                 PluginRegisterPoint.SERV_FORCE_LOAD_FOR_MONGO);
+    }
+
+    //format siteInputEntity to titanKey file content properties
+    private Properties format2Properties(MongoClusterEntity mongoClusterEntity) throws Exception {
+        Properties properties = new Properties();
+        HashMap<String, Object> map = CommonHelper.getFieldMap(mongoClusterEntity);
+        if (map != null && !map.isEmpty()) {
+            for (Map.Entry entry : map.entrySet()) {
+                properties.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return properties;
     }
 
 }

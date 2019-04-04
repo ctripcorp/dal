@@ -34,9 +34,7 @@ public class PluginMongoService {
         Transaction t = Cat.newTransaction("Plugin.Add.Mongo.Cluster", mongoCluster.getClusterName());
         PluginResponse pluginResponse;
         try {
-            List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(4);
-            urlParams.add(new BasicNameValuePair("appid", MONGO_CLIENT_APPID));
-            urlParams.add(new BasicNameValuePair("clusterName", mongoCluster.getClusterName()));
+            List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
             urlParams.add(new BasicNameValuePair("env", env));
             urlParams.add(new BasicNameValuePair("operator", operator));
             String request = Util.gson.toJson(mongoCluster);

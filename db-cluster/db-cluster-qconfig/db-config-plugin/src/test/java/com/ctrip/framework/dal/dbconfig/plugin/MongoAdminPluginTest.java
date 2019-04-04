@@ -1,6 +1,5 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
-import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
@@ -15,12 +14,14 @@ import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.*;
+
 /**
  * Created by shenjie on 2019/4/3.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {MongoAdminPluginTest.class})
-public class MongoAdminPluginTest implements MongoConstants {
+@ContextConfiguration(classes = {MongoAdminPlugin.class})
+public class MongoAdminPluginTest {
 
     private MongoAdminPlugin mongoAdminPlugin = new MongoAdminPlugin();
     private HttpServletRequest request;

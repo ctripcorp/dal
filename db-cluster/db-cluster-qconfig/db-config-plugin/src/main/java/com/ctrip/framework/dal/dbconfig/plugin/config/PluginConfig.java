@@ -32,7 +32,7 @@ public class PluginConfig {
     //Get config param value
     public String getParamValue(String key) throws QServiceException, IOException {
         String result = null;
-        if(envProfile != null && !Strings.isNullOrEmpty(envProfile.formatProfile())){
+        if(envProfile != null && !Strings.isNullOrEmpty(envProfile.formatTopProfile())){
             Properties contentProp = getCurrentContentProp();
             if(contentProp != null){
                 result = contentProp.getProperty(key);
@@ -49,7 +49,7 @@ public class PluginConfig {
         ConfigField configField = new ConfigField(
                 TitanConstants.TITAN_QCONFIG_PLUGIN_APPID,
                 TitanConstants.TITAN_QCONFIG_PLUGIN_CONFIG_FILE,
-                envProfile.formatProfile());
+                envProfile.formatTopProfile());
 
         List<ConfigDetail> cdList = QconfigServiceUtils.currentConfigWithPriority(qconfigService, "Config", Lists.newArrayList(configField));
         if(cdList == null || cdList.isEmpty()){

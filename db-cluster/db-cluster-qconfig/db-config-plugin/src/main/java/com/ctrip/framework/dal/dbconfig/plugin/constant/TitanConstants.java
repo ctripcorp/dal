@@ -24,7 +24,7 @@ public interface TitanConstants extends CommonConstants {
     String NEED_CHECK_DB_CONNECTION = "needCheckDbConnection";
     String NEED_CHECK_DB_CONNECTION_FOR_MHA = "needCheckDbConnectionForMHA";
     String DBA_CONNECTION_CHECK_URL = "dba.connection.check.url";
-    String NO_PARENT_SUFFIX = "no.parent.suffix";
+
     String HTTP_WHITE_LIST = "http.white.list";
     String TOKEN_KEY = "token.key";
     String HTTP_READ_TIMEOUT_MS = "http.read.timeout.ms";

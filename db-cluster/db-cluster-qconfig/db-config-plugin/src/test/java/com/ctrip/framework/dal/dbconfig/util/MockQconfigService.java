@@ -61,7 +61,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
 
     @Override
     public String getClientAppid() {
-        return "1111";
+        return "100007326";
     }
 
     @Override
@@ -93,13 +93,16 @@ public class MockQconfigService implements QconfigService, TitanConstants {
     }
 
     //build plugin itself config file
-    private String buildPluginConfigFileContent() {
+    private String buildPluginConfigFileContent() {//
         String returnFlag = "\n";
         StringBuilder sb = new StringBuilder();
         sb.append("needCheckDbConnection=true").append(returnFlag);
         sb.append("key.service.soa.url=https://cscmws.infosec.fws.qa.nt.ctripcorp.com/cscmws2/json/VerifySign").append(returnFlag);
+        sb.append("appId.ip.check.service.url=http://paas.ctripcorp.com/api/v2/titan/verify/").append(returnFlag);
+        sb.append("appId.ip.check.service.token=540e79aa2d7bfb18007fa1ced9436f6515f291dddf229ff895586aa05724ba6f").append(returnFlag);
+        sb.append("appId.ip.check.service.pass.codeList=0,4").append(returnFlag);
         sb.append("sslCode=VZ00000000000441").append(returnFlag);
-        sb.append("titan.admin.server.list=0:0:0:0:0:0:0:1,127.0.0.1,10.32.20.124,10.32.20.3").append(returnFlag);
+        sb.append("titan.admin.server.list=0:0:0:0:0:0:0:1,10.5.1.174,127.0.0.1,10.32.20.124,10.32.20.3").append(returnFlag);
         sb.append("dba.connection.check.url=http://mysqlapi.db.uat.qa.nt.ctripcorp.com:8080/database/checktitanconnect").append(returnFlag);
         return sb.toString();
     }

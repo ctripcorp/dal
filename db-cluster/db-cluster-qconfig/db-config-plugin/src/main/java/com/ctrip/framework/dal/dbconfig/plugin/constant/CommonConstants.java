@@ -14,6 +14,7 @@ public interface CommonConstants {
     String REQ_ATTR_ENV_PROFILE = "attr_env_profile";
     String REQ_ATTR_OPERATOR = "attr_operator";
     String REQ_ATTR_CLUSTER_NAME = "attr_clustername";
+    String REQ_ATTR_DB_NAME = "attr_dbName";
 
     String REQUEST_SCHEMA_HTTPS = "https";
     String ENV_PRO = "PRO";

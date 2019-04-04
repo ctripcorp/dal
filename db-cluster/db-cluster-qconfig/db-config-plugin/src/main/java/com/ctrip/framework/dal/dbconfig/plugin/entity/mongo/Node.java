@@ -1,14 +1,34 @@
 package com.ctrip.framework.dal.dbconfig.plugin.entity.mongo;
 
-import lombok.Builder;
-import lombok.Data;
-
 /**
  * Created by shenjie on 2019/4/3.
  */
-@Data
-@Builder
 public class Node {
+
     private String host;
     private Integer port;
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                '}';
+    }
 }

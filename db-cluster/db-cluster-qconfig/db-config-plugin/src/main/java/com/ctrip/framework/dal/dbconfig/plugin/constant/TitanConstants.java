@@ -17,6 +17,9 @@ public interface TitanConstants extends CommonConstants {
     String REQ_PARAM_TITAN_KEY = "titankey";
 
     String REQ_ATTR_TITAN_KEY = "attr_titankey";
+    String REQ_ATTR_TITAN_RUN_IN_BIGDATA = "attr_titan_run_in_bigData";
+    String REQ_ATTR_TITAN_ENV_LIST = "attr_titan_env_list";
+    String REQ_ATTR_TITAN_CLIENT_APPID = "attr_titan_client_appid";
 
     String KEYSERVICE_SOA_URL = "key.service.soa.url";
     String SSLCODE = "sslCode";

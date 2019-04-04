@@ -2,7 +2,7 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
-import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.TitanKeyPostHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.PluginRegisterPoint;
@@ -24,6 +24,23 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
         dispatcher = new AdminHandlerDispatcher();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
         adminHandlers.add(new TitanKeyPostHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyForceDataWashHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyGetHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyListByTimeHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyListHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyMHAUpdateHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeySSLCodeGetHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeySSLCodeUpdateHandler(getQconfigService()));
+
+        adminHandlers.add(new DbNameListHandler(getQconfigService()));
+        adminHandlers.add(new KeyListByDbNameHandler(getQconfigService()));
+        adminHandlers.add(new WhiteListAddHandler(getQconfigService()));
+        adminHandlers.add(new WhiteListDeleteHandler(getQconfigService()));
+        adminHandlers.add(new IndexBuildHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyPermissionMergeHandler(getQconfigService()));
+        adminHandlers.add(new FreeVerifyAddHandler(getQconfigService()));
+        adminHandlers.add(new FreeVerifyDeleteHandler(getQconfigService()));
+
 
         for (AdminHandler handler : adminHandlers) {
             dispatcher.register(handler);

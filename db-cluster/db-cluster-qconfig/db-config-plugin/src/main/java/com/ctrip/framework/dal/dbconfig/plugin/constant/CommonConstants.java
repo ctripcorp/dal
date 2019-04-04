@@ -9,9 +9,11 @@ public interface CommonConstants {
     String REQ_PARAM_SUB_ENV = "subenv";
     String REQ_PARAM_OPERATOR = "operator";
     String REQ_PARAM_TARGET_APPID = "appid";
+    String REQ_PARAM_CLUSTER_NAME = "clustername";
 
     String REQ_ATTR_ENV_PROFILE = "attr_env_profile";
     String REQ_ATTR_OPERATOR = "attr_operator";
+    String REQ_ATTR_CLUSTER_NAME = "attr_clustername";
 
     String REQUEST_SCHEMA_HTTPS = "https";
     String ENV_PRO = "PRO";
@@ -19,6 +21,7 @@ public interface CommonConstants {
     String ENV_FAT = "FAT";
     String TT_TOKEN = "tt-token";
     String X_REAL_IP = "X-Real-IP";
+    String NO_PARENT_SUFFIX = "no.parent.suffix";
 
     public static final int PAAS_RETURN_CODE_SUCCESS = 0;
     public static final int PAAS_RETURN_CODE_FAIL_INNER = 4;

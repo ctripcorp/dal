@@ -52,6 +52,12 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
 
     @Override
     public void init() {
+        //ignore
+    }
+
+    @Override
+    public List<PluginRegisterPoint> registerPoints() {
+        return Lists.newArrayList(PluginRegisterPoint.SERV_GET_CONFIG_FOR_TITAN, PluginRegisterPoint.SERV_FORCE_LOAD_FOR_TITAN);
     }
 
     @Override
@@ -128,7 +134,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         //format <titankey>
         String titankey = CommonHelper.formatTitanFileName(dataId); //getQconfigService(), dataId, profile
         request.setAttribute(REQ_ATTR_TITAN_KEY, titankey);
-        request.setAttribute(REQ_ATTR_ENV_PROFILE, profile);
+        request.setAttribute(REQ_ATTR_ENV_PROFILE, envProfile);
 
         //set new 'titanKey' and 'profile' back [2017-11-01]
         ConfigField configField = new ConfigField(group, titankey, profile);
@@ -143,7 +149,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         Stopwatch stopwatch = Stopwatch.createStarted();
         PluginResult pluginResult = PluginResult.oK();
         String result = "";
-        Transaction t = Cat.newTransaction("TitanQconfigPlugin", "TitanKeyDecryptHookPlugin");
+        Transaction t = Cat.newTransaction("TitanQconfigPlugin", "TitanServerPlugin");
         try {
             t.addData("running class=" + getClass().getSimpleName());
             HttpServletRequest request = wrappedRequest.getRequest();
@@ -376,9 +382,6 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         return parentPermission;
     }
 
-    @Override
-    public List<PluginRegisterPoint> registerPoints() {
-        return Lists.newArrayList(PluginRegisterPoint.SERV_GET_CONFIG_FOR_TITAN, PluginRegisterPoint.SERV_FORCE_LOAD_FOR_TITAN);
-    }
+
 
 }

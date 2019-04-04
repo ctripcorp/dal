@@ -3,7 +3,7 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
-import com.ctrip.framework.dal.dbconfig.util.MockQconfigService;
+import com.ctrip.framework.dal.dbconfig.plugin.util.MockQconfigService;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;

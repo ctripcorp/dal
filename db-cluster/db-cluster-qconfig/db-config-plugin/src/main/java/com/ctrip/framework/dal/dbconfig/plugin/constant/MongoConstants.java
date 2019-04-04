@@ -8,4 +8,5 @@ public interface MongoConstants extends CommonConstants {
     String MONGO_CLIENT_APP_ID = "100019648";
 
     String CONNECTIONSTRING_USER_ID = "userId";
+
 }

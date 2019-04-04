@@ -23,18 +23,17 @@ public interface CommonConstants {
     String X_REAL_IP = "X-Real-IP";
     String NO_PARENT_SUFFIX = "no.parent.suffix";
 
-    public static final int PAAS_RETURN_CODE_SUCCESS = 0;
-    public static final int PAAS_RETURN_CODE_FAIL_INNER = 4;
+    int PAAS_RETURN_CODE_SUCCESS = 0;
+    int PAAS_RETURN_CODE_FAIL_INNER = 4;
 
-    public static final String APPID_IP_CHECK_REQUEST_TEMPLATE = "{\"app_id\": \"%s\", \"env\": \"%s\", \"ip\": \"%s\"}";
-
+    String APPID_IP_CHECK_REQUEST_TEMPLATE = "{\"app_id\": \"%s\", \"env\": \"%s\", \"ip\": \"%s\"}";
 
     //titan - plugin_ignite.properties
-    public static final String IGNITE_PREWARM_CACHE_ENABLED = "ignite.prewarm.cache.enabled";
-    public static final String IGNITE_PREWARM_CACHE_APPIDS = "ignite.prewarm.cache.appIds";
-    public static final String CACHE_NORMAL_REFRESH_INTERVAL_MIN = "cache.normal.refresh.interval.min";
-    public static final String APPID_IP_CHECK_FETCH_ALL_APPID_URL = "appId.ip.check.fetch.all.appId.url";
-    public static final String APPID_IP_CHECK_BATCH_FETCH_RELATION_URL = "appId.ip.check.batch.fetch.relation.url";
-    public static final String APPID_IP_CHECK_BATCH_FETCH_COUNT = "appId.ip.check.batch.fetch.count";
+    String IGNITE_PREWARM_CACHE_ENABLED = "ignite.prewarm.cache.enabled";
+    String IGNITE_PREWARM_CACHE_APPIDS = "ignite.prewarm.cache.appIds";
+    String CACHE_NORMAL_REFRESH_INTERVAL_MIN = "cache.normal.refresh.interval.min";
+    String APPID_IP_CHECK_FETCH_ALL_APPID_URL = "appId.ip.check.fetch.all.appId.url";
+    String APPID_IP_CHECK_BATCH_FETCH_RELATION_URL = "appId.ip.check.batch.fetch.relation.url";
+    String APPID_IP_CHECK_BATCH_FETCH_COUNT = "appId.ip.check.batch.fetch.count";
 
 }

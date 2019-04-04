@@ -1,4 +1,4 @@
-package com.ctrip.framework.dal.dbconfig.util;
+package com.ctrip.framework.dal.dbconfig.plugin.util;
 
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.google.common.base.Strings;

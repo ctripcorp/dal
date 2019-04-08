@@ -17,6 +17,7 @@ public class MongoClusterEntity {
     private List<Node> nodes;
     private Map<String, String> extraProperties;
     private Boolean enabled = true;
+    private Integer version;
     private String operator;
     private Date updateTime;
 
@@ -100,6 +101,14 @@ public class MongoClusterEntity {
         this.enabled = enabled;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
     @Override
     public String toString() {
         return "MongoClusterEntity{" +
@@ -111,6 +120,7 @@ public class MongoClusterEntity {
                 ", nodes=" + nodes +
                 ", extraProperties=" + extraProperties +
                 ", enabled=" + enabled +
+                ", version=" + version +
                 ", operator='" + operator + '\'' +
                 ", updateTime=" + updateTime +
                 '}';

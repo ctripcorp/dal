@@ -8,7 +8,6 @@ import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException
 import com.ctrip.framework.dal.dbconfig.plugin.handler.BaseAdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
-import com.ctrip.framework.dal.dbconfig.plugin.util.PermissionCheckUtil;
 import com.ctrip.framework.dal.dbconfig.plugin.util.QconfigServiceUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -97,9 +96,8 @@ public class FreeVerifyDeleteHandler extends BaseAdminHandler implements TitanCo
                     Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
                             "profile参数不能为空");
                     PluginConfig config = new PluginConfig(getQconfigService(), profile);
-                    String adminSiteWhiteIps = config.getParamValue(TITAN_ADMIN_SERVER_LIST);
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
-                    boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);
+                    boolean sitePermission = checkPermission(clientIp, profile);
                     if (sitePermission) {
                         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
                         // get available pro subEnv from config item 'permission.pro.subenv.list'

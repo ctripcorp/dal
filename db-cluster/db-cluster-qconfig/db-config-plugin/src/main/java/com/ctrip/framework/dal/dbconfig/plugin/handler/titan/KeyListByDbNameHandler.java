@@ -6,7 +6,6 @@ import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.BaseAdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
-import com.ctrip.framework.dal.dbconfig.plugin.util.PermissionCheckUtil;
 import com.ctrip.framework.dal.dbconfig.plugin.util.QconfigServiceUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -77,9 +76,9 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
         Transaction t = Cat.newTransaction("TitanQconfigPlugin", "KeyListByDbNameHandler");
         try {
             t.addData("running class=" + getClass().getSimpleName());
-            EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-            t.addData("profile", profile);
-            Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
+            EnvProfile envProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
+            t.addData("profile", envProfile);
+            Preconditions.checkArgument(envProfile != null && envProfile.formatProfile() != null,
                     "profile参数不能为空");
 
             String dbName = (String) request.getAttribute(REQ_ATTR_DB_NAME);
@@ -88,15 +87,14 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
 
 
             //AdminSite白名单检查
-            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), profile);
-            String adminSiteWhiteIps = pluginConfig.getParamValue(TITAN_ADMIN_SERVER_LIST);
+            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), envProfile);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
-            boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);
+            boolean sitePermission = checkPermission(clientIp, envProfile);
             if (sitePermission) {
                 //get data from index file - (db-key)
                 String indexPrefix = pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_PREFIX);
                 int indexNumber = Integer.parseInt(pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_NUM));
-                Set<String> keySet = getKeyFromIndex(profile.formatProfile(), indexPrefix, indexNumber, dbName);
+                Set<String> keySet = getKeyFromIndex(envProfile.formatProfile(), indexPrefix, indexNumber, dbName);
 
                 //set into return result
                 pluginResult.setAttribute(keySet);
@@ -106,7 +104,6 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
                 Cat.logEvent("KeyListByDbNameHandler", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to read index! clientIp=" + clientIp);
                 pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_READ, "Access ip whitelist check fail! clientIp=" + clientIp);
             }
-
 
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {

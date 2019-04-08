@@ -222,7 +222,7 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
                 PluginRegisterPoint.SERV_FORCE_LOAD_FOR_MONGO);
     }
 
-    //format siteInputEntity to titanKey file content properties
+    //format siteInputEntity to file content properties
     private Properties format2Properties(MongoClusterEntity mongoClusterEntity) throws Exception {
         Properties properties = new Properties();
         HashMap<String, Object> map = CommonHelper.getFieldMap(mongoClusterEntity);

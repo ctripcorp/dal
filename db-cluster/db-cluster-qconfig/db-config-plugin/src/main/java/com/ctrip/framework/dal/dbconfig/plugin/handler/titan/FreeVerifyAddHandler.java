@@ -8,7 +8,6 @@ import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException
 import com.ctrip.framework.dal.dbconfig.plugin.handler.BaseAdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
-import com.ctrip.framework.dal.dbconfig.plugin.util.PermissionCheckUtil;
 import com.ctrip.framework.dal.dbconfig.plugin.util.QconfigServiceUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -16,7 +15,6 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.*;
@@ -24,7 +22,6 @@ import qunar.tc.qconfig.plugin.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This handler is to add free verify info(appId/ip) to field of titan key.
@@ -99,9 +96,8 @@ public class FreeVerifyAddHandler extends BaseAdminHandler implements TitanConst
                     Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
                             "profile参数不能为空");
                     PluginConfig config = new PluginConfig(getQconfigService(), profile);
-                    String adminSiteWhiteIps = config.getParamValue(TITAN_ADMIN_SERVER_LIST);
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
-                    boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);
+                    boolean sitePermission = checkPermission(clientIp, profile);
                     if (sitePermission) {
                         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
                         // get available pro subEnv from config item 'permission.pro.subenv.list'

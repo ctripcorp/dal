@@ -141,6 +141,9 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
                     }
 
                     EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
+                    Preconditions.checkArgument(profile != null && !Strings.isNullOrEmpty(profile.formatProfile()),
+                            "profile参数不能为空");
+
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                     boolean permitted = checkPermission(clientIp, profile);
 
@@ -181,7 +184,8 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
         EnvProfile envProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group), "group参数不能为空");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(dataId), "dataId参数不能为空");
-        Preconditions.checkArgument(envProfile != null, "profile参数不能为空");
+        Preconditions.checkArgument(envProfile != null && !Strings.isNullOrEmpty(envProfile.formatProfile()),
+                "profile参数不能为空");
         Preconditions.checkArgument(TITAN_QCONFIG_KEYS_APPID.equals(group),
                 "group=" + group + " not match, only can be " + TITAN_QCONFIG_KEYS_APPID);
 

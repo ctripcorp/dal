@@ -68,7 +68,6 @@ public class DbNameListHandler extends BaseAdminHandler implements TitanConstant
 
     @Override
     public PluginResult postHandle(HttpServletRequest request) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
         PluginResult pluginResult = PluginResult.oK();
         Transaction t = Cat.newTransaction("TitanQconfigPlugin", "DbNameListHandler");
         try {
@@ -81,10 +80,9 @@ public class DbNameListHandler extends BaseAdminHandler implements TitanConstant
 
             //AdminSite白名单检查
             PluginConfig pluginConfig = new PluginConfig(getQconfigService(), profile);
-            String adminSiteWhiteIps = pluginConfig.getParamValue(TITAN_ADMIN_SERVER_LIST);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
-            boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);
-            if (sitePermission) {
+            boolean permitted = checkPermission(clientIp, profile);
+            if (permitted) {
                 //get data from index file - (dbName)
                 String indexPrefix = pluginConfig.getParamValue(INDEX_DBNAME_SHARD_PREFIX);
                 int indexNumber = Integer.parseInt(pluginConfig.getParamValue(INDEX_DBNAME_SHARD_NUM));
@@ -98,7 +96,6 @@ public class DbNameListHandler extends BaseAdminHandler implements TitanConstant
                 Cat.logEvent("DbNameListHandler", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to read index! clientIp=" + clientIp);
                 pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_READ, "Access ip whitelist check fail! clientIp=" + clientIp);
             }
-
 
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {

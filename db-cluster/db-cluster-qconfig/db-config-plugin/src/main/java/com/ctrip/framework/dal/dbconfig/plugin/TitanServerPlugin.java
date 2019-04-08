@@ -68,7 +68,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
                     sb.append("pluginResult.getCode()=").append(pluginResult.getCode()).append(", ");
                     sb.append("pluginResult.getMessage()=").append(pluginResult.getMessage());
                     String errMsg = sb.toString();
-                    Cat.logEvent("TitanPlugin.DecryptHook.PreHandle.Fail.StatusCode", String.valueOf(pluginResult.getCode()), Event.SUCCESS, errMsg);
+                    Cat.logEvent("TitanServerPlugin.PreHandle.Fail.StatusCode", String.valueOf(pluginResult.getCode()), Event.SUCCESS, errMsg);
                     logger.warn("preHandle(): " + errMsg);
                 }
             } else {
@@ -95,7 +95,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
                     sb.append("pluginResult.getCode()=").append(pluginResult.getCode()).append(", ");
                     sb.append("pluginResult.getMessage()=").append(pluginResult.getMessage());
                     String errMsg = sb.toString();
-                    Cat.logEvent("TitanPlugin.DecryptHook.PostHandle.Fail.StatusCode", String.valueOf(pluginResult.getCode()), Event.SUCCESS, errMsg);
+                    Cat.logEvent("TitanServerPlugin.PostHandle.Fail.StatusCode", String.valueOf(pluginResult.getCode()), Event.SUCCESS, errMsg);
                     logger.warn("postHandle(): " + errMsg);
                 }
             } else {
@@ -228,7 +228,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
                 result = "";
                 String errMsg = "postHandleDetail(): permissionCheck=" + permissionCheck + ", not allow to read! dataId=" + dataId + ", clientAppId=" + clientAppId;
                 t.addData(errMsg);
-                Cat.logEvent("TitanQconfigPlugin.Decrypt.Hook", "NO_READ_PERMISSION", Event.SUCCESS, errMsg);
+                Cat.logEvent("TitanServerPlugin", "NO_READ_PERMISSION", Event.SUCCESS, errMsg);
 
                 switch (permissionCheck) {
                     case FAIL_KEY_DISABLED:

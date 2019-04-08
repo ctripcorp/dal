@@ -7,7 +7,6 @@ import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.IndexBuildOutputEnti
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.BaseAdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
-import com.ctrip.framework.dal.dbconfig.plugin.util.PermissionCheckUtil;
 import com.ctrip.framework.dal.dbconfig.plugin.util.QconfigServiceUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -15,7 +14,6 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -29,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Index build handler
@@ -77,16 +74,15 @@ public class IndexBuildHandler extends BaseAdminHandler implements TitanConstant
         Transaction t = Cat.newTransaction("TitanQconfigPlugin", "IndexBuildHandler");
         try {
             t.addData("running class=" + getClass().getSimpleName());
-            EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-            Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
+            EnvProfile envProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
+            Preconditions.checkArgument(envProfile != null && envProfile.formatProfile() != null,
                     "profile参数不能为空");
 
             //AdminSite白名单检查
-            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), profile);
+            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), envProfile);
             boolean indexEnabled = Boolean.parseBoolean(pluginConfig.getParamValue(INDEX_ENABLED));
-            String adminSiteWhiteIps = pluginConfig.getParamValue(TITAN_ADMIN_SERVER_LIST);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
-            boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);
+            boolean sitePermission = checkPermission(clientIp, envProfile);
             if (indexEnabled && sitePermission) {
                 Map<String, Set<String>> dbName2KeyMap = Maps.newLinkedHashMap();
                 int pageNo = 1;
@@ -94,7 +90,9 @@ public class IndexBuildHandler extends BaseAdminHandler implements TitanConstant
                 long total = 0;
                 String group = TITAN_QCONFIG_KEYS_APPID;     //appId
                 String dataId = "";     //fileName = titanKey
-                ConfigField configField = new ConfigField(group, dataId, profile.formatProfile());
+
+                String profile = envProfile.formatProfile();
+                ConfigField configField = new ConfigField(group, dataId, profile);
                 //get paged data from qconfig
                 PaginationResult<ConfigDetail> paginationResult = QconfigServiceUtils.query(getQconfigService(), "IndexBuildHandler", configField, pageNo, pageSize);
                 if (paginationResult != null) {
@@ -137,7 +135,7 @@ public class IndexBuildHandler extends BaseAdminHandler implements TitanConstant
                 String indexPrefix = pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_PREFIX);
                 int indexNumber = Integer.parseInt(pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_NUM));
                 Map<String, Properties> index2PropMap = buildDbKeyIndexData(dbName2KeyMap, indexPrefix, indexNumber);
-                updateDbKeyIndex(index2PropMap, profile.formatProfile());
+                updateDbKeyIndex(index2PropMap, profile);
 
 
                 //update index file - (dbName)
@@ -145,7 +143,7 @@ public class IndexBuildHandler extends BaseAdminHandler implements TitanConstant
                 indexPrefix = pluginConfig.getParamValue(INDEX_DBNAME_SHARD_PREFIX);
                 indexNumber = Integer.parseInt(pluginConfig.getParamValue(INDEX_DBNAME_SHARD_NUM));
                 Map<String, Set<String>> index2SetMap = buildDbIndexData(dbNameSet, indexPrefix, indexNumber);
-                updateDbIndex(index2SetMap, profile.formatProfile());
+                updateDbIndex(index2SetMap, profile);
 
                 //build return data
                 if (index2PropMap != null) {

@@ -80,28 +80,28 @@ public class MongoClusterController {
         }
     }
 
-    @RequestMapping(value = "/titan/add", method = RequestMethod.POST)
-    public ResponseModel addTitan(@RequestBody TitanAddRequest requestBody,
-                                  @RequestParam(name = "env", required = false) String env,
-                                  HttpServletRequest request) {
-        try {
-            String requestIp = IpUtil.getRequestIp(request);
-            if (!validityChecker.checkAllowedIp(requestIp, configService.getAllowedIps())) {
-                return ResponseModel.forbiddenResponse();
-            }
-
-            env = validityChecker.checkAndGetEnv(env);
-
-            PluginResponse response = pluginTitanService.add(requestBody, env);
-            if (response.getStatus() == 0) {
-                return ResponseModel.successResponse();
-            } else {
-                return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, response.getMessage());
-            }
-
-        } catch (Exception e) {
-            log.error("Add titan key failed.", e);
-            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-        }
-    }
+//    @RequestMapping(value = "/titan/add", method = RequestMethod.POST)
+//    public ResponseModel addTitan(@RequestBody TitanAddRequest requestBody,
+//                                  @RequestParam(name = "env", required = false) String env,
+//                                  HttpServletRequest request) {
+//        try {
+//            String requestIp = IpUtil.getRequestIp(request);
+//            if (!validityChecker.checkAllowedIp(requestIp, configService.getAllowedIps())) {
+//                return ResponseModel.forbiddenResponse();
+//            }
+//
+//            env = validityChecker.checkAndGetEnv(env);
+//
+//            PluginResponse response = pluginTitanService.add(requestBody, env);
+//            if (response.getStatus() == 0) {
+//                return ResponseModel.successResponse();
+//            } else {
+//                return ResponseModel.failResponse(ResponseStatus.BAD_REQUEST, response.getMessage());
+//            }
+//
+//        } catch (Exception e) {
+//            log.error("Add titan key failed.", e);
+//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+//        }
+//    }
 }

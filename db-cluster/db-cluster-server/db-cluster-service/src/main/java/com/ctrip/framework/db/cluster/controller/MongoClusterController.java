@@ -52,10 +52,10 @@ public class MongoClusterController {
             validityChecker.checkMongoCluster(mongoCluster);
 
             // 加密用户名和密码
-            String userId = cipherService.encrypt(mongoCluster.getUserId());
-            String password = cipherService.encrypt(mongoCluster.getPassword());
-            mongoCluster.setUserId(userId);
-            mongoCluster.setPassword(password);
+//            String userId = cipherService.encrypt(mongoCluster.getUserId());
+//            String password = cipherService.encrypt(mongoCluster.getPassword());
+//            mongoCluster.setUserId(userId);
+//            mongoCluster.setPassword(password);
 
             // 新增cluster，version=1
             mongoCluster.setVersion(1);

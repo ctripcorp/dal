@@ -25,10 +25,8 @@ import static org.junit.Assert.*;
 public class NoShardOnMysqlDaoUnitTest {
 
     private static final String DATA_BASE = "noShardTestOnMysql";
-
     private static DalClient client = null;
     private static NoShardOnMysqlDao dao = null;
-
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -934,6 +932,24 @@ public class NoShardOnMysqlDaoUnitTest {
         Age.add(20);
         Age.add(21);
         MysqlPersonExtendsUpdatableEntity daoPojo = dao.test_build_query_first_multipleOrderBy(Age, new DalHints());
+        assertEquals("Initial_Shard_11", daoPojo.getName());
+    }
+
+    @Test
+    public void testtest_query_first_with_requireFirst() throws Exception {
+        List<Integer> Age = new ArrayList<>();
+        Age.add(20);
+        Age.add(21);
+        MysqlPersonExtendsUpdatableEntity daoPojo = dao.test_query_first_with_requireFirst(Age, new DalHints());
+        assertEquals("Initial_Shard_11", daoPojo.getName());
+    }
+
+    @Test
+    public void testtest_query_first_without_requireFirst() throws Exception {
+        List<Integer> Age = new ArrayList<>();
+        Age.add(20);
+        Age.add(21);
+        MysqlPersonExtendsUpdatableEntity daoPojo = dao.test_query_first_without_requireFirst(Age, new DalHints());
         assertEquals("Initial_Shard_11", daoPojo.getName());
     }
 

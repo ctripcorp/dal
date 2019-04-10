@@ -94,7 +94,7 @@ public class IgnoreMissingFieldsAndAllowPartialTestOnMysqlDaoUnitTest {
 //		notNullItems.add(DalHintEnum.ignoreMissingFields);
 //		notNullItems.add(DalHintEnum.resultSorter);
 //		DalHintsChecker.checkNull(hints1,notNullItems);
-		List<DalHintEnum> notNullItems1=Lists.newArrayList(DalHintEnum.allShards,DalHintEnum.ignoreMissingFields,DalHintEnum.resultSorter);
+		List<DalHintEnum> notNullItems1=Lists.newArrayList(DalHintEnum.allShards,DalHintEnum.ignoreMissingFields,DalHintEnum.resultSorter,DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints1,notNullItems1);
 
 		ret = dao.test_build_query_first(Age, new DalHints().setShardColValue("Age", 21).ignoreMissingFields());

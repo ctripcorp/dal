@@ -163,13 +163,13 @@ public class AutoGenBigintIDDao {
 		return client.insert(hints, daoPojo);
 	}
 
-//	public int replace(DalHints hints, TableWithBigintIdentity daoPojo) throws SQLException {
-//		if (null == daoPojo) {
-//			return 0;
-//		}
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.replace(hints, daoPojo);
-//	}
+	public int replace(DalHints hints, TableWithBigintIdentity daoPojo) throws SQLException {
+		if (null == daoPojo) {
+			return 0;
+		}
+		hints = DalHints.createIfAbsent(hints);
+		return client.replace(hints, daoPojo);
+	}
 
 	/**
 	 * Insert pojos one by one. If you want to inert them in the batch mode,
@@ -204,13 +204,13 @@ public class AutoGenBigintIDDao {
 		return client.insert(hints, daoPojos);
 	}
 
-//	public int[] replace(DalHints hints, List<TableWithBigintIdentity> daoPojos) throws SQLException {
-//		if (null == daoPojos || daoPojos.size() <= 0) {
-//			return new int[0];
-//		}
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.replace(hints, daoPojos);
-//	}
+	public int[] replace(DalHints hints, List<TableWithBigintIdentity> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() <= 0) {
+			return new int[0];
+		}
+		hints = DalHints.createIfAbsent(hints);
+		return client.replace(hints, daoPojos);
+	}
 
 	/**
 	 * Insert pojo and get the generated PK back in keyHolder.
@@ -320,13 +320,13 @@ public class AutoGenBigintIDDao {
 		return client.batchInsert(hints, daoPojos);
 	}
 
-//	public int[] batchReplace(DalHints hints, List<TableWithBigintIdentity> daoPojos) throws SQLException {
-//		if (null == daoPojos || daoPojos.size() <= 0) {
-//			return new int[0];
-//		}
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.batchReplace(hints, daoPojos);
-//	}
+	public int[] batchReplace(DalHints hints, List<TableWithBigintIdentity> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() <= 0) {
+			return new int[0];
+		}
+		hints = DalHints.createIfAbsent(hints);
+		return client.batchReplace(hints, daoPojos);
+	}
 
 	/**
 	 * Insert multiple pojos in one INSERT SQL
@@ -357,13 +357,13 @@ public class AutoGenBigintIDDao {
 		return client.combinedInsert(hints, daoPojos);
 	}
 
-//	public int combinedReplace(DalHints hints, List<TableWithBigintIdentity> daoPojos) throws SQLException {
-//		if (null == daoPojos || daoPojos.size() <= 0) {
-//			return 0;
-//		}
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.combinedReplace(hints, daoPojos);
-//	}
+	public int combinedReplace(DalHints hints, List<TableWithBigintIdentity> daoPojos) throws SQLException {
+		if (null == daoPojos || daoPojos.size() <= 0) {
+			return 0;
+		}
+		hints = DalHints.createIfAbsent(hints);
+		return client.combinedReplace(hints, daoPojos);
+	}
 
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.

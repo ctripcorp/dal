@@ -185,12 +185,12 @@ public class AutoGenIDDao {
 		return client.insert(hints, daoPojo);
 	}
 
-//	public int replace(DalHints hints, TableWithIdentity daoPojo) throws SQLException {
-//		if(null == daoPojo)
-//			return 0;
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.replace(hints, daoPojo);
-//	}
+	public int replace(DalHints hints, TableWithIdentity daoPojo) throws SQLException {
+		if(null == daoPojo)
+			return 0;
+		hints = DalHints.createIfAbsent(hints);
+		return client.replace(hints, daoPojo);
+	}
 
 	/**
 	 * Insert pojos one by one. If you want to inert them in the batch mode,
@@ -212,12 +212,12 @@ public class AutoGenIDDao {
 		return client.insert(hints, daoPojos);
 	}
 
-//	public int[] replace(DalHints hints, List<TableWithIdentity> daoPojos) throws SQLException {
-//		if(null == daoPojos || daoPojos.size() <= 0)
-//			return new int[0];
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.replace(hints, daoPojos);
-//	}
+	public int[] replace(DalHints hints, List<TableWithIdentity> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() <= 0)
+			return new int[0];
+		hints = DalHints.createIfAbsent(hints);
+		return client.replace(hints, daoPojos);
+	}
 
 
 
@@ -242,12 +242,12 @@ public class AutoGenIDDao {
 		return client.insert(hints, keyHolder, daoPojo);
 	}
 
-//	public int replace(DalHints hints, KeyHolder keyHolder, TableWithIdentity daoPojo) throws SQLException {
-//		if(null == daoPojo)
-//			return 0;
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.replace(hints, keyHolder, daoPojo);
-//	}
+	public int replace(DalHints hints, KeyHolder keyHolder, TableWithIdentity daoPojo) throws SQLException {
+		if(null == daoPojo)
+			return 0;
+		hints = DalHints.createIfAbsent(hints);
+		return client.replace(hints, keyHolder, daoPojo);
+	}
 
 	/**
 	 * Insert pojos and get the generated PK back in keyHolder.
@@ -273,12 +273,12 @@ public class AutoGenIDDao {
 		return client.insert(hints, keyHolder, daoPojos);
 	}
 
-//	public int[] replace(DalHints hints, KeyHolder keyHolder, List<TableWithIdentity> daoPojos) throws SQLException {
-//		if(null == daoPojos || daoPojos.size() <= 0)
-//			return new int[0];
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.replace(hints, keyHolder, daoPojos);
-//	}
+	public int[] replace(DalHints hints, KeyHolder keyHolder, List<TableWithIdentity> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() <= 0)
+			return new int[0];
+		hints = DalHints.createIfAbsent(hints);
+		return client.replace(hints, keyHolder, daoPojos);
+	}
 
 	/**
 	 * Insert pojos in batch mode.
@@ -296,12 +296,12 @@ public class AutoGenIDDao {
 		return client.batchInsert(hints, daoPojos);
 	}
 
-//	public int[] batchReplace(DalHints hints, List<TableWithIdentity> daoPojos) throws SQLException {
-//		if(null == daoPojos || daoPojos.size() <= 0)
-//			return new int[0];
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.batchReplace(hints, daoPojos);
-//	}
+	public int[] batchReplace(DalHints hints, List<TableWithIdentity> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() <= 0)
+			return new int[0];
+		hints = DalHints.createIfAbsent(hints);
+		return client.batchReplace(hints, daoPojos);
+	}
 
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
@@ -321,12 +321,12 @@ public class AutoGenIDDao {
 		return client.combinedInsert(hints, daoPojos);
 	}
 
-//	public int combinedReplace(DalHints hints, List<TableWithIdentity> daoPojos) throws SQLException {
-//		if(null == daoPojos || daoPojos.size() <= 0)
-//			return 0;
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.combinedReplace(hints, daoPojos);
-//	}
+	public int combinedReplace(DalHints hints, List<TableWithIdentity> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() <= 0)
+			return 0;
+		hints = DalHints.createIfAbsent(hints);
+		return client.combinedReplace(hints, daoPojos);
+	}
 
 	/**
 	 * Insert multiple pojos in one INSERT SQL and get the generated PK back in keyHolder.
@@ -347,12 +347,12 @@ public class AutoGenIDDao {
 		return client.combinedInsert(hints, keyHolder, daoPojos);
 	}
 
-//	public int combinedReplace(DalHints hints, KeyHolder keyHolder, List<TableWithIdentity> daoPojos) throws SQLException {
-//		if(null == daoPojos || daoPojos.size() <= 0)
-//			return 0;
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.combinedReplace(hints, keyHolder, daoPojos);
-//	}
+	public int combinedReplace(DalHints hints, KeyHolder keyHolder, List<TableWithIdentity> daoPojos) throws SQLException {
+		if(null == daoPojos || daoPojos.size() <= 0)
+			return 0;
+		hints = DalHints.createIfAbsent(hints);
+		return client.combinedReplace(hints, keyHolder, daoPojos);
+	}
 
 	/**
 	 * Delete the given pojo.

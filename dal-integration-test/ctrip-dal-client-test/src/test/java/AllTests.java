@@ -1,3 +1,5 @@
+import idegentest.IdGenPrefetchTest;
+import idegentest.IdGenTestOnMysql;
 import noshardtest.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -12,6 +14,9 @@ import testUtil.NetStatChecker;
  */
     @RunWith(Suite.class)
     @Suite.SuiteClasses({
+            IdGenTestOnMysql.class,
+            IdGenPrefetchTest.class,
+            EntityExtendsOnMysqlTest.class,
             ConnectionPhantomReferenceCleanerOnDalClientTest.class,
             MysqlAllTypesTableDaoUnitTest.class,
             DesignatedDatabaseOnMysqlGenDaoUnitTest.class,
@@ -81,7 +86,6 @@ import testUtil.NetStatChecker;
             SpTestDaoUnitTest.class,
             TVPColumnsOrderDaoUnitTest.class,
             TestFor414.class,
-            EntityExtendsOnMysqlTest.class,
     })
     public class AllTests {
         @BeforeClass

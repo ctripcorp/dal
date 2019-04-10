@@ -16,8 +16,8 @@
 
   <properties>
     <java.version>1.8</java.version>
-    <framework-bom.version>3.6.0</framework-bom.version>
-    <dal.version>1.16.13-SNAPSHOT</dal.version>
+    <framework-bom.version>3.9.0</framework-bom.version>
+    <dal.version>1.16.14</dal.version>
   </properties>
 
   <modules>
@@ -44,12 +44,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
-      <!--<dependency>
-        <groupId>com.ctrip.framework.idgen</groupId>
-        <artifactId>idgen-client</artifactId>
-        <version>1.1.2</version>
-      </dependency>-->
       <dependency>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>

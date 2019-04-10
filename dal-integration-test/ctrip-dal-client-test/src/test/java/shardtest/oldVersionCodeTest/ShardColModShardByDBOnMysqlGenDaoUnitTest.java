@@ -341,6 +341,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		assertEquals(2, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 		MysqlPersonTable pojo=dao.queryByPk(1L, new DalHints().inShard(0));
@@ -391,6 +392,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 	    assertEquals(2, ret);
 	    List<DalHintEnum> exclude=new ArrayList<>();
 	    exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 	    DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    MysqlPersonTable pojo=dao.queryByPk(1L, new DalHints().inShard(0));
@@ -412,6 +414,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 	    assertEquals(2, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 //	    ignoreMissingFieldsAndAllowPartialTestOnMysqlGen	pojo=dao.queryByPk(1l, new DalHints().inShard(0));
 //		assertEquals("build_update_shard", pojo.getName());
@@ -436,6 +439,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		exclude.add(DalHintEnum.resultSetType);//queryDao的queryFrom设置TYPE_SCROLL_INSENSITIVE
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
@@ -595,6 +599,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -627,6 +632,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.partialQuery);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 
@@ -643,6 +649,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 		ret = dao.test_build_query(Age, new DalHints().inShard(1));
@@ -673,6 +680,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
 		exclude.add(DalHintEnum.partialQuery);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 		ret = dao.test_build_queryPartialFields(Age, new DalHints().inShard(1));
@@ -816,6 +824,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
         ret = dao.test_build_query_field(Age, new DalHints().inShard(0));
@@ -950,6 +959,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -982,6 +992,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
 		exclude.add(DalHintEnum.partialQuery);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -1014,6 +1025,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
 		exclude.add(DalHintEnum.partialQuery);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
 	
@@ -1056,6 +1068,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		exclude.add(DalHintEnum.resultSetType);//queryDao的queryFrom设置TYPE_SCROLL_INSENSITIVE
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
@@ -1079,6 +1092,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		assertNull(pojos.get(0).getID());
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		exclude.add(DalHintEnum.partialQuery);
 		exclude.add(DalHintEnum.resultSorter);
 		exclude.add(DalHintEnum.resultSetType);//queryDao的queryFrom设置TYPE_SCROLL_INSENSITIVE
@@ -1105,6 +1119,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.partialQuery);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		exclude.add(DalHintEnum.resultSorter);
 		exclude.add(DalHintEnum.resultSetType);//queryDao的queryFrom设置TYPE_SCROLL_INSENSITIVE
 		DalHintsChecker.checkEquals(original,hints,exclude);
@@ -1142,6 +1157,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.partialQuery);
 		exclude.add(DalHintEnum.resultSorter);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	}
@@ -1177,6 +1193,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
 		exclude.add(DalHintEnum.partialQuery);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		exclude.add(DalHintEnum.resultSorter);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 	}
@@ -1351,6 +1368,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
         assertEquals("Initial_Shard_00", ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		exclude.add(DalHintEnum.resultSorter);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
@@ -1474,6 +1492,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 	    assertEquals(2, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    int count=dao.count(new DalHints().inShard(0));
@@ -1507,6 +1526,7 @@ public class ShardColModShardByDBOnMysqlGenDaoUnitTest {
 	    assertEquals(1, ret);
 		List<DalHintEnum> exclude=new ArrayList<>();
 		exclude.add(DalHintEnum.allShards);
+		exclude.add(DalHintEnum.implicitAllTableShards);
 		DalHintsChecker.checkEquals(original,hints,exclude);
 
 	    MysqlPersonTable pojo=dao.queryByPk(1, new DalHints().inShard(0));

@@ -69,7 +69,7 @@ public class ConnectionStringSwitchTest {
 
     public void initialize() throws Exception {
         connectionStringSwitch.resetConnectionString(isPro);
-//        Thread.sleep(5000);
+        Thread.sleep(5000);
         currentHostname = dao.selectHostname(new DalHints());
         log.info(String.format("initialize currentHostname is：%s", currentHostname));
     }

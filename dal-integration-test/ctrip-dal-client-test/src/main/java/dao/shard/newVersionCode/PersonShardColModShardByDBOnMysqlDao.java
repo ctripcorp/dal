@@ -731,6 +731,30 @@ public class PersonShardColModShardByDBOnMysqlDao {
 
 		return client.queryObject(builder, hints.sortBy(new MysqlPersonTableComparator()));
 	}
+
+	public MysqlPersonTable test_query_first(List<Integer> Age, DalHints hints) throws SQLException {
+		hints = DalHints.createIfAbsent(hints);
+
+		SelectSqlBuilder builder = new SelectSqlBuilder();
+		builder.select("Birth","Name","Age","ID");
+//		builder.and();
+		builder.inNullable("Age", Age, Types.INTEGER, false);
+		builder.requireFirst();
+
+		return client.queryFirst(builder, hints.sortBy(new MysqlPersonTableComparator()));
+	}
+
+    public MysqlPersonTable test_query_first_noRequireFirst(List<Integer> Age, DalHints hints) throws SQLException {
+        hints = DalHints.createIfAbsent(hints);
+
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.select("Birth","Name","Age","ID");
+//		builder.and();
+        builder.inNullable("Age", Age, Types.INTEGER, false);
+//        builder.requireFirst();
+
+        return client.queryFirst(builder, hints.sortBy(new MysqlPersonTableComparator()));
+    }
 	
 	/**
 	 * 构建，查询

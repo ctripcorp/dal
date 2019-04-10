@@ -171,11 +171,11 @@ public class TitanKeyPermissionMergeHandler extends BaseAdminHandler implements 
     private void paramCheck(HttpServletRequest request, Transaction t) {
         String titanKey = (String) request.getAttribute(REQ_ATTR_TITAN_KEY);
         EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-        t.addData("titanKey=" + titanKey);
-        t.addData("profile=" + profile);
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(titanKey), "titanKey参数不能为空");
         Preconditions.checkArgument(profile != null && !Strings.isNullOrEmpty(profile.formatProfile()),
                 "profile参数不能为空");
+        t.addData("titanKey=" + titanKey);
+        t.addData("profile=" + profile.formatProfile());
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(titanKey), "titanKey参数不能为空");
     }
 
     // build update configDetail list per key ==> (key1, ""), (key1, "FRA-AWS"), (key1_SH, ""), (key1_SH, "FRA-AWS")

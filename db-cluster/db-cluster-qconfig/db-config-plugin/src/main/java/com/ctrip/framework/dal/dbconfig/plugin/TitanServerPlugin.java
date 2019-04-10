@@ -369,7 +369,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         if (!Strings.isNullOrEmpty(subEnv)) {
             String topProfile = CommonHelper.formatProfileTopFromProfile(profile);
             ConfigField configField = new ConfigField(group, dataId, topProfile);
-            Properties contentProp = QconfigServiceUtils.currentConfigWithPriority(qconfigService, "fetchParentKeyPermission4Sub", configField);
+            Properties contentProp = QconfigServiceUtils.currentConfigWithoutPriority(qconfigService, "fetchParentKeyPermission4Sub", configField);
             if (contentProp != null) {
                 parentPermission = (String) contentProp.get(PERMISSIONS);
             }

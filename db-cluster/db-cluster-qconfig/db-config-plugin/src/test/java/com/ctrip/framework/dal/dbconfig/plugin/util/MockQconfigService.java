@@ -3,6 +3,7 @@ package com.ctrip.framework.dal.dbconfig.plugin.util;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.apache.http.conn.routing.HttpRoute;
 import qunar.tc.qconfig.common.bean.PaginationResult;
 import qunar.tc.qconfig.common.exception.QServiceException;
 import qunar.tc.qconfig.common.util.ChecksumAlgorithm;
@@ -41,17 +42,24 @@ public class MockQconfigService implements QconfigService, TitanConstants {
 
     @Override
     public List<ConfigDetail> currentConfigWithoutPriority(List<ConfigField> list) throws QServiceException {
-        String group = TITAN_QCONFIG_PLUGIN_APPID;
-        String dataId = TITAN_QCONFIG_PLUGIN_CONFIG_FILE;
-        String profile = "uat:";
-        ConfigField configField = new ConfigField(group, dataId, profile);
-
-        ConfigDetail cd = new ConfigDetail();
-        cd.setConfigField(configField);
-        cd.setVersion(1L);
-        cd.setContent(buildPluginConfigFileContent());
-        List<ConfigDetail> cdList = Lists.newArrayList(cd);
-        return cdList;
+        String groupId = list.get(0).getGroup();
+        if (TITAN_QCONFIG_PLUGIN_APPID.equals(groupId)) {
+            String profile = "uat:";
+            ConfigField configField = new ConfigField(groupId, TITAN_QCONFIG_PLUGIN_CONFIG_FILE, profile);
+            ConfigDetail cd = new ConfigDetail();
+            cd.setConfigField(configField);
+            cd.setVersion(1L);
+            cd.setContent(buildPluginConfigFileContent());
+            return Lists.newArrayList(cd);
+        } else {
+            String profile = "uat:";
+            ConfigField configField = new ConfigField(groupId, TITAN_QCONFIG_PLUGIN_CONFIG_FILE, profile);
+            ConfigDetail cd = new ConfigDetail();
+            cd.setConfigField(configField);
+            cd.setVersion(1L);
+            cd.setContent(buildTestTitanKeyContent(null));
+            return Lists.newArrayList(cd);
+        }
     }
 
     @Override

@@ -1,12 +1,15 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
+import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.KeyGetOutputEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.util.MockQconfigService;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import qunar.tc.qconfig.plugin.PluginConstant;
 import qunar.tc.qconfig.plugin.PluginResult;
 import qunar.tc.qconfig.plugin.PluginStatusCode;
 import qunar.tc.qconfig.plugin.QconfigService;
@@ -49,6 +52,29 @@ public class TitanKeyGetHandlerTest implements TitanConstants {
 
     @Test
     public void testPostHandle1() {
+        EnvProfile profile = new EnvProfile(env);
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_TITAN_KEY)).andReturn(titanKey).anyTimes();
+        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.2").anyTimes();
+        EasyMock.replay(request);
+
+        PluginResult result = handler.postHandle(request);
+        Assert.assertNotNull(result);
+        Assert.assertNotEquals(result.getCode(), PluginStatusCode.OK);
+    }
+
+    @Test
+    public void testPostHandle2() {
+        EnvProfile profile = new EnvProfile(env);
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_TITAN_KEY)).andReturn(titanKey).anyTimes();
+        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
+        EasyMock.replay(request);
+
+        PluginResult result = handler.postHandle(request);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
+        Assert.assertTrue(result.getAttribute() instanceof KeyGetOutputEntity);
     }
 
 }

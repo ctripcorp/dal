@@ -80,7 +80,7 @@ public class MongoAdminPluginTest {
 
     //init for <TitanKeyPostHandler>
     private void initForMongoClusterPostHandler() {
-        EasyMock.expect(request.getRequestURI()).andReturn("/plugins/mongo/config").anyTimes();
+        EasyMock.expect(request.getRequestURI()).andReturn("/plugins/mongo/config/add").anyTimes();
         EasyMock.expect(request.getMethod()).andReturn("POST").anyTimes();
         EasyMock.expect(request.getParameter(REQ_PARAM_SUB_ENV)).andReturn("FAT1").anyTimes();
 

@@ -34,7 +34,7 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoClusterPostHandler.class);
 
-    private static final String URI = "/plugins/mongo/config";
+    private static final String URI = "/plugins/mongo/config/add";
     private static final String METHOD = "POST";
 
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
@@ -127,7 +127,7 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
     private void add(HttpServletRequest request, MongoClusterEntity mongoClusterEntity) throws Exception {
 
         String group = MONGO_CLIENT_APP_ID;
-        String dataId = mongoClusterEntity.getClusterName();
+        String dataId = mongoClusterEntity.getClusterName().toLowerCase();
         EnvProfile envProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(dataId), "dataId参数不能为空");
         Preconditions.checkArgument(envProfile != null && !Strings.isNullOrEmpty(envProfile.formatProfile()),

@@ -73,9 +73,9 @@ public class DbNameListHandler extends BaseAdminHandler implements TitanConstant
         try {
             t.addData("running class=" + getClass().getSimpleName());
             EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-            t.addData("profile", profile);
             Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
                     "profile参数不能为空");
+            t.addData("profile", profile.formatProfile());
 
 
             //AdminSite白名单检查

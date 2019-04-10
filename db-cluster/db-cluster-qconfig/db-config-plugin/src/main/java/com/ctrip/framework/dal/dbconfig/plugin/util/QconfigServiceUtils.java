@@ -134,7 +134,7 @@ public class QconfigServiceUtils {
     }
 
     //query and get latest config file content
-    public static Properties currentConfigWithPriority(QconfigService qconfigService, String handlerName, ConfigField configField) throws QServiceException, IOException {
+    public static Properties currentConfigWithoutPriority(QconfigService qconfigService, String handlerName, ConfigField configField) throws QServiceException, IOException {
         Properties contentProp = null;
         List<ConfigDetail> cdList = currentConfigWithoutPriority(qconfigService, handlerName, Lists.newArrayList(configField));
         if (cdList != null && !cdList.isEmpty()) {

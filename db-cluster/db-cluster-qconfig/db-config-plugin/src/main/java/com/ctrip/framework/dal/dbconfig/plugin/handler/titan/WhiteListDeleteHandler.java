@@ -74,7 +74,7 @@ public class WhiteListDeleteHandler extends BaseAdminHandler implements TitanCon
 
         //format <titankey>
         titanKey = TitanUtils.formatTitanFileName(titanKey);
-        request.setAttribute(REQ_PARAM_TITAN_KEY, titanKey);
+        request.setAttribute(REQ_ATTR_TITAN_KEY, titanKey);
 
         //format <envList>
         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
@@ -104,7 +104,7 @@ public class WhiteListDeleteHandler extends BaseAdminHandler implements TitanCon
             String highEnv = CommonHelper.getHighEnv(envList);
             String profile = CommonHelper.formatProfileFromEnv(highEnv, "");
             Preconditions.checkArgument(!Strings.isNullOrEmpty(profile), "profile参数不能为空");
-            PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(profile));
+            PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(highEnv));
             String adminSiteWhiteIps = config.getParamValue(TITAN_ADMIN_SERVER_LIST);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);
@@ -117,7 +117,7 @@ public class WhiteListDeleteHandler extends BaseAdminHandler implements TitanCon
 
                 // update for each key in titanKeys
                 List<ConfigDetail> updateCdList = Lists.newArrayList();
-                String titanKeys = (String) request.getAttribute(REQ_PARAM_TITAN_KEY);
+                String titanKeys = (String) request.getAttribute(REQ_ATTR_TITAN_KEY);
                 List<String> titanKeyList = splitter.splitToList(titanKeys);
                 for (String titanKey : titanKeyList) {
                     //获取欲更新TitanKey ('permissions'字段)
@@ -157,7 +157,7 @@ public class WhiteListDeleteHandler extends BaseAdminHandler implements TitanCon
 
     //parameter check
     private void paramCheck(HttpServletRequest request, Transaction t) {
-        String titanKey = (String) request.getAttribute(REQ_PARAM_TITAN_KEY);
+        String titanKey = (String) request.getAttribute(REQ_ATTR_TITAN_KEY);
         List<String> envList = (List<String>) request.getAttribute(REQ_ATTR_TITAN_ENV_LIST);
         String clientAppId = (String) request.getAttribute(REQ_ATTR_TITAN_CLIENT_APPID);
         t.addData("titanKey=" + titanKey);

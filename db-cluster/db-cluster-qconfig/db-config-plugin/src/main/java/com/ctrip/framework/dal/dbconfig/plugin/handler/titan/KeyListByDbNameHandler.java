@@ -77,9 +77,9 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
         try {
             t.addData("running class=" + getClass().getSimpleName());
             EnvProfile envProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-            t.addData("profile", envProfile);
             Preconditions.checkArgument(envProfile != null && envProfile.formatProfile() != null,
                     "profile参数不能为空");
+            t.addData("profile", envProfile.formatProfile());
 
             String dbName = (String) request.getAttribute(REQ_ATTR_DB_NAME);
             t.addData("dbName", dbName);

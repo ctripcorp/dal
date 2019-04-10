@@ -157,12 +157,13 @@ public class FreeVerifyDeleteHandler extends BaseAdminHandler implements TitanCo
         String freeVerifyIpList = freeVerifyInputEntity.getFreeVerifyIpList();
         String freeVerifyAppIdList = freeVerifyInputEntity.getFreeVerifyAppIdList();
 
-        t.addData("profile=" + profile);
+        Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
+                "profile参数不能为空");
+
+        t.addData("profile=" + profile.formatProfile());
         t.addData("titanKeyList=" + titanKeyList);
         t.addData("freeVerifyIpList=" + freeVerifyIpList);
         t.addData("freeVerifyAppIdList=" + freeVerifyAppIdList);
-        Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
-                "profile参数不能为空");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(titanKeyList), "titanKeyList参数不能为空");
         Preconditions.checkArgument((!Strings.isNullOrEmpty(freeVerifyIpList) || !Strings.isNullOrEmpty(freeVerifyAppIdList)), "[freeVerifyIpList, freeVerifyAppIdList]参数不能同时为空");
     }

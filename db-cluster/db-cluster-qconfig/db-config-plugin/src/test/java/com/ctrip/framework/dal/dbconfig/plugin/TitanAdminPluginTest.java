@@ -45,14 +45,14 @@ public class TitanAdminPluginTest {
         EasyMock.expect(request.getParameter(Constants.GROUP_NAME)).andReturn(TITAN_QCONFIG_KEYS_APPID).anyTimes();
         EasyMock.expect(request.getParameter(REQ_PARAM_TARGET_APPID)).andReturn(TITAN_QCONFIG_KEYS_APPID).anyTimes();
 
-//        initForTitanKeyPostHandler();
+        initForTitanKeyPostHandler();
 //        initForTitanKeyListByTimeHandler();
 //        initForTitanKeyListHandler();
 //        initForTitanKeyGetHandler();
 //        initForTitanKeyMHAUpdateHandler();
 //        initForTitanKeySSLCodeGetHandler();
 //        initForTitanKeySSLCodeUpdateHandler();
-        initForTitanKeyForceDataWashHandler();
+//        initForTitanKeyForceDataWashHandler();
     }
 
     @Test
@@ -84,11 +84,7 @@ public class TitanAdminPluginTest {
         System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
         //assert(pluginResult.getAttribute() != null);
         System.out.println("pluginResult.attribute=" + GsonUtils.Object2Json(pluginResult.getAttribute()));
-        Thread.currentThread().join();
-    }
-
-    @Test
-    public void registerPoints() throws Exception {
+//        Thread.currentThread().join();
     }
 
     //init for <TitanKeyPostHandler>

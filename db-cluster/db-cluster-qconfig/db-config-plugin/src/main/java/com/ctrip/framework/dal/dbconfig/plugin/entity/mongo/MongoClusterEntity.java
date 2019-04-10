@@ -18,6 +18,7 @@ public class MongoClusterEntity {
     private Map<String, String> extraProperties;
     private Boolean enabled = true;
     private Integer version;
+    private String sslCode;
     private String operator;
     private Date updateTime;
 
@@ -109,6 +110,14 @@ public class MongoClusterEntity {
         this.version = version;
     }
 
+    public String getSslCode() {
+        return sslCode;
+    }
+
+    public void setSslCode(String sslCode) {
+        this.sslCode = sslCode;
+    }
+
     @Override
     public String toString() {
         return "MongoClusterEntity{" +
@@ -121,6 +130,7 @@ public class MongoClusterEntity {
                 ", extraProperties=" + extraProperties +
                 ", enabled=" + enabled +
                 ", version=" + version +
+                ", sslCode='" + sslCode + '\'' +
                 ", operator='" + operator + '\'' +
                 ", updateTime=" + updateTime +
                 '}';

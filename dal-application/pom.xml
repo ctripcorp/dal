@@ -21,7 +21,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
+            <!--<dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-dal-client</artifactId>
                 <version>1.16.13</version>
@@ -30,11 +30,11 @@
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
                 <version>1.16.13</version>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
-                <version>3.3.0</version>
+                <version>3.10.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

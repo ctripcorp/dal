@@ -82,6 +82,8 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
             if (!Strings.isNullOrEmpty(body)) {
                 MongoClusterEntity mongoClusterEntity = GsonUtils.json2T(body, MongoClusterEntity.class);
                 String operator = (String) request.getAttribute(REQ_ATTR_OPERATOR);
+                Preconditions.checkNotNull(operator, "operator参数不能为空");
+
                 mongoClusterEntity.setOperator(operator);
                 mongoClusterEntity.setUpdateTime(new Date());
 

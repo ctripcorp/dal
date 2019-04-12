@@ -4523,8 +4523,7 @@ public abstract class BaseDalTabelDaoShardByTableTest {
             List<ClientTestModel> result = queryDao.query(builder, new DalHints());
             Assert.fail();
         } catch (Exception e) {
-            Assert.assertEquals("java.sql.SQLException: Can not locate table shard for dao_test_mysql_tableShard",
-                    e.getCause().getMessage());
+            Assert.assertTrue(e.getCause().getMessage().contains("java.sql.SQLException: Can not locate table shard"));
         }
     }
 

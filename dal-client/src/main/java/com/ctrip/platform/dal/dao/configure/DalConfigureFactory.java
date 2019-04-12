@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.platform.dal.dao.annotation.Database;

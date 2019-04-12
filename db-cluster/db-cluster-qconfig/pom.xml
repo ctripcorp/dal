@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>1.7</java.version>
+        <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <framework-bom.version>2.38.0</framework-bom.version>
@@ -34,13 +34,6 @@
                 <version>${framework-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- for code style -->
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.16.16</version>
             </dependency>
 
             <dependency>

@@ -186,7 +186,10 @@ public class FreeVerifyAddHandler extends BaseAdminHandler implements TitanConst
         for (String suffix : suffixList) {
             finalKeyName = titanKey + suffix;
             for (String subEnv : subEnvList) {
-                profile = initProfile.formatProfile();
+                // old
+//                profile = initProfile.formatProfile();
+                EnvProfile envProfile = new EnvProfile(env, subEnv);
+                profile = envProfile.formatProfile();
                 cd = buildUpdateConfigDetail(finalKeyName, profile, freeVerifyInputEntity);
                 if (cd != null) {
                     cdList.add(cd);

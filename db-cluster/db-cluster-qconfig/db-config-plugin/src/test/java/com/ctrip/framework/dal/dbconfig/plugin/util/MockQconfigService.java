@@ -3,7 +3,7 @@ package com.ctrip.framework.dal.dbconfig.plugin.util;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.apache.http.conn.routing.HttpRoute;
+import com.google.common.collect.Sets;
 import qunar.tc.qconfig.common.bean.PaginationResult;
 import qunar.tc.qconfig.common.exception.QServiceException;
 import qunar.tc.qconfig.common.util.ChecksumAlgorithm;
@@ -12,6 +12,7 @@ import qunar.tc.qconfig.plugin.ConfigField;
 import qunar.tc.qconfig.plugin.QconfigService;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by lzyan on 2017/9/6.
@@ -19,11 +20,25 @@ import java.util.List;
 public class MockQconfigService implements QconfigService, TitanConstants {
     @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
-        return 1;
+        return save(list, isPublic, operator, remoteIp);
     }
 
     @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic) throws QServiceException {
+        return save(list, isPublic, null, null);
+    }
+
+    private int save(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
+        Set<String> configFields = Sets.newHashSetWithExpectedSize(list.size());
+        for (ConfigDetail configDetail : list) {
+            ConfigField configField = configDetail.getConfigField();
+            configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+        }
+
+        if (configFields.size() != list.size()) {
+            throw new QServiceException("QConfigService batch save failed.");
+        }
+
         return 1;
     }
 
@@ -44,7 +59,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
     public List<ConfigDetail> currentConfigWithoutPriority(List<ConfigField> list) throws QServiceException {
         String groupId = list.get(0).getGroup();
         if (TITAN_QCONFIG_PLUGIN_APPID.equals(groupId)) {
-            String profile = "uat:";
+            String profile = "fat:";
             ConfigField configField = new ConfigField(groupId, TITAN_QCONFIG_PLUGIN_CONFIG_FILE, profile);
             ConfigDetail cd = new ConfigDetail();
             cd.setConfigField(configField);
@@ -52,10 +67,8 @@ public class MockQconfigService implements QconfigService, TitanConstants {
             cd.setContent(buildPluginConfigFileContent());
             return Lists.newArrayList(cd);
         } else {
-            String profile = "uat:";
-            ConfigField configField = new ConfigField(groupId, TITAN_QCONFIG_PLUGIN_CONFIG_FILE, profile);
             ConfigDetail cd = new ConfigDetail();
-            cd.setConfigField(configField);
+            cd.setConfigField(list.get(0));
             cd.setVersion(1L);
             cd.setContent(buildTestTitanKeyContent(null));
             return Lists.newArrayList(cd);
@@ -88,7 +101,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
             dataId = "titantest_lzyan_v_01";
         }
         if (Strings.isNullOrEmpty(profile)) {
-            profile = "uat:";
+            profile = "fat:";
         }
 
         String content = buildTestTitanKeyContent(dataId);
@@ -110,6 +123,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("appId.ip.check.service.token=540e79aa2d7bfb18007fa1ced9436f6515f291dddf229ff895586aa05724ba6f").append(returnFlag);
         sb.append("appId.ip.check.service.pass.codeList=0,4").append(returnFlag);
         sb.append("sslCode=VZ00000000000441").append(returnFlag);
+        sb.append("permission.pro.subenv.list=fat1").append(returnFlag);
         sb.append("titan.admin.server.list=0:0:0:0:0:0:0:1,10.5.1.174,127.0.0.1,10.32.20.124,10.32.20.3").append(returnFlag);
         sb.append("dba.connection.check.url=http://mysqlapi.db.uat.qa.nt.ctripcorp.com:8080/database/checktitanconnect").append(returnFlag);
         return sb.toString();

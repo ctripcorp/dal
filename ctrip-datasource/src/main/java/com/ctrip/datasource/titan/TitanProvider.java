@@ -37,7 +37,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     public void setSourceTypeByEnv() {
         Env env = Foundation.server().getEnv();
-        if (env.equals(Env.UNKNOWN) || env.equals(Env.DEV)) {
+        if (env.equals(Env.UNKNOWN) || env.equals(Env.DEV) || env.equals(Env.LOCAL)) {
             sourceType = SourceType.Local;
         }
     }

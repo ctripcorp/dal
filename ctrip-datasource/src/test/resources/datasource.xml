@@ -7,7 +7,8 @@
 		4.1、Windows系统从目录/D:/WebSites/CtripAppData/Database.Config读取
 		4.2、Linux系统从目录/opt/ctrip/AppData/Database.Config读取（路径区分大小写）
  -->
-<Datasources location="$classpath">
+<!--<Datasources location="$classpath">-->
+<Datasources>
 	<!-- 数据库连接池属性配置 -->
 	<Datasource name="SimpleShard_0"
               testWhileIdle="false"

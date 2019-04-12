@@ -113,6 +113,7 @@ public class TitanServiceReaderTest {
 
         Map<String, String> settings = new HashMap<>();
         settings.put(DataSourceConfigureConstants.USE_LOCAL_CONFIG, "true");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -148,6 +149,7 @@ public class TitanServiceReaderTest {
 
         Map<String, String> settings = new HashMap<>();
         settings.put(DataSourceConfigureConstants.USE_LOCAL_CONFIG, "true");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -169,6 +171,7 @@ public class TitanServiceReaderTest {
 
         Map<String, String> settings = new HashMap<>();
         settings.put("useLocalConfig", "true");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -304,6 +307,7 @@ public class TitanServiceReaderTest {
         Map<String, String> settings = new HashMap<>();
         settings.put(DataSourceConfigureConstants.USE_LOCAL_CONFIG, "false");
         settings.put(DataSourceConfigureConstants.TIMEOUT, "1000");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -358,6 +362,7 @@ public class TitanServiceReaderTest {
         Map<String, String> settings = new HashMap<>();
         settings.put(DataSourceConfigureConstants.USE_LOCAL_CONFIG, "true");
         settings.put(DataSourceConfigureConstants.TIMEOUT, "1000");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);
@@ -383,6 +388,7 @@ public class TitanServiceReaderTest {
         Map<String, String> settings = new HashMap<>();
         settings.put(DataSourceConfigureConstants.USE_LOCAL_CONFIG, "true");
         settings.put(DataSourceConfigureConstants.TIMEOUT, "1000");
+        settings.put(DataSourceConfigureConstants.DATABASE_CONFIG_LOCATION, "$classpath");
         try {
             provider.initialize(settings);
             provider.setup(dbNames);

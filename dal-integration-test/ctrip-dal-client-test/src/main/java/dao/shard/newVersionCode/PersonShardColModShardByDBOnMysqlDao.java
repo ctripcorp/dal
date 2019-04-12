@@ -1256,7 +1256,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 	public int test_def_update_in (String Name, List<Integer> Age, DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("update person set Name=? where Age in (?)");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;
@@ -1274,7 +1274,7 @@ public class PersonShardColModShardByDBOnMysqlDao {
 	public int test_def_truncate (DalHints hints) throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 
-		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+		FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder();
 		builder.setTemplate("truncate person");
 		StatementParameters parameters = new StatementParameters();
 		int i = 1;

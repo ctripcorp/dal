@@ -929,7 +929,7 @@ public class PersonDaoUnitTest {
 
         dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0));
 //        dao.findFirst(cityIds, name, new DalHints().inAllShards().inTableShard(0).sequentialExecute());
-        Thread.sleep(60*1000);
+//        Thread.sleep(60*1000);
     }
     
     @Test
@@ -949,7 +949,7 @@ public class PersonDaoUnitTest {
         };
         
         DalClientFactory.getClient(DATABASE_NAME_MYSQL).execute(command, new DalHints().inShard(0));
-        Thread.sleep(60*1000);
+//        Thread.sleep(60*1000);
     }   
     
 //    @Test

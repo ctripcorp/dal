@@ -175,18 +175,20 @@ public class RegexMatcherTest {
 
     @Test
     public void clusterName() throws Exception {
-        String normal = "diuserprofile-diuserprofiledb";
-        Assert.assertEquals(true, regexMatcher.clusterName(normal));
+        String clusterName1 = "cmongotest01db_w";
+        Assert.assertEquals(true, regexMatcher.clusterName(clusterName1));
 
-        String dbNameBig = "diuserprofile-diuserprofilEdb";
-        Assert.assertEquals(true, regexMatcher.clusterName(dbNameBig));
+        String clusterName2 = "cmongotest01db_w_r";
+        Assert.assertEquals(true, regexMatcher.clusterName(clusterName2));
 
-        String cluserBig = "dIuserprofile-diuserprofiledb";
-        Assert.assertEquals(false, regexMatcher.clusterName(cluserBig));
+        String clusterName3 = "cmongotest01db-w";
+        Assert.assertEquals(false, regexMatcher.clusterName(clusterName3));
 
+        String clusterName4 = "cmongotest01db_w测试";
+        Assert.assertEquals(false, regexMatcher.clusterName(clusterName4));
 
-        String noMidLine = "diuserprofilediuserprofiledb";
-        Assert.assertEquals(false, regexMatcher.clusterName(noMidLine));
+//        String clusterName5 = "cmongotest01DB_W";
+//        Assert.assertEquals(false, regexMatcher.clusterName(clusterName5));
     }
 
     @Test

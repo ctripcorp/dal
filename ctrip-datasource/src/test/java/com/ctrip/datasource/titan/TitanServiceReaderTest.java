@@ -36,7 +36,7 @@ public class TitanServiceReaderTest {
         String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query/";
         TitanProvider provider = new TitanProvider();
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("AbacusDB_INSERT_1");
+        dbNames.add("DalService2DB");
         dbNames.add("CrawlerResultMDB");
 
         Map<String, String> settings = new HashMap<>();
@@ -48,7 +48,7 @@ public class TitanServiceReaderTest {
 
             DataSourceConfigure result = null;
 
-            result = provider.getDataSourceConfigure("AbacusDB_INSERT_1");
+            result = provider.getDataSourceConfigure("DalService2DB");
             Assert.assertNotNull(result);
 
             result = provider.getDataSourceConfigure("CrawlerResultMDB");
@@ -64,7 +64,7 @@ public class TitanServiceReaderTest {
         String fws = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query";
         TitanProvider provider = new TitanProvider();
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("AbacusDB_INSERT_1");
+        dbNames.add("DalService2DB");
         dbNames.add("CrawlerResultMDB");
         dbNames.add("test");
 
@@ -78,7 +78,7 @@ public class TitanServiceReaderTest {
             Assert.fail();
         }
         DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
-        Assert.assertNotNull(locator.getDataSourceConfigure("AbacusDB_INSERT_1"));
+        Assert.assertNotNull(locator.getDataSourceConfigure("DalService2DB"));
         Assert.assertNotNull(locator.getDataSourceConfigure("CrawlerResultMDB"));
         Assert.assertNull(locator.getDataSourceConfigure("test"));
     }

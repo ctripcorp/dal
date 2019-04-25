@@ -24,19 +24,14 @@ public class CtripLoggerImpl extends AbstractLogger {
         try {
             t.addData(message);
 
-            try {
-                if (callback != null)
-                    callback.execute();
-            } catch (Exception e) {
-                Cat.logError(e);
-                throw e;
-            }
+            if (callback != null)
+                callback.execute();
 
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {
             t.setStatus(e);
             Cat.logError(e);
-//            throw e;
+            throw e;
         } finally {
             t.complete();
         }

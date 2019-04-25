@@ -6,12 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.exceptions.DalConfigException;
 import org.junit.Assert;
 import org.junit.Test;
-
-import javax.validation.constraints.AssertTrue;
 
 public class AllInOneConfigureReaderTest {
     private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/";
@@ -65,24 +63,25 @@ public class AllInOneConfigureReaderTest {
     public void testGetConfigFromFrameworkConfigInDEVMode() throws Exception {
         AllInOneConfigureReader reader = new AllInOneConfigureReader();
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("simpleshard_0");
+        dbNames.add("test12345678");
         try {
-            reader.getConnectionStrings(dbNames, true, null);
+            Map<String, DalConnectionString> ret=reader.getConnectionStrings(dbNames, true, null);
             Assert.fail();
         } catch (Exception e) {
+            Assert.assertTrue(e.getMessage().contains("Cannot load config for the following DB:"));
             //database.config not exist in OS path
-            String osName=null;
-            try {
-                osName = System.getProperty("os.name");
-            } catch (SecurityException ex) {
-
-            }
-            if(osName!=null) {
-                if (osName.startsWith("Windows"))
-                    Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
-                else
-                    Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
-            }
+//            String osName=null;
+//            try {
+//                osName = System.getProperty("os.name");
+//            } catch (SecurityException ex) {
+//
+//            }
+//            if(osName!=null) {
+//                if (osName.startsWith("Windows"))
+//                    Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
+//                else
+//                    Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
+//            }
         }
     }
 
@@ -103,24 +102,25 @@ public class AllInOneConfigureReaderTest {
     public void testGetConfigFromLocalConfigureProviderFileNotFound() throws Exception {
         AllInOneConfigureReader reader = new AllInOneConfigureReader(new MockFileNotFoundLocalConfigureProvider());
         Set<String> dbNames = new HashSet<>();
-        dbNames.add("simpleshard_0");
+        dbNames.add("test12345678");
         try {
-            reader.getConnectionStrings(dbNames, true, null);
+            Map<String, DalConnectionString> config=reader.getConnectionStrings(dbNames, true, null);
             Assert.fail();
         } catch (Exception e) {
+            Assert.assertTrue(e.getMessage().contains("Cannot load config for the following DB:"));
             //database.config not exist in OS path
-            String osName=null;
-            try {
-                osName = System.getProperty("os.name");
-            } catch (SecurityException ex) {
-
-            }
-            if(osName!=null) {
-                if (osName.startsWith("Windows"))
-                    Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
-                else
-                    Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
-            }
+//            String osName=null;
+//            try {
+//                osName = System.getProperty("os.name");
+//            } catch (SecurityException ex) {
+//
+//            }
+//            if(osName!=null) {
+//                if (osName.startsWith("Windows"))
+//                    Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
+//                else
+//                    Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
+//            }
         }
     }
 
@@ -133,7 +133,7 @@ public class AllInOneConfigureReaderTest {
             reader.getConnectionStrings(dbNames, true, null);
             Assert.fail();
         } catch (Exception e) {
-           Assert.assertTrue(e.getMessage().contains("other exception"));
+            Assert.assertTrue(e.getMessage().contains("other exception"));
         }
     }
 }

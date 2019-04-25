@@ -28,13 +28,21 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
-        SingleDataSource newDataSource = new SingleDataSource(name, configure);
+        SingleDataSource newDataSource = createSingleDataSource(name, configure);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
+        DataSourceCreateTask oldTask = oldDataSource.getTask();
+        if (oldTask != null)
+            oldTask.cancel();
     }
 
     private void close(SingleDataSource oldDataSource) {
-        DataSourceTerminator.getInstance().close(oldDataSource);
+        if (oldDataSource != null)
+            DataSourceTerminator.getInstance().close(oldDataSource);
+    }
+
+    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
+        return DataSourceCreator.getInstance().createSingleDataSource(name, configure);
     }
 
     public SingleDataSource getSingleDataSource() {

@@ -68,20 +68,23 @@ public class AllInOneConfigureReaderTest {
             Map<String, DalConnectionString> ret=reader.getConnectionStrings(dbNames, true, null);
             Assert.fail();
         } catch (Exception e) {
-            Assert.assertTrue(e.getMessage().contains("Cannot load config for the following DB:"));
-            //database.config not exist in OS path
-//            String osName=null;
-//            try {
-//                osName = System.getProperty("os.name");
-//            } catch (SecurityException ex) {
-//
-//            }
-//            if(osName!=null) {
-//                if (osName.startsWith("Windows"))
-//                    Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
-//                else
-//                    Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
-//            }
+            try {
+                Assert.assertTrue(e.getMessage().contains("Cannot load config for the following DB:"));
+            }catch (Throwable e1) {
+                //database.config not exist in OS path
+                String osName = null;
+                try {
+                    osName = System.getProperty("os.name");
+                } catch (SecurityException ex) {
+
+                }
+                if (osName != null) {
+                    if (osName.startsWith("Windows"))
+                        Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
+                    else
+                        Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
+                }
+            }
         }
     }
 
@@ -104,23 +107,27 @@ public class AllInOneConfigureReaderTest {
         Set<String> dbNames = new HashSet<>();
         dbNames.add("test12345678");
         try {
-            Map<String, DalConnectionString> config=reader.getConnectionStrings(dbNames, true, null);
+            Map<String, DalConnectionString> config = reader.getConnectionStrings(dbNames, true, null);
             Assert.fail();
         } catch (Exception e) {
-            Assert.assertTrue(e.getMessage().contains("Cannot load config for the following DB:"));
-            //database.config not exist in OS path
-//            String osName=null;
-//            try {
-//                osName = System.getProperty("os.name");
-//            } catch (SecurityException ex) {
-//
-//            }
-//            if(osName!=null) {
-//                if (osName.startsWith("Windows"))
-//                    Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
-//                else
-//                    Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
-//            }
+            try {
+                Assert.assertTrue(e.getMessage().contains("Cannot load config for the following DB:"));
+            } catch (Throwable e1) {
+                //database.config not exist in OS path
+                String osName = null;
+                try {
+                    osName = System.getProperty("os.name");
+                } catch (SecurityException ex) {
+
+                }
+                if (osName != null) {
+                    if (osName.startsWith("Windows"))
+                        Assert.assertTrue(e.getMessage().contains(WIN_DB_CONFIG_FILE));
+                    else
+                        Assert.assertTrue(e.getMessage().contains(LINUX_DB_CONFIG_FILE));
+                }
+            }
+
         }
     }
 

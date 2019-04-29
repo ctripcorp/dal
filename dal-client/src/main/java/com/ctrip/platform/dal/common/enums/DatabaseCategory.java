@@ -46,7 +46,7 @@ public enum DatabaseCategory {
         }
 
         public String buildPage(String selectSqlTemplate, int start, int count) {
-            return String.format(selectSqlTemplate + " limit %d, %d", start, count);
+            return selectSqlTemplate + " limit "+start+", "+count; //we cannot use String.format here because selectSqlTemplate may contains "%"
         }
 
         // SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
@@ -85,7 +85,7 @@ public enum DatabaseCategory {
         }
 
         public String buildPage(String selectSqlTemplate, int start, int count) {
-            return String.format(selectSqlTemplate + " OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", start, count);
+            return selectSqlTemplate + " OFFSET "+start+" ROWS FETCH NEXT "+count+" ROWS ONLY";//we cannot use String.format here because selectSqlTemplate may contains "%"
         }
 
         public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {

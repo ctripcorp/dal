@@ -73,6 +73,14 @@ public class FreeSelectSqlBuilderTest {
         test.atPage(10, 10);
         assertEquals("template template template OFFSET 90 ROWS FETCH NEXT 10 ROWS ONLY", test.build());
     }
+
+    @Test
+    public void testBuildSqlServerAtPageWithLikeTemplate() throws SQLException {
+        FreeSelectSqlBuilder test = createTest();
+        test.setTemplate("select * from testtable where name like '%a%'");
+        test.atPage(10, 10);
+        assertEquals("select * from testtable where name like '%a%' OFFSET 90 ROWS FETCH NEXT 10 ROWS ONLY", test.build());
+    }
     
     @Test
     public void testBuildSqlServerRange() throws SQLException {
@@ -103,6 +111,14 @@ public class FreeSelectSqlBuilderTest {
 
         test.atPage(10, 10);
         assertEquals("template template template limit 90, 10", test.build());
+    }
+
+    @Test
+    public void testBuildMySqlAtPageWithLikeTemplate() throws SQLException {
+        FreeSelectSqlBuilder test = new FreeSelectSqlBuilder(DatabaseCategory.MySql);
+        test.setTemplate("select * from testtable where name like '%a'");
+        test.atPage(10, 10);
+        assertEquals("select * from testtable where name like '%a' limit 90, 10", test.build());
     }
     
     @Test

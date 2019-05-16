@@ -1,5 +1,7 @@
 package com.ctrip.datasource;
 
+import com.ctrip.datasource.configure.qconfig.DalPropertiesProviderImplTest;
+import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImplTest;
 import com.ctrip.datasource.datasource.BackgroundExecutor.DatasourceBackgroundExecutorTest;
 import com.ctrip.datasource.datasource.ConnectionListener.CtripConnectionListenerTest;
 import com.ctrip.datasource.datasource.DataSourceValidatorTest;
@@ -43,7 +45,9 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		CtripConnectionListenerTest.class,
 		DataSourceValidatorTest.class,
 		SqlServerReadonlyTest.class,
-		DatasourceBackgroundExecutorTest.class
+		DatasourceBackgroundExecutorTest.class,
+		DalPropertiesProviderImplTest.class,
+		PoolPropertiesProviderImplTest.class
 	})
 
 public class AllTests {

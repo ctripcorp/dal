@@ -41,7 +41,7 @@ public class CtripDalDataSourceTest {
 	public void testGetDataSourceTitanSuccess() {
 		DalDataSourceFactory dl = new DalDataSourceFactory();
 		try {
-			Assert.assertNotNull(dl.createDataSource("AbacusDB_INSERT_1", fws, "12233"));
+			Assert.assertNotNull(dl.createDataSource("DalService2DB", fws, "12233"));
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}

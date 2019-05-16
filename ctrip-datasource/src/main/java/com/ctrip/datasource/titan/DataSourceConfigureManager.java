@@ -138,20 +138,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         PoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
         dataSourceConfigureLocator.setPoolProperties(poolProperties);
 
-        if (sourceType == SourceType.Remote) {
+        if (sourceType == SourceType.Remote)
             addConnectionStringChangedListeners(names);
 
-            boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get().booleanValue();
-            if (!isPoolListenerAdded) {
-                addPoolPropertiesChangedListener();
-                isPoolPropertiesListenerAdded.compareAndSet(false, true);
-            }
+        boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get().booleanValue();
+        if (!isPoolListenerAdded) {
+            addPoolPropertiesChangedListener();
+            isPoolPropertiesListenerAdded.compareAndSet(false, true);
+        }
 
-            boolean isStatusListenerAdded = isIPDomainStatusListenerAdded.get().booleanValue();
-            if (!isStatusListenerAdded) {
-                addIPDomainStatusChangedListener();
-                isIPDomainStatusListenerAdded.compareAndSet(false, true);
-            }
+        boolean isStatusListenerAdded = isIPDomainStatusListenerAdded.get().booleanValue();
+        if (!isStatusListenerAdded) {
+            addIPDomainStatusChangedListener();
+            isIPDomainStatusListenerAdded.compareAndSet(false, true);
         }
     }
 

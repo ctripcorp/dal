@@ -7,6 +7,9 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
+import qunar.tc.qconfig.client.exception.ResultUnexpectedException;
+import qunar.tc.qconfig.common.util.Constants;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,11 +34,18 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
 
     @Override
     public Map<String, String> getProperties() {
-        Map<String, String> map = new HashMap<>();
-        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DALPROPERTIES_GET_PROPERTIES);
-
         try {
             MapConfig config = getMapConfig();
+            return getPropertiesMap(config);
+        } catch (Throwable e) {
+            throw e;
+        }
+    }
+
+    protected Map<String, String> getPropertiesMap(MapConfig config) {
+        Map<String, String> map = new HashMap<>();
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL, DALPROPERTIES_GET_PROPERTIES);
+        try {
             Map<String, String> temp = config.asMap();
             for (Map.Entry<String, String> entry : temp.entrySet()) {
                 map.put(entry.getKey(), entry.getValue());
@@ -45,12 +55,17 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
             transaction.addData(mapToString(map));
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
-            transaction.setStatus(e);
-            Cat.logError("An error occurred while getting dal.properties from QConfig.", e);
+            if ((e instanceof ResultUnexpectedException) && (((ResultUnexpectedException) e).getStatus() == Constants.FILE_NOT_FIND)) {
+                propertiesRef.set(map);
+                transaction.addData("local dal.properties not exist, we will use default values later");
+                transaction.setStatus(Transaction.SUCCESS);
+            } else {
+                transaction.setStatus(e);
+                Cat.logError("An error occurred while getting dal.properties from QConfig.", e);
+            }
         } finally {
             transaction.complete();
         }
-
         return map;
     }
 

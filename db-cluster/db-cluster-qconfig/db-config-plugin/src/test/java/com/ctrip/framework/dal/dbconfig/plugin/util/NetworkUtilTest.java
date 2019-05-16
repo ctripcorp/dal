@@ -21,13 +21,13 @@ public class NetworkUtilTest {
         assert !NetworkUtil.isFromPublicNet(netType);
 
         netType = null;
-        assert NetworkUtil.isFromPublicNet(netType);
+        assert !NetworkUtil.isFromPublicNet(netType);
 
         netType = "";
-        assert NetworkUtil.isFromPublicNet(netType);
+        assert !NetworkUtil.isFromPublicNet(netType);
 
         netType = "test";
-        assert NetworkUtil.isFromPublicNet(netType);
+        assert !NetworkUtil.isFromPublicNet(netType);
     }
 
 }

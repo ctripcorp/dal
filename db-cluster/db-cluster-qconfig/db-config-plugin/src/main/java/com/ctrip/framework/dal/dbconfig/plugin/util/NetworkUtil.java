@@ -42,20 +42,20 @@ public final class NetworkUtil {
     public final static String getNetType(HttpServletRequest request) {
         String netType = request.getHeader(HEADER_NET_TYPE);
         if (Strings.isNullOrEmpty(netType)) {
-            return PUBLIC_NET_TYPE;
+            return PRIVATE_NET_TYPE;
         }
         return netType;
     }
 
     public final static boolean isFromPublicNet(String netType) {
         if (Strings.isNullOrEmpty(netType)) {
-            return true;
+            return false;
         }
 
-        if (PRIVATE_NET_TYPE.equalsIgnoreCase(netType)) {
-            return false;
-        } else {
+        if (PUBLIC_NET_TYPE.equalsIgnoreCase(netType)) {
             return true;
+        } else {
+            return false;
         }
     }
 

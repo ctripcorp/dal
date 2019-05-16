@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.service.validator;
 
 import com.ctrip.framework.dal.dbconfig.plugin.entity.AppIdIpCheckEntity;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.ClientRequestContext;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.PermissionCheckEnum;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -21,20 +22,22 @@ import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
 public class Step5AppIdIpCheckServiceValidator extends AbstractValidator {
     private Properties pluginProp;
     private Properties keyProp;
-    private String clientAppId;
-    private String clientIp;
-    private String env;
+    private ClientRequestContext context;
 
-    public Step5AppIdIpCheckServiceValidator(Properties pluginProp, Properties keyProp, String clientAppId, String clientIp, String env) {
+    public Step5AppIdIpCheckServiceValidator(Properties pluginProp, Properties keyProp, ClientRequestContext context) {
         this.pluginProp = pluginProp;
         this.keyProp = keyProp;
-        this.clientAppId = clientAppId;
-        this.clientIp = clientIp;
-        this.env = env;
+        this.context = context;
     }
 
     @Override
     public PermissionCheckEnum doValid() {
+        // 如果是公网的请求，跳过cms校验(appId-ip)
+        if (context.isFromPublicNet()) {
+            Cat.logEvent("TitanServerPlugin.PublicNet.CMS.Check.Skipped", String.format("appId:%s,ip:%s", context.getAppId(), context.getIp()));
+            return PermissionCheckEnum.PASS;
+        }
+
         PermissionCheckEnum result = PermissionCheckEnum.PASS;
         AbstractValidator nextValidator = getNextValidator();
 
@@ -45,7 +48,10 @@ public class Step5AppIdIpCheckServiceValidator extends AbstractValidator {
             result = PermissionCheckEnum.FAIL_APPID_IP_CHECK;
         }
 
+
         if (result != PermissionCheckEnum.PASS) {
+            String clientAppId = context.getAppId();
+            String clientIp = context.getIp();
             String keyName = keyProp.getProperty(CONNECTIONSTRING_KEY_NAME);
             String eventName = String.format("%s:%s:%s", keyName, clientAppId, clientIp);
             String msg = "permissionCheckEnum=" + result;
@@ -81,9 +87,9 @@ public class Step5AppIdIpCheckServiceValidator extends AbstractValidator {
 
         AppIdIpCheckEntity appIdIpCheckEntity = new AppIdIpCheckEntity();
         appIdIpCheckEntity.setServiceUrl(appIdIpCheckServiceUrl);
-        appIdIpCheckEntity.setClientAppId(clientAppId);
-        appIdIpCheckEntity.setClientIp(clientIp);
-        appIdIpCheckEntity.setEnv(env);
+        appIdIpCheckEntity.setClientAppId(context.getAppId());
+        appIdIpCheckEntity.setClientIp(context.getIp());
+        appIdIpCheckEntity.setEnv(context.getEnv());
         appIdIpCheckEntity.setServiceToken(serviceToken);
         appIdIpCheckEntity.setTimeoutMs(timeoutMs);
         appIdIpCheckEntity.setPassCodeList(passCodeList);

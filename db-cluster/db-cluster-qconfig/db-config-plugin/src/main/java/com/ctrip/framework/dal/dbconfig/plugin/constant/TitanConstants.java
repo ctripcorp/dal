@@ -84,4 +84,9 @@ public interface TitanConstants extends CommonConstants {
     String NAME_SQLSERVER = "sqlserver";
     String NAME_MYSQL = "mysql";
 
+    // net type
+    String HEADER_NET_TYPE = "net-type";
+    String PUBLIC_NET_TYPE = "public";
+    String PRIVATE_NET_TYPE = "private";
+
 }

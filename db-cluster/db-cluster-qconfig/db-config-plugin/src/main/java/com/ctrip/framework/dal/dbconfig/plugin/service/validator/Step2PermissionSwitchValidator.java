@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin.service.validator;
 
+import com.ctrip.framework.dal.dbconfig.plugin.entity.ClientRequestContext;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.PermissionCheckEnum;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.dianping.cat.Cat;
@@ -27,16 +28,12 @@ import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
 public class Step2PermissionSwitchValidator extends AbstractValidator {
     private Properties pluginProp;
     private Properties keyProp;
-    private String clientAppId;
-    private String clientIp;
-    private String env;
+    private ClientRequestContext context;
 
-    public Step2PermissionSwitchValidator(Properties pluginProp, Properties keyProp, String clientAppId, String clientIp, String env) {
+    public Step2PermissionSwitchValidator(Properties pluginProp, Properties keyProp, ClientRequestContext context) {
         this.pluginProp = pluginProp;
         this.keyProp = keyProp;
-        this.clientAppId = clientAppId;
-        this.clientIp = clientIp;
-        this.env = env;
+        this.context = context;
     }
 
     @Override
@@ -80,11 +77,13 @@ public class Step2PermissionSwitchValidator extends AbstractValidator {
             }
         }
 
+        String clientAppId = context.getAppId();
+        String clientIp = context.getIp();
 
         if(!permissionValidEnabled) {
             try {
                 // validation detect    [2018-10-19]
-                new ValidateDetector(pluginProp, keyProp, clientAppId, clientIp, env).detect();
+                new ValidateDetector(pluginProp, keyProp, context).detect();
             } catch (Exception e) {
                 Cat.logError(e);
             }

@@ -210,7 +210,13 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
                 // 父环境权限不为空, 使用父环境key的权限覆盖 [2018-12-04]
                 keyProp.setProperty(PERMISSIONS, parentPermission);
             }
-            ValidateHandler validateHandler = new ValidateHandler(pluginProp, keyProp, clientAppId, clientIp, env);
+
+            // 判断是否是公网请求
+            String netType = NetworkUtil.getNetType(request);
+            boolean fromPublicNet = NetworkUtil.isFromPublicNet(netType);
+            Cat.logEvent("TitanServerPlugin.PostHandle.NetType", String.format("fromPublicNet:%s,netType:%s", fromPublicNet, netType));
+
+            ValidateHandler validateHandler = new ValidateHandler(pluginProp, keyProp, clientAppId, clientIp, env, fromPublicNet);
             PermissionCheckEnum permissionCheck = validateHandler.doValid();
             if (permissionCheck == PermissionCheckEnum.PASS) {
                 //拼接连接串: normal + failover
@@ -302,24 +308,55 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         }
     }
 
-    //get real client ip from token, it must equal to header value of 'X-Real-IP'
+    //get real client ip from token
     private String getRealClientIp(HttpServletRequest request, PluginConfig config) throws Exception {
-        String hiddenClientIp = null;
+        String xRealIp = getXRealIp(request);
+        String hiddenClientIp = getHiddenClientIp(request, config);
+
+        if (Strings.isNullOrEmpty(xRealIp) || Strings.isNullOrEmpty(hiddenClientIp)) {
+            StringBuilder sb = new StringBuilder(300);
+            sb.append("Invalid request, xRealIp or hiddenClientIp is empty! ");
+            sb.append("xRealIp=").append(xRealIp).append(", ");
+            sb.append("hiddenClientIp=").append(hiddenClientIp);
+            throw new IllegalAccessException(sb.toString());
+        }
+
+        // check whether public net
+        String netType = NetworkUtil.getNetType(request);
+        boolean fromPublicNet = NetworkUtil.isFromPublicNet(netType);
+        Cat.logEvent("TitanServerPlugin.PreHandle.NetType", String.format("fromPublicNet:%s,netType:%s", fromPublicNet, netType));
+
+        // 从专线过来的请求(内网ip)，需要比较
+        if (!fromPublicNet) {
+            // check xRealIp and hiddenClientIp whether equal
+            if (!xRealIp.equals(hiddenClientIp)) {
+                String ttToken = request.getHeader(TT_TOKEN);
+                StringBuilder sb = new StringBuilder(300);
+                sb.append("Invalid request, [xRealIp, hiddenClientIp] not equal! ");
+                sb.append("xRealIp=").append(xRealIp).append(", ");
+                sb.append("hiddenClientIp=").append(hiddenClientIp).append(", ");
+                sb.append("ttToken=").append(ttToken);
+                throw new IllegalAccessException(sb.toString());
+            }
+        } else {
+            Cat.logEvent("TitanServerPlugin.PublicNet.Request", String.format("hiddenClientIp:%s,xRealIp:%s", hiddenClientIp, xRealIp));
+        }
+
+        return hiddenClientIp;
+    }
+
+    private String getXRealIp(HttpServletRequest request) throws Exception {
         String xRealIp = request.getHeader(X_REAL_IP);
-        String ttToken = request.getHeader(TT_TOKEN);
         //if xRealIp is empty, use original clientIp
         if (Strings.isNullOrEmpty(xRealIp)) {
             xRealIp = NetworkUtil.getClientIp(request);
         }
-        //FIXME: === Mock code ====
-//        if(xRealIp == null) {
-//            xRealIp = "1.1.1.1";
-//        }
-//        if(ttToken == null) {
-//            ttToken = "fseYTdpoOWzdkkS5hcTfVWvuzHgETovQSQwOUMMq2ilm0wDOhRdL+OSbnynbrRgem+7UofvSpF9SgQ1eZrB6aXcgwsxAEFF3KZaXwObQ+ykCn+q4eKfYCMzkSCo1wNBRAgW09vV+194nVccMmkTg8iuo6kQK8XKr4EpMK3V6A8Y=";
-//        }
-        //FIXME: === Mock end ===
+        return xRealIp;
+    }
 
+    private String getHiddenClientIp(HttpServletRequest request, PluginConfig config) throws Exception {
+        String hiddenClientIp = null;
+        String ttToken = request.getHeader(TT_TOKEN);
         if (!Strings.isNullOrEmpty(ttToken)) {
             String configKey = config.getParamValue(TOKEN_KEY);
             byte[] bb = Base64.decodeBase64(configKey);
@@ -337,28 +374,13 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
                     }
                 }
             }
-            List<String> list = SecurityUtil.decode(ttToken, key);
-        /*
-            100011420
-            fat
-            1.1.1.1         //target ip
-            11111
-            jinqiao
-        */
-            if (list != null && list.size() >= 3) {
-                hiddenClientIp = list.get(2);
+            List<String> decodedToken = SecurityUtil.decode(ttToken, key);
+            if (decodedToken != null && decodedToken.size() >= 3) {
+                hiddenClientIp = decodedToken.get(2);
             }
         }
 
-        if (Strings.isNullOrEmpty(xRealIp) || Strings.isNullOrEmpty(hiddenClientIp) || !xRealIp.equals(hiddenClientIp)) {
-            StringBuilder sb = new StringBuilder(300);
-            sb.append("Invalid request, [xRealIp, hiddenClientIp] they are empty or not equal! ");
-            sb.append("xRealIp=").append(xRealIp).append(", ");
-            sb.append("hiddenClientIp=").append(hiddenClientIp).append(", ");
-            sb.append("ttToken=").append(ttToken);
-            throw new IllegalAccessException(sb.toString());
-        }
-        return xRealIp;
+        return hiddenClientIp;
     }
 
     // fetch parent key permission for subEnv not empty

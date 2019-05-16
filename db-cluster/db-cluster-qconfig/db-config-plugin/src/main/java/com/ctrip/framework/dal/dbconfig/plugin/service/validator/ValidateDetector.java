@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin.service.validator;
 
+import com.ctrip.framework.dal.dbconfig.plugin.entity.ClientRequestContext;
 import com.dianping.cat.Cat;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -17,17 +18,13 @@ public class ValidateDetector {
 
     private Properties pluginProp;
     private Properties keyProp;
-    private String clientAppId;
-    private String clientIp;
-    private String env;
+    private ClientRequestContext context;
 
     //=== Constructor ===
-    public ValidateDetector(Properties pluginProp, Properties keyProp, String clientAppId, String clientIp, String env) {
+    public ValidateDetector(Properties pluginProp, Properties keyProp, ClientRequestContext context) {
         this.pluginProp = pluginProp;
         this.keyProp = keyProp;
-        this.clientAppId = clientAppId;
-        this.clientIp = clientIp;
-        this.env = env;
+        this.context = context;
     }
 
     /**
@@ -45,6 +42,8 @@ public class ValidateDetector {
                 permissionValidDetectEnabled = Boolean.parseBoolean(permissionValidDetectEnabledObj.toString());
             }
 
+            String clientAppId = context.getAppId();
+            String clientIp = context.getIp();
             if(permissionValidDetectEnabled) {
                 // [1] blank appId
                 if (Strings.isNullOrEmpty(clientAppId)) {
@@ -80,7 +79,7 @@ public class ValidateDetector {
                         String eName = keyName + ":" + clientAppId;
                         Cat.logEvent("TitanPlugin.Permission.Valid.Key.FreeAppId", eName);
                     } else {
-                        Step5AppIdIpCheckServiceValidator step5AppIdIpCheckServiceValidator = new Step5AppIdIpCheckServiceValidator(pluginProp, keyProp, clientAppId, clientIp, env);
+                        Step5AppIdIpCheckServiceValidator step5AppIdIpCheckServiceValidator = new Step5AppIdIpCheckServiceValidator(pluginProp, keyProp, context);
                         step5AppIdIpCheckServiceValidator.doValid();
                     }
                 }

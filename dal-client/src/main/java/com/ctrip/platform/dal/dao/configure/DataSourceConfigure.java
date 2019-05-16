@@ -41,8 +41,10 @@ public class DataSourceConfigure
     }
 
     public void merge(Map<String, String> propertyMap) {
-        for (Map.Entry<String, String> entry : propertyMap.entrySet())
-            properties.setProperty(entry.getKey(), entry.getValue());
+        if (propertyMap != null) {
+            for (Map.Entry<String, String> entry : propertyMap.entrySet())
+                properties.setProperty(entry.getKey(), entry.getValue());
+        }
     }
 
     @Override

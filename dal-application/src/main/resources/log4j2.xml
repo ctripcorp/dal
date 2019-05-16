@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration monitorInterval="60">
+<configuration status="WARN" monitorInterval="1800">
   <appenders>
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="[dal-demo][%t]%d %-5p [%c] %m%n"/>
     </Console>
+    <RollingFile name="RollingFile" fileName="${sys:user.home}/logs/info.log" filePattern="${sys:user.home}/logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+      <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
+      <SizeBasedTriggeringPolicy size="100 MB"/>
+      <!-- 匹配INFO以及以上级别 -->
+      <Filters>
+        <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+    </RollingFile>
     <CatAppender name="Cat" />
     <Async name="Async" includeLocation="true">
       <AppenderRef ref="Console"/>
+      <AppenderRef ref="RollingFile"/>
       <AppenderRef ref="Cat"/>
     </Async>
+
   </appenders>
   <loggers>
     <root level="INFO">

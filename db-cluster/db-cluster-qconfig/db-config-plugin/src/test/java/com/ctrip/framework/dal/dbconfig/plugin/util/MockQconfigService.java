@@ -115,6 +115,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
 
     //build plugin itself config file
     private String buildPluginConfigFileContent() {//
+        String tokenKey = "rO0ABXNyABRqYXZhLnNlY3VyaXR5LktleVJlcL35T7OImqVDAgAETAAJYWxnb3JpdGhtdAASTGphdmEvbGFuZy9TdHJpbmc7WwAHZW5jb2RlZHQAAltCTAAGZm9ybWF0cQB+AAFMAAR0eXBldAAbTGphdmEvc2VjdXJpdHkvS2V5UmVwJFR5cGU7eHB0AANSU0F1cgACW0Ks8xf4BghU4AIAAHhwAAACejCCAnYCAQAwDQYJKoZIhvcNAQEBBQAEggJgMIICXAIBAAKBgQDUDj06foXddWkhKtmJtl16Fft0UHD/WRtrZDKqfMbXkheAuB9PcRHe9DaHebBA1dODp43D4PHAsfS24ff4gdiWhdEYdF6wdV73Fn+YNwLsH/okuUCtXQ85D+QHu7fGVLFhjrU5fhKjofUxCsfmf4m4yj2h7dD+hJLRJk0JD/hZHQIDAQABAoGASiKwRUL2ifYCSxYv93VKOOR2hLOazarZazIchH4bBkKM9PNp/twI42l9pt9kP0aCLAToCxMZccTFSSq3BqpejZ3CTxetq/XSbRNIfJ7Xi5xrgioKkJoyIQ0Zy/D2Zz4I7PKc/UgoFSqnBN85sS1BZGA0jDZrGaV71YXnx1L3egECQQD9FaNnWn3D0yEQ2ZxabH35KpUnlR2fvQZWYL7jlXCSU/vvzxtmjgfueh4/8PxBo+64Wij5QPknS6o55IzBtQM/AkEA1n+aqPDZoGb6EeviZPF8lnaMd8jwlIfh7cWB7kaIqMx4Q0HUBfBCGzXk9Qul36gYWoxzeDwtOUijVCAdQh64owJAFx657cAriw8njyWCDhSpMXD9bT9HFIetI4j1B09omEWJ12+BHk5NVTDcwJSgRtLWBQtfgN25pShZZa6GWU/S+wJBAKkFYB+jujlVK9SXZYxZZe1CeSmio0DHWlZ8fgf+eI1aoaGN677KNa0vaL1XclutH5OqfQrPkGtFO758l9GUV7UCQE8hkYHZXFE1FfK9xHwiu/MSniiLUuPZulIjHsoRwc+Gb6P0Dk9zcZfpjEY76pCC/yy5SLWCx/jccYwIilZMYRl0AAZQS0NTIzh+cgAZamF2YS5zZWN1cml0eS5LZXlSZXAkVHlwZQAAAAAAAAAAEgAAeHIADmphdmEubGFuZy5FbnVtAAAAAAAAAAASAAB4cHQAB1BSSVZBVEU=";
         String returnFlag = "\n";
         StringBuilder sb = new StringBuilder();
         sb.append("needCheckDbConnection=true").append(returnFlag);
@@ -126,6 +127,8 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("permission.pro.subenv.list=fat1").append(returnFlag);
         sb.append("titan.admin.server.list=0:0:0:0:0:0:0:1,10.5.1.174,127.0.0.1,10.32.20.124,10.32.20.3").append(returnFlag);
         sb.append("dba.connection.check.url=http://mysqlapi.db.uat.qa.nt.ctripcorp.com:8080/database/checktitanconnect").append(returnFlag);
+        sb.append("http.white.list=1.1.1.1").append(returnFlag);
+        sb.append("token.key=" + tokenKey).append(returnFlag);
         return sb.toString();
     }
 

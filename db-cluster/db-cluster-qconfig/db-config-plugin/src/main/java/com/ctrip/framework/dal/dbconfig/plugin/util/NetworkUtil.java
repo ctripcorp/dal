@@ -6,7 +6,7 @@ import com.google.common.base.Strings;
 import javax.servlet.http.HttpServletRequest;
 
 import static com.ctrip.framework.dal.dbconfig.plugin.constant.CommonConstants.X_REAL_IP;
-
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
 
 public final class NetworkUtil {
     /**
@@ -37,6 +37,26 @@ public final class NetworkUtil {
             ip = "127.0.0.1";
         }
         return ip;
+    }
+
+    public final static String getNetType(HttpServletRequest request) {
+        String netType = request.getHeader(HEADER_NET_TYPE);
+        if (Strings.isNullOrEmpty(netType)) {
+            return PUBLIC_NET_TYPE;
+        }
+        return netType;
+    }
+
+    public final static boolean isFromPublicNet(String netType) {
+        if (Strings.isNullOrEmpty(netType)) {
+            return true;
+        }
+
+        if (PRIVATE_NET_TYPE.equalsIgnoreCase(netType)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }

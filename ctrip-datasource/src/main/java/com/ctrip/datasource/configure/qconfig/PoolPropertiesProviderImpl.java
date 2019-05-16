@@ -13,6 +13,9 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
+import qunar.tc.qconfig.client.exception.ResultUnexpectedException;
+import qunar.tc.qconfig.common.util.Constants;
+
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -83,7 +86,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
         return config;
     }
 
-    private Map<String, String> getPoolPropertiesMap(MapConfig config) {
+    protected Map<String, String> getPoolPropertiesMap(MapConfig config) {
         Map<String, String> map = null;
         Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_GET_POOLPROPERTIES);
 
@@ -94,10 +97,17 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
             transaction.addData(log);
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable e) {
-            transaction.setStatus(e);
-            String message = e.getMessage();
-            LOGGER.error(message, e);
-            throw e;
+            if ((e instanceof ResultUnexpectedException) && (((ResultUnexpectedException) e).getStatus() == Constants.FILE_NOT_FIND)) {
+                String msg = "datasource.properties not found, we will use default values later";
+                LOGGER.info(msg);
+                transaction.addData(msg);
+                transaction.setStatus(Transaction.SUCCESS);
+            } else {
+                transaction.setStatus(e);
+                String message = e.getMessage();
+                LOGGER.error(message, e);
+                throw e;
+            }
         } finally {
             transaction.complete();
         }

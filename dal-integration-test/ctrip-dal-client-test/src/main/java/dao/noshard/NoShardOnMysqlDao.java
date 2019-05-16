@@ -40,15 +40,47 @@ public class NoShardOnMysqlDao {
     }
 
 
-//	/**
-//	 * Query PersonGen by the specified ID
-//	 * The ID must be a number
-//	**/
-//	public MysqlPersonExtendsUpdatableEntity queryByPk(Number id, DalHints hints)
-//			throws SQLException {
-//		hints = DalHints.createIfAbsent(hints);
-//		return client.queryByPk(id, hints);
-//	}
+    public List<MysqlPersonExtendsUpdatableEntity> queryTopWithLikeTemplate(Integer count, DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.queryTop("name like '%Initial%'", statementParameters, hints, count);
+    }
+
+    public List<MysqlPersonExtendsUpdatableEntity> queryWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.query("name like '%Initial%'", statementParameters, hints);
+    }
+
+    public MysqlPersonExtendsUpdatableEntity queryFirstWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.queryFirst("name like '%Initial%'", statementParameters, hints);
+    }
+
+    public List<MysqlPersonExtendsUpdatableEntity> queryFromWithLikeTemplate(Integer start,Integer count,DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.queryFrom("name like '%Initial%'", statementParameters, hints,start,count);
+    }
+
+    public Integer queryCountWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.count("name like '%Initial%'", statementParameters, hints).intValue();
+    }
+
+    public int deleteWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.delete("name like '%Initial%'", statementParameters, hints);
+    }
+
+    public int updateWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return client.update("update person set name='testUpdate' where name like '%Initial%'", statementParameters, hints);
+    }
 
     public List<MysqlPersonExtendsUpdatableEntity> queryTop(Integer age, Integer count, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
@@ -1305,4 +1337,39 @@ public class NoShardOnMysqlDao {
         return queryDao.update(builder, parameters, hints);
     }
 
+    public List<MysqlPersonExtendsUpdatableEntity> queryDaoQueryTopWithLikeTemplate(Integer count, DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return queryDao.queryTop("select * from person where name like '%Initial%'", statementParameters, hints, personGenRowMapper, count);
+    }
+
+    public List<MysqlPersonExtendsUpdatableEntity> queryDaoQueryWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        FreeSelectSqlBuilder<List<MysqlPersonExtendsUpdatableEntity>> builder=new FreeSelectSqlBuilder();
+        builder.setTemplate("select * from person where name like '%Initial%'");
+        builder.atPage(1,3);
+        builder.mapWith(personGenRowMapper);
+        return queryDao.query(builder, statementParameters, hints);
+    }
+
+    public MysqlPersonExtendsUpdatableEntity queryDaoQueryFirstWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return queryDao.queryFirst("select * from person where name like '%Initial%'", statementParameters, hints, personGenRowMapper);
+    }
+
+    public List<MysqlPersonExtendsUpdatableEntity> queryDaoQueryFromWithLikeTemplate(Integer start,Integer count,DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        return queryDao.queryFrom("select * from person where name like '%Initial%'", statementParameters, hints, personGenRowMapper,start,count);
+    }
+
+    public int queryDaoUpdateWithLikeTemplate(DalHints hints) throws Exception{
+        hints = DalHints.createIfAbsent(hints);
+        StatementParameters statementParameters = new StatementParameters();
+        FreeUpdateSqlBuilder builder=new FreeUpdateSqlBuilder();
+        builder.setTemplate("update person set name='testUpdate' where name like '%Initial%'");
+        return queryDao.update(builder, statementParameters, hints);
+    }
 }

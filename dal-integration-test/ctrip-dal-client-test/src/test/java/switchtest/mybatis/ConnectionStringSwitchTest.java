@@ -16,6 +16,8 @@ import testUtil.ConnectionStringSwitch;
 import testUtil.PoolPropertiesSwitch;
 import testUtil.netstat.NetStat;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.Assert.*;
 
 
@@ -660,6 +662,109 @@ public class ConnectionStringSwitchTest {
             assertEquals(currentHostname, queryHostName(keyName1, new DalHints().inShard(0), autoTestSwitchMultipleKeysWithOneFailedAndOnePassedDao));
             assertEquals(currentHostname, queryHostName(keyName2, new DalHints().inShard(1), autoTestSwitchMultipleKeysWithOneFailedAndOnePassedDao));
 
+            log.info("恢复连接串成功");
+        } catch (Exception ex) {
+            log.error("恢复切换失败，请检查", ex);
+            fail();
+        }
+    }
+
+    @Test
+    public void testRefreshDataSourceConnectTimeout() throws Exception{
+        String invalidIp = "1.1.1.1";
+        String recoveryIp;
+        AtomicReference<Boolean> result=new AtomicReference<>(true);
+
+        //before switch
+        log.info(String.format("before switch"));
+        assertEquals(currentHostname, queryHostName(keyName1, new DalHints(), dao));
+
+        if (currentHostname.equals("FAT1868")) {
+            recoveryIp = "10.2.74.111";
+        } else {
+            recoveryIp = "10.2.74.122";
+        }
+
+        JsonArray jsonArray = new JsonArray();
+        JsonObject subJson = new JsonObject();
+        subJson.addProperty("keyname", keyName1);
+        subJson.addProperty("server", invalidIp);
+        subJson.addProperty("port", "55111");
+        jsonArray.add(subJson);
+
+//        先异步将数据源切换至1.1.1.1
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //start switch
+                    log.info(String.format("start switch"));
+                    connectionStringSwitch.postByQconfig(jsonArray, isPro);
+                    log.info(String.format("switch succeed"));
+                }catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
+        //after switch
+
+        //等待5秒获取通知重建数据源
+        log.info("5 seconds wait...");
+        Thread.sleep(5000);
+
+        //检查切换是否成功
+        log.info("After switch");
+
+        //mysqldaltest01db_W切换到超时IP，在等待超时的过程中，老数据源已经被销毁，请求报错
+
+                try {
+                    queryHostName("mysqldaltest01db_W", new DalHints(), dao);
+                    fail("创建mysqldaltest01db_W时应该失败，但是并没有，请检查切换异常IP是否成功");
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+
+
+//        再切换两次，都是超时IP，造成排队切换的现象
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //start switch
+                    log.info(String.format("start second switch"));
+                    connectionStringSwitch.postByQconfig(jsonArray, isPro);
+                    log.info(String.format("switch second succeed"));
+
+                    Thread.sleep(3000);
+                    //start switch
+                    log.info(String.format("start third switch"));
+                    connectionStringSwitch.postByQconfig(jsonArray, isPro);
+                    log.info(String.format("switch third succeed"));
+                    Thread.sleep(3000);
+                }catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
+                Thread.sleep(7000);
+        log.info("恢复连接串");
+
+        JsonArray jsonArray2 = new JsonArray();
+        JsonObject subJson3 = new JsonObject();
+        subJson3.addProperty("keyname", keyName1);
+        subJson3.addProperty("server", recoveryIp);
+        subJson3.addProperty("port", "55111");
+        jsonArray2.add(subJson3);
+
+        connectionStringSwitch.postByQconfig(jsonArray2, isPro);
+
+//        最多等待15秒，第一个超时异常应该已经跑出，排队的切换被取消，最新的一次切换立马生效
+        try {
+            Thread.sleep(15000);
+            log.info("validate after recovery");
+            assertEquals(currentHostname, queryHostName(keyName1, new DalHints(),dao));
             log.info("恢复连接串成功");
         } catch (Exception ex) {
             log.error("恢复切换失败，请检查", ex);

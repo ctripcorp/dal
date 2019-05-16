@@ -12,6 +12,11 @@ import java.sql.SQLException;
 public class AppConfig {
 
   @Bean
+  public DALServiceDao dao() throws SQLException {
+    return new DALServiceDao();
+  }
+
+  @Bean
   public DALServiceDao mySqlDao() throws SQLException {
     return new DALServiceDao("DalMySqlTest");
   }

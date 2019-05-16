@@ -46,7 +46,7 @@ public class DalDataSourceFactoryTest {
             String url = metaData.getURL();
             Assert.assertTrue(url != null);
         } catch (Throwable e) {
-            Assert.assertTrue(false);
+            Assert.fail();
         }
 
         // String resource = "mybatis-config.xml";

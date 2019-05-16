@@ -13,7 +13,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
-    private DalPropertiesManager dalSettingsManager = DalPropertiesManager.getInstance();
+    private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
 
     public void initialize(Map<String, String> settings) throws Exception {
         setSourceType(settings);
@@ -49,7 +49,7 @@ public class TitanProvider implements DataSourceConfigureProvider {
 
     @Override
     public void setup(Set<String> names) {
-        dalSettingsManager.setup();
+        dalPropertiesManager.setup();
         dataSourceConfigureManager.setup(names, sourceType);
     }
 

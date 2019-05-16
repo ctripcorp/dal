@@ -3,8 +3,10 @@ package noshardtest;
 
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
+import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.MatchPattern;
 import dao.noshard.NoShardOnMysqlDao;
+import entity.MysqlAllTypesTable;
 import entity.MysqlPersonExtendsUpdatableEntity;
 import entity.MysqlPersonTable;
 import entity.TestAlias;
@@ -1589,6 +1591,11 @@ public class NoShardOnMysqlDaoUnitTest {
         assertEquals(1, ret.size());
     }
 
+    @Test
+    public void testTableDaoQuery() throws Exception{
+
+    }
+
 //    @Test
 //    public void testWaitConnection() throws Exception {
 //        Thread t1 = new Thread() {
@@ -1628,4 +1635,76 @@ public class NoShardOnMysqlDaoUnitTest {
 //        Thread.sleep(60000);
 //         System.out.println("Done");
 //    }
+
+    @Test
+    public void queryTopWithLikeTemplateTest() throws Exception{
+        List<MysqlPersonExtendsUpdatableEntity> ret=dao.queryTopWithLikeTemplate(3,null);
+        assertEquals(3,ret.size());
+    }
+
+    @Test
+    public void queryWithLikeTemplateTest() throws Exception{
+        List<MysqlPersonExtendsUpdatableEntity> ret=dao.queryWithLikeTemplate(null);
+        assertEquals(6,ret.size());
+    }
+
+    @Test
+    public void queryFirstWithLikeTemplateTest() throws Exception{
+        MysqlPersonExtendsUpdatableEntity ret=dao.queryFirstWithLikeTemplate(null);
+        assertEquals(1,ret.getID().intValue());
+    }
+
+    @Test
+    public void queryFromWithLikeTemplateTest() throws Exception{
+        List<MysqlPersonExtendsUpdatableEntity> ret=dao.queryFromWithLikeTemplate(0,3,null);
+        assertEquals(3,ret.size());
+    }
+
+    @Test
+    public void queryCountWithLikeTemplateTest() throws Exception{
+        int count=dao.queryCountWithLikeTemplate(null);
+        assertEquals(6,count);
+    }
+
+    @Test
+    public void deleteWithLikeTemplateTest() throws Exception{
+        int ret=dao.deleteWithLikeTemplate(null);
+        assertEquals(6,ret);
+    }
+
+    @Test
+    public void updateWithLikeTemplateTest() throws Exception{
+        int ret=dao.updateWithLikeTemplate(null);
+        assertEquals(6,ret);
+    }
+
+    @Test
+    public void queryDaoQueryTopWithLikeTemplateTest() throws Exception{
+        List<MysqlPersonExtendsUpdatableEntity> ret=dao.queryDaoQueryTopWithLikeTemplate(3,null);
+        assertEquals(3,ret.size());
+    }
+
+    @Test
+    public void queryDaoQueryWithLikeTemplateTest() throws Exception{
+        List<MysqlPersonExtendsUpdatableEntity> ret=dao.queryDaoQueryWithLikeTemplate(null);
+        assertEquals(3,ret.size());
+    }
+
+    @Test
+    public void queryDaoQueryFirstWithLikeTemplateTest() throws Exception{
+        MysqlPersonExtendsUpdatableEntity ret=dao.queryDaoQueryFirstWithLikeTemplate(null);
+        assertEquals(1,ret.getID().intValue());
+    }
+
+    @Test
+    public void queryDaoQueryFromWithLikeTemplateTest() throws Exception{
+        List<MysqlPersonExtendsUpdatableEntity> ret=dao.queryDaoQueryFromWithLikeTemplate(1,3,null);
+        assertEquals(3,ret.size());
+    }
+
+    @Test
+    public void queryDaoUpdateWithLikeTemplateTest() throws Exception{
+        int ret=dao.queryDaoUpdateWithLikeTemplate(null);
+        assertEquals(6,ret);
+    }
 }

@@ -84,11 +84,11 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
                 String operator = (String) request.getAttribute(REQ_ATTR_OPERATOR);
                 Preconditions.checkNotNull(operator, "operator参数不能为空");
 
-                mongoClusterEntity.setOperator(operator);
-                mongoClusterEntity.setUpdateTime(new Date());
-
                 LOGGER.info("postHandleDetail(): mongoClusterEntity=" + mongoClusterEntity);
                 if (mongoClusterEntity != null) {
+                    mongoClusterEntity.setOperator(operator);
+                    mongoClusterEntity.setUpdateTime(new Date());
+
                     // todo: set 'dbName' to lowercase?
                     EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
                     Preconditions.checkArgument(profile != null && !Strings.isNullOrEmpty(profile.formatProfile()),

@@ -31,7 +31,7 @@ public class RefreshableDataSourceTest {
         final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
 
         Properties p2 = new Properties();
-        p2.setProperty("userName", "root");
+        p2.setProperty("userName", "refresh");
         p2.setProperty("password", "111111");
         p2.setProperty("connectionUrl", "jdbc:mysql://1.1.1.1:3306/test");
         p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
@@ -44,18 +44,19 @@ public class RefreshableDataSourceTest {
                 try {
                     refreshableDataSource.refreshDataSource("test", configure2);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             }
         }).start();
 
         Thread.sleep(500);
-        try {
-            Assert.assertNotNull(refreshableDataSource.getSingleDataSource());
-            Assert.assertNull(refreshableDataSource.getSingleDataSource().getDataSource());
-        } catch (Throwable e) {
-            Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getProperty("connectionUrl"));
-        }
+        //切换过程中的请求，如果获取datasource不为空，不报错，且配置为新
+        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", ((org.apache.tomcat.jdbc.pool.DataSource) refreshableDataSource.getSingleDataSource().getDataSource()).getUrl());
+        Assert.assertEquals("refresh", ((org.apache.tomcat.jdbc.pool.DataSource) refreshableDataSource.getSingleDataSource().getDataSource()).getUsername());
+
+        Assert.assertNotNull(refreshableDataSource.getSingleDataSource());
+        Assert.assertNotNull(refreshableDataSource.getSingleDataSource().getDataSource());
+        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getProperty("connectionUrl"));
 
         Thread.sleep(3000);
         Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getProperty("connectionUrl"));
@@ -98,6 +99,7 @@ public class RefreshableDataSourceTest {
         }).start();
 
         Thread.sleep(200);
+        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", ((org.apache.tomcat.jdbc.pool.DataSource)refreshableDataSource.getSingleDataSource().getDataSource()).getUrl());
         Assert.assertEquals("FirstRefresh", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
 
         Properties p3 = new Properties();
@@ -120,6 +122,8 @@ public class RefreshableDataSourceTest {
         }).start();
 
         Thread.sleep(200);
+        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", ((org.apache.tomcat.jdbc.pool.DataSource)refreshableDataSource.getSingleDataSource().getDataSource()).getUrl());
+        Assert.assertEquals("SecondRefresh", ((org.apache.tomcat.jdbc.pool.DataSource)refreshableDataSource.getSingleDataSource().getDataSource()).getUsername());
         Assert.assertEquals("SecondRefresh", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
         SingleDataSource secondDataSource = refreshableDataSource.getSingleDataSource();
 
@@ -143,18 +147,18 @@ public class RefreshableDataSourceTest {
         }).start();
 
         Thread.sleep(200);
+        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", ((org.apache.tomcat.jdbc.pool.DataSource)refreshableDataSource.getSingleDataSource().getDataSource()).getUrl());
+        Assert.assertEquals("ThirdRefresh", ((org.apache.tomcat.jdbc.pool.DataSource)refreshableDataSource.getSingleDataSource().getDataSource()).getUsername());
         Assert.assertEquals("ThirdRefresh", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
         SingleDataSource thirdDataSource = refreshableDataSource.getSingleDataSource();
 
 //        第一次timeout异常时间到，第二次切换被cancel，第三次切换生效
         Thread.sleep(3000);
         Assert.assertEquals("ThirdRefresh", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
-        Assert.assertNull(secondDataSource.getDataSource());
         Assert.assertNotNull(thirdDataSource.getDataSource());
 
         Thread.sleep(3000);
         Assert.assertEquals("ThirdRefresh", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
-        Assert.assertNull(secondDataSource.getDataSource());
 
         Thread.sleep(3000);
         Assert.assertEquals("ThirdRefresh", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
@@ -203,6 +207,7 @@ public class RefreshableDataSourceTest {
 
         Thread.sleep(4000);
         Assert.assertNotNull(refreshableDataSource.getSingleDataSource());
+        Assert.assertNotNull(refreshableDataSource.getSingleDataSource().getDataSource());
         Assert.assertEquals("jdbc:mysql://10.32.20.139:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getProperty("connectionUrl"));
     }
 

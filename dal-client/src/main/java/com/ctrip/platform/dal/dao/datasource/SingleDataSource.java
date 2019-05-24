@@ -54,20 +54,28 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         this.name = name;
         this.dataSourceConfigure = dataSourceConfigure;
         this.task = task;
+
+        createDataSource(name,dataSourceConfigure);
     }
 
-    public void createPool(String name, DataSourceConfigure dataSourceConfigure) {
+    private void createDataSource(String name, DataSourceConfigure dataSourceConfigure){
         try {
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
             setPoolPropertiesIntoValidator(poolProperties);
 
             final org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(poolProperties);
             this.dataSource = dataSource;
+        } catch (Throwable e) {
+            LOGGER.error(String.format("Error creating datasource for %s", name), e);
+        }
+    }
 
+    public void createPool(String name, DataSourceConfigure dataSourceConfigure) {
+        try {
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
-                    poolProperties.getDriverClassName(), dataSourceConfigure.getConnectionUrl());
+                    dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
             long startTime = System.currentTimeMillis();
-            dataSource.createPool();
+            ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).createPool();
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
         } catch (Throwable e) {

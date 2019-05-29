@@ -2,7 +2,9 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.mongo.MongoClusterGetHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.mongo.MongoClusterPostHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.mongo.MongoClusterUpdateHandler;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.PluginRegisterPoint;
@@ -24,6 +26,8 @@ public class MongoAdminPlugin extends AdminPluginAdapter {
         dispatcher = new AdminHandlerDispatcher();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
         adminHandlers.add(new MongoClusterPostHandler(getQconfigService()));
+        adminHandlers.add(new MongoClusterUpdateHandler(getQconfigService()));
+        adminHandlers.add(new MongoClusterGetHandler(getQconfigService()));
 
         for (AdminHandler handler : adminHandlers) {
             dispatcher.register(handler);

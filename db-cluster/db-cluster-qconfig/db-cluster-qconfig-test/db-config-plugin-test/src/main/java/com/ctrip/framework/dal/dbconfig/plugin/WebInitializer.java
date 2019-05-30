@@ -11,11 +11,11 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 @ServletComponentScan
 public class WebInitializer extends SpringBootServletInitializer {
 
-  /**
-   * Configure your application when it’s launched by the servlet container
-   */
-  @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-    return application.sources(WebInitializer.class);
-  }
+    /**
+     * Configure your application when it’s launched by the servlet container
+     */
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(WebInitializer.class);
+    }
 }

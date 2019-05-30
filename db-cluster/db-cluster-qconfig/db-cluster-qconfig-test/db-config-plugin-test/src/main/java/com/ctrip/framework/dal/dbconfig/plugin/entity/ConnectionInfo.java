@@ -83,6 +83,7 @@ public class ConnectionInfo {
     public String getServer() {
         return server;
     }
+
     public ConnectionInfo setServer(String server) {
         this.server = server;
         return this;
@@ -91,6 +92,7 @@ public class ConnectionInfo {
     public String getServerIp() {
         return serverIp;
     }
+
     public ConnectionInfo setServerIp(String serverIp) {
         this.serverIp = serverIp;
         return this;
@@ -99,6 +101,7 @@ public class ConnectionInfo {
     public String getPort() {
         return port;
     }
+
     public ConnectionInfo setPort(String port) {
         this.port = port;
         return this;
@@ -107,6 +110,7 @@ public class ConnectionInfo {
     public String getUid() {
         return uid;
     }
+
     public ConnectionInfo setUid(String uid) {
         this.uid = uid;
         return this;
@@ -115,6 +119,7 @@ public class ConnectionInfo {
     public String getPassword() {
         return password;
     }
+
     public ConnectionInfo setPassword(String password) {
         this.password = password;
         return this;
@@ -123,6 +128,7 @@ public class ConnectionInfo {
     public String getDbName() {
         return dbName;
     }
+
     public ConnectionInfo setDbName(String dbName) {
         this.dbName = dbName;
         return this;
@@ -131,6 +137,7 @@ public class ConnectionInfo {
     public String getExtParam() {
         return extParam;
     }
+
     public ConnectionInfo setExtParam(String extParam) {
         this.extParam = extParam;
         return this;

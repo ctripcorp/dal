@@ -27,9 +27,7 @@ public class MongoPluginServiceTest {
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
     public static final String OPERATOR = "mongoTest";
-    public static final String FWS_SSL_CODE = "VZ00000000000441";
     public static final String UPDATE_SSL_CODE = "HN00000000002356";
-    public static final String BAD_SSL_CODE = "HN111111111112356";
     public static final String MONGO_CLUSTER_NAME = "diuserprofile-diuserprofiledb";
 
     @Autowired

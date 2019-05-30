@@ -25,7 +25,7 @@ public class TitanPermissionTest {
     @Autowired
     private TitanPluginService titanPluginService;
 
-//    @Test
+    //    @Test
     public void getClientConfig() throws Exception {
         // add permission
         PluginResponse response = titanPluginService.addPermissions(TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
@@ -60,7 +60,7 @@ public class TitanPermissionTest {
         assert !isSuccess;
     }
 
-//    @Test
+    //    @Test
     public void addPermissions() throws Exception {
         PluginResponse response = titanPluginService.addPermissions(TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
         assert response.getStatus() == 0;

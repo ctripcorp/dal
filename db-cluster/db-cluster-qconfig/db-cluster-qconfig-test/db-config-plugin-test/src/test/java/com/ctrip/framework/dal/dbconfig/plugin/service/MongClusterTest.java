@@ -37,10 +37,9 @@ public class MongClusterTest {
         assert response != null;
         assert response.getStatus() != 0;
 
-        // get client config from fat16, need add vm option.
-        addLocalVmOptions();
-//        addFat16VmOptions();
-        String content = ConfigUtils.getMongoFileResult(mongoCluster.getClusterName());
+        // get client config, need add vm option.
+        addVmOptions();
+        String content = ConfigUtils.getMongoFileResult("7a11182c-c27b-4d23-90d7-a774295f71b1-test");
         assert Strings.isNotBlank(content);
     }
 
@@ -51,9 +50,8 @@ public class MongClusterTest {
         assert response != null;
         assert response.getStatus() == 0;
 
-        // get client config from fat16, need add vm option.
-        addLocalVmOptions();
-//        addFat16VmOptions();
+        // get client config, need add vm option.
+        addVmOptions();
         String content = ConfigUtils.getMongoFileResult(mongoCluster.getClusterName());
         assert Strings.isNotBlank(content);
     }
@@ -69,6 +67,17 @@ public class MongClusterTest {
         assert response != null;
         assert response.getStatus() == 0;
 
+        // get cluster
+        MongoClusterGetResponse getResponse = mongoPluginService.getMongoCluster(clusterName, FAT_ENV);
+        assert getResponse != null;
+        assert getResponse.getStatus() == 0;
+        MongoClusterGetOutputEntity data = getResponse.getData();
+        assert data != null;
+        assert data.getClusterName().equalsIgnoreCase(clusterName);
+        assert data.getUserId().equalsIgnoreCase(userId);
+        assert data.getEnabled();
+        int version = data.getVersion();
+
         // update cluster
         mongoCluster.setEnabled(false);
         mongoCluster.setUserId(NEW_USER_ID);
@@ -77,18 +86,17 @@ public class MongClusterTest {
         assert updateResponse.getStatus() == 0;
 
         // get cluster
-        MongoClusterGetResponse getResponse = mongoPluginService.getMongoCluster(clusterName, FAT_ENV);
+        getResponse = mongoPluginService.getMongoCluster(clusterName, FAT_ENV);
         assert getResponse != null;
         assert getResponse.getStatus() == 0;
-        MongoClusterGetOutputEntity data = getResponse.getData();
+        data = getResponse.getData();
         assert data != null;
         assert data.getClusterName().equalsIgnoreCase(clusterName);
         assert data.getUserId().equalsIgnoreCase(NEW_USER_ID);
         assert !data.getEnabled();
 
         // get client config, need add vm option.
-        addLocalVmOptions();
-//        addFat16VmOptions();
+        addVmOptions();
         String content = ConfigUtils.getMongoFileResult(clusterName);
         assert Strings.isNotBlank(content);
         System.out.println("---------------------------mongo cluster client config begin----------------------------");
@@ -97,8 +105,15 @@ public class MongClusterTest {
         MongoClusterEntity clientConfig = Utils.gson.fromJson(content, MongoClusterEntity.class);
         assert clientConfig != null;
         assert clientConfig.getClusterName().equalsIgnoreCase(clusterName);
+        assert clientConfig.getClusterType().equalsIgnoreCase(mongoCluster.getClusterType());
+        assert clientConfig.getDbName().equalsIgnoreCase(mongoCluster.getDbName());
         assert clientConfig.getUserId().equalsIgnoreCase(NEW_USER_ID);
+        assert clientConfig.getPassword().equalsIgnoreCase(mongoCluster.getPassword());
+        assert clientConfig.getVersion() == version + 1;
         assert !clientConfig.getEnabled();
+        assert clientConfig.getUpdateTime() != null;
+        assert Strings.isNotBlank(clientConfig.getOperator());
+        assert clientConfig.getNodes() != null && !clientConfig.getNodes().isEmpty();
     }
 
     @Test
@@ -135,16 +150,20 @@ public class MongClusterTest {
         return mongoCluster;
     }
 
-    private void addFat16VmOptions() {
-        System.setProperty("qconfig.admin", "qconfig.fat16.qa.nt.ctripcorp.com");
-        System.setProperty("qserver.http.urls", "10.5.80.175:8080");
-        System.setProperty("qserver.https.urls", "10.5.80.175:8443");
-    }
+    private void addVmOptions() {
+        // local
+//        System.setProperty("qconfig.admin", "localhost:8082");
+//        System.setProperty("qserver.http.urls", "localhost:8080");
+//        System.setProperty("qserver.https.urls", "localhost:8443");
 
-    private void addLocalVmOptions() {
-        // get client config from local, need add vm option.
-        System.setProperty("qconfig.admin", "localhost:8082");
-        System.setProperty("qserver.http.urls", "localhost:8080");
-        System.setProperty("qserver.https.urls", "localhost:8443");
+        // qconfig2: fat1
+        System.setProperty("qconfig.admin", "http://qconfig2.fat1.qa.nt.ctripcorp.com");
+        System.setProperty("qserver.http.urls", "10.5.28.92:8080");
+        System.setProperty("qserver.https.urls", "10.5.28.92:8443");
+
+        // fat16
+//        System.setProperty("qconfig.admin", "qconfig.fat16.qa.nt.ctripcorp.com");
+//        System.setProperty("qserver.http.urls", "10.5.80.175:8080");
+//        System.setProperty("qserver.https.urls", "10.5.80.175:8443");
     }
 }

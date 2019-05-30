@@ -2,6 +2,7 @@ package com.ctrip.framework.db.cluster.service;
 
 import com.ctrip.framework.db.cluster.config.ConfigService;
 import com.ctrip.framework.db.cluster.domain.MongoCluster;
+import com.ctrip.framework.db.cluster.domain.MongoClusterGetResponse;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.util.HttpUtil;
@@ -18,14 +19,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.ctrip.framework.db.cluster.util.Constants.MONGO_CLIENT_APPID;
-
 /**
  * Created by shenjie on 2019/4/2.
  */
 @Slf4j
 @Service
 public class PluginMongoService {
+
+    private static final String ADD_OPERATOR = "/add";
+    private static final String GET_OPERATOR = "/info";
+    private static final String UPDATE_OPERATOR = "/update";
 
     @Autowired
     private ConfigService configService;
@@ -34,12 +37,8 @@ public class PluginMongoService {
         Transaction t = Cat.newTransaction("Plugin.Add.Mongo.Cluster", mongoCluster.getClusterName());
         PluginResponse pluginResponse;
         try {
-            List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
-            urlParams.add(new BasicNameValuePair("env", env));
-            urlParams.add(new BasicNameValuePair("operator", operator));
-            String request = Util.gson.toJson(mongoCluster);
-            String response = HttpUtil.getInstance().sendPost(configService.getPluginMongoUrl(), urlParams, request);
-            pluginResponse = Util.gson.fromJson(response, PluginResponse.class);
+            String url = configService.getPluginMongoUrl() + ADD_OPERATOR;
+            pluginResponse = getResponse(mongoCluster, env, operator, url);
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {
             log.error("Add mongo cluster[" + mongoCluster.getClusterName() + "] to plugin encounter error.", e);
@@ -49,6 +48,56 @@ public class PluginMongoService {
         } finally {
             t.complete();
         }
+        return pluginResponse;
+    }
+
+    public PluginResponse update(MongoCluster mongoCluster, String env, String operator) throws DBClusterServiceException {
+        Transaction t = Cat.newTransaction("Plugin.Update.Mongo.Cluster", mongoCluster.getClusterName());
+        PluginResponse pluginResponse;
+        try {
+            String url = configService.getPluginMongoUrl() + UPDATE_OPERATOR;
+            pluginResponse = getResponse(mongoCluster, env, operator, url);
+            t.setStatus(Message.SUCCESS);
+        } catch (Exception e) {
+            log.error("Update mongo cluster[" + mongoCluster.getClusterName() + "] to plugin encounter error.", e);
+            t.setStatus(e);
+            Cat.logError(e);
+            throw new DBClusterServiceException(e);
+        } finally {
+            t.complete();
+        }
+        return pluginResponse;
+    }
+
+    public MongoClusterGetResponse get(String clusterName, String env) throws DBClusterServiceException {
+        Transaction t = Cat.newTransaction("Plugin.Get.Mongo.Cluster", clusterName);
+        MongoClusterGetResponse pluginResponse;
+        try {
+            List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
+            urlParams.add(new BasicNameValuePair("clustername", clusterName));
+            urlParams.add(new BasicNameValuePair("env", env));
+            String url = configService.getPluginMongoUrl() + GET_OPERATOR;
+            String response = HttpUtil.getInstance().sendGet(url, urlParams);
+            pluginResponse = Util.gson.fromJson(response, MongoClusterGetResponse.class);
+            t.setStatus(Message.SUCCESS);
+        } catch (Exception e) {
+            log.error("Get mongo cluster[" + clusterName + "] from plugin encounter error.", e);
+            t.setStatus(e);
+            Cat.logError(e);
+            throw new DBClusterServiceException(e);
+        } finally {
+            t.complete();
+        }
+        return pluginResponse;
+    }
+
+    private PluginResponse getResponse(MongoCluster mongoCluster, String env, String operator, String url) throws Exception {
+        List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
+        urlParams.add(new BasicNameValuePair("env", env));
+        urlParams.add(new BasicNameValuePair("operator", operator));
+        String request = Util.gson.toJson(mongoCluster);
+        String response = HttpUtil.getInstance().sendPost(url, urlParams, request);
+        PluginResponse pluginResponse = Util.gson.fromJson(response, PluginResponse.class);
         return pluginResponse;
     }
 }

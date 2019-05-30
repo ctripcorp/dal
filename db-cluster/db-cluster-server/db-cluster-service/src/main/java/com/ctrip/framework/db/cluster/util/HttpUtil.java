@@ -41,6 +41,12 @@ public class HttpUtil {
         return sendPost(url, headers, urlParams, message, DEFAULT_TIMEOUT_MS);
     }
 
+    public String sendGet(String url, List<NameValuePair> urlParams) throws Exception {
+        Map<String, String> headers = Maps.newHashMapWithExpectedSize(1);
+        headers.put("Content-Type", "application/json");
+        return sendGet(url, headers, urlParams, DEFAULT_TIMEOUT_MS);
+    }
+
     public String sendPost(String url, Map<String, String> headers, List<NameValuePair> urlParams, String message, int timeout) throws Exception {
         HttpPost httpPost = new HttpPost(url);
         RequestConfig requestConfig = RequestConfig.custom()

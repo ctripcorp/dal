@@ -102,7 +102,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
     public void register(String dbName, DataSourceConfigureChangeListener listener) {}
 
     @Override
-    public DataSourceConfigure loadDataSourceConfigure(String dbName){
+    public DataSourceConfigure forceLoadDataSourceConfigure(String dbName){
        return getDataSourceConfigure(dbName);
     }
 

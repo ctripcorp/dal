@@ -2,8 +2,6 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
-import org.springframework.scheduling.SchedulingAwareRunnable;
-
 import java.util.*;
 
 public class DataSourceConfigure extends AbstractDataSourceConfigure

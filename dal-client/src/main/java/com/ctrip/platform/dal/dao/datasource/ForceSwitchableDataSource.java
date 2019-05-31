@@ -6,18 +6,19 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 
 public class ForceSwitchableDataSource extends RefreshableDataSource implements IForceSwitchableDataSource {
     private IDataSourceConfigureProvider provider;
     private SwitchableDataSourceStatus switchableDataSourceStatus;
-    private SwitchListener listener;
+    private CopyOnWriteArraySet<SwitchListener> listeners = new CopyOnWriteArraySet<>();
     private static Map<String, String> cache = new ConcurrentHashMap<>();
 
     public ForceSwitchableDataSource(String name, IDataSourceConfigureProvider provider) throws SQLException {
-        super(name, DataSourceConfigure.valueOf(provider.loadDataSourceConfigure(name)));
+        super(name, DataSourceConfigure.valueOf(provider.forceLoadDataSourceConfigure()));
         this.provider = provider;
-        switchableDataSourceStatus = new SwitchableDataSourceStatus(false, provider.getDataSourceConfigure(name).getHostName(), provider.getDataSourceConfigure(name).getPort());
+        switchableDataSourceStatus = new SwitchableDataSourceStatus(false, provider.getDataSourceConfigure().getHostName(), provider.getDataSourceConfigure().getPort());
     }
 
     public SwitchableDataSourceStatus forceSwitch(String ip, Integer port) {
@@ -51,7 +52,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
 
     public SwitchableDataSourceStatus restore() {
         String name = getSingleDataSource().getName();
-        DataSourceConfigure configure = DataSourceConfigure.valueOf(provider.loadDataSourceConfigure(name));
+        DataSourceConfigure configure = DataSourceConfigure.valueOf(provider.forceLoadDataSourceConfigure());
 
         SwitchableDataSourceStatus oldStatus = new SwitchableDataSourceStatus(switchableDataSourceStatus.isForceSwitched(), switchableDataSourceStatus.getHostName(), switchableDataSourceStatus.getPort());
 
@@ -65,7 +66,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     }
 
     public void addListener(SwitchListener listener) {
-        this.listener = listener;
+        listeners.add(listener);
     }
 
     private synchronized void addCache(String url) {
@@ -80,24 +81,28 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
 
     private class DefaultForceSwitchListener implements ForceSwitchListener{
         public void onCreatePoolSuccess(DataSourceConfigure configure){
-             listener.onForceSwitchSuccess(new SwitchableDataSourceStatus(true,configure.getHostName(),configure.getPort(),true));
+            for (SwitchListener listener : listeners)
+                listener.onForceSwitchSuccess(new SwitchableDataSourceStatus(true, configure.getHostName(), configure.getPort(), true));
              addCache(configure.getConnectionUrl());
         }
 
         public void onCreatePoolFail(DataSourceConfigure configure,Throwable e) {
-            listener.onForceSwitchFail(new SwitchableDataSourceStatus(true,configure.getHostName(),configure.getPort(),false),e);
+            for (SwitchListener listener : listeners)
+                listener.onForceSwitchFail(new SwitchableDataSourceStatus(true, configure.getHostName(), configure.getPort(), false), e);
             addCache(configure.getConnectionUrl());
         }
     }
 
     private class DefaultRestoreListener implements RestoreListener{
-        public void onCreatePoolSuccess(DataSourceConfigure configure){
-            listener.onRestoreSuccess(new SwitchableDataSourceStatus(false,configure.getHostName(),configure.getPort(),true));
+        public void onCreatePoolSuccess(DataSourceConfigure configure) {
+            for (SwitchListener listener : listeners)
+                listener.onRestoreSuccess(new SwitchableDataSourceStatus(false, configure.getHostName(), configure.getPort(), true));
             addCache(configure.getConnectionUrl());
         }
 
-        public void onCreatePoolFail(DataSourceConfigure configure,Throwable e) {
-            listener.onRestoreFail(new SwitchableDataSourceStatus(false,configure.getHostName(),configure.getPort(),false),e);
+        public void onCreatePoolFail(DataSourceConfigure configure, Throwable e) {
+            for (SwitchListener listener : listeners)
+                listener.onRestoreFail(new SwitchableDataSourceStatus(false, configure.getHostName(), configure.getPort(), false), e);
             addCache(configure.getConnectionUrl());
         }
     }

@@ -1,21 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 
-public abstract class AbstractDataSourceConfigure implements IDataSourceConfigure {
-
-    public abstract String getUserName();
-
-    public abstract String getPassword();
-
-    public abstract String getConnectionUrl();
-
-    public abstract String getDriverClass();
-
-    public abstract String getHostName();
-
-    public abstract Integer getPort();
-
-    public abstract String getDBName();
+public  abstract class AbstractDataSourceConfigure implements IDataSourceConfigure {
 
     public String getEncoding(){
         return null;

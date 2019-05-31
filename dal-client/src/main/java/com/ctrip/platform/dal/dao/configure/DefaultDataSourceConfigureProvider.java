@@ -27,7 +27,7 @@ public class DefaultDataSourceConfigureProvider implements DataSourceConfigurePr
     public void register(String dbName, DataSourceConfigureChangeListener listener) {}
 
     @Override
-    public DataSourceConfigure loadDataSourceConfigure(String dbName) {
+    public DataSourceConfigure forceLoadDataSourceConfigure(String dbName) {
         return getDataSourceConfigure(dbName);
     }
 

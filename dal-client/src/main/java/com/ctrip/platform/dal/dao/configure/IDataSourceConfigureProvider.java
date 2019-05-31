@@ -2,8 +2,8 @@ package com.ctrip.platform.dal.dao.configure;
 
 public interface IDataSourceConfigureProvider {
 //    get datasource configure from local cache
-    IDataSourceConfigure getDataSourceConfigure(String dbName);
+    IDataSourceConfigure getDataSourceConfigure();
 
 //    load datasource configure from configure center
-    IDataSourceConfigure loadDataSourceConfigure(String dbName);
+    IDataSourceConfigure forceLoadDataSourceConfigure();
 }

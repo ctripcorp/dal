@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.configure.SingleDataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.IDataSourceConfigure;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -42,7 +43,7 @@ public class DataSourceLocator {
 
     /**
      * Get DataSource by real db source name
-     * 
+     *
      * @param name
      * @return DataSource
      * @throws NamingException
@@ -78,8 +79,8 @@ public class DataSourceLocator {
             throw new SQLException("Can not find connection configure for " + name);
         }
 
-//        RefreshableDataSource rds = new RefreshableDataSource(name, config);
-        ForceSwitchableDataSource fsds = new ForceSwitchableDataSource(name,provider);
+        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(name, provider);
+        ForceSwitchableDataSource fsds = new ForceSwitchableDataSource(name, dataSourceConfigureProvider);
         provider.register(name, fsds);
         executor.execute(fsds);
 

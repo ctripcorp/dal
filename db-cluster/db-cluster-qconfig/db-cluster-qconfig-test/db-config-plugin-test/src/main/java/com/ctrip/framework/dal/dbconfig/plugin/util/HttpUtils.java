@@ -28,7 +28,7 @@ public class HttpUtils {
 
     private static final CloseableHttpClient httpClient = HttpClients.createDefault();
     private static final HttpUtils instance = new HttpUtils();
-    private static final int DEFAULT_TIMEOUT_MS = 10000;
+    private static final int DEFAULT_TIMEOUT_MS = 60000;
 
     public static HttpUtils getInstance() {
         return instance;

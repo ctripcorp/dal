@@ -73,6 +73,38 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
     }
 
     @Test
+    public void testPostHandleNotExist() {
+        EnvProfile profile = new EnvProfile(env, subEnv);
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName + "test").anyTimes();
+        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
+        EasyMock.replay(request);
+
+        boolean isSuccess = true;
+        try {
+            PluginResult result = handler.postHandle(request);
+        } catch (Exception e) {
+            System.out.println("exception:" + e.getMessage());
+            isSuccess = false;
+        }
+        assert !isSuccess;
+    }
+
+    @Test
+    public void testPostHandleContentEmpty() {
+        EnvProfile profile = new EnvProfile(env, subEnv);
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName + "test").anyTimes();
+        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
+        EasyMock.replay(request);
+
+        PluginResult result = handler.postHandle(request);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
+        Assert.assertNull(result.getAttribute());
+    }
+
+    @Test
     public void testPostHandle2() {
         EnvProfile profile = new EnvProfile(env, subEnv);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();

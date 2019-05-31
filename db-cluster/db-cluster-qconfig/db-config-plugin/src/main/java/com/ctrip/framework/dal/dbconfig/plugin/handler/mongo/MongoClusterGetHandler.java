@@ -116,7 +116,7 @@ public class MongoClusterGetHandler extends BaseAdminHandler implements MongoCon
         List<ConfigDetail> configDetails = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "MongoClusterGetHandler", configFields); //Exact match ???
 
         // build cluster
-        MongoClusterGetOutputEntity outputEntity = buildCluster(configDetails);
+        MongoClusterGetOutputEntity outputEntity = buildCluster(dataId, configDetails);
 
         return outputEntity;
     }
@@ -139,7 +139,7 @@ public class MongoClusterGetHandler extends BaseAdminHandler implements MongoCon
         return outputEntity;
     }
 
-    private MongoClusterGetOutputEntity buildCluster(List<ConfigDetail> configDetails) throws Exception {
+    private MongoClusterGetOutputEntity buildCluster(String clusterName, List<ConfigDetail> configDetails) throws Exception {
         MongoClusterGetOutputEntity outputEntity = null;
         if (configDetails != null && !configDetails.isEmpty()) {
             ConfigDetail configDetail = configDetails.get(0);
@@ -152,6 +152,9 @@ public class MongoClusterGetHandler extends BaseAdminHandler implements MongoCon
 
                 // get encrypted cluster content
                 String encryptedContent = configDetail.getContent();
+                if (Strings.isNullOrEmpty(encryptedContent)) {
+                    return outputEntity;
+                }
                 MongoClusterEntity mongoCluster = GsonUtils.json2T(encryptedContent, MongoClusterEntity.class);
 
                 // decrypt userId
@@ -159,22 +162,28 @@ public class MongoClusterGetHandler extends BaseAdminHandler implements MongoCon
 
                 // clean sslCode and password
                 outputEntity = convert(mongoCluster);
-
             }
+        } else {
+            // not exist, throw exception
+            throw new DbConfigPluginException(String.format("Mongo cluster[%s] 不存在.", clusterName));
         }
         return outputEntity;
     }
 
     private void decrypt(MongoClusterEntity mongoCluster, String profile) throws Exception {
-        Properties needDecryptPro = new Properties();
-        needDecryptPro.put(MongoConstants.CONNECTIONSTRING_USER_ID, mongoCluster.getUserId());
-        needDecryptPro.put(TitanConstants.SSLCODE, mongoCluster.getSslCode());
+        String userId = mongoCluster.getUserId();
+        String sslCode = mongoCluster.getSslCode();
+        if (!Strings.isNullOrEmpty(userId) && !Strings.isNullOrEmpty(sslCode)) {
+            Properties needDecryptPro = new Properties();
+            needDecryptPro.put(MongoConstants.CONNECTIONSTRING_USER_ID, mongoCluster.getUserId());
+            needDecryptPro.put(TitanConstants.SSLCODE, mongoCluster.getSslCode());
 
-        PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(profile));
-        CryptoManager cryptoManager = new CryptoManager(config);
+            PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(profile));
+            CryptoManager cryptoManager = new CryptoManager(config);
 
-        Properties decryptedProp = cryptoManager.decrypt(dataSourceCrypto, keyService, needDecryptPro);
-        mongoCluster.setUserId(decryptedProp.getProperty(MongoConstants.CONNECTIONSTRING_USER_ID));
+            Properties decryptedProp = cryptoManager.decrypt(dataSourceCrypto, keyService, needDecryptPro);
+            mongoCluster.setUserId(decryptedProp.getProperty(MongoConstants.CONNECTIONSTRING_USER_ID));
+        }
     }
 
 }

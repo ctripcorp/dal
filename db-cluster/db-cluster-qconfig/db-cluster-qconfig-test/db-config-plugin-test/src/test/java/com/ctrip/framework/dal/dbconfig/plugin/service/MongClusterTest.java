@@ -116,12 +116,33 @@ public class MongClusterTest {
         assert clientConfig.getNodes() != null && !clientConfig.getNodes().isEmpty();
     }
 
+
+    @Test
+    public void getClient() {
+        // get client config, need add vm option.
+        addVmOptions();
+        String content = ConfigUtils.getMongoFileResult(MONGO_CLUSTER_NAME);
+        assert Strings.isNotBlank(content);
+        System.out.println("---------------------------mongo cluster client config begin----------------------------");
+        System.out.println(content);
+        System.out.println("---------------------------mongo cluster client config end----------------------------");
+    }
+
     @Test
     public void get() {
         MongoClusterGetResponse response = mongoPluginService.getMongoCluster(MONGO_CLUSTER_NAME, FAT_ENV);
         assert response != null;
         assert response.getStatus() == 0;
         assert response.getData() != null;
+    }
+
+    @Test
+    public void updateNotExist() {
+        // update cluster
+        MongoClusterEntity mongoCluster = generateMongoClusterEntity(UUID.randomUUID().toString());
+        PluginResponse updateResponse = mongoPluginService.updateMongoCluster(mongoCluster, FAT_ENV, OPERATOR);
+        assert updateResponse != null;
+        assert updateResponse.getStatus() != 0;
     }
 
     private MongoClusterEntity generateMongoClusterEntity(String clusterName) {

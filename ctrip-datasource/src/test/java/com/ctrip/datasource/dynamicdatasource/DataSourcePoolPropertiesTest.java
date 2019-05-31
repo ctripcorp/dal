@@ -5,11 +5,7 @@ import com.ctrip.datasource.dynamicdatasource.provider.AbstractIPDomainStatusPro
 import com.ctrip.datasource.dynamicdatasource.provider.LocalPoolPropertiesProvider;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
+import com.ctrip.platform.dal.dao.configure.*;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,8 +45,8 @@ public class DataSourcePoolPropertiesTest {
 
     @Test
     public void testPoolPropertiesOptionProperty() throws Exception {
-        PoolPropertiesConfigure configure1 = locator.getUserPoolPropertiesConfigure(name);
-        String option = configure1.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES);
+        DalPoolPropertiesConfigure configure1 = locator.getUserPoolPropertiesConfigure(name);
+        String option = configure1.getConnectionProperties();
         Assert.assertEquals(option, "sendTimeAsDateTime=false");
     }
 

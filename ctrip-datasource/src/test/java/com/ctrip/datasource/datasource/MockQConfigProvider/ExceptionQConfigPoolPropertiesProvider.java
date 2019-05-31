@@ -1,6 +1,6 @@
 package com.ctrip.datasource.datasource.MockQConfigProvider;
 
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
+import com.ctrip.platform.dal.dao.configure.DalPoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -9,7 +9,7 @@ public class ExceptionQConfigPoolPropertiesProvider implements PoolPropertiesPro
     public static final String EXCEPTION_MESSAGE = "An error occured while getting datasource.properties from QConfig.";
 
     @Override
-    public PoolPropertiesConfigure getPoolProperties() {
+    public DalPoolPropertiesConfigure getPoolProperties() {
         try {
             throw new DalException(EXCEPTION_MESSAGE);
         } catch (Throwable e) {

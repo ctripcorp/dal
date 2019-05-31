@@ -115,7 +115,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     public synchronized void setup(Set<String> dbNames, SourceType sourceType) {
-        keyNameMap.clear();
+        for (String dbName : dbNames)
+            keyNameMap.remove(dbName);
+
         Set<String> names = null;
         try {
             names = getFilteredNames(dbNames, sourceType);
@@ -135,7 +137,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
 
         // set pool properties
-        PoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
+        DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
         dataSourceConfigureLocator.setPoolProperties(poolProperties);
 
         if (sourceType == SourceType.Remote)
@@ -247,7 +249,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
 
-        ConnectionStringConfigure connectionStringConfigure = connectionString.getIPConnectionStringConfigure();
+        DalConnectionStringConfigure connectionStringConfigure = connectionString.getIPConnectionStringConfigure();
         String newVersion = connectionStringConfigure.getVersion();
         DataSourceConfigure oldConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
 
@@ -333,7 +335,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private void addPoolPropertiesChangedListener() {
         poolPropertiesProvider.addPoolPropertiesChangedListener(new PoolPropertiesChanged() {
             @Override
-            public void onChanged(PoolPropertiesConfigure configure) {
+            public void onChanged(DalPoolPropertiesConfigure configure) {
                 addPoolPropertiesNotifyTask(configure);
             }
         });
@@ -346,7 +348,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return true;
     }
 
-    private void addPoolPropertiesNotifyTask(PoolPropertiesConfigure configure) {
+    private void addPoolPropertiesNotifyTask(DalPoolPropertiesConfigure configure) {
         Transaction t = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES);
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
         Cat.logEvent(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS,

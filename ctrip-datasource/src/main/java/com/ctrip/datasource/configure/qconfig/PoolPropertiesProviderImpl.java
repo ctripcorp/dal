@@ -1,8 +1,8 @@
 package com.ctrip.datasource.configure.qconfig;
 
+import com.ctrip.platform.dal.dao.configure.DalPoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -42,7 +42,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     private AtomicReference<Boolean> isFirstTimeLoadReference = new AtomicReference<>(true);
 
     @Override
-    public PoolPropertiesConfigure getPoolProperties() {
+    public DalPoolPropertiesConfigure getPoolProperties() {
         MapConfig config = getMapConfig();
         DataSourceConfigure configure;
 

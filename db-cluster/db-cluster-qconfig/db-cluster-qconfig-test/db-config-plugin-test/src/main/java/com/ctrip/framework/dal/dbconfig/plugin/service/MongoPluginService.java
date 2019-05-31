@@ -24,8 +24,8 @@ import java.util.List;
 public class MongoPluginService {
     //    public static final String MONGO_PLUGIN_URL = "http://qconfig.ctripcorp.com/plugins/mongo/config";
 //    public static final String MONGO_PLUGIN_URL = "http://qconfig.fat16.qa.nt.ctripcorp.com/plugins/mongo/config";
-//    public static final String MONGO_PLUGIN_URL = "http://localhost:8082/plugins/mongo/config";
-    public static final String MONGO_PLUGIN_URL = "http://qconfig2.fat1.qa.nt.ctripcorp.com/plugins/mongo/config";
+    public static final String MONGO_PLUGIN_URL = "http://localhost:8082/plugins/mongo/config";
+//    public static final String MONGO_PLUGIN_URL = "http://qconfig2.fat1.qa.nt.ctripcorp.com/plugins/mongo/config";
 
     public static final String ADD_CLUSTER_URL = MONGO_PLUGIN_URL + "/add";
     public static final String UPDATE_CLUSTER_URL = MONGO_PLUGIN_URL + "/update";

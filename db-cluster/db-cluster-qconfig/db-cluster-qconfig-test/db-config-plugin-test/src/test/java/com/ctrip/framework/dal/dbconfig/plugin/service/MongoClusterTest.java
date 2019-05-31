@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-public class MongClusterTest {
+public class MongoClusterTest {
     public static final String FAT_ENV = "fat";
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
@@ -39,7 +39,7 @@ public class MongClusterTest {
 
         // get client config, need add vm option.
         addVmOptions();
-        String content = ConfigUtils.getMongoFileResult("7a11182c-c27b-4d23-90d7-a774295f71b1-test");
+        String content = ConfigUtils.getMongoFileResult(MONGO_CLUSTER_NAME);
         assert Strings.isNotBlank(content);
     }
 
@@ -60,9 +60,9 @@ public class MongClusterTest {
     public void update() {
         // add cluster
         MongoClusterEntity mongoCluster = generateMongoClusterEntity(UUID.randomUUID().toString());
+        mongoCluster.setEnabled(false);
         String clusterName = mongoCluster.getClusterName();
         String userId = mongoCluster.getUserId();
-        assert mongoCluster.getEnabled();
         PluginResponse response = mongoPluginService.addMongoCluster(mongoCluster, FAT_ENV, OPERATOR);
         assert response != null;
         assert response.getStatus() == 0;
@@ -75,11 +75,11 @@ public class MongClusterTest {
         assert data != null;
         assert data.getClusterName().equalsIgnoreCase(clusterName);
         assert data.getUserId().equalsIgnoreCase(userId);
-        assert data.getEnabled();
+        assert !data.getEnabled();
         int version = data.getVersion();
 
         // update cluster
-        mongoCluster.setEnabled(false);
+        mongoCluster.setEnabled(true);
         mongoCluster.setUserId(NEW_USER_ID);
         PluginResponse updateResponse = mongoPluginService.updateMongoCluster(mongoCluster, FAT_ENV, OPERATOR);
         assert updateResponse != null;
@@ -93,7 +93,7 @@ public class MongClusterTest {
         assert data != null;
         assert data.getClusterName().equalsIgnoreCase(clusterName);
         assert data.getUserId().equalsIgnoreCase(NEW_USER_ID);
-        assert !data.getEnabled();
+        assert data.getEnabled();
 
         // get client config, need add vm option.
         addVmOptions();
@@ -110,10 +110,40 @@ public class MongClusterTest {
         assert clientConfig.getUserId().equalsIgnoreCase(NEW_USER_ID);
         assert clientConfig.getPassword().equalsIgnoreCase(mongoCluster.getPassword());
         assert clientConfig.getVersion() == version + 1;
-        assert !clientConfig.getEnabled();
-        assert clientConfig.getUpdateTime() != null;
-        assert Strings.isNotBlank(clientConfig.getOperator());
         assert clientConfig.getNodes() != null && !clientConfig.getNodes().isEmpty();
+        assert clientConfig.getEnabled() == null;
+        assert clientConfig.getUpdateTime() == null;
+        assert Strings.isBlank(clientConfig.getOperator());
+    }
+
+    @Test
+    public void updateDisabled() {
+        // add cluster
+        MongoClusterEntity mongoCluster = generateMongoClusterEntity(UUID.randomUUID().toString());
+        String clusterName = mongoCluster.getClusterName();
+        String userId = mongoCluster.getUserId();
+        PluginResponse response = mongoPluginService.addMongoCluster(mongoCluster, FAT_ENV, OPERATOR);
+        assert response != null;
+        assert response.getStatus() == 0;
+
+        // update cluster
+        mongoCluster.setEnabled(false);
+        mongoCluster.setUserId(NEW_USER_ID);
+        PluginResponse updateResponse = mongoPluginService.updateMongoCluster(mongoCluster, FAT_ENV, OPERATOR);
+        assert updateResponse != null;
+        assert updateResponse.getStatus() == 0;
+
+        // get client config, need add vm option.
+        addVmOptions();
+        boolean isSuccess = true;
+        try {
+            String content = ConfigUtils.getMongoFileResult(clusterName);
+        } catch (Exception e) {
+            System.out.println("exception:" + e.getMessage());
+            isSuccess = false;
+        }
+        assert !isSuccess;
+
     }
 
 
@@ -173,14 +203,14 @@ public class MongClusterTest {
 
     private void addVmOptions() {
         // local
-//        System.setProperty("qconfig.admin", "localhost:8082");
-//        System.setProperty("qserver.http.urls", "localhost:8080");
-//        System.setProperty("qserver.https.urls", "localhost:8443");
+        System.setProperty("qconfig.admin", "localhost:8082");
+        System.setProperty("qserver.http.urls", "localhost:8080");
+        System.setProperty("qserver.https.urls", "localhost:8443");
 
         // qconfig2: fat1
-        System.setProperty("qconfig.admin", "http://qconfig2.fat1.qa.nt.ctripcorp.com");
-        System.setProperty("qserver.http.urls", "10.5.28.92:8080");
-        System.setProperty("qserver.https.urls", "10.5.28.92:8443");
+//        System.setProperty("qconfig.admin", "http://qconfig2.fat1.qa.nt.ctripcorp.com");
+//        System.setProperty("qserver.http.urls", "10.5.28.92:8080");
+//        System.setProperty("qserver.https.urls", "10.5.28.92:8443");
 
         // fat16
 //        System.setProperty("qconfig.admin", "qconfig.fat16.qa.nt.ctripcorp.com");

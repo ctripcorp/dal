@@ -60,7 +60,7 @@ public class TitanProvider implements DataSourceConfigureProvider{
     }
 
     @Override
-    public DataSourceConfigure loadDataSourceConfigure(String name){
+    public DataSourceConfigure forceLoadDataSourceConfigure(String name){
         Set<String> names=new HashSet<>();
         names.add(name);
         dataSourceConfigureManager.setup(names,sourceType);

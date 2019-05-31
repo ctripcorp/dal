@@ -10,9 +10,11 @@ public interface DalConnectionString {
 
      String getDomainConnectionString();
 
-     ConnectionStringConfigure getIPConnectionStringConfigure();
+     DalConnectionStringConfigure getIPConnectionStringConfigure();
 
-     ConnectionStringConfigure getDomainConnectionStringConfigure();
+     DalConnectionStringConfigure getDomainConnectionStringConfigure();
 
      boolean equals(Object o);
+
+     DalConnectionString clone();
 }

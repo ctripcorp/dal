@@ -19,6 +19,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private DataSourceConfigure dataSourceConfigure;
     private DataSource dataSource;
     private DataSourceCreateTask task;
+    private DataSourceCreatePoolListener listener;
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
 
@@ -78,8 +79,12 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).createPool();
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
+            if (listener != null)
+                listener.onCreatePoolSuccess(dataSourceConfigure);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
+            if (listener != null)
+                listener.onCreatePoolFail(dataSourceConfigure, e);
         }
     }
 
@@ -96,6 +101,10 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
         ValidatorProxy dsValidator = (ValidatorProxy) validator;
         dsValidator.setPoolProperties(poolProperties);
+    }
+
+    public void addListener(DataSourceCreatePoolListener listener) {
+        this.listener = listener;
     }
 
 }

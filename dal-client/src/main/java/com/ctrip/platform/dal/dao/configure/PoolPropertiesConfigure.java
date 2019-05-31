@@ -1,18 +1,48 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import java.util.Properties;
 
+/**
+ * A list of properties that are configurable for a connection pool.
+ */
 public interface PoolPropertiesConfigure {
-    Properties getProperties();
 
-    String getProperty(String key);
+    Boolean getTestWhileIdle();
 
-    String getProperty(String key, String defaultValue);
+    Boolean getTestOnBorrow();
 
-    int getIntProperty(String key, int defaultValue);
+    Boolean getTestOnReturn();
 
-    long getLongProperty(String key, long defaultValue);
+    String getValidationQuery();
 
-    boolean getBooleanProperty(String key, boolean defaultValue);
+    Integer getValidationQueryTimeout();
 
+    Long getValidationInterval();
+
+    Integer getTimeBetweenEvictionRunsMillis();
+
+    Integer getMinEvictableIdleTimeMillis();
+
+    Integer getMaxAge();
+
+    Integer getMaxActive();
+
+    Integer getMinIdle();
+
+    Integer getMaxWait();
+
+    Integer getInitialSize();
+
+    Integer getRemoveAbandonedTimeout();
+
+    Boolean getRemoveAbandoned();
+
+    Boolean getLogAbandoned();
+
+    String getConnectionProperties();
+
+    String getValidatorClassName();
+
+    String getInitSQL();
+
+    String getJdbcInterceptors();
 }

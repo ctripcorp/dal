@@ -11,7 +11,7 @@ import java.util.Set;
  * @author jhhe
  *
  */
-public interface DataSourceConfigureProvider extends DalComponent {
+public interface DataSourceConfigureProvider extends DalComponent, IDataSourceConfigureProvider {
 
     /**
      * Declare which databases we want to use.
@@ -27,7 +27,7 @@ public interface DataSourceConfigureProvider extends DalComponent {
      * 
      * @return
      */
-    DataSourceConfigure getDataSourceConfigure(String dbName);
+//    DataSourceConfigure getDataSourceConfigure(String dbName);
 
     /**
      * Allow register datasource config change listener

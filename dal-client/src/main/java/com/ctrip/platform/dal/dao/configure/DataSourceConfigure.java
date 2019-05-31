@@ -2,14 +2,12 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
+import org.springframework.scheduling.SchedulingAwareRunnable;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
-public class DataSourceConfigure
-        implements DataSourceConfigureConstants, ConnectionStringConfigure, PoolPropertiesConfigure {
+public class DataSourceConfigure extends AbstractDataSourceConfigure
+        implements DataSourceConfigureConstants, DalConnectionStringConfigure, DalPoolPropertiesConfigure {
     private String name;
     private Properties properties = new Properties();
     private String version;
@@ -17,7 +15,8 @@ public class DataSourceConfigure
 
     private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
-    public DataSourceConfigure() {}
+    public DataSourceConfigure() {
+    }
 
     public DataSourceConfigure(String name) {
         this.name = name;
@@ -97,6 +96,24 @@ public class DataSourceConfigure
         return version;
     }
 
+    @Override
+    public String getEncoding() {
+        return getProperty(ENCODING);
+    }
+
+    public void setEncoding(String encoding) {
+        setProperty(ENCODING, encoding);
+    }
+
+    public void setDBName(String hostName) {
+        setProperty(DB_NAME, hostName);
+    }
+
+    @Override
+    public String getDBName() {
+        return getProperty(DB_NAME);
+    }
+
     public void setHostName(String hostName) {
         setProperty(HOST_NAME, hostName);
     }
@@ -104,6 +121,17 @@ public class DataSourceConfigure
     @Override
     public String getHostName() {
         return getProperty(HOST_NAME);
+    }
+
+    @Override
+    public Integer getPort() {
+        if(getProperty(PORT)==null)
+            return null;
+        return Integer.parseInt(getProperty(PORT));
+    }
+
+    public void setPort(int port) {
+        setProperty(PORT, String.valueOf(port));
     }
 
     public void setVersion(String version) {
@@ -118,21 +146,25 @@ public class DataSourceConfigure
         this.connectionString = connectionString;
     }
 
-    @Override
+
     public Properties getProperties() {
         return properties;
+    }
+
+    public Map<String, String> getPoolProperties() {
+        return new HashMap<>((Map) properties);
     }
 
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
 
-    @Override
+
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
 
-    @Override
+
     public String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
     }
@@ -141,19 +173,118 @@ public class DataSourceConfigure
         properties.setProperty(key, value);
     }
 
-    @Override
+
     public int getIntProperty(String key, int defaultValue) {
         return properties.containsKey(key) ? Integer.parseInt(getProperty(key)) : defaultValue;
     }
 
-    @Override
+
     public long getLongProperty(String key, long defaultValue) {
         return properties.containsKey(key) ? Long.parseLong(getProperty(key)) : defaultValue;
     }
 
-    @Override
+
     public boolean getBooleanProperty(String key, boolean defaultValue) {
         return properties.containsKey(key) ? Boolean.parseBoolean(getProperty(key)) : defaultValue;
+    }
+
+
+    public Boolean getTestWhileIdle() {
+        return getBooleanProperty(TESTWHILEIDLE, DEFAULT_TESTWHILEIDLE);
+    }
+
+    public Boolean getTestOnBorrow() {
+        return getBooleanProperty(TESTONBORROW, DEFAULT_TESTONBORROW);
+    }
+
+    public Boolean getTestOnReturn() {
+        return getBooleanProperty(TESTONRETURN, DEFAULT_TESTONRETURN);
+    }
+
+    public String getValidationQuery() {
+        return getProperty(VALIDATIONQUERY, DEFAULT_VALIDATIONQUERY);
+    }
+
+    public Integer getValidationQueryTimeout() {
+        return getIntProperty(VALIDATIONQUERYTIMEOUT, DEFAULT_VALIDATIONQUERYTIMEOUT);
+    }
+
+    public Long getValidationInterval() {
+        return getLongProperty(VALIDATIONINTERVAL, DEFAULT_VALIDATIONINTERVAL);
+    }
+
+    public Integer getTimeBetweenEvictionRunsMillis() {
+        return getIntProperty(TIMEBETWEENEVICTIONRUNSMILLIS, DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS);
+    }
+
+    public Integer getMinEvictableIdleTimeMillis() {
+        return getIntProperty(MINEVICTABLEIDLETIMEMILLIS, DEFAULT_MINEVICTABLEIDLETIMEMILLIS);
+    }
+
+    public Integer getMaxAge() {
+        return getIntProperty(MAX_AGE, DEFAULT_MAXAGE);
+    }
+
+    public Integer getMaxActive() {
+        return getIntProperty(MAXACTIVE, DEFAULT_MAXACTIVE);
+    }
+
+    public Integer getMinIdle() {
+        return getIntProperty(MINIDLE, DEFAULT_MINIDLE);
+    }
+
+    public Integer getMaxWait() {
+        return getIntProperty(MAXWAIT, DEFAULT_MAXWAIT);
+    }
+
+    public Integer getInitialSize() {
+        return getIntProperty(INITIALSIZE, DEFAULT_INITIALSIZE);
+    }
+
+    public Integer getRemoveAbandonedTimeout() {
+        return getIntProperty(REMOVEABANDONEDTIMEOUT, DEFAULT_REMOVEABANDONEDTIMEOUT);
+    }
+
+    public Boolean getRemoveAbandoned() {
+        return getBooleanProperty(REMOVEABANDONED, DEFAULT_REMOVEABANDONED);
+    }
+
+    public Boolean getLogAbandoned() {
+        return getBooleanProperty(LOGABANDONED, DEFAULT_LOGABANDONED);
+    }
+
+    public String getConnectionProperties() {
+        return getProperty(CONNECTIONPROPERTIES, DEFAULT_CONNECTIONPROPERTIES);
+    }
+
+    public String getValidatorClassName() {
+        return getProperty(VALIDATORCLASSNAME, DEFAULT_VALIDATORCLASSNAME);
+    }
+
+    public String getOption(){
+        return getProperty(OPTION,DEFAULT_CONNECTIONPROPERTIES);
+    }
+
+
+    public String getInitSQL() {
+        String initSQL = getProperty(INIT_SQL);
+        if (initSQL != null && !initSQL.isEmpty())
+            return initSQL;
+
+        String initSQL2 = getProperty(INIT_SQL2);
+        if (initSQL2 != null && !initSQL2.isEmpty())
+            return initSQL2;
+
+        return null;
+    }
+
+    // This are current hard coded as default value
+    public boolean getJmxEnabled() {
+        return DEFAULT_JMXENABLED;
+    }
+
+    public String getJdbcInterceptors() {
+        return getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS);
     }
 
     public String toConnectionUrl() {
@@ -208,4 +339,65 @@ public class DataSourceConfigure
         return crc;
     }
 
+    public synchronized DataSourceConfigure clone() {
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure(name);
+        Properties p = new Properties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            p.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        }
+        dataSourceConfigure.setProperties(p);
+        dataSourceConfigure.setVersion(version);
+        dataSourceConfigure.setConnectionString(connectionString.clone());
+        return dataSourceConfigure;
+    }
+
+    public static DataSourceConfigure valueOf(IDataSourceConfigure configure) {
+        if (configure instanceof DataSourceConfigure)
+            return (DataSourceConfigure) configure;
+        else {
+            DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
+            Properties properties = new Properties();
+            properties.setProperty(USER_NAME, configure.getUserName());
+            properties.setProperty(PASSWORD, configure.getPassword());
+            properties.setProperty(HOST_NAME, configure.getHostName());
+            properties.setProperty(PORT, String.valueOf(configure.getPort()));
+            properties.setProperty(DB_NAME, configure.getDBName());
+            properties.setProperty(ENCODING, configure.getEncoding());
+            properties.setProperty(CONNECTION_URL, configure.getConnectionUrl());
+            properties.setProperty(DRIVER_CLASS_NAME, configure.getDriverClass());
+            properties.setProperty(TESTWHILEIDLE, String.valueOf(configure.getTestWhileIdle()));
+            properties.setProperty(TESTONBORROW, String.valueOf(configure.getTestOnBorrow()));
+            properties.setProperty(TESTONRETURN, String.valueOf(configure.getTestOnReturn()));
+            properties.setProperty(VALIDATIONQUERY, configure.getValidationQuery());
+            properties.setProperty(VALIDATIONQUERYTIMEOUT, String.valueOf(configure.getValidationQueryTimeout()));
+            properties.setProperty(VALIDATIONINTERVAL, String.valueOf(configure.getValidationInterval()));
+            properties.setProperty(TIMEBETWEENEVICTIONRUNSMILLIS, String.valueOf(configure.getTimeBetweenEvictionRunsMillis()));
+            properties.setProperty(MAX_AGE, String.valueOf(configure.getMaxAge()));
+            properties.setProperty(MAXACTIVE, String.valueOf(configure.getMaxActive()));
+            properties.setProperty(MINIDLE, String.valueOf(configure.getMinIdle()));
+            properties.setProperty(MAXWAIT, String.valueOf(configure.getMaxWait()));
+            properties.setProperty(INITIALSIZE, String.valueOf(configure.getInitialSize()));
+            properties.setProperty(REMOVEABANDONEDTIMEOUT, String.valueOf(configure.getRemoveAbandonedTimeout()));
+            properties.setProperty(REMOVEABANDONED, String.valueOf(configure.getRemoveAbandoned()));
+            properties.setProperty(LOGABANDONED, String.valueOf(configure.getLogAbandoned()));
+            properties.setProperty(MINEVICTABLEIDLETIMEMILLIS, String.valueOf(configure.getMinEvictableIdleTimeMillis()));
+            properties.setProperty(CONNECTIONPROPERTIES, configure.getConnectionProperties());
+            properties.setProperty(INIT_SQL, configure.getInitSQL());
+            properties.setProperty(VALIDATORCLASSNAME, configure.getValidatorClassName());
+            properties.setProperty(JDBC_INTERCEPTORS, configure.getJdbcInterceptors());
+            dataSourceConfigure.setProperties(properties);
+            return dataSourceConfigure;
+        }
+    }
+
+    public void replaceURL(String ip, int port) {
+        String connectionUrl;
+        if (getDriverClass().equalsIgnoreCase(ConnectionStringParser.DRIVER_MYSQL))
+            connectionUrl = String.format(ConnectionStringParser.DBURL_MYSQL, ip, port, getDBName(), getEncoding().isEmpty() ? ConnectionStringParser.DEFAULT_ENCODING : getEncoding());
+        else
+            connectionUrl = String.format(ConnectionStringParser.DBURL_SQLSERVER, ip, port, getDBName());
+        setConnectionUrl(connectionUrl);
+        setHostName(ip);
+        setPort(port);
+    }
 }

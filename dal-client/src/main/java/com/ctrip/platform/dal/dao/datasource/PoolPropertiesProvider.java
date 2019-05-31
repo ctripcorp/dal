@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
+import com.ctrip.platform.dal.dao.configure.DalPoolPropertiesConfigure;
 
 public interface PoolPropertiesProvider {
-    PoolPropertiesConfigure getPoolProperties();
+    DalPoolPropertiesConfigure getPoolProperties();
 
     void addPoolPropertiesChangedListener(final PoolPropertiesChanged callback);
 }

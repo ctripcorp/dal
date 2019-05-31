@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.configure.file;
 
+import com.ctrip.platform.dal.dao.configure.DalPoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
 import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
 
@@ -39,7 +39,7 @@ public class PropertyFilePoolPropertiesProvider implements PoolPropertiesProvide
     }
 
     @Override
-    public PoolPropertiesConfigure getPoolProperties() {
+    public DalPoolPropertiesConfigure getPoolProperties() {
         Properties p = propertiesReference.get();
         DataSourceConfigure configure = new DataSourceConfigure("", p);
         return configure;

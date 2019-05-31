@@ -10,8 +10,6 @@ public class ConnectionString implements DalConnectionString{
     private String ipConnectionString;
     private String domainConnectionString;
 
-    public ConnectionString() {}
-
     public ConnectionString(String name, String ipConnectionString, String domainConnectionString) {
         this.parser = ConnectionStringParser.getInstance();
         this.name = name;
@@ -31,12 +29,12 @@ public class ConnectionString implements DalConnectionString{
         return domainConnectionString;
     }
 
-    public ConnectionStringConfigure getIPConnectionStringConfigure() {
+    public DalConnectionStringConfigure getIPConnectionStringConfigure() {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return parser.parse(keyName, ipConnectionString);
     }
 
-    public ConnectionStringConfigure getDomainConnectionStringConfigure() {
+    public DalConnectionStringConfigure getDomainConnectionStringConfigure() {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return parser.parse(keyName, domainConnectionString);
     }
@@ -52,5 +50,9 @@ public class ConnectionString implements DalConnectionString{
         return name.equals(connectionString.getName())
                 && ipConnectionString.equals(connectionString.getIPConnectionString())
                 && domainConnectionString.equals(connectionString.getDomainConnectionString());
+    }
+
+    public synchronized ConnectionString clone() {
+        return new ConnectionString(name, ipConnectionString, domainConnectionString);
     }
 }

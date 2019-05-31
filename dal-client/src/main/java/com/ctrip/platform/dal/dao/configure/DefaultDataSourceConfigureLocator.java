@@ -25,7 +25,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     private AtomicReference<IPDomainStatus> ipDomainStatusReference = new AtomicReference<>(IPDomainStatus.IP);
 
     // user datasource.xml pool properties configure
-    private Map<String, PoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
+    private Map<String, DalPoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
     private Map<String, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
 
     private static final String SEPARATOR = "\\.";
@@ -40,14 +40,14 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     protected String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
 
     @Override
-    public void addUserPoolPropertiesConfigure(String name, PoolPropertiesConfigure configure) {
+    public void addUserPoolPropertiesConfigure(String name, DalPoolPropertiesConfigure configure) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         userPoolPropertiesConfigure.put(keyName, configure);
         dataSourceConfiguresCache.put(keyName, new DataSourceConfigure(keyName, configure.getProperties()));
     }
 
     @Override
-    public PoolPropertiesConfigure getUserPoolPropertiesConfigure(String name) {
+    public DalPoolPropertiesConfigure getUserPoolPropertiesConfigure(String name) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         return userPoolPropertiesConfigure.get(keyName);
     }
@@ -146,7 +146,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     @Override
-    public Properties setPoolProperties(PoolPropertiesConfigure configure) {
+    public Properties setPoolProperties(DalPoolPropertiesConfigure configure) {
         PropertiesWrapper oldWrapper = propertiesWrapperReference.get();
         Properties oldOriginalProperties =
                 oldWrapper == null ? null : deepCopyProperties(oldWrapper.getOriginalProperties());
@@ -189,7 +189,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     @Override
     public DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString) {
-        ConnectionStringConfigure connectionStringConfigure = getConnectionStringConfigure(connectionString);
+        DalConnectionStringConfigure connectionStringConfigure = getConnectionStringConfigure(connectionString);
         if (connectionStringConfigure == null)
             return null;
 
@@ -210,7 +210,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return c;
     }
 
-    protected void overrideProperties(ConnectionStringConfigure connectionStringConfigure,
+    protected void overrideProperties(DalConnectionStringConfigure connectionStringConfigure,
             DalConnectionString connectionString, PropertiesWrapper wrapper, DataSourceConfigure c, String name,
             String logName) {
         // override app-level properties
@@ -272,7 +272,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     protected void overrideConnectionStringConfigureAndDataSourceXml(
-            ConnectionStringConfigure connectionStringConfigure, DataSourceConfigure c,
+            DalConnectionStringConfigure connectionStringConfigure, DataSourceConfigure c,
             DalConnectionString connectionString, String name) {
         if (connectionStringConfigure == null)
             return;
@@ -285,7 +285,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     private void mergeConnectionStringConfigure(DataSourceConfigure c,
-            ConnectionStringConfigure connectionStringConfigure, DalConnectionString connectionString) {
+            DalConnectionStringConfigure connectionStringConfigure, DalConnectionString connectionString) {
         mergeConnectionStringConfigure(c, connectionStringConfigure);
         c.setConnectionString(connectionString);
         String log = CONNECTION_URL + connectionStringConfigure.getConnectionUrl();
@@ -296,24 +296,24 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         if (name == null || name.isEmpty())
             return;
 
-        PoolPropertiesConfigure dataSourceXml = getUserPoolPropertiesConfigure(name);
+        DalPoolPropertiesConfigure dataSourceXml = getUserPoolPropertiesConfigure(name);
         if (dataSourceXml != null) {
             overrideDataSourceXml(c, dataSourceXml);
         } else {
             String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
             possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
-            PoolPropertiesConfigure ppc = getUserPoolPropertiesConfigure(possibleName);
+            DalPoolPropertiesConfigure ppc = getUserPoolPropertiesConfigure(possibleName);
             if (ppc != null) {
                 overrideDataSourceXml(c, ppc);
             }
         }
     }
 
-    protected ConnectionStringConfigure getConnectionStringConfigure(DalConnectionString connectionString) {
+    protected DalConnectionStringConfigure getConnectionStringConfigure(DalConnectionString connectionString) {
         if (connectionString == null)
             return null;
 
-        ConnectionStringConfigure configure = null;
+        DalConnectionStringConfigure configure = null;
         IPDomainStatus status = getIPDomainStatus();
         if (status.equals(IPDomainStatus.IP)) {
             configure = connectionString.getIPConnectionStringConfigure();
@@ -324,7 +324,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return configure;
     }
 
-    protected void overrideDataSourceXml(DataSourceConfigure c, PoolPropertiesConfigure dataSourceXml) {
+    protected void overrideDataSourceXml(DataSourceConfigure c, DalPoolPropertiesConfigure dataSourceXml) {
         overrideProperties(c.getProperties(), dataSourceXml.getProperties());
         String log = DATASOURCE_XML_OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.toProperties());
         LOGGER.info(log);
@@ -355,7 +355,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     protected void mergeConnectionStringConfigure(DataSourceConfigure dataSourceConfigure,
-            ConnectionStringConfigure connectionStringConfigure) {
+            DalConnectionStringConfigure connectionStringConfigure) {
         if (dataSourceConfigure == null || connectionStringConfigure == null)
             return;
 
@@ -365,9 +365,36 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         setPassword(dataSourceConfigure, connectionStringConfigure);
         setDriverClass(dataSourceConfigure, connectionStringConfigure);
         setVersion(dataSourceConfigure, connectionStringConfigure);
+        setHostName(dataSourceConfigure,connectionStringConfigure);
+        setPort(dataSourceConfigure,connectionStringConfigure);
+        setDBName(dataSourceConfigure,connectionStringConfigure);
+        setEncoding(dataSourceConfigure,connectionStringConfigure);
     }
 
-    private void setName(DataSourceConfigure dataSourceConfigure, ConnectionStringConfigure connectionStringConfigure) {
+    private void setHostName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
+        String hostName= connectionStringConfigure.getHostName();
+        if(hostName!=null)
+            dataSourceConfigure.setHostName(hostName);
+    }
+
+    private void setPort(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
+        int port= connectionStringConfigure.getPort();
+            dataSourceConfigure.setPort(port);
+    }
+
+    private void setDBName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
+        String DBName= connectionStringConfigure.getDBName();
+        if(DBName!=null)
+            dataSourceConfigure.setDBName(DBName);
+    }
+
+    private void setEncoding(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
+        String encoding= connectionStringConfigure.getEncoding();
+        if(encoding!=null)
+            dataSourceConfigure.setEncoding(encoding);
+    }
+
+    private void setName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure) {
         String name = connectionStringConfigure.getName();
         if (name != null)
             dataSourceConfigure.setName(name);
@@ -402,7 +429,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     private void setVersion(DataSourceConfigure dataSourceConfigure,
-            ConnectionStringConfigure connectionStringConfigure) {
+            DalConnectionStringConfigure connectionStringConfigure) {
         String version = connectionStringConfigure.getVersion();
         if (version != null)
             dataSourceConfigure.setVersion(version);

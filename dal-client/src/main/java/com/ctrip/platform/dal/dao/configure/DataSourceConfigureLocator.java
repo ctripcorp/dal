@@ -8,9 +8,9 @@ import java.util.Properties;
 import java.util.Set;
 
 public interface DataSourceConfigureLocator extends Ordered {
-    void addUserPoolPropertiesConfigure(String name, PoolPropertiesConfigure configure);
+    void addUserPoolPropertiesConfigure(String name, DalPoolPropertiesConfigure configure);
 
-    PoolPropertiesConfigure getUserPoolPropertiesConfigure(String name);
+    DalPoolPropertiesConfigure getUserPoolPropertiesConfigure(String name);
 
     DataSourceConfigure getDataSourceConfigure(String name);
 
@@ -30,7 +30,7 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     DalConnectionString setConnectionString(String name, DalConnectionString connectionString);
 
-    Properties setPoolProperties(PoolPropertiesConfigure configure);
+    Properties setPoolProperties(DalPoolPropertiesConfigure configure);
 
     DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString);
 

@@ -24,7 +24,7 @@ public class DalPropertiesProviderImpl implements DalPropertiesProvider {
 
     private static final String DALPROPERTIES_GET_MAPCONFIG = "DalProperties::getMapConfig";
     private static final String DALPROPERTIES_GET_PROPERTIES = "DalProperties::getProperties";
-    private static final String DALPROPERTIES_ADD_LISTENER = "DalProperties::addListener";
+    private static final String DALPROPERTIES_ADD_LISTENER = "DalProperties::setListener";
     private static final String DALPROPERTIES_PROPERTIES_CHANGED = "DalProperties::propertiesChanged";
 
     private static final Object LOCK = new Object();

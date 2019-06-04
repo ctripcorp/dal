@@ -10,14 +10,9 @@ import com.ctrip.framework.clogging.agent.log.LogManager;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+import com.ctrip.platform.dal.dao.datasource.*;
 import com.ctrip.datasource.datasource.IPDomainStatusChanged;
 import com.ctrip.datasource.datasource.IPDomainStatusProvider;
-import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
-import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
@@ -581,8 +576,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         // If we still can't get the DataSourceConfigureChangeListener,then we try to get or create the
         // RefreshableDataSource from DataSourceLocator.
         DataSource ds = getOrCreateDataSource(keyName);
-        if (ds instanceof RefreshableDataSource) {
-            RefreshableDataSource rds = (RefreshableDataSource) ds;
+        if (ds instanceof ForceSwitchableDataSource) {
+            ForceSwitchableDataSource rds = (ForceSwitchableDataSource) ds;
             if (rds instanceof DataSourceConfigureChangeListener) {
                 listener = rds;
             }

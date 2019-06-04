@@ -31,8 +31,9 @@ public class DataSourceCreator {
         factory = ServiceLoaderHelper.getInstance(DataSourceCreateTaskFactory.class);
     }
 
-    public SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
+    public SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
         SingleDataSource singleDataSource = new SingleDataSource(name, configure,null);
+        singleDataSource.setListener(listener);
         DataSourceCreateTask task;
         if (factory != null)
             task = factory.createTask(name, configure, singleDataSource);

@@ -26,15 +26,18 @@ public class ConnectionStringParser {
     private static final Pattern versionPattern = Pattern.compile("(version)=([^;]+)", Pattern.CASE_INSENSITIVE);
 
     private static final String PORT_SPLIT = ",";
-    public static final String DBURL_SQLSERVER = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
-    public static final String DBURL_MYSQL = "jdbc:mysql://%s:%s/%s?useUnicode=true&characterEncoding=%s";
+    private static final String MYSQL_URL_PREFIX="jdbc:mysql://";
+    private static final String SQLSERVER_URL_PREFIX="jdbc:sqlserver://";
+    public static final String DBURL_SQLSERVER = SQLSERVER_URL_PREFIX+"%s:%s;DatabaseName=%s";
+    public static final String DBURL_MYSQL = MYSQL_URL_PREFIX+"%s:%s/%s?useUnicode=true&characterEncoding=%s";
     public static final String DEFAULT_ENCODING = "UTF-8";
     public static final String DEFAULT_PORT = "3306";
     public static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     public static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    private static final Pattern ipPortPatternInMySQLURL=Pattern.compile("");
-    private static final Pattern ipPortPatternInSQLServerURL=Pattern.compile("");
+    private static final Pattern ipPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([\\S:]+):([^/]+)");
+    private static final Pattern ipPortPatternInSQLServerURL = Pattern.compile("(jdbc:sqlserver://)([\\S:]+):([^;]+)");
+
     /**
      * parse "Data Source=127.0.0.1,28747;UID=sa;password=sa;database=test;"
      *
@@ -61,7 +64,7 @@ public class ConnectionStringParser {
         String url = null;
         String charset = null;
         String driverClass = null;
-        String port=null;
+        String port = null;
         matcher = dburlPattern.matcher(connectionString);
         boolean isSqlServer;
         if (matcher.find()) {
@@ -69,7 +72,7 @@ public class ConnectionStringParser {
             dbhost = dburls[0];
             if (dburls.length == 2) {// is sqlserver
                 isSqlServer = true;
-                port=dburls[1];
+                port = dburls[1];
                 url = String.format(DBURL_SQLSERVER, dbhost, port, dbname);
             } else {// should be mysql
                 isSqlServer = false;
@@ -81,11 +84,9 @@ public class ConnectionStringParser {
                 }
                 matcher = dbportPattern.matcher(connectionString);
                 if (matcher.find()) {
-                    port=matcher.group(2);
-//                    url = String.format(DBURL_MYSQL, dbhost, matcher.group(2), dbname, charset);
+                    port = matcher.group(2);
                 } else {
-                    port=DEFAULT_PORT;
-//                    url = String.format(DBURL_MYSQL, dbhost, DEFAULT_PORT, dbname, charset);
+                    port = DEFAULT_PORT;
                 }
                 url = String.format(DBURL_MYSQL, dbhost, port, dbname, charset);
             }
@@ -120,13 +121,19 @@ public class ConnectionStringParser {
         return config;
     }
 
+    public static HostAndPort parseHostPortFromURL(String url) {
+        if (url.toLowerCase().startsWith(MYSQL_URL_PREFIX)) {
+            Matcher matcher = ipPortPatternInMySQLURL.matcher(url);
+            if (matcher.find())
+                return new HostAndPort(url,matcher.group(2),Integer.parseInt(matcher.group(3)));
+        }
 
-    public static String parseHostNameFromURL(String url){
-       return null;
+        if (url.toLowerCase().startsWith(SQLSERVER_URL_PREFIX)) {
+            Matcher matcher = ipPortPatternInMySQLURL.matcher(url);
+            if (matcher.find())
+                return new HostAndPort(url,matcher.group(2),Integer.parseInt(matcher.group(3)));
+        }
+
+        return new HostAndPort();
     }
-
-    public static String parsePortFromURL(String url){
-        return null;
-    }
-
 }

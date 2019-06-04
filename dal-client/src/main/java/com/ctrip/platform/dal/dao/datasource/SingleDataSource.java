@@ -80,11 +80,11 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
             if (listener != null)
-                listener.onCreatePoolSuccess(dataSourceConfigure);
+                listener.onCreatePoolSuccess();
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
             if (listener != null)
-                listener.onCreatePoolFail(dataSourceConfigure, e);
+                listener.onCreatePoolFail(e);
         }
     }
 
@@ -103,7 +103,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         dsValidator.setPoolProperties(poolProperties);
     }
 
-    public void addListener(DataSourceCreatePoolListener listener) {
+    public void setListener(DataSourceCreatePoolListener listener) {
         this.listener = listener;
     }
 

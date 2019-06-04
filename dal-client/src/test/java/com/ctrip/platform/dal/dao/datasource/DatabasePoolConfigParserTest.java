@@ -63,7 +63,7 @@ public class DatabasePoolConfigParserTest {
         Assert.assertEquals("sendTimeAsDateTime=false", ((DalPoolPropertiesConfigure) configure).getOption());
 
         // Test default settings,now default value is zero
-        Assert.assertEquals(0, configure.getMaxAge().intValue());
+        Assert.assertEquals(0, ((DataSourceConfigure)configure).getIntProperty(DataSourceConfigureConstants.MAX_AGE,0));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
+
 import java.util.*;
 
 public class DataSourceConfigure extends AbstractDataSourceConfigure
@@ -123,7 +124,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
 
     @Override
     public Integer getPort() {
-        if(getProperty(PORT)==null)
+        if (getProperty(PORT) == null)
             return null;
         return Integer.parseInt(getProperty(PORT));
     }
@@ -259,8 +260,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return getProperty(VALIDATORCLASSNAME, DEFAULT_VALIDATORCLASSNAME);
     }
 
-    public String getOption(){
-        return getProperty(OPTION,DEFAULT_CONNECTIONPROPERTIES);
+    public String getOption() {
+        return getProperty(OPTION, DEFAULT_CONNECTIONPROPERTIES);
     }
 
 
@@ -345,7 +346,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         }
         dataSourceConfigure.setProperties(p);
         dataSourceConfigure.setVersion(version);
-        dataSourceConfigure.setConnectionString(connectionString.clone());
+        dataSourceConfigure.setConnectionString(connectionString==null?null:connectionString.clone());
         return dataSourceConfigure;
     }
 
@@ -360,29 +361,51 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
             properties.setProperty(HOST_NAME, configure.getHostName());
             properties.setProperty(PORT, String.valueOf(configure.getPort()));
             properties.setProperty(DB_NAME, configure.getDBName());
-            properties.setProperty(ENCODING, configure.getEncoding());
             properties.setProperty(CONNECTION_URL, configure.getConnectionUrl());
-            properties.setProperty(DRIVER_CLASS_NAME, configure.getDriverClass());
-            properties.setProperty(TESTWHILEIDLE, String.valueOf(configure.getTestWhileIdle()));
-            properties.setProperty(TESTONBORROW, String.valueOf(configure.getTestOnBorrow()));
-            properties.setProperty(TESTONRETURN, String.valueOf(configure.getTestOnReturn()));
-            properties.setProperty(VALIDATIONQUERY, configure.getValidationQuery());
-            properties.setProperty(VALIDATIONQUERYTIMEOUT, String.valueOf(configure.getValidationQueryTimeout()));
-            properties.setProperty(VALIDATIONINTERVAL, String.valueOf(configure.getValidationInterval()));
-            properties.setProperty(TIMEBETWEENEVICTIONRUNSMILLIS, String.valueOf(configure.getTimeBetweenEvictionRunsMillis()));
-            properties.setProperty(MAX_AGE, String.valueOf(configure.getMaxAge()));
-            properties.setProperty(MAXACTIVE, String.valueOf(configure.getMaxActive()));
-            properties.setProperty(MINIDLE, String.valueOf(configure.getMinIdle()));
-            properties.setProperty(MAXWAIT, String.valueOf(configure.getMaxWait()));
-            properties.setProperty(INITIALSIZE, String.valueOf(configure.getInitialSize()));
-            properties.setProperty(REMOVEABANDONEDTIMEOUT, String.valueOf(configure.getRemoveAbandonedTimeout()));
-            properties.setProperty(REMOVEABANDONED, String.valueOf(configure.getRemoveAbandoned()));
-            properties.setProperty(LOGABANDONED, String.valueOf(configure.getLogAbandoned()));
-            properties.setProperty(MINEVICTABLEIDLETIMEMILLIS, String.valueOf(configure.getMinEvictableIdleTimeMillis()));
-            properties.setProperty(CONNECTIONPROPERTIES, configure.getConnectionProperties());
-            properties.setProperty(INIT_SQL, configure.getInitSQL());
-            properties.setProperty(VALIDATORCLASSNAME, configure.getValidatorClassName());
-            properties.setProperty(JDBC_INTERCEPTORS, configure.getJdbcInterceptors());
+            if (configure.getEncoding() != null)
+                properties.setProperty(ENCODING, configure.getEncoding());
+            if (configure.getDriverClass() != null)
+                properties.setProperty(DRIVER_CLASS_NAME, configure.getDriverClass());
+            if (configure.getTestWhileIdle() != null)
+                properties.setProperty(TESTWHILEIDLE, String.valueOf(configure.getTestWhileIdle()));
+            if (configure.getTestOnBorrow() != null)
+                properties.setProperty(TESTONBORROW, String.valueOf(configure.getTestOnBorrow()));
+            if (configure.getTestOnReturn() != null)
+                properties.setProperty(TESTONRETURN, String.valueOf(configure.getTestOnReturn()));
+            if (configure.getValidationQuery() != null)
+                properties.setProperty(VALIDATIONQUERY, configure.getValidationQuery());
+            if (configure.getValidationQueryTimeout() != null)
+                properties.setProperty(VALIDATIONQUERYTIMEOUT, String.valueOf(configure.getValidationQueryTimeout()));
+            if (configure.getValidationInterval() != null)
+                properties.setProperty(VALIDATIONINTERVAL, String.valueOf(configure.getValidationInterval()));
+            if (configure.getTimeBetweenEvictionRunsMillis() != null)
+                properties.setProperty(TIMEBETWEENEVICTIONRUNSMILLIS, String.valueOf(configure.getTimeBetweenEvictionRunsMillis()));
+            if (configure.getMaxAge() != null)
+                properties.setProperty(MAX_AGE, String.valueOf(configure.getMaxAge()));
+            if (configure.getMaxActive() != null)
+                properties.setProperty(MAXACTIVE, String.valueOf(configure.getMaxActive()));
+            if (configure.getMinIdle() != null)
+                properties.setProperty(MINIDLE, String.valueOf(configure.getMinIdle()));
+            if (configure.getMaxWait() != null)
+                properties.setProperty(MAXWAIT, String.valueOf(configure.getMaxWait()));
+            if (configure.getInitialSize() != null)
+                properties.setProperty(INITIALSIZE, String.valueOf(configure.getInitialSize()));
+            if (configure.getRemoveAbandonedTimeout() != null)
+                properties.setProperty(REMOVEABANDONEDTIMEOUT, String.valueOf(configure.getRemoveAbandonedTimeout()));
+            if (configure.getRemoveAbandoned() != null)
+                properties.setProperty(REMOVEABANDONED, String.valueOf(configure.getRemoveAbandoned()));
+            if (configure.getLogAbandoned() != null)
+                properties.setProperty(LOGABANDONED, String.valueOf(configure.getLogAbandoned()));
+            if (configure.getMinEvictableIdleTimeMillis() != null)
+                properties.setProperty(MINEVICTABLEIDLETIMEMILLIS, String.valueOf(configure.getMinEvictableIdleTimeMillis()));
+            if (configure.getConnectionProperties() != null)
+                properties.setProperty(CONNECTIONPROPERTIES, configure.getConnectionProperties());
+            if (configure.getInitSQL() != null)
+                properties.setProperty(INIT_SQL, configure.getInitSQL());
+            if (configure.getValidatorClassName() != null)
+                properties.setProperty(VALIDATORCLASSNAME, configure.getValidatorClassName());
+            if (configure.getJdbcInterceptors() != null)
+                properties.setProperty(JDBC_INTERCEPTORS, configure.getJdbcInterceptors());
             dataSourceConfigure.setProperties(properties);
             return dataSourceConfigure;
         }
@@ -391,7 +414,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     public void replaceURL(String ip, int port) {
         String connectionUrl;
         if (getDriverClass().equalsIgnoreCase(ConnectionStringParser.DRIVER_MYSQL))
-            connectionUrl = String.format(ConnectionStringParser.DBURL_MYSQL, ip, port, getDBName(), getEncoding().isEmpty() ? ConnectionStringParser.DEFAULT_ENCODING : getEncoding());
+            connectionUrl = String.format(ConnectionStringParser.DBURL_MYSQL, ip, port, getDBName(), getEncoding()==null ? ConnectionStringParser.DEFAULT_ENCODING : getEncoding());
         else
             connectionUrl = String.format(ConnectionStringParser.DBURL_SQLSERVER, ip, port, getDBName());
         setConnectionUrl(connectionUrl);

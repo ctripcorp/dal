@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 
 public class SwitchableDataSourceStatus {
-    private boolean isForceSwitched = false;
+    private boolean isForceSwitched;
     private String hostName;
     private Integer port;
     private boolean isConnected;
@@ -36,5 +36,9 @@ public class SwitchableDataSourceStatus {
 
     public boolean isConnected() {
         return isConnected;
+    }
+
+    public SwitchableDataSourceStatus fork() {
+        return new SwitchableDataSourceStatus(isForceSwitched, hostName, port, isConnected);
     }
 }

@@ -377,8 +377,9 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
             dataSourceConfigure.setHostName(hostName);
     }
 
-    private void setPort(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
-        int port= connectionStringConfigure.getPort();
+    private void setPort(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure) {
+        Integer port = connectionStringConfigure.getPort();
+        if (port != null)
             dataSourceConfigure.setPort(port);
     }
 

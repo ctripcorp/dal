@@ -2,7 +2,7 @@
     <Datasource name="dao"
                 userName="ws_daogen"
                 password="buOcbmwo9iuNwkbla3hg"
-                connectionUrl="jdbc:mysql://DaoGen.mysql.db.dev.qa.ctripcorp.com:28747/daogendb"
+                connectionUrl="jdbc:mysql://DaoGen.mysql.db.dev.qa.nt.ctripcorp.com:28747/daogendb"
                 driverClassName="com.mysql.jdbc.Driver"
                 testWhileIdle="false"
                 testOnBorrow="true"

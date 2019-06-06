@@ -2,7 +2,6 @@ package com.ctrip.framework.db.cluster.service;
 
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.domain.TitanAddRequest;
-import com.ctrip.framework.foundation.Foundation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

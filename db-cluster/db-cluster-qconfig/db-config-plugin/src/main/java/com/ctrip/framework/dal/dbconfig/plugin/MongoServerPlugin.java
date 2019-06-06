@@ -2,6 +2,7 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
+import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.service.*;
@@ -170,30 +171,39 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
                 }
             }
 
-            //decrypt in value
             MongoClusterEntity mongoClusterEntity = GsonUtils.json2T(encryptText, MongoClusterEntity.class);
-            Properties rawProp = format2Properties(mongoClusterEntity);
+            Boolean enabled = mongoClusterEntity.getEnabled();
+            if (enabled == null || !enabled) {
+                pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_DISABLE,
+                        String.format("mongo cluster=%s 被禁用, 数据库可能已经下线, 请联系dba!", dataId));
+            } else {
+                // decrypt in value
+                decrypt(mongoClusterEntity, profile);
 
-            Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, rawProp);
-            String originalText = GsonUtils.Object2Json(originalProp);
+                // clean sslCode,operator
+                clean(mongoClusterEntity);
 
-            //黑白名单检查
-            String clientAppId = getQconfigService().getClientAppid();  //client appId
+                // covert to json content
+                Properties clusterFields = format2Properties(mongoClusterEntity);
+                String content = GsonUtils.Object2Json(clusterFields);
 
-            String clientIp = NetworkUtil.getClientIp(request);
-            // prepare eventName [2018-10-18]. Format:   dataId:subEnv:appId:ip
-            String eventName = String.format("%s:%s:%s:%s", dataId, subEnv_input, clientAppId, clientIp);
-            Cat.logEvent("MongoPlugin.Cluster.Request", eventName);
+                //黑白名单检查
+                String clientAppId = getQconfigService().getClientAppid();  //client appId
 
+                String clientIp = NetworkUtil.getClientIp(request);
+                // eventName format: dataId:subEnv:appId:ip
+                String eventName = String.format("%s:%s:%s:%s", dataId, subEnv_input, clientAppId, clientIp);
+                Cat.logEvent("MongoPlugin.Cluster.Request", eventName);
 
-            //log clusterName in cat
-            String clusterName = originalProp.getProperty(REQ_PARAM_CLUSTER_NAME);
-            Cat.logEvent("MongoCluster." + clusterName, clientAppId, Event.SUCCESS, clientIp);
+                //log clusterName in cat
+                String clusterName = clusterFields.getProperty(REQ_PARAM_CLUSTER_NAME);
+                Cat.logEvent("MongoCluster." + clusterName, clientAppId, Event.SUCCESS, clientIp);
 
-            //set into return result
-            configDetail.setChecksum(ChecksumAlgorithm.getChecksum(originalText));
-            configDetail.setContent(originalText);
-            pluginResult.setConfigs(configDetail);
+                //set into return result
+                configDetail.setChecksum(ChecksumAlgorithm.getChecksum(content));
+                configDetail.setContent(content);
+                pluginResult.setConfigs(configDetail);
+            }
 
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {
@@ -212,6 +222,31 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
         if (!REQUEST_SCHEMA_HTTPS.equalsIgnoreCase(schema)) {
             throw new IllegalAccessException("Invalid request schema, only support https!");
         }
+    }
+
+    private void decrypt(MongoClusterEntity mongoCluster, String profile) throws Exception {
+        String userId = mongoCluster.getUserId();
+        String password = mongoCluster.getPassword();
+        String sslCode = mongoCluster.getSslCode();
+
+        Properties needDecryptPro = new Properties();
+        needDecryptPro.put(MongoConstants.CONNECTIONSTRING_USER_ID, userId);
+        needDecryptPro.put(TitanConstants.CONNECTIONSTRING_PASSWORD, password);
+        needDecryptPro.put(TitanConstants.SSLCODE, sslCode);
+
+        PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(profile));
+        CryptoManager cryptoManager = new CryptoManager(config);
+
+        Properties decryptedProp = cryptoManager.decrypt(dataSourceCrypto, keyService, needDecryptPro);
+        mongoCluster.setUserId(decryptedProp.getProperty(MongoConstants.CONNECTIONSTRING_USER_ID));
+        mongoCluster.setPassword(decryptedProp.getProperty(TitanConstants.CONNECTIONSTRING_PASSWORD));
+    }
+
+    private void clean(MongoClusterEntity mongoCluster) throws Exception {
+        mongoCluster.setEnabled(null);
+        mongoCluster.setSslCode(null);
+        mongoCluster.setUpdateTime(null);
+        mongoCluster.setOperator(null);
     }
 
 

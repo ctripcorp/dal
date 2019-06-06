@@ -1,8 +1,10 @@
-package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
+package com.ctrip.framework.dal.dbconfig.plugin.handler.mongo;
 
-import com.ctrip.framework.dal.dbconfig.plugin.TitanAdminPlugin;
-import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
+import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.MockQconfigService;
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -18,18 +20,19 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 
 /**
- * Created by shenjie on 2019/4/12.
+ * Created by shenjie on 2019/5/29.
  */
-public class FreeVerifyAddHandlerTest implements TitanConstants {
-    private String titanKey = "titantest_lzyan_v_01";
+public class MongoClusterUpdateHandlerTest implements MongoConstants {
+    private String clusterName = "demoMongoCluster";
     private String env = "fat";
     private String subEnv = "fat1";
+    private String operator = "test";
     private HttpServletRequest request;
-    private static TitanAdminPlugin titanAdminPlugin = new TitanAdminPlugin();
+    private AdminHandler handler;
 
-    public FreeVerifyAddHandlerTest() {
+    public MongoClusterUpdateHandlerTest() {
         QconfigService service = new MockQconfigService();
-        titanAdminPlugin.init(service);
+        handler = new MongoClusterUpdateHandler(service);
     }
 
     @Before
@@ -37,17 +40,15 @@ public class FreeVerifyAddHandlerTest implements TitanConstants {
         request = EasyMock.createMock(HttpServletRequest.class);
         EasyMock.expect(request.getParameter(REQ_PARAM_ENV)).andReturn(env).anyTimes();
         EasyMock.expect(request.getParameter(REQ_PARAM_SUB_ENV)).andReturn(subEnv).anyTimes();
-        EasyMock.expect(request.getParameter(REQ_PARAM_TITAN_KEY)).andReturn(titanKey).anyTimes();
-        EasyMock.expect(request.getParameter(REQ_PARAM_TARGET_APPID)).andReturn(TITAN_QCONFIG_KEYS_APPID).anyTimes();
-
-        EasyMock.expect(request.getRequestURI()).andReturn("/plugins/titan/freeverify/add").anyTimes();
-        EasyMock.expect(request.getMethod()).andReturn("POST").anyTimes();
+        EasyMock.expect(request.getParameter(REQ_PARAM_OPERATOR)).andReturn(operator).anyTimes();
+        EasyMock.expect(request.getParameter(REQ_PARAM_CLUSTER_NAME)).andReturn(clusterName).anyTimes();
 
         try {
-            String request = "{\n" +
-                    "   \"titanKeyList\":\"titantest_lzyan_v_01\",\n" +
-                    "   \"freeVerifyAppIdList\":\"100019729\"\n" +
-                    "}";
+            MongoClusterEntity mongoCluster = new MongoClusterEntity();
+            mongoCluster.setClusterName(clusterName);
+            mongoCluster.setEnabled(false);
+            String request = GsonUtils.t2Json(mongoCluster);
+
             EasyMock.expect(this.request.getContentLength()).andReturn(request.length()).anyTimes();
             EasyMock.expect(this.request.getInputStream()).andReturn(
                     new DelegatingServletInputStream(new ByteArrayInputStream(request.getBytes()))).anyTimes();
@@ -58,25 +59,28 @@ public class FreeVerifyAddHandlerTest implements TitanConstants {
 
     @Test
     public void testPreHandle() {
-        request.setAttribute(EasyMock.eq(REQ_ATTR_TITAN_KEY), EasyMock.anyString());
+        request.setAttribute(EasyMock.eq(REQ_ATTR_OPERATOR), EasyMock.anyString());
+        request.setAttribute(EasyMock.eq(REQ_ATTR_CLUSTER_NAME), EasyMock.anyString());
         request.setAttribute(EasyMock.eq(REQ_ATTR_ENV_PROFILE), EasyMock.anyString());
         EasyMock.replay(request);
 
-        PluginResult result = titanAdminPlugin.preHandle(request);
+        PluginResult result = handler.preHandle(request);
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
     }
 
     @Test
-    public void testPostHandleSuccess() {
+    public void testPostHandle() {
         EnvProfile profile = new EnvProfile(env);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
-        EasyMock.expect(request.getAttribute(REQ_ATTR_TITAN_KEY)).andReturn(titanKey).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_OPERATOR)).andReturn(operator).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName).anyTimes();
         EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
         EasyMock.replay(request);
 
-        PluginResult result = titanAdminPlugin.postHandle(request);
+        PluginResult result = handler.postHandle(request);
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
     }
+
 }

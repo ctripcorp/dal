@@ -1,6 +1,8 @@
 package com.ctrip.framework.dal.dbconfig.plugin.util;
 
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.Node;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -11,8 +13,11 @@ import qunar.tc.qconfig.plugin.ConfigDetail;
 import qunar.tc.qconfig.plugin.ConfigField;
 import qunar.tc.qconfig.plugin.QconfigService;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.MONGO_CLIENT_APP_ID;
 
 /**
  * Created by lzyan on 2017/9/6.
@@ -33,6 +38,9 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         for (ConfigDetail configDetail : list) {
             ConfigField configField = configDetail.getConfigField();
             configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+            System.out.println("---------------save begin-----------------------");
+            System.out.println(configDetail.getContent());
+            System.out.println("---------------save end-----------------------");
         }
 
         if (configFields.size() != list.size()) {
@@ -66,12 +74,20 @@ public class MockQconfigService implements QconfigService, TitanConstants {
             cd.setVersion(1L);
             cd.setContent(buildPluginConfigFileContent());
             return Lists.newArrayList(cd);
-        } else {
+        } else if (TITAN_QCONFIG_KEYS_APPID.equals(groupId)) {
             ConfigDetail cd = new ConfigDetail();
             cd.setConfigField(list.get(0));
             cd.setVersion(1L);
             cd.setContent(buildTestTitanKeyContent(null));
             return Lists.newArrayList(cd);
+        } else if (MONGO_CLIENT_APP_ID.equals(groupId)) {
+            ConfigDetail cd = new ConfigDetail();
+            cd.setConfigField(list.get(0));
+            cd.setVersion(1L);
+            cd.setContent(buildTestMongoClusterContent(null));
+            return Lists.newArrayList(cd);
+        } else {
+            return Lists.newArrayList();
         }
     }
 
@@ -155,6 +171,31 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("extParam=").append(returnFlag);
         sb.append("version=2").append(returnFlag);
         return sb.toString();
+    }
+
+    //build test content
+    public String buildTestMongoClusterContent(String clusterName) {
+        if (Strings.isNullOrEmpty(clusterName)) {
+            clusterName = "demoMongoCluster";
+        }
+
+        MongoClusterEntity mongoCluster = new MongoClusterEntity();
+        Node node = new Node("mongo.node.host", 55944);
+
+        mongoCluster.setNodes(Lists.newArrayList(node, node, node));
+        mongoCluster.setClusterName(clusterName);
+        mongoCluster.setClusterType("sharding");
+        mongoCluster.setDbName("mongoDBName");
+        mongoCluster.setUserId("35CC911241C1F1DD3241DA6FCB4B1A56");
+        mongoCluster.setPassword("B66C59EC4E2A996F781594974B191279");
+        mongoCluster.setVersion(1);
+        mongoCluster.setOperator("testUser");
+        mongoCluster.setSslCode("VZ00000000000441");
+        mongoCluster.setEnabled(true);
+        mongoCluster.setUpdateTime(new Date());
+
+        String content = GsonUtils.t2Json(mongoCluster);
+        return content;
     }
 
 }

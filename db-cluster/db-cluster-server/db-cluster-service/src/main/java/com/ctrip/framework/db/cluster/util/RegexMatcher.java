@@ -70,18 +70,9 @@ public class RegexMatcher {
     }
 
     public boolean clusterName(String clusterName) {
-        if (!clusterName.trim().contains("-")) {
-            return false;
-        }
-        //全是小写英文字母
-        String cluster = clusterName.split("-")[0];
-        // 大小写英文字母
-        String dbName = clusterName.split("-")[1];
-        Pattern clusterPattern = Pattern.compile(configService.getClusterNameRegex());
-        Matcher clusterMatcher = clusterPattern.matcher(cluster);
-        Pattern dbNamePatter = Pattern.compile(configService.getDbNameRegex(), Pattern.CASE_INSENSITIVE);
-        Matcher dbNameMatcher = dbNamePatter.matcher(dbName);
-        return clusterMatcher.matches() && dbNameMatcher.matches();
+        Pattern pattern = Pattern.compile(configService.getClusterNameRegex());
+        Matcher matcher = pattern.matcher(clusterName);
+        return matcher.matches();
     }
 
 }

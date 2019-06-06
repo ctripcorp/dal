@@ -9,13 +9,13 @@ import com.ctrip.framework.dal.dbconfig.plugin.handler.BaseAdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.service.*;
 import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
+import com.ctrip.framework.dal.dbconfig.plugin.util.MongoUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.QconfigServiceUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -24,7 +24,6 @@ import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -71,8 +70,6 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
     @Override
     public PluginResult postHandle(HttpServletRequest request) {
         PluginResult pluginResult = PluginResult.oK();
-        // todo:
-        Stopwatch stopwatch = Stopwatch.createStarted();
         Transaction t = Cat.newTransaction("MongoQconfigPlugin", "MongoClusterPostPlugin");
         try {
             t.addData("running class=" + getClass().getSimpleName());
@@ -100,16 +97,16 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
                     if (permitted) {
                         add(request, mongoClusterEntity);
                     } else {
-                        t.addData("postHandleDetail(): sitePermission=false, not allow to update!");
-                        Cat.logEvent("MongoClusterPostPlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to update! clientIp=" + clientIp);
+                        t.addData("postHandleDetail(): sitePermission=false, not allow to add!");
+                        Cat.logEvent("MongoClusterPostPlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to add! clientIp=" + clientIp);
                         pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_WRITE, "Access ip whitelist check fail! clientIp=" + clientIp);
                     }
 
                 } else {
-                    t.addData("postHandleDetail(): mongoClusterEntity=null, no need to add/update!");
+                    t.addData("postHandleDetail(): mongoClusterEntity=null, no need to add!");
                 }
             } else {
-                t.addData("postHandleDetail(): mongo cluster body is null or empty, no need to add/update!");
+                t.addData("postHandleDetail(): mongo cluster body is null or empty, no need to add!");
             }
 
             t.setStatus(Message.SUCCESS);
@@ -119,9 +116,6 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
             throw new DbConfigPluginException(e);
         } finally {
             t.complete();
-            //metric cost
-            stopwatch.stop();
-            long cost = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         }
         return pluginResult;
     }
@@ -129,13 +123,16 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
     private void add(HttpServletRequest request, MongoClusterEntity mongoClusterEntity) throws Exception {
 
         String group = MONGO_CLIENT_APP_ID;
-        String dataId = mongoClusterEntity.getClusterName().toLowerCase();
+        String dataId = mongoClusterEntity.getClusterName();
         EnvProfile envProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(dataId), "dataId参数不能为空");
         Preconditions.checkArgument(envProfile != null && !Strings.isNullOrEmpty(envProfile.formatProfile()),
                 "profile参数不能为空");
 
-        //build updateConf from <mongoClusterEntity>
+        // format file name
+        dataId = MongoUtils.formatClusterName(dataId);
+
+        //build config from <mongoClusterEntity>
         Properties rawProp = format2Properties(mongoClusterEntity);
 
         PluginConfig config = new PluginConfig(getQconfigService(), envProfile);

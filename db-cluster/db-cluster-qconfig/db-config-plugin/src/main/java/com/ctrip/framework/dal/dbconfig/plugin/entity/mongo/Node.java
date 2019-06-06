@@ -8,6 +8,11 @@ public class Node {
     private String host;
     private Integer port;
 
+    public Node(String host, Integer port) {
+        this.host = host;
+        this.port = port;
+    }
+
     public String getHost() {
         return host;
     }

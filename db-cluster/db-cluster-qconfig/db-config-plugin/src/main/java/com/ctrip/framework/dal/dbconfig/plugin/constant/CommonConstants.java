@@ -9,7 +9,7 @@ public interface CommonConstants {
     String REQ_PARAM_SUB_ENV = "subenv";
     String REQ_PARAM_OPERATOR = "operator";
     String REQ_PARAM_TARGET_APPID = "appid";
-    String REQ_PARAM_CLUSTER_NAME = "clusterName";
+    String REQ_PARAM_CLUSTER_NAME = "clustername";
 
     String REQ_ATTR_ENV_PROFILE = "attr_env_profile";
     String REQ_ATTR_OPERATOR = "attr_operator";

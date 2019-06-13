@@ -366,9 +366,9 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         setDriverClass(dataSourceConfigure, connectionStringConfigure);
         setVersion(dataSourceConfigure, connectionStringConfigure);
         setHostName(dataSourceConfigure,connectionStringConfigure);
-        setPort(dataSourceConfigure,connectionStringConfigure);
-        setDBName(dataSourceConfigure,connectionStringConfigure);
-        setEncoding(dataSourceConfigure,connectionStringConfigure);
+//        setPort(dataSourceConfigure,connectionStringConfigure);
+//        setDBName(dataSourceConfigure,connectionStringConfigure);
+//        setEncoding(dataSourceConfigure,connectionStringConfigure);
     }
 
     private void setHostName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
@@ -376,24 +376,24 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         if(hostName!=null)
             dataSourceConfigure.setHostName(hostName);
     }
+//
+//    private void setPort(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure) {
+//        Integer port = connectionStringConfigure.getPort();
+//        if (port != null)
+//            dataSourceConfigure.setPort(port);
+//    }
+//
+//    private void setDBName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
+//        String DBName= connectionStringConfigure.getDBName();
+//        if(DBName!=null)
+//            dataSourceConfigure.setDBName(DBName);
+//    }
 
-    private void setPort(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure) {
-        Integer port = connectionStringConfigure.getPort();
-        if (port != null)
-            dataSourceConfigure.setPort(port);
-    }
-
-    private void setDBName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
-        String DBName= connectionStringConfigure.getDBName();
-        if(DBName!=null)
-            dataSourceConfigure.setDBName(DBName);
-    }
-
-    private void setEncoding(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
-        String encoding= connectionStringConfigure.getEncoding();
-        if(encoding!=null)
-            dataSourceConfigure.setEncoding(encoding);
-    }
+//    private void setEncoding(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure){
+//        String encoding= connectionStringConfigure.getEncoding();
+//        if(encoding!=null)
+//            dataSourceConfigure.setEncoding(encoding);
+//    }
 
     private void setName(DataSourceConfigure dataSourceConfigure, DalConnectionStringConfigure connectionStringConfigure) {
         String name = connectionStringConfigure.getName();

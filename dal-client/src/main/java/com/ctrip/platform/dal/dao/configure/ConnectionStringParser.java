@@ -38,6 +38,9 @@ public class ConnectionStringParser {
     private static final Pattern ipPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([\\S:]+):([^/]+)");
     private static final Pattern ipPortPatternInSQLServerURL = Pattern.compile("(jdbc:sqlserver://)([\\S:]+):([^;]+)");
 
+    private static final Pattern urlReplacePatternInMySQLURL = Pattern.compile("jdbc:mysql://([^/]+)");
+    private static final Pattern urlReplacePatternInSQLServerURL = Pattern.compile("jdbc:sqlserver://([^;]+)");
+
     /**
      * parse "Data Source=127.0.0.1,28747;UID=sa;password=sa;database=test;"
      *
@@ -116,9 +119,25 @@ public class ConnectionStringParser {
         config.setDriverClass(driverClass);
         config.setVersion(version);
         config.setHostName(dbhost);
-        config.setPort(Integer.parseInt(port));
+//        config.setPort(Integer.parseInt(port));
 
         return config;
+    }
+
+    public static String replaceHostAndPort(String url, String newHost, String newPort) {
+        Matcher matcher = null;
+        if (url.toLowerCase().startsWith(MYSQL_URL_PREFIX)) {
+            matcher = urlReplacePatternInMySQLURL.matcher(url);
+            if (matcher.find())
+                url = matcher.replaceFirst(String.format("jdbc:mysql://%s:%s", newHost, newPort));
+        }
+
+        if (url.toLowerCase().startsWith(SQLSERVER_URL_PREFIX)) {
+            matcher = urlReplacePatternInSQLServerURL.matcher(url);
+            if (matcher.find())
+                url = matcher.replaceFirst(String.format("jdbc:sqlserver://%s:%s", newHost, newPort));
+        }
+        return url;
     }
 
     public static HostAndPort parseHostPortFromURL(String url) {
@@ -129,7 +148,7 @@ public class ConnectionStringParser {
         }
 
         if (url.toLowerCase().startsWith(SQLSERVER_URL_PREFIX)) {
-            Matcher matcher = ipPortPatternInMySQLURL.matcher(url);
+            Matcher matcher = ipPortPatternInSQLServerURL.matcher(url);
             if (matcher.find())
                 return new HostAndPort(url,matcher.group(2),Integer.parseInt(matcher.group(3)));
         }

@@ -27,7 +27,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
 
 
     public ForceSwitchableDataSource(IDataSourceConfigureProvider provider) throws SQLException {
-        this(provider.getDataSourceConfigure().getDBName(), provider);
+        this(provider.getDataSourceConfigure().getConnectionUrl(), provider);
     }
 
     public ForceSwitchableDataSource(String name, IDataSourceConfigureProvider provider) throws SQLException {

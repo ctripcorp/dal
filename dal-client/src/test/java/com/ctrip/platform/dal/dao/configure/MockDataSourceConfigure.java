@@ -4,19 +4,19 @@ public class MockDataSourceConfigure extends AbstractDataSourceConfigure {
     private String connectionUrl;
     private String userName;
     private String password;
-    private String hostName;
-    private Integer port;
-    private String dbName;
+//    private String hostName;
+//    private Integer port;
+//    private String dbName;
     private String driverClass;
     private String connectionProperties;
 
-    public MockDataSourceConfigure(String connectionUrl, String userName, String password, String hostName, Integer port, String dbName, String driverClass, String connectionProperties) {
+    public MockDataSourceConfigure(String connectionUrl, String userName, String password, String driverClass, String connectionProperties) {
         this.connectionUrl = connectionUrl;
         this.userName = userName;
         this.password = password;
-        this.hostName = hostName;
-        this.port = port;
-        this.dbName = dbName;
+//        this.hostName = hostName;
+//        this.port = port;
+//        this.dbName = dbName;
         this.driverClass = driverClass;
         this.connectionProperties = connectionProperties;
     }
@@ -37,19 +37,19 @@ public class MockDataSourceConfigure extends AbstractDataSourceConfigure {
         return password;
     }
 
-    @Override
-    public String getHostName() {
-        return hostName;
-    }
-
-    @Override
-    public Integer getPort() {
-        return port;
-    }
-
-    public String getDBName() {
-        return dbName;
-    }
+//    @Override
+//    public String getHostName() {
+//        return hostName;
+//    }
+//
+//    @Override
+//    public Integer getPort() {
+//        return port;
+//    }
+//
+//    public String getDBName() {
+//        return dbName;
+//    }
 
     @Override
     public String getDriverClass() {

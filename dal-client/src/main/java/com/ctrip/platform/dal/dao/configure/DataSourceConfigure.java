@@ -2,7 +2,9 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
+import java.sql.Connection;
 import java.util.*;
 
 public class DataSourceConfigure extends AbstractDataSourceConfigure
@@ -95,23 +97,23 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return version;
     }
 
-    @Override
-    public String getEncoding() {
-        return getProperty(ENCODING);
-    }
+//    @Override
+//    public String getEncoding() {
+//        return getProperty(ENCODING);
+//    }
+//
+//    public void setEncoding(String encoding) {
+//        setProperty(ENCODING, encoding);
+//    }
 
-    public void setEncoding(String encoding) {
-        setProperty(ENCODING, encoding);
-    }
+//    public void setDBName(String hostName) {
+//        setProperty(DB_NAME, hostName);
+//    }
 
-    public void setDBName(String hostName) {
-        setProperty(DB_NAME, hostName);
-    }
-
-    @Override
-    public String getDBName() {
-        return getProperty(DB_NAME);
-    }
+//    @Override
+//    public String getDBName() {
+//        return getProperty(DB_NAME);
+//    }
 
     public void setHostName(String hostName) {
         setProperty(HOST_NAME, hostName);
@@ -122,12 +124,12 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return getProperty(HOST_NAME);
     }
 
-    @Override
-    public Integer getPort() {
-        if (getProperty(PORT) == null)
-            return null;
-        return Integer.parseInt(getProperty(PORT));
-    }
+//    @Override
+//    public Integer getPort() {
+//        if (getProperty(PORT) == null)
+//            return null;
+//        return Integer.parseInt(getProperty(PORT));
+//    }
 
     public void setPort(int port) {
         setProperty(PORT, String.valueOf(port));
@@ -358,12 +360,14 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
             Properties properties = new Properties();
             properties.setProperty(USER_NAME, configure.getUserName());
             properties.setProperty(PASSWORD, configure.getPassword());
-            properties.setProperty(HOST_NAME, configure.getHostName());
-            properties.setProperty(PORT, String.valueOf(configure.getPort()));
-            properties.setProperty(DB_NAME, configure.getDBName());
-            properties.setProperty(CONNECTION_URL, configure.getConnectionUrl());
-            if (configure.getEncoding() != null)
-                properties.setProperty(ENCODING, configure.getEncoding());
+            String connectionUrl=configure.getConnectionUrl();
+            if(connectionUrl==null)
+                throw new DalRuntimeException("connetion url cannot be null");
+            properties.setProperty(CONNECTION_URL,connectionUrl);
+            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
+            properties.setProperty(HOST_NAME, hostAndPort.getHost());
+            properties.setProperty(PORT, String.valueOf(hostAndPort.getPort()));
+
             if (configure.getDriverClass() != null)
                 properties.setProperty(DRIVER_CLASS_NAME, configure.getDriverClass());
             if (configure.getTestWhileIdle() != null)
@@ -412,13 +416,9 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void replaceURL(String ip, int port) {
-        String connectionUrl;
-        if (getDriverClass().equalsIgnoreCase(ConnectionStringParser.DRIVER_MYSQL))
-            connectionUrl = String.format(ConnectionStringParser.DBURL_MYSQL, ip, port, getDBName(), getEncoding()==null ? ConnectionStringParser.DEFAULT_ENCODING : getEncoding());
-        else
-            connectionUrl = String.format(ConnectionStringParser.DBURL_SQLSERVER, ip, port, getDBName());
-        setConnectionUrl(connectionUrl);
-        setHostName(ip);
-        setPort(port);
+        String newConnectionUrl = ConnectionStringParser.replaceHostAndPort(getConnectionUrl(),ip,String.valueOf(port));
+        setConnectionUrl(newConnectionUrl);
+//        setHostName(ip);
+//        setPort(port);
     }
 }

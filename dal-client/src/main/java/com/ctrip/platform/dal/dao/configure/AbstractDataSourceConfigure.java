@@ -3,10 +3,6 @@ package com.ctrip.platform.dal.dao.configure;
 
 public  abstract class AbstractDataSourceConfigure implements IDataSourceConfigure {
 
-    public String getEncoding(){
-        return null;
-    }
-
     public Boolean getTestWhileIdle(){
         return null;
     }

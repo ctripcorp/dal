@@ -26,15 +26,13 @@ public interface CommonConstants {
 
     int PAAS_RETURN_CODE_SUCCESS = 0;
     int PAAS_RETURN_CODE_FAIL_INNER = 4;
-
-    String APPID_IP_CHECK_REQUEST_TEMPLATE = "{\"app_id\": \"%s\", \"env\": \"%s\", \"ip\": \"%s\"}";
+    int PAAS_RETURN_CODE_NOT_MATCH = 1;
 
     //titan - plugin_ignite.properties
     String IGNITE_PREWARM_CACHE_ENABLED = "ignite.prewarm.cache.enabled";
     String IGNITE_PREWARM_CACHE_APPIDS = "ignite.prewarm.cache.appIds";
     String CACHE_NORMAL_REFRESH_INTERVAL_MIN = "cache.normal.refresh.interval.min";
-    String APPID_IP_CHECK_FETCH_ALL_APPID_URL = "appId.ip.check.fetch.all.appId.url";
-    String APPID_IP_CHECK_BATCH_FETCH_RELATION_URL = "appId.ip.check.batch.fetch.relation.url";
+    String CMS_GET_APP_URL = "cms.get.app.url";
     String APPID_IP_CHECK_BATCH_FETCH_COUNT = "appId.ip.check.batch.fetch.count";
 
 }

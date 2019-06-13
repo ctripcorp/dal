@@ -243,7 +243,6 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
     }
 
     private void clean(MongoClusterEntity mongoCluster) throws Exception {
-        mongoCluster.setEnabled(null);
         mongoCluster.setSslCode(null);
         mongoCluster.setUpdateTime(null);
         mongoCluster.setOperator(null);

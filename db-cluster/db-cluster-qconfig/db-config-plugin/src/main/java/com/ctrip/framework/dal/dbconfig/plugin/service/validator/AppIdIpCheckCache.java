@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AppIdIpCheckCache {
     private static Logger logger = LoggerFactory.getLogger(AppIdIpCheckCache.class);
+    private static final String CAT_EVENT_FORMAT = "%s:%s";
 
     private static class AppIdIpCheckCacheSingletonHolder {
         private static final AppIdIpCheckCache instance = new AppIdIpCheckCache();
@@ -31,6 +32,7 @@ public class AppIdIpCheckCache {
 
     private Cache<AppIdIpCheckEntity, Integer> normalCache = null;      //常驻缓存, 存放的是状态正常的关系, return_code=0
     private LoadingCache<AppIdIpCheckEntity, Integer> tmpCache = null;  //临时缓存, 主要存放的是状态异常的关系(可能也有部分状态正常的数据)
+
     private AppIdIpManager appIdIpManager;
 
     //constructor - private
@@ -43,6 +45,10 @@ public class AppIdIpCheckCache {
         return AppIdIpCheckCacheSingletonHolder.instance;
     }
 
+
+    protected void setAppIdIpManager(AppIdIpManager appIdIpManager) {
+        this.appIdIpManager = appIdIpManager;
+    }
 
     /**
      * Build normal cache (general cache)
@@ -105,7 +111,6 @@ public class AppIdIpCheckCache {
         return tmpCache;
     }
 
-
     /**
      * 从缓存中获取数据
      * [1] 首先从 normalCache 中获取
@@ -116,7 +121,7 @@ public class AppIdIpCheckCache {
      * @param appIdIpCheckEntity
      * @return
      */
-    private Integer getValueInCache(AppIdIpCheckEntity appIdIpCheckEntity) {
+    protected Integer getValueInCache(AppIdIpCheckEntity appIdIpCheckEntity) {
         Integer returnCode = getNormalCache().getIfPresent(appIdIpCheckEntity);
         if (returnCode == null) {
             Cat.logEvent("TitanPlugin.AppIdIpCheck.Cache.Miss", "NormalCache", Event.SUCCESS, "appIdIpCheckEntity=" + appIdIpCheckEntity);
@@ -156,7 +161,8 @@ public class AppIdIpCheckCache {
                 match = true;
             } else {
                 match = false;
-                Cat.logEvent("AppIdIpCheckServiceValidator", "APPID_IP_CHECK_FAIL", Event.SUCCESS, "appId-Ip check fail! returnCode=" + returnCode);
+                Cat.logEvent("AppIdIpCheck.NotMatch", String.format(CAT_EVENT_FORMAT, appIdIpCheckEntity.getClientAppId(), appIdIpCheckEntity.getClientIp()),
+                        Event.SUCCESS, "appId-Ip check fail! returnCode=" + returnCode);
             }
         } catch (Exception e) {
             Cat.logError("check appId-Ip error, appIdIpCheckEntity=" + appIdIpCheckEntity, e);
@@ -197,7 +203,7 @@ public class AppIdIpCheckCache {
             if (!Strings.isNullOrEmpty(env)) {
                 env = env.toLowerCase();
             }
-            List<AppIdIpCheckEntity> appIdIpCheckEntityList = appIdIpManager.fetchAllExistAppIdIp(env);
+            List<AppIdIpCheckEntity> appIdIpCheckEntityList = appIdIpManager.getAllAppIdIp(env);
             logger.info("preWarmCache():env=" + env + ", appIdIpCheckEntityList.size()=" + (appIdIpCheckEntityList == null ? 0 : appIdIpCheckEntityList.size()));
             if (appIdIpCheckEntityList != null && !appIdIpCheckEntityList.isEmpty()) {
                 for (AppIdIpCheckEntity entity : appIdIpCheckEntityList) {

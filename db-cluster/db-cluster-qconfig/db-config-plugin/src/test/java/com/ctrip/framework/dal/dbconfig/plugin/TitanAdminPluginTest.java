@@ -8,10 +8,7 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.mock.web.DelegatingServletInputStream;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import qunar.tc.qconfig.common.util.Constants;
 import qunar.tc.qconfig.plugin.*;
 

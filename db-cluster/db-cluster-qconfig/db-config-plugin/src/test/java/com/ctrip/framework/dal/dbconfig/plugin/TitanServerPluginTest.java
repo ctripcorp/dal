@@ -29,7 +29,7 @@ public class TitanServerPluginTest {
     private HttpServletRequest request;
     private String titanKey = "titantest_lzyan_v_01";
     private String env = "fat";
-    private String privateNetIp = "10.5.158.50";
+    private String privateNetIp = "10.5.156.193";
     private String publicNetIp = "10.9.253.50";
     private String qconfigAgencyIp = "1.1.1.1";
     private String ttToken = "fseYTdpoOWzdkkS5hcTfVWvuzHgETovQSQwOUMMq2ilm0wDOhRdL+OSbnynbrRgem+7UofvSpF9SgQ1eZrB6aXcgwsxAEFF3KZaXwObQ+ykCn+q4eKfYCMzkSCo1wNBRAgW09vV+194nVccMmkTg8iuo6kQK8XKr4EpMK3V6A8Y=";
@@ -181,7 +181,7 @@ public class TitanServerPluginTest {
     public void postHandlePrivateNetFailed() throws Exception {
         String profile = CommonHelper.formatProfileFromEnv(env);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile(env)).anyTimes();
-        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn("10.5.156.193").anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn("10.5.158.50").anyTimes();
         EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
         EasyMock.replay(request);   //保存期望结果
         EasyMock.verify(request);
@@ -258,7 +258,7 @@ public class TitanServerPluginTest {
         sb.append("dbName=mysqldaltest01db").append(returnFlag);
         sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
         sb.append("enabled=true").append(returnFlag);
-        sb.append("permissions=100007326").append(returnFlag);
+        sb.append("permissions=100020032").append(returnFlag);
         sb.append("updateUser=lzyan").append(returnFlag);
         sb.append("createUser=lzyan").append(returnFlag);
         sb.append("timeOut=30").append(returnFlag);

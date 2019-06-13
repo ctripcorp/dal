@@ -45,8 +45,8 @@ public interface TitanConstants extends CommonConstants {
     String PERMISSION_VALID_DETECT_ENABLED = "permission.valid.detect.enabled";
     String APPID_IP_CHECK_ENABLED = "appId.ip.check.enabled";
     String APPID_IP_CHECK_FREE_APPIDLIST = "appId.ip.check.free.appIdList";
-    String APPID_IP_CHECK_SERVICE_URL = "appId.ip.check.service.url";
-    String APPID_IP_CHECK_SERVICE_TOKEN = "appId.ip.check.service.token";
+    String CMS_GET_GROUP_SERVICE_URL = "cms.get.group.service.url";
+    String CMS_ACCESS_TOKEN = "cms.access.token";
     String APPID_IP_CHECK_SERVICE_PASS_CODELIST = "appId.ip.check.service.pass.codeList";
     String APPID_IP_CHECK_HTTP_READ_TIMEOUT_MS = "appId.ip.check.http.read.timeout.ms";
     String MHA_LAST_UPDATE_ALLOW_INTERVAL_MIN = "mha.last.update.allow.interval.min";

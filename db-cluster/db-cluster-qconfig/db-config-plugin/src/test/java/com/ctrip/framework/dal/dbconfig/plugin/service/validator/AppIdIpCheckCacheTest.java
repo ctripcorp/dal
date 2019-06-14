@@ -22,7 +22,7 @@ public class AppIdIpCheckCacheTest {
 
     private AppIdIpManager appIdIpManager = new MockAppIdManager();
     private AppIdIpCheckCache appIdIpCheckCache = AppIdIpCheckCache.getInstance();
-    private static final int THREAD_COUNT = 2;
+    private static final int THREAD_COUNT = 10;
     private ExecutorService exec = Executors.newFixedThreadPool(THREAD_COUNT);
 
     @Before
@@ -74,7 +74,7 @@ public class AppIdIpCheckCacheTest {
             assert returnCode;
 
             // get tmp cache appIdIp from tmp cache, invoke tmp cache load method, then put appIdIp to normal cache
-            tmpReturnCode = appIdIpCheckCache.getTmpCache().get(appIdIp);
+            tmpReturnCode = appIdIpCheckCache.getTmpCache().getIfPresent(appIdIp);
             assert tmpReturnCode != null && tmpReturnCode == CommonConstants.PAAS_RETURN_CODE_SUCCESS;
 
             // get get tmp cache appIdIp from normal cache success
@@ -105,7 +105,7 @@ public class AppIdIpCheckCacheTest {
         System.out.println("-------------------------isAppIdIpMatch end-------------------------");
     }
 
-//    @Test
+    @Test
     public void getValueInCache() throws Exception {
         for (int i = 0; i < THREAD_COUNT; i++) {
             exec.execute(new Runnable() {
@@ -121,7 +121,6 @@ public class AppIdIpCheckCacheTest {
                                 assert realReturnCode != null;
                                 assert realReturnCode == expectedReturnCode;
                             }
-                            TimeUnit.MINUTES.sleep(1);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -130,7 +129,7 @@ public class AppIdIpCheckCacheTest {
                 }
             });
         }
-        TimeUnit.MINUTES.sleep(10);
+        TimeUnit.MINUTES.sleep(1);
     }
 
 }

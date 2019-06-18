@@ -119,7 +119,6 @@ public class ConnectionStringParser {
         config.setDriverClass(driverClass);
         config.setVersion(version);
         config.setHostName(dbhost);
-//        config.setPort(Integer.parseInt(port));
 
         return config;
     }

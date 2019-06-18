@@ -43,12 +43,12 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         this.task = task;
     }
 
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure){
+    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
         this(name, dataSourceConfigure, null);
         createPool(name, dataSourceConfigure);
     }
 
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreateTask task){
+    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreateTask task) {
         if (dataSourceConfigure == null)
             throw new DalRuntimeException("Can not find any connection configure for " + name);
 
@@ -56,10 +56,10 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         this.dataSourceConfigure = dataSourceConfigure;
         this.task = task;
 
-        createDataSource(name,dataSourceConfigure);
+        createDataSource(name, dataSourceConfigure);
     }
 
-    private void createDataSource(String name, DataSourceConfigure dataSourceConfigure){
+    private void createDataSource(String name, DataSourceConfigure dataSourceConfigure) {
         try {
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
             setPoolPropertiesIntoValidator(poolProperties);
@@ -104,7 +104,9 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     }
 
     public void setListener(DataSourceCreatePoolListener listener) {
+        long startTime = System.currentTimeMillis();
         this.listener = listener;
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format("SetListener: %s", name), "set DataSourceCreatePoolListener", startTime);
     }
 
 }

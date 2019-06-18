@@ -10,12 +10,4 @@ public interface ConnectionStringConfigure {
 
     String getDriverClass();
 
-
-
-//    Integer getPort();
-
-//    String getDBName();
-
-//    characterEncoding, UTF-8 default
-//    String getEncoding();
 }

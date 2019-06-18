@@ -6,11 +6,4 @@ public interface DalConnectionStringConfigure extends ConnectionStringConfigure 
     String getVersion();
 
     String getHostName();
-
-//    String getEncoding();
-//    String getHostName();
-
-//    Integer getPort();
-
-//    String getDBName();
 }

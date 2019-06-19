@@ -86,7 +86,7 @@ public class ForceSwitchableDataSourceTest {
 
 //        first forceSwitch
         SwitchableDataSourceStatus status1 = dataSource.forceSwitch(INVALIDHOST, 3306);
-        Thread.sleep(7000);
+        Thread.sleep(4000);
         assertEquals("onForceSwitchFail", listener.getOnCallMethodName());
         assertFalse(status1.isForceSwitched());
         assertEquals(IPHOST, status1.getHostName().toLowerCase());

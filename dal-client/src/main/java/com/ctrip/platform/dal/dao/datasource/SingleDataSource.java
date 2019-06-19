@@ -104,9 +104,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     }
 
     public void setListener(DataSourceCreatePoolListener listener) {
-        long startTime = System.currentTimeMillis();
         this.listener = listener;
-        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format("SetListener: %s", name), "set DataSourceCreatePoolListener", startTime);
     }
 
 }

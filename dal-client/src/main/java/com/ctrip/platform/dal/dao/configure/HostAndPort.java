@@ -5,13 +5,14 @@ public class HostAndPort {
     private String host;
     private Integer port;
     private String connectionUrl;
+    private boolean isValid = true;
 
     public HostAndPort(){}
 
-    public HostAndPort(String connectionUrl, String host, Integer port){
-        this.connectionUrl=connectionUrl;
-        this.host=host;
-        this.port=port;
+    public HostAndPort(String connectionUrl, String host, Integer port) {
+        this.connectionUrl = connectionUrl;
+        this.host = host;
+        this.port = port;
     }
 
     public String getHost() {
@@ -38,5 +39,11 @@ public class HostAndPort {
         this.connectionUrl = connectionUrl;
     }
 
+    public boolean isValid() {
+        return isValid;
+    }
 
+    public void setValid(boolean valid) {
+        isValid = valid;
+    }
 }

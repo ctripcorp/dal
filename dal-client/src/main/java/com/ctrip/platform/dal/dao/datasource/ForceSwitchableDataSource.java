@@ -66,7 +66,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                             public void onCreatePoolSuccess() {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name), configure.getConnectionUrl());
                                 isConnected = true;
-                                final SwitchableDataSourceStatus status = getStatus(true);
+                                final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s",name), "notify listeners' onForceSwitchSuccess");
                                 for (final SwitchListener listener : listeners)
                                     executor.submit(new Runnable() {
@@ -84,7 +84,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                             public void onCreatePoolFail(final Throwable e) {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail: %s",name),  e.getMessage());
                                 isConnected = false;
-                                final SwitchableDataSourceStatus status = getStatus(false);
+                                final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail::notifyListeners: %s",name), "notify listeners' onForceSwitchFail");
                                 for (final SwitchListener listener : listeners)
                                     executor.submit(new Runnable() {
@@ -110,10 +110,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     }
 
     public SwitchableDataSourceStatus getStatus() {
-        return getStatus(false);
-    }
-
-    private SwitchableDataSourceStatus getStatus(final boolean isPoolCreated) {
         synchronized (lock) {
             org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) getSingleDataSource().getDataSource();
 
@@ -125,7 +121,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "getStatus", new Callback() {
                     @Override
                     public void execute() throws Exception {
-                        if (!isConnected || isUrlChanged(url)) {
+                        if (!currentHostAndPort.isValid() || isUrlChanged(url)) {
                             currentHostAndPort.setValid(false);
                             LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, "url changed, we will get url from connection");
                             try {
@@ -136,10 +132,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                                             setIpPortCache(ConnectionStringParser.parseHostPortFromURL(getConnection().getMetaData().getURL()));
                                             setIsConnected(true);
                                         } catch (Exception e) {
-                                            if (isPoolCreated)
-                                                setIpPortCache(ConnectionStringParser.parseHostPortFromURL(url));
-                                            else
-                                                setIpPortCache(new HostAndPort());
+                                            setIpPortCache(ConnectionStringParser.parseHostPortFromURL(url));
                                         } finally {
                                             latch.countDown();
                                         }
@@ -157,8 +150,8 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                 throw new DalRuntimeException("get status error", e);
             }
             if (!currentHostAndPort.isValid()) {
-                isConnected = false;
                 setIpPortCache(ConnectionStringParser.parseHostPortFromURL(url));
+                return new SwitchableDataSourceStatus(isForceSwitched, currentHostAndPort.getHost(), currentHostAndPort.getPort(), false);
             }
             return new SwitchableDataSourceStatus(isForceSwitched, currentHostAndPort.getHost(), currentHostAndPort.getPort(), isConnected);
         }
@@ -180,7 +173,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("old connection url: %s", configure.getConnectionUrl()));
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("old isForceSwitched before restore: %s, old isConnected before restore: %s", oldStatus.isForceSwitched(), oldStatus.isConnected()));
 
-                        if (isForceSwitched == false) {
+                        if (!isForceSwitched) {
                             LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("%s is not force switched, return", name));
                             return;
                         }
@@ -192,7 +185,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                             public void onCreatePoolSuccess() {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name),  newConfigure.getConnectionUrl());
                                 isConnected = true;
-                                final SwitchableDataSourceStatus status = getStatus(true);
+                                final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s",name), "notify listeners' onRestoreSuccess");
                                 for (final SwitchListener listener : listeners)
                                     executor.submit(new Runnable() {
@@ -210,7 +203,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                             public void onCreatePoolFail(final Throwable e) {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail: %s",name),  e.getMessage());
                                 isConnected = false;
-                                final SwitchableDataSourceStatus status = getStatus(false);
+                                final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail::notifyListeners: %s",name), "notify listeners' onRestoreFail");
                                 for (final SwitchListener listener : listeners)
                                     executor.submit(new Runnable() {

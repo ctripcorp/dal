@@ -86,6 +86,19 @@ public class ForceSwitchableDataSourceTest {
 
 //        first forceSwitch
         SwitchableDataSourceStatus status1 = dataSource.forceSwitch(INVALIDHOST, 3306);
+        assertNull(listener.getOnCallMethodName());
+        assertFalse(status1.isForceSwitched());
+        assertEquals(IPHOST, status1.getHostName().toLowerCase());
+        assertEquals("3306", status1.getPort().toString());
+        assertTrue(status1.isConnected());
+
+//        getStatus
+        SwitchableDataSourceStatus status11 = dataSource.getStatus();
+        assertTrue(status11.isForceSwitched());
+        assertEquals(INVALIDHOST,status11.getHostName());
+        assertEquals("3306",status11.getPort().toString());
+        assertFalse(status11.isConnected());
+
         Thread.sleep(4000);
         assertEquals("onForceSwitchFail", listener.getOnCallMethodName());
         assertFalse(status1.isForceSwitched());
@@ -96,18 +109,18 @@ public class ForceSwitchableDataSourceTest {
 //        getStatus
         SwitchableDataSourceStatus status2 = dataSource.getStatus();
         assertTrue(status2.isForceSwitched());
-        assertNull(status2.getHostName());
-        assertNull(status2.getPort());
+        assertEquals(INVALIDHOST,status2.getHostName());
+        assertEquals("3306",status2.getPort().toString());
         assertFalse(status2.isConnected());
 
 //        second forceSwitch
         SwitchableDataSourceStatus status3 = dataSource.forceSwitch(IPHOST, 3306);
         Thread.sleep(2000);
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
-        assertTrue(status2.isForceSwitched());
-        assertNull(status2.getHostName());
-        assertNull(status2.getPort());
-        assertFalse(status2.isConnected());
+        assertTrue(status3.isForceSwitched());
+        assertEquals(INVALIDHOST,status3.getHostName());
+        assertEquals("3306",status3.getPort().toString());
+        assertFalse(status3.isConnected());
 
 //        getStatus
         SwitchableDataSourceStatus status4 = dataSource.getStatus();

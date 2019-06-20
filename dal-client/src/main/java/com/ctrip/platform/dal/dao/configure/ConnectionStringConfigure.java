@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
 public interface ConnectionStringConfigure {
-    String getName();
 
     String getUserName();
 
@@ -11,7 +10,4 @@ public interface ConnectionStringConfigure {
 
     String getDriverClass();
 
-    String getVersion();
-
-    String getHostName();
 }

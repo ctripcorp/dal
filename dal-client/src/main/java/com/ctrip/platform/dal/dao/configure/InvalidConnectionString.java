@@ -32,11 +32,11 @@ public class InvalidConnectionString implements DalInvalidConnectionString {
         throw new DalRuntimeException(String.format("The DomainConnectionString of %s is null", name));
     }
 
-    public ConnectionStringConfigure getIPConnectionStringConfigure() {
+    public DalConnectionStringConfigure getIPConnectionStringConfigure() {
         throw new DalRuntimeException(String.format("The IPConnectionStringConfigure of %s is null", name));
     }
 
-    public ConnectionStringConfigure getDomainConnectionStringConfigure() {
+    public DalConnectionStringConfigure getDomainConnectionStringConfigure() {
         throw new DalRuntimeException(String.format("The DomainConnectionStringConfigure of %s is null", name));
     }
 
@@ -50,5 +50,9 @@ public class InvalidConnectionString implements DalInvalidConnectionString {
         InvalidConnectionString connectionString = (InvalidConnectionString) o;
         return name.equals(connectionString.getName())
                 && connectionStringException.equals(connectionString.getConnectionStringException());
+    }
+
+    public synchronized InvalidConnectionString clone(){
+       return  new InvalidConnectionString(name,connectionStringException);
     }
 }

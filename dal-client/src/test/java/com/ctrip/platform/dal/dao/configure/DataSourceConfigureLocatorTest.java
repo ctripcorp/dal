@@ -44,25 +44,25 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
         DataSourceConfigure configure = new DataSourceConfigure(name, p);
         locator.addUserPoolPropertiesConfigure(name, configure);
         PoolPropertiesConfigure ppc = locator.getUserPoolPropertiesConfigure(name);
-        Assert.assertEquals(p.getProperty(TESTWHILEIDLE), ppc.getProperty(TESTWHILEIDLE));
-        Assert.assertEquals(p.getProperty(TESTONBORROW), ppc.getProperty(TESTONBORROW));
-        Assert.assertEquals(p.getProperty(TESTONRETURN), ppc.getProperty(TESTONRETURN));
-        Assert.assertEquals(p.getProperty(VALIDATIONQUERY), ppc.getProperty(VALIDATIONQUERY));
-        Assert.assertEquals(p.getProperty(VALIDATIONINTERVAL), ppc.getProperty(VALIDATIONINTERVAL));
-        Assert.assertEquals(p.getProperty(VALIDATORCLASSNAME), ppc.getProperty(VALIDATORCLASSNAME));
+        Assert.assertEquals(p.getProperty(TESTWHILEIDLE), ppc.getTestWhileIdle().toString());
+        Assert.assertEquals(p.getProperty(TESTONBORROW), ppc.getTestOnBorrow().toString());
+        Assert.assertEquals(p.getProperty(TESTONRETURN), ppc.getTestOnReturn().toString());
+        Assert.assertEquals(p.getProperty(VALIDATIONQUERY), ppc.getValidationQuery());
+        Assert.assertEquals(p.getProperty(VALIDATIONINTERVAL), ppc.getValidationInterval().toString());
+        Assert.assertEquals(p.getProperty(VALIDATORCLASSNAME), ppc.getValidatorClassName());
         Assert.assertEquals(p.getProperty(TIMEBETWEENEVICTIONRUNSMILLIS),
-                ppc.getProperty(TIMEBETWEENEVICTIONRUNSMILLIS));
-        Assert.assertEquals(p.getProperty(MAXACTIVE), ppc.getProperty(MAXACTIVE));
-        Assert.assertEquals(p.getProperty(MINIDLE), ppc.getProperty(MINIDLE));
-        Assert.assertEquals(p.getProperty(MAXWAIT), ppc.getProperty(MAXWAIT));
-        Assert.assertEquals(p.getProperty(MAX_AGE), ppc.getProperty(MAX_AGE));
-        Assert.assertEquals(p.getProperty(INITIALSIZE), ppc.getProperty(INITIALSIZE));
-        Assert.assertEquals(p.getProperty(REMOVEABANDONEDTIMEOUT), ppc.getProperty(REMOVEABANDONEDTIMEOUT));
-        Assert.assertEquals(p.getProperty(REMOVEABANDONED), ppc.getProperty(REMOVEABANDONED));
-        Assert.assertEquals(p.getProperty(LOGABANDONED), ppc.getProperty(LOGABANDONED));
-        Assert.assertEquals(p.getProperty(MINEVICTABLEIDLETIMEMILLIS), ppc.getProperty(MINEVICTABLEIDLETIMEMILLIS));
-        Assert.assertEquals(p.getProperty(CONNECTIONPROPERTIES), ppc.getProperty(CONNECTIONPROPERTIES));
-        Assert.assertEquals(p.getProperty(JDBC_INTERCEPTORS), ppc.getProperty(JDBC_INTERCEPTORS));
+                ppc.getTimeBetweenEvictionRunsMillis().toString());
+        Assert.assertEquals(p.getProperty(MAXACTIVE), ppc.getMaxActive().toString());
+        Assert.assertEquals(p.getProperty(MINIDLE), ppc.getMinIdle().toString());
+        Assert.assertEquals(p.getProperty(MAXWAIT), ppc.getMaxWait().toString());
+        Assert.assertEquals(p.getProperty(MAX_AGE), ppc.getMaxAge().toString());
+        Assert.assertEquals(p.getProperty(INITIALSIZE), ppc.getInitialSize().toString());
+        Assert.assertEquals(p.getProperty(REMOVEABANDONEDTIMEOUT), ppc.getRemoveAbandonedTimeout().toString());
+        Assert.assertEquals(p.getProperty(REMOVEABANDONED), ppc.getRemoveAbandoned().toString());
+        Assert.assertEquals(p.getProperty(LOGABANDONED), ppc.getLogAbandoned().toString());
+        Assert.assertEquals(p.getProperty(MINEVICTABLEIDLETIMEMILLIS), ppc.getMinEvictableIdleTimeMillis().toString());
+        Assert.assertEquals(p.getProperty(CONNECTIONPROPERTIES), ppc.getConnectionProperties());
+        Assert.assertEquals(p.getProperty(JDBC_INTERCEPTORS), ppc.getJdbcInterceptors());
     }
 
     @Test

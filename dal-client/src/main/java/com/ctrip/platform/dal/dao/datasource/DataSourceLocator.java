@@ -8,10 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.dao.configure.SingleDataSourceConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.IDataSourceConfigure;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 
@@ -42,7 +43,7 @@ public class DataSourceLocator {
 
     /**
      * Get DataSource by real db source name
-     * 
+     *
      * @param name
      * @return DataSource
      * @throws NamingException
@@ -73,16 +74,17 @@ public class DataSourceLocator {
     }
 
     private DataSource createDataSource(String name) throws SQLException {
-        DataSourceConfigure config = provider.getDataSourceConfigure(name);
+        IDataSourceConfigure config = provider.getDataSourceConfigure(name);
         if (config == null) {
             throw new SQLException("Can not find connection configure for " + name);
         }
 
-        RefreshableDataSource rds = new RefreshableDataSource(name, config);
-        provider.register(name, rds);
-        executor.execute(rds);
+        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(name, provider);
+        ForceSwitchableDataSource fsds = new ForceSwitchableDataSource(name, dataSourceConfigureProvider);
+        provider.register(name, fsds);
+        executor.execute(fsds);
 
-        return rds;
+        return fsds;
     }
 
     public static Map<String, Integer> getActiveConnectionNumber() {

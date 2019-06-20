@@ -11,9 +11,9 @@ public class PropertyFilePoolPropertiesProviderTest implements DataSourceConfigu
         PropertyFilePoolPropertiesProvider provider = new PropertyFilePoolPropertiesProvider();
         PoolPropertiesConfigure configure = provider.getPoolProperties();
         // Custom value
-        Assert.assertEquals(configure.getProperty(MINIDLE), "1");
+        Assert.assertEquals(configure.getMinIdle(), "1");
 
         // Default value
-        Assert.assertEquals(configure.getProperty(MAXACTIVE), String.valueOf(DEFAULT_MAXACTIVE));
+        Assert.assertEquals(configure.getMaxActive(), String.valueOf(DEFAULT_MAXACTIVE));
     }
 }

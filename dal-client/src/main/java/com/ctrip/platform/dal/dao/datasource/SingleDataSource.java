@@ -19,6 +19,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private DataSourceConfigure dataSourceConfigure;
     private DataSource dataSource;
     private DataSourceCreateTask task;
+    private DataSourceCreatePoolListener listener;
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
 
@@ -42,12 +43,12 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         this.task = task;
     }
 
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure){
+    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
         this(name, dataSourceConfigure, null);
         createPool(name, dataSourceConfigure);
     }
 
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreateTask task){
+    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreateTask task) {
         if (dataSourceConfigure == null)
             throw new DalRuntimeException("Can not find any connection configure for " + name);
 
@@ -55,10 +56,10 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         this.dataSourceConfigure = dataSourceConfigure;
         this.task = task;
 
-        createDataSource(name,dataSourceConfigure);
+        createDataSource(name, dataSourceConfigure);
     }
 
-    private void createDataSource(String name, DataSourceConfigure dataSourceConfigure){
+    private void createDataSource(String name, DataSourceConfigure dataSourceConfigure) {
         try {
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
             setPoolPropertiesIntoValidator(poolProperties);
@@ -78,8 +79,12 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).createPool();
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
+            if (listener != null)
+                listener.onCreatePoolSuccess();
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
+            if (listener != null)
+                listener.onCreatePoolFail(e);
         }
     }
 
@@ -96,6 +101,10 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
         ValidatorProxy dsValidator = (ValidatorProxy) validator;
         dsValidator.setPoolProperties(poolProperties);
+    }
+
+    public void setListener(DataSourceCreatePoolListener listener) {
+        this.listener = listener;
     }
 
 }

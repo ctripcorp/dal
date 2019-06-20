@@ -7,7 +7,6 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
-
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
@@ -28,7 +27,11 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
-        SingleDataSource newDataSource = createSingleDataSource(name, configure);
+        refreshDataSource(name,configure,null);
+    }
+
+    public void refreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) throws SQLException {
+        SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
         DataSourceCreateTask oldTask = oldDataSource.getTask();
@@ -41,8 +44,8 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
             DataSourceTerminator.getInstance().close(oldDataSource);
     }
 
-    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
-        return DataSourceCreator.getInstance().createSingleDataSource(name, configure);
+    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+        return DataSourceCreator.getInstance().createSingleDataSource(name, configure, listener);
     }
 
     public SingleDataSource getSingleDataSource() {

@@ -68,7 +68,7 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(String dbName) {
-        PoolPropertiesConfigure configure =
+        DalPoolPropertiesConfigure configure =
                 DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure(dbName);
         DataSourceConfigure dataSourceConfigure = configure == null ? new DataSourceConfigure(dbName)
                 : new DataSourceConfigure(dbName, configure.getProperties());
@@ -100,5 +100,10 @@ public class PropertyFileConfigureProvider implements DataSourceConfigureProvide
 
     @Override
     public void register(String dbName, DataSourceConfigureChangeListener listener) {}
+
+    @Override
+    public DataSourceConfigure forceLoadDataSourceConfigure(String dbName){
+       return getDataSourceConfigure(dbName);
+    }
 
 }

@@ -1,9 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
-import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
+import com.ctrip.platform.dal.dao.configure.*;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -27,55 +24,55 @@ public class DatabasePoolConfigParserTest {
 
     @Test
     public void test1() {
-        PoolPropertiesConfigure configure =
+        DalPoolPropertiesConfigure configure =
                 DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dao_test");
-        Assert.assertEquals(10000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
+        Assert.assertEquals(10000, configure.getMaxWait().intValue());
         Assert.assertEquals(
                 "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8",
-                configure.getProperty(DataSourceConfigureConstants.OPTION));
+                configure.getOption());
     }
 
     @Test
     public void test2() {
         PoolPropertiesConfigure configure =
                 DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dao_test_select");
-        Assert.assertEquals(true, configure.getBooleanProperty(DataSourceConfigureConstants.TESTWHILEIDLE, false));
-        Assert.assertEquals(true, configure.getBooleanProperty(DataSourceConfigureConstants.TESTONBORROW, false));
-        Assert.assertEquals("SELECT 1", configure.getProperty(DataSourceConfigureConstants.VALIDATIONQUERY));
-        Assert.assertEquals(30000, configure.getIntProperty(DataSourceConfigureConstants.VALIDATIONINTERVAL, 0));
+        Assert.assertEquals(true, configure.getTestWhileIdle().booleanValue());
+        Assert.assertEquals(true, configure.getTestOnBorrow().booleanValue());
+        Assert.assertEquals("SELECT 1", configure.getValidationQuery());
+        Assert.assertEquals(30000, configure.getValidationInterval().intValue());
         Assert.assertEquals(30000,
-                configure.getIntProperty(DataSourceConfigureConstants.TIMEBETWEENEVICTIONRUNSMILLIS, 0));
-        Assert.assertEquals(100, configure.getIntProperty(DataSourceConfigureConstants.MAXACTIVE, 0));
-        Assert.assertEquals(10, configure.getIntProperty(DataSourceConfigureConstants.MINIDLE, 0));
-        Assert.assertEquals(1000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
-        Assert.assertEquals(10, configure.getIntProperty(DataSourceConfigureConstants.INITIALSIZE, 0));
-        Assert.assertEquals(60, configure.getIntProperty(DataSourceConfigureConstants.REMOVEABANDONEDTIMEOUT, 0));
-        Assert.assertEquals(true, configure.getBooleanProperty(DataSourceConfigureConstants.REMOVEABANDONED, false));
-        Assert.assertEquals(true, configure.getBooleanProperty(DataSourceConfigureConstants.LOGABANDONED, false));
+                configure.getTimeBetweenEvictionRunsMillis().intValue());
+        Assert.assertEquals(100, configure.getMaxActive().intValue());
+        Assert.assertEquals(10, configure.getMinIdle().intValue());
+        Assert.assertEquals(1000, configure.getMaxWait().intValue());
+        Assert.assertEquals(10, configure.getInitialSize().intValue());
+        Assert.assertEquals(60, configure.getRemoveAbandonedTimeout().intValue());
+        Assert.assertEquals(true, configure.getRemoveAbandoned().booleanValue());
+        Assert.assertEquals(true, configure.getLogAbandoned().booleanValue());
         Assert.assertEquals(30000,
-                configure.getIntProperty(DataSourceConfigureConstants.MINEVICTABLEIDLETIMEMILLIS, 0));
+                configure.getMinEvictableIdleTimeMillis().intValue());
         Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true",
-                configure.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
+                configure.getConnectionProperties());
     }
 
     @Test
     public void test3() {
         PoolPropertiesConfigure configure =
                 DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dal_test_new");
-        Assert.assertEquals(10000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
-        Assert.assertEquals("sendTimeAsDateTime=false", configure.getProperty(DataSourceConfigureConstants.OPTION));
+        Assert.assertEquals(10000, configure.getMaxWait().intValue());
+        Assert.assertEquals("sendTimeAsDateTime=false", ((DalPoolPropertiesConfigure) configure).getOption());
 
         // Test default settings,now default value is zero
-        Assert.assertEquals(0, configure.getIntProperty(DataSourceConfigureConstants.MAX_AGE, 0));
+        Assert.assertEquals(0, ((DataSourceConfigure)configure).getIntProperty(DataSourceConfigureConstants.MAX_AGE,0));
     }
 
     @Test
     public void test4() {
         PoolPropertiesConfigure configure =
                 DataSourceConfigureLocatorManager.getInstance().getUserPoolPropertiesConfigure("dao_test_select");
-        Assert.assertEquals(1000, configure.getIntProperty(DataSourceConfigureConstants.MAXWAIT, 0));
+        Assert.assertEquals(1000, configure.getMaxWait().intValue());
         Assert.assertEquals("rewriteBatchedStatements=true;allowMultiQueries=true",
-                configure.getProperty(DataSourceConfigureConstants.CONNECTIONPROPERTIES));
+                configure.getConnectionProperties());
     }
 
 }

@@ -2,14 +2,11 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import java.util.*;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-public class DataSourceConfigure
-        implements DataSourceConfigureConstants, ConnectionStringConfigure, PoolPropertiesConfigure {
+public class DataSourceConfigure extends AbstractDataSourceConfigure
+        implements DataSourceConfigureConstants, DalConnectionStringConfigure, DalPoolPropertiesConfigure {
     private String name;
     private Properties properties = new Properties();
     private String version;
@@ -17,7 +14,8 @@ public class DataSourceConfigure
 
     private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
 
-    public DataSourceConfigure() {}
+    public DataSourceConfigure() {
+    }
 
     public DataSourceConfigure(String name) {
         this.name = name;
@@ -97,6 +95,7 @@ public class DataSourceConfigure
         return version;
     }
 
+
     public void setHostName(String hostName) {
         setProperty(HOST_NAME, hostName);
     }
@@ -118,21 +117,25 @@ public class DataSourceConfigure
         this.connectionString = connectionString;
     }
 
-    @Override
+
     public Properties getProperties() {
         return properties;
+    }
+
+    public Map<String, String> getPoolProperties() {
+        return new HashMap<>((Map) properties);
     }
 
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
 
-    @Override
+
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
 
-    @Override
+
     public String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
     }
@@ -141,19 +144,118 @@ public class DataSourceConfigure
         properties.setProperty(key, value);
     }
 
-    @Override
+
     public int getIntProperty(String key, int defaultValue) {
         return properties.containsKey(key) ? Integer.parseInt(getProperty(key)) : defaultValue;
     }
 
-    @Override
+
     public long getLongProperty(String key, long defaultValue) {
         return properties.containsKey(key) ? Long.parseLong(getProperty(key)) : defaultValue;
     }
 
-    @Override
+
     public boolean getBooleanProperty(String key, boolean defaultValue) {
         return properties.containsKey(key) ? Boolean.parseBoolean(getProperty(key)) : defaultValue;
+    }
+
+
+    public Boolean getTestWhileIdle() {
+        return getBooleanProperty(TESTWHILEIDLE, DEFAULT_TESTWHILEIDLE);
+    }
+
+    public Boolean getTestOnBorrow() {
+        return getBooleanProperty(TESTONBORROW, DEFAULT_TESTONBORROW);
+    }
+
+    public Boolean getTestOnReturn() {
+        return getBooleanProperty(TESTONRETURN, DEFAULT_TESTONRETURN);
+    }
+
+    public String getValidationQuery() {
+        return getProperty(VALIDATIONQUERY, DEFAULT_VALIDATIONQUERY);
+    }
+
+    public Integer getValidationQueryTimeout() {
+        return getIntProperty(VALIDATIONQUERYTIMEOUT, DEFAULT_VALIDATIONQUERYTIMEOUT);
+    }
+
+    public Long getValidationInterval() {
+        return getLongProperty(VALIDATIONINTERVAL, DEFAULT_VALIDATIONINTERVAL);
+    }
+
+    public Integer getTimeBetweenEvictionRunsMillis() {
+        return getIntProperty(TIMEBETWEENEVICTIONRUNSMILLIS, DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS);
+    }
+
+    public Integer getMinEvictableIdleTimeMillis() {
+        return getIntProperty(MINEVICTABLEIDLETIMEMILLIS, DEFAULT_MINEVICTABLEIDLETIMEMILLIS);
+    }
+
+    public Integer getMaxAge() {
+        return getIntProperty(MAX_AGE, DEFAULT_MAXAGE);
+    }
+
+    public Integer getMaxActive() {
+        return getIntProperty(MAXACTIVE, DEFAULT_MAXACTIVE);
+    }
+
+    public Integer getMinIdle() {
+        return getIntProperty(MINIDLE, DEFAULT_MINIDLE);
+    }
+
+    public Integer getMaxWait() {
+        return getIntProperty(MAXWAIT, DEFAULT_MAXWAIT);
+    }
+
+    public Integer getInitialSize() {
+        return getIntProperty(INITIALSIZE, DEFAULT_INITIALSIZE);
+    }
+
+    public Integer getRemoveAbandonedTimeout() {
+        return getIntProperty(REMOVEABANDONEDTIMEOUT, DEFAULT_REMOVEABANDONEDTIMEOUT);
+    }
+
+    public Boolean getRemoveAbandoned() {
+        return getBooleanProperty(REMOVEABANDONED, DEFAULT_REMOVEABANDONED);
+    }
+
+    public Boolean getLogAbandoned() {
+        return getBooleanProperty(LOGABANDONED, DEFAULT_LOGABANDONED);
+    }
+
+    public String getConnectionProperties() {
+        return getProperty(CONNECTIONPROPERTIES, DEFAULT_CONNECTIONPROPERTIES);
+    }
+
+    public String getValidatorClassName() {
+        return getProperty(VALIDATORCLASSNAME, DEFAULT_VALIDATORCLASSNAME);
+    }
+
+    public String getOption() {
+        return getProperty(OPTION, DEFAULT_CONNECTIONPROPERTIES);
+    }
+
+
+    public String getInitSQL() {
+        String initSQL = getProperty(INIT_SQL);
+        if (initSQL != null && !initSQL.isEmpty())
+            return initSQL;
+
+        String initSQL2 = getProperty(INIT_SQL2);
+        if (initSQL2 != null && !initSQL2.isEmpty())
+            return initSQL2;
+
+        return null;
+    }
+
+    // This are current hard coded as default value
+    public boolean getJmxEnabled() {
+        return DEFAULT_JMXENABLED;
+    }
+
+    public String getJdbcInterceptors() {
+        return getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS);
     }
 
     public String toConnectionUrl() {
@@ -208,4 +310,82 @@ public class DataSourceConfigure
         return crc;
     }
 
+    public synchronized DataSourceConfigure clone() {
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure(name);
+        Properties p = new Properties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            p.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        }
+        dataSourceConfigure.setProperties(p);
+        dataSourceConfigure.setVersion(version);
+        dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
+        return dataSourceConfigure;
+    }
+
+    public static DataSourceConfigure valueOf(IDataSourceConfigure configure) {
+        if (configure instanceof DataSourceConfigure)
+            return (DataSourceConfigure) configure;
+        else {
+            DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
+            Properties properties = new Properties();
+            properties.setProperty(USER_NAME, configure.getUserName());
+            properties.setProperty(PASSWORD, configure.getPassword());
+            String connectionUrl = configure.getConnectionUrl();
+            if (connectionUrl == null)
+                throw new DalRuntimeException("connetion url cannot be null");
+            properties.setProperty(CONNECTION_URL, connectionUrl);
+            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
+            properties.setProperty(HOST_NAME, hostAndPort.getHost());
+
+            if (configure.getDriverClass() != null)
+                properties.setProperty(DRIVER_CLASS_NAME, configure.getDriverClass());
+            if (configure.getTestWhileIdle() != null)
+                properties.setProperty(TESTWHILEIDLE, String.valueOf(configure.getTestWhileIdle()));
+            if (configure.getTestOnBorrow() != null)
+                properties.setProperty(TESTONBORROW, String.valueOf(configure.getTestOnBorrow()));
+            if (configure.getTestOnReturn() != null)
+                properties.setProperty(TESTONRETURN, String.valueOf(configure.getTestOnReturn()));
+            if (configure.getValidationQuery() != null)
+                properties.setProperty(VALIDATIONQUERY, configure.getValidationQuery());
+            if (configure.getValidationQueryTimeout() != null)
+                properties.setProperty(VALIDATIONQUERYTIMEOUT, String.valueOf(configure.getValidationQueryTimeout()));
+            if (configure.getValidationInterval() != null)
+                properties.setProperty(VALIDATIONINTERVAL, String.valueOf(configure.getValidationInterval()));
+            if (configure.getTimeBetweenEvictionRunsMillis() != null)
+                properties.setProperty(TIMEBETWEENEVICTIONRUNSMILLIS, String.valueOf(configure.getTimeBetweenEvictionRunsMillis()));
+            if (configure.getMaxAge() != null)
+                properties.setProperty(MAX_AGE, String.valueOf(configure.getMaxAge()));
+            if (configure.getMaxActive() != null)
+                properties.setProperty(MAXACTIVE, String.valueOf(configure.getMaxActive()));
+            if (configure.getMinIdle() != null)
+                properties.setProperty(MINIDLE, String.valueOf(configure.getMinIdle()));
+            if (configure.getMaxWait() != null)
+                properties.setProperty(MAXWAIT, String.valueOf(configure.getMaxWait()));
+            if (configure.getInitialSize() != null)
+                properties.setProperty(INITIALSIZE, String.valueOf(configure.getInitialSize()));
+            if (configure.getRemoveAbandonedTimeout() != null)
+                properties.setProperty(REMOVEABANDONEDTIMEOUT, String.valueOf(configure.getRemoveAbandonedTimeout()));
+            if (configure.getRemoveAbandoned() != null)
+                properties.setProperty(REMOVEABANDONED, String.valueOf(configure.getRemoveAbandoned()));
+            if (configure.getLogAbandoned() != null)
+                properties.setProperty(LOGABANDONED, String.valueOf(configure.getLogAbandoned()));
+            if (configure.getMinEvictableIdleTimeMillis() != null)
+                properties.setProperty(MINEVICTABLEIDLETIMEMILLIS, String.valueOf(configure.getMinEvictableIdleTimeMillis()));
+            if (configure.getConnectionProperties() != null)
+                properties.setProperty(CONNECTIONPROPERTIES, configure.getConnectionProperties());
+            if (configure.getInitSQL() != null)
+                properties.setProperty(INIT_SQL, configure.getInitSQL());
+            if (configure.getValidatorClassName() != null)
+                properties.setProperty(VALIDATORCLASSNAME, configure.getValidatorClassName());
+            if (configure.getJdbcInterceptors() != null)
+                properties.setProperty(JDBC_INTERCEPTORS, configure.getJdbcInterceptors());
+            dataSourceConfigure.setProperties(properties);
+            return dataSourceConfigure;
+        }
+    }
+
+    public void replaceURL(String ip, int port) {
+        String newConnectionUrl = ConnectionStringParser.replaceHostAndPort(getConnectionUrl(),ip,String.valueOf(port));
+        setConnectionUrl(newConnectionUrl);
+    }
 }

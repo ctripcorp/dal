@@ -1,5 +1,6 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
+import com.ctrip.platform.dal.dao.configure.DalPoolPropertiesConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.PoolPropertiesConfigure;
@@ -10,7 +11,7 @@ import java.util.Properties;
 
 public class AbstractPoolPropertiesProvider implements PoolPropertiesProvider, DataSourceConfigureConstants {
     @Override
-    public PoolPropertiesConfigure getPoolProperties() {
+    public DalPoolPropertiesConfigure getPoolProperties() {
         Properties p = getProperties();
         DataSourceConfigure configure = new DataSourceConfigure("", p);
         return configure;

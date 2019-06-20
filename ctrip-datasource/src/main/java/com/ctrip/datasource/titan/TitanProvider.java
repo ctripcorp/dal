@@ -1,5 +1,6 @@
 package com.ctrip.datasource.titan;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
 
-public class TitanProvider implements DataSourceConfigureProvider {
+public class TitanProvider implements DataSourceConfigureProvider{
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
@@ -56,6 +57,14 @@ public class TitanProvider implements DataSourceConfigureProvider {
     @Override
     public void register(String name, DataSourceConfigureChangeListener listener) {
         dataSourceConfigureManager.register(name, listener);
+    }
+
+    @Override
+    public DataSourceConfigure forceLoadDataSourceConfigure(String name){
+        Set<String> names=new HashSet<>();
+        names.add(name);
+        dataSourceConfigureManager.setup(names,sourceType);
+        return getDataSourceConfigure(name);
     }
 
     // for unit test only

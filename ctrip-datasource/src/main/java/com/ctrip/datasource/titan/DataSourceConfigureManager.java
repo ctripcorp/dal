@@ -10,14 +10,9 @@ import com.ctrip.framework.clogging.agent.log.LogManager;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+import com.ctrip.platform.dal.dao.datasource.*;
 import com.ctrip.datasource.datasource.IPDomainStatusChanged;
 import com.ctrip.datasource.datasource.IPDomainStatusProvider;
-import com.ctrip.platform.dal.dao.datasource.PoolPropertiesChanged;
-import com.ctrip.platform.dal.dao.datasource.PoolPropertiesProvider;
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
@@ -115,7 +110,9 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     public synchronized void setup(Set<String> dbNames, SourceType sourceType) {
-        keyNameMap.clear();
+        for (String dbName : dbNames)
+            keyNameMap.remove(dbName);
+
         Set<String> names = null;
         try {
             names = getFilteredNames(dbNames, sourceType);
@@ -135,7 +132,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
 
         // set pool properties
-        PoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
+        DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
         dataSourceConfigureLocator.setPoolProperties(poolProperties);
 
         if (sourceType == SourceType.Remote)
@@ -247,7 +244,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
 
-        ConnectionStringConfigure connectionStringConfigure = connectionString.getIPConnectionStringConfigure();
+        DalConnectionStringConfigure connectionStringConfigure = connectionString.getIPConnectionStringConfigure();
         String newVersion = connectionStringConfigure.getVersion();
         DataSourceConfigure oldConfigure = dataSourceConfigureLocator.getDataSourceConfigure(keyName);
 
@@ -333,7 +330,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private void addPoolPropertiesChangedListener() {
         poolPropertiesProvider.addPoolPropertiesChangedListener(new PoolPropertiesChanged() {
             @Override
-            public void onChanged(PoolPropertiesConfigure configure) {
+            public void onChanged(DalPoolPropertiesConfigure configure) {
                 addPoolPropertiesNotifyTask(configure);
             }
         });
@@ -346,7 +343,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return true;
     }
 
-    private void addPoolPropertiesNotifyTask(PoolPropertiesConfigure configure) {
+    private void addPoolPropertiesNotifyTask(DalPoolPropertiesConfigure configure) {
         Transaction t = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES);
         t.addData(DATASOURCE_NOTIFY_LISTENER_START);
         Cat.logEvent(DalLogTypes.DAL_CONFIGURE, POOLPROPERTIES_REFRESH_POOLPROPERTIES, Message.SUCCESS,
@@ -579,8 +576,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         // If we still can't get the DataSourceConfigureChangeListener,then we try to get or create the
         // RefreshableDataSource from DataSourceLocator.
         DataSource ds = getOrCreateDataSource(keyName);
-        if (ds instanceof RefreshableDataSource) {
-            RefreshableDataSource rds = (RefreshableDataSource) ds;
+        if (ds instanceof ForceSwitchableDataSource) {
+            ForceSwitchableDataSource rds = (ForceSwitchableDataSource) ds;
             if (rds instanceof DataSourceConfigureChangeListener) {
                 listener = rds;
             }

@@ -8,9 +8,6 @@ public class MockDataSourceConfigureProvider implements IDataSourceConfigureProv
         String connectionUrl = "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8";
         String userName = "root";
         String password = "!QAZ@WSX1qaz2wsx";
-//        String hostName = "10.32.20.139";
-//        Integer port = 3306;
-//        String dbName = "llj_test";
         String driverClass = "com.mysql.jdbc.Driver";
         String connectionProperties = "connectTimeout=2000";
         return new MockDataSourceConfigure(connectionUrl, userName, password, driverClass, connectionProperties);
@@ -22,9 +19,6 @@ public class MockDataSourceConfigureProvider implements IDataSourceConfigureProv
         String connectionUrl = "jdbc:mysql://DST56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8";
         String userName = "root";
         String password = "!QAZ@WSX1qaz2wsx";
-//        String hostName = "DST56614";
-//        Integer port = 3306;
-//        String dbName = "llj_test";
         String driverClass = "com.mysql.jdbc.Driver";
         String connectionProperties = "connectTimeout=2000";
         return new MockDataSourceConfigure(connectionUrl, userName, password, driverClass, connectionProperties);

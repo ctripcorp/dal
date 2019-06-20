@@ -51,7 +51,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             final String name = getSingleDataSource().getName();
             final String logName = String.format(FORCE_SWITCH, name);
             isForceSwitched = true;
-            isConnected = false;
             try {
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "forceSwitch", new Callback() {
                     DataSourceConfigure configure = getSingleDataSource().getDataSourceConfigure().clone();
@@ -61,7 +60,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("old isForceSwitched before force switch: %s, old isConnected before force switch: %s", oldStatus.isForceSwitched(), oldStatus.isConnected()));
                         configure.replaceURL(ip, port);
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new connection url: %s", configure.getConnectionUrl()));
-
+                        isConnected = false;
                         refreshDataSource(name, configure, new ForceSwitchListener() {
                             public void onCreatePoolSuccess() {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name), configure.getConnectionUrl());
@@ -129,7 +128,9 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                                 executor.submit(new Runnable() {
                                     public void run() {
                                         try {
-                                            setIpPortCache(ConnectionStringParser.parseHostPortFromURL(getConnection().getMetaData().getURL()));
+                                            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(getConnection().getMetaData().getURL());
+                                            hostAndPort.setValid(true);
+                                            setIpPortCache(hostAndPort);
                                             setIsConnected(true);
                                         } catch (Exception e) {
                                             setIpPortCache(ConnectionStringParser.parseHostPortFromURL(url));
@@ -162,7 +163,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             final SwitchableDataSourceStatus oldStatus = getStatus();
             final String name = getSingleDataSource().getName();
             final String logName = String.format(RESTORE, name);
-            isConnected = false;
 
             try {
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "restore", new Callback() {
@@ -180,7 +180,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
 
                         final DataSourceConfigure newConfigure = DataSourceConfigure.valueOf(provider.forceLoadDataSourceConfigure());
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new connection url: %s", newConfigure.getConnectionUrl()));
-
+                        isConnected = false;
                         refreshDataSource(name, newConfigure, new RestoreListener() {
                             public void onCreatePoolSuccess() {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name),  newConfigure.getConnectionUrl());

@@ -5,7 +5,7 @@ public class HostAndPort {
     private String host;
     private Integer port;
     private String connectionUrl;
-    private boolean isValid = true;
+    private boolean isValid = false;
 
     public HostAndPort(){}
 

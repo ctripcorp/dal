@@ -6,8 +6,10 @@ import com.ctrip.framework.dal.dbconfig.plugin.entity.*;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcherTest;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.TitanKeyGetHandlerTest;
 import com.ctrip.framework.dal.dbconfig.plugin.ignite.PluginIgniteConfigTest;
+import com.ctrip.framework.dal.dbconfig.plugin.service.AppIdIpManagerTest;
 import com.ctrip.framework.dal.dbconfig.plugin.service.DefaultDataSourceCryptoTest;
 import com.ctrip.framework.dal.dbconfig.plugin.service.Soa2KeyServiceTest;
+import com.ctrip.framework.dal.dbconfig.plugin.service.validator.AppIdIpCheckCacheTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -37,11 +39,16 @@ import org.junit.runners.Suite;
         // service
         DefaultDataSourceCryptoTest.class,
         Soa2KeyServiceTest.class,
+        AppIdIpManagerTest.class,
 
         DbConfigAdminPluginTest.class,
         MongoAdminPluginTest.class,
         MongoServerPluginTest.class,
         TitanAdminPluginTest.class,
-        TitanServerPluginTest.class
+        TitanServerPluginTest.class,
+
+        // cache
+        AppIdIpCheckCacheTest.class
 })
-public class AllTests {}
+public class AllTests {
+}

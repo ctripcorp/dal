@@ -1,5 +1,6 @@
 package com.ctrip.datasource.dynamicdatasource.provider;
 
+import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesChanged;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 
@@ -12,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class LocalDalPropertiesProvider extends AbstractDalPropertiesProvider {
     private AtomicBoolean atomicStatus = new AtomicBoolean(true);
+    private AtomicBoolean implicitAllShardsStatus = new AtomicBoolean(false);
     private DalPropertiesChanged callback;
 
     public void setOn() {
@@ -26,6 +28,9 @@ public class LocalDalPropertiesProvider extends AbstractDalPropertiesProvider {
         Map<String, String> map = getProperties();
         boolean value = Boolean.parseBoolean(map.get(SWITCH_KEYNAME));
         atomicStatus.set(value);
+
+        value = Boolean.parseBoolean(map.get(IMPLICIT_ALL_SHARDS_SWITCH_KEYNAME));
+        implicitAllShardsStatus.set(value);
     }
 
     public void triggerTableParseSwitchChanged() {
@@ -38,6 +43,19 @@ public class LocalDalPropertiesProvider extends AbstractDalPropertiesProvider {
 
         Map<String, String> map = new HashMap<>();
         map.put(SWITCH_KEYNAME, new Boolean(value).toString());
+        callback.onChanged(map);
+    }
+
+    public void triggerImplicitAllShardsSwitchChanged() {
+        boolean value = implicitAllShardsStatus.get();
+        value = !value;
+        implicitAllShardsStatus.set(value);
+
+        ImplicitAllShardsSwitch status = value ? ImplicitAllShardsSwitch.ON : ImplicitAllShardsSwitch.OFF;
+        System.out.println(String.format("********** Current status: %s **********", status.toString()));
+
+        Map<String, String> map = new HashMap<>();
+        map.put(IMPLICIT_ALL_SHARDS_SWITCH_KEYNAME, new Boolean(value).toString());
         callback.onChanged(map);
     }
 

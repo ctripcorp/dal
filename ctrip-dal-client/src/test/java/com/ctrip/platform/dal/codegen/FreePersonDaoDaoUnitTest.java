@@ -776,7 +776,7 @@ public class FreePersonDaoDaoUnitTest {
             ret = dao.findWithError(name, cityIds, hints.inShard(1));
             fail();
         } catch (Exception e) {
-            Thread.sleep(65*1000);
+            Thread.sleep(6*1000);
         }
     }    
 }

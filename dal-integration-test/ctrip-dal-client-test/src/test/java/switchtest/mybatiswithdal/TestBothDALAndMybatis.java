@@ -174,7 +174,7 @@ public class TestBothDALAndMybatis {
         }
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             try {
                 String hostnameMybatis = drTestMapperDao.getHostNameMySQL();
                 log.info(String.format("切换前hostname in mybatis：%s", hostnameMybatis));

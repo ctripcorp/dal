@@ -46,7 +46,7 @@ public class ConnectionStringSwitchTest {
         connectionStringSwitch = new ConnectionStringSwitch();
         poolPropertiesSwitch = new PoolPropertiesSwitch();
         netStat = new NetStat();
-        poolPropertiesSwitch.resetPoolProperties();
+//        poolPropertiesSwitch.resetPoolProperties();
     }
 
 
@@ -716,13 +716,14 @@ public class ConnectionStringSwitchTest {
         //检查切换是否成功
         log.info("After switch");
 
-        //mysqldaltest01db_W切换到超时IP，在等待超时的过程中，老数据源已经被销毁，请求报错
+        //mysqldaltest01db_W切换到超时IP，在等待超时的过程中，老数据源已经被销毁，请求报错，但不能是datasource为null
 
                 try {
                     queryHostName("mysqldaltest01db_W", new DalHints(), dao);
                     fail("创建mysqldaltest01db_W时应该失败，但是并没有，请检查切换异常IP是否成功");
                 } catch (Throwable e) {
                     e.printStackTrace();
+                    assertFalse(e.getMessage().contains("DataSource can't be null."));
                 }
 
 

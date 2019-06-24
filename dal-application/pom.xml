@@ -24,12 +24,12 @@
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-dal-client</artifactId>
-                <version>1.17.2</version>
+                <version>1.17.4</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.17.2</version>
+                <version>1.17.4</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.framework</groupId>

@@ -40,12 +40,10 @@ public class AppIdIpManager {
     private static final String RESULT_DEPTH_ATTRIBUTE = "_resultDepth";
     private static final String SERVER_IP_ATTRIBUTE = "server.ip";
     private static final String ENTITY_STATUS_ATTRIBUTE = "entityStatus";
-    private static final String SERVER_ENTITY_STATUS_ATTRIBUTE = "server.entityStatus";
     private static final String APP_IN_ATTRIBUTE = "appId@in";
     private static final String APP_ID = "appId";
     private static final String GROUP = "group";
     private static final String GROUPS = "groups";
-    private static final String WORKING_STATUS = "WORKING";
     private static final String NORMAL_STATUS = "NORMAL";
 
     public List<AppIdIpCheckEntity> getAllAppIdIp(String env) {
@@ -225,7 +223,6 @@ public class AppIdIpManager {
             // build request
             Map<String, Object> queries = Maps.newHashMap();
             queries.put(SERVER_IP_ATTRIBUTE, clientIp);
-            queries.put(SERVER_ENTITY_STATUS_ATTRIBUTE, WORKING_STATUS);
             queries.put(RETURN_FIELDS_ATTRIBUTE, Lists.newArrayList(APP_ID));
             CmsRequest cmsRequest = new CmsRequest(cmsAccessToken, queries);
             String requestBody = GsonUtils.t2Json(cmsRequest);

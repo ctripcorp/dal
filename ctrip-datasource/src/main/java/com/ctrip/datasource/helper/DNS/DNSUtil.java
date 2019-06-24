@@ -51,12 +51,14 @@ public class DNSUtil {
             t.setStatus(e);
 
             final Throwable ex = e;
-            info.SetFailStatus(new Action() {
-                @Override
-                public void invoke() throws Exception {
-                    Cat.logError(ex);
-                }
-            });
+            if(info!=null) {
+                info.SetFailStatus(new Action() {
+                    @Override
+                    public void invoke() throws Exception {
+                        Cat.logError(ex);
+                    }
+                });
+            }
         } finally {
             t.complete();
         }

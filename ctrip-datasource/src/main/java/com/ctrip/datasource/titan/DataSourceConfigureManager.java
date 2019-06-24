@@ -634,7 +634,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         appId = null;
         useLocal = false;
         databaseConfigLocation = null;
-        config = null;
+        config.clear();
         startUpLog.clear();
     }
 

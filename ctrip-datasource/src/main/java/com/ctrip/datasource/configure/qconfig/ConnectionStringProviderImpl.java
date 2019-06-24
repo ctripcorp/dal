@@ -74,7 +74,7 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
                     transaction.complete();
                     continue;
                 } catch (Throwable e) {
-                    String errorMessage = String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT, keyName);
+                    String errorMessage = String.format(CONNECTIONSTRING_EXCEPTION_MESSAGE_FORMAT, keyName, e.getMessage());
                     logger.error(errorMessage,e);
                     configures.put(keyName, new InvalidConnectionString(keyName, new DalException(errorMessage, e)));
                     transaction.setStatus(e);

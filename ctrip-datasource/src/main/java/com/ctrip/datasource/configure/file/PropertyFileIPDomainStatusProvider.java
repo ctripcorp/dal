@@ -3,6 +3,7 @@ package com.ctrip.datasource.configure.file;
 import com.ctrip.datasource.datasource.IPDomainStatusChanged;
 import com.ctrip.datasource.datasource.IPDomainStatusProvider;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
+import com.dianping.cat.Cat;
 
 import java.io.File;
 import java.io.FileReader;
@@ -25,10 +26,20 @@ public class PropertyFileIPDomainStatusProvider implements IPDomainStatusProvide
         if (url == null)
             return;
 
+        FileReader reader=null;
         try {
-            properties.load(new FileReader(new File(url.toURI())));
+            reader= new FileReader(new File(url.toURI()));
+            properties.load(reader);
         } catch (Throwable e) {
             throw new RuntimeException(e);
+        }finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            }catch (Exception e){
+
+            }
+
         }
     }
 

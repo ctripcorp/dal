@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure.dalproperties;
 
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -67,4 +68,11 @@ public class DalPropertiesManager {
         return mySqlDalPropertiesLocator;
     }
 
+    public synchronized void tearDown(){
+        isPropertiesListenerAdded.compareAndSet(true,false);
+        Map<String,String> dalProperties=new HashMap<>();
+        dalProperties.put(DefaultDalPropertiesLocator.TABLE_PARSE_SWITCH_KEYNAME,"true");
+        dalProperties.put(DefaultDalPropertiesLocator.IMPLICIT_ALL_SHARDS_SWITCH,"false");
+        dalPropertiesLocator.setProperties(dalProperties);
+    }
 }

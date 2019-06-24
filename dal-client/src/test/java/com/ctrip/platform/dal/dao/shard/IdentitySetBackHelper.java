@@ -90,21 +90,24 @@ public class IdentitySetBackHelper {
             for(ClientTestModel model: entities) {
                 assertTrue(model.getId() > 0);    
             }        
-        else
-            if(hints.isAsyncExecution()){
-                for(ClientTestModel model: entities) {
-                    dao.queryByPk(model, hints);
-                    ClientTestModel p2;
-                    try {
-                        p2 = hints.getResult();
-                        assertEquals(p2.getAddress(), model.getAddress());    
-                    } catch (Exception e) {
-                        fail();
-                    }
-                }        
-            }else
-                for(ClientTestModel model: entities) {
-                    assertEquals(dao.queryByPk(model, hints).getAddress(), model.getAddress());    
+        else if (hints.isAsyncExecution()) {
+            for (ClientTestModel model : entities) {
+                dao.queryByPk(model, hints);
+                ClientTestModel p2;
+                try {
+                    p2 = hints.getResult();
+                    assertEquals(p2.getAddress(), model.getAddress());
+                } catch (Exception e) {
+                    fail();
                 }
+            }
+        } else
+            for (ClientTestModel model : entities) {
+                try {
+                    assertEquals(dao.queryByPk(model, hints).getAddress(), model.getAddress());
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
     }
 }

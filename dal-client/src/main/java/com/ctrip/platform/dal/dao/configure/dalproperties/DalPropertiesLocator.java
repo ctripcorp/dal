@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure.dalproperties;
 
+import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
 
@@ -14,5 +15,7 @@ public interface DalPropertiesLocator {
     TableParseSwitch getTableParseSwitch();
 
     Map<String, ErrorCodeInfo> getErrorCodes();
+
+    ImplicitAllShardsSwitch getImplicitAllShardsSwitch();
 
 }

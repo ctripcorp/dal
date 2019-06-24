@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao.shard;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.configure.LocalDalPropertiesProvider;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import org.junit.Assert;
@@ -17,11 +19,12 @@ import static org.junit.Assert.*;
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.deleteAllShardsByDb;
 import static com.ctrip.platform.dal.dao.unittests.DalTestHelper.getCountByDb;
 
-public abstract class BaseDalTableDaoShardByDbTest {
+public abstract class  BaseDalTableDaoShardByDbTest {
     private boolean ASSERT_ALLOWED = false;
     private boolean INSERT_PK_BACK_ALLOWED = false;
     private DatabaseDifference diff;
     private String databaseName;
+
 
     public BaseDalTableDaoShardByDbTest(String databaseName, String generatedKey, DatabaseDifference diff) {
         this.diff = diff;

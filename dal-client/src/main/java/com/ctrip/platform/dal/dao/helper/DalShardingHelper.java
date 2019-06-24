@@ -44,7 +44,7 @@ public class DalShardingHelper {
      * @return true if shard id can be located
      * @throws SQLException
      */
-    private static boolean locateShardId(String logicDbName, DalHints hints) throws SQLException {
+    public static boolean locateShardId(String logicDbName, DalHints hints) throws SQLException {
         DalConfigure config = DalClientFactory.getDalConfigure();
 
         DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
@@ -67,7 +67,7 @@ public class DalShardingHelper {
      * @return
      * @throws SQLException
      */
-    private static boolean locateTableShardId(String logicDbName, String tableName, DalHints hints)
+    public static boolean locateTableShardId(String logicDbName, String tableName, DalHints hints)
             throws SQLException {
         DalConfigure config = DalClientFactory.getDalConfigure();
         DalShardingStrategy strategy = config.getDatabaseSet(logicDbName).getStrategy();
@@ -110,13 +110,17 @@ public class DalShardingHelper {
 
         // First check if we can locate the table shard id with the original hints
         String shard = strategy.locateTableShard(config, logicDbName, tableName, hints);
-        if (shard != null)
+        if (shard != null) {
+            hints.inTableShard(shard);
             return shard;
+        }
 
         shard = strategy.locateTableShard(config, logicDbName, tableName,
                 new DalHints().setParameters(parameters).setFields(fields));
-        if (shard != null)
+        if (shard != null) {
+            hints.inTableShard(shard);
             return shard;
+        }
 
         throw new SQLException("Can not locate table shard for " + logicDbName);
 

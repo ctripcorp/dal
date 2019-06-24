@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure.dalproperties;
 
+import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
 
@@ -41,6 +42,11 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
             return new HashMap<>();
 
         return new HashMap<>(map); // avoid origin data being modified outside
+    }
+
+    @Override
+    public ImplicitAllShardsSwitch getImplicitAllShardsSwitch() {
+        throw new UnsupportedOperationException("getImplicitAllShardsSwitch not supported.");
     }
 
     protected void setErrorCodes(String errorCodes) {

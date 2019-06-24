@@ -36,7 +36,7 @@ public class DalRequestExecutor {
 	public static final String KEEP_ALIVE_TIME = "keepAliveTime";
 	
 	// To be consist with default connection max active size
-	public static final int DEFAULT_MAX_POOL_SIZE = 500;
+	public static final int DEFAULT_MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
 	public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
 	

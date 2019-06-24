@@ -1,7 +1,13 @@
 package com.ctrip.platform.dal.dao.task;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.configure.LocalDalPropertiesProvider;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.sqlbuilder.SqlBuilder;
+import com.ctrip.platform.dal.dao.sqlbuilder.TableSqlBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -61,6 +67,71 @@ public class DalSqlTaskRequestTest {
 		@Override
 		public StatementParameters buildParameters() {
 			return p;
+		}
+	}
+
+	private class TestTableSqlBuilder extends TestSqlBuilder implements TableSqlBuilder {
+
+		@Override
+		public TableSqlBuilder from(String tableName) throws SQLException {
+			return null;
+		}
+
+		@Override
+		public TableSqlBuilder setDatabaseCategory(DatabaseCategory dbCategory) throws SQLException {
+			return null;
+		}
+
+		@Override
+		public String getTableName() {
+			return "dal_client_test";
+		}
+
+		@Override
+		public String build(String shardStr) {
+			return null;
+		}
+	}
+
+
+	@Test
+	public void testImplicitAllShards() throws Exception {
+//		set implicitAllShards on
+		DalPropertiesManager.getInstance().tearDown();
+		DalPropertiesManager.getInstance().setDalPropertiesProvider(new LocalDalPropertiesProvider());
+		DalPropertiesManager.getInstance().setup();
+
+//		implicit in all shards
+		DalSqlTaskRequest<Integer> testRequest = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbTableShard", new TestTableSqlBuilder(), new DalHints(), new FreeSqlUpdateTask(), new ResultMerger.IntSummary());
+		Assert.assertTrue(testRequest.isCrossShard());
+
+//		implicit in all table shards
+		testRequest.validateAndPrepare();
+		Map<String, Callable<Integer>> tasks = testRequest.createTasks();
+		for (Callable callable : tasks.values())
+			assertEquals(4, ((DalSqlTaskRequest.SqlTaskCallable) callable).tableShards().size());
+
+//		set implicitAllShards off
+		DalPropertiesManager.getInstance().tearDown();
+		DalPropertiesManager.getInstance().setDalPropertiesProvider(DalElementFactory.DEFAULT.getDalPropertiesProvider());
+		DalPropertiesManager.getInstance().setup();
+
+		//	not	implicit in all shards
+		try {
+			testRequest = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbTableShard", new TestTableSqlBuilder(), new DalHints(), new FreeSqlUpdateTask(), new ResultMerger.IntSummary());
+			Assert.assertFalse(testRequest.isCrossShard());
+		}catch (Exception e) {
+			fail();
+		}
+
+		//	not	implicit in all shards
+		try {
+			testRequest = new DalSqlTaskRequest<>("dao_test_sqlsvr_tableShard", new TestTableSqlBuilder(), new DalHints(), new FreeSqlUpdateTask(), new ResultMerger.IntSummary());
+			testRequest.validateAndPrepare();
+			Callable<Integer> task = testRequest.createTask();
+			assertNull(((DalSqlTaskRequest.SqlTaskCallable) task).tableShards());
+		}catch (Exception e) {
+			fail();
 		}
 	}
 

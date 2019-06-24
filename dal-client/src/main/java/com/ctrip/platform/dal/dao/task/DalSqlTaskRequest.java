@@ -7,10 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogContext;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -34,6 +37,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     private Set<String> shards;
     private Map<String, List<?>> parametersByShard;
     private DalTaskContext taskContext;
+    private static DalPropertiesLocator dalPropertiesLocator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
 
     public DalSqlTaskRequest(String logicDbName, SqlBuilder builder, DalHints hints, SqlTask<T> task,
             ResultMerger<T> merger) throws SQLException {
@@ -41,7 +45,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         this.logicDbName = logicDbName;
         this.builder = builder;
         this.parameters = builder.buildParameters();
-        this.hints = hints;
+        this.hints = hints.clone();
         this.task = task;
         this.merger = merger;
         this.shards = getShards();
@@ -131,7 +135,14 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             StatementParameter parameter = parameters.get(hints.getShardBy(), ParameterDirection.Input);
             parametersByShard = DalShardingHelper.shuffle(logicDbName, (List) parameter.getValue());
             shards = parametersByShard.keySet();
+        } else if (dalPropertiesLocator.getImplicitAllShardsSwitch() == ImplicitAllShardsSwitch.ON) {
+            // implicit all shards if no shard can be located
+            if (!DalShardingHelper.locateShardId(logicDbName, hints.setParameters(parameters.duplicate()))) {
+                hints.inAllShards();
+                shards = DalShardingHelper.getAllShards(logicDbName);
+            }
         }
+
 
         if (shards != null && shards.size() > 1) {
             logOnMultipleShards(shards, builder);
@@ -155,7 +166,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         }
     }
 
-    private static class SqlTaskCallable<T> implements Callable<T> {
+    protected static class SqlTaskCallable<T> implements Callable<T> {
         private ILogger iLogger = DalElementFactory.DEFAULT.getILogger();
         private static final String SQL_CROSSSHARD = "SQL.crossShard";
         private static final String IMPLICIT_IN_ALL_TABLE_SHARDS = "implicitInAllTableShards";
@@ -241,6 +252,14 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 parametersByTableShard =
                         DalShardingHelper.shuffleByTable(logicDbName, rawTableName, null, (List) parameter.getValue());
                 tableShards = parametersByTableShard.keySet();
+            } else if (dalPropertiesLocator.getImplicitAllShardsSwitch() == ImplicitAllShardsSwitch.ON) {
+                // implicit all table shards if no table shard can be located
+                try {
+                    DalShardingHelper.locateTableShardId(logicDbName, rawTableName, hints, compileParameters(parameters.duplicate()), null);
+                } catch (SQLException e) {
+                    hints.inAllTableShards();
+                    tableShards = DalShardingHelper.getAllTableShards(logicDbName, rawTableName);
+                }
             }
 
             if (tableShards != null && tableShards.size() > 1) {
@@ -496,6 +515,10 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             }
 
             return null;
+        }
+
+        protected Set<String> tableShards(){
+            return this.tableShards;
         }
 
     }

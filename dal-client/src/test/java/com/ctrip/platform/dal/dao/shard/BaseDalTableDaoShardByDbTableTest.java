@@ -2,7 +2,10 @@ package com.ctrip.platform.dal.dao.shard;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.dao.configure.LocalDalPropertiesProvider;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaMapper;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DefaultResultCallback;
 import com.ctrip.platform.dal.dao.sqlbuilder.DeleteSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.Expressions;
@@ -33,6 +36,7 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
     private DatabaseDifference diff;
     private static DalTableDao<ClientTestModel> dao;
     private static DalQueryDao queryDao;
+
 
     public BaseDalTableDaoShardByDbTableTest(String databaseName, DatabaseDifference diff) {
         this.diff = diff;
@@ -440,6 +444,23 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
         testQueryByPkWithEntity(new DalHints());
         testQueryByPkWithEntity(asyncHints());
         testQueryByPkWithEntity(callbackHints());
+    }
+
+    @Test
+    public void testQueryByPkWithEntityImplicitAllShards() throws SQLException {
+        //		set implicitAllShards on
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(new LocalDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+
+        testQueryByPkWithEntity(new DalHints());
+        testQueryByPkWithEntity(asyncHints());
+        testQueryByPkWithEntity(callbackHints());
+
+        //		set implicitAllShards on
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(DalElementFactory.DEFAULT.getDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
     }
 
     private void testQueryByPkWithEntity(DalHints hints) throws SQLException {
@@ -1036,6 +1057,87 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
             models = dao.queryFrom(whereClause, parameters, hints, 0, i + 1);
             models = assertModels(models, hints);
             assertQueryX(shardId, models, i);
+        }
+    }
+
+    @Test
+    public void testQueryFromWithWhereClauseImplicitAllShards() throws SQLException {
+        //		set implicitAllShards on
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(new LocalDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+
+        List<ClientTestModel> models = null;
+        String whereClause = "dbIndex=? order by id";
+
+        // By parameters
+        StatementParameters parameters = new StatementParameters();
+        parameters.set(1, "dbIndex", Types.SMALLINT, 0);
+
+        try {
+            models = dao.queryFrom(whereClause, parameters, new DalHints(), 0, 10);
+            Assert.assertEquals(10, models.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        whereClause = "tableIndex=? order by id";
+        parameters = new StatementParameters();
+        parameters.set(1, "tableIndex", Types.SMALLINT, 0);
+
+        try {
+            models = dao.queryFrom(whereClause, parameters, new DalHints(), 0, 10);
+            Assert.assertEquals(2, models.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        //		set implicitAllShards off
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(DalElementFactory.DEFAULT.getDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+    }
+
+    @Test
+    public void testInvalidShardid() throws Exception{
+
+        //		set implicitAllShards on
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(new LocalDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+
+        List<ClientTestModel> models = null;
+        String whereClause = "type=? order by id";
+        StatementParameters parameters = new StatementParameters();
+        parameters.set(1, Types.SMALLINT, 1);
+        try {
+            models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue("abc").setTableShardValue(1), 0, 10);
+        }catch (Exception e){
+            assertTrue(e.getMessage().contains("For input string: \"abc\""));
+        }
+
+        try {
+            models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue(0).setTableShardValue("abc"), 0, 10);
+        }catch (Exception e){
+            assertTrue(e.getMessage().contains("For input string: \"abc\""));
+        }
+
+        //		set implicitAllShards off
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(DalElementFactory.DEFAULT.getDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+
+        try {
+            models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue("abc").setTableShardValue(1), 0, 10);
+        }catch (Exception e){
+            assertTrue(e.getMessage().contains("For input string: \"abc\""));
+        }
+
+        try {
+            models = dao.queryFrom(whereClause, parameters, new DalHints().setShardValue(0).setTableShardValue("abc"), 0, 10);
+        }catch (Exception e){
+            e.printStackTrace();
+            assertTrue(e.getCause().getMessage().contains("For input string: \"abc\""));
         }
     }
 
@@ -3626,6 +3728,83 @@ public abstract class BaseDalTableDaoShardByDbTableTest {
         } catch (Exception e) {
             Assert.fail();
         }
+    }
+
+    @Test
+    public void testQueryListImplicitInAllDBAndAllTableShards() throws SQLException {
+        //		set implicitAllShards on
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(new LocalDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+
+        SelectSqlBuilder ssb1 = new SelectSqlBuilder();
+        ssb1.selectAll().from(TABLE_NAME).where(" id = 1 ");
+
+        try {
+            List<ClientTestModel> list = dao.query(ssb1, new DalHints());
+            Assert.assertEquals(8, list.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        SelectSqlBuilder ssb2 = new SelectSqlBuilder();
+        ssb2.selectAll().from(TABLE_NAME);
+
+        try {
+            List<ClientTestModel> list = dao.query(ssb2, new DalHints());
+            Assert.assertEquals(20, list.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        SelectSqlBuilder ssb3 = new SelectSqlBuilder();
+        ssb3.selectAll().from(TABLE_NAME).equal("dbIndex",0,Types.INTEGER);
+        try {
+            List<ClientTestModel> list = dao.query(ssb3, new DalHints());
+            Assert.assertEquals(10, list.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        SelectSqlBuilder ssb4= new SelectSqlBuilder();
+        ssb4.selectAll().from(TABLE_NAME).equal("tableIndex",0,Types.INTEGER);
+        try {
+            List<ClientTestModel> list = dao.query(ssb4, new DalHints());
+            Assert.assertEquals(2, list.size());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        //		set implicitAllShards off
+        DalPropertiesManager.getInstance().tearDown();
+        DalPropertiesManager.getInstance().setDalPropertiesProvider(DalElementFactory.DEFAULT.getDalPropertiesProvider());
+        DalPropertiesManager.getInstance().setup();
+
+        try {
+            List<ClientTestModel> list = dao.query(ssb1, new DalHints());
+            Assert.fail();
+        } catch (Exception e) {
+           assertTrue(e.getMessage().contains("Can not locate table shard"));
+        }
+
+        SelectSqlBuilder ssb5 = new SelectSqlBuilder();
+        ssb5.selectAll().from(TABLE_NAME).equal("dbIndex",0,Types.INTEGER);
+        try {
+            List<ClientTestModel> list = dao.query(ssb5, new DalHints());
+            Assert.fail();
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("Can not locate table shard"));
+        }
+
+        SelectSqlBuilder ssb6= new SelectSqlBuilder();
+        ssb6.selectAll().from(TABLE_NAME).equal("tableIndex",0,Types.INTEGER);
+        try {
+            List<ClientTestModel> list = dao.query(ssb6, new DalHints());
+            Assert.fail();
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("Can not locate shard"));
+        }
+
     }
 
     @Test

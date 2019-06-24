@@ -5,7 +5,7 @@ public class SwitchableDataSourceStatus {
     private boolean isForceSwitched;
     private String hostName;
     private Integer port;
-    private boolean isConnected;
+    private boolean poolCreated;
 
     public SwitchableDataSourceStatus(String hostName, Integer port) {
         this.hostName = hostName;
@@ -17,9 +17,9 @@ public class SwitchableDataSourceStatus {
         this.isForceSwitched = isForceSwitched;
     }
 
-    public SwitchableDataSourceStatus(boolean isForceSwitched, String hostName, Integer port, boolean isConnected) {
+    public SwitchableDataSourceStatus(boolean isForceSwitched, String hostName, Integer port, boolean poolCreated) {
         this(isForceSwitched, hostName, port);
-        this.isConnected = isConnected;
+        this.poolCreated = poolCreated;
     }
 
     public boolean isForceSwitched() {
@@ -34,11 +34,11 @@ public class SwitchableDataSourceStatus {
         return port;
     }
 
-    public boolean isConnected() {
-        return isConnected;
+    public boolean isPoolCreated() {
+        return poolCreated;
     }
 
-    public SwitchableDataSourceStatus fork() {
-        return new SwitchableDataSourceStatus(isForceSwitched, hostName, port, isConnected);
+    public String toString() {
+        return String.format("isForceSwitched: %s, poolCreated: %s, hostName: %s, port: %s", isForceSwitched, poolCreated, hostName, port);
     }
 }

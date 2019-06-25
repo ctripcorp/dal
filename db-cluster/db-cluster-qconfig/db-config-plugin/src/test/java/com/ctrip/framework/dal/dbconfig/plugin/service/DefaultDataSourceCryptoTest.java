@@ -41,7 +41,7 @@ public class DefaultDataSourceCryptoTest {
     //build init keyInfo
     private KeyInfo buildKeyInfo(){
         String m_key = "1234567890123456";
-        String m_sslCode = "VZ00000000000441";
+        String m_sslCode = "VZ00000000000441_test";
         KeyInfo key = new KeyInfo();
         key.setKey(m_key).setSslCode(m_sslCode);
         return key;

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dao-gen-core</artifactId>
-    <version>1.16.8</version>
+    <version>1.16.9</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <dal-client-version>1.17.1</dal-client-version>
@@ -20,7 +20,7 @@
         <commons-io-version>2.5</commons-io-version>
         <jcl-over-slf4j>1.7.21</jcl-over-slf4j>
         <logback-version>1.2.2</logback-version>
-        <fastjson-version>1.2.29</fastjson-version>
+        <fastjson-version>1.2.58</fastjson-version>
         <jackson-version>2.9.9</jackson-version>
         <jsqlparser-version>1.2</jsqlparser-version>
         <junit-version>4.12</junit-version>

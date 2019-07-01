@@ -12,7 +12,7 @@
     <groupId>com.ctrip.framework.dal</groupId>
     <artifactId>db-cluster</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <modules>
         <module>db-cluster-common</module>
         <module>db-cluster-service</module>

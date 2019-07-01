@@ -21,6 +21,7 @@ public class PluginMongoServiceTest {
 
     private static final String MONGO_CLUSTER_NAME = "diuserprofile-diuserprofiledb";
     private static final String FAT_ENV = "fat";
+    private static final String LPT_ENV = "lpt";
     private static final String OPERATOR = "test";
     private static final String NEW_USER_ID = "newUserId";
 
@@ -30,7 +31,7 @@ public class PluginMongoServiceTest {
     @Test
     public void add() throws Exception {
         MongoCluster mongoCluster = generateMongoCluster(UUID.randomUUID().toString());
-        PluginResponse response = pluginMongoService.add(mongoCluster, FAT_ENV, OPERATOR);
+        PluginResponse response = pluginMongoService.add(mongoCluster, FAT_ENV, LPT_ENV, OPERATOR);
         assert response != null;
         assert response.getStatus() == 0;
     }
@@ -41,12 +42,12 @@ public class PluginMongoServiceTest {
         MongoCluster mongoCluster = generateMongoCluster(UUID.randomUUID().toString());
         String clusterName = mongoCluster.getClusterName();
         String userId = mongoCluster.getUserId();
-        PluginResponse response = pluginMongoService.add(mongoCluster, FAT_ENV, OPERATOR);
+        PluginResponse response = pluginMongoService.add(mongoCluster, FAT_ENV, LPT_ENV, OPERATOR);
         assert response != null;
         assert response.getStatus() == 0;
 
         // get cluster
-        MongoClusterGetResponse getResponse = pluginMongoService.get(clusterName, FAT_ENV);
+        MongoClusterGetResponse getResponse = pluginMongoService.get(clusterName, FAT_ENV, LPT_ENV);
         assert getResponse != null;
         assert getResponse.getStatus() == 0;
         MongoClusterInfo data = getResponse.getData();
@@ -62,12 +63,12 @@ public class PluginMongoServiceTest {
         // update cluster
         mongoCluster.setEnabled(false);
         mongoCluster.setUserId(NEW_USER_ID);
-        PluginResponse updateResponse = pluginMongoService.update(mongoCluster, FAT_ENV, OPERATOR);
+        PluginResponse updateResponse = pluginMongoService.update(mongoCluster, FAT_ENV, LPT_ENV, OPERATOR);
         assert updateResponse != null;
         assert updateResponse.getStatus() == 0;
 
         // get cluster
-        getResponse = pluginMongoService.get(clusterName, FAT_ENV);
+        getResponse = pluginMongoService.get(clusterName, FAT_ENV, LPT_ENV);
         assert getResponse != null;
         assert getResponse.getStatus() == 0;
         data = getResponse.getData();
@@ -81,7 +82,7 @@ public class PluginMongoServiceTest {
 
     @Test
     public void get() throws Exception {
-        MongoClusterGetResponse response = pluginMongoService.get("demoCluster", "fat");
+        MongoClusterGetResponse response = pluginMongoService.get("7e9ddf6b-4855-4a16-b194-7ec81ca89eef-test", FAT_ENV, LPT_ENV);
         assert response != null;
         assert response.getStatus() == 0;
         assert (response.getData() instanceof MongoClusterInfo);

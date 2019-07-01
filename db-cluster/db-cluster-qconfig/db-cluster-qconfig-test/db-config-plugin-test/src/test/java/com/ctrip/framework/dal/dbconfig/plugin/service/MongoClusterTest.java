@@ -19,7 +19,7 @@ import java.util.UUID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class MongoClusterTest {
-    public static final String FAT_ENV = "fat";
+    public static final String FAT_ENV = "fat:fat1";
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
     public static final String OPERATOR = "mongoTest";
@@ -111,7 +111,7 @@ public class MongoClusterTest {
         assert clientConfig.getPassword().equalsIgnoreCase(mongoCluster.getPassword());
         assert clientConfig.getVersion() == version + 1;
         assert clientConfig.getNodes() != null && !clientConfig.getNodes().isEmpty();
-        assert clientConfig.getEnabled() == null;
+        assert clientConfig.getEnabled() == true;
         assert clientConfig.getUpdateTime() == null;
         assert Strings.isBlank(clientConfig.getOperator());
     }
@@ -151,7 +151,7 @@ public class MongoClusterTest {
     public void getClient() {
         // get client config, need add vm option.
         addVmOptions();
-        String content = ConfigUtils.getMongoFileResult(MONGO_CLUSTER_NAME);
+        String content = ConfigUtils.getMongoFileResult("frtshoppingcartdb_w");
         assert Strings.isNotBlank(content);
         System.out.println("---------------------------mongo cluster client config begin----------------------------");
         System.out.println(content);
@@ -203,14 +203,14 @@ public class MongoClusterTest {
 
     private void addVmOptions() {
         // local
-        System.setProperty("qconfig.admin", "localhost:8082");
-        System.setProperty("qserver.http.urls", "localhost:8080");
-        System.setProperty("qserver.https.urls", "localhost:8443");
+//        System.setProperty("qconfig.admin", "localhost:8082");
+//        System.setProperty("qserver.http.urls", "localhost:8080");
+//        System.setProperty("qserver.https.urls", "localhost:8443");
 
         // qconfig2: fat1
-//        System.setProperty("qconfig.admin", "http://qconfig2.fat1.qa.nt.ctripcorp.com");
-//        System.setProperty("qserver.http.urls", "10.5.28.92:8080");
-//        System.setProperty("qserver.https.urls", "10.5.28.92:8443");
+        System.setProperty("qconfig.admin", "http://qconfig2.fat1.qa.nt.ctripcorp.com");
+        System.setProperty("qserver.http.urls", "10.5.61.180:8080");
+        System.setProperty("qserver.https.urls", "10.5.61.180:8443");
 
         // fat16
 //        System.setProperty("qconfig.admin", "qconfig.fat16.qa.nt.ctripcorp.com");

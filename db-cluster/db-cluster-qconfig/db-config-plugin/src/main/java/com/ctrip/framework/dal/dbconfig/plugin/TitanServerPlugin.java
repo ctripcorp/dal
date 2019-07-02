@@ -6,30 +6,25 @@ import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.PermissionCheckEnum;
 import com.ctrip.framework.dal.dbconfig.plugin.service.*;
 import com.ctrip.framework.dal.dbconfig.plugin.service.validator.ValidateHandler;
-import com.ctrip.framework.dal.dbconfig.plugin.util.*;
+import com.ctrip.framework.dal.dbconfig.plugin.util.CommonHelper;
+import com.ctrip.framework.dal.dbconfig.plugin.util.NetworkUtil;
+import com.ctrip.framework.dal.dbconfig.plugin.util.QconfigServiceUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.common.exception.QServiceException;
 import qunar.tc.qconfig.common.util.ChecksumAlgorithm;
-import qunar.tc.qconfig.common.util.Constants;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.security.Key;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author c7ch23en
@@ -39,16 +34,6 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     private static Logger logger = LoggerFactory.getLogger(TitanServerPlugin.class);
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
-
-    //whether allow to process this request
-    private boolean canProcess(HttpServletRequest request) {
-        boolean canDo = false;
-        String group = request.getParameter(Constants.GROUP_NAME);
-        if (TITAN_QCONFIG_KEYS_APPID.equals(group)) {
-            canDo = true;
-        }
-        return canDo;
-    }
 
     @Override
     public void init() {
@@ -60,7 +45,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         PluginResult pluginResult = null;
         try {
             HttpServletRequest request = wrappedRequest.getRequest();
-            if (canProcess(request)) {
+            if (canProcess(request, TITAN_QCONFIG_KEYS_APPID)) {
                 pluginResult = preHandleDetail(wrappedRequest);
                 // If pluginResult.getCode != 0, log event
                 if (pluginResult.getCode() != PluginStatusCode.OK) {
@@ -87,7 +72,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         PluginResult pluginResult = null;
         try {
             HttpServletRequest request = wrappedRequest.getRequest();
-            if (canProcess(request)) {
+            if (canProcess(request, TITAN_QCONFIG_KEYS_APPID)) {
                 pluginResult = postHandleDetail(wrappedRequest);
                 // If pluginResult.getCode != 0, log event
                 if (pluginResult.getCode() != PluginStatusCode.OK) {
@@ -141,7 +126,6 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
 
 
     private PluginResult postHandleDetail(WrappedRequest wrappedRequest) throws Exception {
-        Stopwatch stopwatch = Stopwatch.createStarted();
         PluginResult pluginResult = PluginResult.oK();
         String result = "";
         Transaction t = Cat.newTransaction("TitanQconfigPlugin", "TitanServerPlugin");
@@ -166,40 +150,20 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
             CryptoManager cryptoManager = new CryptoManager(config);
 
-            //check request schema is https. (No need to check again, already checked in preHandleDetail) [2017-12-14]
-            //checkHttps(request, config);
-
-            //noParent check [2017-10-31]
-            EnvProfile profile_raw = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-            String subEnv_input = profile_raw.formatSubEnv();
-            String noParentSuffix = config.getParamValue(NO_PARENT_SUFFIX);
-            boolean isPro = CommonHelper.checkPro(profile);
-            boolean noParent = CommonHelper.checkSubEnvNoParent(subEnv_input, noParentSuffix, isPro);//use 'subEnv_input'
-            if (noParent) {
-                //compare used subEnv is just user input one
-                String subEnv_actual = envProfile.formatSubEnv();
-                if (subEnv_input != null && !subEnv_input.equalsIgnoreCase(subEnv_actual)) {
-                    //let it go when profile is like 'LPT:xxx'  [2018-02-23]
-                    String topEnv = envProfile.formatEnv();
-                    if (!CommonHelper.checkLptEnv(topEnv)) {
-                        throw new IllegalArgumentException("dataId=" + dataId + ", noParent=true, subEnv not match! subEnv_input=" + subEnv_input + ", subEnv_actual=" + subEnv_actual);
-                    }
-                }
-            }
+            EnvProfile rawProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
+            // noParent check [2017-10-31]
+            checkNoParent(dataId, rawProfile, envProfile, config);
 
             //decrypt in value
             Properties encryptProp = CommonHelper.parseString2Properties(encryptText);
             Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, encryptProp);
-            String originalText = CommonHelper.parseProperties2String(originalProp);
-            //firstly set result with originalText
-            result = originalText;
+
             //黑白名单检查
-            String clientAppId = getQconfigService().getClientAppid();  //client appId
-            // safety improvement [2018-09-27]
-//            PermissionCheckEnum permissionCheck = PermissionCheckUtil.readPermissionCheck(originalText, clientAppId);
+            String clientAppId = getQconfigService().getClientAppid();
 
             String clientIp = NetworkUtil.getClientIp(request);
             // prepare eventName [2018-10-18]. Format:   dataId:subEnv:appId:ip
+            String subEnv_input = rawProfile.formatSubEnv();
             String eventName = String.format("%s:%s:%s:%s", dataId, subEnv_input, clientAppId, clientIp);
             Cat.logEvent("TitanPlugin.Key.Request", eventName);
             Properties pluginProp = config.getCurrentContentProp();
@@ -271,9 +235,6 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             throw e;
         } finally {
             t.complete();
-            //metric cost
-            stopwatch.stop();
-            long cost = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         }
         return pluginResult;
     }
@@ -285,102 +246,6 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
         sb.append("failover=").append(failoverConnString);
         return sb.toString();
-    }
-
-
-    //https check
-    private void checkHttps(HttpServletRequest request, PluginConfig config) throws Exception {
-        String schema = request.getScheme();
-        if (!REQUEST_SCHEMA_HTTPS.equalsIgnoreCase(schema)) {
-            //check whether this http client ip in white list
-            checkHttpClientValid(request, config);
-        }
-    }
-
-    //check http client valid. (client ip in white list)
-    private void checkHttpClientValid(HttpServletRequest request, PluginConfig config) throws Exception {
-        //get http white list
-        String httpWhiteList = config.getParamValue(HTTP_WHITE_LIST);
-        String realClientIp = getRealClientIp(request, config);
-        boolean inHttpWhiteList = PermissionCheckUtil.checkClientIpInHttpWhiteList(httpWhiteList, realClientIp);
-        if (!inHttpWhiteList) {
-            throw new IllegalAccessException("Invalid request schema, only support https! inHttpWhiteList=" + inHttpWhiteList + ", realClientIp=" + realClientIp);
-        }
-    }
-
-    //get real client ip from token
-    private String getRealClientIp(HttpServletRequest request, PluginConfig config) throws Exception {
-        String xRealIp = getXRealIp(request);
-        String hiddenClientIp = getHiddenClientIp(request, config);
-
-        if (Strings.isNullOrEmpty(xRealIp) || Strings.isNullOrEmpty(hiddenClientIp)) {
-            StringBuilder sb = new StringBuilder(300);
-            sb.append("Invalid request, xRealIp or hiddenClientIp is empty! ");
-            sb.append("xRealIp=").append(xRealIp).append(", ");
-            sb.append("hiddenClientIp=").append(hiddenClientIp);
-            throw new IllegalAccessException(sb.toString());
-        }
-
-        // check whether public net
-        String netType = NetworkUtil.getNetType(request);
-        boolean fromPublicNet = NetworkUtil.isFromPublicNet(netType);
-        Cat.logEvent("TitanServerPlugin.PreHandle.NetType", String.format("fromPublicNet:%s,netType:%s", fromPublicNet, netType));
-
-        // 从专线过来的请求(内网ip)，需要比较
-        if (!fromPublicNet) {
-            // check xRealIp and hiddenClientIp whether equal
-            if (!xRealIp.equals(hiddenClientIp)) {
-                String ttToken = request.getHeader(TT_TOKEN);
-                StringBuilder sb = new StringBuilder(300);
-                sb.append("Invalid request, [xRealIp, hiddenClientIp] not equal! ");
-                sb.append("xRealIp=").append(xRealIp).append(", ");
-                sb.append("hiddenClientIp=").append(hiddenClientIp).append(", ");
-                sb.append("ttToken=").append(ttToken);
-                throw new IllegalAccessException(sb.toString());
-            }
-        } else {
-            Cat.logEvent("TitanServerPlugin.PublicNet.Request", String.format("hiddenClientIp:%s,xRealIp:%s", hiddenClientIp, xRealIp));
-        }
-
-        return hiddenClientIp;
-    }
-
-    private String getXRealIp(HttpServletRequest request) throws Exception {
-        String xRealIp = request.getHeader(X_REAL_IP);
-        //if xRealIp is empty, use original clientIp
-        if (Strings.isNullOrEmpty(xRealIp)) {
-            xRealIp = NetworkUtil.getClientIp(request);
-        }
-        return xRealIp;
-    }
-
-    private String getHiddenClientIp(HttpServletRequest request, PluginConfig config) throws Exception {
-        String hiddenClientIp = null;
-        String ttToken = request.getHeader(TT_TOKEN);
-        if (!Strings.isNullOrEmpty(ttToken)) {
-            String configKey = config.getParamValue(TOKEN_KEY);
-            byte[] bb = Base64.decodeBase64(configKey);
-            Key key = null;
-            ObjectInputStream ois = null;
-            try {
-                ois = new ObjectInputStream(new ByteArrayInputStream(bb));
-                key = (Key) ois.readObject();
-            } finally {
-                if (ois != null) {
-                    try {
-                        ois.close();
-                    } catch (Exception e) {
-                        //
-                    }
-                }
-            }
-            List<String> decodedToken = SecurityUtil.decode(ttToken, key);
-            if (decodedToken != null && decodedToken.size() >= 3) {
-                hiddenClientIp = decodedToken.get(2);
-            }
-        }
-
-        return hiddenClientIp;
     }
 
     // fetch parent key permission for subEnv not empty

@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.*;
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.HEADER_NET_TYPE;
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.PRIVATE_NET_TYPE;
 
 
 /**
@@ -33,6 +35,9 @@ public class MongoServerPluginTest {
     private HttpServletRequest request;
     private String clusterName = "diuserprofile-diuserprofiledb";
     private String env = "fat";
+    private String proEnv = "pro";
+    private String awsProfile = "pro:fra-aws";
+    private String privateNetIp = "10.5.156.193";
 
     @Before
     public void init() throws Exception {
@@ -143,6 +148,52 @@ public class MongoServerPluginTest {
         String content = GsonUtils.t2Json(mongoCluster);
 
         return content;
+    }
+
+    @Test
+    public void postHandleAwsTest() throws Exception {
+        String profile = proEnv;
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile(awsProfile)).anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();
+        EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
+        EasyMock.replay(request);   //保存期望结果
+        EasyMock.verify(request);
+
+        String groupId = MONGO_CLIENT_APP_ID;
+        String dataId = clusterName;
+        //String profile = "fat:LPT10";
+        long version = 1L;
+        String content = buildMongoClusterContent(false);
+        ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
+        WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
+        PluginResult pluginResult = mongoServerPlugin.postHandle(wrappedRequest);
+        assert (pluginResult != null);
+        System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
+        assert pluginResult.getCode() != PluginStatusCode.OK;
+        System.out.println("pluginResult.message=" + pluginResult.getMessage());
+    }
+
+    @Test
+    public void postHandleLptTest() throws Exception {
+        String profile = "fat";
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile("fat:lpt")).anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();
+        EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
+        EasyMock.replay(request);   //保存期望结果
+        EasyMock.verify(request);
+
+        String groupId = MONGO_CLIENT_APP_ID;
+        String dataId = clusterName;
+        //String profile = "fat:LPT10";
+        long version = 1L;
+        String content = buildMongoClusterContent(false);
+        ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
+        WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
+        PluginResult pluginResult = mongoServerPlugin.postHandle(wrappedRequest);
+        assert (pluginResult != null);
+        System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
+        assert pluginResult.getCode() != PluginStatusCode.OK;
+        System.out.println("pluginResult.message=" + pluginResult.getMessage());
     }
 
     @Test

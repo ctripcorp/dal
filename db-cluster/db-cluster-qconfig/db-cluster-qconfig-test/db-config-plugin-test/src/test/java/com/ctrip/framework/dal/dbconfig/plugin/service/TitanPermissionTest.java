@@ -2,6 +2,7 @@ package com.ctrip.framework.dal.dbconfig.plugin.service;
 
 import com.ctrip.framework.dal.dbconfig.plugin.entity.*;
 import com.ctrip.framework.dal.dbconfig.plugin.util.ConfigUtils;
+import com.ctrip.framework.dal.dbconfig.plugin.util.Utils;
 import com.ctrip.framework.foundation.Foundation;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Test;
@@ -19,22 +20,29 @@ public class TitanPermissionTest {
     public static final String FAT_ENV = "fat";
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
-    public static final String TITAN_KEY = "titantest_shenjie_v_04";
+    public static final String TITAN_KEY = " titantest_lzyan_v_01";
     public static final String RUN_IN_BIG_DATA = "false";
 
     @Autowired
     private TitanPluginService titanPluginService;
 
-    //    @Test
+    @Test
     public void getClientConfig() throws Exception {
+        // need add vm option.
+        Utils.addLocalVmOptions();
+        String content = ConfigUtils.getTitanFileResult(TITAN_KEY);
+        assert Strings.isNotBlank(content);
+        System.out.println(content);
+    }
+
+    @Test
+    public void addPermissionAndGetClientConfig() throws Exception {
         // add permission
         PluginResponse response = titanPluginService.addPermissions(TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
         assert response.getStatus() == 0;
 
-        // get client config from fat16, need add vm option.
-        System.setProperty("qconfig.admin", "qconfig.fat16.qa.nt.ctripcorp.com");
-        System.setProperty("qserver.http.urls", "10.5.80.175:8080");
-        System.setProperty("qserver.https.urls", "10.5.80.175:8443");
+        // need add vm option.
+        Utils.addLocalVmOptions();
         String content = ConfigUtils.getTitanFileResult(TITAN_KEY);
         assert Strings.isNotBlank(content);
     }

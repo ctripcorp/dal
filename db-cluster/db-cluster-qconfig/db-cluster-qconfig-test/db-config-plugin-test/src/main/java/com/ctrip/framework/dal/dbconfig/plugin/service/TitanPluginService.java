@@ -25,7 +25,8 @@ public class TitanPluginService {
 
     // qconfig fat16
 //    public static final String TITAN_PLUGIN_URL = "http://qconfig.fat16.qa.nt.ctripcorp.com/plugins/titan";
-    public static final String TITAN_PLUGIN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
+//    public static final String TITAN_PLUGIN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
+    public static final String TITAN_PLUGIN_URL = "http://localhost:8082/plugins/titan";
 
     public static final String TITAN_PLUGIN_CONFIG_URL = TITAN_PLUGIN_URL + "/config";
     public static final String TITAN_PLUGIN_CONFIGS_URL = TITAN_PLUGIN_URL + "/configs";

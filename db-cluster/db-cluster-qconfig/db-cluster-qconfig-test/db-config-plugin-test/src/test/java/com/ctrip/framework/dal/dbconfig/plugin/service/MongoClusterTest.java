@@ -38,7 +38,7 @@ public class MongoClusterTest {
         assert response.getStatus() != 0;
 
         // get client config, need add vm option.
-        addVmOptions();
+        Utils.addLocalVmOptions();
         String content = ConfigUtils.getMongoFileResult(MONGO_CLUSTER_NAME);
         assert Strings.isNotBlank(content);
     }
@@ -51,7 +51,7 @@ public class MongoClusterTest {
         assert response.getStatus() == 0;
 
         // get client config, need add vm option.
-        addVmOptions();
+        Utils.addLocalVmOptions();
         String content = ConfigUtils.getMongoFileResult(mongoCluster.getClusterName());
         assert Strings.isNotBlank(content);
     }
@@ -96,7 +96,7 @@ public class MongoClusterTest {
         assert data.getEnabled();
 
         // get client config, need add vm option.
-        addVmOptions();
+        Utils.addLocalVmOptions();
         String content = ConfigUtils.getMongoFileResult(clusterName);
         assert Strings.isNotBlank(content);
         System.out.println("---------------------------mongo cluster client config begin----------------------------");
@@ -134,7 +134,7 @@ public class MongoClusterTest {
         assert updateResponse.getStatus() == 0;
 
         // get client config, need add vm option.
-        addVmOptions();
+        Utils.addLocalVmOptions();
         boolean isSuccess = true;
         try {
             String content = ConfigUtils.getMongoFileResult(clusterName);
@@ -150,7 +150,7 @@ public class MongoClusterTest {
     @Test
     public void getClient() {
         // get client config, need add vm option.
-        addVmOptions();
+        Utils.addLocalVmOptions();
         String content = ConfigUtils.getMongoFileResult("frtshoppingcartdb_w");
         assert Strings.isNotBlank(content);
         System.out.println("---------------------------mongo cluster client config begin----------------------------");
@@ -199,22 +199,5 @@ public class MongoClusterTest {
                 .build();
 
         return mongoCluster;
-    }
-
-    private void addVmOptions() {
-        // local
-//        System.setProperty("qconfig.admin", "localhost:8082");
-//        System.setProperty("qserver.http.urls", "localhost:8080");
-//        System.setProperty("qserver.https.urls", "localhost:8443");
-
-        // qconfig2: fat1
-        System.setProperty("qconfig.admin", "http://qconfig2.fat1.qa.nt.ctripcorp.com");
-        System.setProperty("qserver.http.urls", "10.5.61.180:8080");
-        System.setProperty("qserver.https.urls", "10.5.61.180:8443");
-
-        // fat16
-//        System.setProperty("qconfig.admin", "qconfig.fat16.qa.nt.ctripcorp.com");
-//        System.setProperty("qserver.http.urls", "10.5.80.175:8080");
-//        System.setProperty("qserver.https.urls", "10.5.80.175:8443");
     }
 }

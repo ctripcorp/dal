@@ -189,6 +189,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         Cat.logEvent(CAT_TRANSACTION_TYPE, "NeedCheckDbConnection", Event.SUCCESS, "needCheckDbConnection=" + needCheckDbConnection);
         for(MhaInputBasicData mhaBD : mhaBasicList){
             dataId = CommonHelper.formatTitanFileName(mhaBD.getKeyname());    //Notice: extarct match + lowercase
+            Cat.logEvent("Titan.MHAUpdate.TitanKey", dataId);
             inputDataIdList.add(dataId);
             Properties updateProp = buildUpdatePropFromBasicData(mhaBD);
             if(updateProp != null && !updateProp.isEmpty()){

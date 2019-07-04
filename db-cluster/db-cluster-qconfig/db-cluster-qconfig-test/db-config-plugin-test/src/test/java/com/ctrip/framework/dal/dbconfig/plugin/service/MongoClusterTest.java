@@ -19,7 +19,7 @@ import java.util.UUID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class MongoClusterTest {
-    public static final String FAT_ENV = "fat:fat1";
+    public static final String FAT_ENV = "fat:lpt";
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
     public static final String OPERATOR = "mongoTest";
@@ -150,8 +150,9 @@ public class MongoClusterTest {
     @Test
     public void getClient() {
         // get client config, need add vm option.
-        Utils.addLocalVmOptions();
-        String content = ConfigUtils.getMongoFileResult("frtshoppingcartdb_w");
+//        Utils.addLocalVmOptions();
+        Utils.addQConfig2Fat1VmOptions();
+        String content = ConfigUtils.getMongoFileResult("d97a0427-356a-4f53-87ad-5cb86cddc5de-test");
         assert Strings.isNotBlank(content);
         System.out.println("---------------------------mongo cluster client config begin----------------------------");
         System.out.println(content);

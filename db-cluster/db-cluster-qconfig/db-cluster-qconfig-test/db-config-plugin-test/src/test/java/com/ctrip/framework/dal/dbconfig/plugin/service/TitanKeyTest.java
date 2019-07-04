@@ -23,7 +23,7 @@ public class TitanKeyTest {
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
     public static final String OPERATOR = "titanTest";
-    public static final String TITAN_KEY = "titantest_shenjie_v_04";
+    public static final String TITAN_KEY = "titantest_shenjie_v_01";
     public static final String ABSENT_TITAN_KEY = "titantest_shenjie_v_03_absent";
 
     @Autowired
@@ -51,7 +51,7 @@ public class TitanKeyTest {
 
     @Test
     public void updateTitanKey() throws Exception {
-        String serverIp = "10.2.74.111";
+        String serverIp = "";
         TitanUpdateData data = TitanUpdateData.builder()
                 .keyName(TITAN_KEY)
                 .server(serverIp)

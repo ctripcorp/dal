@@ -107,7 +107,7 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
         EnvProfile envProfile = new EnvProfile(profile);
 
         PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
-        // noParent check [2017-10-31]
+        //check request schema is https
         checkHttps(request, config);
 
         String clusterName = MongoUtils.formatClusterName(dataId); //getQconfigService(), dataId, profile

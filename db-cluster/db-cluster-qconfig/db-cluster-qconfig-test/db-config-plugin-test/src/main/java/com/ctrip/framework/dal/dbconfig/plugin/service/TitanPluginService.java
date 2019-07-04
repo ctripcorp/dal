@@ -26,7 +26,8 @@ public class TitanPluginService {
     // qconfig fat16
 //    public static final String TITAN_PLUGIN_URL = "http://qconfig.fat16.qa.nt.ctripcorp.com/plugins/titan";
 //    public static final String TITAN_PLUGIN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
-    public static final String TITAN_PLUGIN_URL = "http://localhost:8082/plugins/titan";
+//    public static final String TITAN_PLUGIN_URL = "http://localhost:8082/plugins/titan";
+    public static final String TITAN_PLUGIN_URL = "http://qconfig2.fat1.qa.nt.ctripcorp.com/plugins/titan";
 
     public static final String TITAN_PLUGIN_CONFIG_URL = TITAN_PLUGIN_URL + "/config";
     public static final String TITAN_PLUGIN_CONFIGS_URL = TITAN_PLUGIN_URL + "/configs";
@@ -156,13 +157,14 @@ public class TitanPluginService {
         return pluginResponse;
     }
 
-    public PluginResponse addPermissions(String titanKeys, String appIds, String runInBigData) {
+    public PluginResponse addPermissions(String env,String titanKeys, String appIds, String runInBigData) {
         Transaction t = Cat.newTransaction("Titan.Plugin", "addPermissions");
         PluginResponse pluginResponse = null;
         try {
             Map<String, String> header = Maps.newLinkedHashMapWithExpectedSize(1);
             header.put("Content-Type", "application/x-www-form-urlencoded");
             List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(3);
+            urlParams.add(new BasicNameValuePair("env", env));
             urlParams.add(new BasicNameValuePair("titanKey", titanKeys));
             urlParams.add(new BasicNameValuePair("clientAppId", appIds));
             urlParams.add(new BasicNameValuePair("runInBigData", runInBigData));

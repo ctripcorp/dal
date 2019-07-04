@@ -20,7 +20,7 @@ public class TitanPermissionTest {
     public static final String FAT_ENV = "fat";
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
-    public static final String TITAN_KEY = " titantest_lzyan_v_01";
+    public static final String TITAN_KEY = "titantest_shenjie_v_01";
     public static final String RUN_IN_BIG_DATA = "false";
 
     @Autowired
@@ -29,7 +29,8 @@ public class TitanPermissionTest {
     @Test
     public void getClientConfig() throws Exception {
         // need add vm option.
-        Utils.addLocalVmOptions();
+//        Utils.addLocalVmOptions();
+        Utils.addQConfig2Fat1VmOptions();
         String content = ConfigUtils.getTitanFileResult(TITAN_KEY);
         assert Strings.isNotBlank(content);
         System.out.println(content);
@@ -38,11 +39,12 @@ public class TitanPermissionTest {
     @Test
     public void addPermissionAndGetClientConfig() throws Exception {
         // add permission
-        PluginResponse response = titanPluginService.addPermissions(TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
+        PluginResponse response = titanPluginService.addPermissions(FAT_ENV, TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
         assert response.getStatus() == 0;
 
         // need add vm option.
-        Utils.addLocalVmOptions();
+//        Utils.addLocalVmOptions();
+        Utils.addQConfig2Fat1VmOptions();
         String content = ConfigUtils.getTitanFileResult(TITAN_KEY);
         assert Strings.isNotBlank(content);
     }
@@ -70,7 +72,7 @@ public class TitanPermissionTest {
 
     //    @Test
     public void addPermissions() throws Exception {
-        PluginResponse response = titanPluginService.addPermissions(TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
+        PluginResponse response = titanPluginService.addPermissions(FAT_ENV, TITAN_KEY, Foundation.app().getAppId(), RUN_IN_BIG_DATA);
         assert response.getStatus() == 0;
     }
 

@@ -89,6 +89,7 @@ public class TitanServerPluginTest {
                     transaction.setStatus(Transaction.SUCCESS);
                 } catch (Exception e) {
                     Cat.logError("Get connecting string from qconfig failed.", e);
+                    log.error("Get connecting string from qconfig failed.", e);
                     transaction.setStatus(e);
                 } finally {
                     transaction.complete();

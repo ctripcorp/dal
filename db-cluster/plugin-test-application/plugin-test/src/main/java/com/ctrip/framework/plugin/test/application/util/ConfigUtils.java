@@ -14,8 +14,8 @@ public class ConfigUtils {
 
     public static String getConfig(String groupName, String fileName) {
         // delete qconfig cache
-        File file = AppStoreUtil.getAppStore();
-        delete(file);
+//        File file = AppStoreUtil.getAppStore();
+//        delete(file);
 
         Feature feature = Feature.create().setHttpsEnable(true).build();
         TypedConfig<String> typedConfig = TypedConfig.get(groupName, fileName, feature, new TypedConfig.Parser<String>() {
@@ -29,7 +29,7 @@ public class ConfigUtils {
         return fileResult;
     }
 
-    private static void delete(File file) {
+    public static void delete(File file) {
         File[] files = file.listFiles();
         if (files != null && files.length > 0) {
             for (File file1 : files) {

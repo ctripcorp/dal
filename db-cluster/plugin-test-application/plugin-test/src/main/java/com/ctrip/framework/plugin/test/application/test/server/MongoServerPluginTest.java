@@ -73,6 +73,7 @@ public class MongoServerPluginTest {
                     transaction.setStatus(Transaction.SUCCESS);
                 } catch (Exception e) {
                     Cat.logError("Get mongo cluster config from qconfig failed.", e);
+                    log.error("Get mongo cluster config from qconfig failed.", e);
                     transaction.setStatus(e);
                 } finally {
                     transaction.complete();

@@ -24,19 +24,32 @@ import java.util.List;
 public class MongoPluginService {
     //    public static final String MONGO_PLUGIN_URL = "http://qconfig.ctripcorp.com/plugins/mongo/config";
 //    public static final String MONGO_PLUGIN_URL = "http://qconfig.fat16.qa.nt.ctripcorp.com/plugins/mongo/config";
-//    public static final String MONGO_PLUGIN_URL = "http://localhost:8082/plugins/mongo/config";
-    public static final String MONGO_PLUGIN_URL = "http://qconfig2.fat1.qa.nt.ctripcorp.com/plugins/mongo/config";
+    public static final String MONGO_PLUGIN_URL = "http://localhost:8082/plugins/mongo/config";
+//    public static final String MONGO_PLUGIN_URL = "http://qconfig2.fat1.qa.nt.ctripcorp.com/plugins/mongo/config";
 
     public static final String ADD_CLUSTER_URL = MONGO_PLUGIN_URL + "/add";
     public static final String UPDATE_CLUSTER_URL = MONGO_PLUGIN_URL + "/update";
     public static final String GET_CLUSTER_URL = MONGO_PLUGIN_URL + "/info";
 
     public PluginResponse addMongoCluster(MongoClusterEntity clusterEntity, String env, String operator) {
+        return addMongoCluster(clusterEntity, env, null, operator);
+    }
+
+    public PluginResponse updateMongoCluster(MongoClusterEntity clusterEntity, String env, String operator) {
+        return updateMongoCluster(clusterEntity, env, null, operator);
+    }
+
+    public MongoClusterGetResponse getMongoCluster(String clusterName, String env) {
+        return getMongoCluster(clusterName, env, null);
+    }
+
+    public PluginResponse addMongoCluster(MongoClusterEntity clusterEntity, String env, String subEnv, String operator) {
         Transaction t = Cat.newTransaction("Mongo.Plugin", "addMongoCluster");
         PluginResponse pluginResponse = null;
         try {
-            List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
+            List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(3);
             urlParams.add(new BasicNameValuePair("env", env));
+            urlParams.add(new BasicNameValuePair("subenv", subEnv));
             urlParams.add(new BasicNameValuePair("operator", operator));
             String request = Utils.gson.toJson(clusterEntity);
             String response = HttpUtils.getInstance().sendPost(ADD_CLUSTER_URL, urlParams, request);
@@ -52,12 +65,13 @@ public class MongoPluginService {
         return pluginResponse;
     }
 
-    public PluginResponse updateMongoCluster(MongoClusterEntity clusterEntity, String env, String operator) {
+    public PluginResponse updateMongoCluster(MongoClusterEntity clusterEntity, String env, String subEnv, String operator) {
         Transaction t = Cat.newTransaction("Mongo.Plugin", "updateMongoCluster");
         PluginResponse pluginResponse = null;
         try {
             List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
             urlParams.add(new BasicNameValuePair("env", env));
+            urlParams.add(new BasicNameValuePair("subenv", subEnv));
             urlParams.add(new BasicNameValuePair("operator", operator));
             String request = Utils.gson.toJson(clusterEntity);
             String response = HttpUtils.getInstance().sendPost(UPDATE_CLUSTER_URL, urlParams, request);
@@ -73,13 +87,14 @@ public class MongoPluginService {
         return pluginResponse;
     }
 
-    public MongoClusterGetResponse getMongoCluster(String clusterName, String env) {
+    public MongoClusterGetResponse getMongoCluster(String clusterName, String env, String subEnv) {
         Transaction t = Cat.newTransaction("Mongo.Plugin", "getMongoCluster");
         MongoClusterGetResponse pluginResponse = null;
         try {
             List<NameValuePair> urlParams = Lists.newArrayListWithCapacity(2);
             urlParams.add(new BasicNameValuePair("clustername", clusterName));
             urlParams.add(new BasicNameValuePair("env", env));
+            urlParams.add(new BasicNameValuePair("subenv", subEnv));
             String response = HttpUtils.getInstance().sendGet(GET_CLUSTER_URL, urlParams);
             pluginResponse = Utils.gson.fromJson(response, MongoClusterGetResponse.class);
             t.setStatus(Message.SUCCESS);

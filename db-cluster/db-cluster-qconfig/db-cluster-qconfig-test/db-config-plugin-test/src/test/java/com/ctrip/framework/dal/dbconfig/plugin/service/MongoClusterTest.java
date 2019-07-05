@@ -19,7 +19,9 @@ import java.util.UUID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class MongoClusterTest {
-    public static final String FAT_ENV = "fat:lpt";
+    public static final String FAT_ENV = "fat";
+    public static final String FAT_1_ENV = "fat1";
+    public static final String LPT_ENV = "lpt";
     public static final String UAT_ENV = "uat";
     public static final String PRO_ENV = "pro";
     public static final String OPERATOR = "mongoTest";
@@ -150,9 +152,9 @@ public class MongoClusterTest {
     @Test
     public void getClient() {
         // get client config, need add vm option.
-//        Utils.addLocalVmOptions();
-        Utils.addQConfig2Fat1VmOptions();
-        String content = ConfigUtils.getMongoFileResult("d97a0427-356a-4f53-87ad-5cb86cddc5de-test");
+        Utils.addLocalVmOptions();
+//        Utils.addQConfig2Fat1VmOptions();
+        String content = ConfigUtils.getMongoFileResult("mongoclustertest2");
         assert Strings.isNotBlank(content);
         System.out.println("---------------------------mongo cluster client config begin----------------------------");
         System.out.println(content);
@@ -174,6 +176,66 @@ public class MongoClusterTest {
         PluginResponse updateResponse = mongoPluginService.updateMongoCluster(mongoCluster, FAT_ENV, OPERATOR);
         assert updateResponse != null;
         assert updateResponse.getStatus() != 0;
+    }
+
+    @Test
+    public void addGetUpdateSubEnv() {
+        // add cluster to fat:lpt
+        MongoClusterEntity mongoCluster = generateMongoClusterEntity(UUID.randomUUID().toString() + "-" + LPT_ENV);
+        mongoCluster.setEnabled(false);
+        String clusterName = mongoCluster.getClusterName();
+        String userId = mongoCluster.getUserId();
+        PluginResponse response = mongoPluginService.addMongoCluster(mongoCluster, FAT_ENV, LPT_ENV, OPERATOR);
+        assert response != null;
+        assert response.getStatus() == 0;
+
+        // get cluster from fat:lpt
+        MongoClusterGetResponse getResponse = mongoPluginService.getMongoCluster(clusterName, FAT_ENV, LPT_ENV);
+        assert getResponse != null;
+        assert getResponse.getStatus() == 0;
+        MongoClusterGetOutputEntity data = getResponse.getData();
+        assert data != null;
+        assert data.getClusterName().equalsIgnoreCase(clusterName);
+        assert data.getUserId().equalsIgnoreCase(userId);
+        assert !data.getEnabled();
+        int version = data.getVersion();
+
+        // update cluster in fat:lpt
+        mongoCluster.setEnabled(true);
+        mongoCluster.setUserId(NEW_USER_ID);
+        PluginResponse updateResponse = mongoPluginService.updateMongoCluster(mongoCluster, FAT_ENV, LPT_ENV, OPERATOR);
+        assert updateResponse != null;
+        assert updateResponse.getStatus() == 0;
+
+        // get cluster from fat:lpt
+        getResponse = mongoPluginService.getMongoCluster(clusterName, FAT_ENV, LPT_ENV);
+        assert getResponse != null;
+        assert getResponse.getStatus() == 0;
+        data = getResponse.getData();
+        assert data != null;
+        assert data.getClusterName().equalsIgnoreCase(clusterName);
+        assert data.getUserId().equalsIgnoreCase(NEW_USER_ID);
+        assert data.getEnabled();
+
+        // get client config from fat:lpt, need add vm option.
+        Utils.addLocalVmOptions();
+        String content = ConfigUtils.getMongoFileResult(clusterName);
+        assert Strings.isNotBlank(content);
+        System.out.println("---------------------------mongo cluster client config begin----------------------------");
+        System.out.println(content);
+        System.out.println("---------------------------mongo cluster client config end----------------------------");
+        MongoClusterEntity clientConfig = Utils.gson.fromJson(content, MongoClusterEntity.class);
+        assert clientConfig != null;
+        assert clientConfig.getClusterName().equalsIgnoreCase(clusterName);
+        assert clientConfig.getClusterType().equalsIgnoreCase(mongoCluster.getClusterType());
+        assert clientConfig.getDbName().equalsIgnoreCase(mongoCluster.getDbName());
+        assert clientConfig.getUserId().equalsIgnoreCase(NEW_USER_ID);
+        assert clientConfig.getPassword().equalsIgnoreCase(mongoCluster.getPassword());
+        assert clientConfig.getVersion() == version + 1;
+        assert clientConfig.getNodes() != null && !clientConfig.getNodes().isEmpty();
+        assert clientConfig.getEnabled() == true;
+        assert clientConfig.getUpdateTime() == null;
+        assert Strings.isBlank(clientConfig.getOperator());
     }
 
     private MongoClusterEntity generateMongoClusterEntity(String clusterName) {

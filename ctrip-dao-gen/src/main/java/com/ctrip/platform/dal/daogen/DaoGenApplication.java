@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen;
 
 import com.ctrip.platform.dal.daogen.hickwall.HickwallMetrics;
+import com.ctrip.platform.dal.daogen.resource.DalDynamicDSResource;
 import com.ctrip.platform.dal.daogen.resource.DalReportResource;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 
@@ -23,5 +24,8 @@ public class DaoGenApplication extends ResourceConfig {
 
         // init dal version report
         DalReportResource.initReportData();
+
+        // init dal dynamic datasource data
+        DalDynamicDSResource.initDalDynamicDS();
     }
 }

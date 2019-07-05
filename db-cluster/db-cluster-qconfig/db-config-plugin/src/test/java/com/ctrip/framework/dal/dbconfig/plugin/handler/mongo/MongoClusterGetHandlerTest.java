@@ -52,8 +52,8 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
     }
 
     @Test
-    public void testPostHandle1() {
-        EnvProfile profile = new EnvProfile(env, subEnv);
+    public void testPostHandle() {
+        EnvProfile profile = new EnvProfile(env);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
         EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName).anyTimes();
         EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
@@ -73,6 +73,27 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
     }
 
     @Test
+    public void testPostHandleSubEnv() {
+        EnvProfile profile = new EnvProfile(env, subEnv);
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
+        EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName).anyTimes();
+        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
+        EasyMock.replay(request);
+
+        PluginResult result = handler.postHandle(request);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
+
+        MongoClusterGetOutputEntity mongoCluster = (MongoClusterGetOutputEntity) result.getAttribute();
+        Assert.assertTrue(mongoCluster instanceof MongoClusterGetOutputEntity);
+
+        String data = GsonUtils.t2Json(mongoCluster);
+        System.out.println("-------------Get mongo cluster begin------------------------------");
+        System.out.println(data);
+        System.out.println("-------------Get mongo cluster end------------------------------");
+    }
+
+    //    @Test
     public void testPostHandleNotExist() {
         EnvProfile profile = new EnvProfile(env, subEnv);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
@@ -90,7 +111,7 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
         assert !isSuccess;
     }
 
-    @Test
+    //    @Test
     public void testPostHandleContentEmpty() {
         EnvProfile profile = new EnvProfile(env, subEnv);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();

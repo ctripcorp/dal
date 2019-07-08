@@ -29,6 +29,8 @@ public class TitanServerPluginTest {
     private HttpServletRequest request;
     private String titanKey = "titantest_lzyan_v_01";
     private String env = "fat";
+    private String proEnv = "pro";
+    private String awsProfile = "pro:fra-aws";
     private String privateNetIp = "10.5.156.193";
     private String publicNetIp = "10.9.253.50";
     private String qconfigAgencyIp = "1.1.1.1";
@@ -265,6 +267,52 @@ public class TitanServerPluginTest {
         sb.append("extParam=").append(returnFlag);
         sb.append("version=2").append(returnFlag);
         return sb.toString();
+    }
+
+    @Test
+    public void postHandleAwsTest() throws Exception {
+        String profile = proEnv;
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile(awsProfile)).anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();
+        EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
+        EasyMock.replay(request);   //保存期望结果
+        EasyMock.verify(request);
+
+        String groupId = TITAN_QCONFIG_KEYS_APPID;
+        String dataId = "titantest_lzyan_v_01";
+        //String profile = "fat:LPT10";
+        long version = 1L;
+        String content = buildTitanKeyContent(titanKey);
+        ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
+        WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
+        PluginResult pluginResult = titanServerPlugin.postHandle(wrappedRequest);
+        assert (pluginResult != null);
+        System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
+        assert pluginResult.getCode() != PluginStatusCode.OK;
+        System.out.println("pluginResult.message=" + pluginResult.getMessage());
+    }
+
+    @Test
+    public void postHandleLptTest() throws Exception {
+        String profile = "fat";
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile("fat:lpt")).anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();
+        EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
+        EasyMock.replay(request);   //保存期望结果
+        EasyMock.verify(request);
+
+        String groupId = TITAN_QCONFIG_KEYS_APPID;
+        String dataId = "titantest_lzyan_v_01";
+        //String profile = "fat:LPT10";
+        long version = 1L;
+        String content = buildTitanKeyContent(titanKey);
+        ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
+        WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
+        PluginResult pluginResult = titanServerPlugin.postHandle(wrappedRequest);
+        assert (pluginResult != null);
+        System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
+        assert pluginResult.getCode() != PluginStatusCode.OK;
+        System.out.println("pluginResult.message=" + pluginResult.getMessage());
     }
 
 }

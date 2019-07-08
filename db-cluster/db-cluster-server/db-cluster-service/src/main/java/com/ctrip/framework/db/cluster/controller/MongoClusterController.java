@@ -38,6 +38,7 @@ public class MongoClusterController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ResponseModel add(@RequestBody MongoCluster mongoCluster,
                              @RequestParam(name = "env", required = false) String env,
+                             @RequestParam(name = "subenv", required = false) String subEnv,
                              @RequestParam(name = "operator", required = false) String operator,
                              HttpServletRequest request) {
         try {
@@ -62,7 +63,7 @@ public class MongoClusterController {
             mongoCluster.setProdLine(null);
             mongoCluster.setContacts(null);
 
-            PluginResponse response = pluginMongoService.add(mongoCluster, env, operator);
+            PluginResponse response = pluginMongoService.add(mongoCluster, env, subEnv, operator);
             if (response.getStatus() == 0) {
                 return ResponseModel.successResponse();
             } else {
@@ -82,6 +83,7 @@ public class MongoClusterController {
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     public ResponseModel update(@RequestBody MongoCluster mongoCluster,
                                 @RequestParam(name = "env", required = false) String env,
+                                @RequestParam(name = "subenv", required = false) String subEnv,
                                 @RequestParam(name = "operator", required = false) String operator,
                                 HttpServletRequest request) {
         try {
@@ -96,7 +98,7 @@ public class MongoClusterController {
             Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clusterName为空");
             // todo:校验cluster
 
-            PluginResponse response = pluginMongoService.update(mongoCluster, env, operator);
+            PluginResponse response = pluginMongoService.update(mongoCluster, env, subEnv, operator);
             if (response.getStatus() == 0) {
                 return ResponseModel.successResponse(response.getData());
             } else {
@@ -116,6 +118,7 @@ public class MongoClusterController {
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public ResponseModel get(@RequestParam(name = "clustername", required = false) String clusterName,
                              @RequestParam(name = "env", required = false) String env,
+                             @RequestParam(name = "subenv", required = false) String subEnv,
                              HttpServletRequest request) {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername为空");
@@ -124,7 +127,7 @@ public class MongoClusterController {
                 return ResponseModel.forbiddenResponse();
             }
 
-            MongoClusterGetResponse response = pluginMongoService.get(clusterName, env);
+            MongoClusterGetResponse response = pluginMongoService.get(clusterName, env, subEnv);
             if (response.getStatus() == 0) {
                 return ResponseModel.successResponse(response.getData());
             } else {

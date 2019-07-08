@@ -3,7 +3,6 @@ package com.ctrip.framework.dal.dbconfig.plugin.util;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.Node;
-import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -148,6 +147,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("token.key=" + tokenKey).append(returnFlag);
         sb.append("cms.get.group.service.url=http://osg.ops.ctripcorp.com/api/CMSFATGetGroup/?_version=new").append(returnFlag);
         sb.append("cms.access.token=96ddbe67728bc756466a226ec050456d").append(returnFlag);
+        sb.append("no.parent.suffix=-AWS,lpt").append(returnFlag);
         return sb.toString();
     }
 

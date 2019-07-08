@@ -36,6 +36,7 @@ public class MongoClusterControllerTest {
 
     private static final String MONGO_CLUSTER_NAME = "diuserprofile-diuserprofiledb";
     private static final String FAT_ENV = "fat";
+    private static final String LPT_ENV = "lpt";
     private static final String OPERATOR = "test";
     private static final String NEW_USER_ID = "newUserId";
     // 模拟MVC对象，通过MockMvcBuilders.webAppContextSetup(this.wac).build()初始化。
@@ -74,6 +75,7 @@ public class MongoClusterControllerTest {
         MvcResult mvcResult = mockMvc.perform(post(MONGO_CLUSTER_ADD_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("env", FAT_ENV)
+                .param("subenv", LPT_ENV)
                 .param("operator", OPERATOR)
                 .content(JSON.toJSONString(mongoCluster)))
                 .andReturn();
@@ -86,7 +88,8 @@ public class MongoClusterControllerTest {
         MvcResult getMvcResult = mockMvc.perform(get(MONGO_CLUSTER_GET_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("clustername", clusterName)
-                .param("env", FAT_ENV))
+                .param("env", FAT_ENV)
+                .param("subenv", LPT_ENV))
                 .andReturn();
 
         result = getMvcResult.getResponse().getContentAsString();
@@ -110,6 +113,7 @@ public class MongoClusterControllerTest {
         mvcResult = mockMvc.perform(post(MONGO_CLUSTER_UPDATE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("env", FAT_ENV)
+                .param("subenv", LPT_ENV)
                 .param("operator", OPERATOR)
                 .content(JSON.toJSONString(mongoCluster)))
                 .andReturn();
@@ -122,7 +126,8 @@ public class MongoClusterControllerTest {
         getMvcResult = mockMvc.perform(get(MONGO_CLUSTER_GET_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("clustername", clusterName)
-                .param("env", FAT_ENV))
+                .param("env", FAT_ENV)
+                .param("subenv", LPT_ENV))
                 .andReturn();
 
         result = getMvcResult.getResponse().getContentAsString();

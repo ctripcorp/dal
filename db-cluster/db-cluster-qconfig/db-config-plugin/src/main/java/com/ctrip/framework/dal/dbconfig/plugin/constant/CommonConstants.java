@@ -35,4 +35,7 @@ public interface CommonConstants {
     String CMS_GET_APP_URL = "cms.get.app.url";
     String APPID_IP_CHECK_BATCH_FETCH_COUNT = "appId.ip.check.batch.fetch.count";
 
+    String HTTP_WHITE_LIST = "http.white.list";
+    String TOKEN_KEY = "token.key";
+
 }

@@ -4,12 +4,16 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
 import com.ctrip.platform.dal.daogen.entity.AppIDInfo;
+import com.ctrip.platform.dal.daogen.entity.DynamicDSDataDto;
+import com.ctrip.platform.dal.daogen.entity.SwitchHostIPInfo;
 import com.ctrip.platform.dal.daogen.entity.TriggerMethod;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +47,41 @@ public class DalDynamicDSResource {
 
     }
 
-    @POST
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("executeCheckDynamicDS")
-    public Map<String, List<AppIDInfo>> executeCheckDynamicDS(@QueryParam("checkTime") Date checkTime) {
+    public List<DynamicDSDataDto> executeCheckDynamicDS() throws Exception{
+        List<DynamicDSDataDto> dynamicDSDataList = new ArrayList<>();
         Env envEntity = Foundation.server().getEnv();
         String env = envEntity.name().toLowerCase();
+        Date checkTime = new Date();
+//        SimpleDateFormat sdf =   new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+//        Date checkTime = sdf.parse("2019-07-08 12:23:00");
         dalDynamicDSDao.checkSwitchDataSource(env, checkTime, TriggerMethod.MANUAL);
-        return null;
+        for (Map.Entry<String, List<AppIDInfo>> titanKeyData: dalDynamicDSDao.getTitanKeyAppIDMap().entrySet()) {
+            DynamicDSDataDto dynamicDSData = new DynamicDSDataDto();
+            String appIds  = "";
+            String hostIps = "";
+            String successCount = "";
+            String switchCount = "";
+            for (AppIDInfo appIDInfo : titanKeyData.getValue()) {
+                appIds += appIDInfo.getAppID() + "<br/>";
+                for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
+                    hostIps += switchHostIPInfo.getHostIP() + "<br/>";
+                    switchCount += switchHostIPInfo.getStartSwitchPoint().size() + "<br/>";
+                    successCount += switchHostIPInfo.getEndSwitchPoint().size() + "<br/>";
+                }
+                hostIps += "<br/>";
+                switchCount += "<br/>";
+                successCount += "<br/>";
+            }
+            dynamicDSData.setTitanKey(titanKeyData.getKey());
+            dynamicDSData.setAppIds(appIds);
+            dynamicDSData.setHostIps(hostIps);
+            dynamicDSData.setSuccessCount(successCount);
+            dynamicDSData.setSwitchCount(switchCount);
+            dynamicDSDataList.add(dynamicDSData);
+        }
+        return dynamicDSDataList;
     }
 }

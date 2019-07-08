@@ -15,7 +15,16 @@
 <html lang="zh-CN">
 
 <head>
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Ctrip DAO Generator</title>
+    <link href="/static/images/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+    <link href="/static/bootstrap/css/bootstrap.min.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css?codegen=${version}" rel="stylesheet">
+    <link href="/static/css/loading.css?codegen=${version}" rel="stylesheet">
 </head>
 <body>
     <ul class="nav nav-tabs" role="tablist">
@@ -27,7 +36,9 @@
         <div role="tabpanel" class="tab-pane active" id="dynamicDS">
             <div class="panel">
                 <div class="panel-heading">
-                    <div id="divLoading" class="ld ld-ring ld-cycle"></div>
+                    <div id="viewLatestOneHourData">
+                        <button id="viewButton" class="label label-success span-margin cursor font-size">查看近1h切换数据</button>
+                    </div>
                     <div class="panel-body">
                         <div id="divTable" class="display-none">
                             <p class="bg-success padding-left-right">
@@ -60,7 +71,7 @@
     </div>
     <script src="/static/jquery/jquery-1.10.2.min.js?codegen=${version}"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js?codegen=${version}"></script>
-    <script src="/static/js/report.js?codegen=${version}"></script>
+    <script src="/static/js/DynamicDS.js?codegen=${version}"></script>
     <script src="/static/js/echarts.min.js?codegen=${version}"></script>
     <script src="/static/js/sprintf.js?codegen=${version}"></script>
 </body>

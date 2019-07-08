@@ -60,11 +60,12 @@ public class DalDynamicDSDao {
     }
 
     public void checkSwitchDataSource(String env, Date checkTime, TriggerMethod method) {
-        Set<String> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTime);
-        if (TitanKeys == null || TitanKeys.size() == 0) {
-            return;
-        }
+        Set<String> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTime, env);
+
         try {
+            if (TitanKeys == null || TitanKeys.size() == 0) {
+                return;
+            }
             initSwitchTitanKeyAndAppID(TitanKeys, env, checkTime, method);
 
         } catch (Exception e) {
@@ -74,6 +75,7 @@ public class DalDynamicDSDao {
 
     private synchronized void initSwitchTitanKeyAndAppID(Set<String> TitanKeys, String env, Date checkTime, TriggerMethod method) {
         List<TitanKeyInfo> TitanKeyInfoList = null;
+        TitanKeyAppIDMap.clear();
         try {
             TitanKeyInfoList = getTitanKeyInfo(TitanKeys, env);
             for (TitanKeyInfo titanKeyInfo : TitanKeyInfoList) {
@@ -81,7 +83,7 @@ public class DalDynamicDSDao {
                 List<AppIDInfo> switchAppIDList = new ArrayList<>();
                 for (String appID : appIDList) {
                     List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
-                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(appID, checkTime, hostIPList);
+                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(titanKeyInfo.getKeyName(), appID, checkTime, hostIPList, env);
                     if (isSwitch) {
                         AppIDInfo appIDInfo = new AppIDInfo();
                         appIDInfo.setAppID(appID);
@@ -105,7 +107,7 @@ public class DalDynamicDSDao {
             for (int i = 0; i < RETRY_TIME; ++i) {
                 TitanResponse response = HttpUtil.getJSONEntity(TitanResponse.class, titanUrl, null, HttpMethod.HttpGet);
                 if (response.getStatus() == 0) {
-                    TitanKeyInfoList.add(response.getTitanKeyInfo());
+                    TitanKeyInfoList.add(response.getData());
                     break;
                 }
             }

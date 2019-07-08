@@ -17,17 +17,27 @@ import java.util.*;
  * Created by taochen on 2019/7/3.
  */
 public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
-    private static final String CAT_TRANSACTION_URL =
+    private static final String CAT_TRANSACTION_URL_PRO =
             "http://cat.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
-    private static final String CAT_EVENT_TITAN_UPDATE =
+    private static final String CAT_EVENT_TITAN_UPDATE_PRO =
             "http://cat.ctripcorp.com/cat/r/e?domain=100005701&ip=All&date=%s&reportType=day&op=view&group=SHAJQ&type=%s&forceDownload=json";
 
-    private static final String DAL_CONFIG_TRANSACTION_TYPE = "DAL.configure";
-//    private static final String DAL_CONFIG_TRANSACTION_TYPE = "SQL.task";
+    private static final String CAT_TRANSACTION_URL_UAT =
+            "http://cat.uat.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
-    private static final String DAL_CONFIG_TRANSACTION_DS_NAME = "DataSourceConfig::refreshDataSourceConfig%s";
-//    private static final String DAL_CONFIG_TRANSACTION_DS_NAME = "GetShardingDataSetList,Shard:3";
+    private static final String CAT_EVENT_TITAN_UPDATE_UAT =
+            "http://cat.uat.qa.nt.ctripcorp.com/cat/r/e?domain=100005701&ip=All&date=%s&reportType=day&op=view&group=SHAJQ&type=%s&forceDownload=json";
+
+    private static final String CAT_TRANSACTION_URL_FAT =
+            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
+
+    private static final String CAT_EVENT_TITAN_UPDATE_FAT =
+            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?domain=100005701&ip=All&date=%s&reportType=day&op=view&group=SHAJQ&type=%s&forceDownload=json";
+
+    private static final String DAL_CONFIG_TRANSACTION_TYPE = "DAL.configure";
+
+    private static final String DAL_CONFIG_TRANSACTION_DS_NAME = "DataSourceConfig::refreshDataSourceConfig:%s";
 
     private static final String DAL_DATASOURCE_TRANSACTION_TYPE = "DAL.dataSource";
 
@@ -38,21 +48,21 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     private static final String ALL_IP = "All";
 
     @Override
-    public boolean isSwitchInAppID(String appID, Date checkTime, List<SwitchHostIPInfo> hostIPList) {
+    public boolean isSwitchInAppID(String titanKey, String appID, Date checkTime, List<SwitchHostIPInfo> hostIPList, String env) {
         List<String> ips = new ArrayList<>();
         String beforeDate = getBeforeOneHourDateString(checkTime);
         String nowDate = getNowDateString(checkTime);
-        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(appID, beforeDate, ips);
+        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, beforeDate, ips, env);
         if (!isAppSwitch) {
             //可能跨小时
-            isAppSwitch = checkAppRefreshDataSourceTransaction(appID, nowDate, ips);
+            isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, nowDate, ips, env);
         }
         if (isAppSwitch) {
             for (String ip : ips) {
-                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(appID, ip, beforeDate);
+                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, beforeDate, env);
                 if (switchHostIPInfo == null) {
                     //可能跨小时
-                    switchHostIPInfo = checkIpRefreshDataSourceTransaction(appID, ip, nowDate);
+                    switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, nowDate, env);
                 }
                 if (switchHostIPInfo != null) {
                     hostIPList.add(switchHostIPInfo);
@@ -63,22 +73,30 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     }
 
     @Override
-    public Set<String> getSwitchTitanKey(Date checkTime) {
+    public Set<String> getSwitchTitanKey(Date checkTime, String env) {
         Set<String> titanKeys = new HashSet<>();
         String beforeDate = getBeforeOneHourDateString(checkTime);
-        String url = String.format(CAT_EVENT_TITAN_UPDATE, beforeDate, DAL_TITAN_UPDATE_TYPE);
+        String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_EVENT_TITAN_UPDATE_FAT : "UAT".equalsIgnoreCase(env) ?
+                CAT_EVENT_TITAN_UPDATE_UAT : CAT_EVENT_TITAN_UPDATE_PRO;
+        String url = String.format(formatUrl, beforeDate, DAL_TITAN_UPDATE_TYPE);
         CatTransactionEntity catTransactionEntity = null;
         try {
             catTransactionEntity =  HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
         } catch (Exception e) {
             Cat.logError("get switch titan key fail.", e);
         }
-        CatTransactionReport configReport = catTransactionEntity.getReport();
-        Object types = parseCatTransactionReportTypes(configReport, ALL_IP);
+        CatTransactionReport configReport = null;
+        if (catTransactionEntity != null) {
+            configReport = catTransactionEntity.getReport();
+        }
+        Object types = null;
+        if (configReport != null) {
+            types = parseCatTransactionReportTypes(configReport, ALL_IP);
+        }
         if (types == null) {
             return null;
         }
-        Object namesObject = parseCatTransactionReportNames(configReport, DAL_CONFIG_TRANSACTION_TYPE, ALL_IP);
+        Object namesObject = parseCatTransactionReportNames(configReport, ALL_IP, DAL_TITAN_UPDATE_TYPE);
         if (namesObject != null) {
             JSONObject namesJsonObject = JSON.parseObject(namesObject.toString());
             for (Object key : namesJsonObject.keySet()) {
@@ -107,16 +125,24 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         return dateString.substring(0, dateString.indexOf(":"));
     }
 
-    public boolean checkAppRefreshDataSourceTransaction(String appID, String date, List<String> ips) {
-        String url = String.format(CAT_TRANSACTION_URL, appID, date, ALL_IP, DAL_CONFIG_TRANSACTION_TYPE, DAL_CONFIG_TRANSACTION_DS_NAME);
+    public boolean checkAppRefreshDataSourceTransaction(String titanKey, String appID, String date, List<String> ips, String env) {
+        String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_TRANSACTION_URL_FAT : "UAT".equalsIgnoreCase(env) ?
+                CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
+        String url = String.format(formatUrl, appID, date, ALL_IP, DAL_CONFIG_TRANSACTION_TYPE, String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
         try {
             catTransactionEntity =  HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
         } catch (Exception e) {
             Cat.logError("check appid:" + appID + "Refresh DataSource fail.", e);
         }
-        CatTransactionReport configReport = catTransactionEntity.getReport();
-        Object names = parseCatTransactionReportNames(configReport, ALL_IP, DAL_CONFIG_TRANSACTION_TYPE);
+        CatTransactionReport configReport = null;
+        if (catTransactionEntity != null) {
+            configReport = catTransactionEntity.getReport();
+        }
+        Object names = null;
+        if (configReport != null) {
+            names = parseCatTransactionReportNames(configReport, ALL_IP, DAL_CONFIG_TRANSACTION_TYPE);
+        }
         if (names == null) {
             return false;
         }
@@ -124,19 +150,27 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         return true;
     }
 
-    public SwitchHostIPInfo checkIpRefreshDataSourceTransaction(String appID, String ip, String date) {
-        String url = String.format(CAT_TRANSACTION_URL, appID, date, ip, DAL_CONFIG_TRANSACTION_TYPE, DAL_CONFIG_TRANSACTION_DS_NAME);
+    public SwitchHostIPInfo checkIpRefreshDataSourceTransaction(String titanKey, String appID, String ip, String date, String env) {
+        String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_TRANSACTION_URL_FAT : "UAT".equalsIgnoreCase(env) ?
+                CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
+        String url = String.format(formatUrl, appID, date, ip, DAL_CONFIG_TRANSACTION_TYPE, String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
         try {
             catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
         } catch (Exception e) {
             Cat.logError("check appid:" + appID + " ip:" + ip + "Refresh DataSource fail.", e);
         }
-        CatTransactionReport configReport = catTransactionEntity.getReport();
-        Object names = parseCatTransactionReportNames(configReport, ip, DAL_CONFIG_TRANSACTION_TYPE);
+        CatTransactionReport configReport = null;
+        if (catTransactionEntity != null) {
+            configReport = catTransactionEntity.getReport();
+        }
+        Object names = null;
+        if (configReport != null) {
+            names = parseCatTransactionReportNames(configReport, ip, DAL_CONFIG_TRANSACTION_TYPE);
+        }
         if (names != null) {
             Map<Integer, Integer> startSwitchPoint = new HashMap<>();
-            List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), DAL_CONFIG_TRANSACTION_DS_NAME);
+            List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
             for (TransactionNameRange range : ranges) {
                 if (range.getCount() != 0) {
                     startSwitchPoint.put(range.getValue(), range.getCount());
@@ -145,15 +179,17 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
             SwitchHostIPInfo switchHostIPInfo = new SwitchHostIPInfo();
             switchHostIPInfo.setHostIP(ip);
             switchHostIPInfo.setStartSwitchPoint(startSwitchPoint);
-            Map<Integer, Integer> endSwitchPoint = getEndSwitchHostIPPoint(appID, ip, date);
+            Map<Integer, Integer> endSwitchPoint = getEndSwitchHostIPPoint(titanKey, appID, ip, date, env);
             switchHostIPInfo.setEndSwitchPoint(endSwitchPoint);
             return switchHostIPInfo;
         }
         return null;
     }
 
-    private Map<Integer, Integer> getEndSwitchHostIPPoint(String appID, String ip, String date) {
-        String url = String.format(CAT_TRANSACTION_URL, appID, date, ip, DAL_DATASOURCE_TRANSACTION_TYPE, DAL_DATASOURCE_TRANSACTION_NAME);
+    private Map<Integer, Integer> getEndSwitchHostIPPoint(String titanKey, String appID, String ip, String date, String env) {
+        String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_TRANSACTION_URL_FAT : "UAT".equalsIgnoreCase(env) ?
+                CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
+        String url = String.format(formatUrl, appID, date, ip, DAL_DATASOURCE_TRANSACTION_TYPE, String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
         try {
             catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
@@ -163,7 +199,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         Object names = parseCatTransactionReportNames(catTransactionEntity.getReport(), ip, DAL_DATASOURCE_TRANSACTION_TYPE);
         if (names != null) {
             Map<Integer, Integer> endSwitchPoint = new HashMap<>();
-            List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), DAL_DATASOURCE_TRANSACTION_NAME);
+            List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));
             for (TransactionNameRange range : ranges) {
                 if (range.getCount() != 0) {
                     endSwitchPoint.put(range.getValue(), range.getCount());
@@ -176,6 +212,9 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
 
     private Object parseCatTransactionReportNames(CatTransactionReport configReport, String ip, String transactionType) {
         Object types = parseCatTransactionReportTypes(configReport, ip);
+        if (types == null) {
+            return null;
+        }
         JSONObject typesJSONObject = JSON.parseObject(types.toString());
         String  transactionTypeStr = typesJSONObject.getString(transactionType);
         JSONObject nameObject = JSON.parseObject(transactionTypeStr);

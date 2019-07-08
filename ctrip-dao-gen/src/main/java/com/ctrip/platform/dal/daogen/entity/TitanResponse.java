@@ -8,7 +8,7 @@ public class TitanResponse {
 
     private String message;
 
-    private TitanKeyInfo titanKeyInfo;
+    private TitanKeyInfo data;
 
     public int getStatus() {
         return status;
@@ -26,11 +26,11 @@ public class TitanResponse {
         this.message = message;
     }
 
-    public TitanKeyInfo getTitanKeyInfo() {
-        return titanKeyInfo;
+    public TitanKeyInfo getData() {
+        return data;
     }
 
-    public void setTitanKeyInfo(TitanKeyInfo titanKeyInfo) {
-        this.titanKeyInfo = titanKeyInfo;
+    public void setData(TitanKeyInfo data) {
+        this.data = data;
     }
 }

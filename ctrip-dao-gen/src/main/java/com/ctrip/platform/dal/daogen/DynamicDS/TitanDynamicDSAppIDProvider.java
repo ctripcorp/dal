@@ -4,9 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.platform.dal.daogen.entity.TitanKeyInfo;
 import qunar.tc.qconfig.client.MapConfig;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by taochen on 2019/7/3.
@@ -22,10 +20,13 @@ public class TitanDynamicDSAppIDProvider implements DynamicDSAppIDProvider {
 
     @Override
     public List<String> getDynamicDSAppID(TitanKeyInfo titanKeyInfo) {
+        List<String> permissionAppIDList = new ArrayList<>();
         String appIDString = titanKeyInfo.getPermissions();
-        List<String> appIDList = JSON.parseArray(appIDString, String.class);
-        appIDList.addAll(getGlobalPermissionAppID());
-        return appIDList;
+        List<String> appIDList = Arrays.asList(appIDString.split(","));
+        List<String> globalPermissionAppID = getGlobalPermissionAppID();
+        permissionAppIDList.addAll(appIDList);
+        permissionAppIDList.addAll(globalPermissionAppID);
+        return permissionAppIDList;
     }
 
     private List<String> getGlobalPermissionAppID() {

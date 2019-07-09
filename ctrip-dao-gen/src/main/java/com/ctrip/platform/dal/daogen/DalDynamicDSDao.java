@@ -31,7 +31,7 @@ public class DalDynamicDSDao {
 
     private static DalDynamicDSDao dynamicDSDao = null;
 
-    private Map<String, List<AppIDInfo>> TitanKeyAppIDMap = new HashMap<>();
+    private Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap = new HashMap<>();
 
     private DynamicDSAppIDProvider dynamicDSAppIDProvider = new TitanDynamicDSAppIDProvider();
 
@@ -60,7 +60,7 @@ public class DalDynamicDSDao {
     }
 
     public void checkSwitchDataSource(String env, Date checkTime, TriggerMethod method) {
-        Set<String> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTime, env);
+        Set<SwitchTitanKey> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTime, env);
 
         try {
             if (TitanKeys == null || TitanKeys.size() == 0) {
@@ -73,8 +73,9 @@ public class DalDynamicDSDao {
         }
     }
 
-    private synchronized void initSwitchTitanKeyAndAppID(Set<String> TitanKeys, String env, Date checkTime, TriggerMethod method) {
+    private synchronized void initSwitchTitanKeyAndAppID(Set<SwitchTitanKey> TitanKeys, String env, Date checkTime, TriggerMethod method) {
         List<TitanKeyInfo> TitanKeyInfoList = null;
+        Map<String, List<AppIDInfo>> tempTitanKeyAppIDMap = new HashMap<>();
         TitanKeyAppIDMap.clear();
         try {
             TitanKeyInfoList = getTitanKeyInfo(TitanKeys, env);
@@ -92,18 +93,21 @@ public class DalDynamicDSDao {
                     }
                 }
                 if (TriggerMethod.MANUAL.equals(method)) {
-                    TitanKeyAppIDMap.put(titanKeyInfo.getKeyName(), switchAppIDList);
+                    tempTitanKeyAppIDMap.put(titanKeyInfo.getKeyName(), switchAppIDList);
                 }
+            }
+            for (SwitchTitanKey switchTitanKey : TitanKeys) {
+                TitanKeyAppIDMap.put(switchTitanKey, tempTitanKeyAppIDMap.get(switchTitanKey.getTitanKey()));
             }
         } catch (Exception e) {
             Cat.logError("get titanKey config failed from qconfig.", e);
         }
     }
 
-    private List<TitanKeyInfo> getTitanKeyInfo(Set<String> TitanKeys, String env) throws Exception {
+    private List<TitanKeyInfo> getTitanKeyInfo(Set<SwitchTitanKey> TitanKeys, String env) throws Exception {
         List<TitanKeyInfo> TitanKeyInfoList = new ArrayList<>();
-        for (String titanKey : TitanKeys) {
-            String titanUrl = String.format(TITAN_KEY_GET, TITANKEY_APPID, titanKey, env);
+        for (SwitchTitanKey titanKey : TitanKeys) {
+            String titanUrl = String.format(TITAN_KEY_GET, TITANKEY_APPID, titanKey.getTitanKey(), env);
             for (int i = 0; i < RETRY_TIME; ++i) {
                 TitanResponse response = HttpUtil.getJSONEntity(TitanResponse.class, titanUrl, null, HttpMethod.HttpGet);
                 if (response.getStatus() == 0) {
@@ -125,11 +129,11 @@ public class DalDynamicDSDao {
         return initDelay;
     }
 
-    public Map<String, List<AppIDInfo>> getTitanKeyAppIDMap() {
+    public Map<SwitchTitanKey, List<AppIDInfo>> getTitanKeyAppIDMap() {
         return TitanKeyAppIDMap;
     }
 
-    public void setTitanKeyAppIDMap(Map<String, List<AppIDInfo>> titanKeyAppIDMap) {
+    public void setTitanKeyAppIDMap(Map<SwitchTitanKey, List<AppIDInfo>> titanKeyAppIDMap) {
         TitanKeyAppIDMap = titanKeyAppIDMap;
     }
 }

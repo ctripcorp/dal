@@ -2,10 +2,7 @@ package com.ctrip.platform.dal.daogen.DynamicDS;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.ctrip.platform.dal.daogen.entity.CatTransactionEntity;
-import com.ctrip.platform.dal.daogen.entity.CatTransactionReport;
-import com.ctrip.platform.dal.daogen.entity.SwitchHostIPInfo;
-import com.ctrip.platform.dal.daogen.entity.TransactionNameRange;
+import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
@@ -21,19 +18,19 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
             "http://cat.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
     private static final String CAT_EVENT_TITAN_UPDATE_PRO =
-            "http://cat.ctripcorp.com/cat/r/e?domain=100005701&ip=All&date=%s&reportType=day&op=view&group=SHAJQ&type=%s&forceDownload=json";
+            "http://cat.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
     private static final String CAT_TRANSACTION_URL_UAT =
             "http://cat.uat.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
     private static final String CAT_EVENT_TITAN_UPDATE_UAT =
-            "http://cat.uat.qa.nt.ctripcorp.com/cat/r/e?domain=100005701&ip=All&date=%s&reportType=day&op=view&group=SHAJQ&type=%s&forceDownload=json";
+            "http://cat.uat.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
     private static final String CAT_TRANSACTION_URL_FAT =
             "http://cat.fws.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
     private static final String CAT_EVENT_TITAN_UPDATE_FAT =
-            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?domain=100005701&ip=All&date=%s&reportType=day&op=view&group=SHAJQ&type=%s&forceDownload=json";
+            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
     private static final String DAL_CONFIG_TRANSACTION_TYPE = "DAL.configure";
 
@@ -73,8 +70,8 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     }
 
     @Override
-    public Set<String> getSwitchTitanKey(Date checkTime, String env) {
-        Set<String> titanKeys = new HashSet<>();
+    public Set<SwitchTitanKey> getSwitchTitanKey(Date checkTime, String env) {
+        Set<SwitchTitanKey> titanKeys = new HashSet<>();
         String beforeDate = getBeforeOneHourDateString(checkTime);
         String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_EVENT_TITAN_UPDATE_FAT : "UAT".equalsIgnoreCase(env) ?
                 CAT_EVENT_TITAN_UPDATE_UAT : CAT_EVENT_TITAN_UPDATE_PRO;
@@ -100,7 +97,21 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         if (namesObject != null) {
             JSONObject namesJsonObject = JSON.parseObject(namesObject.toString());
             for (Object key : namesJsonObject.keySet()) {
-                titanKeys.add(key.toString());
+                if ("All".equalsIgnoreCase(key.toString())) {
+                    continue;
+                }
+                JSONObject switchTitanKeyObject = JSON.parseObject(namesJsonObject.get(key).toString());
+                List<TransactionNameRange> ranges = JSON.parseArray(switchTitanKeyObject.getString("ranges"), TransactionNameRange.class);
+                SwitchTitanKey switchTitanKey = new SwitchTitanKey();
+                switchTitanKey.setTitanKey(key.toString());
+                Map<Integer, Integer> switchCount = new HashMap<>();
+                for (TransactionNameRange range : ranges) {
+                    if (range.getCount() != 0) {
+                        switchCount.put(range.getValue(), range.getCount());
+                    }
+                }
+                switchTitanKey.setSwitchCount(switchCount);
+                titanKeys.add(switchTitanKey);
             }
             return titanKeys;
         }
@@ -196,7 +207,10 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         } catch (Exception e) {
             Cat.logError("get appid:" + appID + " ip:" + ip + "Switch HostIP Info fail.", e);
         }
-        Object names = parseCatTransactionReportNames(catTransactionEntity.getReport(), ip, DAL_DATASOURCE_TRANSACTION_TYPE);
+        Object names = null;
+        if (catTransactionEntity != null) {
+            names = parseCatTransactionReportNames(catTransactionEntity.getReport(), ip, DAL_DATASOURCE_TRANSACTION_TYPE);
+        }
         if (names != null) {
             Map<Integer, Integer> endSwitchPoint = new HashMap<>();
             List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));

@@ -3,10 +3,7 @@ package com.ctrip.platform.dal.daogen.resource;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
-import com.ctrip.platform.dal.daogen.entity.AppIDInfo;
-import com.ctrip.platform.dal.daogen.entity.DynamicDSDataDto;
-import com.ctrip.platform.dal.daogen.entity.SwitchHostIPInfo;
-import com.ctrip.platform.dal.daogen.entity.TriggerMethod;
+import com.ctrip.platform.dal.daogen.entity.*;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -50,36 +47,37 @@ public class DalDynamicDSResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("executeCheckDynamicDS")
-    public List<DynamicDSDataDto> executeCheckDynamicDS() throws Exception{
+    public List<DynamicDSDataDto> executeCheckDynamicDS(@QueryParam("settingDate") String settingDate) throws Exception{
         List<DynamicDSDataDto> dynamicDSDataList = new ArrayList<>();
         Env envEntity = Foundation.server().getEnv();
         String env = envEntity.name().toLowerCase();
-        Date checkTime = new Date();
-//        SimpleDateFormat sdf =   new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
-//        Date checkTime = sdf.parse("2019-07-08 12:23:00");
+        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
+        Date checkTime = sdf.parse(settingDate.replace('T', ' '));
         dalDynamicDSDao.checkSwitchDataSource(env, checkTime, TriggerMethod.MANUAL);
-        for (Map.Entry<String, List<AppIDInfo>> titanKeyData: dalDynamicDSDao.getTitanKeyAppIDMap().entrySet()) {
+        for (Map.Entry<SwitchTitanKey, List<AppIDInfo>> titanKeyData: dalDynamicDSDao.getTitanKeyAppIDMap().entrySet()) {
             DynamicDSDataDto dynamicDSData = new DynamicDSDataDto();
             String appIds  = "";
             String hostIps = "";
-            String successCount = "";
-            String switchCount = "";
+            String hostSuccessCount = "";
+            String hostSwitchCount = "";
+            String titanKeySwitchCount = titanKeyData.getKey().getSwitchCount().size() + "<br/>";
             for (AppIDInfo appIDInfo : titanKeyData.getValue()) {
                 appIds += appIDInfo.getAppID() + "<br/>";
                 for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
                     hostIps += switchHostIPInfo.getHostIP() + "<br/>";
-                    switchCount += switchHostIPInfo.getStartSwitchPoint().size() + "<br/>";
-                    successCount += switchHostIPInfo.getEndSwitchPoint().size() + "<br/>";
+                    hostSwitchCount += switchHostIPInfo.getStartSwitchPoint().size() + "<br/>";
+                    hostSuccessCount += switchHostIPInfo.getEndSwitchPoint().size() + "<br/>";
                 }
                 hostIps += "<br/>";
-                switchCount += "<br/>";
-                successCount += "<br/>";
+                hostSwitchCount += "<br/>";
+                hostSuccessCount += "<br/>";
             }
-            dynamicDSData.setTitanKey(titanKeyData.getKey());
+            dynamicDSData.setTitanKey(titanKeyData.getKey().getTitanKey());
             dynamicDSData.setAppIds(appIds);
             dynamicDSData.setHostIps(hostIps);
-            dynamicDSData.setSuccessCount(successCount);
-            dynamicDSData.setSwitchCount(switchCount);
+            dynamicDSData.setHostSuccessCount(hostSuccessCount);
+            dynamicDSData.setHostSwitchCount(hostSwitchCount);
+            dynamicDSData.setTitanKeySwitchCount(titanKeySwitchCount);
             dynamicDSDataList.add(dynamicDSData);
         }
         return dynamicDSDataList;

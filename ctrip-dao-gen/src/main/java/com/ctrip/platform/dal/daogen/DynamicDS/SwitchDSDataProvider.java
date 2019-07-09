@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.DynamicDS;
 
 import com.ctrip.platform.dal.daogen.entity.SwitchHostIPInfo;
+import com.ctrip.platform.dal.daogen.entity.SwitchTitanKey;
 
 import java.util.Date;
 import java.util.List;
@@ -12,5 +13,5 @@ import java.util.Set;
 public interface SwitchDSDataProvider {
     public boolean isSwitchInAppID(String titanKey, String appID, Date checkTime, List<SwitchHostIPInfo> hostIPList, String env);
 
-    public Set<String> getSwitchTitanKey(Date checkTime, String env);
+    public Set<SwitchTitanKey> getSwitchTitanKey(Date checkTime, String env);
 }

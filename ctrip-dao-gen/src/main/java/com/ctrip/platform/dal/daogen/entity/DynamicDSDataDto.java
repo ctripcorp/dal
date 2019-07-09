@@ -6,13 +6,15 @@ package com.ctrip.platform.dal.daogen.entity;
 public class DynamicDSDataDto {
     private String titanKey;
 
+    private String titanKeySwitchCount;
+
     private String appIds;
 
     private String hostIps;
 
-    private String switchCount;
+    private String hostSwitchCount;
 
-    private String successCount;
+    private String hostSuccessCount;
 
     public String getTitanKey() {
         return titanKey;
@@ -38,19 +40,27 @@ public class DynamicDSDataDto {
         this.hostIps = hostIps;
     }
 
-    public String getSwitchCount() {
-        return switchCount;
+    public String getTitanKeySwitchCount() {
+        return titanKeySwitchCount;
     }
 
-    public void setSwitchCount(String switchCount) {
-        this.switchCount = switchCount;
+    public void setTitanKeySwitchCount(String titanKeySwitchCount) {
+        this.titanKeySwitchCount = titanKeySwitchCount;
     }
 
-    public String getSuccessCount() {
-        return successCount;
+    public String getHostSwitchCount() {
+        return hostSwitchCount;
     }
 
-    public void setSuccessCount(String successCount) {
-        this.successCount = successCount;
+    public void setHostSwitchCount(String hostSwitchCount) {
+        this.hostSwitchCount = hostSwitchCount;
+    }
+
+    public String getHostSuccessCount() {
+        return hostSuccessCount;
+    }
+
+    public void setHostSuccessCount(String hostSuccessCount) {
+        this.hostSuccessCount = hostSuccessCount;
     }
 }

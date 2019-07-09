@@ -36,8 +36,9 @@
         <div role="tabpanel" class="tab-pane active" id="dynamicDS">
             <div class="panel">
                 <div class="panel-heading">
-                    <div id="viewLatestOneHourData">
-                        <button id="viewButton" class="label label-success span-margin cursor font-size">查看近1h切换数据</button>
+                    <div id="viewLatestOneHourData" >
+                        <input type="datetime-local" id="settingDate" style="padding-left: 20px"/>
+                        <button id="viewButton" class="font-size">查看前1h切换数据</button>
                     </div>
                     <div class="panel-body">
                         <div id="divTable" class="display-none">
@@ -50,14 +51,15 @@
                                     <thead>
                                     <tr>
                                         <th id="">TitanKey</th>
+                                        <th>TitanKey SwitchCount</th>
                                         <th>App Ids</th>
                                         <th>Host IPs</th>
                                         <%--<th>Related modules</th>--%>
                                         <%--<th>Key Point</th>--%>
                                         <%--<th>Start Time</th>--%>
                                         <%--<th>End Time</th>--%>
-                                        <th>Switch Count</th>
-                                        <th>Success Count</th>
+                                        <th>Host SwitchCount</th>
+                                        <th>Host Success Count</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>

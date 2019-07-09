@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.application.fireman;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.framework.fireman.spi.FiremanDependency;
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import com.ctrip.platform.dal.dao.datasource.ForceSwitchableDataSource;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -15,7 +16,7 @@ public class DalFiremanDependency implements FiremanDependency {
     @Override
     public List<String> getAppIds() {
         List<String> appIds = new ArrayList<>();
-        appIds.add("100015050");
+        appIds.add(Foundation.app().getAppId());
         return appIds;
     }
 

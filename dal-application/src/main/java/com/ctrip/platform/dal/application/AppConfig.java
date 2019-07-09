@@ -3,14 +3,12 @@ package com.ctrip.platform.dal.application;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
 import com.ctrip.platform.dal.application.service.DALService;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.sql.SQLException;
 
 
 @Configuration
-@ComponentScan({"com.ctrip.framework.fireman"})
 public class AppConfig {
 
   @Bean

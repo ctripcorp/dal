@@ -12,6 +12,7 @@ import java.util.List;
 
 public class DalFiremanDependency implements FiremanDependency {
     private static final String KEY_NAME = "DalService2DB_W";
+    private ConnectionStringParser parser = ConnectionStringParser.getInstance();
 
     @Override
     public List<String> getAppIds() {
@@ -22,11 +23,8 @@ public class DalFiremanDependency implements FiremanDependency {
 
     @Override
     public String getDatabaseDomainName() {
-        ForceSwitchableDataSource dataSource = getDataSource();
-        String domainConnectionString = dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionString().getDomainConnectionString();
-        String domain = new ConnectionStringParser().parse(KEY_NAME, domainConnectionString).getHostName();
-        Integer port = dataSource.getStatus().getPort();
-        return String.format("%s:%d", domain, port);
+        String domainConnectionString = getDataSource().getSingleDataSource().getDataSourceConfigure().getConnectionString().getDomainConnectionString();
+        return parser.parse(KEY_NAME, domainConnectionString).getHostName();
     }
 
     @Override

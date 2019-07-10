@@ -21,16 +21,16 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
+            <!--<dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-dal-client</artifactId>
-                <version>1.17.5</version>
+                <version>1.17.4</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
-                <version>1.17.5</version>
-            </dependency>
+                <version>1.17.4</version>
+            </dependency>-->
             <dependency>
                 <groupId>com.ctrip.framework.fireman</groupId>
                 <artifactId>fireman</artifactId>
@@ -39,14 +39,7 @@
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
-                <version>3.3.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.spring.platform</groupId>
-                <artifactId>platform-bom</artifactId>
-                <version>2.0.8.RELEASE</version>
+                <version>3.22.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -54,6 +47,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>1.4.3.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

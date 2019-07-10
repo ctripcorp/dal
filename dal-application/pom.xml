@@ -34,7 +34,7 @@
             <dependency>
                 <groupId>com.ctrip.framework.fireman</groupId>
                 <artifactId>fireman</artifactId>
-                <version>0.0.10</version>
+                <version>0.0.11</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.framework</groupId>

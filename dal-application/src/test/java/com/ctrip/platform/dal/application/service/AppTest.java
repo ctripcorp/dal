@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.application.service;
 
 import com.ctrip.platform.dal.application.AppConfig;
+import com.ctrip.platform.dal.application.dao.DALServiceDao;
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 import com.ctrip.platform.dal.dao.DalHints;
 import org.junit.Assert;
@@ -22,6 +23,12 @@ import java.util.List;
 public class AppTest {
     @Autowired
     DALService dalService;
+
+    @Autowired
+    private DALServiceDao mySqlDao;
+
+    @Autowired
+    private DALServiceDao sqlServerDao;
 
     @Test
     public void testQuery() throws Exception {
@@ -101,5 +108,37 @@ public class AppTest {
     @Test
     public void queryTopWithNoOrderby() throws Exception{
         dalService.queryTopWithNoOrderby();
+    }
+
+    @Test
+    public void testMySql() throws Exception{
+        DALServiceTable pojo = new DALServiceTable();
+        pojo.setName("mysql");
+        mySqlDao.insert(new DalHints().setIdentityBack(), pojo);
+        pojo = mySqlDao.queryByPk(pojo.getID(), null);
+        Assert.assertEquals("mysql",pojo.getName());
+        pojo.setName("update");
+        mySqlDao.update(null,pojo);
+        pojo = mySqlDao.queryByPk(pojo.getID(), null);
+        Assert.assertEquals("update",pojo.getName());
+        mySqlDao.delete(null, pojo);
+        pojo = mySqlDao.queryByPk(pojo.getID(), null);
+        Assert.assertNull(pojo);
+    }
+
+    @Test
+    public void testSqlServer() throws Exception{
+        DALServiceTable pojo = new DALServiceTable();
+        pojo.setName("sqlServer");
+        sqlServerDao.insert(new DalHints().setIdentityBack(), pojo);
+        pojo = sqlServerDao.queryByPk(pojo.getID(), null);
+        Assert.assertEquals("sqlServer",pojo.getName());
+        pojo.setName("update");
+        sqlServerDao.update(null,pojo);
+        pojo = sqlServerDao.queryByPk(pojo.getID(), null);
+        Assert.assertEquals("update",pojo.getName());
+        sqlServerDao.delete(null, pojo);
+        pojo = sqlServerDao.queryByPk(pojo.getID(), null);
+        Assert.assertNull(pojo);
     }
 }

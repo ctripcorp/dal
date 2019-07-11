@@ -8,7 +8,9 @@ import java.util.List;
 public class DalClientSwitchInfoDto {
     private String dalClientIP;
 
-    private List<SwitchCountTime> switchs;
+    private List<SwitchCountTime> startSwitchs;
+
+    private List<SwitchCountTime> endSwitchs;
 
     public String getDalClientIP() {
         return dalClientIP;
@@ -18,11 +20,19 @@ public class DalClientSwitchInfoDto {
         this.dalClientIP = dalClientIP;
     }
 
-    public List<SwitchCountTime> getSwitchs() {
-        return switchs;
+    public List<SwitchCountTime> getStartSwitchs() {
+        return startSwitchs;
     }
 
-    public void setSwitchs(List<SwitchCountTime> switchs) {
-        this.switchs = switchs;
+    public void setStartSwitchs(List<SwitchCountTime> startSwitchs) {
+        this.startSwitchs = startSwitchs;
+    }
+
+    public List<SwitchCountTime> getEndSwitchs() {
+        return endSwitchs;
+    }
+
+    public void setEndSwitchs(List<SwitchCountTime> endSwitchs) {
+        this.endSwitchs = endSwitchs;
     }
 }

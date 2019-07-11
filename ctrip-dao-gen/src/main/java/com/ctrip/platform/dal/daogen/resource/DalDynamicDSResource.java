@@ -234,14 +234,22 @@ public class DalDynamicDSResource {
                     for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
                         DalClientSwitchInfoDto dalClientSwitchInfoDto = new DalClientSwitchInfoDto();
                         dalClientSwitchInfoDto.setDalClientIP(switchHostIPInfo.getHostIP());
-                        List<SwitchCountTime> switchs = new ArrayList<>();
+                        List<SwitchCountTime> startSwitchs = new ArrayList<>();
+                        List<SwitchCountTime> endSwitchs = new ArrayList<>();
                         for (Map.Entry<Integer, Integer> hostIPTime : switchHostIPInfo.getStartSwitchPoint().entrySet()) {
                             SwitchCountTime switchCountTime = new SwitchCountTime();
                             switchCountTime.setTime(hostIPTime.getKey());
                             switchCountTime.setCount(hostIPTime.getValue());
-                            switchs.add(switchCountTime);
+                            startSwitchs.add(switchCountTime);
                         }
-                        dalClientSwitchInfoDto.setSwitchs(switchs);
+                        dalClientSwitchInfoDto.setStartSwitchs(startSwitchs);
+                        for (Map.Entry<Integer, Integer> hostIPTime : switchHostIPInfo.getEndSwitchPoint().entrySet()) {
+                            SwitchCountTime switchCountTime = new SwitchCountTime();
+                            switchCountTime.setTime(hostIPTime.getKey());
+                            switchCountTime.setCount(hostIPTime.getValue());
+                            endSwitchs.add(switchCountTime);
+                        }
+                        dalClientSwitchInfoDto.setEndSwitchs(endSwitchs);
                         dalClientList.add(dalClientSwitchInfoDto);
                     }
                     appIDSwitchInfoDto.setDalClientList(dalClientList);

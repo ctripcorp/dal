@@ -36,6 +36,7 @@
         <div role="tabpanel" class="tab-pane active" id="dynamicDS">
             <div class="panel">
                 <div class="panel-heading">
+                    <p style="font-size: 20px;color:#FF0000;margin-left: 20px">由于Cat限流策略，统计数据显示可能会比较慢！！！</p>
                     <div id="viewLatestOneHourData" >
                         <input type="datetime-local" id="settingDate" style="margin-left: 20px"/>
                         <input id="checkTitanKey" style="margin-left: 20px;width: 250px" placeholder="titanKey1,titanKey2,titanKey3..."/>

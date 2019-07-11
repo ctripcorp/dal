@@ -11,7 +11,7 @@ import java.util.Set;
  * Created by taochen on 2019/7/3.
  */
 public interface SwitchDSDataProvider {
-    public boolean isSwitchInAppID(String titanKey, String appID, Date checkTime, List<SwitchHostIPInfo> hostIPList, String env);
+    public boolean isSwitchInAppID(String titanKey, String appID, String checkTime, List<SwitchHostIPInfo> hostIPList, String env);
 
-    public Set<SwitchTitanKey> getSwitchTitanKey(Date checkTime, String env);
+    public Set<SwitchTitanKey> getSwitchTitanKey(String checkTime, Set<String> checkTitanKeys, String env);
 }

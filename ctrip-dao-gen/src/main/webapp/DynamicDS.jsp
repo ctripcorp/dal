@@ -29,7 +29,7 @@
 <body>
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active">
-            <a href="#dynamicDS" aria-controls="dynamicDS" role="tab" data-toggle="tab">DAL 数据源切换统计</a>
+            <a href="#dynamicDS" aria-controls="dynamicDS" role="tab" data-toggle="tab">DAL 动态数据源切换统计</a>
         </li>
     </ul>
     <div class="tab-content">
@@ -37,8 +37,12 @@
             <div class="panel">
                 <div class="panel-heading">
                     <div id="viewLatestOneHourData" >
-                        <input type="datetime-local" id="settingDate" style="padding-left: 20px"/>
-                        <button id="viewButton" class="font-size">查看前1h切换数据</button>
+                        <input type="datetime-local" id="settingDate" style="margin-left: 20px"/>
+                        <input id="checkTitanKey" style="margin-left: 20px;width: 250px" placeholder="titanKey1,titanKey2,titanKey3..."/>
+                        <button id="viewButton" style="margin-left: 10px" class="font-size">查看数据</button>
+                    </div>
+                    <div>
+                        <span id="toDate" style="margin-left: 20px;margin-top: 50px" class="bg-success"></span>
                     </div>
                     <div class="panel-body">
                         <div id="divTable" class="display-none">
@@ -46,26 +50,33 @@
                                 <span id="spanCount"></span>
                                 <span id="spanLastUpdate" class="float-right"></span>
                             </p>
+                            <p>
+                                <span id="startTime"></span>
+                                <span id="endTime"></span>
+                            </p>
                             <div class="scroll table-size">
                                 <table id="tableDynamicDS" class="table table-striped table-bordered">
                                     <thead>
                                     <tr>
                                         <th id="">TitanKey</th>
                                         <th>TitanKey SwitchCount</th>
-                                        <th>App Ids</th>
-                                        <th>Host IPs</th>
+                                        <th>Operation</th>
+                                        <th>Client AppId</th>
+                                        <th>Client IP</th>
                                         <%--<th>Related modules</th>--%>
                                         <%--<th>Key Point</th>--%>
                                         <%--<th>Start Time</th>--%>
                                         <%--<th>End Time</th>--%>
-                                        <th>Host SwitchCount</th>
-                                        <th>Host Success Count</th>
+                                        <th>Client SwitchCount</th>
+                                        <th>Client SuccessCount</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
                         </div>
+                    </div>
+                    <div id="details">
                     </div>
                 </div>
             </div>

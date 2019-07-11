@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen.entity;
 
+import java.util.List;
+
 /**
  * Created by taochen on 2019/7/5.
  */
@@ -8,13 +10,7 @@ public class DynamicDSDataDto {
 
     private String titanKeySwitchCount;
 
-    private String appIds;
-
-    private String hostIps;
-
-    private String hostSwitchCount;
-
-    private String hostSuccessCount;
+    private List<AppIDInfoDto> appIds;
 
     public String getTitanKey() {
         return titanKey;
@@ -22,22 +18,6 @@ public class DynamicDSDataDto {
 
     public void setTitanKey(String titanKey) {
         this.titanKey = titanKey;
-    }
-
-    public String getAppIds() {
-        return appIds;
-    }
-
-    public void setAppIds(String appIds) {
-        this.appIds = appIds;
-    }
-
-    public String getHostIps() {
-        return hostIps;
-    }
-
-    public void setHostIps(String hostIps) {
-        this.hostIps = hostIps;
     }
 
     public String getTitanKeySwitchCount() {
@@ -48,19 +28,11 @@ public class DynamicDSDataDto {
         this.titanKeySwitchCount = titanKeySwitchCount;
     }
 
-    public String getHostSwitchCount() {
-        return hostSwitchCount;
+    public List<AppIDInfoDto> getAppIds() {
+        return appIds;
     }
 
-    public void setHostSwitchCount(String hostSwitchCount) {
-        this.hostSwitchCount = hostSwitchCount;
-    }
-
-    public String getHostSuccessCount() {
-        return hostSuccessCount;
-    }
-
-    public void setHostSuccessCount(String hostSuccessCount) {
-        this.hostSuccessCount = hostSuccessCount;
+    public void setAppIds(List<AppIDInfoDto> appIds) {
+        this.appIds = appIds;
     }
 }

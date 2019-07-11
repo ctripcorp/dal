@@ -32,7 +32,7 @@ public class DalDynamicDSTest {
         DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
         SimpleDateFormat sdf =   new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
         Date date = sdf.parse("2019-07-08 12:23:00");
-        dalDynamicDSDao.checkSwitchDataSource(env, date, TriggerMethod.MANUAL);
+        dalDynamicDSDao.checkSwitchDataSource(env, date, null, TriggerMethod.MANUAL);
     }
 
     @Test

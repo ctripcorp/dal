@@ -10,7 +10,9 @@ import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
+import org.apache.commons.lang.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -54,14 +56,20 @@ public class DalDynamicDSDao {
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                checkSwitchDataSource(env, checkTime, TriggerMethod.TIME);
+                checkSwitchDataSource(env, checkTime, null, TriggerMethod.TIME);
             }
         }, initDelay, FIXED_RATE, TimeUnit.SECONDS);
     }
 
-    public void checkSwitchDataSource(String env, Date checkTime, TriggerMethod method) {
-        Set<SwitchTitanKey> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTime, env);
-
+    public void checkSwitchDataSource(String env, Date checkTime, Set<String> checkTitanKeys, TriggerMethod method) {
+        String checkTimeStr = null;
+        if (TriggerMethod.MANUAL.equals(method)) {
+            checkTimeStr = getNowDateString(checkTime);
+        }
+        else {
+            checkTimeStr = getBeforeOneHourDateString(checkTime);
+        }
+        Set<SwitchTitanKey> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTimeStr, checkTitanKeys, env);
         try {
             if (TitanKeys == null || TitanKeys.size() == 0) {
                 return;
@@ -77,6 +85,13 @@ public class DalDynamicDSDao {
         List<TitanKeyInfo> TitanKeyInfoList = null;
         Map<String, List<AppIDInfo>> tempTitanKeyAppIDMap = new HashMap<>();
         TitanKeyAppIDMap.clear();
+        String checkTimeStr = null;
+        if (TriggerMethod.MANUAL.equals(method)) {
+            checkTimeStr = getNowDateString(checkTime);
+        }
+        else {
+            checkTimeStr = getBeforeOneHourDateString(checkTime);
+        }
         try {
             TitanKeyInfoList = getTitanKeyInfo(TitanKeys, env);
             for (TitanKeyInfo titanKeyInfo : TitanKeyInfoList) {
@@ -84,7 +99,9 @@ public class DalDynamicDSDao {
                 List<AppIDInfo> switchAppIDList = new ArrayList<>();
                 for (String appID : appIDList) {
                     List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
-                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(titanKeyInfo.getKeyName(), appID, checkTime, hostIPList, env);
+                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(titanKeyInfo.getKeyName(), appID, checkTimeStr, hostIPList, env);
+                    //cat 限流策略
+                    Thread.sleep(600);
                     if (isSwitch) {
                         AppIDInfo appIDInfo = new AppIDInfo();
                         appIDInfo.setAppID(appID);
@@ -135,5 +152,23 @@ public class DalDynamicDSDao {
 
     public void setTitanKeyAppIDMap(Map<SwitchTitanKey, List<AppIDInfo>> titanKeyAppIDMap) {
         TitanKeyAppIDMap = titanKeyAppIDMap;
+    }
+
+    private String getBeforeOneHourDateString(Date checkTime) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(checkTime);
+        calendar.add(Calendar.HOUR, -1);
+        Date catTransactionDate = calendar.getTime();
+        return formatCheckTime(catTransactionDate);
+    }
+
+    private String formatCheckTime(Date convertCheckTime) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = formatter.format(convertCheckTime).replaceAll("-| ", "");
+        return dateString.substring(0, dateString.indexOf(":"));
+    }
+
+    private String getNowDateString(Date checkTime) {
+        return formatCheckTime(checkTime);
     }
 }

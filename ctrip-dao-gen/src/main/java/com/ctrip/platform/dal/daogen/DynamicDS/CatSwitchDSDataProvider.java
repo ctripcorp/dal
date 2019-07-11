@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
+import org.apache.commons.lang.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,22 +46,12 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     private static final String ALL_IP = "All";
 
     @Override
-    public boolean isSwitchInAppID(String titanKey, String appID, Date checkTime, List<SwitchHostIPInfo> hostIPList, String env) {
+    public boolean isSwitchInAppID(String titanKey, String appID, String checkTime, List<SwitchHostIPInfo> hostIPList, String env) {
         List<String> ips = new ArrayList<>();
-        String beforeDate = getBeforeOneHourDateString(checkTime);
-        String nowDate = getNowDateString(checkTime);
-        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, beforeDate, ips, env);
-        if (!isAppSwitch) {
-            //可能跨小时
-            isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, nowDate, ips, env);
-        }
+        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, checkTime, ips, env);
         if (isAppSwitch) {
             for (String ip : ips) {
-                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, beforeDate, env);
-                if (switchHostIPInfo == null) {
-                    //可能跨小时
-                    switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, nowDate, env);
-                }
+                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, checkTime, env);
                 if (switchHostIPInfo != null) {
                     hostIPList.add(switchHostIPInfo);
                 }
@@ -70,12 +61,11 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     }
 
     @Override
-    public Set<SwitchTitanKey> getSwitchTitanKey(Date checkTime, String env) {
+    public Set<SwitchTitanKey> getSwitchTitanKey(String checkTime, Set<String> checkTitanKeys, String env) {
         Set<SwitchTitanKey> titanKeys = new HashSet<>();
-        String beforeDate = getBeforeOneHourDateString(checkTime);
         String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_EVENT_TITAN_UPDATE_FAT : "UAT".equalsIgnoreCase(env) ?
                 CAT_EVENT_TITAN_UPDATE_UAT : CAT_EVENT_TITAN_UPDATE_PRO;
-        String url = String.format(formatUrl, beforeDate, DAL_TITAN_UPDATE_TYPE);
+        String url = String.format(formatUrl, checkTime, DAL_TITAN_UPDATE_TYPE);
         CatTransactionEntity catTransactionEntity = null;
         try {
             catTransactionEntity =  HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
@@ -111,29 +101,18 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
                     }
                 }
                 switchTitanKey.setSwitchCount(switchCount);
-                titanKeys.add(switchTitanKey);
+                if (checkTitanKeys != null) {
+                    if (checkTitanKeys.contains(key.toString())) {
+                        titanKeys.add(switchTitanKey);
+                    }
+                }
+                else {
+                    titanKeys.add(switchTitanKey);
+                }
             }
             return titanKeys;
         }
         return null;
-    }
-
-    private String getBeforeOneHourDateString(Date checkTime) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(checkTime);
-        calendar.add(Calendar.HOUR, -1);
-        Date catTransactionDate = calendar.getTime();
-        return formatCheckTime(catTransactionDate);
-    }
-
-    private String getNowDateString(Date checkTime) {
-        return formatCheckTime(checkTime);
-    }
-
-    private String formatCheckTime(Date convertCheckTime) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dateString = formatter.format(convertCheckTime).replaceAll("-| ", "");
-        return dateString.substring(0, dateString.indexOf(":"));
     }
 
     public boolean checkAppRefreshDataSourceTransaction(String titanKey, String appID, String date, List<String> ips, String env) {

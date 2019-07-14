@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.daogen.DynamicDS;
 
-import com.alibaba.fastjson.JSON;
-import com.ctrip.platform.dal.daogen.entity.TitanKeyInfo;
 import qunar.tc.qconfig.client.MapConfig;
 
 import java.util.*;
@@ -19,9 +17,8 @@ public class TitanDynamicDSAppIDProvider implements DynamicDSAppIDProvider {
     private static final int RETRY_TIME = 3;
 
     @Override
-    public List<String> getDynamicDSAppID(TitanKeyInfo titanKeyInfo) {
+    public List<String> getDynamicDSAppID(String appIDString) {
         List<String> permissionAppIDList = new ArrayList<>();
-        String appIDString = titanKeyInfo.getPermissions();
         List<String> appIDList = Arrays.asList(appIDString.split(","));
         List<String> globalPermissionAppID = getGlobalPermissionAppID();
         permissionAppIDList.addAll(appIDList);

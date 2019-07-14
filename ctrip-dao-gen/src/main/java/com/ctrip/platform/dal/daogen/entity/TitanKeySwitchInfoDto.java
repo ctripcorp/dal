@@ -8,7 +8,7 @@ import java.util.List;
 public class TitanKeySwitchInfoDto {
     private String titanKey;
 
-    private List<SwitchCountTime> switchs;
+    private List<SwitchCountTime> switches;
 
     private List<AppIDSwitchInfoDto> appIDList;
 
@@ -20,12 +20,12 @@ public class TitanKeySwitchInfoDto {
         this.titanKey = titanKey;
     }
 
-    public List<SwitchCountTime> getSwitchs() {
-        return switchs;
+    public List<SwitchCountTime> getSwitches() {
+        return switches;
     }
 
-    public void setSwitchs(List<SwitchCountTime> switchs) {
-        this.switchs = switchs;
+    public void setSwitches(List<SwitchCountTime> switches) {
+        this.switches = switches;
     }
 
     public List<AppIDSwitchInfoDto> getAppIDList() {

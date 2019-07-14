@@ -27,12 +27,8 @@ public class DalDynamicDSTest {
 
     @Test
     public void fixedCheckTest() throws Exception {
-        Env envEntity = Foundation.server().getEnv();
-        String env = envEntity.name().toLowerCase();
         DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
-        SimpleDateFormat sdf =   new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
-        Date date = sdf.parse("2019-07-08 12:23:00");
-        dalDynamicDSDao.checkSwitchDataSource(env, date, null, TriggerMethod.MANUAL);
+        dalDynamicDSDao.checkSwitchDataSource("2019070811", null, TriggerMethod.MANUAL);
     }
 
     @Test

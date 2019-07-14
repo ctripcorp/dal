@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.daogen.DynamicDS;
 import com.ctrip.platform.dal.daogen.entity.SwitchHostIPInfo;
 import com.ctrip.platform.dal.daogen.entity.SwitchTitanKey;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 

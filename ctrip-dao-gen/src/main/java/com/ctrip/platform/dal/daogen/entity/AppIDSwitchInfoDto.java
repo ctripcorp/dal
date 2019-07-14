@@ -8,7 +8,7 @@ import java.util.List;
 public class AppIDSwitchInfoDto {
     private String appID;
 
-    private List<DalClientSwitchInfoDto> dalClientList;
+    private List<DalClientSwitchInfoDto> ClientList;
 
     public String getAppID() {
         return appID;
@@ -18,11 +18,11 @@ public class AppIDSwitchInfoDto {
         this.appID = appID;
     }
 
-    public List<DalClientSwitchInfoDto> getDalClientList() {
-        return dalClientList;
+    public List<DalClientSwitchInfoDto> getClientList() {
+        return ClientList;
     }
 
-    public void setDalClientList(List<DalClientSwitchInfoDto> dalClientList) {
-        this.dalClientList = dalClientList;
+    public void setClientList(List<DalClientSwitchInfoDto> clientList) {
+        ClientList = clientList;
     }
 }

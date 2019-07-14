@@ -7,6 +7,8 @@
 
     function getDynamicDSData(settingDate, checkTitanKeys) {
         var table = $("#divTable");
+        var loading = $("#loadingSpan");
+        loading.html("正在加载中。。。");
         table.hide();
         $.getJSON("/rest/dynamicDS/executeCheckDynamicDS", {
             settingDate: settingDate,
@@ -53,7 +55,10 @@
             //window.alert(tableBody);
             $("#tableDynamicDS tbody").html(tableBody);
             table.show();
-        });
+            loading.html("");
+        }).fail(function (e) {
+            loading.html(e);
+        })
     }
 
     function bindViewButton() {
@@ -62,10 +67,18 @@
             if (settingDate === null) {
                 return;
             }
+            var date = formatDateTimeLoacl(settingDate);
+            var limitDate = getNowTimeHour();
+
+            if (date >= limitDate) {
+                alert("设置事件不能大于" + limitDate);
+                return;
+            }
             var checkTitanKeys = $("#checkTitanKey").val();
             getDynamicDSData(settingDate, checkTitanKeys);
             var settime = $("#settingDate").val();
             var toDate = getFromDate(settime) + " to " + getToDate(settime);
+            $("#settingDate").data("checkTime", getCheckTime(settime));
             $("#toDate").html(toDate);
         });
     }
@@ -76,7 +89,9 @@
                 var tr = $(this).closest("tr");
                 var td = tr.find("td");
                 var titanKey = td[0].innerHTML;
-                window.open("/rest/dynamicDS/getTitanKeySwitchTime?titanKey=" + titanKey, '_blank');
+                var checkTime = $("#settingDate").data("checkTime");
+                var titanKeySwitchUrl = sprintf("/rest/dynamicDS/getTitanKeySwitchTime?titanKey=%s&checkTime=%s", titanKey, checkTime);
+                window.open(titanKeySwitchUrl, '_blank');
                 // $.getJSON("/rest/dynamicDS/getTitanKeySwitchTime", {
                 //     titanKey: titanKey
                 // }, function (data) {
@@ -98,8 +113,10 @@
 
     function init(){
         var nowtime = new Date();
+        nowtime.setHours(nowtime.getHours() - 1);
         var timeString = timeToString(nowtime);
         $("#settingDate").val(timeString);
+        $("#settingDate").data("checkTime", getCheckTime(nowtime));
         var toDate = getFromDate(nowtime) + " to " + getToDate(nowtime);
         $("#toDate").html(toDate);
     }
@@ -108,7 +125,7 @@
         var m = date.getMonth() + 1;
         var d = date.getDate();
         var hour = date.getHours().toString();
-        var minutes = date.getMinutes().toString();
+        var minutes = 0;
         if (hour < 10) {
             hour = "0" + hour;
         }
@@ -148,4 +165,33 @@
         return  y + '/' + (m < 10 ? ('0' + m) : m) + '/' + (d < 10 ? ('0' + d) : d) + " " + hour + ":" + minutes ;
     }
 
+    function getCheckTime(time) {
+        var date = new Date(time);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        var d = date.getDate();
+        var hour = date.getHours();
+        if (hour < 10) {
+            hour = "0" + hour;
+        }
+        return  y + (m < 10 ? ('0' + m) : m) + (d < 10 ? ('0' + d) : d) + hour;
+    }
+
+    function formatDateTimeLoacl(time) {
+        var date = new Date();
+        date.setFullYear(parseInt(time.substring(0, 4)));
+        date.setMonth(parseInt(time.substring(5, 7)) - 1);
+        date.setDate(parseInt(time.substring(8, 10)));
+        date.setHours(parseInt(time.substring(11, 13)));
+        date.setMinutes(parseInt(time.substring(14, 16)));
+        return date;
+    }
+
+    function getNowTimeHour() {
+        var date = new Date();
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        return date;
+    }
 })(jQuery, window, document);

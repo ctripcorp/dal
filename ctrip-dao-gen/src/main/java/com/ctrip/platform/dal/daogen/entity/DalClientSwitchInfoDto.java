@@ -6,33 +6,33 @@ import java.util.List;
  * Created by taochen on 2019/7/11.
  */
 public class DalClientSwitchInfoDto {
-    private String dalClientIP;
+    private String clientIP;
 
-    private List<SwitchCountTime> startSwitchs;
+    private List<SwitchCountTime> startSwitches;
 
-    private List<SwitchCountTime> endSwitchs;
+    private List<SwitchCountTime> endSwitches;
 
-    public String getDalClientIP() {
-        return dalClientIP;
+    public String getClientIP() {
+        return clientIP;
     }
 
-    public void setDalClientIP(String dalClientIP) {
-        this.dalClientIP = dalClientIP;
+    public void setClientIP(String clientIP) {
+        this.clientIP = clientIP;
     }
 
-    public List<SwitchCountTime> getStartSwitchs() {
-        return startSwitchs;
+    public List<SwitchCountTime> getStartSwitches() {
+        return startSwitches;
     }
 
-    public void setStartSwitchs(List<SwitchCountTime> startSwitchs) {
-        this.startSwitchs = startSwitchs;
+    public void setStartSwitches(List<SwitchCountTime> startSwitches) {
+        this.startSwitches = startSwitches;
     }
 
-    public List<SwitchCountTime> getEndSwitchs() {
-        return endSwitchs;
+    public List<SwitchCountTime> getEndSwitches() {
+        return endSwitches;
     }
 
-    public void setEndSwitchs(List<SwitchCountTime> endSwitchs) {
-        this.endSwitchs = endSwitchs;
+    public void setEndSwitches(List<SwitchCountTime> endSwitches) {
+        this.endSwitches = endSwitches;
     }
 }

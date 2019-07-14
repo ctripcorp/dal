@@ -36,9 +36,9 @@
         <div role="tabpanel" class="tab-pane active" id="dynamicDS">
             <div class="panel">
                 <div class="panel-heading">
-                    <p style="font-size: 20px;color:#FF0000;margin-left: 20px">由于Cat限流策略，统计数据显示可能会比较慢！！！</p>
+                    <%--<p style="font-size: 20px;color:#FF0000;margin-left: 20px">由于Cat限流策略，统计数据显示可能会比较慢！！！</p>--%>
                     <div id="viewLatestOneHourData" >
-                        <input type="datetime-local" id="settingDate" style="margin-left: 20px"/>
+                        <input type="datetime-local" id="settingDate" style="margin-left: 20px" data-checkTime=""/>
                         <input id="checkTitanKey" style="margin-left: 20px;width: 250px" placeholder="titanKey1,titanKey2,titanKey3..."/>
                         <button id="viewButton" style="margin-left: 10px" class="font-size">查看数据</button>
                     </div>
@@ -46,6 +46,7 @@
                         <span id="toDate" style="margin-left: 20px;margin-top: 50px" class="bg-success"></span>
                     </div>
                     <div class="panel-body">
+                        <div><span id="loadingSpan" style="font-size: 20px;margin-left: 20px"></span></div>
                         <div id="divTable" class="display-none">
                             <p class="bg-success padding-left-right">
                                 <span id="spanCount"></span>
@@ -55,7 +56,9 @@
                                 <span id="startTime"></span>
                                 <span id="endTime"></span>
                             </p>
+
                             <div class="scroll table-size">
+                                <%--<div id="divLoading" class="ld ld-ring ld-cycle" style="margin-left: 50%;visibility:hidden"></div>--%>
                                 <table id="tableDynamicDS" class="table table-striped table-bordered">
                                     <thead>
                                     <tr>

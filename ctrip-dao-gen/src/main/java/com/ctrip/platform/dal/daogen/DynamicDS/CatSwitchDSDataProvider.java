@@ -6,9 +6,7 @@ import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
-import org.apache.commons.lang.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -27,11 +25,15 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     private static final String CAT_EVENT_TITAN_UPDATE_UAT =
             "http://cat.uat.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
+//    private static final String CAT_TRANSACTION_URL_FAT =
+//            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
     private static final String CAT_TRANSACTION_URL_FAT =
-            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
+        "http://cat.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
+//    private static final String CAT_EVENT_TITAN_UPDATE_FAT =
+//            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
     private static final String CAT_EVENT_TITAN_UPDATE_FAT =
-            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
+        "http://cat.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
     private static final String DAL_CONFIG_TRANSACTION_TYPE = "DAL.configure";
 
@@ -44,6 +46,8 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     private static final String DAL_TITAN_UPDATE_TYPE = "Titan.MHAUpdate.TitanKey";
 
     private static final String ALL_IP = "All";
+
+    private static final int RETRY_TIME = 3;
 
     @Override
     public boolean isSwitchInAppID(String titanKey, String appID, String checkTime, List<SwitchHostIPInfo> hostIPList, String env) {
@@ -67,10 +71,13 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
                 CAT_EVENT_TITAN_UPDATE_UAT : CAT_EVENT_TITAN_UPDATE_PRO;
         String url = String.format(formatUrl, checkTime, DAL_TITAN_UPDATE_TYPE);
         CatTransactionEntity catTransactionEntity = null;
-        try {
-            catTransactionEntity =  HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
-        } catch (Exception e) {
-            Cat.logError("get switch titan key fail.", e);
+        for (int i = 0; i < RETRY_TIME; i++) {
+            try {
+                catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
+                break;
+            } catch (Exception e) {
+                Cat.logError("get switch titan key fail.", e);
+            }
         }
         CatTransactionReport configReport = null;
         if (catTransactionEntity != null) {
@@ -87,7 +94,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         if (namesObject != null) {
             JSONObject namesJsonObject = JSON.parseObject(namesObject.toString());
             for (Object key : namesJsonObject.keySet()) {
-                if ("All".equalsIgnoreCase(key.toString())) {
+                if (ALL_IP.equalsIgnoreCase(key.toString())) {
                     continue;
                 }
                 JSONObject switchTitanKeyObject = JSON.parseObject(namesJsonObject.get(key).toString());
@@ -120,10 +127,12 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
                 CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
         String url = String.format(formatUrl, appID, date, ALL_IP, DAL_CONFIG_TRANSACTION_TYPE, String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
-        try {
-            catTransactionEntity =  HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
-        } catch (Exception e) {
-            Cat.logError("check appid:" + appID + "Refresh DataSource fail.", e);
+        for (int i = 0; i < RETRY_TIME; i++) {
+            try {
+                catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
+            } catch (Exception e) {
+                Cat.logError("check appid:" + appID + "Refresh DataSource fail.", e);
+            }
         }
         CatTransactionReport configReport = null;
         if (catTransactionEntity != null) {
@@ -145,10 +154,12 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
                 CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
         String url = String.format(formatUrl, appID, date, ip, DAL_CONFIG_TRANSACTION_TYPE, String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
-        try {
-            catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
-        } catch (Exception e) {
-            Cat.logError("check appid:" + appID + " ip:" + ip + "Refresh DataSource fail.", e);
+        for (int i = 0; i < RETRY_TIME; i++) {
+            try {
+                catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
+            } catch (Exception e) {
+                Cat.logError("check appid:" + appID + " ip:" + ip + "Refresh DataSource fail.", e);
+            }
         }
         CatTransactionReport configReport = null;
         if (catTransactionEntity != null) {
@@ -181,26 +192,27 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
                 CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
         String url = String.format(formatUrl, appID, date, ip, DAL_DATASOURCE_TRANSACTION_TYPE, String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
-        try {
-            catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
-        } catch (Exception e) {
-            Cat.logError("get appid:" + appID + " ip:" + ip + "Switch HostIP Info fail.", e);
+        Map<Integer, Integer> endSwitchPoint = new HashMap<>();
+        for (int i = 0; i < RETRY_TIME; i++) {
+            try {
+                catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
+            } catch (Exception e) {
+                Cat.logError("get appid:" + appID + " ip:" + ip + "Switch HostIP Info fail.", e);
+            }
         }
         Object names = null;
         if (catTransactionEntity != null) {
             names = parseCatTransactionReportNames(catTransactionEntity.getReport(), ip, DAL_DATASOURCE_TRANSACTION_TYPE);
         }
         if (names != null) {
-            Map<Integer, Integer> endSwitchPoint = new HashMap<>();
             List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));
             for (TransactionNameRange range : ranges) {
                 if (range.getCount() != 0) {
                     endSwitchPoint.put(range.getValue(), range.getCount());
                 }
             }
-            return endSwitchPoint;
         }
-        return null;
+        return endSwitchPoint;
     }
 
     private Object parseCatTransactionReportNames(CatTransactionReport configReport, String ip, String transactionType) {
@@ -211,16 +223,14 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         JSONObject typesJSONObject = JSON.parseObject(types.toString());
         String  transactionTypeStr = typesJSONObject.getString(transactionType);
         JSONObject nameObject = JSON.parseObject(transactionTypeStr);
-        Object names = nameObject.get("names");
-        return names;
+        return nameObject.get("names");
     }
 
     private Object parseCatTransactionReportTypes(CatTransactionReport configReport, String ip) {
         JSONObject machinesObject = JSON.parseObject(configReport.getMachines());
         String ipString = machinesObject.get(ip).toString();
         JSONObject typeObject = JSON.parseObject(ipString);
-        Object types = typeObject.get("types");
-        return types;
+        return typeObject.get("types");
     }
 
     private List<TransactionNameRange> parseCatTransactionReportRanges(String transactionNames, String transactionName) {
@@ -228,7 +238,6 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         String tNames = transactionNameObject.get(transactionName).toString();
         JSONObject rangesObject = JSON.parseObject(tNames);
         String ranges = rangesObject.get("ranges").toString();
-        List<TransactionNameRange> transactionNameRanges = JSON.parseArray(ranges, TransactionNameRange.class);
-        return transactionNameRanges;
+        return JSON.parseArray(ranges, TransactionNameRange.class);
     }
 }

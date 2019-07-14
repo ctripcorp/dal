@@ -4,16 +4,16 @@ package com.ctrip.platform.dal.daogen.entity;
  * Created by taochen on 2019/7/11.
  */
 public class SwitchCountTime {
-    private int time;
+    private int minute;
 
     private int count;
 
-    public int getTime() {
-        return time;
+    public int getMinute() {
+        return minute;
     }
 
-    public void setTime(int time) {
-        this.time = time;
+    public void setMinute(int minute) {
+        this.minute = minute;
     }
 
     public int getCount() {

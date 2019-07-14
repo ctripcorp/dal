@@ -10,6 +10,8 @@ public class SwitchTitanKey {
 
     private Map<Integer, Integer> switchCount;
 
+    private String Permissions;
+
     public String getTitanKey() {
         return titanKey;
     }
@@ -24,5 +26,13 @@ public class SwitchTitanKey {
 
     public void setSwitchCount(Map<Integer, Integer> switchCount) {
         this.switchCount = switchCount;
+    }
+
+    public String getPermissions() {
+        return Permissions;
+    }
+
+    public void setPermissions(String permissions) {
+        Permissions = permissions;
     }
 }

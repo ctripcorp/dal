@@ -95,12 +95,6 @@
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
             <version>${dao-gen-core-version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
@@ -134,7 +128,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>28.0-jre</version>
         </dependency>
     </dependencies>
     <profiles>

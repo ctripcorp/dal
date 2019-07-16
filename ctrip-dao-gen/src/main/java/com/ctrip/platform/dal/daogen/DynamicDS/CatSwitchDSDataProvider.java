@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
+import com.google.common.util.concurrent.RateLimiter;
 
 import java.util.*;
 
@@ -49,18 +50,23 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
 
     private static final int RETRY_TIME = 3;
 
+    private RateLimiter rateLimiter = RateLimiter.create(20);
+
     @Override
-    public boolean isSwitchInAppID(String titanKey, String appID, String checkTime, List<SwitchHostIPInfo> hostIPList, String env) {
+    public boolean isSwitchInAppID(String titanKey, String appID, String checkTime, List<String> hostIPList, Map<Integer, Integer> appIDSwitchTime, String env) {
         List<String> ips = new ArrayList<>();
-        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, checkTime, ips, env);
-        if (isAppSwitch) {
-            for (String ip : ips) {
-                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, checkTime, env);
-                if (switchHostIPInfo != null) {
-                    hostIPList.add(switchHostIPInfo);
-                }
-            }
-        }
+        long startTimeCatHostIPs = System.currentTimeMillis();
+        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, checkTime, hostIPList, appIDSwitchTime, env);
+        long endTimeCatHostIPs = System.currentTimeMillis();
+        System.out.println("cat api time: " + (endTimeCatHostIPs - startTimeCatHostIPs));
+//        if (isAppSwitch) {
+//            for (String ip : ips) {
+//                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, checkTime, env);
+//                if (switchHostIPInfo != null) {
+//                    hostIPList.add(switchHostIPInfo);
+//                }
+//            }
+//        }
         return isAppSwitch;
     }
 
@@ -122,13 +128,14 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         return null;
     }
 
-    public boolean checkAppRefreshDataSourceTransaction(String titanKey, String appID, String date, List<String> ips, String env) {
+    public boolean checkAppRefreshDataSourceTransaction(String titanKey, String appID, String date, List<String> ips, Map<Integer, Integer> appIDSwitchTime, String env) {
         String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_TRANSACTION_URL_FAT : "UAT".equalsIgnoreCase(env) ?
                 CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
         String url = String.format(formatUrl, appID, date, ALL_IP, DAL_CONFIG_TRANSACTION_TYPE, String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
         CatTransactionEntity catTransactionEntity = null;
         for (int i = 0; i < RETRY_TIME; i++) {
             try {
+                rateLimiter.acquire(1);
                 catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
             } catch (Exception e) {
                 Cat.logError("check appid:" + appID + "Refresh DataSource fail.", e);
@@ -144,6 +151,14 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         }
         if (names == null) {
             return false;
+        }
+        else {
+            List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), String.format(DAL_CONFIG_TRANSACTION_DS_NAME, titanKey));
+            for (TransactionNameRange range : ranges) {
+                if (range.getCount() != 0) {
+                    appIDSwitchTime.put(range.getValue(), range.getCount());
+                }
+            }
         }
         ips.addAll(configReport.getHostIPs());
         return true;

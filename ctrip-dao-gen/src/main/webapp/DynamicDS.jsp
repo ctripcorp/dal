@@ -66,13 +66,12 @@
                                         <th>TitanKey SwitchCount</th>
                                         <th>Operation</th>
                                         <th>Client AppId</th>
-                                        <th>Client IP</th>
+                                        <th>Client IP Count</th>
                                         <%--<th>Related modules</th>--%>
                                         <%--<th>Key Point</th>--%>
                                         <%--<th>Start Time</th>--%>
                                         <%--<th>End Time</th>--%>
-                                        <th>Client SwitchCount</th>
-                                        <th>Client SuccessCount</th>
+                                        <th>AppID SwitchCount</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>

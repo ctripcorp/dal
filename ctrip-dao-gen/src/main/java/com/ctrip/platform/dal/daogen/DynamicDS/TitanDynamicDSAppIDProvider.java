@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.daogen.DynamicDS;
 
+import org.apache.commons.lang.StringUtils;
+import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.MapConfig;
 
 import java.util.*;
@@ -16,17 +18,26 @@ public class TitanDynamicDSAppIDProvider implements DynamicDSAppIDProvider {
 
     private static final int RETRY_TIME = 3;
 
+    private List<String> globalPermissionAppID = null;
+
     @Override
     public List<String> getDynamicDSAppID(String appIDString) {
         List<String> permissionAppIDList = new ArrayList<>();
-        List<String> appIDList = Arrays.asList(appIDString.split(","));
-        List<String> globalPermissionAppID = getGlobalPermissionAppID();
-        permissionAppIDList.addAll(appIDList);
+        List<String> appIDList = null;
+        if (StringUtils.isNotBlank(appIDString)) {
+            appIDList = Arrays.asList(appIDString.split(","));
+        }
+        if (globalPermissionAppID == null) {
+            getGlobalPermissionAppID();
+        }
+        if (appIDList != null) {
+            permissionAppIDList.addAll(appIDList);
+        }
         permissionAppIDList.addAll(globalPermissionAppID);
         return permissionAppIDList;
     }
 
-    private List<String> getGlobalPermissionAppID() {
+    private void getGlobalPermissionAppID() {
         MapConfig config = null;
         for (int i = 0; i < RETRY_TIME; ++i) {
             config = MapConfig.get(TITAN_QCONFIG_APPID, QCONFIG_KEY, null);
@@ -35,8 +46,18 @@ public class TitanDynamicDSAppIDProvider implements DynamicDSAppIDProvider {
             }
         }
         Map<String, String> map = config.asMap();
-        String globalPermissionAppIDStr = map.get(FREE_PERM_KEY);
+        initGlobalPermissionAppID(map);
+        config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
+            @Override
+            public void onLoad(Map<String, String> stringStringMap) {
+                initGlobalPermissionAppID(stringStringMap);
+            }
+        });
+    }
+
+    private void initGlobalPermissionAppID(Map<String, String> config) {
+        String globalPermissionAppIDStr = config.get(FREE_PERM_KEY);
         String[] globalPermissionAppIDArray = globalPermissionAppIDStr.split(",");
-        return Arrays.asList(globalPermissionAppIDArray);
+        globalPermissionAppID = Arrays.asList(globalPermissionAppIDArray);
     }
 }

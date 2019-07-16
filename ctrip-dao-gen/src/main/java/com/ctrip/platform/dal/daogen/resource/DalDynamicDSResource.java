@@ -44,7 +44,8 @@ public class DalDynamicDSResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("executeCheckDynamicDS")
-    public List<DynamicDSDataDto> executeCheckDynamicDS(@QueryParam("settingDate") String settingDate, @QueryParam("checkTitanKeys") String checkTitanKeys) throws Exception{
+    public CheckDynamicDSResponse executeCheckDynamicDS(@QueryParam("settingDate") String settingDate, @QueryParam("checkTitanKeys") String checkTitanKeys) throws Exception{
+        CheckDynamicDSResponse checkDynamicDSResponse = new CheckDynamicDSResponse();
         List<DynamicDSDataDto> dynamicDSDataList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
         Date checkDate = sdf.parse(settingDate.replace('T', ' '));
@@ -80,24 +81,31 @@ public class DalDynamicDSResource {
 
                 for (AppIDInfo appIDInfo : titanKeyData.getValue()) {
                     AppIDInfoDto appIDInfoDto = new AppIDInfoDto();
-                    String hostIPs = "";
-                    String hostSuccessCount = "";
-                    String hostSwitchCount = "";
-                    for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
-                        if (switchHostIPInfo.getStartSwitchPoint() != null) {
-                            switchCount = switchHostIPInfo.getStartSwitchPoint().size();
-                        }
-                        if (switchHostIPInfo.getEndSwitchPoint() != null) {
-                            successCount = switchHostIPInfo.getEndSwitchPoint().size();
-                        }
-                        hostIPs += switchHostIPInfo.getHostIP() + "<br/>";
-                        hostSuccessCount += successCount + "<br/>";
-                        hostSwitchCount += switchCount + "<br/>";
+//                    String hostIPs = "";
+//                    String hostSuccessCount = "";
+//                    String hostSwitchCount = "";
+//                    for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
+//                        if (switchHostIPInfo.getStartSwitchPoint() != null) {
+//                            switchCount = switchHostIPInfo.getStartSwitchPoint().size();
+//                        }
+//                        if (switchHostIPInfo.getEndSwitchPoint() != null) {
+//                            successCount = switchHostIPInfo.getEndSwitchPoint().size();
+//                        }
+//                        hostIPs += switchHostIPInfo.getHostIP() + "<br/>";
+//                        hostSuccessCount += successCount + "<br/>";
+//                        hostSwitchCount += switchCount + "<br/>";
+//                    }
+//                    appIDInfoDto.setAppID(appIDInfo.getAppID());
+//                    appIDInfoDto.setHostIPs(hostIPs);
+//                    appIDInfoDto.setHostSwitchCount(hostSwitchCount);
+//                    appIDInfoDto.setHostSuccessCount(hostSuccessCount);
+                    int appIDSwitchCount = 0;
+                    for (Integer value : appIDInfo.getAppIDSwitchTime().values()) {
+                        appIDSwitchCount += value;
                     }
                     appIDInfoDto.setAppID(appIDInfo.getAppID());
-                    appIDInfoDto.setHostIPs(hostIPs);
-                    appIDInfoDto.setHostSwitchCount(hostSwitchCount);
-                    appIDInfoDto.setHostSuccessCount(hostSuccessCount);
+                    appIDInfoDto.setHostIPCount(appIDInfo.getHostIPInfolist().size());
+                    appIDInfoDto.setAppIDSwitchCount(appIDSwitchCount);
                     appIds.add(appIDInfoDto);
                 }
                 dynamicDSData.setTitanKey(titanKeyData.getKey().getTitanKey());
@@ -176,7 +184,24 @@ public class DalDynamicDSResource {
 //        appInfoList2.add(appIDInfoDto4);
 //        dynamicDSDataDto2.setAppIds(appInfoList2);
 //        dynamicDSDataList.add(dynamicDSDataDto2);
-        return dynamicDSDataList;
+        Map<String, Integer> checkTimeSwitchCountMap = dalDynamicDSDao.getCheckTimeSwitchCountMap();
+        if (checkTimeSwitchCountMap.containsKey(checkTime)) {
+            checkDynamicDSResponse.setStatusCode(2);
+            checkDynamicDSResponse.setStatisticTime(dalDynamicDSDao.getStatisticTime());
+            checkDynamicDSResponse.setStatisticProgress(dalDynamicDSDao.getStatisticProgress());
+            checkDynamicDSResponse.setSwitchTitanKeyCount(dalDynamicDSDao.getStatisticTitanKeyCount());
+        }
+        else if (checkTime.equalsIgnoreCase(dalDynamicDSDao.getStatisticTime())) {
+            checkDynamicDSResponse.setStatusCode(1);
+            checkDynamicDSResponse.setSwitchTitanKeyCount(dalDynamicDSDao.getStatisticTitanKeyCount());
+            checkDynamicDSResponse.setStatisticProgress(dalDynamicDSDao.getStatisticProgress());
+            checkDynamicDSResponse.setStatisticTime(dalDynamicDSDao.getStatisticTime());
+        }
+        else {
+            checkDynamicDSResponse.setStatusCode(0);
+            checkDynamicDSResponse.setDynamicDSDataList(dynamicDSDataList);
+        }
+        return checkDynamicDSResponse;
     }
 
 //    @GET
@@ -236,34 +261,45 @@ public class DalDynamicDSResource {
                     switchCountTimeList.add(switchCountTime);
                 }
                 titanKeySwitchInfoDto.setSwitches(switchCountTimeList);
-                List<AppIDSwitchInfoDto> appIDSwitchInfoDtoList = new ArrayList<>();
+//                List<AppIDSwitchInfoDto> appIDSwitchInfoDtoList = new ArrayList<>();
+                List<SwitchAppIDInfoDto> appIDSwitchInfoDtoList = new ArrayList<>();
                 for (AppIDInfo appIDInfo : titanKeyData.getValue()) {
-                    AppIDSwitchInfoDto appIDSwitchInfoDto = new AppIDSwitchInfoDto();
-                    appIDSwitchInfoDto.setAppID(appIDInfo.getAppID());
-                    List<DalClientSwitchInfoDto> dalClientList = new ArrayList<>();
-                    for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
-                        DalClientSwitchInfoDto dalClientSwitchInfoDto = new DalClientSwitchInfoDto();
-                        dalClientSwitchInfoDto.setClientIP(switchHostIPInfo.getHostIP());
-                        List<SwitchCountTime> startSwitches = new ArrayList<>();
-                        List<SwitchCountTime> endSwitches = new ArrayList<>();
-                        for (Map.Entry<Integer, Integer> hostIPTime : switchHostIPInfo.getStartSwitchPoint().entrySet()) {
-                            SwitchCountTime switchCountTime = new SwitchCountTime();
-                            switchCountTime.setMinute(hostIPTime.getKey());
-                            switchCountTime.setCount(hostIPTime.getValue());
-                            startSwitches.add(switchCountTime);
-                        }
-                        dalClientSwitchInfoDto.setStartSwitches(startSwitches);
-                        for (Map.Entry<Integer, Integer> hostIPTime : switchHostIPInfo.getEndSwitchPoint().entrySet()) {
-                            SwitchCountTime switchCountTime = new SwitchCountTime();
-                            switchCountTime.setMinute(hostIPTime.getKey());
-                            switchCountTime.setCount(hostIPTime.getValue());
-                            endSwitches.add(switchCountTime);
-                        }
-                        dalClientSwitchInfoDto.setEndSwitches(endSwitches);
-                        dalClientList.add(dalClientSwitchInfoDto);
+                    SwitchAppIDInfoDto switchAppIDInfoDto = new SwitchAppIDInfoDto();
+                    switchAppIDInfoDto.setAppID(appIDInfo.getAppID());
+                    List<SwitchCountTime> appIDSwitches = new ArrayList<>();
+                    for (Map.Entry<Integer, Integer> appIDSwitchTime : appIDInfo.getAppIDSwitchTime().entrySet()) {
+                        SwitchCountTime switchCountTime = new SwitchCountTime();
+                        switchCountTime.setMinute(appIDSwitchTime.getKey());
+                        switchCountTime.setCount(appIDSwitchTime.getValue());
+                        appIDSwitches.add(switchCountTime);
                     }
-                    appIDSwitchInfoDto.setClientList(dalClientList);
-                    appIDSwitchInfoDtoList.add(appIDSwitchInfoDto);
+                    switchAppIDInfoDto.setSwitches(appIDSwitches);
+//                    AppIDSwitchInfoDto appIDSwitchInfoDto = new AppIDSwitchInfoDto();
+//                    appIDSwitchInfoDto.setAppID(appIDInfo.getAppID());
+//                    List<DalClientSwitchInfoDto> dalClientList = new ArrayList<>();
+//                    for (SwitchHostIPInfo switchHostIPInfo : appIDInfo.getHostIPInfolist()) {
+//                        DalClientSwitchInfoDto dalClientSwitchInfoDto = new DalClientSwitchInfoDto();
+//                        dalClientSwitchInfoDto.setClientIP(switchHostIPInfo.getHostIP());
+//                        List<SwitchCountTime> startSwitches = new ArrayList<>();
+//                        List<SwitchCountTime> endSwitches = new ArrayList<>();
+//                        for (Map.Entry<Integer, Integer> hostIPTime : switchHostIPInfo.getStartSwitchPoint().entrySet()) {
+//                            SwitchCountTime switchCountTime = new SwitchCountTime();
+//                            switchCountTime.setMinute(hostIPTime.getKey());
+//                            switchCountTime.setCount(hostIPTime.getValue());
+//                            startSwitches.add(switchCountTime);
+//                        }
+//                        dalClientSwitchInfoDto.setStartSwitches(startSwitches);
+//                        for (Map.Entry<Integer, Integer> hostIPTime : switchHostIPInfo.getEndSwitchPoint().entrySet()) {
+//                            SwitchCountTime switchCountTime = new SwitchCountTime();
+//                            switchCountTime.setMinute(hostIPTime.getKey());
+//                            switchCountTime.setCount(hostIPTime.getValue());
+//                            endSwitches.add(switchCountTime);
+//                        }
+//                        dalClientSwitchInfoDto.setEndSwitches(endSwitches);
+//                        dalClientList.add(dalClientSwitchInfoDto);
+//                    }
+//                    appIDSwitchInfoDto.setClientList(dalClientList);
+                    appIDSwitchInfoDtoList.add(switchAppIDInfoDto);
                 }
                 titanKeySwitchInfoDto.setAppIDList(appIDSwitchInfoDtoList);
                 break;

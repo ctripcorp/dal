@@ -17,9 +17,17 @@
             if (data === undefined || data === null) {
                 return;
             }
+            if (data.statusCode === 1) {
+                loading.html(sprintf("当前查询时间数据正在统计中...TitanKeyCount总数%s，当前已完成%s", data.switchTitanKeyCount, data.statisticProgress));
+                return;
+            }
+            else if (data.statusCode === 2) {
+                loading.html(sprintf("目前系统正在统计%s时间数据...TitanKeyCount总数%s，当前已完成%s", data.statisticTime, data.switchTitanKeyCount, data.statisticProgress));
+                return;
+            }
             var tableBody = "";
             var tableIndex = 0;
-            $.each(data, function (i, n) {
+            $.each(data.dynamicDSDataList, function (i, n) {
                 var rows = n.appIds.length;
                 if (rows > 1) {
                     var rowContent1 = "<tr><td rowspan=\"%s\" id=\"%s\" data-titanKey=\"%s\">%s</td><td rowspan=\"%s\">%s</td><td rowspan=\"%s\" id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td></tr>";
@@ -28,27 +36,29 @@
                     tableBody += sprintf(rowContent1, rows, titanKeyId, n.titanKey, n.titanKey, rows, n.titanKeySwitchCount, rows);
                     tableIndex = tableIndex + rows;
                     $.each(n.appIds, function (j, m) {
-                        var rowContent2 = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
-                        tableBody += sprintf(rowContent2, m.appID, m.hostIPs, m.hostSwitchCount, m.hostSuccessCount);
+                        // var rowContent2 = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                        // tableBody += sprintf(rowContent2, m.appID, m.hostIPs, m.hostSwitchCount, m.hostSuccessCount);
+                        var rowContent2 = "<tr><td>%s</td><td>%s</td><td>%s</td></tr>";
+                        tableBody += sprintf(rowContent2, m.appID, m.hostIPCount, m.appIDSwitchCount);
                     });
                     //tableBody += "<tr><td rowspan=\"2\" id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td></tr>";
                     //tableBody += sprintf("<tr><td rowspan=\"%s\" id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td></tr>", rows);
                 }
                 else if (rows === 1) {
-                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td></tr>";
                     var appIDInfo = null;
                     $.each(n.appIds, function (j, m) {
                         appIDInfo = m;
                     });
                     var titanKeyId = sprintf("titanKey%s",tableIndex);
-                    tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, appIDInfo.appID,  appIDInfo.hostIPs,
-                        appIDInfo.hostSwitchCount, appIDInfo.hostSuccessCount);
+                    tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, appIDInfo.appID,  appIDInfo.hostIPCount,
+                        appIDInfo.appIDSwitchCount);
                     tableIndex = tableIndex + 1;
                 }
                 else {
-                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td></tr>";
                     var titanKeyId = sprintf("titanKey%s",tableIndex);
-                    tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, "",  "", 0, 0);
+                    tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, "",  0, 0);
                     tableIndex = tableIndex + 1;
                 }
             });
@@ -56,9 +66,7 @@
             $("#tableDynamicDS tbody").html(tableBody);
             table.show();
             loading.html("");
-        }).fail(function (e) {
-            loading.html(e);
-        })
+        });
     }
 
     function bindViewButton() {

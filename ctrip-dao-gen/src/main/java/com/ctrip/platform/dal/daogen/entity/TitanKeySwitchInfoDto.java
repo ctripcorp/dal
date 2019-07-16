@@ -10,7 +10,9 @@ public class TitanKeySwitchInfoDto {
 
     private List<SwitchCountTime> switches;
 
-    private List<AppIDSwitchInfoDto> appIDList;
+    //private List<AppIDSwitchInfoDto> appIDList;
+
+    private List<SwitchAppIDInfoDto> appIDList;
 
     public String getTitanKey() {
         return titanKey;
@@ -28,11 +30,20 @@ public class TitanKeySwitchInfoDto {
         this.switches = switches;
     }
 
-    public List<AppIDSwitchInfoDto> getAppIDList() {
+//    public List<AppIDSwitchInfoDto> getAppIDList() {
+//        return appIDList;
+//    }
+//
+//    public void setAppIDList(List<AppIDSwitchInfoDto> appIDList) {
+//        this.appIDList = appIDList;
+//    }
+
+
+    public List<SwitchAppIDInfoDto> getAppIDList() {
         return appIDList;
     }
 
-    public void setAppIDList(List<AppIDSwitchInfoDto> appIDList) {
+    public void setAppIDList(List<SwitchAppIDInfoDto> appIDList) {
         this.appIDList = appIDList;
     }
 }

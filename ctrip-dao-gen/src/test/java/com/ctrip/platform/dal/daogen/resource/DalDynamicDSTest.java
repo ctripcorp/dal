@@ -28,14 +28,14 @@ public class DalDynamicDSTest {
     @Test
     public void fixedCheckTest() throws Exception {
         DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
-        dalDynamicDSDao.checkSwitchDataSource("2019070811", null, TriggerMethod.MANUAL);
+        //dalDynamicDSDao.checkSwitchDataSource("2019070811", null, TriggerMethod.MANUAL);
     }
 
     @Test
     public void parseCatTransactionTest() {
         CatSwitchDSDataProvider catSwitchDSDataProvider = new CatSwitchDSDataProvider();
         List<String> ips = new ArrayList<>();
-        catSwitchDSDataProvider.checkAppRefreshDataSourceTransaction("dalservice2db_w","110402", "2019070319", ips, "FAT");
+        //catSwitchDSDataProvider.checkAppRefreshDataSourceTransaction("dalservice2db_w","110402", "2019070319", ips, "FAT");
         System.out.println();
     }
 

@@ -17,10 +17,8 @@ import com.google.common.cache.LoadingCache;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by taochen on 2019/7/2.
@@ -32,6 +30,10 @@ public class DalDynamicDSDao {
 
     private static final int STAY_TIME = 4;
 
+    private static final long ONE_SECOND = 1000; //ms
+
+    private static final int CAT_LIMIT = 2;
+
     private static final String TITANKEY_APPID = "100010061";
 
     private static final String TITAN_KEY_GET =
@@ -41,18 +43,31 @@ public class DalDynamicDSDao {
 
     private ScheduledExecutorService executor = null;
 
-    private Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap = new HashMap<>();
+//    private Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap = new HashMap<>();
 
     private DynamicDSAppIDProvider dynamicDSAppIDProvider = new TitanDynamicDSAppIDProvider();
 
     private SwitchDSDataProvider catSwitchDSDataProvider = new CatSwitchDSDataProvider();
 
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
+
+   // private boolean isRunning = false;
+
+    private int statisticProgress = 0;
+
+    private int statisticTitanKeyCount = 0;
+
+    private String statisticTime = "";
+
+    private Map<String, Integer> checkTimeSwitchCountMap = new ConcurrentHashMap<>();
+
     //初始化guava cache
     private final LoadingCache<String, Map<SwitchTitanKey, List<AppIDInfo>>> titanKeySwitchCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(STAY_TIME, TimeUnit.DAYS).build(new CacheLoader<String, Map<SwitchTitanKey, List<AppIDInfo>>>() {
+            .expireAfterAccess(STAY_TIME, TimeUnit.DAYS).build(new CacheLoader<String, Map<SwitchTitanKey, List<AppIDInfo>>>() {
                 @Override
                 public Map<SwitchTitanKey, List<AppIDInfo>> load(String timeString) throws Exception {
-                    checkSwitchDataSource(timeString, null, TriggerMethod.MANUAL);
+                    Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap = new HashMap<>();
+                    checkSwitchDataSource(timeString, null, TitanKeyAppIDMap, TriggerMethod.MANUAL);
                     return TitanKeyAppIDMap;
                 }
             });
@@ -73,13 +88,12 @@ public class DalDynamicDSDao {
             @Override
             public void run() {
                 String checkTime = getBeforeOneHourDateString(new Date());
-                checkSwitchDataSource(checkTime, null, TriggerMethod.AUTO);
+                checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
             }
         }, initDelay, FIXED_RATE, TimeUnit.SECONDS);
     }
 
-    public void checkSwitchDataSource(String checkTime, Set<String> checkTitanKeys, TriggerMethod method) {
-        TitanKeyAppIDMap.clear();
+    public void checkSwitchDataSource(String checkTime, Set<String> checkTitanKeys, Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap, TriggerMethod method) {
         Env envEntity = Foundation.server().getEnv();
         String env = envEntity.name().toLowerCase();
         Set<SwitchTitanKey> TitanKeys = catSwitchDSDataProvider.getSwitchTitanKey(checkTime, checkTitanKeys, env);
@@ -91,32 +105,75 @@ public class DalDynamicDSDao {
             switchTitanKeys.append(switchTitanKey).append(",");
         }
         Cat.logEvent("TitanKeySwitch", switchTitanKeys.toString());
-        initSwitchTitanKeyAndAppID(TitanKeys, env, checkTime, method);
+
+        if (isRunning.compareAndSet(false, true)) {
+            initSwitchTitanKeyAndAppID(TitanKeys, env, checkTime, TitanKeyAppIDMap, method);
+        }
+        else if (!statisticTime.equalsIgnoreCase(checkTime)){
+            //todo 内存待优化
+            checkTimeSwitchCountMap.put(checkTime, TitanKeys.size());
+        }
     }
 
-    private synchronized void initSwitchTitanKeyAndAppID(Set<SwitchTitanKey> TitanKeys, String env, String checkTime, TriggerMethod method) {
+    private void initSwitchTitanKeyAndAppID(Set<SwitchTitanKey> TitanKeys, String env, String checkTime, Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap, TriggerMethod method) {
+        statisticTime = checkTime;
+        statisticTitanKeyCount = TitanKeys.size();
         Map<String, List<AppIDInfo>> TitanKeyStringAppIDMap = new HashMap<>();
         List<SwitchTitanKey> switchTitanKeyList = getTitanKeyInfo(TitanKeys, env);
         Transaction t = Cat.newTransaction("DynamicDataSource", "catAPI_dal");
         try {
+            Cat.logEvent("SwitchTitanKeyCount", String.valueOf(switchTitanKeyList.size()));
+            System.out.println("SwitchTitanKeyCount:" + switchTitanKeyList.size());
+            int i = 0;
             for (SwitchTitanKey switchTitanKey : switchTitanKeyList) {
                 List<String> appIDList = dynamicDSAppIDProvider.getDynamicDSAppID(switchTitanKey.getPermissions());
                 List<AppIDInfo> switchAppIDList = new ArrayList<>();
-                int i = 0;
+                ++i;
+                //System.out.print(i +" appID count: " + appIDList.size());
+                long consumeTime = 0;
+                int catApiCount = 0;
+                long startTimeCatAppID = System.currentTimeMillis();
                 for (String appID : appIDList) {
-                    List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
-                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(switchTitanKey.getTitanKey(), appID, checkTime, hostIPList, env);
-                    //cat 限流策略
-                    Thread.sleep(600);
+                    //List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
+                    long startTimeCatHostIPs = System.currentTimeMillis();
+                    List<String> hostIPList = new ArrayList<>();
+                    Map<Integer, Integer> appIDSwitchTime = new HashMap<>();
+                    boolean isSwitch = false;
+                    //if (catApiCount < CAT_LIMIT) {
+                        isSwitch = catSwitchDSDataProvider.isSwitchInAppID(switchTitanKey.getTitanKey(), appID, checkTime, hostIPList, appIDSwitchTime, env);
+                        catApiCount++;
+                   // }
+//                    long endTimeCatHostIPs = System.currentTimeMillis();
+//                    consumeTime += (endTimeCatHostIPs - startTimeCatHostIPs);
+//                    if (consumeTime >= ONE_SECOND) {
+//                        catApiCount = 0;
+//                        consumeTime = 0;
+//                    }
+//                    else if (consumeTime < ONE_SECOND && catApiCount == CAT_LIMIT) {
+//                        //cat 限流策略
+//                        Thread.sleep(ONE_SECOND - consumeTime);
+//                        catApiCount = 0;
+//                        //System.out.println("sleep time: " + (ONE_SECOND - consumeTime));
+//                        consumeTime = 0;
+//                    }
+//                    if (catApiCount % 2 == 0) {
+//                        Thread.sleep(400);
+//                    }
                     if (isSwitch) {
                         AppIDInfo appIDInfo = new AppIDInfo();
                         appIDInfo.setAppID(appID);
                         appIDInfo.setHostIPInfolist(hostIPList);
+                        appIDInfo.setAppIDSwitchTime(appIDSwitchTime);
                         switchAppIDList.add(appIDInfo);
                     }
                 }
+                long endTimeCatAppID = System.currentTimeMillis();
+                statisticProgress = i;
+                System.out.println("appIDs time: " + (endTimeCatAppID - startTimeCatAppID));
+                //System.out.println(" cat api time: " + (endTimeCatHostIPs - startTimeCatHostIPs) + "ms. appid count: " +  appIDList.size());
                 TitanKeyStringAppIDMap.put(switchTitanKey.getTitanKey(), switchAppIDList);
-                Cat.logEvent("SwitchTitanKey", switchTitanKey.getTitanKey());
+                Cat.logEvent("SwitchTitanKey", "index: " + i + " name: " + switchTitanKey.getTitanKey());
+                System.out.println("index: " + i + " name: " + switchTitanKey.getTitanKey());
             }
             t.setStatus(Transaction.SUCCESS);
             if (TriggerMethod.MANUAL.equals(method)) {
@@ -136,6 +193,8 @@ public class DalDynamicDSDao {
             t.setStatus(e);
         } finally {
             t.complete();
+            isRunning.compareAndSet(true, false);
+            statisticTime = "";
         }
     }
 
@@ -196,5 +255,21 @@ public class DalDynamicDSDao {
 
     public String getNowDateString(Date checkTime) {
         return formatCheckTime(checkTime);
+    }
+
+    public int getStatisticProgress() {
+        return statisticProgress;
+    }
+
+    public int getStatisticTitanKeyCount() {
+        return statisticTitanKeyCount;
+    }
+
+    public String getStatisticTime() {
+        return statisticTime;
+    }
+
+    public Map<String, Integer> getCheckTimeSwitchCountMap() {
+        return checkTimeSwitchCountMap;
     }
 }

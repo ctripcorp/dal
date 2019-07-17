@@ -18,11 +18,11 @@
                 return;
             }
             if (data.statusCode === 1) {
-                loading.html(sprintf("当前查询时间数据正在统计中...TitanKeyCount总数%s，当前已完成%s", data.switchTitanKeyCount, data.statisticProgress));
+                loading.html(sprintf("当前查询时间数据正在统计中...TitanKey总数%s，当前已完成%s", data.switchTitanKeyCount, data.statisticProgress));
                 return;
             }
             else if (data.statusCode === 2) {
-                loading.html(sprintf("目前系统正在统计%s时间数据...TitanKeyCount总数%s，当前已完成%s", data.statisticTime, data.switchTitanKeyCount, data.statisticProgress));
+                loading.html(sprintf("目前系统正在统计%s时间数据...TitanKey总数%s，当前已完成%s", data.statisticTime, data.switchTitanKeyCount, data.statisticProgress));
                 return;
             }
             var tableBody = "";

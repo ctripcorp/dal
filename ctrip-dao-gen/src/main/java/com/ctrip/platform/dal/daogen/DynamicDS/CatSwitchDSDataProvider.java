@@ -26,15 +26,15 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     private static final String CAT_EVENT_TITAN_UPDATE_UAT =
             "http://cat.uat.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
-//    private static final String CAT_TRANSACTION_URL_FAT =
-//            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
     private static final String CAT_TRANSACTION_URL_FAT =
-        "http://cat.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
+            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
+//    private static final String CAT_TRANSACTION_URL_FAT =
+//        "http://cat.ctripcorp.com/cat/r/t?domain=%s&date=%s&ip=%s&type=%s&min=-1&max=-1&name=%s&forceDownload=json";
 
-//    private static final String CAT_EVENT_TITAN_UPDATE_FAT =
-//            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
     private static final String CAT_EVENT_TITAN_UPDATE_FAT =
-        "http://cat.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
+            "http://cat.fws.qa.nt.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
+//    private static final String CAT_EVENT_TITAN_UPDATE_FAT =
+//        "http://cat.ctripcorp.com/cat/r/e?ip=All&domain=100005701&date=%s&type=%s&min=-1&max=-1&op=graphs&forceDownload=json";
 
     private static final String DAL_CONFIG_TRANSACTION_TYPE = "DAL.configure";
 
@@ -58,7 +58,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         long startTimeCatHostIPs = System.currentTimeMillis();
         boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, checkTime, hostIPList, appIDSwitchTime, env);
         long endTimeCatHostIPs = System.currentTimeMillis();
-        System.out.println("cat api time: " + (endTimeCatHostIPs - startTimeCatHostIPs));
+        //System.out.println("cat api time: " + (endTimeCatHostIPs - startTimeCatHostIPs));
 //        if (isAppSwitch) {
 //            for (String ip : ips) {
 //                SwitchHostIPInfo switchHostIPInfo = checkIpRefreshDataSourceTransaction(titanKey, appID, ip, checkTime, env);

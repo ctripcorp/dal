@@ -59,9 +59,12 @@ public class DalDynamicDSResource {
             }
         }
         //dalDynamicDSDao.checkSwitchDataSource(checkTime, checkTitanKeySet, TriggerMethod.MANUAL);
-        Map<SwitchTitanKey, List<AppIDInfo>> fullTitanKeyAppIDMap = dalDynamicDSDao.getTitanKeyAppIDMap(checkTime);
+        Map<SwitchTitanKey, List<AppIDInfo>> fullTitanKeyAppIDMap = new HashMap<>();
+        //todo 两个相同时间的请求间隔时间短还是会出现阻塞的情况
+        if (!checkTime.equalsIgnoreCase(dalDynamicDSDao.getStatisticTime())) {
+            fullTitanKeyAppIDMap = dalDynamicDSDao.getTitanKeyAppIDMap(checkTime);
+        }
         //filter titankey
-
         Map<SwitchTitanKey, List<AppIDInfo>> TitanKeyAppIDMap = new HashMap<>();
         TitanKeyAppIDMap.putAll(fullTitanKeyAppIDMap);
         if (checkTitanKeySet != null && checkTitanKeySet.size() > 0) {

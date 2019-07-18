@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
+import com.ctrip.platform.dal.daogen.report.App;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import com.google.common.util.concurrent.RateLimiter;
@@ -53,11 +54,12 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
     private RateLimiter rateLimiter = RateLimiter.create(20);
 
     @Override
-    public boolean isSwitchInAppID(String titanKey, String appID, String checkTime, List<String> hostIPList, Map<Integer, Integer> appIDSwitchTime, String env) {
+    public AppIDInfo checkSwitchInAppID(String titanKey, String checkTime, String appID, String env) {
         List<String> ips = new ArrayList<>();
-        long startTimeCatHostIPs = System.currentTimeMillis();
-        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, checkTime, hostIPList, appIDSwitchTime, env);
-        long endTimeCatHostIPs = System.currentTimeMillis();
+        Map<Integer, Integer> appIDSwitchTime = new HashMap<>();
+        //long startTimeCatHostIPs = System.currentTimeMillis();
+        boolean isAppSwitch = checkAppRefreshDataSourceTransaction(titanKey, appID, checkTime, ips, appIDSwitchTime, env);
+        //long endTimeCatHostIPs = System.currentTimeMillis();
         //System.out.println("cat api time: " + (endTimeCatHostIPs - startTimeCatHostIPs));
 //        if (isAppSwitch) {
 //            for (String ip : ips) {
@@ -67,7 +69,16 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
 //                }
 //            }
 //        }
-        return isAppSwitch;
+        AppIDInfo appIDInfo = null;
+        if (isAppSwitch) {
+            appIDInfo = new AppIDInfo();
+            appIDInfo.setAppID(appID);
+            appIDInfo.setHostIPInfolist(ips);
+            appIDInfo.setAppIDSwitchTime(appIDSwitchTime);
+            Map<Integer, Integer> appIDSuccessTime = getEndSwitchAppIDPoint(titanKey, appID, checkTime, env);
+            appIDInfo.setAppIDSuccessTime(appIDSuccessTime);
+        }
+        return appIDInfo;
     }
 
     @Override
@@ -162,6 +173,35 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         }
         ips.addAll(configReport.getHostIPs());
         return true;
+    }
+
+    public Map<Integer, Integer> getEndSwitchAppIDPoint(String titanKey, String appID, String date, String env) {
+        String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_TRANSACTION_URL_FAT : "UAT".equalsIgnoreCase(env) ?
+                CAT_TRANSACTION_URL_UAT : CAT_TRANSACTION_URL_PRO;
+        String url = String.format(formatUrl, appID, date, ALL_IP, DAL_DATASOURCE_TRANSACTION_TYPE, String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));
+        CatTransactionEntity catTransactionEntity = null;
+        Map<Integer, Integer> endSwitchPoint = new HashMap<>();
+        for (int i = 0; i < RETRY_TIME; i++) {
+            try {
+                rateLimiter.acquire(1);
+                catTransactionEntity = HttpUtil.getJSONEntity(CatTransactionEntity.class, url, null, HttpMethod.HttpGet);
+            } catch (Exception e) {
+                Cat.logError("get appid:" + appID + "Switch end Info fail.", e);
+            }
+        }
+        Object names = null;
+        if (catTransactionEntity != null) {
+            names = parseCatTransactionReportNames(catTransactionEntity.getReport(), ALL_IP, DAL_DATASOURCE_TRANSACTION_TYPE);
+        }
+        if (names != null) {
+            List<TransactionNameRange> ranges = parseCatTransactionReportRanges(names.toString(), String.format(DAL_DATASOURCE_TRANSACTION_NAME, titanKey));
+            for (TransactionNameRange range : ranges) {
+                if (range.getCount() != 0) {
+                    endSwitchPoint.put(range.getValue(), range.getCount());
+                }
+            }
+        }
+        return endSwitchPoint;
     }
 
     public SwitchHostIPInfo checkIpRefreshDataSourceTransaction(String titanKey, String appID, String ip, String date, String env) {

@@ -38,27 +38,27 @@
                     $.each(n.appIds, function (j, m) {
                         // var rowContent2 = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
                         // tableBody += sprintf(rowContent2, m.appID, m.hostIPs, m.hostSwitchCount, m.hostSuccessCount);
-                        var rowContent2 = "<tr><td>%s</td><td>%s</td><td>%s</td></tr>";
-                        tableBody += sprintf(rowContent2, m.appID, m.hostIPCount, m.appIDSwitchCount);
+                        var rowContent2 = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                        tableBody += sprintf(rowContent2, m.appID, m.hostIPCount, m.appIDSwitchCount, m.appIDSuccessCount);
                     });
                     //tableBody += "<tr><td rowspan=\"2\" id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td></tr>";
                     //tableBody += sprintf("<tr><td rowspan=\"%s\" id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td></tr>", rows);
                 }
                 else if (rows === 1) {
-                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
                     var appIDInfo = null;
                     $.each(n.appIds, function (j, m) {
                         appIDInfo = m;
                     });
                     var titanKeyId = sprintf("titanKey%s",tableIndex);
                     tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, appIDInfo.appID,  appIDInfo.hostIPCount,
-                        appIDInfo.appIDSwitchCount);
+                        appIDInfo.appIDSwitchCount, appIDInfo.appIDSuccessCount);
                     tableIndex = tableIndex + 1;
                 }
                 else {
-                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                    var rowTemplate = "<tr><td id=\"%s\" data-titanKey=\"%s\">%s</td><td>%s</td><td id=\"showDetails\"><a href = \"javascript:void(0)\">详情</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
                     var titanKeyId = sprintf("titanKey%s",tableIndex);
-                    tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, "",  0, 0);
+                    tableBody += sprintf(rowTemplate, titanKeyId, n.titanKey, n.titanKey, n.titanKeySwitchCount, "",  0, 0, 0);
                     tableIndex = tableIndex + 1;
                 }
             });

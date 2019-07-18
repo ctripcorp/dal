@@ -18,6 +18,8 @@ public class AppIDInfoDto {
 
     private int appIDSwitchCount;
 
+    private int appIDSuccessCount;
+
     public String getAppID() {
         return appID;
     }
@@ -65,5 +67,13 @@ public class AppIDInfoDto {
 
     public void setAppIDSwitchCount(int appIDSwitchCount) {
         this.appIDSwitchCount = appIDSwitchCount;
+    }
+
+    public int getAppIDSuccessCount() {
+        return appIDSuccessCount;
+    }
+
+    public void setAppIDSuccessCount(int appIDSuccessCount) {
+        this.appIDSuccessCount = appIDSuccessCount;
     }
 }

@@ -27,7 +27,7 @@ public class DalDynamicDSDao {
 
     private static final int STAY_TIME = 4;
 
-    private static final int LRU_CACHE_SIZE = 2;
+    private static final int LRU_CACHE_SIZE = 20;
 
     private static final String TITANKEY_APPID = "100010061";
 
@@ -97,7 +97,7 @@ public class DalDynamicDSDao {
         }
         StringBuilder switchTitanKeys = new StringBuilder();
         for (SwitchTitanKey switchTitanKey : TitanKeys) {
-            switchTitanKeys.append(switchTitanKey).append(",");
+            switchTitanKeys.append(switchTitanKey.getTitanKey()).append(",");
         }
         Cat.logEvent("TitanKeySwitch", switchTitanKeys.toString());
 
@@ -127,14 +127,8 @@ public class DalDynamicDSDao {
                 for (String appID : appIDList) {
                     //List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
                     long startTimeCatHostIPs = System.currentTimeMillis();
-                    List<String> hostIPList = new ArrayList<>();
-                    Map<Integer, Integer> appIDSwitchTime = new HashMap<>();
-                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(switchTitanKey.getTitanKey(), appID, checkTime, hostIPList, appIDSwitchTime, env);
-                    if (isSwitch) {
-                        AppIDInfo appIDInfo = new AppIDInfo();
-                        appIDInfo.setAppID(appID);
-                        appIDInfo.setHostIPInfolist(hostIPList);
-                        appIDInfo.setAppIDSwitchTime(appIDSwitchTime);
+                    AppIDInfo appIDInfo = catSwitchDSDataProvider.checkSwitchInAppID(switchTitanKey.getTitanKey(), checkTime, appID, env);
+                    if (appIDInfo != null) {
                         switchAppIDList.add(appIDInfo);
                     }
                 }

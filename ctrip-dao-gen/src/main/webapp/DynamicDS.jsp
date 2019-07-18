@@ -72,6 +72,7 @@
                                         <%--<th>Start Time</th>--%>
                                         <%--<th>End Time</th>--%>
                                         <th>AppID SwitchCount</th>
+                                        <th>AppID SuccessCount</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>

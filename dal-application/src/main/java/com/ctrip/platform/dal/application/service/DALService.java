@@ -4,12 +4,16 @@ import com.ctrip.platform.dal.application.dao.DALServiceDao;
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class DALService {
@@ -19,6 +23,8 @@ public class DALService {
 
   @Autowired
   private DALServiceDao sqlServerDao;
+
+  private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   public List<DALServiceTable> queryAllMySql() throws Exception {
       return mySqlDao.queryAll(null);
@@ -99,4 +105,20 @@ public class DALService {
     age.add(20);
     return sqlServerDao.queryTopWithNoOrderby(age,new DalHints(),10);
   }
+
+  public void mockCatTransaction(String type, String name, long millis) {
+    executor.submit(() -> {
+      Transaction t = Cat.newTransaction(type, name);
+      try {
+        Thread.sleep(millis);
+        t.setStatus(Transaction.SUCCESS);
+      } catch (Exception e) {
+        Cat.logError(e);
+        t.setStatus(e);
+      } finally {
+        t.complete();
+      }
+    });
+  }
+
 }

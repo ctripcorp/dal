@@ -100,11 +100,11 @@ public class DALServiceController {
   public String mockPoolWaitAlert(@RequestParam(name = "millis", required = false) Long millis) {
     String type = "DAL.alert.poolWait";
     String name = "Connection::waitConnection:jdbc:mysql://mock";
-    return mockPoolWaitAlert(type, name, millis);
+    return mockCatTransaction(type, name, millis);
   }
 
   @RequestMapping("/mockCatTransaction")
-  public String mockPoolWaitAlert(@RequestParam(name = "type", required = false) String type,
+  public String mockCatTransaction(@RequestParam(name = "type", required = false) String type,
                                   @RequestParam(name = "name", required = false) String name,
                                   @RequestParam(name = "millis", required = false) Long millis) {
     millis = millis == null ? 100 : millis;

@@ -40,7 +40,7 @@ public class DalFiremanDependency implements FiremanDependency {
 
     @Override
     public int mhaSwitchMaxExecuteTimeoutS() {
-        return 20;
+        return 120;
     }
 
     @Override

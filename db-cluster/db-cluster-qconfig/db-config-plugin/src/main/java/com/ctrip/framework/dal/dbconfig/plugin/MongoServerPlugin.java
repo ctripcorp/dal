@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
@@ -34,10 +35,11 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
     private static Logger logger = LoggerFactory.getLogger(MongoServerPlugin.class);
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
+    private PluginConfigManager pluginConfigManager;
 
     @Override
     public void init() {
-        //ignore
+        pluginConfigManager = new PluginConfigManager(getQconfigService());
     }
 
     @Override
@@ -106,7 +108,7 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
         profile = CommonHelper.formatProfileForLpt(profile);
         EnvProfile envProfile = new EnvProfile(profile);
 
-        PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+        PluginConfig config = pluginConfigManager.getPluginConfig(envProfile);
         //check request schema is https
         checkHttps(request, config);
 
@@ -141,7 +143,7 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
 
             EnvProfile envProfile = new EnvProfile(profile);
 
-            PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+            PluginConfig config = pluginConfigManager.getPluginConfig(envProfile);
             CryptoManager cryptoManager = new CryptoManager(config);
 
             //noParent check [2017-10-31]

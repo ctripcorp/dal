@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
@@ -29,8 +30,8 @@ public class TitanKeySSLCodeGetHandler extends BaseAdminHandler implements Titan
     private static final String URI = "/plugins/titan/sslcode";
     private static final String METHOD = "GET";
 
-    public TitanKeySSLCodeGetHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeySSLCodeGetHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class TitanKeySSLCodeGetHandler extends BaseAdminHandler implements Titan
             EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
             Preconditions.checkArgument(profile != null && !Strings.isNullOrEmpty(profile.formatProfile()),
                     "profile参数不能为空");
-            PluginConfig config = new PluginConfig(getQconfigService(), profile);
+            PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
 
             //AdminSite白名单检查
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);

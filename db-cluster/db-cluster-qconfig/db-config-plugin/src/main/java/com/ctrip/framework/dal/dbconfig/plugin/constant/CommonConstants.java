@@ -32,6 +32,7 @@ public interface CommonConstants {
     String IGNITE_PREWARM_CACHE_ENABLED = "ignite.prewarm.cache.enabled";
     String IGNITE_PREWARM_CACHE_APPIDS = "ignite.prewarm.cache.appIds";
     String CACHE_NORMAL_REFRESH_INTERVAL_MIN = "cache.normal.refresh.interval.min";
+    String PLUGIN_CONFIG_REFRESH_INTERVAL_MS = "plugin.config.refresh.interval.ms";
     String CMS_GET_APP_URL = "cms.get.app.url";
     String APPID_IP_CHECK_BATCH_FETCH_COUNT = "appId.ip.check.batch.fetch.count";
 

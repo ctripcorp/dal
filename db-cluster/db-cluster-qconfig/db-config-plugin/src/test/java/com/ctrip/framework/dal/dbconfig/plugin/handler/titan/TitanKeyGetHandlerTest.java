@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.KeyGetOutputEntity;
@@ -28,7 +29,8 @@ public class TitanKeyGetHandlerTest implements TitanConstants {
 
     public TitanKeyGetHandlerTest() {
         QconfigService service = new MockQconfigService();
-        handler = new TitanKeyGetHandler(service);
+        PluginConfigManager pluginConfigManager = new PluginConfigManager(service);
+        handler = new TitanKeyGetHandler(service, pluginConfigManager);
     }
 
     @Before

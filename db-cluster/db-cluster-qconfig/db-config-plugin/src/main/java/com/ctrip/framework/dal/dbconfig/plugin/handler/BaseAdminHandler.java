@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.CommonConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
@@ -17,18 +18,24 @@ import java.util.List;
 public abstract class BaseAdminHandler implements AdminHandler, CommonConstants {
 
     private QconfigService qconfigService;
+    private PluginConfigManager pluginConfigManager;
 
-    protected BaseAdminHandler(QconfigService qconfigService) {
+    protected BaseAdminHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
         this.qconfigService = qconfigService;
+        this.pluginConfigManager = pluginConfigManager;
     }
 
     protected QconfigService getQconfigService() {
         return qconfigService;
     }
 
+    protected PluginConfigManager getPluginConfigManager() {
+        return pluginConfigManager;
+    }
+
     // todo: 不同plugin配置
     protected boolean checkPermission(String clientIp, EnvProfile profile) {
-        PluginConfig config = new PluginConfig(qconfigService, profile);
+        PluginConfig config = pluginConfigManager.getPluginConfig(profile);
         try {
             String ipWhitelist = config.getParamValue(TitanConstants.TITAN_ADMIN_SERVER_LIST);
             return checkPermission(ipWhitelist, clientIp);

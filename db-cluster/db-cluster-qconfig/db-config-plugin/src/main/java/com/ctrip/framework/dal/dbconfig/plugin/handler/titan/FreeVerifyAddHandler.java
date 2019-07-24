@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.FreeVerifyInputEntity;
@@ -42,8 +43,8 @@ import java.util.Properties;
  */
 public class FreeVerifyAddHandler extends BaseAdminHandler implements TitanConstants {
 
-    public FreeVerifyAddHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public FreeVerifyAddHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -95,7 +96,7 @@ public class FreeVerifyAddHandler extends BaseAdminHandler implements TitanConst
                     EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
                     Preconditions.checkArgument(profile != null && profile.formatProfile() != null,
                             "profile参数不能为空");
-                    PluginConfig config = new PluginConfig(getQconfigService(), profile);
+                    PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                     boolean sitePermission = checkPermission(clientIp, profile);
                     if (sitePermission) {

@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.KeyGetOutputEntity;
@@ -15,7 +16,6 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.*;
@@ -23,13 +23,12 @@ import qunar.tc.qconfig.plugin.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Get titan key handler
  * Sample:
- *  [GET]   http://qconfig.uat.qa.nt.ctripcorp.com/plugins/titan/config?appid=100010061&titankey=test1DB_W&env=uat
- *
+ * [GET]   http://qconfig.uat.qa.nt.ctripcorp.com/plugins/titan/config?appid=100010061&titankey=test1DB_W&env=uat
+ * <p>
  * Created by lzyan on 2017/8/18.
  */
 public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstants {
@@ -40,8 +39,8 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public TitanKeyGetHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyGetHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -87,24 +86,23 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
             //AdminSite白名单检查
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean permitted = checkPermission(clientIp, profile);
-            if(permitted){
+            if (permitted) {
                 //first set input profile, then set real profile from getConfigPropContent()
                 String[] inputProfileArray = new String[1];
                 inputProfileArray[0] = profile.formatProfile();
 
                 //获取TitanKey文件内容, 同时设置实际返回的profile到inputProfileArray
                 Properties properties = getConfigPropContent(titankey, inputProfileArray);
-                if(properties != null && !properties.isEmpty()) {
+                if (properties != null && !properties.isEmpty()) {
                     keyGetOutputEntity = buildKeyGetOutputEntityFromProperties(properties);
                     String subEnv = CommonHelper.getSubEnvFromProfile(inputProfileArray[0]);
                     keyGetOutputEntity.setSubEnv(subEnv); //set actual profile
                 }
-            }else{
+            } else {
                 t.addData("postHandleDetail(): sitePermission=false, not allow to get!");
                 Cat.logEvent("TitanKeyGetPlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to get! clientIp=" + clientIp);
                 pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_READ, "Access ip whitelist check fail! clientIp=" + clientIp);
             }
-
 
 
             //set into return result
@@ -132,15 +130,15 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
         //get latest from qconfig
         List<ConfigField> configFieldList = Lists.newArrayList(configField);
         List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeyGetHandler", configFieldList); //Exact match ???
-        if(configDetailList != null && !configDetailList.isEmpty()){
+        if (configDetailList != null && !configDetailList.isEmpty()) {
             ConfigDetail cd = configDetailList.get(0);
             ConfigField cm = cd.getConfigField();
             String content = cd.getContent();
-            if(cm != null){
+            if (cm != null) {
                 String realProfile = cm.getProfile();
                 inputProfileArray[0] = realProfile; //Notice: here set actual profile to return
                 String topProfile = CommonHelper.formatProfileTopFromProfile(realProfile);
-                PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(topProfile));
+                PluginConfig config = getPluginConfigManager().getPluginConfig(new EnvProfile(topProfile));
                 CryptoManager cryptoManager = new CryptoManager(config);
 
                 //decrypt in value
@@ -156,7 +154,7 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
     }
 
     //build KeyGetOutputEntity
-    private KeyGetOutputEntity buildKeyGetOutputEntityFromProperties(Properties properties){
+    private KeyGetOutputEntity buildKeyGetOutputEntityFromProperties(Properties properties) {
         KeyGetOutputEntity keyGetOutputEntity = new KeyGetOutputEntity();
         keyGetOutputEntity.setKeyName(properties.getProperty(CONNECTIONSTRING_KEY_NAME));
         keyGetOutputEntity.setProviderName(properties.getProperty(CONNECTIONSTRING_PROVIDER_NAME));
@@ -167,7 +165,7 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
 
         //password : RC4 encode
         String password = properties.getProperty(CONNECTIONSTRING_PASSWORD);
-        if(!Strings.isNullOrEmpty(password)){
+        if (!Strings.isNullOrEmpty(password)) {
             password = RC4.encrypt(password, keyGetOutputEntity.getKeyName());
         }
         keyGetOutputEntity.setPassword(password);
@@ -177,7 +175,7 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
         //timeOut
         Integer timeOut = null;
         Object timeOutObj = properties.get(TIMEOUT);
-        if(timeOutObj != null){
+        if (timeOutObj != null) {
             timeOut = Integer.valueOf(timeOutObj.toString());
         }
         keyGetOutputEntity.setTimeOut(timeOut);
@@ -186,7 +184,7 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
         //enabled
         Boolean enabled = null;
         Object enabledObj = properties.get(ENABLED);
-        if(enabledObj != null){
+        if (enabledObj != null) {
             enabled = Boolean.valueOf(enabledObj.toString());
         }
         keyGetOutputEntity.setEnabled(enabled);
@@ -202,7 +200,7 @@ public class TitanKeyGetHandler extends BaseAdminHandler implements TitanConstan
         //id
         Integer id = null;
         Object idObj = properties.get(ID);
-        if(idObj != null){
+        if (idObj != null) {
             id = Integer.valueOf(idObj.toString());
         }
         keyGetOutputEntity.setId(id);

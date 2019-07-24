@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.SiteOutputEntity;
@@ -43,8 +44,8 @@ public class TitanKeyListByTimeHandler extends BaseAdminHandler implements Titan
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public TitanKeyListByTimeHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyListByTimeHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class TitanKeyListByTimeHandler extends BaseAdminHandler implements Titan
                     "TitanKeyListByTimeHandler", group, profile.formatProfile(), dateTimeStr);
             List<SiteOutputEntity> siteOutputEntityList = new ArrayList<>();
             if(cdList != null){
-                PluginConfig config = new PluginConfig(getQconfigService(), profile);
+                PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
                 CryptoManager cryptoManager = new CryptoManager(config);
                 //AdminSite白名单检查
                 String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);

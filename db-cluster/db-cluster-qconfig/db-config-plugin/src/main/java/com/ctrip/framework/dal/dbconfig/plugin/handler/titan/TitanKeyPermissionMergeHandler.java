@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.SiteInputEntity;
@@ -48,8 +49,8 @@ public class TitanKeyPermissionMergeHandler extends BaseAdminHandler implements 
     private static final String URI = "/plugins/titan/config/permission/merge";
     private static final String METHOD = "POST";
 
-    public TitanKeyPermissionMergeHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyPermissionMergeHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -107,7 +108,7 @@ public class TitanKeyPermissionMergeHandler extends BaseAdminHandler implements 
                     Preconditions.checkArgument(!Strings.isNullOrEmpty(siteInputEntity.getWhiteList()), "whiteList参数不能为空");
 
                     EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
-                    PluginConfig config = new PluginConfig(getQconfigService(), profile);
+                    PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
 
                     //AdminSite白名单检查
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);

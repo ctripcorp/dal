@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.PermissionCheckEnum;
@@ -34,10 +35,11 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     private static Logger logger = LoggerFactory.getLogger(TitanServerPlugin.class);
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
+    private PluginConfigManager pluginConfigManager;
 
     @Override
     public void init() {
-        //ignore
+        pluginConfigManager = new PluginConfigManager(getQconfigService());
     }
 
     @Override
@@ -108,7 +110,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         EnvProfile envProfile = new EnvProfile(profile);
 
         //check request schema is https [2017-12-14]
-        PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+        PluginConfig config = pluginConfigManager.getPluginConfig(envProfile);
         checkHttps(request, config);
 
         //format <titankey>
@@ -147,7 +149,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
 
             EnvProfile envProfile = new EnvProfile(profile);
 
-            PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+            PluginConfig config = pluginConfigManager.getPluginConfig(envProfile);
             CryptoManager cryptoManager = new CryptoManager(config);
 
             EnvProfile rawProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);

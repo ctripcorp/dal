@@ -33,7 +33,7 @@ public class MongoClusterUpdateHandlerTest implements MongoConstants {
 
     public MongoClusterUpdateHandlerTest() {
         QconfigService service = new MockQconfigService();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(service);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         handler = new MongoClusterUpdateHandler(service, pluginConfigManager);
     }
 

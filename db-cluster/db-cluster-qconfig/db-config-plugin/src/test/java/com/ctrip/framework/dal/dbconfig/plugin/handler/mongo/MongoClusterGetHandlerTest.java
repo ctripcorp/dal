@@ -30,7 +30,7 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
 
     public MongoClusterGetHandlerTest() {
         QconfigService service = new MockQconfigService();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(service);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         handler = new MongoClusterGetHandler(service, pluginConfigManager);
     }
 

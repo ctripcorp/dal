@@ -37,9 +37,25 @@ public class PluginConfigManagerTest {
         fatProfile = new EnvProfile(FAT_ENV);
     }
 
+
+    @Test
+    public void testEnvProfileIsNull() throws Exception {
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(qconfigService);
+        boolean success = true;
+        try {
+            PluginConfig fatPluginConfig = pluginConfigManager.getPluginConfig(null);
+            String keyServiceUri = fatPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
+            assert (!Strings.isNullOrEmpty(keyServiceUri));
+        } catch (Exception e) {
+            success = false;
+            e.printStackTrace();
+        }
+        assert !success;
+    }
+
     @Test
     public void getParamValue() throws Exception {
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(qconfigService);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(qconfigService);
         PluginConfig fatPluginConfig = pluginConfigManager.getPluginConfig(fatProfile);
         String keyServiceUri = fatPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
         String sslCode = fatPluginConfig.getParamValue(TitanConstants.SSLCODE);
@@ -67,7 +83,7 @@ public class PluginConfigManagerTest {
 
     @Test
     public void getParamValueConcurrence() throws Exception {
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(qconfigService);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(qconfigService);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         for (int i = 0; i < THREAD_COUNT; i++) {
             executor.execute(new Runnable() {
@@ -75,24 +91,29 @@ public class PluginConfigManagerTest {
                 public void run() {
                     int count = 0;
                     for (int i = 0; i < EXECUTE_COUNT; i++) {
-                        PluginConfig fatPluginConfig = pluginConfigManager.getPluginConfig(fatProfile);
-                        String keyServiceUri = fatPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
-                        String sslCode = fatPluginConfig.getParamValue(TitanConstants.SSLCODE);
-                        assert (!Strings.isNullOrEmpty(keyServiceUri));
-                        assert (!Strings.isNullOrEmpty(sslCode));
+                        try {
+                            PluginConfig fatPluginConfig = pluginConfigManager.getPluginConfig(fatProfile);
+                            String keyServiceUri = fatPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
+                            String sslCode = fatPluginConfig.getParamValue(TitanConstants.SSLCODE);
+                            assert (!Strings.isNullOrEmpty(keyServiceUri));
+                            assert (!Strings.isNullOrEmpty(sslCode));
 
-                        PluginConfig uatPluginConfig = pluginConfigManager.getPluginConfig(uatProfile);
-                        keyServiceUri = uatPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
-                        sslCode = uatPluginConfig.getParamValue(TitanConstants.SSLCODE);
-                        assert (!Strings.isNullOrEmpty(keyServiceUri));
-                        assert (!Strings.isNullOrEmpty(sslCode));
+                            PluginConfig uatPluginConfig = pluginConfigManager.getPluginConfig(uatProfile);
+                            keyServiceUri = uatPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
+                            sslCode = uatPluginConfig.getParamValue(TitanConstants.SSLCODE);
+                            assert (!Strings.isNullOrEmpty(keyServiceUri));
+                            assert (!Strings.isNullOrEmpty(sslCode));
 
-                        PluginConfig proPluginConfig = pluginConfigManager.getPluginConfig(proProfile);
-                        keyServiceUri = proPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
-                        sslCode = proPluginConfig.getParamValue(TitanConstants.SSLCODE);
-                        assert (!Strings.isNullOrEmpty(keyServiceUri));
-                        assert (!Strings.isNullOrEmpty(sslCode));
-                        count++;
+                            PluginConfig proPluginConfig = pluginConfigManager.getPluginConfig(proProfile);
+                            keyServiceUri = proPluginConfig.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
+                            sslCode = proPluginConfig.getParamValue(TitanConstants.SSLCODE);
+                            assert (!Strings.isNullOrEmpty(keyServiceUri));
+                            assert (!Strings.isNullOrEmpty(sslCode));
+                            count++;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
                     }
                     System.out.println(Thread.currentThread().getName() + ":" + count);
                     latch.countDown();

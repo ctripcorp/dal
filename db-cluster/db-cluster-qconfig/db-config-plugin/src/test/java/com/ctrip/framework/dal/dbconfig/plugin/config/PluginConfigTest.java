@@ -41,6 +41,22 @@ public class PluginConfigTest {
         assert (!Strings.isNullOrEmpty(sslcode));
     }
 
+//    @Test
+    public void testGetFailed() throws Exception {
+        // delete (plugin.config.refresh.interval.ms) in class MockQconfigService
+        boolean success = true;
+        try {
+            PluginConfig config = new PluginConfig(qconfigService, envProfile);
+            String keyServiceUri = config.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
+            System.out.println("keyServiceUri=" + keyServiceUri);
+            assert (!Strings.isNullOrEmpty(keyServiceUri));
+        } catch (Exception e) {
+            success = false;
+            e.printStackTrace();
+        }
+        assert !success;
+    }
+
     @Test
     public void getParamValueConcurrence() throws Exception {
         PluginConfig config = new PluginConfig(qconfigService, envProfile);

@@ -35,11 +35,9 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     private static Logger logger = LoggerFactory.getLogger(TitanServerPlugin.class);
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
-    private PluginConfigManager pluginConfigManager;
 
     @Override
     public void init() {
-        pluginConfigManager = new PluginConfigManager(getQconfigService());
     }
 
     @Override
@@ -110,7 +108,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         EnvProfile envProfile = new EnvProfile(profile);
 
         //check request schema is https [2017-12-14]
-        PluginConfig config = pluginConfigManager.getPluginConfig(envProfile);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
         checkHttps(request, config);
 
         //format <titankey>
@@ -149,7 +147,7 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
 
             EnvProfile envProfile = new EnvProfile(profile);
 
-            PluginConfig config = pluginConfigManager.getPluginConfig(envProfile);
+            PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
             CryptoManager cryptoManager = new CryptoManager(config);
 
             EnvProfile rawProfile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);

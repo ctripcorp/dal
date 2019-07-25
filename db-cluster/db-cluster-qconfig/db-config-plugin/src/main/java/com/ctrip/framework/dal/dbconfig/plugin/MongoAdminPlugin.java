@@ -25,7 +25,7 @@ public class MongoAdminPlugin extends AdminPluginAdapter {
     @Override
     public void init() {
         dispatcher = new AdminHandlerDispatcher();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(getQconfigService());
+        PluginConfigManager pluginConfigManager = getPluginConfigManager();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
         adminHandlers.add(new MongoClusterPostHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new MongoClusterUpdateHandler(getQconfigService(), pluginConfigManager));

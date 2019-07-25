@@ -35,8 +35,8 @@ public abstract class BaseAdminHandler implements AdminHandler, CommonConstants 
 
     // todo: 不同plugin配置
     protected boolean checkPermission(String clientIp, EnvProfile profile) {
-        PluginConfig config = pluginConfigManager.getPluginConfig(profile);
         try {
+            PluginConfig config = pluginConfigManager.getPluginConfig(profile);
             String ipWhitelist = config.getParamValue(TitanConstants.TITAN_ADMIN_SERVER_LIST);
             return checkPermission(ipWhitelist, clientIp);
         } catch (Exception e) {

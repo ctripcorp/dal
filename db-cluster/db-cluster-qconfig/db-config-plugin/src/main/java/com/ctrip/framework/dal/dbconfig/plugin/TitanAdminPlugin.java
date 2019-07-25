@@ -23,7 +23,7 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
     @Override
     public void init() {
         dispatcher = new AdminHandlerDispatcher();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(getQconfigService());
+        PluginConfigManager pluginConfigManager = getPluginConfigManager();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
         adminHandlers.add(new TitanKeyPostHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeyForceDataWashHandler(getQconfigService(), pluginConfigManager));

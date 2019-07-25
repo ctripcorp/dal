@@ -24,7 +24,7 @@ public class AdminHandlerDispatcherTest {
     @Test
     public void testRegister1() {
         QconfigService service = new MockQconfigService();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(service);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         List<AdminHandler> handlers = new ArrayList<>();
         handlers.add(new MongoClusterPostHandler(service, pluginConfigManager));
         handlers.add(new MongoClusterPostHandler(service, pluginConfigManager));
@@ -41,7 +41,7 @@ public class AdminHandlerDispatcherTest {
     @Test
     public void testRegister2() {
         QconfigService service = new MockQconfigService();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(service);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         List<AdminHandler> handlers = new ArrayList<>();
         handlers.add(new MongoClusterPostHandler(service, pluginConfigManager));
         handlers.add(new DbNameListHandler(service, pluginConfigManager));

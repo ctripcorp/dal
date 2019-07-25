@@ -29,7 +29,7 @@ public class TitanKeyGetHandlerTest implements TitanConstants {
 
     public TitanKeyGetHandlerTest() {
         QconfigService service = new MockQconfigService();
-        PluginConfigManager pluginConfigManager = new PluginConfigManager(service);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         handler = new TitanKeyGetHandler(service, pluginConfigManager);
     }
 

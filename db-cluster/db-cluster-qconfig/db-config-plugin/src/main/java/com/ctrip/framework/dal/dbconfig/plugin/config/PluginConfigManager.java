@@ -1,15 +1,14 @@
 package com.ctrip.framework.dal.dbconfig.plugin.config;
 
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
+import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
 import com.dianping.cat.Cat;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.plugin.QconfigService;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,36 +17,53 @@ import java.util.Map;
 public class PluginConfigManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PluginConfigManager.class);
-    private static final String PLUGIN_ENV = "pro,uat,fat";
     private QconfigService qconfigService;
-    private Map<String, PluginConfig> pluginConfigCache = Maps.newHashMap();
+    private final Map<String, PluginConfig> pluginConfigCache = Maps.newConcurrentMap();
+    private volatile static PluginConfigManager pluginConfigManager = null;
 
-    public PluginConfigManager(QconfigService qconfigService) {
+    private PluginConfigManager(QconfigService qconfigService) {
         this.qconfigService = qconfigService;
-        fillCache(pluginConfigCache);
     }
 
-    public PluginConfig getPluginConfig(EnvProfile envProfile) {
+    public static PluginConfigManager getInstance(QconfigService qconfigService) {
+        if (null == pluginConfigManager) {
+            synchronized (PluginConfigManager.class) {
+                if (null == pluginConfigManager) {
+                    pluginConfigManager = new PluginConfigManager(qconfigService);
+                }
+            }
+        }
+        return pluginConfigManager;
+    }
+
+    public PluginConfig getPluginConfig(EnvProfile envProfile) throws Exception {
         PluginConfig pluginConfig = null;
         if (envProfile != null && !Strings.isNullOrEmpty(envProfile.formatTopProfile())) {
-            pluginConfig = pluginConfigCache.get(envProfile.formatTopProfile());
+            pluginConfig = getFromCache(envProfile);
         } else {
-            Cat.logError("TitanQConfigPlugin.Config", new RuntimeException("getPluginConfig(): profile is null or empty!"));
+            DbConfigPluginException exception = new DbConfigPluginException("getPluginConfig(): profile is null or empty!");
+            Cat.logError("TitanQconfigPlugin.Config", exception);
+            throw exception;
         }
 
         return pluginConfig;
     }
 
-    private void fillCache(Map<String, PluginConfig> pluginConfigCache) {
-        logger.info("fillCache(): fill cache data begin ...");
-        Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
-        List<String> pluginConfigEnv = splitter.splitToList(PLUGIN_ENV);
-        for (String env : pluginConfigEnv) {
-            EnvProfile envProfile = new EnvProfile(env);
-            PluginConfig pluginConfig = new PluginConfig(qconfigService, envProfile);
-            pluginConfigCache.put(envProfile.formatTopProfile(), pluginConfig);
+    private PluginConfig getFromCache(EnvProfile envProfile) throws Exception {
+        String topProfile = envProfile.formatTopProfile();
+        PluginConfig pluginConfig = pluginConfigCache.get(topProfile);
+        if (null == pluginConfig) {
+            synchronized (pluginConfigCache) {
+                pluginConfig = pluginConfigCache.get(topProfile);
+                if (null == pluginConfig) {
+                    logger.info("getFromCache(): initialize [{}] plugin config begin ...", topProfile);
+                    pluginConfig = new PluginConfig(qconfigService, envProfile);
+                    pluginConfigCache.put(topProfile, pluginConfig);
+                    logger.info("getFromCache(): initialize [{}] plugin config end ...", topProfile);
+                }
+            }
         }
-        logger.info("fillCache(): fill cache data end ...");
+        return pluginConfig;
     }
 
 }

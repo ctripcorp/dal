@@ -27,7 +27,7 @@ public class AppIdIpManagerTest {
     private static final String ACCESS_TOKEN = "96ddbe67728bc756466a226ec050456d";
     private static final int TIMEOUT = 1000;
     private static final List<String> PASS_CODES = Lists.newArrayList("0", "4");
-    private static final int EXECUTE_COUNT = 1000;
+    private static final int EXECUTE_COUNT = 500;
     private static final int THREAD_COUNT = 10;
     private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
     private static final String PAAS_CHECK_APP_ID_IP_URL = "http://paas.ctripcorp.com/api/v2/titan/verify/";

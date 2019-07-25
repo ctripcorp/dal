@@ -64,8 +64,8 @@ public class PluginConfig {
 
                     long refreshInterval = getRefreshInterval();
                     if (refreshInterval != refreshIntervalMs) {
-                        Cat.logEvent("Plugin.Config.Changed", String.format("%s:%s:%s",
-                                topProfile, refreshInterval, refreshIntervalMs));
+                        Cat.logEvent("Plugin.Config.Refresh.Interval.Changed", String.format("%s:%s->%s",
+                                topProfile, refreshIntervalMs, refreshInterval));
                         logger.info("registerTimer(): [{}] remote refresh interval changed: newRefreshInterval: {}, oldRefreshInterval: {}.",
                                 topProfile, refreshInterval, refreshIntervalMs);
                         refreshIntervalMs = refreshInterval;

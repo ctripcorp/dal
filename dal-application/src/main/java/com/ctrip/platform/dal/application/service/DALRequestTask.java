@@ -71,6 +71,6 @@ public class DALRequestTask {
                     }
                 }
             }
-        }, 0, 1000, TimeUnit.MICROSECONDS);
+        }, 0, 10000, TimeUnit.MICROSECONDS);
     }
 }

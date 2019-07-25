@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -94,4 +95,21 @@ public class DALServiceController {
   public List<String> queryTopWithNoOrderby() throws Exception{
     return dalService.queryTopWithNoOrderby();
   }
+
+  @RequestMapping("/mockPoolWaitAlert")
+  public String mockPoolWaitAlert(@RequestParam(name = "millis", required = false) Long millis) {
+    String type = "DAL.alert.poolWait";
+    String name = "Connection::waitConnection:mock";
+    return mockCatTransaction(type, name, millis);
+  }
+
+  @RequestMapping("/mockCatTransaction")
+  public String mockCatTransaction(@RequestParam(name = "type", required = false) String type,
+                                  @RequestParam(name = "name", required = false) String name,
+                                  @RequestParam(name = "millis", required = false) Long millis) {
+    millis = millis == null ? 100 : millis;
+    dalService.mockCatTransaction(type, name, millis);
+    return "ok";
+  }
+
 }

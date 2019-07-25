@@ -15,6 +15,9 @@
 <html lang="zh-CN">
 
 <head>
+    <style type="text/css">
+
+    </style>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,8 +31,11 @@
 </head>
 <body>
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active">
+        <li role="presentation" class="active" id="hourReport">
             <a href="#dynamicDS" aria-controls="dynamicDS" role="tab" data-toggle="tab">DAL 动态数据源切换统计</a>
+        </li>
+        <li role="presentation" id="weekReport">
+            <a href="#switchReport" aria-controls="switchReport" role="tab" data-toggle="tab">DAL 切换TitanKey周报</a>
         </li>
     </ul>
     <div class="tab-content">
@@ -81,6 +87,44 @@
                         </div>
                     </div>
                     <div id="details">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane" id="switchReport">
+            <div class="panel">
+                <div class="panel-heading">
+                    <%--<p style="font-size: 20px;color:#FF0000;margin-left: 20px">由于Cat限流策略，统计数据显示可能会比较慢！！！</p>--%>
+                    <div id="viewOneWeekData" >
+                        <input type="datetime-local" id="settingStartDate" style="margin-left: 20px" data-checkTime=""/>
+                        <span style="margin-left: 10px">-</span>
+                        <input type="datetime-local" id="settingEndDate" style="margin-left: 10px" data-checkTime=""/>
+                        <button id="viewRangeButton" style="margin-left: 10px" class="font-size">查看数据</button>
+                    </div>
+                    <div>
+                        <span id="dateRange" style="margin-left: 20px;margin-top: 50px" class="bg-success"></span>
+                    </div>
+                    <div class="panel-body">
+                        <div><span id="loadingSpan2" style="font-size: 20px;margin-left: 20px"></span></div>
+                        <div id="divTable2" class="display-none">
+                            <div class="scroll table-size">
+                                <table id="tableDynamicDSWeek" class="table table-striped table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>TitanKey</th>
+                                        <th>TitanKey SwitchCount</th>
+                                        <th>Client AppId</th>
+                                        <th>Client IP Count</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
-import com.ctrip.platform.dal.daogen.report.App;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import com.google.common.util.concurrent.RateLimiter;
@@ -45,7 +44,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
 
     private static final String DAL_DATASOURCE_TRANSACTION_NAME = "DataSource::createDataSource:%s";
 
-    private static final String DAL_TITAN_UPDATE_TYPE = "Titan.MHAUpdate.TitanKey";
+    private static final String DAL_TITAN_UPDATE_TYPE = "Titan.MHAUpdate.TitanKey:%s";
 
     private static final String ALL_IP = "All";
 
@@ -86,7 +85,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         Set<SwitchTitanKey> titanKeys = new HashSet<>();
         String formatUrl = "FAT".equalsIgnoreCase(env) ? CAT_EVENT_TITAN_UPDATE_FAT : "UAT".equalsIgnoreCase(env) ?
                 CAT_EVENT_TITAN_UPDATE_UAT : CAT_EVENT_TITAN_UPDATE_PRO;
-        String url = String.format(formatUrl, checkTime, DAL_TITAN_UPDATE_TYPE);
+        String url = String.format(formatUrl, checkTime, String.format(DAL_TITAN_UPDATE_TYPE, env));
         CatTransactionEntity catTransactionEntity = null;
         for (int i = 0; i < RETRY_TIME; i++) {
             try {
@@ -107,7 +106,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
         if (types == null) {
             return null;
         }
-        Object namesObject = parseCatTransactionReportNames(configReport, ALL_IP, DAL_TITAN_UPDATE_TYPE);
+        Object namesObject = parseCatTransactionReportNames(configReport, ALL_IP, String.format(DAL_TITAN_UPDATE_TYPE, env));
         if (namesObject != null) {
             JSONObject namesJsonObject = JSON.parseObject(namesObject.toString());
             for (Object key : namesJsonObject.keySet()) {
@@ -136,6 +135,11 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
             }
             return titanKeys;
         }
+        return null;
+    }
+
+    @Override
+    public TransactionSimple getTransactionSimpleByMessageId(String appID, String ip, long hour, int index) {
         return null;
     }
 

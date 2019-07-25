@@ -33,11 +33,12 @@ public class DaoGenApplication extends ResourceConfig {
 //        Transaction t = Cat.newTransaction("DAL.configure", "DataSourceConfig::refreshDataSourceConfig:dalservice2db_w");
 //        t.setStatus(Transaction.SUCCESS);
 //        t.complete();
-//
+
 //        Transaction t1 = Cat.newTransaction("DAL.dataSource", "DataSource::createDataSource:dalservice2db_w");
 //        t1.setStatus(Transaction.SUCCESS);
 //        t1.complete();
 
-//        Cat.logEvent("Titan.MHAUpdate.TitanKey", "dalservice2db_w");
+//        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservice2db_w");
+//        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservicedb");
     }
 }

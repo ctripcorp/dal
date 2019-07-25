@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import com.alibaba.fastjson.JSON;
+import com.ctrip.platform.dal.daogen.DalDynamicDSDBDao;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
 import com.ctrip.platform.dal.daogen.entity.*;
 import org.apache.commons.lang.StringUtils;
@@ -36,9 +37,15 @@ public class DalDynamicDSResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("getSwitchDSData")
-    public void get() {
-
+    @Path("getSwitchDSDataOneWeek")
+    public List<TitanKeySwitchInfoDB> getSwitchDSDataOneWeek(@QueryParam("startCheckTime") String settingStartDate, @QueryParam("endCheckTime") String settingEndDate) throws Exception {
+        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
+        Date startCheckDate = sdf.parse(settingStartDate.replace('T', ' '));
+        Date endCheckDate = sdf.parse(settingEndDate.replace('T', ' '));
+        String startCheckTime = dalDynamicDSDao.formatCheckTime(startCheckDate);
+        String endCheckTime = dalDynamicDSDao.formatCheckTime(endCheckDate);
+        DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
+        return dalDynamicDSDao.mergeSwitchData(dalDynamicDSDBDao.queryInRange(startCheckTime, endCheckTime));
     }
 
     @GET

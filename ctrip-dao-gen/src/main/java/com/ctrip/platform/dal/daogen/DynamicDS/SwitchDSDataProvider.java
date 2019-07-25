@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.DynamicDS;
 
 import com.ctrip.platform.dal.daogen.entity.AppIDInfo;
 import com.ctrip.platform.dal.daogen.entity.SwitchTitanKey;
+import com.ctrip.platform.dal.daogen.entity.TransactionSimple;
 
 import java.util.Set;
 
@@ -12,4 +13,6 @@ public interface SwitchDSDataProvider {
     public AppIDInfo checkSwitchInAppID(String titanKey, String checkTime, String appID, String env);
 
     public Set<SwitchTitanKey> getSwitchTitanKey(String checkTime, Set<String> checkTitanKeys, String env);
+
+    public TransactionSimple getTransactionSimpleByMessageId(String appID, String ip, long hour, int index);
 }

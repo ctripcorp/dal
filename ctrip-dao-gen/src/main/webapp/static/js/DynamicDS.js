@@ -3,6 +3,8 @@
         init();
         bindViewButton();
         bindTitanKeySwitchData();
+        bindTabSwitch();
+        bindViewRangeButton();
     });
 
     function getDynamicDSData(settingDate, checkTitanKeys) {
@@ -79,7 +81,7 @@
             var limitDate = getNowTimeHour();
 
             if (date >= limitDate) {
-                alert("设置事件不能大于" + limitDate);
+                alert("设置时间不能大于" + limitDate);
                 return;
             }
             var checkTitanKeys = $("#checkTitanKey").val();
@@ -88,6 +90,57 @@
             var toDate = getFromDate(settime) + " to " + getToDate(settime);
             $("#settingDate").data("checkTime", getCheckTime(settime));
             $("#toDate").html(toDate);
+        });
+    }
+
+    function bindTabSwitch() {
+        $(document.body).on("click", "#hourReport", function () {
+            $("#dynamicDS").show();
+            $("#switchReport").hide();
+        });
+        $(document.body).on("click", "#weekReport", function () {
+            $("#dynamicDS").hide();
+            $("#switchReport").show();
+        });
+    }
+
+    function bindViewRangeButton() {
+        $(document.body).on("click", "#viewRangeButton", function () {
+            var settingStartDate = $("#settingStartDate").val();
+            var settingEndDate = $("#settingEndDate").val();
+            if (settingStartDate === null || settingEndDate === null) {
+                return;
+            }
+            var startDate = formatDateTimeLoacl(settingStartDate);
+            var endDate = formatDateTimeLoacl(settingEndDate);
+            if (startDate >= endDate) {
+                alert("设置开始时间不能大于结束时间");
+                return;
+            }
+            getDynamicDSDataRange(settingStartDate, settingEndDate);
+        });
+    }
+
+    function getDynamicDSDataRange(settingStartDate, settingEndDate) {
+        var table = $("#divTable2");
+        var loading = $("#loadingSpan2");
+        loading.html("正在加载中。。。");
+        table.hide();
+        $.getJSON("/rest/dynamicDS/getSwitchDSDataOneWeek", {
+            startCheckTime: settingStartDate,
+            endCheckTime: settingEndDate
+        }, function (data) {
+            if (data === undefined || data === null) {
+                return;
+            }
+            var tableBody = "";
+            $.each(data, function (i, n) {
+                var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                tableBody += sprintf(rowTemplate, i + 1, n.titanKey, n.switchCount, n.appIDCount, n.ipCount);
+            });
+            $("#tableDynamicDSWeek tbody").html(tableBody);
+            table.show();
+            loading.html("");
         });
     }
 
@@ -125,6 +178,8 @@
         var timeString = timeToString(nowtime);
         $("#settingDate").val(timeString);
         $("#settingDate").data("checkTime", getCheckTime(nowtime));
+        $("#settingStartDate").val(timeString);
+        $("#settingEndDate").val(timeString);
         var toDate = getFromDate(nowtime) + " to " + getToDate(nowtime);
         $("#toDate").html(toDate);
     }

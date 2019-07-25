@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.ctrip.framework.dal</groupId>
         <artifactId>db-cluster-qconfig</artifactId>
-        <version>1.0.9</version>
+        <version>1.0.10</version>
     </parent>
     <artifactId>db-config-plugin</artifactId>
 

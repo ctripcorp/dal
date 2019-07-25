@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.mongo;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
@@ -42,8 +43,8 @@ public class MongoClusterUpdateHandler extends BaseAdminHandler implements Mongo
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public MongoClusterUpdateHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public MongoClusterUpdateHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -157,7 +158,7 @@ public class MongoClusterUpdateHandler extends BaseAdminHandler implements Mongo
         MongoClusterEntity oldCluster = GsonUtils.json2T(encryptedOldConf, MongoClusterEntity.class);
 
         // encrypt new cluster userId and password
-        PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
         CryptoManager cryptoManager = new CryptoManager(config);
         encrypt(newCluster, cryptoManager);
 

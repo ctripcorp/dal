@@ -72,6 +72,8 @@ public class Step5AppIdIpCheckServiceValidator extends AbstractValidator {
     private AppIdIpCheckEntity buildAppIdIpCheckEntity() {
         String appIdIpCheckServiceUrl = pluginProp.getProperty(CMS_GET_GROUP_SERVICE_URL);
         String serviceToken = pluginProp.getProperty(CMS_ACCESS_TOKEN);
+        String paasAppIdIpCheckServiceUrl = pluginProp.getProperty(APPID_IP_CHECK_SERVICE_URL);
+        String paasServiceToken = pluginProp.getProperty(APPID_IP_CHECK_SERVICE_TOKEN);
 
         // get timeoutMs
         int timeoutMs = 1000;    //default 1s
@@ -93,6 +95,8 @@ public class Step5AppIdIpCheckServiceValidator extends AbstractValidator {
         appIdIpCheckEntity.setServiceToken(serviceToken);
         appIdIpCheckEntity.setTimeoutMs(timeoutMs);
         appIdIpCheckEntity.setPassCodeList(passCodeList);
+        appIdIpCheckEntity.setPaasServiceUrl(paasAppIdIpCheckServiceUrl);
+        appIdIpCheckEntity.setPaasServiceToken(paasServiceToken);
         return appIdIpCheckEntity;
     }
 

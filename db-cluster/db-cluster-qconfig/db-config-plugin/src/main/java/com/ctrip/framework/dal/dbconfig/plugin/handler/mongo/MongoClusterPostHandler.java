@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.mongo;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
@@ -39,8 +40,8 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public MongoClusterPostHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public MongoClusterPostHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -135,7 +136,7 @@ public class MongoClusterPostHandler extends BaseAdminHandler implements MongoCo
         //build config from <mongoClusterEntity>
         Properties rawProp = format2Properties(mongoClusterEntity);
 
-        PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
         CryptoManager cryptoManager = new CryptoManager(config);
 
         //get current config from qconfig

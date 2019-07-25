@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.SiteInputEntity;
@@ -73,8 +74,8 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public TitanKeyPostHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyPostHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -195,7 +196,7 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
         //build updateConf from <siteInputEntity>
         Properties rawProp = format2Properties(siteInputEntity);
 
-        PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
         CryptoManager cryptoManager = new CryptoManager(config);
 
         //get current config from qconfig

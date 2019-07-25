@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.KeyInfo;
@@ -47,8 +48,8 @@ public class TitanKeyForceDataWashHandler extends BaseAdminHandler implements Ti
     private ExecutorService reEncryptService = Executors.newSingleThreadExecutor();
     private AtomicBoolean m_atomic = new AtomicBoolean(true);
 
-    public TitanKeyForceDataWashHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyForceDataWashHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -142,7 +143,7 @@ public class TitanKeyForceDataWashHandler extends BaseAdminHandler implements Ti
                             int pageNo = 1;
                             int pageSize = 10;
                             //get current latest sslCode
-                            PluginConfig config = new PluginConfig(getQconfigService(), profile);
+                            PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
                             String newSslCode = config.getParamValue(SSLCODE);
 
                             //build query
@@ -191,7 +192,7 @@ public class TitanKeyForceDataWashHandler extends BaseAdminHandler implements Ti
                 StringBuilder sb = new StringBuilder();
                 boolean isFirst = true;
 
-                PluginConfig config = new PluginConfig(getQconfigService(), profile);
+                PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
                 CryptoManager cryptoManager = new CryptoManager(config);
                 String keyServiceUri = config.getParamValue(KEYSERVICE_SOA_URL);
 

@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.IndexBuildOutputEntity;
@@ -41,8 +42,8 @@ import java.util.Set;
  */
 public class IndexBuildHandler extends BaseAdminHandler implements TitanConstants {
 
-    public IndexBuildHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public IndexBuildHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class IndexBuildHandler extends BaseAdminHandler implements TitanConstant
                     "profile参数不能为空");
 
             //AdminSite白名单检查
-            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), envProfile);
+            PluginConfig pluginConfig = getPluginConfigManager().getPluginConfig(envProfile);
             boolean indexEnabled = Boolean.parseBoolean(pluginConfig.getParamValue(INDEX_ENABLED));
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean sitePermission = checkPermission(clientIp, envProfile);

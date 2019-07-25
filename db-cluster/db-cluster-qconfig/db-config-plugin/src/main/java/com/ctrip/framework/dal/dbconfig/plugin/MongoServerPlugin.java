@@ -37,7 +37,6 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
 
     @Override
     public void init() {
-        //ignore
     }
 
     @Override
@@ -106,7 +105,7 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
         profile = CommonHelper.formatProfileForLpt(profile);
         EnvProfile envProfile = new EnvProfile(profile);
 
-        PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
         //check request schema is https
         checkHttps(request, config);
 
@@ -141,7 +140,7 @@ public class MongoServerPlugin extends ServerPluginAdapter implements MongoConst
 
             EnvProfile envProfile = new EnvProfile(profile);
 
-            PluginConfig config = new PluginConfig(getQconfigService(), envProfile);
+            PluginConfig config = getPluginConfigManager().getPluginConfig(envProfile);
             CryptoManager cryptoManager = new CryptoManager(config);
 
             //noParent check [2017-10-31]

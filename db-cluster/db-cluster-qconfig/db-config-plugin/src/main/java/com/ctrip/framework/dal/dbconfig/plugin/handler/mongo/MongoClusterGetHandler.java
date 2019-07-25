@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.mongo;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
@@ -39,8 +40,8 @@ public class MongoClusterGetHandler extends BaseAdminHandler implements MongoCon
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public MongoClusterGetHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public MongoClusterGetHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class MongoClusterGetHandler extends BaseAdminHandler implements MongoCon
             needDecryptPro.put(MongoConstants.CONNECTIONSTRING_USER_ID, mongoCluster.getUserId());
             needDecryptPro.put(TitanConstants.SSLCODE, mongoCluster.getSslCode());
 
-            PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(profile));
+            PluginConfig config = getPluginConfigManager().getPluginConfig(new EnvProfile(profile));
             CryptoManager cryptoManager = new CryptoManager(config);
 
             Properties decryptedProp = cryptoManager.decrypt(dataSourceCrypto, keyService, needDecryptPro);

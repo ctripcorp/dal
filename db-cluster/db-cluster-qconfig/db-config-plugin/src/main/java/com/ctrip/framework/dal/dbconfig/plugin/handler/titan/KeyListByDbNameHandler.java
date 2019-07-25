@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
@@ -38,8 +39,8 @@ import java.util.Set;
  */
 public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanConstants {
 
-    public KeyListByDbNameHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public KeyListByDbNameHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
 
 
             //AdminSite白名单检查
-            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), envProfile);
+            PluginConfig pluginConfig = getPluginConfigManager().getPluginConfig(envProfile);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean sitePermission = checkPermission(clientIp, envProfile);
             if (sitePermission) {

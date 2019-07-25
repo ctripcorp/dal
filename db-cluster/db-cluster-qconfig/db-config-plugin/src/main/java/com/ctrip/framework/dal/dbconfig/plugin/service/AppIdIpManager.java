@@ -45,6 +45,7 @@ public class AppIdIpManager {
     private static final String GROUP = "group";
     private static final String GROUPS = "groups";
     private static final String NORMAL_STATUS = "NORMAL";
+    private static final String APPID_IP_CHECK_REQUEST_TEMPLATE = "{\"app_id\": \"%s\", \"env\": \"%s\", \"ip\": \"%s\"}";
 
     public List<AppIdIpCheckEntity> getAllAppIdIp(String env) {
         List<AppIdIpCheckEntity> appIdIps = Lists.newLinkedList();
@@ -274,6 +275,56 @@ public class AppIdIpManager {
         } catch (Exception e) {
             t.setStatus(e);
             Cat.logError("checkAppIdIp(): check error, just let it go!", e);
+        } finally {
+            t.complete();
+        }
+        return returnCode;
+    }
+
+    protected Integer checkAppIdIpByPaaS(AppIdIpCheckEntity appIdIp) {
+        Integer returnCode = PAAS_RETURN_CODE_FAIL_INNER;
+        Transaction t = Cat.newTransaction("AppIdIpCheck.CheckAppIdIpByPaaS", String.format(CAT_TRANSACTION_FORMAT, appIdIp.getClientAppId(), appIdIp.getClientIp()));
+        try {
+            // Sample: http://paas.ctripcorp.com/api/v2/titan/verify/
+            String appIdIpCheckServiceUrl = appIdIp.getPaasServiceUrl();
+            String clientAppId = appIdIp.getClientAppId();
+            String clientIp = appIdIp.getClientIp();
+            String env = appIdIp.getEnv();
+            String serviceToken = appIdIp.getPaasServiceToken();
+            int timeoutMs = appIdIp.getTimeoutMs();
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(appIdIpCheckServiceUrl), "paasAppIdIpCheckServiceUrl=null, please check config item 'appId.ip.check.service.url'!");
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(clientAppId), "clientAppId=null, please check again!");
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(clientIp), "clientIp=null, please check again!");
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(env), "env=null, please check again!");
+
+            // {"app_id": "100006124", "env": "fat", "ip": "10.5.55.161"}
+            String request = String.format(APPID_IP_CHECK_REQUEST_TEMPLATE, clientAppId, env, clientIp);
+
+            t.addData("url", appIdIpCheckServiceUrl);
+            t.addData("request", request);
+            t.addData("timeoutMs", timeoutMs);
+
+            Map<String, String> headers = Maps.newHashMap();
+            headers.put("Content-Type", "application/json");
+            if (!Strings.isNullOrEmpty(serviceToken)) {
+                headers.put("X-Service-Token", serviceToken);
+            }
+            String body = RequestExecutor.getInstance().executePost(appIdIpCheckServiceUrl, headers, request, timeoutMs);
+            //Sample:   {"return_code": 0, "error_msg": ""}
+            JsonParser parser = new JsonParser();
+            JsonObject jsonObj = parser.parse(body).getAsJsonObject();
+            returnCode = jsonObj.get("return_code").getAsInt();
+            Cat.logEvent("AppIdIpCheckService.Validator.PaaS.ReturnCode", String.valueOf(returnCode), Event.SUCCESS, "body=" + body);
+
+            t.setStatus(Message.SUCCESS);
+        } catch (SocketTimeoutException e) {
+            t.setStatus(Message.SUCCESS);
+            Cat.logEvent("AppIdIpCheck.CheckAppIdIpByPaaS.SocketTimeout",
+                    String.format(CAT_TRANSACTION_FORMAT, appIdIp.getClientAppId(), appIdIp.getClientIp()), Event.SUCCESS, e.getMessage());
+            logger.warn("checkAppIdIpByPaaS(): check timeout, just let it go!", e);
+        } catch (Exception e) {
+            t.setStatus(e);
+            Cat.logError("CheckAppIdIpByPaaS(): check error, just let it go!", e);
         } finally {
             t.complete();
         }

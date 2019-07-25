@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.*;
@@ -22,24 +23,25 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
     @Override
     public void init() {
         dispatcher = new AdminHandlerDispatcher();
+        PluginConfigManager pluginConfigManager = getPluginConfigManager();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
-        adminHandlers.add(new TitanKeyPostHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeyForceDataWashHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeyGetHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeyListByTimeHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeyListHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeyMHAUpdateHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeySSLCodeGetHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeySSLCodeUpdateHandler(getQconfigService()));
+        adminHandlers.add(new TitanKeyPostHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeyForceDataWashHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeyGetHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeyListByTimeHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeyListHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeyMHAUpdateHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeySSLCodeGetHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeySSLCodeUpdateHandler(getQconfigService(), pluginConfigManager));
 
-        adminHandlers.add(new DbNameListHandler(getQconfigService()));
-        adminHandlers.add(new KeyListByDbNameHandler(getQconfigService()));
-        adminHandlers.add(new WhiteListAddHandler(getQconfigService()));
-        adminHandlers.add(new WhiteListDeleteHandler(getQconfigService()));
-        adminHandlers.add(new IndexBuildHandler(getQconfigService()));
-        adminHandlers.add(new TitanKeyPermissionMergeHandler(getQconfigService()));
-        adminHandlers.add(new FreeVerifyAddHandler(getQconfigService()));
-        adminHandlers.add(new FreeVerifyDeleteHandler(getQconfigService()));
+        adminHandlers.add(new DbNameListHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new KeyListByDbNameHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new WhiteListAddHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new WhiteListDeleteHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new IndexBuildHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new TitanKeyPermissionMergeHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new FreeVerifyAddHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new FreeVerifyDeleteHandler(getQconfigService(), pluginConfigManager));
 
 
         for (AdminHandler handler : adminHandlers) {

@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
@@ -37,8 +38,8 @@ import java.util.Set;
  */
 public class DbNameListHandler extends BaseAdminHandler implements TitanConstants {
 
-    public DbNameListHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public DbNameListHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class DbNameListHandler extends BaseAdminHandler implements TitanConstant
 
 
             //AdminSite白名单检查
-            PluginConfig pluginConfig = new PluginConfig(getQconfigService(), profile);
+            PluginConfig pluginConfig = getPluginConfigManager().getPluginConfig(profile);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean permitted = checkPermission(clientIp, profile);
             if (permitted) {
@@ -90,6 +91,8 @@ public class DbNameListHandler extends BaseAdminHandler implements TitanConstant
 
                 //set into return result
                 pluginResult.setAttribute(allDbNameSet);
+
+
 
             } else {
                 t.addData("postHandleDetail(): sitePermission=false, not allow to read index!");

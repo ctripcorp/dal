@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import qunar.tc.qconfig.plugin.Plugin;
 import qunar.tc.qconfig.plugin.QconfigService;
 
@@ -9,6 +10,11 @@ import qunar.tc.qconfig.plugin.QconfigService;
 public abstract class PluginAdapter implements Plugin {
 
     private QconfigService qconfigService;
+    private PluginConfigManager pluginConfigManager;
+
+    public PluginConfigManager getPluginConfigManager() {
+        return pluginConfigManager;
+    }
 
     protected QconfigService getQconfigService() {
         return qconfigService;
@@ -21,6 +27,7 @@ public abstract class PluginAdapter implements Plugin {
     @Override
     public void init(QconfigService qconfigService) {
         setQconfigService(qconfigService);
+        this.pluginConfigManager = PluginConfigManager.getInstance(qconfigService);
         init();
     }
 

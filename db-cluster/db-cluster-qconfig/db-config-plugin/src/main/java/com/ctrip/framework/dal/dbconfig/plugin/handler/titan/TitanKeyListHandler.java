@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.SiteOutputEntity;
@@ -49,8 +50,8 @@ public class TitanKeyListHandler extends BaseAdminHandler implements TitanConsta
     private KeyService keyService = Soa2KeyService.getInstance();
     private static ExecutorService decryptService = Executors.newFixedThreadPool(5); //[2017-11-13]
 
-    public TitanKeyListHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyListHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class TitanKeyListHandler extends BaseAdminHandler implements TitanConsta
                 pageSize = Integer.parseInt(pageSize_str);
             }
 
-            PluginConfig config = new PluginConfig(getQconfigService(), profile);
+            PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
             //AdminSite白名单检查
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean permitted = checkPermission(clientIp, profile);

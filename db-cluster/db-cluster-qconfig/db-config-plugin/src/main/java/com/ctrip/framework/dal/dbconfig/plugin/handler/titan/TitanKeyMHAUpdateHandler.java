@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.titan.MhaInputBasicData;
@@ -70,8 +71,8 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public TitanKeyMHAUpdateHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeyMHAUpdateHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -177,11 +178,14 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
         String env = mhaInputEntity.getEnv();
         EnvProfile profile = new EnvProfile(env);  //Notice: ":"
+        String topEnv = profile.formatTopProfile();
+        topEnv = topEnv.substring(0, topEnv.length() - 1);
+
         List<ConfigDetail> cdList = new ArrayList<ConfigDetail>();
         List<String> inputDataIdList = new ArrayList<String>();
         List<MhaInputBasicData> mhaBasicList = mhaInputEntity.getData();
 
-        PluginConfig config = new PluginConfig(getQconfigService(), profile);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
         CryptoManager cryptoManager = new CryptoManager(config);
         DbAccessManager dbAccessManager = new DbAccessManager(config);
         boolean forMHA = true;
@@ -189,7 +193,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         Cat.logEvent(CAT_TRANSACTION_TYPE, "NeedCheckDbConnection", Event.SUCCESS, "needCheckDbConnection=" + needCheckDbConnection);
         for(MhaInputBasicData mhaBD : mhaBasicList){
             dataId = CommonHelper.formatTitanFileName(mhaBD.getKeyname());    //Notice: extarct match + lowercase
-            Cat.logEvent("Titan.MHAUpdate.TitanKey", dataId);
+            Cat.logEvent("Titan.MHAUpdate.TitanKey:" + topEnv, dataId);
             inputDataIdList.add(dataId);
             Properties updateProp = buildUpdatePropFromBasicData(mhaBD);
             if(updateProp != null && !updateProp.isEmpty()){

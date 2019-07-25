@@ -13,12 +13,15 @@ public class AppIdIpCheckEntity {
     private String serviceToken;
     private int timeoutMs;
     private List<String> passCodeList;
+    private String paasServiceUrl;
+    private String paasServiceToken;
 
 
     //setter/getter
     public String getServiceUrl() {
         return serviceUrl;
     }
+
     public void setServiceUrl(String serviceUrl) {
         this.serviceUrl = serviceUrl;
     }
@@ -26,6 +29,7 @@ public class AppIdIpCheckEntity {
     public String getClientAppId() {
         return clientAppId;
     }
+
     public void setClientAppId(String clientAppId) {
         this.clientAppId = clientAppId;
     }
@@ -33,6 +37,7 @@ public class AppIdIpCheckEntity {
     public String getClientIp() {
         return clientIp;
     }
+
     public void setClientIp(String clientIp) {
         this.clientIp = clientIp;
     }
@@ -40,6 +45,7 @@ public class AppIdIpCheckEntity {
     public String getEnv() {
         return env;
     }
+
     public void setEnv(String env) {
         this.env = env;
     }
@@ -47,6 +53,7 @@ public class AppIdIpCheckEntity {
     public String getServiceToken() {
         return serviceToken;
     }
+
     public void setServiceToken(String serviceToken) {
         this.serviceToken = serviceToken;
     }
@@ -54,6 +61,7 @@ public class AppIdIpCheckEntity {
     public int getTimeoutMs() {
         return timeoutMs;
     }
+
     public void setTimeoutMs(int timeoutMs) {
         this.timeoutMs = timeoutMs;
     }
@@ -61,10 +69,26 @@ public class AppIdIpCheckEntity {
     public List<String> getPassCodeList() {
         return passCodeList;
     }
+
     public void setPassCodeList(List<String> passCodeList) {
         this.passCodeList = passCodeList;
     }
 
+    public String getPaasServiceUrl() {
+        return paasServiceUrl;
+    }
+
+    public void setPaasServiceUrl(String paasServiceUrl) {
+        this.paasServiceUrl = paasServiceUrl;
+    }
+
+    public String getPaasServiceToken() {
+        return paasServiceToken;
+    }
+
+    public void setPaasServiceToken(String paasServiceToken) {
+        this.paasServiceToken = paasServiceToken;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -94,9 +118,10 @@ public class AppIdIpCheckEntity {
         sb.append(", clientIp='").append(clientIp).append('\'');
         sb.append(", env='").append(env).append('\'');
         sb.append(", serviceToken='").append(serviceToken).append('\'');
+        sb.append(", paasServiceUrl='").append(paasServiceUrl).append('\'');
+        sb.append(", paasServiceToken='").append(paasServiceToken).append('\'');
         sb.append(", timeoutMs=").append(timeoutMs);
         sb.append('}');
         return sb.toString();
     }
-
 }

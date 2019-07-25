@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.KeyInfo;
@@ -17,7 +18,6 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.*;
@@ -25,17 +25,16 @@ import qunar.tc.qconfig.plugin.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This handler is to add/update sslCode
  * Sample:
- *  [POST]   http://qconfig.uat.qa.nt.ctripcorp.com/plugins/titan/sslcode?appid=100010061&env=uat&operator=lzyan
- *
+ * [POST]   http://qconfig.uat.qa.nt.ctripcorp.com/plugins/titan/sslcode?appid=100010061&env=uat&operator=lzyan
+ * <p>
  * [body] only sslCode string
- ZI00000000000126
-
- *
+ * ZI00000000000126
+ * <p>
+ * <p>
  * Created by lzyan on 2017/8/29.
  */
 public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements TitanConstants {
@@ -46,8 +45,8 @@ public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements Ti
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
-    public TitanKeySSLCodeUpdateHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public TitanKeySSLCodeUpdateHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -81,20 +80,20 @@ public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements Ti
             String newSslCode = body.trim();
             t.addData(" newSslCode=" + newSslCode);
 
-            if(Strings.isNullOrEmpty(newSslCode)){
+            if (Strings.isNullOrEmpty(newSslCode)) {
                 t.addData("postHandleDetail(): newSslCode is null or empty, no need to add/update!");
                 pluginResult = new PluginResult(PluginStatusCode.TITAN_NOT_DEFINED, "newSslCode is null or empty, can't update!");
-            }else{
+            } else {
                 //AdminSite白名单检查
                 EnvProfile profile = (EnvProfile) request.getAttribute(REQ_ATTR_ENV_PROFILE);
                 Preconditions.checkArgument(profile != null && !Strings.isNullOrEmpty(profile.formatProfile()),
                         "profile参数不能为空");
                 String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                 boolean permitted = checkPermission(clientIp, profile);
-                if(permitted){
+                if (permitted) {
                     //更新sslCode
                     update(request, body);
-                }else{
+                } else {
                     t.addData("postHandleDetail(): sitePermission=false, not allow to update sslCode!");
                     Cat.logEvent("TitanKeySSLCodeUpdatePlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to update sslCode! clientIp=" + clientIp);
                     pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_WRITE, "Access ip whitelist check fail! clientIp=" + clientIp);
@@ -134,7 +133,8 @@ public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements Ti
         Preconditions.checkArgument(!Strings.isNullOrEmpty(remoteIp), "remoteIp参数不能为空");
 
         //store new sslCode in map
-        String keyServiceUri = new PluginConfig(getQconfigService(), profile).getParamValue(KEYSERVICE_SOA_URL);
+        PluginConfig config = getPluginConfigManager().getPluginConfig(profile);
+        String keyServiceUri = config.getParamValue(KEYSERVICE_SOA_URL);
         KeyInfo key = keyService.getKeyInfo(sslCode, keyServiceUri);
         if (key == null || key.getKey() == null || key.getKey().length() <= 0) {
             throw new IllegalArgumentException("update(): sslCode is invalid.");
@@ -147,7 +147,7 @@ public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements Ti
         ConfigField cf = new ConfigField(group, dataId, profile.formatProfile());
         List<ConfigField> configFieldList = Lists.newArrayList(cf);
         List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeySSLCodeUpdateHandler", configFieldList);
-        if(configDetailList != null && !configDetailList.isEmpty()){
+        if (configDetailList != null && !configDetailList.isEmpty()) {
             ConfigDetail cd = configDetailList.get(0);
             String oldConf = cd.getContent();
 
@@ -158,7 +158,7 @@ public class TitanKeySSLCodeUpdateHandler extends BaseAdminHandler implements Ti
             cd.setContent(newConf);
 
             cdList.add(cd);
-        }else{
+        } else {
             //add new
             //compose <configDetail>
             ConfigDetail configDetail = new ConfigDetail();

@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler.mongo;
 
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterGetOutputEntity;
@@ -29,7 +30,8 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
 
     public MongoClusterGetHandlerTest() {
         QconfigService service = new MockQconfigService();
-        handler = new MongoClusterGetHandler(service);
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
+        handler = new MongoClusterGetHandler(service, pluginConfigManager);
     }
 
     @Before

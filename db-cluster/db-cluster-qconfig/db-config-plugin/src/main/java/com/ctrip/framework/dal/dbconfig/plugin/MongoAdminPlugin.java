@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.mongo.MongoClusterGetHandler;
@@ -24,10 +25,11 @@ public class MongoAdminPlugin extends AdminPluginAdapter {
     @Override
     public void init() {
         dispatcher = new AdminHandlerDispatcher();
+        PluginConfigManager pluginConfigManager = getPluginConfigManager();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
-        adminHandlers.add(new MongoClusterPostHandler(getQconfigService()));
-        adminHandlers.add(new MongoClusterUpdateHandler(getQconfigService()));
-        adminHandlers.add(new MongoClusterGetHandler(getQconfigService()));
+        adminHandlers.add(new MongoClusterPostHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new MongoClusterUpdateHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new MongoClusterGetHandler(getQconfigService(), pluginConfigManager));
 
         for (AdminHandler handler : adminHandlers) {
             dispatcher.register(handler);

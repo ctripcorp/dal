@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin.handler;
 
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.mongo.MongoClusterPostHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.*;
@@ -23,9 +24,10 @@ public class AdminHandlerDispatcherTest {
     @Test
     public void testRegister1() {
         QconfigService service = new MockQconfigService();
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         List<AdminHandler> handlers = new ArrayList<>();
-        handlers.add(new MongoClusterPostHandler(service));
-        handlers.add(new MongoClusterPostHandler(service));
+        handlers.add(new MongoClusterPostHandler(service, pluginConfigManager));
+        handlers.add(new MongoClusterPostHandler(service, pluginConfigManager));
         try {
             register(handlers);
             Assert.fail();
@@ -39,24 +41,25 @@ public class AdminHandlerDispatcherTest {
     @Test
     public void testRegister2() {
         QconfigService service = new MockQconfigService();
+        PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
         List<AdminHandler> handlers = new ArrayList<>();
-        handlers.add(new MongoClusterPostHandler(service));
-        handlers.add(new DbNameListHandler(service));
-        handlers.add(new FreeVerifyAddHandler(service));
-        handlers.add(new FreeVerifyDeleteHandler(service));
-        handlers.add(new IndexBuildHandler(service));
-        handlers.add(new KeyListByDbNameHandler(service));
-        handlers.add(new TitanKeyForceDataWashHandler(service));
-        handlers.add(new TitanKeyGetHandler(service));
-        handlers.add(new TitanKeyListByTimeHandler(service));
-        handlers.add(new TitanKeyListHandler(service));
-        handlers.add(new TitanKeyMHAUpdateHandler(service));
-        handlers.add(new TitanKeyPermissionMergeHandler(service));
-        handlers.add(new TitanKeyPostHandler(service));
-        handlers.add(new TitanKeySSLCodeGetHandler(service));
-        handlers.add(new TitanKeySSLCodeUpdateHandler(service));
-        handlers.add(new WhiteListAddHandler(service));
-        handlers.add(new WhiteListDeleteHandler(service));
+        handlers.add(new MongoClusterPostHandler(service, pluginConfigManager));
+        handlers.add(new DbNameListHandler(service, pluginConfigManager));
+        handlers.add(new FreeVerifyAddHandler(service, pluginConfigManager));
+        handlers.add(new FreeVerifyDeleteHandler(service, pluginConfigManager));
+        handlers.add(new IndexBuildHandler(service, pluginConfigManager));
+        handlers.add(new KeyListByDbNameHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyForceDataWashHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyGetHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyListByTimeHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyListHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyMHAUpdateHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyPermissionMergeHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeyPostHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeySSLCodeGetHandler(service, pluginConfigManager));
+        handlers.add(new TitanKeySSLCodeUpdateHandler(service, pluginConfigManager));
+        handlers.add(new WhiteListAddHandler(service, pluginConfigManager));
+        handlers.add(new WhiteListDeleteHandler(service, pluginConfigManager));
         register(handlers);
 
         Assert.assertTrue(getHandler("/plugins/mongo/config/add", "POST") instanceof MongoClusterPostHandler);

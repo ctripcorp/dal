@@ -5,12 +5,14 @@ import com.ctrip.framework.dal.dbconfig.plugin.entity.AppIdIpCheckEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.mock.CmsDataGenerator;
 import com.ctrip.framework.dal.dbconfig.plugin.mock.MockAppIdManager;
 import com.ctrip.framework.dal.dbconfig.plugin.service.AppIdIpManager;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +24,7 @@ public class AppIdIpCheckCacheTest {
 
     private AppIdIpManager appIdIpManager = new MockAppIdManager();
     private AppIdIpCheckCache appIdIpCheckCache = AppIdIpCheckCache.getInstance();
+    private static final int EXECUTE_COUNT = 300000;
     private static final int THREAD_COUNT = 10;
     private ExecutorService exec = Executors.newFixedThreadPool(THREAD_COUNT);
 
@@ -107,29 +110,35 @@ public class AppIdIpCheckCacheTest {
 
     @Test
     public void getValueInCache() throws Exception {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         for (int i = 0; i < THREAD_COUNT; i++) {
             exec.execute(new Runnable() {
                 @Override
                 public void run() {
-                    while (true) {
-                        try {
-                            Map<AppIdIpCheckEntity, Integer> appIdIpAndReturnCodes = CmsDataGenerator.generateAppIdIpAndReturnCodes();
-                            for (Map.Entry<AppIdIpCheckEntity, Integer> appIdIpAndResult : appIdIpAndReturnCodes.entrySet()) {
-                                AppIdIpCheckEntity appIdIp = appIdIpAndResult.getKey();
-                                Integer expectedReturnCode = appIdIpAndResult.getValue();
-                                Integer realReturnCode = appIdIpCheckCache.getValueInCache(appIdIp);
-                                assert realReturnCode != null;
-                                assert realReturnCode == expectedReturnCode;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    int count = 0;
+                    for (int i = 0; i < EXECUTE_COUNT; i++) {
+                        count++;
+                        Map<AppIdIpCheckEntity, Integer> appIdIpAndReturnCodes = CmsDataGenerator.generateAppIdIpAndReturnCodes();
+                        for (Map.Entry<AppIdIpCheckEntity, Integer> appIdIpAndResult : appIdIpAndReturnCodes.entrySet()) {
+                            AppIdIpCheckEntity appIdIp = appIdIpAndResult.getKey();
+                            Integer expectedReturnCode = appIdIpAndResult.getValue();
+                            Integer realReturnCode = appIdIpCheckCache.getValueInCache(appIdIp);
+                            assert realReturnCode != null;
+                            assert realReturnCode == expectedReturnCode;
                         }
-
                     }
+                    System.out.println(Thread.currentThread().getName() + ":" + count);
+                    latch.countDown();
                 }
             });
         }
-        TimeUnit.MINUTES.sleep(1);
+        latch.await();
+
+        exec.shutdown();
+        stopwatch.stop();
+        long cost = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        System.out.println("test getValueInCache() cost:" + cost);
     }
 
 }

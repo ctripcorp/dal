@@ -2,6 +2,7 @@ package com.ctrip.framework.dal.dbconfig.plugin.handler.titan;
 
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
+import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
@@ -50,8 +51,8 @@ import java.util.concurrent.TimeUnit;
 public class WhiteListDeleteHandler extends BaseAdminHandler implements TitanConstants {
     private static Logger logger = LoggerFactory.getLogger(WhiteListDeleteHandler.class);
 
-    public WhiteListDeleteHandler(QconfigService qconfigService) {
-        super(qconfigService);
+    public WhiteListDeleteHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
+        super(qconfigService,pluginConfigManager);
     }
 
     @Override
@@ -104,7 +105,7 @@ public class WhiteListDeleteHandler extends BaseAdminHandler implements TitanCon
             String highEnv = CommonHelper.getHighEnv(envList);
             String profile = CommonHelper.formatProfileFromEnv(highEnv, "");
             Preconditions.checkArgument(!Strings.isNullOrEmpty(profile), "profile参数不能为空");
-            PluginConfig config = new PluginConfig(getQconfigService(), new EnvProfile(highEnv));
+            PluginConfig config = getPluginConfigManager().getPluginConfig(new EnvProfile(highEnv));
             String adminSiteWhiteIps = config.getParamValue(TITAN_ADMIN_SERVER_LIST);
             String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
             boolean sitePermission = PermissionCheckUtil.checkSitePermission(adminSiteWhiteIps, clientIp);

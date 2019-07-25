@@ -84,7 +84,8 @@ public class PluginConfig {
 
         Properties newPluginConfigs = getPluginConfigs();
         Cat.logEvent("Plugin.Config.Refresh", topProfile);
-        logger.info("refresh(): get [{}] new plugin configs, config size is {}", topProfile, newPluginConfigs.size());
+        int newPluginConfigSize = (newPluginConfigs == null ? 0 : newPluginConfigs.size());
+        logger.info("refresh(): get [{}] new plugin configs, config size is {}", topProfile, newPluginConfigSize);
 
         if (newPluginConfigs != null && !newPluginConfigs.isEmpty()) {
             pluginConfigs = newPluginConfigs;

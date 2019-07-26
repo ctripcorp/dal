@@ -27,7 +27,7 @@ public class DalDynamicDSTest {
     @Test
     public void fixedCheckTest() throws Exception {
         DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
-        //dalDynamicDSDao.checkSwitchDataSource("2019070811", null, TriggerMethod.MANUAL);
+        dalDynamicDSDao.checkSwitchDataSource("2019072518", null, null, TriggerMethod.AUTO);
     }
 
     @Test

@@ -134,15 +134,21 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     Cat.logEvent(CAT_TRANSACTION_TYPE, "Site.Permission", Event.SUCCESS, "sitePermission=" + permitted);
                     if (permitted) {
                         //MHA更新titanKey文件
-                        int saveCount = updateMhaInput(mhaInputEntity);
+                        int saveCount = 0;
+                        try {
+                            saveCount = updateMhaInput(mhaInputEntity);
+                        } catch (Exception e) {
+                            logEvent(CAT_EVENT_FAILED_TYPE, mhaInputEntity, profile);
+                            throw e;
+                        }
                         t.addData("postHandleDetail(): saveCount=" + saveCount);
+                        logEvent(CAT_EVENT_SUCCESS_TYPE, mhaInputEntity, profile);
                     } else {
                         t.addData("postHandleDetail(): sitePermission=false, not allow to update!");
                         Cat.logEvent("TitanKeyMHAUpdatePlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to update! clientIp=" + clientIp);
                         pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_WRITE, "Access ip whitelist check fail! clientIp=" + clientIp);
+                        logEvent(CAT_EVENT_FAILED_TYPE, mhaInputEntity, profile);
                     }
-
-                    logEvent(pluginResult, mhaInputEntity, profile);
                 } else {
                     t.addData("postHandleDetail(): mhaInputEntity=null, no need to update!");
                 }
@@ -164,21 +170,15 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         return pluginResult;
     }
 
-    private void logEvent(PluginResult pluginResult, MhaInputEntity mhaInputEntity, EnvProfile profile) {
+    private void logEvent(String catEventType, MhaInputEntity mhaInputEntity, EnvProfile profile) {
         String topEnv = profile.formatTopProfile();
         topEnv = topEnv.substring(0, topEnv.length() - 1);
-        String eventName;
-        if (pluginResult.getCode() == PluginStatusCode.OK) {
-            eventName = CAT_EVENT_SUCCESS_TYPE;
-        } else {
-            eventName = CAT_EVENT_FAILED_TYPE;
-        }
         List<MhaInputBasicData> mhaInputBasicData = mhaInputEntity.getData();
         if (mhaInputBasicData != null && !mhaInputBasicData.isEmpty()) {
             for (MhaInputBasicData data : mhaInputBasicData) {
                 String titanKeyName = data.getKeyname();
                 if (!Strings.isNullOrEmpty(titanKeyName)) {
-                    Cat.logEvent(eventName + topEnv, titanKeyName);
+                    Cat.logEvent(catEventType + topEnv, titanKeyName);
                 }
             }
         }

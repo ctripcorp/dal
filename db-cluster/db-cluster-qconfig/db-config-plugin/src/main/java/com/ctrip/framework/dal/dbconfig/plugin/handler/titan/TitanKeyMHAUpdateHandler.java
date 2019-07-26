@@ -16,7 +16,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.*;
@@ -25,40 +24,39 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This handler is to update titan key for MHA
  * Sample:
- *  [POST]   [生产] http://qconfig.ctripcorp.com/plugins/titan/config/mha?group=100010061
- *           [测试] http://qconfig.fat16.qa.nt.ctripcorp.com/plugins/titan/config/mha?group=100010061
- *  [body] sample as bellow:
- {
-     "env": "uat",
-     "data": [
-         {
-             "keyname": "test1db_w",
-             "server": "127.0.0.1",
-             "port": 55111
-         }
-     ]
- }
-
- [response]
- [成功返回]
- {
-     "status": 0,
-     "message": "正常",
-     "data": null
- }
-
- [失败返回]
- {
-     "status": -1,
-     "message": "服务器内部错误:null",
-     "data": null
- }
-
+ * [POST]   [生产] http://qconfig.ctripcorp.com/plugins/titan/config/mha?group=100010061
+ * [测试] http://qconfig.fat16.qa.nt.ctripcorp.com/plugins/titan/config/mha?group=100010061
+ * [body] sample as bellow:
+ * {
+ * "env": "uat",
+ * "data": [
+ * {
+ * "keyname": "test1db_w",
+ * "server": "127.0.0.1",
+ * "port": 55111
+ * }
+ * ]
+ * }
+ * <p>
+ * [response]
+ * [成功返回]
+ * {
+ * "status": 0,
+ * "message": "正常",
+ * "data": null
+ * }
+ * <p>
+ * [失败返回]
+ * {
+ * "status": -1,
+ * "message": "服务器内部错误:null",
+ * "data": null
+ * }
+ * <p>
  * Created by lzyan on 2017/8/21, 2018/06/01, 2018/12/27.
  */
 public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanConstants {
@@ -67,12 +65,14 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
     private static final String METHOD = "POST";
 
     private static final String CAT_TRANSACTION_TYPE = "TitanKeyMHAUpdatePlugin.TitanKey.Update";
+    private static final String CAT_EVENT_SUCCESS_TYPE = "Titan.MHAUpdate.TitanKey.Success:";
+    private static final String CAT_EVENT_FAILED_TYPE = "Titan.MHAUpdate.TitanKey.Failed:";
 
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
 
     public TitanKeyMHAUpdateHandler(QconfigService qconfigService, PluginConfigManager pluginConfigManager) {
-        super(qconfigService,pluginConfigManager);
+        super(qconfigService, pluginConfigManager);
     }
 
     @Override
@@ -119,9 +119,9 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
              ]
              }
              */
-            if(!Strings.isNullOrEmpty(body)){
+            if (!Strings.isNullOrEmpty(body)) {
                 MhaInputEntity mhaInputEntity = GsonUtils.json2T(body, MhaInputEntity.class);
-                if(mhaInputEntity != null){
+                if (mhaInputEntity != null) {
                     Cat.logEvent(CAT_TRANSACTION_TYPE, "TitanFile.MHA", Event.SUCCESS, "mhaInputEntity= " + mhaInputEntity.toString());
 
                     String env = mhaInputEntity.getEnv();
@@ -132,20 +132,21 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                     boolean permitted = checkPermission(clientIp, profile);
                     Cat.logEvent(CAT_TRANSACTION_TYPE, "Site.Permission", Event.SUCCESS, "sitePermission=" + permitted);
-                    if(permitted){
+                    if (permitted) {
                         //MHA更新titanKey文件
                         int saveCount = updateMhaInput(mhaInputEntity);
                         t.addData("postHandleDetail(): saveCount=" + saveCount);
-                    }else{
+                    } else {
                         t.addData("postHandleDetail(): sitePermission=false, not allow to update!");
                         Cat.logEvent("TitanKeyMHAUpdatePlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to update! clientIp=" + clientIp);
                         pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_WRITE, "Access ip whitelist check fail! clientIp=" + clientIp);
                     }
 
-                }else{
-                    t.addData( "postHandleDetail(): mhaInputEntity=null, no need to update!");
+                    logEvent(pluginResult, mhaInputEntity, profile);
+                } else {
+                    t.addData("postHandleDetail(): mhaInputEntity=null, no need to update!");
                 }
-            }else{
+            } else {
                 t.addData("postHandleDetail(): mha body is null or empty, no need to update!");
             }
 
@@ -163,13 +164,25 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         return pluginResult;
     }
 
-//    @Override
-//    public String key() {
-//        String uri = "/plugins/titan/config/mha";
-//        String method = "POST";
-//        return PluginKeyUtil.adminPluginKey(uri, method);
-//    }
-
+    private void logEvent(PluginResult pluginResult, MhaInputEntity mhaInputEntity, EnvProfile profile) {
+        String topEnv = profile.formatTopProfile();
+        topEnv = topEnv.substring(0, topEnv.length() - 1);
+        String eventName;
+        if (pluginResult.getCode() == PluginStatusCode.OK) {
+            eventName = CAT_EVENT_SUCCESS_TYPE;
+        } else {
+            eventName = CAT_EVENT_FAILED_TYPE;
+        }
+        List<MhaInputBasicData> mhaInputBasicData = mhaInputEntity.getData();
+        if (mhaInputBasicData != null && !mhaInputBasicData.isEmpty()) {
+            for (MhaInputBasicData data : mhaInputBasicData) {
+                String titanKeyName = data.getKeyname();
+                if (!Strings.isNullOrEmpty(titanKeyName)) {
+                    Cat.logEvent(eventName + topEnv, titanKeyName);
+                }
+            }
+        }
+    }
 
     private int updateMhaInput(MhaInputEntity mhaInputEntity) throws Exception {
         String group = TITAN_QCONFIG_KEYS_APPID;   //appId
@@ -178,8 +191,6 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
         String env = mhaInputEntity.getEnv();
         EnvProfile profile = new EnvProfile(env);  //Notice: ":"
-        String topEnv = profile.formatTopProfile();
-        topEnv = topEnv.substring(0, topEnv.length() - 1);
 
         List<ConfigDetail> cdList = new ArrayList<ConfigDetail>();
         List<String> inputDataIdList = new ArrayList<String>();
@@ -191,17 +202,16 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         boolean forMHA = true;
         boolean needCheckDbConnection = dbAccessManager.needCheckDbConnection(forMHA);
         Cat.logEvent(CAT_TRANSACTION_TYPE, "NeedCheckDbConnection", Event.SUCCESS, "needCheckDbConnection=" + needCheckDbConnection);
-        for(MhaInputBasicData mhaBD : mhaBasicList){
+        for (MhaInputBasicData mhaBD : mhaBasicList) {
             dataId = CommonHelper.formatTitanFileName(mhaBD.getKeyname());    //Notice: extarct match + lowercase
-            Cat.logEvent("Titan.MHAUpdate.TitanKey:" + topEnv, dataId);
             inputDataIdList.add(dataId);
             Properties updateProp = buildUpdatePropFromBasicData(mhaBD);
-            if(updateProp != null && !updateProp.isEmpty()){
+            if (updateProp != null && !updateProp.isEmpty()) {
                 //get current config from qconfig
                 ConfigField cf = new ConfigField(group, dataId, profile.formatProfile());
                 List<ConfigField> configFieldList = Lists.newArrayList(cf);
                 List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeyMHAUpdateHandler", configFieldList);
-                if(configDetailList != null && !configDetailList.isEmpty()){
+                if (configDetailList != null && !configDetailList.isEmpty()) {
                     ConfigDetail cd = configDetailList.get(0);
                     String encryptOldConf = cd.getContent();
 
@@ -217,11 +227,11 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     //field 'mhaLastUpdate' update [2018-12-27]
                     CommonHelper.updateMhaLastUpdateInProperties(mergeProp);
 
-                    if(needCheckDbConnection) {
+                    if (needCheckDbConnection) {
                         //decrypt
                         Properties decryptProp = cryptoManager.decrypt(dataSourceCrypto, keyService, mergeProp);
                         boolean validResult = dbAccessManager.validConnection(decryptProp, env, forMHA);
-                        if(!validResult){
+                        if (!validResult) {
                             throw new Exception("update(): validResult=false, db connection check failure!");
                         }
                     }
@@ -231,7 +241,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     cd.setContent(encryptText);
 
                     cdList.add(cd);
-                }else{
+                } else {
                     throw new Exception("updateMhaInput(): configDetailList is null or empty for dataId=[" + dataId + "]!");
                 }
             }
@@ -239,7 +249,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
         //save to qconfig
         int saveCount = 0;
-        if(!cdList.isEmpty()){
+        if (!cdList.isEmpty()) {
             int cdListSize = cdList.size();
             Cat.logEvent(CAT_TRANSACTION_TYPE, "BatchSave.Before", Event.SUCCESS, "cdListSize=" + cdListSize);
             saveCount = QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyMHAUpdateHandler", cdList, true);
@@ -250,9 +260,9 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         return saveCount;
     }
 
-    private Properties buildUpdatePropFromBasicData(MhaInputBasicData mhaInputBasicData){
+    private Properties buildUpdatePropFromBasicData(MhaInputBasicData mhaInputBasicData) {
         Properties properties = new Properties();
-        if(mhaInputBasicData != null){
+        if (mhaInputBasicData != null) {
             properties.put(CONNECTIONSTRING_SERVER_IP, mhaInputBasicData.getServer());
             properties.put(CONNECTIONSTRING_PORT, String.valueOf(mhaInputBasicData.getPort()));
         }

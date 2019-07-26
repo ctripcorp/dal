@@ -42,11 +42,11 @@ public class TitanAdminPluginTest {
         EasyMock.expect(request.getParameter(Constants.GROUP_NAME)).andReturn(TITAN_QCONFIG_KEYS_APPID).anyTimes();
         EasyMock.expect(request.getParameter(REQ_PARAM_TARGET_APPID)).andReturn(TITAN_QCONFIG_KEYS_APPID).anyTimes();
 
-        initForTitanKeyPostHandler();
+//        initForTitanKeyPostHandler();
 //        initForTitanKeyListByTimeHandler();
 //        initForTitanKeyListHandler();
 //        initForTitanKeyGetHandler();
-//        initForTitanKeyMHAUpdateHandler();
+        initForTitanKeyMHAUpdateHandler();
 //        initForTitanKeySSLCodeGetHandler();
 //        initForTitanKeySSLCodeUpdateHandler();
 //        initForTitanKeyForceDataWashHandler();

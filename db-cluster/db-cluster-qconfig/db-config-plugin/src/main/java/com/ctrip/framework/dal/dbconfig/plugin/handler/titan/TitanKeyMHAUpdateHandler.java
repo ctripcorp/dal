@@ -67,6 +67,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
     private static final String CAT_TRANSACTION_TYPE = "TitanKeyMHAUpdatePlugin.TitanKey.Update";
     private static final String CAT_EVENT_SUCCESS_TYPE = "Titan.MHAUpdate.TitanKey.Success:";
     private static final String CAT_EVENT_FAILED_TYPE = "Titan.MHAUpdate.TitanKey.Failed:";
+    private static final String CAT_EVENT_NO_PERMISSION_TYPE = "Titan.MHAUpdate.NoSitePermission:";
 
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
@@ -95,6 +96,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         PluginResult pluginResult = PluginResult.oK();
 //        Stopwatch stopwatch = Stopwatch.createStarted();
         Transaction t = Cat.newTransaction("TitanQconfigPlugin", "TitanKeyMHAUpdatePlugin");
+        MhaInputEntity mhaInputEntity = null;
         try {
             t.addData("running class=" + getClass().getSimpleName());
 
@@ -120,7 +122,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
              }
              */
             if (!Strings.isNullOrEmpty(body)) {
-                MhaInputEntity mhaInputEntity = GsonUtils.json2T(body, MhaInputEntity.class);
+                mhaInputEntity = GsonUtils.json2T(body, MhaInputEntity.class);
                 if (mhaInputEntity != null) {
                     Cat.logEvent(CAT_TRANSACTION_TYPE, "TitanFile.MHA", Event.SUCCESS, "mhaInputEntity= " + mhaInputEntity.toString());
 
@@ -128,26 +130,19 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     EnvProfile profile = new EnvProfile(env);
 
                     //AdminSite白名单检查
-//                    Config config = new Config(getQconfigService(), profile);
                     String clientIp = (String) request.getAttribute(PluginConstant.REMOTE_IP);
                     boolean permitted = checkPermission(clientIp, profile);
                     Cat.logEvent(CAT_TRANSACTION_TYPE, "Site.Permission", Event.SUCCESS, "sitePermission=" + permitted);
                     if (permitted) {
                         //MHA更新titanKey文件
-                        int saveCount = 0;
-                        try {
-                            saveCount = updateMhaInput(mhaInputEntity);
-                        } catch (Exception e) {
-                            logEvent(CAT_EVENT_FAILED_TYPE, mhaInputEntity, profile);
-                            throw e;
-                        }
+                        int saveCount = updateMhaInput(mhaInputEntity);
                         t.addData("postHandleDetail(): saveCount=" + saveCount);
-                        logEvent(CAT_EVENT_SUCCESS_TYPE, mhaInputEntity, profile);
+                        logEventSuccess(CAT_EVENT_SUCCESS_TYPE, mhaInputEntity, profile);
                     } else {
                         t.addData("postHandleDetail(): sitePermission=false, not allow to update!");
                         Cat.logEvent("TitanKeyMHAUpdatePlugin", "NO_PERMISSION", Event.SUCCESS, "sitePermission=false, not allow to update! clientIp=" + clientIp);
                         pluginResult = new PluginResult(PluginStatusCode.TITAN_KEY_CANNOT_WRITE, "Access ip whitelist check fail! clientIp=" + clientIp);
-                        logEvent(CAT_EVENT_FAILED_TYPE, mhaInputEntity, profile);
+                        logEventFail(CAT_EVENT_NO_PERMISSION_TYPE, mhaInputEntity);
                     }
                 } else {
                     t.addData("postHandleDetail(): mhaInputEntity=null, no need to update!");
@@ -160,7 +155,8 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         } catch (Exception e) {
             t.setStatus(e);
             Cat.logError(e);
-            throw new DbConfigPluginException();
+            logEventFail(CAT_EVENT_FAILED_TYPE, mhaInputEntity);
+            throw new DbConfigPluginException(e);
         } finally {
             t.complete();
             //metric cost
@@ -170,18 +166,52 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         return pluginResult;
     }
 
-    private void logEvent(String catEventType, MhaInputEntity mhaInputEntity, EnvProfile profile) {
-        String topEnv = profile.formatTopProfile();
-        topEnv = topEnv.substring(0, topEnv.length() - 1);
-        List<MhaInputBasicData> mhaInputBasicData = mhaInputEntity.getData();
-        if (mhaInputBasicData != null && !mhaInputBasicData.isEmpty()) {
-            for (MhaInputBasicData data : mhaInputBasicData) {
-                String titanKeyName = data.getKeyname();
-                if (!Strings.isNullOrEmpty(titanKeyName)) {
-                    Cat.logEvent(catEventType + topEnv, titanKeyName);
+    private void logEventFail(String catEventType, MhaInputEntity mhaInputEntity) {
+        try {
+            if (mhaInputEntity != null) {
+                String env = mhaInputEntity.getEnv();
+                if (Strings.isNullOrEmpty(env)) {
+                    Cat.logEvent("Titan.MHAUpdate.RequestBody.Error", "env");
+                    return;
+                }
+                EnvProfile envProfile = new EnvProfile(env);
+                String topEnv = envProfile.formatTopProfile();
+                topEnv = topEnv.substring(0, topEnv.length() - 1);
+                List<MhaInputBasicData> mhaInputBasicData = mhaInputEntity.getData();
+                if (mhaInputBasicData != null && !mhaInputBasicData.isEmpty()) {
+                    for (MhaInputBasicData data : mhaInputBasicData) {
+                        String titanKeyName = data.getKeyname();
+                        if (!Strings.isNullOrEmpty(titanKeyName)) {
+                            Cat.logEvent(catEventType + topEnv, titanKeyName);
+                        }
+                    }
+                    return;
                 }
             }
+            Cat.logEvent("Titan.MHAUpdate.RequestBody.Error", "mhaInputEntity");
+        } catch (Exception e) {
+            //ignore
         }
+
+    }
+
+    private void logEventSuccess(String catEventType, MhaInputEntity mhaInputEntity, EnvProfile envProfile) {
+        try {
+            String topEnv = envProfile.formatTopProfile();
+            topEnv = topEnv.substring(0, topEnv.length() - 1);
+            List<MhaInputBasicData> mhaInputBasicData = mhaInputEntity.getData();
+            if (mhaInputBasicData != null && !mhaInputBasicData.isEmpty()) {
+                for (MhaInputBasicData data : mhaInputBasicData) {
+                    String titanKeyName = data.getKeyname();
+                    if (!Strings.isNullOrEmpty(titanKeyName)) {
+                        Cat.logEvent(catEventType + topEnv, titanKeyName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            //ignore
+        }
+
     }
 
     private int updateMhaInput(MhaInputEntity mhaInputEntity) throws Exception {

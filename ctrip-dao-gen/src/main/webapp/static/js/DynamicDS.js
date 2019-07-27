@@ -135,8 +135,8 @@
             }
             var tableBody = "";
             $.each(data, function (i, n) {
-                var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
-                tableBody += sprintf(rowTemplate, i + 1, n.titanKey, n.switchCount, n.appIDCount, n.ipCount);
+                var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+                tableBody += sprintf(rowTemplate, i + 1, n.titanKey, n.switchCount, n.appIDCount, n.ipCount, n.switchCount * n.ipCount);
             });
             $("#tableDynamicDSWeek tbody").html(tableBody);
             table.show();

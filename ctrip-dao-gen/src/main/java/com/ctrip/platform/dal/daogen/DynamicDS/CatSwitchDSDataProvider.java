@@ -44,7 +44,7 @@ public class CatSwitchDSDataProvider implements SwitchDSDataProvider {
 
     private static final String DAL_DATASOURCE_TRANSACTION_NAME = "DataSource::createDataSource:%s";
 
-    private static final String DAL_TITAN_UPDATE_TYPE = "Titan.MHAUpdate.TitanKey:%s";
+    private static final String DAL_TITAN_UPDATE_TYPE = "Titan.MHAUpdate.TitanKey.Success:%s";
 
     private static final String ALL_IP = "All";
 

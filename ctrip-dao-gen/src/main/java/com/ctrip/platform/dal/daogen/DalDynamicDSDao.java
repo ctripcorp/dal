@@ -6,10 +6,9 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DynamicDS.*;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
+import com.ctrip.platform.dal.daogen.util.DateUtils;
+import com.ctrip.platform.dal.daogen.util.EmailUtils;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
-import com.ctrip.soa.platform.basesystem.emailservice.v1.EmailServiceClient;
-import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailRequest;
-import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailResponse;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -20,11 +19,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,8 +41,6 @@ public class DalDynamicDSDao {
             "http://qconfig.ctripcorp.com/plugins/titan/config?appid=%s&titankey=%s&env=%s";
 
     private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
-
-    private static final String APP_PROPERTIES_CLASSPATH = "/META-INF/app.properties";
 
     private static final String CMS_APPID_IP = "http://osg.ops.ctripcorp.com/api/CMSGetApp/?_version=new";
 
@@ -105,18 +97,20 @@ public class DalDynamicDSDao {
         return dynamicDSDao;
     }
 
+    private DalDynamicDSDao() { }
+
     public void init() {
         //init_delay 设置为每个小时的整点执行
         Date nowDate = new Date();
-        long initDelay = getFixInitDelay(nowDate);
+        long initDelay = DateUtils.getFixInitDelay(nowDate);
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 Date checkDate = new Date();
                 String checkTime = getBeforeOneHourDateString(checkDate);
-                if (checkIsSendEMailTime(checkDate)) {
+                if (DateUtils.checkIsSendEMailTime(checkDate)) {
                     List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(checkDate, CheckTimeRange.ONE_WEEK);
-                    sendEmail(switchDataList, checkDate, CheckTimeRange.ONE_WEEK);
+                    EmailUtils.sendEmail(generateBodyContent(switchDataList), checkDate, CheckTimeRange.ONE_WEEK);
                 }
                 Cat.logEvent("DynamicDSFixJob", checkTime);
                 checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
@@ -258,8 +252,8 @@ public class DalDynamicDSDao {
         String endCheckTime = null;
         DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
         if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
-            startCheckTime = getStartOneWeek(nextWeekDate);
-            endCheckTime = getEndOneWeek(nextWeekDate);
+            startCheckTime = DateUtils.getStartOneWeek(nextWeekDate);
+            endCheckTime = DateUtils.getEndOneWeek(nextWeekDate);
         }
         return mergeSwitchData(dalDynamicDSDBDao.queryInRange(startCheckTime, endCheckTime));
     }
@@ -272,12 +266,11 @@ public class DalDynamicDSDao {
             if (helpMap.containsKey(titanKey)) {
                 TitanKeySwitchInfoDB existTitanKeySwitchInfoDB = helpMap.get(titanKey);
                 int switchCount = existTitanKeySwitchInfoDB.getSwitchCount();
-                int appIDCount = existTitanKeySwitchInfoDB.getAppIDCount();
-                int ipCount = existTitanKeySwitchInfoDB.getIpCount();
                 existTitanKeySwitchInfoDB.setSwitchCount(switchCount + titanKeySwitchInfoDB.getSwitchCount());
-                existTitanKeySwitchInfoDB.setAppIDCount(appIDCount + titanKeySwitchInfoDB.getAppIDCount());
-                existTitanKeySwitchInfoDB.setIpCount(ipCount + titanKeySwitchInfoDB.getIpCount());
-                helpMap.put(titanKey, existTitanKeySwitchInfoDB);
+                if (existTitanKeySwitchInfoDB.getCheckTime() < titanKeySwitchInfoDB.getCheckTime()) {
+                    existTitanKeySwitchInfoDB.setAppIDCount(titanKeySwitchInfoDB.getAppIDCount());
+                    existTitanKeySwitchInfoDB.setIpCount(titanKeySwitchInfoDB.getIpCount());
+                }
             }
             else {
                 helpMap.put(titanKeySwitchInfoDB.getTitanKey(), titanKeySwitchInfoDB);
@@ -287,17 +280,6 @@ public class DalDynamicDSDao {
             result.add(titanKeySwitchInfoDB);
         }
         return result;
-    }
-
-    // one hour delay
-    private long getFixInitDelay(Date checkTime) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(checkTime);
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime().getTime()/1000 - checkTime.getTime()/1000;
     }
 
     public Map<SwitchTitanKey, List<AppIDInfo>> getTitanKeyAppIDMap(String checkTime) {
@@ -314,78 +296,7 @@ public class DalDynamicDSDao {
         calendar.setTime(checkTime);
         calendar.add(Calendar.HOUR_OF_DAY, -1);
         Date catTransactionDate = calendar.getTime();
-        return formatCheckTime(catTransactionDate);
-    }
-
-    public String formatCheckTime(Date convertCheckTime) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dateString = formatter.format(convertCheckTime).replaceAll("-| ", "");
-        return dateString.substring(0, dateString.indexOf(":"));
-    }
-
-    private String getStartOneWeek(Date nextWeekDate) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(nextWeekDate);
-        calendar.add(Calendar.DAY_OF_MONTH, -7);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        return formatCheckTime(calendar.getTime());
-    }
-
-    private String getEndOneWeek(Date nextWeekDate) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(nextWeekDate);
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        return formatCheckTime(calendar.getTime());
-    }
-
-    private boolean checkIsSendEMailTime(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        //每周一上午9点发邮件
-        if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
-                calendar.get(Calendar.HOUR_OF_DAY) == 9) {
-            return true;
-        }
-        return false;
-    }
-
-    public void sendEmail(List<TitanKeySwitchInfoDB> switchDataList, Date checkDate, CheckTimeRange checkTimeRange) {
-        String startCheckTime = null;
-        String endCheckTime = null;
-        if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
-            startCheckTime = getStartOneWeek(checkDate);
-            endCheckTime = getEndOneWeek(checkDate);
-        }
-
-        EmailServiceClient client = EmailServiceClient.getInstance();
-        SendEmailRequest sendEmailRequest = new SendEmailRequest();
-        sendEmailRequest.setAppID(getLocalAppID());
-        sendEmailRequest.setBodyTemplateID(28030004);
-        sendEmailRequest.setCharset("GB2312");
-        sendEmailRequest.setIsBodyHtml(true);
-        sendEmailRequest.setOrderID(0);
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH,2);
-        sendEmailRequest.setExpiredTime(calendar);
-        sendEmailRequest.setSendCode("28030004");
-        sendEmailRequest.setSender("taochen@ctrip.com");
-        sendEmailRequest.setSubject(String.format("%s-%s动态数据源切换统计",startCheckTime, endCheckTime));
-        sendEmailRequest.setBodyContent(generateBodyContent(switchDataList));
-        List<String> recipient = new ArrayList<>();
-        recipient.add(RECEIVE_EMAIL);
-        sendEmailRequest.setRecipient(recipient);
-        try {
-            SendEmailResponse response = client.sendEmail(sendEmailRequest);
-            if (response != null && response.getResultCode() == 1) {
-                return;
-            }
-            else {
-                throw new Exception();
-            }
-        }catch (Exception e) {
-            Cat.logError("send email fail, time:" + checkDate.toString(), e);
-        }
+        return DateUtils.formatCheckTime(catTransactionDate);
     }
 
     public List<AppIDInfo> getBatchAppIdIp(List<String> appIds, String env) {
@@ -444,35 +355,22 @@ public class DalDynamicDSDao {
 
     private String generateBodyContent(List<TitanKeySwitchInfoDB> switchDataList) {
         String htmlTemplate = "<entry><content><![CDATA[%s]]></content></entry>";
-        String htmlTable = " <table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"80\">ID</th><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey</th>" +
-                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">SwitchCount</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">AppId Count</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">IP Count</th></tr></thead><tbody>%s</tbody></table>";
-        String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0\">%s</td><td style=\"border:1px solid #B0B0B0\">%s</td><td style=\"border:1px solid #B0B0B0\">%s</td>" +
-                "<td style=\"border:1px solid #B0B0B0\">%s</td><td style=\"border:1px solid #B0B0B0\">%s</td></tr>";
+        String htmlTable = " <table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"80\">序号</th><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey切换次数</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端AppId数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端IP数量</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端切换总次数</th></tr></thead><tbody>%s</tbody></table>";
+        String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>" +
+                "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
         StringBuilder sb = new StringBuilder();
         int i = 0;
         for (TitanKeySwitchInfoDB switchData : switchDataList) {
             ++i;
-            sb.append(String.format(bodyTemplate, i, switchData.getTitanKey(), switchData.getSwitchCount(), switchData.getAppIDCount(), switchData.getIpCount()));
+            sb.append(String.format(bodyTemplate, i, switchData.getTitanKey(), switchData.getSwitchCount(), switchData.getAppIDCount(), switchData.getIpCount(), switchData.getSwitchCount() * switchData.getIpCount()));
         }
         return String.format(htmlTemplate, String.format(htmlTable, sb.toString()));
     }
 
-    private int getLocalAppID() {
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(APP_PROPERTIES_CLASSPATH);
-        Properties m_appProperties = new Properties();
-        if (in == null) {
-            in = DalDynamicDSDao.class.getResourceAsStream(APP_PROPERTIES_CLASSPATH);
-        }
-        try {
-            m_appProperties.load(new InputStreamReader(in, StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            Cat.logError("get local appID fail!", e);
-        }
-        return Integer.valueOf(m_appProperties.getProperty("app.id"));
-    }
-
     public String getNowDateString(Date checkTime) {
-        return formatCheckTime(checkTime);
+        return DateUtils.formatCheckTime(checkTime);
     }
 
     public int getStatisticProgress() {

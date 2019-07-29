@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen;
 import com.ctrip.platform.dal.daogen.hickwall.HickwallMetrics;
 import com.ctrip.platform.dal.daogen.resource.DalDynamicDSResource;
 import com.ctrip.platform.dal.daogen.resource.DalReportResource;
+import com.ctrip.platform.dal.daogen.resource.TitanKeyInfoReportResource;
 import com.ctrip.platform.dal.daogen.utils.Configuration;
 
 import com.dianping.cat.Cat;
@@ -30,14 +31,17 @@ public class DaoGenApplication extends ResourceConfig {
         // init dal dynamic datasource data
         DalDynamicDSResource.initDalDynamicDS();
 
+        TitanKeyInfoReportResource.initTitanKeyInfoReportDao();
+
 //        Transaction t = Cat.newTransaction("DAL.configure", "DataSourceConfig::refreshDataSourceConfig:dalservice2db_w");
 //        t.setStatus(Transaction.SUCCESS);
 //        t.complete();
-//
+
 //        Transaction t1 = Cat.newTransaction("DAL.dataSource", "DataSource::createDataSource:dalservice2db_w");
 //        t1.setStatus(Transaction.SUCCESS);
 //        t1.complete();
 
-//        Cat.logEvent("Titan.MHAUpdate.TitanKey", "dalservice2db_w");
+//        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservice2db_w");
+//        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservicedb");
     }
 }

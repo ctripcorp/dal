@@ -15,6 +15,8 @@ public class AppIDInfo {
 
     private Map<Integer, Integer> appIDSwitchTime;
 
+    private Map<Integer, Integer> appIDSuccessTime;
+
     public String getAppID() {
         return appID;
     }
@@ -37,5 +39,13 @@ public class AppIDInfo {
 
     public void setAppIDSwitchTime(Map<Integer, Integer> appIDSwitchTime) {
         this.appIDSwitchTime = appIDSwitchTime;
+    }
+
+    public Map<Integer, Integer> getAppIDSuccessTime() {
+        return appIDSuccessTime;
+    }
+
+    public void setAppIDSuccessTime(Map<Integer, Integer> appIDSuccessTime) {
+        this.appIDSuccessTime = appIDSuccessTime;
     }
 }

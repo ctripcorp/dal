@@ -1,18 +1,24 @@
 package com.ctrip.platform.dal.daogen;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DynamicDS.*;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
+import com.ctrip.platform.dal.daogen.util.DateUtils;
+import com.ctrip.platform.dal.daogen.util.EmailUtils;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,12 +33,29 @@ public class DalDynamicDSDao {
 
     private static final int STAY_TIME = 4;
 
-    private static final int LRU_CACHE_SIZE = 2;
+    private static final int LRU_CACHE_SIZE = 20;
 
     private static final String TITANKEY_APPID = "100010061";
 
     private static final String TITAN_KEY_GET =
             "http://qconfig.ctripcorp.com/plugins/titan/config?appid=%s&titankey=%s&env=%s";
+
+    private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
+
+    private static final String CMS_APPID_IP = "http://osg.ops.ctripcorp.com/api/CMSGetApp/?_version=new";
+
+    private static final String CMS_APPID_IP_FAT = "http://osg.ops.ctripcorp.com/api/CMSFATGetApp/?_version=new";
+
+    private static final String CMS_APPID_IP_UAT = "http://osg.ops.ctripcorp.com/api/CMSUATGetApp/?_version=new";
+
+    private static final String ACCESS_TOKEN = "96ddbe67728bc756466a226ec050456d";
+    private static final String RETURN_FIELDS_ATTRIBUTE = "_returnFields";
+    private static final String RESULT_BRANCH_ATTRIBUTE = "_resultBranch";
+    private static final String RESULT_DEPTH_ATTRIBUTE = "_resultDepth";
+    private static final String APP_IN_ATTRIBUTE = "appId@in";
+    private static final String APP_ID = "appId";
+    private static final String GROUP = "group";
+    private static final String GROUPS = "groups";
 
     private static DalDynamicDSDao dynamicDSDao = null;
 
@@ -74,14 +97,21 @@ public class DalDynamicDSDao {
         return dynamicDSDao;
     }
 
+    private DalDynamicDSDao() { }
+
     public void init() {
         //init_delay 设置为每个小时的整点执行
         Date nowDate = new Date();
-        long initDelay = getFixInitDelay(nowDate);
+        long initDelay = DateUtils.getFixInitDelay(nowDate);
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                String checkTime = getBeforeOneHourDateString(new Date());
+                Date checkDate = new Date();
+                String checkTime = getBeforeOneHourDateString(checkDate);
+                if (DateUtils.checkIsSendEMailTime(checkDate)) {
+                    List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(checkDate, CheckTimeRange.ONE_WEEK);
+                    EmailUtils.sendEmail(generateBodyContent(switchDataList), checkDate, CheckTimeRange.ONE_WEEK);
+                }
                 Cat.logEvent("DynamicDSFixJob", checkTime);
                 checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
             }
@@ -97,7 +127,7 @@ public class DalDynamicDSDao {
         }
         StringBuilder switchTitanKeys = new StringBuilder();
         for (SwitchTitanKey switchTitanKey : TitanKeys) {
-            switchTitanKeys.append(switchTitanKey).append(",");
+            switchTitanKeys.append(switchTitanKey.getTitanKey()).append(",");
         }
         Cat.logEvent("TitanKeySwitch", switchTitanKeys.toString());
 
@@ -121,24 +151,19 @@ public class DalDynamicDSDao {
             int i = 0;
             for (SwitchTitanKey switchTitanKey : switchTitanKeyList) {
                 List<String> appIDList = dynamicDSAppIDProvider.getDynamicDSAppID(switchTitanKey.getPermissions());
-                List<AppIDInfo> switchAppIDList = new ArrayList<>();
+                List<AppIDInfo> switchAppIDList = getBatchAppIdIp(appIDList, env);
                 ++i;
-                long startTimeCatAppID = System.currentTimeMillis();
-                for (String appID : appIDList) {
-                    //List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
-                    long startTimeCatHostIPs = System.currentTimeMillis();
-                    List<String> hostIPList = new ArrayList<>();
-                    Map<Integer, Integer> appIDSwitchTime = new HashMap<>();
-                    boolean isSwitch = catSwitchDSDataProvider.isSwitchInAppID(switchTitanKey.getTitanKey(), appID, checkTime, hostIPList, appIDSwitchTime, env);
-                    if (isSwitch) {
-                        AppIDInfo appIDInfo = new AppIDInfo();
-                        appIDInfo.setAppID(appID);
-                        appIDInfo.setHostIPInfolist(hostIPList);
-                        appIDInfo.setAppIDSwitchTime(appIDSwitchTime);
-                        switchAppIDList.add(appIDInfo);
-                    }
-                }
-                long endTimeCatAppID = System.currentTimeMillis();
+//                long startTimeCatAppID = System.currentTimeMillis();
+//                for (String appID : appIDList) {
+//                    //List<SwitchHostIPInfo> hostIPList = new ArrayList<>();
+//                    long startTimeCatHostIPs = System.currentTimeMillis();
+//                    AppIDInfo appIDInfo = catSwitchDSDataProvider.checkSwitchInAppID(switchTitanKey.getTitanKey(), checkTime, appID, env);
+//                    if (appIDInfo != null) {
+//                        switchAppIDList.add(appIDInfo);
+//                    }
+//                }
+//                long endTimeCatAppID = System.currentTimeMillis();
+
                 statisticProgress = i;
                 //System.out.println("appIDs time: " + (endTimeCatAppID - startTimeCatAppID));
                 //System.out.println(" cat api time: " + (endTimeCatHostIPs - startTimeCatHostIPs) + "ms. appid count: " +  appIDList.size());
@@ -157,6 +182,7 @@ public class DalDynamicDSDao {
                 for (SwitchTitanKey switchTitanKey : switchTitanKeyList) {
                     tempTitanKeyAppIDMap.put(switchTitanKey, TitanKeyStringAppIDMap.get(switchTitanKey.getTitanKey()));
                 }
+                storeToDB(tempTitanKeyAppIDMap, checkTime);
                 titanKeySwitchCache.put(checkTime, tempTitanKeyAppIDMap);
             }
         } catch (Exception e) {
@@ -196,15 +222,64 @@ public class DalDynamicDSDao {
         return TitanKeyInfoList;
     }
 
-    // one hour delay
-    private long getFixInitDelay(Date checkTime) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(checkTime);
-        calendar.add(Calendar.HOUR, 1);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime().getTime()/1000 - checkTime.getTime()/1000;
+    private void storeToDB(Map<SwitchTitanKey, List<AppIDInfo>> switchDatas, String checkTime) {
+        List<TitanKeySwitchInfoDB> titanKeySwitchInfoList = new ArrayList<>();
+        for (Map.Entry<SwitchTitanKey, List<AppIDInfo>> switchData : switchDatas.entrySet()) {
+            TitanKeySwitchInfoDB titanKeySwitchInfoDB = new TitanKeySwitchInfoDB();
+            titanKeySwitchInfoDB.setTitanKey(switchData.getKey().getTitanKey());
+            //统计titankey切换次数
+            int titanKeySwitchCount = 0;
+            for (int value : switchData.getKey().getSwitchCount().values()) {
+                titanKeySwitchCount += value;
+            }
+            titanKeySwitchInfoDB.setSwitchCount(titanKeySwitchCount);
+            titanKeySwitchInfoDB.setAppIDCount(switchData.getValue().size());
+            //统计ip数量
+            int ipCount = 0;
+            for (AppIDInfo appIDInfo : switchData.getValue()) {
+                ipCount += appIDInfo.getHostIPInfolist().size();
+            }
+            titanKeySwitchInfoDB.setIpCount(ipCount);
+            titanKeySwitchInfoDB.setCheckTime(Integer.valueOf(checkTime));
+            titanKeySwitchInfoList.add(titanKeySwitchInfoDB);
+        }
+        DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
+        dalDynamicDSDBDao.batchInsertSwitchData(titanKeySwitchInfoList);
+    }
+
+    public List<TitanKeySwitchInfoDB> getSwitchDataInRange(Date nextWeekDate, CheckTimeRange checkTimeRange) {
+        String startCheckTime = null;
+        String endCheckTime = null;
+        DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
+        if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
+            startCheckTime = DateUtils.getStartOneWeek(nextWeekDate);
+            endCheckTime = DateUtils.getEndOneWeek(nextWeekDate);
+        }
+        return mergeSwitchData(dalDynamicDSDBDao.queryInRange(startCheckTime, endCheckTime));
+    }
+
+    public List<TitanKeySwitchInfoDB> mergeSwitchData(List<TitanKeySwitchInfoDB> switchDataList) {
+        Map<String, TitanKeySwitchInfoDB> helpMap = new HashMap<>();
+        List<TitanKeySwitchInfoDB> result = new ArrayList<>();
+        for (TitanKeySwitchInfoDB titanKeySwitchInfoDB : switchDataList) {
+            String titanKey = titanKeySwitchInfoDB.getTitanKey();
+            if (helpMap.containsKey(titanKey)) {
+                TitanKeySwitchInfoDB existTitanKeySwitchInfoDB = helpMap.get(titanKey);
+                int switchCount = existTitanKeySwitchInfoDB.getSwitchCount();
+                existTitanKeySwitchInfoDB.setSwitchCount(switchCount + titanKeySwitchInfoDB.getSwitchCount());
+                if (existTitanKeySwitchInfoDB.getCheckTime() < titanKeySwitchInfoDB.getCheckTime()) {
+                    existTitanKeySwitchInfoDB.setAppIDCount(titanKeySwitchInfoDB.getAppIDCount());
+                    existTitanKeySwitchInfoDB.setIpCount(titanKeySwitchInfoDB.getIpCount());
+                }
+            }
+            else {
+                helpMap.put(titanKeySwitchInfoDB.getTitanKey(), titanKeySwitchInfoDB);
+            }
+        }
+        for (TitanKeySwitchInfoDB titanKeySwitchInfoDB : helpMap.values()) {
+            result.add(titanKeySwitchInfoDB);
+        }
+        return result;
     }
 
     public Map<SwitchTitanKey, List<AppIDInfo>> getTitanKeyAppIDMap(String checkTime) {
@@ -219,19 +294,83 @@ public class DalDynamicDSDao {
     private String getBeforeOneHourDateString(Date checkTime) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(checkTime);
-        calendar.add(Calendar.HOUR, -1);
+        calendar.add(Calendar.HOUR_OF_DAY, -1);
         Date catTransactionDate = calendar.getTime();
-        return formatCheckTime(catTransactionDate);
+        return DateUtils.formatCheckTime(catTransactionDate);
     }
 
-    private String formatCheckTime(Date convertCheckTime) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dateString = formatter.format(convertCheckTime).replaceAll("-| ", "");
-        return dateString.substring(0, dateString.indexOf(":"));
+    public List<AppIDInfo> getBatchAppIdIp(List<String> appIds, String env) {
+        String formatUrl = "FAT".equalsIgnoreCase(env) ? CMS_APPID_IP_FAT : "UAT".equalsIgnoreCase(env) ?
+                CMS_APPID_IP_UAT : CMS_APPID_IP;
+        List<AppIDInfo> switchAppIDList = new ArrayList<>();
+        Transaction t = Cat.newTransaction("SwitchTitanKey", "getBatchAppIdIp");
+        Map<String, Object> queries = Maps.newHashMap();
+        queries.put(APP_IN_ATTRIBUTE, appIds);
+        queries.put(RESULT_BRANCH_ATTRIBUTE, GROUP);
+        queries.put(RESULT_DEPTH_ATTRIBUTE, 1);
+        queries.put(RETURN_FIELDS_ATTRIBUTE, Lists.newArrayList(APP_ID, GROUPS));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("access_token", ACCESS_TOKEN);
+        parameters.put("request_body", JSON.toJSONString(queries));
+        try {
+            AppIpGetResponse response = HttpUtil.getJSONEntity(AppIpGetResponse.class, formatUrl, parameters, HttpMethod.HttpPost);
+            Boolean status = response.getStatus();
+            List<App> apps = response.getData();
+            if (status == null || apps == null || apps.isEmpty()) {
+                return switchAppIDList;
+            }
+            if (status) {
+                for (App app : apps) {
+                    AppIDInfo appIDInfo = new AppIDInfo();
+                    String appId = app.getAppId();
+                    appIDInfo.setAppID(appId);
+                    List<String> hostIP = new ArrayList<>();
+                    List<Group> groups = app.getGroups();
+                    if (groups != null && !groups.isEmpty()) {
+                        for (Group group : groups) {
+                            List<GroupMember> groupMembers = group.getAccessGroupMembers();
+                            if (groupMembers != null && !groupMembers.isEmpty()) {
+                                for (GroupMember groupMember : groupMembers) {
+                                    String ip = groupMember.getIp();
+                                    if (StringUtils.isNotBlank(ip)) {
+                                        hostIP.add(ip);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    appIDInfo.setHostIPInfolist(hostIP);
+                    switchAppIDList.add(appIDInfo);
+                }
+            }
+            t.setStatus(Message.SUCCESS);
+        } catch (Exception e) {
+            Cat.logError("get app id ip fail!", e);
+            t.setStatus(e);
+        } finally {
+            t.complete();
+        }
+        return switchAppIDList;
+    }
+
+    private String generateBodyContent(List<TitanKeySwitchInfoDB> switchDataList) {
+        String htmlTemplate = "<entry><content><![CDATA[%s]]></content></entry>";
+        String htmlTable = " <table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"80\">序号</th><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey切换次数</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端AppId数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端IP数量</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端切换总次数</th></tr></thead><tbody>%s</tbody></table>";
+        String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>" +
+                "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for (TitanKeySwitchInfoDB switchData : switchDataList) {
+            ++i;
+            sb.append(String.format(bodyTemplate, i, switchData.getTitanKey(), switchData.getSwitchCount(), switchData.getAppIDCount(), switchData.getIpCount(), switchData.getSwitchCount() * switchData.getIpCount()));
+        }
+        return String.format(htmlTemplate, String.format(htmlTable, sb.toString()));
     }
 
     public String getNowDateString(Date checkTime) {
-        return formatCheckTime(checkTime);
+        return DateUtils.formatCheckTime(checkTime);
     }
 
     public int getStatisticProgress() {

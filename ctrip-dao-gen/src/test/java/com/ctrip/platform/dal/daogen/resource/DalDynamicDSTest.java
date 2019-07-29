@@ -4,8 +4,7 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
 import com.ctrip.platform.dal.daogen.DynamicDS.CatSwitchDSDataProvider;
-import com.ctrip.platform.dal.daogen.entity.SwitchHostIPInfo;
-import com.ctrip.platform.dal.daogen.entity.TriggerMethod;
+import com.ctrip.platform.dal.daogen.entity.*;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import org.junit.Test;
@@ -28,7 +27,7 @@ public class DalDynamicDSTest {
     @Test
     public void fixedCheckTest() throws Exception {
         DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
-        //dalDynamicDSDao.checkSwitchDataSource("2019070811", null, TriggerMethod.MANUAL);
+        dalDynamicDSDao.checkSwitchDataSource("2019072518", null, null, TriggerMethod.AUTO);
     }
 
     @Test
@@ -49,7 +48,7 @@ public class DalDynamicDSTest {
     //模拟切换数据源cat打点
     @Test
     public void titanCatEvent() {
-        Cat.logEvent("Titan.MHAUpdate.TitanKey", "dalservice2db_w");
+        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservice2db_w");
     }
 
     @Test
@@ -60,7 +59,7 @@ public class DalDynamicDSTest {
     }
 
     @Test
-    public void dalDataSourceCatTransaction() {
+    public void dalDataSourceCatTransaction() throws Exception {
         Transaction t = Cat.newTransaction("DAL.dataSource", "DataSource::createDataSource:dalservice2db_w");
         t.setStatus(Transaction.SUCCESS);
         t.complete();
@@ -81,4 +80,35 @@ public class DalDynamicDSTest {
         }
         System.out.println("App ID： " + m_appProperties.getProperty("app.id"));
     }
+
+    @Test
+    public void testSendEmail() {
+        DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
+//        TitanKeySwitchInfoDB titanKeySwitchInfoDB1 = new TitanKeySwitchInfoDB();
+//        titanKeySwitchInfoDB1.setTitanKey("abcd");
+//        titanKeySwitchInfoDB1.setSwitchCount(10);
+//        titanKeySwitchInfoDB1.setAppIDCount(50);
+//        titanKeySwitchInfoDB1.setIpCount(100);
+//        TitanKeySwitchInfoDB titanKeySwitchInfoDB2 = new TitanKeySwitchInfoDB();
+//        titanKeySwitchInfoDB2.setTitanKey("efgh");
+//        titanKeySwitchInfoDB2.setSwitchCount(8);
+//        titanKeySwitchInfoDB2.setAppIDCount(30);
+//        titanKeySwitchInfoDB2.setIpCount(80);
+//        List<TitanKeySwitchInfoDB> titanKeySwitchInfoDBList = new ArrayList<>();
+//        titanKeySwitchInfoDBList.add(titanKeySwitchInfoDB1);
+//        titanKeySwitchInfoDBList.add(titanKeySwitchInfoDB2);
+
+        dalDynamicDSDao.sendEmail(dalDynamicDSDao.getSwitchDataInRange(new Date(), CheckTimeRange.ONE_WEEK), new Date(), CheckTimeRange.ONE_WEEK);
+    }
+
+    @Test
+    public void testGetCMSIP() {
+        DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
+        List<String> appIds = new ArrayList<>();
+        appIds.add("930201");
+        appIds.add("100005701");
+        List<AppIDInfo> appIDInfos = dalDynamicDSDao.getBatchAppIdIp(appIds, "pro");
+        System.out.println(appIDInfos.size());
+    }
+
 }

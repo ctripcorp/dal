@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.application.service;
 
 import com.ctrip.platform.dal.application.AppConfig;
+import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -141,4 +142,11 @@ public class AppTest {
         pojo = sqlServerDao.queryByPk(pojo.getID(), null);
         Assert.assertNull(pojo);
     }
+
+//    @Test
+//    public void testQConfig() throws Exception{
+//        DalApplicationConfig config=new DalApplicationConfig();
+//        config.initMap();
+//        System.out.println(config.getQPS());
+//    }
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,11 @@ public class AWSDepolyService {
         } catch (Exception e) {
             log.error("AwsDeployService init error", e);
         }
+    }
+
+    @PreDestroy
+    public void cleanUp() throws Exception{
+        executor.shutdownNow();
     }
 
     private void addTask() {

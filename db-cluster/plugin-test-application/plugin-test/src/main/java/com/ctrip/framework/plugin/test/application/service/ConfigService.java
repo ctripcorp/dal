@@ -1,6 +1,7 @@
 package com.ctrip.framework.plugin.test.application.service;
 
 import com.dianping.cat.Cat;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import qunar.agile.Conf;
 import qunar.tc.qconfig.client.Configuration;
@@ -14,6 +15,7 @@ import static com.ctrip.framework.plugin.test.application.util.Constants.CONFIG_
 /**
  * Created by shenjie on 2019/3/5.
  */
+@Slf4j
 @Service
 public class ConfigService {
 
@@ -46,6 +48,7 @@ public class ConfigService {
             });
         } catch (Exception e) {
             Cat.logError("ConfigService init failed", e);
+            log.error("ConfigService init failed", e);
             throw new Exception("ConfigService init failed", e);
         }
     }

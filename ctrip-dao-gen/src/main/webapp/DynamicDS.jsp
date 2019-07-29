@@ -31,15 +31,105 @@
 </head>
 <body>
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active" id="weekReport">
-            <a href="#switchReport" aria-controls="switchReport" role="tab" data-toggle="tab">DAL 切换TitanKey报表</a>
+        <li role="presentation" class="active" id="titanKeyReportTab">
+            <a href="#titanKeyReport" aria-controls="titanKeyReport" role="tab" data-toggle="tab">TitanKey IP直连统计</a>
+        </li>
+        <li role="presentation" id="weekReport">
+            <a href="#switchReport" aria-controls="switchReport" role="tab" data-toggle="tab">TitanKey切换报表</a>
         </li>
         <li role="presentation" id="hourReport">
             <a href="#dynamicDS" aria-controls="dynamicDS" role="tab" data-toggle="tab">DAL 动态数据源切换统计</a>
         </li>
     </ul>
+
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="switchReport">
+        <div role="tabpanel" class="tab-pane active" id="titanKeyReport">
+            <div class="panel">
+                <div class="panel-heading">
+                    <%--<p style="font-size: 20px;color:#FF0000;margin-left: 20px">由于Cat限流策略，统计数据显示可能会比较慢！！！</p>--%>
+                    <%--<div id="viewOneWeekData" >--%>
+                        <%--<button id="viewTitanKeyButton" style="margin-left: 12px" class="font-size">查看数据</button>--%>
+                    <%--</div>--%>
+                    <div style="margin-left: 20px;margin-top: 10px">
+                        数据更新日期：<span id="statisticsDate" class="bg-success"></span>
+                    </div>
+                    <div class="panel-body">
+                        <div><span id="loadingSpan3" style="font-size: 20px;margin-left: 20px"></span></div>
+                        <%--<div id="divTable3" class="display-none">--%>
+                            <%--<div class="scroll table-size">--%>
+                                <%--<table id="tableTitanKeyOneDay" class="table table-striped table-bordered">--%>
+                                    <%--<thead>--%>
+                                    <%--<tr>--%>
+                                        <%--<th>TitanKey总数</th>--%>
+                                        <%--<th>使用MySql数量</th>--%>
+                                        <%--<th>使用SqlServer数量</th>--%>
+                                        <%--<th>IP直连数量</th>--%>
+                                        <%--<th>IP直连MySql数量</th>--%>
+                                        <%--<th>IP直连SqlServer数量</th>--%>
+                                    <%--</tr>--%>
+                                    <%--</thead>--%>
+                                    <%--<tbody></tbody>--%>
+                                <%--</table>--%>
+                            <%--</div>--%>
+
+                            <div class="scroll table-size">
+                                <table id="tableTitanKeyDirectConnect" class="table table-striped table-bordered" style="width: 600px">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 120px">TitanKey总数</th>
+                                        <th style="width: 150px">IP直连数量</th>
+                                        <th style="width: 150px">IP直连占比</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="scroll table-size">
+                                <table id="tableTitanKeyDirectConnectMySql" class="table table-striped table-bordered" style="width: 600px">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 120px">MySql总数</th>
+                                        <th style="width: 150px">IP直连MySql数量</th>
+                                        <th style="width: 150px">IP直连MySql占比</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="scroll table-size">
+                                <table id="tableTitanKeyDirectConnectSqlServer" class="table table-striped table-bordered" style="width: 600px">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 120px">SqlServer总数</th>
+                                        <th style="width: 150px">IP直连SqlServer数量</th>
+                                        <th style="width: 150px">IP直连SqlServer占比</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="scroll table-size">
+                                <div><span id="abnormalTitanKeyTableTitle" style="font-size: 20px">TitanKey配置异常统计(TitanKey配置serverIp不是ip或者serverName不是域名)</span></div>
+                                <table id="tableAbnormalTitanKey" class="table table-striped table-bordered" style="width: 400px">
+                                    <thead>
+                                    <tr>
+                                        <th>TitanKey     </th>
+                                        <th>ServerIp</th>
+                                        <th>ServerName   </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane" id="switchReport">
             <div class="panel">
                 <div class="panel-heading">
                     <%--<p style="font-size: 20px;color:#FF0000;margin-left: 20px">由于Cat限流策略，统计数据显示可能会比较慢！！！</p>--%>

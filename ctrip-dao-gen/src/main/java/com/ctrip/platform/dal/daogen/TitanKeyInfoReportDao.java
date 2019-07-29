@@ -2,17 +2,16 @@ package com.ctrip.platform.dal.daogen;
 
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.platform.dal.daogen.entity.AbnormalTitanKey;
-import com.ctrip.platform.dal.daogen.entity.TitanKeyAPIInfo;
-import com.ctrip.platform.dal.daogen.entity.TitanKeyInfoReportDto;
-import com.ctrip.platform.dal.daogen.entity.TitanKeyPluginsResponse;
+import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
+import com.ctrip.platform.dal.daogen.util.EmailUtils;
 import com.ctrip.platform.dal.daogen.util.IPUtils;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import org.apache.commons.lang.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Created by taochen on 2019/7/26.
  */
 public class TitanKeyInfoReportDao {
-    private static final long FIXED_RATE = 3600 * 24; //second
+    private static final long FIXED_RATE = 3600; //second
 
     private static final String TITANKEY_LIST_API = "http://qconfig.ctripcorp.com/plugins/titan/configs?appid=100010061&env=%s&pageNo=1&pageSize=%s";
 
@@ -51,14 +50,15 @@ public class TitanKeyInfoReportDao {
     public void init() {
         //init_delay 设置为每个小时的整点执行
         Date nowDate = new Date();
-        long initDelay = DateUtils.getZeroInitDelay(nowDate);
+        long initDelay = DateUtils.getFixInitDelay(nowDate);
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 getTiTanKeyInfoReport();
                 Date checkDate = new Date();
                 if (DateUtils.checkIsSendEMailTime(checkDate)) {
-
+                    String subject = "TitanKey IP直连统计(" + DateUtils.getBeforeOneDay(checkDate).substring(0,8) +  ")";
+                    EmailUtils.sendEmail(generateBodyContent(), subject);
                 }
             }
         }, initDelay, FIXED_RATE, TimeUnit.SECONDS);
@@ -67,6 +67,7 @@ public class TitanKeyInfoReportDao {
     public void getTiTanKeyInfoReport() {
         Env envEntity = Foundation.server().getEnv();
         String env = envEntity.name().toLowerCase();
+        //String env = "pro";
         int total = getTitanKeyTotal(env);
         TitanKeyPluginsResponse response = callTitanPluginsAPI(env, total);
         int titanKeyCount = 0;
@@ -116,6 +117,7 @@ public class TitanKeyInfoReportDao {
         titanKeyInfoReportDto.setDirectConnectMysqlCount(directConnectMysqlCount);
         titanKeyInfoReportDto.setDirectConnectSqlServerCount(directConnectSqlServerCount);
         titanKeyInfoReportDto.setAbnormalTitanKeyList(abnormalTitanKeys);
+        titanKeyInfoReportDto.setStatisticsDate(DateUtils.formatDate(new Date()));
     }
 
     private int getTitanKeyTotal(String env) {
@@ -146,15 +148,52 @@ public class TitanKeyInfoReportDao {
         return titanKeyInfoReportDto;
     }
 
-    private String generateBodyContent() {
+    public String generateBodyContent() {
+        DecimalFormat df = new DecimalFormat("0.00%");
         String htmlTemplate = "<entry><content><![CDATA[%s]]></content></entry>";
-        String htmlTable = " <table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey总数</th>" +
-                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">使用MySql数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">使用SqlServer数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">IP直连数据库数量</th>" +
-                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">IP直连MySql数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">IP直连SqlServer数量</th></tr></thead><tbody>%s</tbody></table>";
-        String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>" +
-                "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
-        String table = String.format(bodyTemplate, titanKeyInfoReportDto.getTitanKeyCount(), titanKeyInfoReportDto.getUseMysqlCount(), titanKeyInfoReportDto.getUseSqlServerCount(),
-                titanKeyInfoReportDto.getDirectConnectDBCount(), titanKeyInfoReportDto.getDirectConnectMysqlCount(), titanKeyInfoReportDto.getDirectConnectSqlServerCount());
-        return null;
+
+//        String htmlTitanKeyTable = "<div><span style=\"font-size: 20px\">TitanKey IP直连统计</span></div><table style=\"border-collapse:collapse;width: auto\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey总数</th>" +
+//                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">使用MySql数量</th><th style=\"border:1px solid #B0B0B0\" width= \"150\">使用SqlServer数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">IP直连数量</th>" +
+//                "<th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连MySql数量</th><th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连SqlServer数量</th></tr></thead><tbody>%s</tbody></table>";
+
+        String htmlTitanKeyTableDB = "<table style=\"border-collapse:collapse;width: auto\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey总数</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连数量</th><th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连占比</th></tr></thead><tbody>%s</tbody></table>";
+
+        String htmlTitanKeyTableMySql = "<table style=\"border-collapse:collapse;width: auto\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"120\">MySql总数</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连MySql数量</th><th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连MySql占比</th></tr></thead><tbody>%s</tbody></table>";
+
+        String htmlTitanKeyTableSqlServer = "<table style=\"border-collapse:collapse;width: auto\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"120\">SqlServer总数</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连SqlServer数量</th><th style=\"border:1px solid #B0B0B0\" width= \"150\">IP直连SqlServer占比</th></tr></thead><tbody>%s</tbody></table>";
+
+//        String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>" +
+//                "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
+//        String tableData = String.format(bodyTemplate, titanKeyInfoReportDto.getTitanKeyCount(), titanKeyInfoReportDto.getUseMysqlCount(), titanKeyInfoReportDto.getUseSqlServerCount(),
+//                titanKeyInfoReportDto.getDirectConnectDBCount(), titanKeyInfoReportDto.getDirectConnectMysqlCount(), titanKeyInfoReportDto.getDirectConnectSqlServerCount());
+//        String titanKeyTableContent = String.format(htmlTitanKeyTable, tableData);
+
+        String bodyTemplateDB = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
+        double dbPercent = (double) titanKeyInfoReportDto.getDirectConnectDBCount() / titanKeyInfoReportDto.getTitanKeyCount();
+        double mysqlPercent = (double) titanKeyInfoReportDto.getDirectConnectMysqlCount() / titanKeyInfoReportDto.getUseMysqlCount();
+        double sqlServerPercent = (double) titanKeyInfoReportDto.getDirectConnectSqlServerCount() / titanKeyInfoReportDto.getUseSqlServerCount();
+        String tableDataDB = String.format(bodyTemplateDB, titanKeyInfoReportDto.getTitanKeyCount(), titanKeyInfoReportDto.getDirectConnectDBCount(),
+                df.format(dbPercent));
+        String tableDataMySql = String.format(bodyTemplateDB, titanKeyInfoReportDto.getUseMysqlCount(), titanKeyInfoReportDto.getDirectConnectMysqlCount(),
+                df.format(mysqlPercent));
+        String tableDataSqlServer = String.format(bodyTemplateDB, titanKeyInfoReportDto.getUseSqlServerCount(), titanKeyInfoReportDto.getDirectConnectSqlServerCount(),
+                df.format(sqlServerPercent));
+        String titanKeyTableDBContent = String.format(htmlTitanKeyTableDB, tableDataDB);
+        String titanKeyTableMySqlContent = String.format(htmlTitanKeyTableMySql, tableDataMySql);
+        String titanKeyTableSqlServerContent = String.format(htmlTitanKeyTableSqlServer, tableDataSqlServer);
+
+        String htmlAbnormalTitanKeyTable = "<div style=\"margin-top: 20px\"><span style=\"font-size: 20px\">TitanKey配置异常统计(TitanKey配置serverIp不是ip或者serverName不是域名)</span></div><table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey     </th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">ServerIp</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">ServerName   </th></tr></thead><tbody>%s</tbody></table>";
+        String abnormalTitanKeyBodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>";
+        StringBuilder sb = new StringBuilder();
+        for (AbnormalTitanKey abnormalTitanKey : titanKeyInfoReportDto.getAbnormalTitanKeyList()) {
+            sb.append(String.format(abnormalTitanKeyBodyTemplate, abnormalTitanKey.getTitanKey(), abnormalTitanKey.getServerIp(), abnormalTitanKey.getServerName()));
+        }
+        String abnormalTitanKeyTableContent = String.format(htmlAbnormalTitanKeyTable, sb.toString());
+
+        return String.format(htmlTemplate, titanKeyTableDBContent + titanKeyTableMySqlContent + titanKeyTableSqlServerContent + abnormalTitanKeyTableContent );
     }
 }

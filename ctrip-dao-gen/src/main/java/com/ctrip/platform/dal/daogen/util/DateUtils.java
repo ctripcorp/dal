@@ -63,4 +63,25 @@ public class DateUtils {
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         return formatCheckTime(calendar.getTime());
     }
+
+    public static String getBeforeOneDay(Date checkTime) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(checkTime);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        return formatCheckTime(calendar.getTime());
+    }
+
+    public static String formatDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        return sdf.format(date);
+    }
+
+    public static String getBeforeOneHourDateString(Date checkTime) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(checkTime);
+        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        Date catTransactionDate = calendar.getTime();
+        return DateUtils.formatCheckTime(catTransactionDate);
+    }
 }

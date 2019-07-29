@@ -40,8 +40,6 @@ public class DalDynamicDSDao {
     private static final String TITAN_KEY_GET =
             "http://qconfig.ctripcorp.com/plugins/titan/config?appid=%s&titankey=%s&env=%s";
 
-    private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
-
     private static final String CMS_APPID_IP = "http://osg.ops.ctripcorp.com/api/CMSGetApp/?_version=new";
 
     private static final String CMS_APPID_IP_FAT = "http://osg.ops.ctripcorp.com/api/CMSFATGetApp/?_version=new";
@@ -107,11 +105,8 @@ public class DalDynamicDSDao {
             @Override
             public void run() {
                 Date checkDate = new Date();
-                String checkTime = getBeforeOneHourDateString(checkDate);
-                if (DateUtils.checkIsSendEMailTime(checkDate)) {
-                    List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(checkDate, CheckTimeRange.ONE_WEEK);
-                    EmailUtils.sendEmail(generateBodyContent(switchDataList), checkDate, CheckTimeRange.ONE_WEEK);
-                }
+                String checkTime = DateUtils.getBeforeOneHourDateString(checkDate);
+                notifyByEmail(checkDate);
                 Cat.logEvent("DynamicDSFixJob", checkTime);
                 checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
             }
@@ -247,14 +242,8 @@ public class DalDynamicDSDao {
         dalDynamicDSDBDao.batchInsertSwitchData(titanKeySwitchInfoList);
     }
 
-    public List<TitanKeySwitchInfoDB> getSwitchDataInRange(Date nextWeekDate, CheckTimeRange checkTimeRange) {
-        String startCheckTime = null;
-        String endCheckTime = null;
+    public List<TitanKeySwitchInfoDB> getSwitchDataInRange(String startCheckTime, String endCheckTime) {
         DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
-        if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
-            startCheckTime = DateUtils.getStartOneWeek(nextWeekDate);
-            endCheckTime = DateUtils.getEndOneWeek(nextWeekDate);
-        }
         return mergeSwitchData(dalDynamicDSDBDao.queryInRange(startCheckTime, endCheckTime));
     }
 
@@ -289,14 +278,6 @@ public class DalDynamicDSDao {
             Cat.logError("get titanKey switch info error, key: " + checkTime, e);
         }
         return null;
-    }
-
-    private String getBeforeOneHourDateString(Date checkTime) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(checkTime);
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
-        Date catTransactionDate = calendar.getTime();
-        return DateUtils.formatCheckTime(catTransactionDate);
     }
 
     public List<AppIDInfo> getBatchAppIdIp(List<String> appIds, String env) {
@@ -353,10 +334,20 @@ public class DalDynamicDSDao {
         return switchAppIDList;
     }
 
-    private String generateBodyContent(List<TitanKeySwitchInfoDB> switchDataList) {
+    public void notifyByEmail(Date checkDate) {
+        if (DateUtils.checkIsSendEMailTime(checkDate)) {
+            String startCheckTime = DateUtils.getStartOneWeek(checkDate);
+            String endCheckTime = DateUtils.getEndOneWeek(checkDate);
+            List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(startCheckTime, endCheckTime);
+            String subject = String.format("动态数据源切换统计(%s-%s)",startCheckTime.substring(0,8), endCheckTime.substring(0,8));
+            EmailUtils.sendEmail(generateBodyContent(switchDataList), subject);
+        }
+    }
+
+    public String generateBodyContent(List<TitanKeySwitchInfoDB> switchDataList) {
         String htmlTemplate = "<entry><content><![CDATA[%s]]></content></entry>";
         String htmlTable = " <table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"80\">序号</th><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey</th>" +
-                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey切换次数</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端AppId数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端IP数量</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey切换次数</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端AppId数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端IP总数</th>" +
                 "<th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端切换总次数</th></tr></thead><tbody>%s</tbody></table>";
         String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>" +
                 "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";

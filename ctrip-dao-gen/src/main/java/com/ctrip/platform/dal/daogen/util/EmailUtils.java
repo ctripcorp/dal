@@ -6,6 +6,7 @@ import com.ctrip.soa.platform.basesystem.emailservice.v1.EmailServiceClient;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailRequest;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailResponse;
 import com.dianping.cat.Cat;
+import qunar.tc.qconfig.client.MapConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,14 +20,29 @@ import java.util.*;
 public class EmailUtils {
     private static final String APP_PROPERTIES_CLASSPATH = "/META-INF/app.properties";
 
-    public static void sendEmail(String content, Date checkDate, CheckTimeRange checkTimeRange) {
-        String startCheckTime = null;
-        String endCheckTime = null;
-        if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
-            startCheckTime = DateUtils.getStartOneWeek(checkDate);
-            endCheckTime = DateUtils.getEndOneWeek(checkDate);
-        }
+    private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
 
+    private static final String QCONFIG_KEY = "sendEmailIpAddress";
+
+    private static final String SEND_EMAIL_IP_KEY = "ipAddress";
+
+    private static final int RETRY_TIME = 3;
+
+    public static void sendEmail(String content, String subject) {
+        MapConfig config = null;
+        for (int i = 0; i < RETRY_TIME; ++i) {
+            config = MapConfig.get(String.valueOf(getLocalAppID()), QCONFIG_KEY, null);
+            if (config != null) {
+                break;
+            }
+        }
+        Map<String, String> map = config.asMap();
+        String ip = map.get(SEND_EMAIL_IP_KEY);
+
+        Cat.logEvent("SendEmailIP", ip);
+        if (!IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
+            return;
+        }
         EmailServiceClient client = EmailServiceClient.getInstance();
         SendEmailRequest sendEmailRequest = new SendEmailRequest();
         sendEmailRequest.setAppID(getLocalAppID());
@@ -39,10 +55,10 @@ public class EmailUtils {
         sendEmailRequest.setExpiredTime(calendar);
         sendEmailRequest.setSendCode("28030004");
         sendEmailRequest.setSender("taochen@ctrip.com");
-        sendEmailRequest.setSubject(String.format("%s-%s动态数据源切换统计",startCheckTime, endCheckTime));
+        sendEmailRequest.setSubject(subject);
         sendEmailRequest.setBodyContent(content);
         List<String> recipient = new ArrayList<>();
-        recipient.add("taochen@ctrip.com");
+        recipient.add(RECEIVE_EMAIL);
         sendEmailRequest.setRecipient(recipient);
         try {
             SendEmailResponse response = client.sendEmail(sendEmailRequest);
@@ -53,7 +69,7 @@ public class EmailUtils {
                 throw new Exception();
             }
         }catch (Exception e) {
-            Cat.logError("send email fail, time:" + checkDate.toString(), e);
+            Cat.logError("send email fail!" , e);
         }
     }
 

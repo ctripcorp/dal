@@ -8,6 +8,7 @@
     <Loggers>
         <Root level="info">
             <AppenderRef ref="Cat"/>
+            <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
 </Configuration>

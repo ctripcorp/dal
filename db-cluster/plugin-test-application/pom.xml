@@ -31,7 +31,7 @@
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
-                <version>3.1.0</version>
+                <version>3.25.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -52,12 +52,6 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.16.16</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>1.2.58</version>
             </dependency>
 
             <!-- test -->

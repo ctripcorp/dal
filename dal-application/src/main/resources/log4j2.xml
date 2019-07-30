@@ -4,7 +4,7 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="[dal-demo][%t]%d %-5p [%c] %m%n"/>
     </Console>
-    <RollingFile name="RollingFile" fileName="${sys:user.home}/logs/info.log" filePattern="${sys:user.home}/logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+    <RollingFile name="RollingFile" fileName="/opt/logs/100015050/info.log" filePattern="/opt/logs/100015050/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
       <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
       <SizeBasedTriggeringPolicy size="100 MB"/>
       <!-- 匹配INFO以及以上级别 -->

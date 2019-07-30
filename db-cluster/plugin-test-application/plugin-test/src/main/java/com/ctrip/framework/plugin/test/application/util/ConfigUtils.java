@@ -2,7 +2,6 @@ package com.ctrip.framework.plugin.test.application.util;
 
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.TypedConfig;
-import qunar.tc.qconfig.client.util.AppStoreUtil;
 
 import java.io.File;
 import java.io.IOException;

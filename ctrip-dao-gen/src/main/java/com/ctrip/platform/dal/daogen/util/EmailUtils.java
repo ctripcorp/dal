@@ -22,24 +22,8 @@ public class EmailUtils {
 
     private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
 
-    private static final String QCONFIG_KEY = "sendEmailIpAddress";
-
-    private static final String SEND_EMAIL_IP_KEY = "ipAddress";
-
-    private static final int RETRY_TIME = 3;
-
     public static void sendEmail(String content, String subject) {
-        MapConfig config = null;
-        for (int i = 0; i < RETRY_TIME; ++i) {
-            config = MapConfig.get(String.valueOf(getLocalAppID()), QCONFIG_KEY, null);
-            if (config != null) {
-                break;
-            }
-        }
-        Map<String, String> map = config.asMap();
-        String ip = map.get(SEND_EMAIL_IP_KEY);
-
-        Cat.logEvent("SendEmailIP", ip);
+        String ip = IPUtils.getExecuteIPFromQConfig();
         if (!IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
             return;
         }
@@ -73,7 +57,7 @@ public class EmailUtils {
         }
     }
 
-    private static int getLocalAppID() {
+    public static int getLocalAppID() {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(APP_PROPERTIES_CLASSPATH);
         Properties m_appProperties = new Properties();
         if (in == null) {

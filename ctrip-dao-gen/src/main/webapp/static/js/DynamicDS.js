@@ -142,10 +142,17 @@
                 return;
             }
             var tableBody = "";
+            var titanKeySum = 0;
+            var titanKeySwitchCountSum = 0;
+            var clientSwitchCountSum = 0;
+            var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
             $.each(data, function (i, n) {
-                var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
                 tableBody += sprintf(rowTemplate, i + 1, n.titanKey, n.switchCount, n.appIDCount, n.ipCount, n.switchCount * n.ipCount);
+                titanKeySum++;
+                titanKeySwitchCountSum += n.switchCount;
+                clientSwitchCountSum += n.switchCount * n.ipCount;
             });
+            tableBody = sprintf(rowTemplate, "总数", titanKeySum, titanKeySwitchCountSum, "", "", clientSwitchCountSum) + tableBody;
             $("#tableDynamicDSWeek tbody").html(tableBody);
             table.show();
             loading.html("");

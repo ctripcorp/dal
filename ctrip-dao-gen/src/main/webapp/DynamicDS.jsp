@@ -37,9 +37,9 @@
         <li role="presentation" id="weekReport">
             <a href="#switchReport" aria-controls="switchReport" role="tab" data-toggle="tab">TitanKey切换报表</a>
         </li>
-        <li role="presentation" id="hourReport">
-            <a href="#dynamicDS" aria-controls="dynamicDS" role="tab" data-toggle="tab">DAL 动态数据源切换统计</a>
-        </li>
+        <%--<li role="presentation" id="hourReport">--%>
+            <%--<a href="#dynamicDS" aria-controls="dynamicDS" role="tab" data-toggle="tab">DAL 动态数据源切换统计</a>--%>
+        <%--</li>--%>
     </ul>
 
     <div class="tab-content">

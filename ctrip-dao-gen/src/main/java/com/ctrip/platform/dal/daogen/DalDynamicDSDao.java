@@ -8,6 +8,7 @@ import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
 import com.ctrip.platform.dal.daogen.util.EmailUtils;
+import com.ctrip.platform.dal.daogen.util.IPUtils;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -177,7 +178,10 @@ public class DalDynamicDSDao {
                 for (SwitchTitanKey switchTitanKey : switchTitanKeyList) {
                     tempTitanKeyAppIDMap.put(switchTitanKey, TitanKeyStringAppIDMap.get(switchTitanKey.getTitanKey()));
                 }
-                storeToDB(tempTitanKeyAppIDMap, checkTime);
+                String ip = IPUtils.getExecuteIPFromQConfig();
+                if (IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
+                    storeToDB(tempTitanKeyAppIDMap, checkTime);
+                }
                 titanKeySwitchCache.put(checkTime, tempTitanKeyAppIDMap);
             }
         } catch (Exception e) {
@@ -353,6 +357,13 @@ public class DalDynamicDSDao {
                 "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
         StringBuilder sb = new StringBuilder();
         int i = 0;
+        int titanKeySwitchCountSum = 0;
+        int clientSwitchCountSum = 0;
+        for (TitanKeySwitchInfoDB switchData : switchDataList) {
+            titanKeySwitchCountSum += switchData.getSwitchCount();
+            clientSwitchCountSum += switchData.getSwitchCount() * switchData.getIpCount();
+        }
+        sb.append(String.format(bodyTemplate, "总数", switchDataList.size(), titanKeySwitchCountSum, "", "", clientSwitchCountSum));
         for (TitanKeySwitchInfoDB switchData : switchDataList) {
             ++i;
             sb.append(String.format(bodyTemplate, i, switchData.getTitanKey(), switchData.getSwitchCount(), switchData.getAppIDCount(), switchData.getIpCount(), switchData.getSwitchCount() * switchData.getIpCount()));

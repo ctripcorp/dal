@@ -121,7 +121,7 @@ public class DalDynamicDSTest {
     public void testAll() {
         DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
         Date checkDate = new Date();
-        String checkTime = DateUtils.getBeforeOneHourDateString(checkDate);
+        String checkTime = dalDynamicDSDao.getNowDateString(checkDate);
         dalDynamicDSDao.checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
         dalDynamicDSDao.notifyByEmail(checkDate);
     }

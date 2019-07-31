@@ -11,19 +11,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class DALRequestTask {
-    private ScheduledExecutorService executor;
+    private ExecutorService executor = Executors.newFixedThreadPool(2);
     private static Logger log = LoggerFactory.getLogger(Application.class);
     private int qps = 100;
     private int delay = 40;
+    public MySQLThread mySQLThread;
+    public SQLServerThread sqlServerThread;
 
     @Autowired
     private DalApplicationConfig dalApplicationConfig;
@@ -44,9 +44,10 @@ public class DALRequestTask {
         }
 
         try {
-            executor = Executors.newScheduledThreadPool(2);
+            mySQLThread = new MySQLThread(delay);
+            sqlServerThread = new SQLServerThread(delay);
             addTask();
-            Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS,String.format("executor start with qps %s",getQps()));
+            Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS, String.format("executor start with qps %s", getQps()));
         } catch (Exception e) {
             log.error("DALRequestTask init error", e);
         }
@@ -55,55 +56,88 @@ public class DALRequestTask {
     @PreDestroy
     public void cleanUp() throws Exception {
         executor.shutdownNow();
-        Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS,"executor clean up");
+    }
+
+    public void cancelThreadTask() {
+        mySQLThread.exit = true;
+        sqlServerThread.exit = true;
     }
 
     private void addTask() {
-        executor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        DALServiceTable pojo = new DALServiceTable();
-                        pojo.setName("mysql");
-                        mySqlDao.insert(new DalHints().setIdentityBack(), pojo);
-                        pojo = mySqlDao.queryByPk(pojo.getID(), null);
-                        pojo.setName("update");
-                        mySqlDao.update(null, pojo);
-                        mySqlDao.delete(null, pojo);
-                    } catch (Exception e) {
-                        log.error("mysql error", e);
-                    }
-                }
-            }
-        }, 0, delay, TimeUnit.MILLISECONDS);
-
-        executor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        DALServiceTable pojo = new DALServiceTable();
-                        pojo.setName("sqlServer");
-                        sqlServerDao.insert(new DalHints().setIdentityBack(), pojo);
-                        pojo = sqlServerDao.queryByPk(pojo.getID(), null);
-                        pojo.setName("update");
-                        sqlServerDao.update(null, pojo);
-                        sqlServerDao.delete(null, pojo);
-                    } catch (Exception e) {
-                        log.error("sqlserver error", e);
-                    }
-                }
-            }
-        }, 0, delay, TimeUnit.MILLISECONDS);
+        executor.submit(mySQLThread);
+        executor.submit(sqlServerThread);
     }
 
-    public void restart() throws Exception{
-        cleanUp();
+    public void restart() throws Exception {
+        cancelThreadTask();
         init();
     }
 
-    public int getQps(){
+    public int getQps() {
         return qps;
+    }
+
+    private class MySQLThread extends Thread {
+        public volatile boolean exit = false;
+        private int mysqlDelay;
+
+        public MySQLThread(int delay) {
+            this.mysqlDelay = delay;
+        }
+
+        @Override
+        public void run() {
+            while (!exit) {
+                try {
+                    DALServiceTable pojo = new DALServiceTable();
+                    pojo.setName("mysql");
+                    mySqlDao.insert(new DalHints().setIdentityBack(), pojo);
+                    pojo = mySqlDao.queryByPk(pojo.getID(), null);
+                    pojo.setName("update");
+                    mySqlDao.update(null, pojo);
+                    mySqlDao.delete(null, pojo);
+                } catch (Exception e) {
+                    log.error("mysql error", e);
+                } finally {
+                    try {
+                        Thread.sleep(mysqlDelay);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
+    }
+
+    private class SQLServerThread extends Thread {
+        public volatile boolean exit = false;
+        private int sqlDelay;
+
+        public SQLServerThread(int delay) {
+            this.sqlDelay = delay;
+        }
+
+        @Override
+        public void run() {
+            while (!exit) {
+                try {
+                    DALServiceTable pojo = new DALServiceTable();
+                    pojo.setName("sqlServer");
+                    sqlServerDao.insert(new DalHints().setIdentityBack(), pojo);
+                    pojo = sqlServerDao.queryByPk(pojo.getID(), null);
+                    pojo.setName("update");
+                    sqlServerDao.update(null, pojo);
+                    sqlServerDao.delete(null, pojo);
+                } catch (Exception e) {
+                    log.error("sqlserver error", e);
+                } finally {
+                    try {
+                        Thread.sleep(sqlDelay);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
     }
 }

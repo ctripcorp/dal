@@ -30,7 +30,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     private static final String GET_STATUS = "ForceSwitch::getStatus:%s";
     private static final String RESTORE = "ForceSwitch::restore:%s";
 
-
     public ForceSwitchableDataSource(IDataSourceConfigureProvider provider) throws SQLException {
         this(provider.getDataSourceConfigure().getConnectionUrl(), provider);
     }

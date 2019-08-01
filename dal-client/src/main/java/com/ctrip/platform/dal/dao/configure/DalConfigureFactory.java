@@ -219,10 +219,10 @@ public class DalConfigureFactory implements DalConfigConstants {
         }
 
         if (shardingStrategy.isEmpty())
-            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
+            return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
                     databases, idGenConfig);
         else
-            return new DatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
+            return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
                     shardingStrategy, databases, idGenConfig);
     }
 

@@ -10,13 +10,19 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
-        SingleDataSource dataSource = new SingleDataSource(name, config);
-        dataSourceReference.set(dataSource);
+        this(new SingleDataSource(name, config));
+    }
+
+    public RefreshableDataSource(SingleDataSource targetDataSource) {
+        if (targetDataSource == null)
+            throw new DalRuntimeException("targetDataSource cannot be null");
+        dataSourceReference.set(targetDataSource);
     }
 
     @Override

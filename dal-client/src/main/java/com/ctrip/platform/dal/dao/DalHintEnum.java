@@ -267,6 +267,11 @@ public enum DalHintEnum {
     /*
      * Indicate name of the parameter that will partition table shards for the request.
      */
-    tableShardBy
+    tableShardBy,
+
+    /*
+     * Table used for sharding.
+     */
+    shardingTable
 
 }

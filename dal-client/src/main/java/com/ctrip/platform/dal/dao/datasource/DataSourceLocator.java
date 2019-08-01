@@ -8,18 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.ctrip.platform.dal.dao.configure.SingleDataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.IDataSourceConfigure;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
-
 public class DataSourceLocator {
+
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
-    private static final ConcurrentHashMap<String, DataSource> cache = new ConcurrentHashMap<>();
+    private static final Map<String, DataSource> cache = new ConcurrentHashMap<>();
+    private static final Map<Database, DataSource> cache4Cluster = new ConcurrentHashMap<>();
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
 
@@ -73,6 +72,26 @@ public class DataSourceLocator {
         return ds;
     }
 
+    public DataSource getDataSource(Database database) {
+        DataSource ds = cache4Cluster.get(database);
+        if (ds == null) {
+            synchronized (cache4Cluster) {
+                ds = cache4Cluster.get(database);
+                if (ds == null) {
+                    try {
+                        ds = createDataSource(database);
+                        cache4Cluster.put(database, ds);
+                    } catch (Throwable t) {
+                        String msg = String.format("creating datasource exception for database: %s", database);
+                        LOGGER.error(msg, t);
+                        throw new RuntimeException(msg, t);
+                    }
+                }
+            }
+        }
+        return ds;
+    }
+
     private DataSource createDataSource(String name) throws SQLException {
         IDataSourceConfigure config = provider.getDataSourceConfigure(name);
         if (config == null) {
@@ -80,11 +99,25 @@ public class DataSourceLocator {
         }
 
         SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(name, provider);
-        ForceSwitchableDataSource fsds = new ForceSwitchableDataSource(name, dataSourceConfigureProvider);
-        provider.register(name, fsds);
-        executor.execute(fsds);
+        ForceSwitchableDataSource ds = new ForceSwitchableDataSource(name, dataSourceConfigureProvider);
+        provider.register(name, ds);
+        executor.execute(ds);
 
-        return fsds;
+        return ds;
+    }
+
+    private DataSource createDataSource(Database database) throws SQLException {
+        IDataSourceConfigure config = provider.getDataSourceConfigure(database);
+        if (config == null) {
+            throw new SQLException(String.format("datasource configure not found for database: %s", database));
+        }
+
+        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(name, provider);
+        ForceSwitchableDataSource ds = new ForceSwitchableDataSource(name, dataSourceConfigureProvider);
+        provider.register(name, ds);
+        executor.execute(ds);
+
+        return ds;
     }
 
     public static Map<String, Integer> getActiveConnectionNumber() {

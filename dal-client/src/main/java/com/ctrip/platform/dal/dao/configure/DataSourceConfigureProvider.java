@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.framework.dal.cluster.client.database.Database;
+
 import java.util.Set;
 
 
@@ -38,6 +40,7 @@ public interface DataSourceConfigureProvider extends DalComponent {
      */
     DataSourceConfigure forceLoadDataSourceConfigure(String dbName);
 
+    DataSourceConfigure getDataSourceConfigure(Database database);
 
     /**
      * Allow register datasource config change listener

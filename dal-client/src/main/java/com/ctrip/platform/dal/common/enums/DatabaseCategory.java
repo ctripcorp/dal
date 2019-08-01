@@ -176,6 +176,16 @@ public enum DatabaseCategory {
         throw new RuntimeException("The provider: " + provider + " can not be recoganized");
     }
 
+    public static DatabaseCategory matchWith(com.ctrip.framework.dal.cluster.client.database.DatabaseCategory category) {
+        if (category == null)
+            throw new RuntimeException("category can not be NULL!");
+        if (category == com.ctrip.framework.dal.cluster.client.database.DatabaseCategory.MYSQL)
+            return DatabaseCategory.MySql;
+        else if (category == com.ctrip.framework.dal.cluster.client.database.DatabaseCategory.SQLSERVER)
+            return DatabaseCategory.SqlServer;
+        throw new RuntimeException("category unrecognized");
+    }
+
     public Set<Integer> getDefaultRetriableErrorCodes() {
         return new TreeSet<Integer>(retriableCodeSet);
     }

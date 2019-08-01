@@ -4,13 +4,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
 
-public class TitanProvider implements DataSourceConfigureProvider{
+public class TitanProvider implements IntegratedConfigProvider {
+
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
@@ -65,6 +68,16 @@ public class TitanProvider implements DataSourceConfigureProvider{
         names.add(name);
         dataSourceConfigureManager.setup(names,sourceType);
         return getDataSourceConfigure(name);
+    }
+
+    @Override
+    public ClusterConfig getClusterConfig(String clusterName) {
+        return null;
+    }
+
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(Database database) {
+        return null;
     }
 
     // for unit test only

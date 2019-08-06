@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.daogen.util;
 
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.CheckTimeRange;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.EmailServiceClient;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailRequest;
@@ -20,8 +21,6 @@ import java.util.*;
 public class EmailUtils {
     private static final String APP_PROPERTIES_CLASSPATH = "/META-INF/app.properties";
 
-    private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
-
     public static void sendEmail(String content, String subject) {
         String ip = IPUtils.getExecuteIPFromQConfig();
         if (!IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
@@ -38,12 +37,19 @@ public class EmailUtils {
         calendar.add(Calendar.DAY_OF_MONTH,2);
         sendEmailRequest.setExpiredTime(calendar);
         sendEmailRequest.setSendCode("28030004");
-        sendEmailRequest.setSender("taochen@ctrip.com");
+        sendEmailRequest.setSender(MonitorConfigManager.getMonitorConfig().getSender());
         sendEmailRequest.setSubject(subject);
         sendEmailRequest.setBodyContent(content);
+
+        String[] recipientArray = MonitorConfigManager.getMonitorConfig().getRecipient().split(",");
         List<String> recipient = new ArrayList<>();
-        recipient.add(RECEIVE_EMAIL);
+        Collections.addAll(recipient, recipientArray);
         sendEmailRequest.setRecipient(recipient);
+
+        String[] ccArray = MonitorConfigManager.getMonitorConfig().getCc().split(",");
+        List<String> cc = new ArrayList<>();
+        Collections.addAll(cc, ccArray);
+        sendEmailRequest.setCc(cc);
         try {
             SendEmailResponse response = client.sendEmail(sendEmailRequest);
             if (response != null && response.getResultCode() == 1) {

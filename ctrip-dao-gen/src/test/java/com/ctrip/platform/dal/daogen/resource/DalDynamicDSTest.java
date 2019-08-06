@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.daogen.DynamicDS.CatSwitchDSDataProvider;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
 import com.ctrip.platform.dal.daogen.util.EmailUtils;
+import com.ctrip.platform.dal.daogen.util.IPUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import org.junit.Test;
@@ -124,6 +125,11 @@ public class DalDynamicDSTest {
         String checkTime = dalDynamicDSDao.getNowDateString(checkDate);
         dalDynamicDSDao.checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
         dalDynamicDSDao.notifyByEmail(checkDate);
+    }
+
+    @Test
+    public void getExecutorIP() {
+        System.out.println(IPUtils.getExecuteIPFromQConfig());
     }
 
 

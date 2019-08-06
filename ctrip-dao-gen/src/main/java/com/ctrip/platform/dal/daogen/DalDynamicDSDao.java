@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DynamicDS.*;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
@@ -23,6 +24,8 @@ import org.apache.commons.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by taochen on 2019/7/2.
@@ -202,7 +205,14 @@ public class DalDynamicDSDao {
 
     private List<SwitchTitanKey> getTitanKeyInfo(Set<SwitchTitanKey> TitanKeys, String env) {
         List<SwitchTitanKey> TitanKeyInfoList = new ArrayList<>();
+        String[] filterTitanKeyArray = MonitorConfigManager.getMonitorConfig().getFilterTitanKey().split(",");
+        String filterTemplate = generateRegExp(filterTitanKeyArray);
+        Pattern pattern = Pattern.compile(filterTemplate);
         for (SwitchTitanKey titanKey : TitanKeys) {
+            Matcher matcher = pattern.matcher(titanKey.getTitanKey());
+            if (matcher.matches()) {
+                continue;
+            }
             String titanUrl = String.format(TITAN_KEY_GET, TITANKEY_APPID, titanKey.getTitanKey(), env);
             for (int i = 0; i < RETRY_TIME; ++i) {
                 TitanResponse response = null;
@@ -369,6 +379,15 @@ public class DalDynamicDSDao {
             sb.append(String.format(bodyTemplate, i, switchData.getTitanKey(), switchData.getSwitchCount(), switchData.getAppIDCount(), switchData.getIpCount(), switchData.getSwitchCount() * switchData.getIpCount()));
         }
         return String.format(htmlTemplate, String.format(htmlTable, sb.toString()));
+    }
+
+    public String generateRegExp(String[] filterTitanKeyArray) {
+        StringBuilder sb = new StringBuilder();
+        for (String filterTitanKey : filterTitanKeyArray) {
+            sb.append("(").append(filterTitanKey).append(")|");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
     public String getNowDateString(Date checkTime) {

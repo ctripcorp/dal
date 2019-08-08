@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen;
 
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
@@ -58,7 +59,8 @@ public class TitanKeyInfoReportDao {
                 Date checkDate = new Date();
                 if (DateUtils.checkIsSendEMailTime(checkDate)) {
                     String subject = "TitanKey IP直连统计(" + DateUtils.getBeforeOneDay(checkDate).substring(0,8) +  ")";
-                    EmailUtils.sendEmail(generateBodyContent(), subject);
+                    EmailUtils.sendEmail(generateBodyContent(), subject, MonitorConfigManager.getMonitorConfig().getDBEmailRecipient(),
+                            MonitorConfigManager.getMonitorConfig().getDBEmailCc());
                 }
             }
         }, initDelay, FIXED_RATE, TimeUnit.SECONDS);
@@ -70,6 +72,9 @@ public class TitanKeyInfoReportDao {
         //String env = "pro";
         int total = getTitanKeyTotal(env);
         TitanKeyPluginsResponse response = callTitanPluginsAPI(env, total);
+        if (response == null) {
+            return;
+        }
         int titanKeyCount = 0;
         int useMysqlCount = 0;
         int useSqlServerCount = 0;

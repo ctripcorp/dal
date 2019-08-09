@@ -9,6 +9,8 @@ public interface ConnectionString {
 
     String getFailOverConnectionUrl();
 
+    String getDbName();
+
     String getUsername();
 
     String getPassword();

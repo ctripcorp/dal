@@ -5,6 +5,10 @@ package com.ctrip.framework.dal.cluster.client.database;
  */
 public interface Database {
 
+    String getClusterName();
+
+    int getShardIndex();
+
     boolean isMaster();
 
     ConnectionString getConnectionString();

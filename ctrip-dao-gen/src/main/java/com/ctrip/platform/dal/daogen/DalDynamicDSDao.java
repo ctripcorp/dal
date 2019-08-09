@@ -354,7 +354,8 @@ public class DalDynamicDSDao {
             String endCheckTime = DateUtils.getEndOneWeek(checkDate);
             List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(startCheckTime, endCheckTime);
             String subject = String.format("动态数据源切换统计(%s-%s)",startCheckTime.substring(0,8), endCheckTime.substring(0,8));
-            EmailUtils.sendEmail(generateBodyContent(switchDataList), subject);
+            EmailUtils.sendEmail(generateBodyContent(switchDataList), subject, MonitorConfigManager.getMonitorConfig().getSwitchEmailRecipient(),
+                    MonitorConfigManager.getMonitorConfig().getSwitchEmailCc());
         }
     }
 

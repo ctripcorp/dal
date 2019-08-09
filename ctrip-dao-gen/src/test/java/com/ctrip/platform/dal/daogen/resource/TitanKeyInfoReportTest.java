@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.TitanKeyInfoReportDao;
+import com.ctrip.platform.dal.daogen.config.MonitorConfig;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.TitanKeyInfoReportDto;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
 import com.ctrip.platform.dal.daogen.util.EmailUtils;
@@ -37,6 +39,13 @@ public class TitanKeyInfoReportTest {
         TitanKeyInfoReportDao titanKeyInfoReportDao = TitanKeyInfoReportDao.getInstance();
         titanKeyInfoReportDao.getTiTanKeyInfoReport();
         String subject = "TitanKey IP直连统计(" + DateUtils.getBeforeOneDay(new Date()).substring(0,8) +  ")";
-        EmailUtils.sendEmail(titanKeyInfoReportDao.generateBodyContent(), subject);
+        EmailUtils.sendEmail(titanKeyInfoReportDao.generateBodyContent(), subject, MonitorConfigManager.getMonitorConfig().getDBEmailRecipient(),
+                MonitorConfigManager.getMonitorConfig().getDBEmailCc());
+    }
+
+    @Test
+    public void testMonitorConfig() {
+        MonitorConfig monitorConfig = MonitorConfigManager.getMonitorConfig();
+        System.out.println(monitorConfig);
     }
 }

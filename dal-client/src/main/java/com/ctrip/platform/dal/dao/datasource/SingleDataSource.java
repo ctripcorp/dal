@@ -12,66 +12,46 @@ import org.apache.tomcat.jdbc.pool.Validator;
 
 import javax.sql.DataSource;
 
-public class SingleDataSource implements DataSourceConfigureConstants {
-    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
-    private String name;
-    private DataSourceConfigure dataSourceConfigure;
-    private DataSource dataSource;
-    private DataSourceCreateTask task;
-    private DataSourceCreatePoolListener listener;
+public class SingleDataSource implements DataSourceConfigureConstants, DataSourceCreatePoolTask {
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
 
-    public String getName() {
-        return name;
-    }
+    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
-    public DataSourceConfigure getDataSourceConfigure() {
-        return dataSourceConfigure;
-    }
+    private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
+    private volatile String name;
+    private volatile DataSourceConfigure dataSourceConfigure;
+    private DataSource dataSource;
+    private DataSourceCreatePoolListener listener;
+    private volatile boolean createPoolTaskCancelled = false;
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public DataSourceCreateTask getTask() {
-        return task;
-    }
-
-    public void setTask(DataSourceCreateTask task) {
-        this.task = task;
-    }
-
+    // sync create pool
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
         this(name, dataSourceConfigure, null);
-        createPool(name, dataSourceConfigure);
+        createPool();
     }
 
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreateTask task) {
+    // async create pool
+    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreatePoolListener listener) {
         if (dataSourceConfigure == null)
             throw new DalRuntimeException("Can not find any connection configure for " + name);
-
         this.name = name;
         this.dataSourceConfigure = dataSourceConfigure;
-        this.task = task;
-
-        createDataSource(name, dataSourceConfigure);
+        this.listener = listener;
+        createDataSource();
     }
 
-    private void createDataSource(String name, DataSourceConfigure dataSourceConfigure) {
+    private void createDataSource() {
         try {
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
             setPoolPropertiesIntoValidator(poolProperties);
-
-            final org.apache.tomcat.jdbc.pool.DataSource dataSource = new DalTomcatDataSource(poolProperties);
-            this.dataSource = dataSource;
+            this.dataSource = new DalTomcatDataSource(poolProperties);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating datasource for %s", name), e);
         }
     }
 
-    public void createPool(String name, DataSourceConfigure dataSourceConfigure) {
+    private void createPool() {
         try {
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
                     dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
@@ -88,23 +68,39 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         }
     }
 
+    @Override
+    public void run() {
+        if (!createPoolTaskCancelled)
+            createPool();
+    }
+
+    @Override
+    public void cancelTask() {
+        createPoolTaskCancelled = true;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public DataSourceConfigure getDataSourceConfigure() {
+        return dataSourceConfigure;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
     private void setPoolPropertiesIntoValidator(PoolProperties poolProperties) {
         if (poolProperties == null)
             return;
-
         Validator validator = poolProperties.getValidator();
         if (validator == null)
             return;
-
         if (!(validator instanceof ValidatorProxy))
             return;
-
         ValidatorProxy dsValidator = (ValidatorProxy) validator;
         dsValidator.setPoolProperties(poolProperties);
-    }
-
-    public void setListener(DataSourceCreatePoolListener listener) {
-        this.listener = listener;
     }
 
 }

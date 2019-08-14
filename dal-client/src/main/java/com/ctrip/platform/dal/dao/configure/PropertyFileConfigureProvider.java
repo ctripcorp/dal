@@ -9,12 +9,12 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
+
     private final String CONFIG_NAME = "database.properties";
     private final String PATH = "path";
 
@@ -110,11 +110,6 @@ public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
 
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
-        return null;
-    }
-
-    @Override
-    public DataSourceConfigure getDataSourceConfigure(Database database) {
         return null;
     }
 

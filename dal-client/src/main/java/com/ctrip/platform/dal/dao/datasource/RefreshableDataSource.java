@@ -10,19 +10,13 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
+
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
-    public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
-        this(new SingleDataSource(name, config));
-    }
-
-    public RefreshableDataSource(SingleDataSource targetDataSource) {
-        if (targetDataSource == null)
-            throw new DalRuntimeException("targetDataSource cannot be null");
-        dataSourceReference.set(targetDataSource);
+    public RefreshableDataSource(String name, DataSourceConfigure config) {
+        dataSourceReference.set(new SingleDataSource(name, config));
     }
 
     @Override
@@ -32,26 +26,25 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         refreshDataSource(name, newConfigure);
     }
 
-    public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
+    public void refreshDataSource(String name, DataSourceConfigure configure) {
         refreshDataSource(name,configure,null);
     }
 
-    public void refreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) throws SQLException {
+    public void refreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
         SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
-        DataSourceCreateTask oldTask = oldDataSource.getTask();
-        if (oldTask != null)
-            oldTask.cancel();
     }
 
     private void close(SingleDataSource oldDataSource) {
-        if (oldDataSource != null)
+        if (oldDataSource != null) {
             DataSourceTerminator.getInstance().close(oldDataSource);
+            oldDataSource.cancelTask();
+        }
     }
 
     private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
-        return DataSourceCreator.getInstance().createSingleDataSource(name, configure, listener);
+        return DataSourceCreator.getInstance().getOrCreateSingleDataSource(name, configure, listener);
     }
 
     public SingleDataSource getSingleDataSource() {
@@ -62,11 +55,9 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         SingleDataSource singleDataSource = getSingleDataSource();
         if (singleDataSource == null)
             throw new IllegalStateException("SingleDataSource can't be null.");
-
         DataSource dataSource = singleDataSource.getDataSource();
         if (dataSource == null)
             throw new IllegalStateException("DataSource can't be null.");
-
         return dataSource;
     }
 
@@ -114,4 +105,5 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return getDataSource().isWrapperFor(iface);
     }
+
 }

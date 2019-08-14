@@ -43,6 +43,8 @@ public interface DataSourceConfigureProvider extends DalComponent {
 
     DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id);
 
+    DataSourceConfigure forceLoadDataSourceConfigure(DataSourceIdentity id);
+
     /**
      * Allow register datasource config change listener
      * 

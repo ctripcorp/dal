@@ -90,7 +90,7 @@ public class DataSourceLocator {
             throw new SQLException(String.format("datasource configure not found for %s", id.getId()));
         }
 
-        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(name, provider);
+        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(id, provider);
         ForceSwitchableDataSource ds = new ForceSwitchableDataSource(id.getId(), dataSourceConfigureProvider);
         provider.register(id.getId(), ds);
         executor.execute(ds);

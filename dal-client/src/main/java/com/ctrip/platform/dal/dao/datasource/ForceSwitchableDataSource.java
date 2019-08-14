@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -8,11 +7,11 @@ import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+
 import java.sql.SQLException;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 
 public class ForceSwitchableDataSource extends RefreshableDataSource implements IForceSwitchableDataSource {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();

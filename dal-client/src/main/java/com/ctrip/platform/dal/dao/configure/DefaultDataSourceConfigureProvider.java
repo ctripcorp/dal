@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.database.Database;
 
 import java.util.Map;
 import java.util.Set;
@@ -36,11 +35,6 @@ public class DefaultDataSourceConfigureProvider implements IntegratedConfigProvi
 
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
-        return null;
-    }
-
-    @Override
-    public DataSourceConfigure getDataSourceConfigure(Database database) {
         return null;
     }
 

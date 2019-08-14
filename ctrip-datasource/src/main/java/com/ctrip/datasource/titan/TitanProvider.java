@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
@@ -66,17 +65,12 @@ public class TitanProvider implements IntegratedConfigProvider {
     public DataSourceConfigure forceLoadDataSourceConfigure(String name){
         Set<String> names=new HashSet<>();
         names.add(name);
-        dataSourceConfigureManager.setup(names,sourceType);
+        dataSourceConfigureManager.setup(names, sourceType);
         return getDataSourceConfigure(name);
     }
 
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
-        return null;
-    }
-
-    @Override
-    public DataSourceConfigure getDataSourceConfigure(Database database) {
         return null;
     }
 

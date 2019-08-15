@@ -11,19 +11,30 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
  */
 public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
-    private static final String ID_FORMAT = "";
+    private static final String ID_FORMAT = "%s-%d-%s-%s:%d"; // cluster-shard-role-host:port
+    private static final String MASTER = "master";
+    private static final String SLAVE = "slave";
 
     private Database database;
+    private String id;
     private DalConnectionString connectionString;
 
     public ClusterDataSourceIdentity(Database database) {
         this.database = database;
-        this.connectionString = new ClusterConnectionStringImpl(getId(), database);
+        init();
+    }
+
+    private void init() {
+        String role = database.isMaster() ? MASTER : SLAVE;
+        ConnectionString connString = database.getConnectionString();
+        id = String.format(ID_FORMAT, database.getClusterName(), database.getShardIndex(), role,
+                connString.getPrimaryHost(), connString.getPrimaryPort());
+        this.connectionString = new ClusterConnectionStringImpl(id, database);
     }
 
     @Override
     public String getId() {
-        return null;
+        return id;
     }
 
     public DalConnectionString getConnectionString() {
@@ -40,14 +51,16 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
         return super.hashCode();
     }
 
-    private static class ClusterConnectionStringImpl implements DalConnectionString {
+    public static class ClusterConnectionStringImpl implements DalConnectionString {
 
         private String name;
-        private Database database;
+        private ConnectionString connectionString;
+        private String[] aliasKeys;
 
         public ClusterConnectionStringImpl(String name, Database database) {
             this.name = name;
-            this.database = database;
+            this.connectionString = database.getConnectionString();
+            this.aliasKeys = database.getAliasKeys();
         }
 
         @Override
@@ -55,20 +68,23 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
             return name;
         }
 
+        public String[] getAliasKeys() {
+            return aliasKeys;
+        }
+
         @Override
         public String getIPConnectionString() {
-            return database.getConnectionString().getPrimaryConnectionUrl();
+            return connectionString.getPrimaryConnectionUrl();
         }
 
         @Override
         public String getDomainConnectionString() {
-            return database.getConnectionString().getFailOverConnectionUrl();
+            return connectionString.getFailOverConnectionUrl();
         }
 
         @Override
         public DalConnectionStringConfigure getIPConnectionStringConfigure() {
-            DataSourceConfigure configure = new DataSourceConfigure(getName());
-            ConnectionString connectionString = database.getConnectionString();
+            DataSourceConfigure configure = new DataSourceConfigure(name);
             configure.setConnectionUrl(connectionString.getPrimaryConnectionUrl());
             configure.setUserName(connectionString.getUsername());
             configure.setPassword(connectionString.getPassword());
@@ -78,8 +94,7 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
         @Override
         public DalConnectionStringConfigure getDomainConnectionStringConfigure() {
-            DataSourceConfigure configure = new DataSourceConfigure(getName());
-            ConnectionString connectionString = database.getConnectionString();
+            DataSourceConfigure configure = new DataSourceConfigure(name);
             configure.setConnectionUrl(connectionString.getFailOverConnectionUrl());
             configure.setUserName(connectionString.getUsername());
             configure.setPassword(connectionString.getPassword());

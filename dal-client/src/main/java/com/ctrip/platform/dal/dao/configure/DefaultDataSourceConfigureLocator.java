@@ -1,12 +1,16 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
+import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
+import java.lang.annotation.ElementType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,9 +30,10 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     // user datasource.xml pool properties configure
     private Map<String, DalPoolPropertiesConfigure> userPoolPropertiesConfigure = new ConcurrentHashMap<>();
-    private Map<String, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
+    private Map<DataSourceIdentity, DataSourceConfigure> dataSourceConfiguresCache = new ConcurrentHashMap<>();
 
     private static final String SEPARATOR = "\\.";
+    private static final String CLUSTER_SPLITTER = "-";
     private static final String DATASOURCE_PROPERTIES_EXCEPTION_MESSAGE =
             "An error occured while getting datasource properties.";
     private static final String APP_OVERRIDE_RESULT = "App override result: ";
@@ -43,7 +48,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     public void addUserPoolPropertiesConfigure(String name, DalPoolPropertiesConfigure configure) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         userPoolPropertiesConfigure.put(keyName, configure);
-        dataSourceConfiguresCache.put(keyName, new DataSourceConfigure(keyName, configure.getProperties()));
+        dataSourceConfiguresCache.put(new DataSourceName(name), new DataSourceConfigure(keyName, configure.getProperties()));
     }
 
     @Override
@@ -54,28 +59,31 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(String name) {
-        String keyName = ConnectionStringKeyHelper.getKeyName(name);
-        DataSourceConfigure configure = _getDataSourceConfigure(keyName);
-        return configure;
+        return getDataSourceConfigure(new DataSourceName(name));
     }
 
-    private DataSourceConfigure _getDataSourceConfigure(String name) {
-        DataSourceConfigure configure = null;
-        configure = dataSourceConfiguresCache.get(name);
-        if (configure != null) {
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id) {
+        DataSourceConfigure configure = dataSourceConfiguresCache.get(id);
+        if (configure != null)
             return configure;
-        }
 
-        DalConnectionString connectionString = connectionStrings.get(name);
-
+        DalConnectionString connectionString = getConnectionString(id);
         if (connectionString instanceof DalInvalidConnectionString)
-            return configure;
+            return null;
 
         configure = mergeDataSourceConfigure(connectionString);
         if (configure != null) {
-            dataSourceConfiguresCache.put(name, configure);
+            dataSourceConfiguresCache.put(id, configure);
         }
         return configure;
+    }
+
+    private DalConnectionString getConnectionString(DataSourceIdentity id) {
+        if (id instanceof ClusterDataSourceIdentity)
+            return ((ClusterDataSourceIdentity) id).getConnectionString();
+        else
+            return connectionStrings.get(id.getId());
     }
 
     private void removeDataSourceConfigures() {
@@ -217,7 +225,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         overrideAppLevelProperties(wrapper, c, logName);
 
         // override datasource-level properties
-        overrideDataSourceLevelProperties(wrapper, c, name, logName);
+        overrideDataSourceLevelProperties(wrapper, c, name, logName, connectionString);
 
         // override config from connection settings,datasource.xml
         overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
@@ -238,7 +246,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     private void overrideDataSourceLevelProperties(PropertiesWrapper wrapper, DataSourceConfigure c, String name,
-            String logName) {
+                                                   String logName, DalConnectionString connectionString) {
         if (name == null || name.isEmpty())
             return;
 
@@ -246,29 +254,92 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         if (datasourceProperties == null || datasourceProperties.isEmpty())
             return;
 
-        _overrideDataSourceLevelProperties(datasourceProperties, c, name, logName);
+        overrideDataSourceLevelProperties(datasourceProperties, c, name, logName, connectionString);
     }
 
-    private void _overrideDataSourceLevelProperties(Map<String, Properties> datasourceProperties, DataSourceConfigure c,
-            String name, String logName) {
-        Properties p1 = datasourceProperties.get(name);
-        if (p1 != null && !p1.isEmpty()) {
-            overrideProperties(c.getProperties(), p1);
-            String log = name + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
-            LOGGER.info(log);
-            LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, log);
+    private void overrideDataSourceLevelProperties(Map<String, Properties> datasourceProperties, DataSourceConfigure c,
+                                                   String name, String logName, DalConnectionString connectionString) {
+        if (name.contains(CLUSTER_SPLITTER)) {
+            String[] aliasKeys = null;
+            if (connectionString instanceof ClusterDataSourceIdentity.ClusterConnectionStringImpl)
+                aliasKeys = ((ClusterDataSourceIdentity.ClusterConnectionStringImpl) connectionString).getAliasKeys();
+            overrideClusterDataSourceProperties(datasourceProperties, c, name, logName, aliasKeys);
+        }
+        else
+            overrideNamedDataSourceProperties(datasourceProperties, c, name, logName);
+    }
+
+    private boolean overrideNamedDataSourceProperties(Map<String, Properties> datasourceProperties,
+                                                      DataSourceConfigure c, String name, String logName) {
+        Properties p = datasourceProperties.get(name);
+        if (p != null && !p.isEmpty()) {
+            overrideDataSourceProperties(p, c, name, logName);
+            return true;
         } else {
             String possibleName = DataSourceConfigureParser.getInstance().getPossibleName(name);
             possibleName = ConnectionStringKeyHelper.getKeyName(possibleName);
-            Properties p2 = datasourceProperties.get(possibleName);
-            if (p2 != null && !p2.isEmpty()) {
-                overrideProperties(c.getProperties(), p2);
-                String log =
-                        possibleName + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
-                LOGGER.info(log);
-                LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, log);
+            p = datasourceProperties.get(possibleName);
+            if (p != null && !p.isEmpty()) {
+                overrideDataSourceProperties(p, c, possibleName, logName);
+                return true;
             }
         }
+        return false;
+    }
+
+    private boolean overrideClusterDataSourceProperties(Map<String, Properties> datasourceProperties, DataSourceConfigure c,
+                                                        String name, String logName, String[] aliasKeys) {
+        String[] identities = name.split(CLUSTER_SPLITTER);
+        if (identities.length < 3) {
+            // warn
+            return false;
+        } else {
+            String cluster = identities[0];
+            String shard = identities[1];
+            String role = identities[2];
+            // step 1: cluster-shard-role
+            String id = String.format("%s-%s-%s", cluster, shard, role);
+            Properties p = datasourceProperties.get(id);
+            if (p != null && !p.isEmpty()) {
+                overrideDataSourceProperties(p, c, id, logName);
+                return true;
+            }
+            // step 2: cluster-role
+            id = String.format("%s-%s", cluster, role);
+            p = datasourceProperties.get(id);
+            if (p != null && !p.isEmpty()) {
+                overrideDataSourceProperties(p, c, id, logName);
+                return true;
+            }
+            // step 3: cluster-shard
+            id = String.format("%s-%s", cluster, shard);
+            p = datasourceProperties.get(id);
+            if (p != null && !p.isEmpty()) {
+                overrideDataSourceProperties(p, c, id, logName);
+                return true;
+            }
+            // step 4: cluster
+            id = cluster;
+            p = datasourceProperties.get(id);
+            if (p != null && !p.isEmpty()) {
+                overrideDataSourceProperties(p, c, id, logName);
+                return true;
+            }
+            // step 5: alias keys
+            if (aliasKeys != null && aliasKeys.length > 0)
+                for (int i = 0; i < aliasKeys.length; i++)
+                    if (overrideNamedDataSourceProperties(datasourceProperties, c, aliasKeys[i], logName))
+                        return true;
+            // no override
+            return false;
+        }
+    }
+
+    private void overrideDataSourceProperties(Properties p, DataSourceConfigure c, String name, String logName) {
+        overrideProperties(c.getProperties(), p);
+        String log = name + OVERRIDE_RESULT + poolPropertiesHelper.propertiesToString(c.getProperties());
+        LOGGER.info(log);
+        LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, log);
     }
 
     protected void overrideConnectionStringConfigureAndDataSourceXml(

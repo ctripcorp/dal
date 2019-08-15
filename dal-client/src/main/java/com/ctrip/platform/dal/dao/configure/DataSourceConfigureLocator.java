@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.Ordered;
 
 import java.util.Map;
@@ -13,6 +14,8 @@ public interface DataSourceConfigureLocator extends Ordered {
     DalPoolPropertiesConfigure getUserPoolPropertiesConfigure(String name);
 
     DataSourceConfigure getDataSourceConfigure(String name);
+
+    DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id);
 
     Set<String> getDataSourceConfigureKeySet();
 

@@ -10,6 +10,7 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 
 public class TitanProvider implements IntegratedConfigProvider {
 
@@ -18,9 +19,44 @@ public class TitanProvider implements IntegratedConfigProvider {
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
 
+    @Override
     public void initialize(Map<String, String> settings) throws Exception {
         setSourceType(settings);
         dataSourceConfigureManager.initialize(settings);
+    }
+
+    @Override
+    public void setup(Set<String> names) {
+        dalPropertiesManager.setup();
+        dataSourceConfigureManager.setup(names, sourceType);
+    }
+
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(String name) {
+        return DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name);
+    }
+
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id) {
+        return null;
+    }
+
+    @Override
+    public DataSourceConfigure forceLoadDataSourceConfigure(String name){
+        Set<String> names=new HashSet<>();
+        names.add(name);
+        dataSourceConfigureManager.setup(names, sourceType);
+        return getDataSourceConfigure(name);
+    }
+
+    @Override
+    public void register(String name, DataSourceConfigureChangeListener listener) {
+        dataSourceConfigureManager.register(name, listener);
+    }
+
+    @Override
+    public ClusterConfig getClusterConfig(String clusterName) {
+        return null;
     }
 
     private void setSourceType(Map<String, String> settings) {
@@ -43,35 +79,6 @@ public class TitanProvider implements IntegratedConfigProvider {
         if (env.equals(Env.UNKNOWN) || env.equals(Env.DEV) || env.equals(Env.LOCAL)) {
             sourceType = SourceType.Local;
         }
-    }
-
-    @Override
-    public DataSourceConfigure getDataSourceConfigure(String name) {
-        return DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(name);
-    }
-
-    @Override
-    public void setup(Set<String> names) {
-        dalPropertiesManager.setup();
-        dataSourceConfigureManager.setup(names, sourceType);
-    }
-
-    @Override
-    public void register(String name, DataSourceConfigureChangeListener listener) {
-        dataSourceConfigureManager.register(name, listener);
-    }
-
-    @Override
-    public DataSourceConfigure forceLoadDataSourceConfigure(String name){
-        Set<String> names=new HashSet<>();
-        names.add(name);
-        dataSourceConfigureManager.setup(names, sourceType);
-        return getDataSourceConfigure(name);
-    }
-
-    @Override
-    public ClusterConfig getClusterConfig(String clusterName) {
-        return null;
     }
 
     // for unit test only

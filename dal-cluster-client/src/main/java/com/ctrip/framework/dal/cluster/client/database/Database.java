@@ -13,6 +13,6 @@ public interface Database {
 
     ConnectionString getConnectionString();
 
-    String getAliasKey();
+    String[] getAliasKeys();
 
 }

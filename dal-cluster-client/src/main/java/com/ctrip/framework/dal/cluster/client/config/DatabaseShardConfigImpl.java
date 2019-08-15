@@ -15,10 +15,10 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
     private int shardIndex;
     private String masterDomain;
     private Integer masterPort;
-    private String masterKey;
+    private String masterKeys;
     private String slaveDomain;
     private Integer slavePort;
-    private String slaveKey;
+    private String slaveKeys;
     private List<DatabaseConfig> databaseConfigs = new LinkedList<>();
 
     public DatabaseShardConfigImpl(ClusterConfigImpl clusterConfig, int shardIndex) {
@@ -50,8 +50,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         return masterPort;
     }
 
-    public String getMasterKey() {
-        return masterKey;
+    public String getMasterKeys() {
+        return masterKeys;
     }
 
     public String getSlaveDomain() {
@@ -62,8 +62,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         return slavePort;
     }
 
-    public String getSlaveKey() {
-        return slaveKey;
+    public String getSlaveKeys() {
+        return slaveKeys;
     }
 
     public void setMasterDomain(String masterDomain) {
@@ -74,8 +74,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         this.masterPort = masterPort;
     }
 
-    public void setMasterKey(String masterKey) {
-        this.masterKey = masterKey;
+    public void setMasterKeys(String masterKeys) {
+        this.masterKeys = masterKeys;
     }
 
     public void setSlaveDomain(String slaveDomain) {
@@ -86,8 +86,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         this.slavePort = slavePort;
     }
 
-    public void setSlaveKey(String slaveKey) {
-        this.slaveKey = slaveKey;
+    public void setSlaveKeys(String slaveKeys) {
+        this.slaveKeys = slaveKeys;
     }
 
     public void addDatabaseConfig(DatabaseConfig databaseConfig) {

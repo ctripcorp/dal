@@ -17,4 +17,8 @@ public interface ConnectionString {
 
     String getDriverClassName();
 
+    String getPrimaryHost();
+
+    int getPrimaryPort();
+
 }

@@ -101,12 +101,12 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         String masterPort = getAttribute(databaseShardNode, MASTER_PORT);
         if (!StringUtils.isEmpty(masterPort))
             databaseShardConfig.setMasterPort(Integer.parseInt(masterPort));
-        databaseShardConfig.setMasterKey(getAttribute(databaseShardNode, MASTER_KEY));
+        databaseShardConfig.setMasterKeys(getAttribute(databaseShardNode, MASTER_KEYS));
         databaseShardConfig.setSlaveDomain(getAttribute(databaseShardNode, SLAVE_DOMAIN));
         String slavePort = getAttribute(databaseShardNode, SLAVE_PORT);
         if (!StringUtils.isEmpty(slavePort))
             databaseShardConfig.setSlavePort(Integer.parseInt(slavePort));
-        databaseShardConfig.setSlaveKey(getAttribute(databaseShardNode, SLAVE_KEY));
+        databaseShardConfig.setSlaveKeys(getAttribute(databaseShardNode, SLAVE_KEYS));
     }
 
     private void parseDatabase(DatabaseShardConfigImpl databaseShardConfig, Node databaseNode) {

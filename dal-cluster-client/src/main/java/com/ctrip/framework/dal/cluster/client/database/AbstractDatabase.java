@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.database;
 
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
 import com.ctrip.framework.dal.cluster.client.config.DatabaseConfigImpl;
 import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 
@@ -52,16 +53,40 @@ public abstract class AbstractDatabase implements Database, ConnectionString {
         return databaseConfig.getPwd();
     }
 
-    protected DatabaseConfigImpl getDatabaseConfig() {
-        return databaseConfig;
+    @Override
+    public String getDbName() {
+        return databaseConfig.getDbName();
     }
 
-    protected String getPrimaryHost() {
+    @Override
+    public String getPrimaryHost() {
         return databaseConfig.getIp();
     }
 
-    protected Integer getPrimaryPort() {
+    @Override
+    public int getPrimaryPort() {
         return databaseConfig.getPort();
+    }
+
+    @Override
+    public String getClusterName() {
+        return databaseConfig.getDatabaseShardConfig().getClusterConfig().getClusterName();
+    }
+
+    @Override
+    public int getShardIndex() {
+        return databaseConfig.getDatabaseShardConfig().getShardIndex();
+    }
+
+    @Override
+    public String[] getAliasKeys() {
+        DatabaseShardConfigImpl databaseShardConfig = databaseConfig.getDatabaseShardConfig();
+        String aliasKeys = isMaster() ? databaseShardConfig.getMasterKeys() : databaseShardConfig.getSlaveKeys();
+        return aliasKeys != null ? aliasKeys.split(ClusterConfigXMLConstants.KEY_SEPARATOR) : null;
+    }
+
+    protected DatabaseConfigImpl getDatabaseConfig() {
+        return databaseConfig;
     }
 
     protected String getFailOverHost() {

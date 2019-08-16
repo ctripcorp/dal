@@ -11,6 +11,9 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.Validator;
 
 import javax.sql.DataSource;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.LockSupport;
 
 public class SingleDataSource implements DataSourceConfigureConstants {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -20,6 +23,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private DataSource dataSource;
     private DataSourceCreateTask task;
     private DataSourceCreatePoolListener listener;
+    private volatile boolean isSwitching = false;
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
 
@@ -41,6 +45,14 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
     public void setTask(DataSourceCreateTask task) {
         this.task = task;
+    }
+
+    public boolean getSwitching() {
+        return isSwitching;
+    }
+
+    public void setSwitching(boolean switching) {
+        isSwitching = switching;
     }
 
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
@@ -71,7 +83,8 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         }
     }
 
-    public void createPool(String name, DataSourceConfigure dataSourceConfigure) {
+    public boolean createPool(String name, DataSourceConfigure dataSourceConfigure) {
+        boolean isSuccess = true;
         try {
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
                     dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
@@ -79,13 +92,15 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).createPool();
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
-            if (listener != null)
-                listener.onCreatePoolSuccess();
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
             if (listener != null)
                 listener.onCreatePoolFail(e);
+            isSuccess = false;
+        } finally {
+            isSwitching = false;
         }
+        return isSuccess;
     }
 
     private void setPoolPropertiesIntoValidator(PoolProperties poolProperties) {

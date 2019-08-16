@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.IDataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.SwitchableDataSourceStatus;
 
 public interface IForceSwitchableDataSource {
@@ -10,7 +12,11 @@ public interface IForceSwitchableDataSource {
      * @param port of the new datasource
      * @return SwitchableDataSourceStatus before switch
      */
-    SwitchableDataSourceStatus forceSwitch(String ip, Integer port);
+    //SwitchableDataSourceStatus forceSwitch(String ip, Integer port);
+
+    SwitchableDataSourceStatus forceSwitch(IDataSourceConfigure configure, final String ip, final Integer port);
+
+    IDataSourceConfigure getDataSourceConfigure();
 
     /**
      * get status of current datasource

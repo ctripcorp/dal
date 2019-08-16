@@ -9,12 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 public class DataSourceCreator {
     private static volatile DataSourceCreator creator = null;
-    private ScheduledExecutorService service =
-            Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
-
-    private static final int INIT_DELAY = 0;
-    private static final int POOL_SIZE = 1;
-    private static final String THREAD_NAME = "DataSourceCreator";
 
     private DataSourceCreateTaskFactory factory = null;
 
@@ -40,7 +34,7 @@ public class DataSourceCreator {
         else
             task = new DefaultDataSourceCreateTask(name, configure, singleDataSource);
         singleDataSource.setTask(task);
-        service.schedule(task, INIT_DELAY, TimeUnit.MILLISECONDS);
+        singleDataSource.setSwitching(true);
         return singleDataSource;
     }
 }

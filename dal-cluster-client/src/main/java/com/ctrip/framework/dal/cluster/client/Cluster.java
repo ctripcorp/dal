@@ -1,9 +1,11 @@
 package com.ctrip.framework.dal.cluster.client;
 
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,5 +28,11 @@ public interface Cluster {
     Set<String> getAllTableShards(String tableName);
 
     String getTableShardSeparator(String tableName);
+
+    List<Database> getDatabases();
+
+    Database getMasterOnShard(int shardIndex);
+
+    List<Database> getSlavesOnShard(int shardIndex);
 
 }

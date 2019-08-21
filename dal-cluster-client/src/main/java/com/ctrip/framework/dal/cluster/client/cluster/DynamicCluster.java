@@ -3,11 +3,13 @@ package com.ctrip.framework.dal.cluster.client.cluster;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,6 +65,21 @@ public class DynamicCluster implements Cluster {
     @Override
     public String getTableShardSeparator(String tableName) {
         return getInnerCluster().getTableShardSeparator(tableName);
+    }
+
+    @Override
+    public List<Database> getDatabases() {
+        return getInnerCluster().getDatabases();
+    }
+
+    @Override
+    public Database getMasterOnShard(int shardIndex) {
+        return getInnerCluster().getMasterOnShard(shardIndex);
+    }
+
+    @Override
+    public List<Database> getSlavesOnShard(int shardIndex) {
+        return getInnerCluster().getSlavesOnShard(shardIndex);
     }
 
     private void registerListener() {

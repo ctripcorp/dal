@@ -2,14 +2,13 @@ package com.ctrip.framework.dal.cluster.client.cluster;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author c7ch23en
@@ -62,6 +61,26 @@ public class DefaultCluster implements Cluster {
     @Override
     public String getTableShardSeparator(String tableName) {
         return shardStrategyProxy.getTableShardSeparator(tableName);
+    }
+
+    @Override
+    public List<Database> getDatabases() {
+        List<Database> databases = new LinkedList<>();
+        for (DatabaseShard databaseShard : databaseShards.values()) {
+            databases.add(databaseShard.getMaster());
+            databases.addAll(databaseShard.getSlaves());
+        }
+        return databases;
+    }
+
+    @Override
+    public Database getMasterOnShard(int shardIndex) {
+        return databaseShards.get(shardIndex).getMaster();
+    }
+
+    @Override
+    public List<Database> getSlavesOnShard(int shardIndex) {
+        return databaseShards.get(shardIndex).getSlaves();
     }
 
     public void addDatabaseShard(DatabaseShard databaseShard) {

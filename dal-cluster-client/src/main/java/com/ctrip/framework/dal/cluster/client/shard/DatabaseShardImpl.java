@@ -25,6 +25,16 @@ public class DatabaseShardImpl implements DatabaseShard {
         return databaseShardConfig.getShardIndex();
     }
 
+    @Override
+    public Database getMaster() {
+        return master;
+    }
+
+    @Override
+    public List<Database> getSlaves() {
+        return new LinkedList<>(slaves);
+    }
+
     public void addDatabase(Database database) {
         if (database.isMaster()) {
             if (master != null)

@@ -32,7 +32,11 @@ public class FreshnessHelper implements FreshnessReader {
     private static final String SQLSVR_LATERNCY_SP = "{ ? = call Spb_ReplDelay}";
     
     public int getSlaveFreshness(String logicDbName, String slaveConnectionString) {
-        DatabaseCategory category = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory();
+        DatabaseSet dbSet = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
+        if (dbSet instanceof ClusterDatabaseSet)
+            return INVALID;
+
+        DatabaseCategory category = dbSet.getDatabaseCategory();
         
         if(category == DatabaseCategory.MySql)
             return getFromMysqlSlave(logicDbName, slaveConnectionString);

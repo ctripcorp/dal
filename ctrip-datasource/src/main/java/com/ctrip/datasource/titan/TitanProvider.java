@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.datasource.configure.CtripLocalClusterConfigProvider;
+import com.ctrip.datasource.configure.qconfig.CtripClusterConfigProvider;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
@@ -11,6 +13,7 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 
 public class TitanProvider implements IntegratedConfigProvider {
 
@@ -18,11 +21,15 @@ public class TitanProvider implements IntegratedConfigProvider {
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
+    private ClusterConfigProvider clusterConfigProvider = new CtripClusterConfigProvider();
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
         setSourceType(settings);
         dataSourceConfigureManager.initialize(settings);
+        if (sourceType == SourceType.Local) {
+            clusterConfigProvider = new CtripLocalClusterConfigProvider();
+        }
     }
 
     @Override
@@ -38,25 +45,37 @@ public class TitanProvider implements IntegratedConfigProvider {
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id) {
-        return null;
+        return DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(id);
     }
 
     @Override
     public DataSourceConfigure forceLoadDataSourceConfigure(String name){
-        Set<String> names=new HashSet<>();
+        Set<String> names = new HashSet<>();
         names.add(name);
         dataSourceConfigureManager.setup(names, sourceType);
         return getDataSourceConfigure(name);
     }
 
     @Override
+    public DataSourceConfigure forceLoadDataSourceConfigure(DataSourceIdentity id) {
+        Set<String> names = new HashSet<>();
+        dataSourceConfigureManager.setup(names, sourceType);
+        return getDataSourceConfigure(id);
+    }
+
+    @Override
     public void register(String name, DataSourceConfigureChangeListener listener) {
-        dataSourceConfigureManager.register(name, listener);
+        register(new DataSourceName(name), listener);
+    }
+
+    @Override
+    public void register(DataSourceIdentity id, DataSourceConfigureChangeListener listener) {
+        dataSourceConfigureManager.register(id, listener);
     }
 
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
-        return null;
+        return clusterConfigProvider.getClusterConfig(clusterName);
     }
 
     private void setSourceType(Map<String, String> settings) {

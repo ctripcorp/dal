@@ -119,10 +119,10 @@ public class ForceSwitchableDataSourceTest {
 
 //        getStatus
         SwitchableDataSourceStatus status11 = dataSource.getStatus();
-        assertTrue(status11.isForceSwitched());
+        assertFalse(status11.isForceSwitched());
         assertEquals(IPHOST, status11.getHostName().toLowerCase());
         assertEquals("3306", status11.getPort().toString());
-        assertFalse(status11.isPoolCreated());
+        assertTrue(status11.isPoolCreated());
 
         Thread.sleep(4000);
         assertEquals("onForceSwitchFail", listener.getOnCallMethodName());
@@ -132,7 +132,7 @@ public class ForceSwitchableDataSourceTest {
         assertFalse(status2.isForceSwitched());
         assertEquals(IPHOST, status2.getHostName().toLowerCase());
         assertEquals("3306", status2.getPort().toString());
-        assertFalse(status2.isPoolCreated());
+        assertTrue(status2.isPoolCreated());
 
 //        second forceSwitch
         DataSourceConfigure dataSourceConfigure3 = new DataSourceConfigure();
@@ -142,7 +142,7 @@ public class ForceSwitchableDataSourceTest {
         assertFalse(status3.isForceSwitched());
         assertEquals(IPHOST, status3.getHostName());
         assertEquals("3306", status3.getPort().toString());
-        assertFalse(status3.isPoolCreated());
+        assertTrue(status3.isPoolCreated());
 
 //        getStatus
         SwitchableDataSourceStatus status4 = dataSource.getStatus();
@@ -203,6 +203,10 @@ public class ForceSwitchableDataSourceTest {
         dataSource.addListener(listener);
 
         assertEquals("nullDataSource", dataSource.getSingleDataSource().getName());
+        SwitchableDataSourceStatus status0 = dataSource.getStatus();
+        assertFalse(status0.isForceSwitched());
+        assertFalse(status0.isPoolCreated());
+
         assertNull(dataSource.getDataSourceConfigure().getConnectionUrl());
         assertNull(dataSource.getDataSourceConfigure().getUserName());
         assertNull(dataSource.getDataSourceConfigure().getPassword());
@@ -232,7 +236,7 @@ public class ForceSwitchableDataSourceTest {
         SwitchableDataSourceStatus status2 = dataSource.getStatus();
 
         assertTrue(status2.isForceSwitched());
-        assertFalse(status2.isPoolCreated());
+        assertTrue(status2.isPoolCreated());
         assertEquals(DOMAINHOST, status2.getHostName().toLowerCase());
         assertEquals("3306", status2.getPort().toString());
 
@@ -252,7 +256,7 @@ public class ForceSwitchableDataSourceTest {
 
         SwitchableDataSourceStatus status4 = dataSource.getStatus();
         assertTrue(status4.isForceSwitched());
-        assertFalse(status4.isPoolCreated());
+        assertTrue(status4.isPoolCreated());
         assertEquals(IPHOST, status4.getHostName().toLowerCase());
         assertEquals("3306", status4.getPort().toString());
     }

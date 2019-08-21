@@ -1104,13 +1104,13 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
             if (!isTableShardingEnabled(logicDbName, rawTableName))
                 tableName = wrapField(dbCategory, rawTableName);
             else if (tableShardId != null)
-                tableName = wrapField(dbCategory, rawTableName + buildShardStr(logicDbName, tableShardId));
+                tableName = wrapField(dbCategory, rawTableName + buildShardStr(logicDbName, rawTableName, tableShardId));
             else if (tableShardValue != null) {
                 tableName =
-                        wrapField(dbCategory, rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName,
+                        wrapField(dbCategory, rawTableName + buildShardStr(logicDbName, rawTableName, locateTableShardId(logicDbName,
                                 rawTableName, new DalHints().setTableShardValue(tableShardValue), null, null)));
             } else
-                tableName = wrapField(dbCategory, rawTableName + buildShardStr(logicDbName,
+                tableName = wrapField(dbCategory, rawTableName + buildShardStr(logicDbName, rawTableName,
                         locateTableShardId(logicDbName, rawTableName, getHints(), getParameters(), null)));
 
             return alias == null ? tableName : tableName + " AS " + alias;

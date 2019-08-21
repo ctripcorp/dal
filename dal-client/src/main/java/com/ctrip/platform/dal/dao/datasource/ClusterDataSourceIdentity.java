@@ -37,8 +37,12 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
         return id;
     }
 
-    public DalConnectionString getConnectionString() {
+    public DalConnectionString getDalConnectionString() {
         return connectionString;
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 
     @Override

@@ -14,6 +14,10 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
 import com.ctrip.platform.dal.dao.helper.ClassScanner;
@@ -104,7 +108,7 @@ public class DalConfigureFactory implements DalConfigConstants {
         DalConnectionLocator locator =
                 readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR);
 
-        Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
+        Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), locator);
 
         locator.setup(getAllDbNames(databaseSets));
 
@@ -117,8 +121,10 @@ public class DalConfigureFactory implements DalConfigConstants {
     private Set<String> getAllDbNames(Map<String, DatabaseSet> databaseSets) {
         Set<String> dbNames = new HashSet<>();
         for (DatabaseSet dbSet : databaseSets.values()) {
-            for (DataBase db : dbSet.getDatabases().values()) {
-                dbNames.add(db.getConnectionString());
+            if (dbSet instanceof DefaultDatabaseSet) {
+                for (DataBase db : dbSet.getDatabases().values()) {
+                    dbNames.add(db.getConnectionString());
+                }
             }
         }
         return dbNames;
@@ -188,14 +194,31 @@ public class DalConfigureFactory implements DalConfigConstants {
         return found;
     }
 
-    private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
-        List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
+    private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalConnectionLocator locator) throws Exception {
         Map<String, DatabaseSet> databaseSets = new HashMap<>();
+
+        ClusterConfigProvider provider = locator.getClusterConfigProvider();
+        List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
+        for (int i = 0; i < clusterList.size(); i++) {
+            Cluster cluster = readCluster(clusterList.get(i), provider);
+            databaseSets.put(cluster.getClusterName(), new ClusterDatabaseSet(cluster.getClusterName(), cluster));
+        }
+
+        List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
         for (int i = 0; i < databaseSetList.size(); i++) {
             DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i));
             databaseSets.put(databaseSet.getName(), databaseSet);
         }
+
         return databaseSets;
+    }
+
+    private Cluster readCluster(Node clusterNode, ClusterConfigProvider provider) throws Exception {
+        String name = getAttribute(clusterNode, NAME);
+        if (StringUtils.isEmpty(name))
+            throw new DalConfigException("empty cluster name");
+        ClusterConfig config = provider.getClusterConfig(name);
+        return new DynamicCluster(config);
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
@@ -296,7 +319,7 @@ public class DalConfigureFactory implements DalConfigConstants {
     private DataBase readDataBase(Node dataBaseNode, boolean isSharded) {
         checkAttribte(dataBaseNode, NAME, DATABASE_TYPE, SHARDING, CONNECTION_STRING);
         String sharding = isSharded ? getAttribute(dataBaseNode, SHARDING) : "";
-        return new DataBase(getAttribute(dataBaseNode, NAME), getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
+        return new DefaultDataBase(getAttribute(dataBaseNode, NAME), getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
                 sharding, getAttribute(dataBaseNode, CONNECTION_STRING));
     }
 

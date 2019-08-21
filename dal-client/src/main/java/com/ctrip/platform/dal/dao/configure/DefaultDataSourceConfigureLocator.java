@@ -81,7 +81,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     private DalConnectionString getConnectionString(DataSourceIdentity id) {
         if (id instanceof ClusterDataSourceIdentity)
-            return ((ClusterDataSourceIdentity) id).getConnectionString();
+            return ((ClusterDataSourceIdentity) id).getDalConnectionString();
         else
             return connectionStrings.get(id.getId());
     }

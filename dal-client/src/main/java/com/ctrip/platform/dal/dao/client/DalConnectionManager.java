@@ -3,13 +3,12 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.configure.DalConfigure;
-import com.ctrip.platform.dal.dao.configure.DataBase;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.configure.SelectionContext;
+import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -114,14 +113,21 @@ public class DalConnectionManager {
 		}
 
 		DataBase selectedDataBase = select(logicDbName, dbSet, hints, shardId, isMaster, isSelect);
-		String allInOneKey = selectedDataBase.getConnectionString();
 
 		try {
-			conn = locator.getConnection(allInOneKey);
-			DbMeta meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
+			DbMeta meta;
+			if (selectedDataBase instanceof ClusterDataBase) {
+				Database db = ((ClusterDataBase) selectedDataBase).getDatabase();
+				conn = locator.getConnection(db);
+				meta = DbMeta.createIfAbsent(new ClusterDataSourceIdentity(db), dbSet.getDatabaseCategory(), conn);
+			} else {
+				String allInOneKey = selectedDataBase.getConnectionString();
+				conn = locator.getConnection(allInOneKey);
+				meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
+			}
 			return new DalConnection(conn, selectedDataBase.isMaster(), shardId, meta);
 		} catch (Throwable e) {
-			throw new DalException(ErrorCode.CantGetConnection, e, allInOneKey);
+			throw new DalException(ErrorCode.CantGetConnection, e, selectedDataBase.getConnectionString());
 		}
 	}
 

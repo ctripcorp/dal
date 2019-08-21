@@ -480,7 +480,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                         DalShardingHelper.locateTableShardId(logicDbName, tableName, hints, parameters, null);
             }
 
-            return DalShardingHelper.buildShardStr(logicDbName, tempTableShardId);
+            return DalShardingHelper.buildShardStr(logicDbName, tableName, tempTableShardId);
         }
 
         private ResultMerger createResultMerger(boolean isTableShardingEnabled, ResultMerger<T> merger,

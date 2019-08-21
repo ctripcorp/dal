@@ -10,6 +10,8 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -33,8 +35,8 @@ public class DbMeta {
         hostRegxPattern = Pattern.compile(regEx);
     }
 
-    private DbMeta(Connection conn, String realDbName, DatabaseCategory dbCategory) throws SQLException {
-        dataBaseKeyName = realDbName;
+    private DbMeta(Connection conn, DataSourceIdentity id, DatabaseCategory dbCategory) throws SQLException {
+        dataBaseKeyName = id.getId();
         this.dbCategory = dbCategory;
 
         try {
@@ -43,7 +45,7 @@ public class DbMeta {
             url = meta.getURL();
             simplifiedUrl=LoggerHelper.getSimplifiedDBUrl(url);
             host = parseHostFromDBURL(url);
-            DataSourceConfigure configure = configureLocator.getDataSourceConfigure(realDbName);
+            DataSourceConfigure configure = configureLocator.getDataSourceConfigure(id);
             if (configure != null) {
                 userName = configure.getUserName();
             }
@@ -62,7 +64,12 @@ public class DbMeta {
 
     public static DbMeta createIfAbsent(String realDbName, DatabaseCategory dbCategory, Connection conn)
             throws SQLException {
-        return new DbMeta(conn, realDbName, dbCategory);
+        return new DbMeta(conn, new DataSourceName(realDbName), dbCategory);
+    }
+
+    public static DbMeta createIfAbsent(DataSourceIdentity id, DatabaseCategory dbCategory, Connection conn)
+            throws SQLException {
+        return new DbMeta(conn, id, dbCategory);
     }
 
     public String getDatabaseName() {

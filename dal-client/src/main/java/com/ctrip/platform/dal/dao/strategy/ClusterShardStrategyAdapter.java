@@ -57,7 +57,7 @@ public class ClusterShardStrategyAdapter implements DalShardingStrategy {
 
     @Override
     public boolean isShardingByTable() {
-        return true;
+        throw new UnsupportedOperationException("table name undefined");
     }
 
     @Override

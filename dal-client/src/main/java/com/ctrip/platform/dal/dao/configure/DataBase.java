@@ -1,35 +1,16 @@
 package com.ctrip.platform.dal.dao.configure;
 
+/**
+ * @author c7ch23en
+ */
+public interface DataBase {
 
-public class DataBase {
-	private String name;
-	private boolean master;
-	private String sharding;
-	private String connectionString;
-	
-	public DataBase(String name, 
-			boolean master, 
-			String sharding, 
-			String connectionString) {
-		this.name = name;
-		this.master = master;
-		this.sharding = sharding;
-		this.connectionString = connectionString;
-	}
-	
-	public String getName() {
-		return name;
-	}
+    String getName();
 
-	public boolean isMaster() {
-		return master;
-	}
+    boolean isMaster();
 
-	public String getSharding() {
-		return sharding;
-	}
+    String getSharding();
 
-	public String getConnectionString() {
-		return connectionString;
-	}
+    String getConnectionString();
+
 }

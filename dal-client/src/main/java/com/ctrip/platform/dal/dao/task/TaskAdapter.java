@@ -157,7 +157,7 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 			return rawTableName;
 		
 		hints.cleanUp();
-		return rawTableName + buildShardStr(logicDbName, locateTableShardId(logicDbName, rawTableName, hints, parameters, fields));
+		return rawTableName + buildShardStr(logicDbName, rawTableName, locateTableShardId(logicDbName, rawTableName, hints, parameters, fields));
 	}
 	
 	/**

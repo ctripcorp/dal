@@ -1,11 +1,14 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 
 import java.util.Map;
 import java.util.Set;
 
 public class DefaultDataSourceConfigureProvider implements IntegratedConfigProvider {
+
+    private ClusterConfigProvider clusterConfigProvider = new LocalClusterConfigProvider();
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
@@ -35,7 +38,25 @@ public class DefaultDataSourceConfigureProvider implements IntegratedConfigProvi
 
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
-        return null;
+        return clusterConfigProvider.getClusterConfig(clusterName);
     }
+
+    @Override
+    public DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id) {
+        DataSourceConfigure dataSourceConfigure =
+                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(id);
+        if (dataSourceConfigure == null)
+            return new DataSourceConfigure(id.getId());
+
+        return new DataSourceConfigure(id.getId(), dataSourceConfigure.getProperties());
+    }
+
+    @Override
+    public DataSourceConfigure forceLoadDataSourceConfigure(DataSourceIdentity id) {
+        return getDataSourceConfigure(id);
+    }
+
+    @Override
+    public void register(DataSourceIdentity id, DataSourceConfigureChangeListener listener) {}
 
 }

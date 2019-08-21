@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.helper;
 import java.sql.SQLException;
 import java.util.*;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -11,6 +12,7 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.strategy.ClusterShardStrategyAdapter;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 
 public class DalShardingHelper {
@@ -27,8 +29,19 @@ public class DalShardingHelper {
         return getDatabaseSet(logicDbName).isTableShardingSupported(tableName);
     }
 
+    // reserved
     public static String buildShardStr(String logicDbName, String shardId) throws SQLException {
         String separator = getDatabaseSet(logicDbName).getStrategy().getTableShardSeparator();
+        return separator == null ? shardId : separator + shardId;
+    }
+
+    public static String buildShardStr(String logicDbName, String rawTableName, String shardId) throws SQLException {
+        String separator;
+        DalShardingStrategy strategy = getDatabaseSet(logicDbName).getStrategy();
+        if (strategy instanceof ClusterShardStrategyAdapter)
+            separator = ((ClusterShardStrategyAdapter) strategy).getTableShardSeparator(rawTableName);
+        else
+            separator = strategy.getTableShardSeparator();
         return separator == null ? shardId : separator + shardId;
     }
 

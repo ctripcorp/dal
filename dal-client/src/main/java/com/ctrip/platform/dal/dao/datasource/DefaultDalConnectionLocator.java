@@ -47,7 +47,9 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
 
     @Override
     public Connection getConnection(Database database) throws Exception {
-        return null;
+        DataSourceIdentity id = new ClusterDataSourceIdentity(database);
+        DataSource dataSource = locator.getDataSource(id);
+        return dataSource.getConnection();
     }
 
     @Override

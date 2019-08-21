@@ -53,4 +53,6 @@ public interface DataSourceConfigureProvider extends DalComponent {
      */
     void register(String dbName, DataSourceConfigureChangeListener listener);
 
+    void register(DataSourceIdentity id, DataSourceConfigureChangeListener listener);
+
 }

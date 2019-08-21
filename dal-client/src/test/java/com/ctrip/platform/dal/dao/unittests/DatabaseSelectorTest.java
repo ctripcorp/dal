@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.configure.DataBase;
+import com.ctrip.platform.dal.dao.configure.DefaultDataBase;
 import com.ctrip.platform.dal.dao.configure.DefaultDatabaseSelector;
 import com.ctrip.platform.dal.dao.configure.SelectionContext;
 import com.ctrip.platform.dal.dao.markdown.*;
@@ -112,12 +113,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void validDesigantedDbTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
         SelectionContext context;
         
 		context = getContext(new DalHints().inDatabase(M1), ms, ss, false, true);
@@ -148,12 +149,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void invalidDesigantedDbTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		context = getContext(new DalHints().inDatabase(M1 + M2), ms, ss, false, false);
@@ -172,12 +173,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void desigantedMarkdownDbTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		autoMarkdown(M1);
@@ -205,12 +206,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void desigantedUsedInHaTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		context = getContext(new DalHints().setHA(new DalHA().addDB(M1)).inDatabase(M1), ms, ss, false, true);
@@ -223,12 +224,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void masterOnlyTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		// make sure no slave is qualified
@@ -260,12 +261,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void masterOnlyHaTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		// make sure no slave is qualified
@@ -317,12 +318,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void notMasterOnlyTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		context = getContext(null, ms, ss, false, true);
@@ -335,12 +336,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void notMasterOnlyMarkdownTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		autoMarkdown(S1);
@@ -389,12 +390,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void notMasterOnlyHaTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		Set<String> matched = newHashSet(S1, S2, S3);
 		
@@ -422,12 +423,12 @@ public class DatabaseSelectorTest {
 	@Test
 	public void notMasterOnlyHaMarkdownTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		Set<String> matched;
 		
@@ -452,11 +453,11 @@ public class DatabaseSelectorTest {
 	@Test
 	public void isSelectTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
         SelectionContext context;
 
 		context = getContext(null, ms, ss, false, true);
@@ -490,11 +491,11 @@ public class DatabaseSelectorTest {
 	@Test
 	public void notSelectTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
         SelectionContext context;
 
 		context = getContext(new DalHints(), ms, ss, false, false);
@@ -528,8 +529,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void onlyHaveMasterTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = null;
 		SelectionContext context;
 		
@@ -558,8 +559,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void onlyHaveMasterHaTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = null;
 		SelectionContext context;
 		
@@ -604,8 +605,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void onlyHaveMasterHaMarkdownTest() throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = null;
 		SelectionContext context;
 		
@@ -629,9 +630,9 @@ public class DatabaseSelectorTest {
 	public void onlyHaveSlaveTest() throws DalException {
 		List<DataBase> ms = null;
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		context = getContext(null, ms, ss, true, false);
@@ -663,9 +664,9 @@ public class DatabaseSelectorTest {
 	public void onlyHaveSlaveHaTest() throws DalException {
 		List<DataBase> ms = null;
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		Set<String> matched;
@@ -690,9 +691,9 @@ public class DatabaseSelectorTest {
 	public void onlyHaveSlaveHaMarkdownTest() throws DalException {
 		List<DataBase> ms = null;
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 		SelectionContext context;
 		
 		Set<String> matched;
@@ -713,7 +714,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void onlyOneMasterTest() throws DalException {
-		DataBase db = new DataBase(M1, true, "", M1);
+		DataBase db = new DefaultDataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
 
@@ -737,7 +738,7 @@ public class DatabaseSelectorTest {
 	@Test
 	public void onlyOneMasterMarkdownTest() {
 		autoMarkdown(M1);
-		DataBase db = new DataBase(M1, true, "", M1);
+		DataBase db = new DefaultDataBase(M1, true, "", M1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
 		SelectionContext context = getContext(null, dbs, null, false, false);
@@ -757,8 +758,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void hasOneMarkdownMasterTest() throws DalException {
 		List<DataBase> dbs = new ArrayList<DataBase>();
-		dbs.add(new DataBase(M1, true, "", M1));
-		dbs.add(new DataBase(M2, true, "", M2));
+		dbs.add(new DefaultDataBase(M1, true, "", M1));
+		dbs.add(new DefaultDataBase(M2, true, "", M2));
 
 		autoMarkdown(M1);
 		SelectionContext context = getContext(null, dbs, null, false, false);
@@ -790,7 +791,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void onlyOneSlaveTest() throws DalException {
-		DataBase db = new DataBase(S1, false, "", S1);
+		DataBase db = new DefaultDataBase(S1, false, "", S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
 		SelectionContext context = getContext(null, null, dbs,
@@ -821,7 +822,7 @@ public class DatabaseSelectorTest {
 
 	@Test
 	public void onlyOneSlaveMarkdownTest() {
-		DataBase db = new DataBase(S1, false, "", S1);
+		DataBase db = new DefaultDataBase(S1, false, "", S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
 		dbs.add(db);
 
@@ -856,8 +857,8 @@ public class DatabaseSelectorTest {
 	public void hasOneMarkdownSlaveTest() throws DalException {
 		autoMarkdown(S1);
 		List<DataBase> dbs = new ArrayList<DataBase>();
-		dbs.add(new DataBase(S1, false, "", S1));
-		dbs.add(new DataBase(S2, false, "", S2));
+		dbs.add(new DefaultDataBase(S1, false, "", S1));
+		dbs.add(new DefaultDataBase(S2, false, "", S2));
 
 		SelectionContext context = getContext(new DalHints(), null, dbs,
 				false, true);
@@ -886,10 +887,10 @@ public class DatabaseSelectorTest {
 	public void hasMixedMasterAndSlaveButSlaveMarkdownTest()
 			throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		autoMarkdown(S1);
 		autoMarkdown(S2);
@@ -927,10 +928,10 @@ public class DatabaseSelectorTest {
 	public void hasMixedMasterAndSlaveButMasterMarkdownTest()
 			throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		autoMarkdown(M1);
 
@@ -965,11 +966,11 @@ public class DatabaseSelectorTest {
 	public void hasMixedMasterAndSlaveButOneMasterMarkdownTest()
 			throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		autoMarkdown(M1);
 
@@ -993,11 +994,11 @@ public class DatabaseSelectorTest {
 	public void hasHAMixedMasterAndSlaveButOneMasterMarkdownTest()
 			throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		autoMarkdown(M1);
 		
@@ -1032,11 +1033,11 @@ public class DatabaseSelectorTest {
 	public void hasHAMixedMasterAndSlaveButOneSlaveMarkdownTest()
 			throws DalException {
 		List<DataBase> ms = new ArrayList<DataBase>();
-		ms.add(new DataBase(M1, true, "", M1));
-		ms.add(new DataBase(M2, true, "", M2));
+		ms.add(new DefaultDataBase(M1, true, "", M1));
+		ms.add(new DefaultDataBase(M2, true, "", M2));
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		autoMarkdown(S1);
 		DalHA ha = new DalHA();
@@ -1079,8 +1080,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void hasHASlavesTest() throws DalException {
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		DalHA ha = new DalHA();
 		ha.addDB(S1);
@@ -1104,8 +1105,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void hasHASlavesAllNotUsedTest() throws DalException {
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		DalHA ha = new DalHA();
 		ha.addDB(S1);
@@ -1132,8 +1133,8 @@ public class DatabaseSelectorTest {
 	@Test
 	public void hasHASlavesOneMarkdownTest() throws DalException {
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
 
 		DalHA ha = new DalHA();
 		autoMarkdown(S2);
@@ -1155,9 +1156,9 @@ public class DatabaseSelectorTest {
 	@Test
 	public void hasHASlavesOneMarkdownFailOverTest() throws DalException {
 		List<DataBase> ss = new ArrayList<DataBase>();
-		ss.add(new DataBase(S1, false, "", S1));
-		ss.add(new DataBase(S2, false, "", S2));
-		ss.add(new DataBase(S3, false, "", S3));
+		ss.add(new DefaultDataBase(S1, false, "", S1));
+		ss.add(new DefaultDataBase(S2, false, "", S2));
+		ss.add(new DefaultDataBase(S3, false, "", S3));
 
 		DalHA ha = new DalHA();
 		ha.addDB(S1);

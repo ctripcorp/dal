@@ -7,6 +7,7 @@ public interface DalConfigConstants {
     String NAME = "name";
     String DATABASE_SETS = "databaseSets";
     String DATABASE_SET = "databaseSet";
+    String CLUSTER = "cluster";
     String ADD = "add";
     String PROVIDER = "provider";
     String SHARD_STRATEGY = "shardStrategy";

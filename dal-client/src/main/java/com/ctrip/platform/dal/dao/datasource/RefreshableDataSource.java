@@ -26,7 +26,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         refreshDataSource(name, newConfigure);
     }
 
-    public void refreshDataSource(String name, DataSourceConfigure configure) {
+    public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
         refreshDataSource(name,configure,null);
     }
 

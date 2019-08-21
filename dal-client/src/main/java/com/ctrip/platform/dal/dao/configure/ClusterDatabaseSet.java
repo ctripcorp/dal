@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.strategy.ClusterShardStrategyAdapter;
@@ -9,10 +10,7 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author c7ch23en
@@ -56,18 +54,18 @@ public class ClusterDatabaseSet implements DatabaseSet {
 
     @Override
     public Map<String, DataBase> getDatabases() {
-        return null;
+        List<Database> clusterDatabases = cluster.getDatabases();
+        Map<String, DataBase> dataBases = new HashMap<>();
+        for (Database clusterDatabase : clusterDatabases) {
+            DataBase dataBase = new ClusterDataBase(clusterDatabase);
+            dataBases.put(dataBase.getName(), dataBase);
+        }
+        return dataBases;
     }
 
     @Override
     public void validate(String shard) throws SQLException {
-        try {
-            Integer shardIndex = StringUtils.toInt(shard);
-            if (shardIndex == null || shardIndex < 0 || shardIndex >= cluster.getDbShardCount())
-                throw new DalRuntimeException("shard is null or out of range");
-        } catch (Throwable t) {
-            throw new SQLException(String.format("illegal shard: %s", shard));
-        }
+        getShardIndex(shard);
     }
 
     @Override
@@ -90,27 +88,55 @@ public class ClusterDatabaseSet implements DatabaseSet {
 
     @Override
     public List<DataBase> getMasterDbs() {
-        return null;
+        Database clusterDatabase = cluster.getMasterOnShard(0);
+        List<DataBase> dataBases = new LinkedList<>();
+        dataBases.add(new ClusterDataBase(clusterDatabase));
+        return dataBases;
     }
 
     @Override
     public List<DataBase> getSlaveDbs() {
-        return null;
+        List<Database> clusterDatabases = cluster.getSlavesOnShard(0);
+        List<DataBase> dataBases = new LinkedList<>();
+        for (Database clusterDatabase : clusterDatabases) {
+            dataBases.add(new ClusterDataBase(clusterDatabase));
+        }
+        return dataBases;
     }
 
     @Override
     public List<DataBase> getMasterDbs(String shard) {
-        return null;
+        Database clusterDatabase = cluster.getMasterOnShard(getShardIndex(shard));
+        List<DataBase> dataBases = new LinkedList<>();
+        dataBases.add(new ClusterDataBase(clusterDatabase));
+        return dataBases;
     }
 
     @Override
     public List<DataBase> getSlaveDbs(String shard) {
-        return null;
+        List<Database> clusterDatabases = cluster.getSlavesOnShard(getShardIndex(shard));
+        List<DataBase> dataBases = new LinkedList<>();
+        for (Database clusterDatabase : clusterDatabases) {
+            dataBases.add(new ClusterDataBase(clusterDatabase));
+        }
+        return dataBases;
     }
 
     @Override
     public IIdGeneratorConfig getIdGenConfig() {
+        // TODO: cluster idgen support
         return null;
+    }
+
+    private int getShardIndex(String shard) {
+        try {
+            Integer shardIndex = StringUtils.toInt(shard);
+            if (shardIndex == null || shardIndex < 0 || shardIndex >= cluster.getDbShardCount())
+                throw new DalRuntimeException("shard is null or out of range");
+            return shardIndex;
+        } catch (Throwable t) {
+            throw new DalRuntimeException(String.format("illegal shard: %s", shard));
+        }
     }
 
 }

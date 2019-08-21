@@ -11,6 +11,7 @@ import java.util.Set;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
@@ -118,7 +119,9 @@ public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id) {
-        throw new UnsupportedOperationException("not supported for cluster datasource");
+        if (id instanceof ClusterDataSourceIdentity)
+            throw new UnsupportedOperationException("not supported for cluster datasource");
+        return getDataSourceConfigure(id.getId());
     }
 
     @Override

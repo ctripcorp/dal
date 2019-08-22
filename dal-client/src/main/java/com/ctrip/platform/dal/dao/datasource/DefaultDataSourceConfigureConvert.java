@@ -15,4 +15,9 @@ public class DefaultDataSourceConfigureConvert implements DataSourceConfigureCon
     public DataSourceConfigure desDecrypt(DataSourceConfigure encryptConfig) {
         return encryptConfig;
     }
+
+    @Override
+    public int getOrder() {
+        return LOWEST_PRECEDENCE;
+    }
 }

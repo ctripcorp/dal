@@ -54,7 +54,7 @@ public class ForceSwitchableDataSourceTest {
 
 //        first forceSwitch
         DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure();
-        SwitchableDataSourceStatus status1 = dataSource.forceSwitch(dataSourceConfigure1, DOMAINHOST, 3306);
+        SwitchableDataSourceStatus status1 = dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), DOMAINHOST, 3306);
         Thread.sleep(2000);
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
         assertFalse(status1.isForceSwitched());
@@ -71,7 +71,7 @@ public class ForceSwitchableDataSourceTest {
 
 //        second forceSwitch
         DataSourceConfigure dataSourceConfigure3 = new DataSourceConfigure();
-        SwitchableDataSourceStatus status3 = dataSource.forceSwitch(dataSourceConfigure3, IPHOST, 3306);
+        SwitchableDataSourceStatus status3 = dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure3), IPHOST, 3306);
         Thread.sleep(2000);
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
         assertTrue(status3.isForceSwitched());
@@ -113,7 +113,7 @@ public class ForceSwitchableDataSourceTest {
 
 //        first forceSwitch
         DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure();
-        SwitchableDataSourceStatus status1 = dataSource.forceSwitch(dataSourceConfigure1, INVALIDHOST, 3306);
+        SwitchableDataSourceStatus status1 = dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), INVALIDHOST, 3306);
         assertNull(listener.getOnCallMethodName());
         assertFalse(status1.isForceSwitched());
         assertEquals(IPHOST, status1.getHostName().toLowerCase());
@@ -139,7 +139,7 @@ public class ForceSwitchableDataSourceTest {
 
 //        second forceSwitch
         DataSourceConfigure dataSourceConfigure3 = new DataSourceConfigure();
-        SwitchableDataSourceStatus status3 = dataSource.forceSwitch(dataSourceConfigure3, DOMAINHOST, 3306);
+        SwitchableDataSourceStatus status3 = dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure3), DOMAINHOST, 3306);
         Thread.sleep(2000);
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
         assertFalse(status3.isForceSwitched());
@@ -179,7 +179,7 @@ public class ForceSwitchableDataSourceTest {
         dataSource.addListener(listener);
 
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
-        dataSource.forceSwitch(dataSourceConfigure, DOMAINHOST, 3306);
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure), DOMAINHOST, 3306);
 
         DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent("DalService2DB_w", newConfigure, oldConfigure);
         dataSource.configChanged(event);
@@ -220,7 +220,7 @@ public class ForceSwitchableDataSourceTest {
         properties.setProperty(CONNECTION_URL, "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         properties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure("DalService2DB_w", properties);
-        dataSource.forceSwitch(dataSourceConfigure, DOMAINHOST, 3306);
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure), DOMAINHOST, 3306);
         Thread.sleep(2000);
 
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
@@ -233,7 +233,7 @@ public class ForceSwitchableDataSourceTest {
         assertEquals("!QAZ@WSX1qaz2wsx", dataSource.getSingleDataSource().getDataSourceConfigure().getPassword());
         assertEquals("jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", dataSource.getSingleDataSource().getName());
 
-        dataSource.forceSwitch(dataSourceConfigure, INVALIDHOST, 3306);
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure), INVALIDHOST, 3306);
         Thread.sleep(20000);
 
         assertEquals("onForceSwitchFail", listener.getOnCallMethodName());
@@ -250,7 +250,7 @@ public class ForceSwitchableDataSourceTest {
         properties1.setProperty(CONNECTION_URL, "jdbc:mysql://dst56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         properties1.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
         DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("DalService2DB_w", properties1);
-        dataSource.forceSwitch(dataSourceConfigure1, IPHOST, 3306);
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), IPHOST, 3306);
         Thread.sleep(10000);
 
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());

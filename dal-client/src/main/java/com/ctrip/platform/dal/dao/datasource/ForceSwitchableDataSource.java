@@ -10,7 +10,6 @@ import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
-import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLException;
 import java.util.concurrent.*;
@@ -36,6 +35,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     private static final String GET_STATUS = "ForceSwitch::getStatus:%s";
     private static final String RESTORE = "ForceSwitch::restore:%s";
     private static final String NULL_DATASOURCE = "nullDataSource";
+    private static final DataSourceConfigureConvert dataSourceConfigureConvert = ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
 
 
     public ForceSwitchableDataSource(IDataSourceConfigureProvider provider) throws SQLException {
@@ -68,16 +68,20 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
         return iDataSourceConfigure;
     }
 
-    public SwitchableDataSourceStatus forceSwitch(IDataSourceConfigure configure, final String ip, final Integer port) {
+    public SwitchableDataSourceStatus forceSwitch(FirstAidKit configure, final String ip, final Integer port) {
         synchronized (lock) {
             final SwitchableDataSourceStatus oldStatus = getStatus();
             final String name;
             final DataSourceConfigure usedConfigure;
             forceSwitchedStatus = ForceSwitchedStatus.ForceSwitching;
             if (isNullDataSource) {
-                DataSourceConfigureConvert stringConvert = getDataSourceConfigureConvert();
-                usedConfigure = stringConvert.desDecrypt(DataSourceConfigure.valueOf(configure));
-                name = configure.getConnectionUrl();
+                if (configure instanceof IDataSourceConfigure) {
+                    usedConfigure = dataSourceConfigureConvert.desDecrypt(DataSourceConfigure.valueOf((IDataSourceConfigure) configure));
+                    name = ((IDataSourceConfigure)configure).getConnectionUrl();
+                }
+                else {
+                    throw new DalRuntimeException("Force Switch Error: datasource configure is invalid");
+                }
             }
             else {
                 usedConfigure = getSingleDataSource().getDataSourceConfigure().clone();
@@ -296,13 +300,8 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
         super.configChanged(event);
     }
 
-    private DataSourceConfigureConvert getDataSourceConfigureConvert() {
-        return ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
-    }
-
-    public IDataSourceConfigure getDataSourceConfigure() {
-        DataSourceConfigure dataSourceConfigure = getSingleDataSource().getDataSourceConfigure().clone();
-        DataSourceConfigureConvert configConvert = getDataSourceConfigureConvert();
-        return SerializableDataSourceConfig.valueOf(configConvert.desEncrypt(dataSourceConfigure));
+    public FirstAidKit getFirstAidKit() {
+        DataSourceConfigure dataSourceConfigure = getSingleDataSource().getDataSourceConfigure();
+        return SerializableDataSourceConfig.valueOf(dataSourceConfigureConvert.desEncrypt(dataSourceConfigure));
     }
 }

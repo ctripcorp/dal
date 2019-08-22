@@ -1,6 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -207,9 +210,9 @@ public class ForceSwitchableDataSourceTest {
         assertFalse(status0.isForceSwitched());
         assertFalse(status0.isPoolCreated());
 
-        assertNull(dataSource.getDataSourceConfigure().getConnectionUrl());
-        assertNull(dataSource.getDataSourceConfigure().getUserName());
-        assertNull(dataSource.getDataSourceConfigure().getPassword());
+        assertNull(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl());
+        assertNull(dataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
+        assertNull(dataSource.getSingleDataSource().getDataSourceConfigure().getPassword());
 
         Properties properties = new Properties();
         properties.setProperty(USER_NAME, "root");
@@ -226,8 +229,9 @@ public class ForceSwitchableDataSourceTest {
         assertTrue(status1.isPoolCreated());
         assertEquals(DOMAINHOST, status1.getHostName().toLowerCase());
         assertEquals("3306", status1.getPort().toString());
-        assertEquals("root", dataSource.getDataSourceConfigure().getUserName());
-        assertEquals("!QAZ@WSX1qaz2wsx", dataSource.getDataSourceConfigure().getPassword());
+        assertEquals("root", dataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
+        assertEquals("!QAZ@WSX1qaz2wsx", dataSource.getSingleDataSource().getDataSourceConfigure().getPassword());
+        assertEquals("jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", dataSource.getSingleDataSource().getName());
 
         dataSource.forceSwitch(dataSourceConfigure, INVALIDHOST, 3306);
         Thread.sleep(20000);
@@ -240,7 +244,13 @@ public class ForceSwitchableDataSourceTest {
         assertEquals(DOMAINHOST, status2.getHostName().toLowerCase());
         assertEquals("3306", status2.getPort().toString());
 
-        dataSource.forceSwitch(dataSourceConfigure, IPHOST, 3306);
+        Properties properties1 = new Properties();
+        properties1.setProperty(USER_NAME, "root");
+        properties1.setProperty(PASSWORD, "!QAZ@WSX1qaz2wsx");
+        properties1.setProperty(CONNECTION_URL, "jdbc:mysql://dst56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        properties1.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+        DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("DalService2DB_w", properties1);
+        dataSource.forceSwitch(dataSourceConfigure1, IPHOST, 3306);
         Thread.sleep(10000);
 
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
@@ -248,7 +258,7 @@ public class ForceSwitchableDataSourceTest {
         assertEquals(IPHOST, status3.getHostName().toLowerCase());
         assertTrue(status3.isForceSwitched());
         assertTrue(status3.isPoolCreated());
-
+        assertEquals("jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", dataSource.getSingleDataSource().getName());
         assertEquals("3306", status3.getPort().toString());
 
         dataSource.restore();

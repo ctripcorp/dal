@@ -5,10 +5,13 @@ import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import org.apache.commons.lang.StringUtils;
+
 import java.sql.SQLException;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
@@ -68,16 +71,19 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     public SwitchableDataSourceStatus forceSwitch(IDataSourceConfigure configure, final String ip, final Integer port) {
         synchronized (lock) {
             final SwitchableDataSourceStatus oldStatus = getStatus();
-            final String name = getSingleDataSource().getName();
-            final String logName = String.format(FORCE_SWITCH, name);
+            final String name;
             final DataSourceConfigure usedConfigure;
             forceSwitchedStatus = ForceSwitchedStatus.ForceSwitching;
             if (isNullDataSource) {
-                usedConfigure = DataSourceConfigure.valueOf(configure);
+                DataSourceConfigureConvert stringConvert = getDataSourceConfigureConvert();
+                usedConfigure = stringConvert.desDecrypt(DataSourceConfigure.valueOf(configure));
+                name = configure.getConnectionUrl();
             }
             else {
                 usedConfigure = getSingleDataSource().getDataSourceConfigure().clone();
+                name = getSingleDataSource().getName();
             }
+            final String logName = String.format(FORCE_SWITCH, name);
             try {
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "forceSwitch", new Callback() {
                     @Override
@@ -86,12 +92,13 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("old isForceSwitched before force switch: %s, old poolCreated before force switch: %s", oldStatus.isForceSwitched(), oldStatus.isPoolCreated()));
                         usedConfigure.replaceURL(ip, port);
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new connection url: %s", usedConfigure.getConnectionUrl()));
-                        refreshDataSource(usedConfigure.getName(), usedConfigure, new ForceSwitchListener() {
+                        refreshDataSource(name, usedConfigure, new ForceSwitchListener() {
                             public void onCreatePoolSuccess() {
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name), usedConfigure.getConnectionUrl());
                                 poolCreated = true;
                                 forceSwitchedStatus = ForceSwitchedStatus.ForceSwitched;
                                 oldForceSwitchedStatus = forceSwitchedStatus;
+                                isNullDataSource = false;
                                 final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s",name), "notify listeners' onForceSwitchSuccess");
                                 for (final SwitchListener listener : listeners)
@@ -289,7 +296,13 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
         super.configChanged(event);
     }
 
+    private DataSourceConfigureConvert getDataSourceConfigureConvert() {
+        return ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
+    }
+
     public IDataSourceConfigure getDataSourceConfigure() {
-        return getSingleDataSource().getDataSourceConfigure().clone();
+        DataSourceConfigure dataSourceConfigure = getSingleDataSource().getDataSourceConfigure().clone();
+        DataSourceConfigureConvert configConvert = getDataSourceConfigureConvert();
+        return SerializableDataSourceConfig.valueOf(configConvert.desEncrypt(dataSourceConfigure));
     }
 }

@@ -13,10 +13,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This registrar only works when annotation config is activated, i.e. <code>@Autowired</code> should be supported.
- * <br />
+ * This registrar only works when annotation config is activated, i.e. Autowired should be supported.
  * For old Spring projects which use XML Config, you need to have either
- * <code>&lt;context:annotation-config /&gt;</code> or <code>&lt;context:component-scan /&gt;</code> configured. <br />
+ * context:annotation-config or context:component-scan configured.
  * For newer Spring projects which use Java Config, it should work by nature.
  */
 public class DalMybatisInterceptorRegistrar implements InitializingBean {

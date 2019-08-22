@@ -17,8 +17,7 @@ import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
-    private ScheduledExecutorService service =
-            Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
+    private volatile ScheduledExecutorService service = null;
 
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
@@ -38,6 +37,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
         SingleDataSource newDataSource = createSingleDataSource(name, configure, null);
+        service = getExecutorService();
         service.schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
@@ -47,6 +47,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void refreshDataSource(final String name, final DataSourceConfigure configure, final DataSourceCreatePoolListener listener) throws SQLException {
+        service = getExecutorService();
         service.schedule(new Runnable() {
             @Override
             public void run() {
@@ -87,6 +88,17 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
             throw new IllegalStateException("DataSource can't be null.");
 
         return dataSource;
+    }
+
+    private ScheduledExecutorService getExecutorService() {
+        if (service == null) {
+            synchronized (RefreshableDataSource.class) {
+                if (service == null) {
+                    service = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
+                }
+            }
+        }
+        return service;
     }
 
     @Override

@@ -21,7 +21,8 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     private CopyOnWriteArraySet<SwitchListener> listeners = new CopyOnWriteArraySet<>();
     private HostAndPort currentHostAndPort = new HostAndPort();
     private volatile ForceSwitchedStatus forceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
-    private volatile boolean poolCreated;
+    private ForceSwitchedStatus oldForceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
+    private volatile boolean poolCreated = false;
     private boolean isNullDataSource = false;
     private final Lock lock = new ReentrantLock();
     private static ThreadPoolExecutor executor;
@@ -38,7 +39,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
         this(getIDataSourceConfigure(provider) == null ? NULL_DATASOURCE : getIDataSourceConfigure(provider).getConnectionUrl(), provider);
         if (getIDataSourceConfigure(provider) == null) {
             isNullDataSource = true;
-            poolCreated = false;
         }
     }
 
@@ -71,7 +71,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             final String name = getSingleDataSource().getName();
             final String logName = String.format(FORCE_SWITCH, name);
             final DataSourceConfigure usedConfigure;
-            final ForceSwitchedStatus oldForceSwitchedStatus = forceSwitchedStatus;
             forceSwitchedStatus = ForceSwitchedStatus.ForceSwitching;
             if (isNullDataSource) {
                 usedConfigure = DataSourceConfigure.valueOf(configure);
@@ -92,6 +91,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name), usedConfigure.getConnectionUrl());
                                 poolCreated = true;
                                 forceSwitchedStatus = ForceSwitchedStatus.ForceSwitched;
+                                oldForceSwitchedStatus = forceSwitchedStatus;
                                 final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s",name), "notify listeners' onForceSwitchSuccess");
                                 for (final SwitchListener listener : listeners)

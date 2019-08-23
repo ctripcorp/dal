@@ -23,7 +23,8 @@ public class DatabaseConfigImpl implements DatabaseConfig {
     private String dbName;
     private String uid;
     private String pwd;
-    private Integer readWeight;
+    private String charset = "UTF-8";
+    private Integer readWeight = 1;
     private Set<String> tags = new HashSet<>();
 
     public DatabaseConfigImpl(DatabaseShardConfigImpl databaseShardConfig) {
@@ -31,7 +32,7 @@ public class DatabaseConfigImpl implements DatabaseConfig {
     }
 
     @Override
-    public Database generateDatabase() {
+    public Database generate() {
         DatabaseCategory databaseCategory = databaseShardConfig.getClusterConfig().getDatabaseCategory();
         if (databaseCategory == null)
             throw new ClusterConfigException("undefined database category");

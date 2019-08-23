@@ -23,8 +23,8 @@ public class DynamicClusterConfig extends ListenableSupport<ClusterConfig> imple
     }
 
     @Override
-    public Cluster generateCluster() {
-        return getConfig().generateCluster();
+    public Cluster generate() {
+        return getConfig().generate();
     }
 
     private void init() {

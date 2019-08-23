@@ -30,10 +30,10 @@ public class ClusterConfigImpl extends IgnoredListenable<ClusterConfig> implemen
     }
 
     @Override
-    public Cluster generateCluster() {
+    public Cluster generate() {
         DefaultCluster cluster = new DefaultCluster(this);
         for (DatabaseShardConfig databaseShardConfig : databaseShardConfigs)
-            cluster.addDatabaseShard(databaseShardConfig.generateDatabaseShard());
+            cluster.addDatabaseShard(databaseShardConfig.generate());
         ShardStrategyProxy shardStrategy = new ShardStrategyProxy(defaultShardStrategy);
         for (ShardStrategy strategy : shardStrategies)
             shardStrategy.addStrategy(strategy);

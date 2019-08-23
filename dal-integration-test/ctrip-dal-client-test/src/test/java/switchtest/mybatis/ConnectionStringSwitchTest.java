@@ -685,7 +685,7 @@ public class ConnectionStringSwitchTest {
             recoveryIp = "10.2.74.122";
         }
 
-        JsonArray jsonArray = new JsonArray();
+        final JsonArray jsonArray = new JsonArray();
         JsonObject subJson = new JsonObject();
         subJson.addProperty("keyname", keyName1);
         subJson.addProperty("server", invalidIp);

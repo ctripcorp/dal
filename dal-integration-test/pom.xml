@@ -15,9 +15,9 @@
   <packaging>pom</packaging>
 
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>1.7</java.version>
     <framework-bom.version>3.20.0</framework-bom.version>
-    <dal.version>1.17.4</dal.version>
+    <dal.version>2.0.0-SNAPSHOT</dal.version>
   </properties>
 
   <modules>
@@ -44,7 +44,7 @@
         <artifactId>qconfig-common</artifactId>
         <version>1.100.4</version>
       </dependency>-->
-     <!-- <dependency>
+      <dependency>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-dal-client</artifactId>
         <version>${dal.version}</version>
@@ -53,7 +53,7 @@
         <groupId>com.ctrip.platform</groupId>
         <artifactId>ctrip-datasource</artifactId>
         <version>${dal.version}</version>
-      </dependency>-->
+      </dependency>
       <dependency>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-bom</artifactId>

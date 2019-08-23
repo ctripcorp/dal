@@ -60,7 +60,7 @@ public class ConnectionPhantomReferenceCleanerOnDalDatasourceTest {
 
 //        获取DataSourceLocator中的数据源缓存，以便于每次case前清理
         dataSourceLocator = Class.forName("com.ctrip.platform.dal.dao.datasource.DataSourceLocator");
-        cache = dataSourceLocator.getDeclaredField("cache");
+        cache = dataSourceLocator.getDeclaredField("dataSourceCache");
         modifiersField.set(cache, cache.getModifiers() & ~Modifier.FINAL);
         cache.setAccessible(true);
     }

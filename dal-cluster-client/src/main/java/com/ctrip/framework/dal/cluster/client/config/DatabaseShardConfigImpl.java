@@ -27,10 +27,10 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
     }
 
     @Override
-    public DatabaseShard generateDatabaseShard() {
+    public DatabaseShard generate() {
         DatabaseShardImpl databaseShard = new DatabaseShardImpl(this);
         for (DatabaseConfig databaseConfig : databaseConfigs)
-            databaseShard.addDatabase(databaseConfig.generateDatabase());
+            databaseShard.addDatabase(databaseConfig.generate());
         return databaseShard;
     }
 

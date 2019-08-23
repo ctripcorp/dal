@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.configure.FirstAidKit;
 import com.ctrip.platform.dal.dao.configure.SwitchableDataSourceStatus;
 
 public interface IForceSwitchableDataSource {
@@ -10,7 +11,11 @@ public interface IForceSwitchableDataSource {
      * @param port of the new datasource
      * @return SwitchableDataSourceStatus before switch
      */
-    SwitchableDataSourceStatus forceSwitch(String ip, Integer port);
+    //SwitchableDataSourceStatus forceSwitch(String ip, Integer port);
+
+    SwitchableDataSourceStatus forceSwitch(FirstAidKit configure, final String ip, final Integer port);
+
+    FirstAidKit getFirstAidKit();
 
     /**
      * get status of current datasource

@@ -71,7 +71,8 @@ public class SingleDataSource implements DataSourceConfigureConstants {
         }
     }
 
-    public void createPool(String name, DataSourceConfigure dataSourceConfigure) {
+    public boolean createPool(String name, DataSourceConfigure dataSourceConfigure) {
+        boolean isSuccess = true;
         try {
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
                     dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
@@ -79,13 +80,13 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).createPool();
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
-            if (listener != null)
-                listener.onCreatePoolSuccess();
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating pool for data source %s", name), e);
             if (listener != null)
                 listener.onCreatePoolFail(e);
+            isSuccess = false;
         }
+        return isSuccess;
     }
 
     private void setPoolPropertiesIntoValidator(PoolProperties poolProperties) {

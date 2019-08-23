@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao.configure;
 
 
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -140,6 +142,9 @@ public class ConnectionStringParser {
     }
 
     public static HostAndPort parseHostPortFromURL(String url) {
+        if (StringUtils.isEmpty(url)) {
+            return new HostAndPort();
+        }
         if (url.toLowerCase().startsWith(MYSQL_URL_PREFIX)) {
             Matcher matcher = ipPortPatternInMySQLURL.matcher(url);
             if (matcher.find())

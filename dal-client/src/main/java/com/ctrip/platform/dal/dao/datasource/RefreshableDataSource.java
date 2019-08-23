@@ -4,15 +4,24 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
+
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
+
+    private volatile ScheduledExecutorService service = null;
+
+    private static final int INIT_DELAY = 0;
+    private static final int POOL_SIZE = 1;
+    private static final String THREAD_NAME = "ConnectionPoolCreator";
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
@@ -27,16 +36,31 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
-        refreshDataSource(name,configure,null);
-    }
-
-    public void refreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) throws SQLException {
-        SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
+        SingleDataSource newDataSource = createSingleDataSource(name, configure, null);
+        getExecutorService().schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
         DataSourceCreateTask oldTask = oldDataSource.getTask();
         if (oldTask != null)
             oldTask.cancel();
+    }
+
+    public void refreshDataSource(final String name, final DataSourceConfigure configure, final DataSourceCreatePoolListener listener) throws SQLException {
+        getExecutorService().schedule(new Runnable() {
+            @Override
+            public void run() {
+                SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
+                boolean isSuccess = newDataSource.createPool(name, configure);
+                if (isSuccess) {
+                    SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
+                    listener.onCreatePoolSuccess();
+                    close(oldDataSource);
+                    DataSourceCreateTask oldTask = oldDataSource.getTask();
+                    if (oldTask != null)
+                        oldTask.cancel();
+                }
+            }
+        }, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
     private void close(SingleDataSource oldDataSource) {
@@ -62,6 +86,17 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
             throw new IllegalStateException("DataSource can't be null.");
 
         return dataSource;
+    }
+
+    private ScheduledExecutorService getExecutorService() {
+        if (service == null) {
+            synchronized (this) {
+                if (service == null) {
+                    service = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
+                }
+            }
+        }
+        return service;
     }
 
     @Override

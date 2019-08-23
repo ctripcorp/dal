@@ -34,14 +34,14 @@ public class DataSourceCreator {
         return creator;
     }
 
-    public SingleDataSource getOrCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+    public SingleDataSource getOrCreateSingleDataSource(String name, DataSourceConfigure configure) {
         SingleDataSource ds = targetDataSourceCache.get(configure);
         if (ds == null) {
             synchronized (targetDataSourceCache) {
                 ds = targetDataSourceCache.get(configure);
                 if (ds == null) {
                     try {
-                        ds = createSingleDataSource(name, configure, listener);
+                        ds = createSingleDataSource(name, configure);
                         targetDataSourceCache.put(configure, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating single datasource: %s", name);
@@ -54,7 +54,31 @@ public class DataSourceCreator {
         return ds;
     }
 
-    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+    public SingleDataSource getOrCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+        SingleDataSource ds = targetDataSourceCache.get(configure);
+        if (ds == null) {
+            synchronized (targetDataSourceCache) {
+                ds = targetDataSourceCache.get(configure);
+                if (ds == null) {
+                    try {
+                        ds = asyncCreateSingleDataSource(name, configure, listener);
+                        targetDataSourceCache.put(configure, ds);
+                    } catch (Throwable t) {
+                        String msg = String.format("error when creating single datasource: %s", name);
+                        LOGGER.error(msg, t);
+                        throw new RuntimeException(msg, t);
+                    }
+                }
+            }
+        }
+        return ds;
+    }
+
+    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
+        return new SingleDataSource(name, configure);
+    }
+
+    private SingleDataSource asyncCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
         SingleDataSource ds = new SingleDataSource(name, configure, listener);
         service.schedule(ds, INIT_DELAY, TimeUnit.MILLISECONDS);
         return ds;

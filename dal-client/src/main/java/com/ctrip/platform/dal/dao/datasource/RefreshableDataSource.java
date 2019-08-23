@@ -16,7 +16,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
-        dataSourceReference.set(new SingleDataSource(name, config));
+        dataSourceReference.set(createSingleDataSource(name, config));
     }
 
     @Override
@@ -31,7 +31,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void refreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
-        SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
+        SingleDataSource newDataSource = asyncCreateSingleDataSource(name, configure, listener);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
     }
@@ -43,7 +43,11 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         }
     }
 
-    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+    private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
+        return DataSourceCreator.getInstance().getOrCreateSingleDataSource(name, configure);
+    }
+
+    private SingleDataSource asyncCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
         return DataSourceCreator.getInstance().getOrCreateSingleDataSource(name, configure, listener);
     }
 

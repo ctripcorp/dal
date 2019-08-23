@@ -47,12 +47,16 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if (obj instanceof ClusterDataSourceIdentity) {
+            Database objDatabase = ((ClusterDataSourceIdentity) obj).getDatabase();
+            return (database != null && database.equals(objDatabase)) || (database == null && objDatabase == null);
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return database != null ? database.hashCode() : 0;
     }
 
     public static class ClusterConnectionStringImpl implements DalConnectionString {

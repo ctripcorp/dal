@@ -388,4 +388,84 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         String newConnectionUrl = ConnectionStringParser.replaceHostAndPort(getConnectionUrl(),ip,String.valueOf(port));
         setConnectionUrl(newConnectionUrl);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DataSourceConfigure) {
+            DataSourceConfigure ref = (DataSourceConfigure) obj;
+            return (equals(ref.getConnectionUrl(), ref.getConnectionUrl()) &&
+                    equals(ref.getUserName(), ref.getUserName()) &&
+                    equals(ref.getPassword(), ref.getPassword()) &&
+                    equals(ref.getDriverClass(), ref.getDriverClass()) &&
+                    equals(ref.getTestOnBorrow(), ref.getTestOnBorrow()) &&
+                    equals(ref.getTestOnReturn(), ref.getTestOnReturn()) &&
+                    equals(ref.getTestWhileIdle(), ref.getTestWhileIdle()) &&
+                    equals(ref.getValidationInterval(), ref.getValidationInterval()) &&
+                    equals(ref.getValidationQuery(), ref.getValidationQuery()) &&
+                    equals(ref.getValidationQueryTimeout(), ref.getValidationQueryTimeout()) &&
+                    equals(ref.getValidatorClassName(), ref.getValidatorClassName()) &&
+                    equals(ref.getMaxActive(), ref.getMaxActive()) &&
+                    equals(ref.getMaxAge(), ref.getMaxAge()) &&
+                    equals(ref.getMaxWait(), ref.getMaxWait()) &&
+                    equals(ref.getMinIdle(), ref.getMinIdle()) &&
+                    equals(ref.getTimeBetweenEvictionRunsMillis(), ref.getTimeBetweenEvictionRunsMillis()) &&
+                    equals(ref.getMinEvictableIdleTimeMillis(), ref.getMinEvictableIdleTimeMillis()) &&
+                    equals(ref.getInitialSize(), ref.getInitialSize()) &&
+                    equals(ref.getInitSQL(), ref.getInitSQL()) &&
+                    equals(ref.getLogAbandoned(), ref.getLogAbandoned()) &&
+                    equals(ref.getRemoveAbandoned(), ref.getRemoveAbandoned()) &&
+                    equals(ref.getRemoveAbandonedTimeout(), ref.getRemoveAbandonedTimeout()) &&
+                    equals(ref.getJdbcInterceptors(), ref.getJdbcInterceptors()) &&
+                    equals(ref.getConnectionProperties(), ref.getConnectionProperties()) &&
+                    equals(ref.getJmxEnabled(), ref.getJmxEnabled()));
+        }
+        return false;
+    }
+
+    private boolean equals(Object obj1, Object obj2) {
+        return (obj1 != null && obj1.equals(obj2)) || (obj1 == null && obj2 == null);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeGenerator().
+                append(getConnectionUrl()).
+                append(getUserName()).
+                append(getPassword()).
+                append(getDriverClass()).
+                append(getTestOnBorrow()).
+                append(getTestOnReturn()).
+                append(getTestWhileIdle()).
+                append(getValidationInterval()).
+                append(getValidationQuery()).
+                append(getValidationQueryTimeout()).
+                append(getValidatorClassName()).
+                append(getMaxActive()).
+                append(getMaxAge()).
+                append(getMaxWait()).
+                append(getMinIdle()).
+                append(getTimeBetweenEvictionRunsMillis()).
+                append(getMinEvictableIdleTimeMillis()).
+                append(getInitialSize()).
+                append(getInitSQL()).
+                append(getLogAbandoned()).
+                append(getRemoveAbandoned()).
+                append(getRemoveAbandonedTimeout()).
+                append(getJdbcInterceptors()).
+                append(getConnectionProperties()).
+                append(getJmxEnabled()).
+                generate();
+    }
+
+    private static class HashCodeGenerator {
+        private int hashCode = 0;
+        public HashCodeGenerator append(Object obj) {
+            hashCode = hashCode * 31 + (obj != null ? obj.hashCode() : 0);
+            return this;
+        }
+        public int generate() {
+            return hashCode;
+        }
+    }
+
 }

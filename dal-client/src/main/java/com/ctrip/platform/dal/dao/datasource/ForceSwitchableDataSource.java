@@ -230,6 +230,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name),  newConfigure.getConnectionUrl());
                                 poolCreated = true;
                                 forceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
+                                oldForceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
                                 final SwitchableDataSourceStatus status = getStatus();
                                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s",name), "notify listeners' onRestoreSuccess");
                                 for (final SwitchListener listener : listeners)

@@ -270,4 +270,44 @@ public class ForceSwitchableDataSourceTest {
         assertEquals(IPHOST, status4.getHostName().toLowerCase());
         assertEquals("3306", status4.getPort().toString());
     }
+
+    @Test
+    public void testForceSwitchStatus() throws Exception {
+        IDataSourceConfigureProvider provider = new MockDataSourceConfigureProvider();
+        ForceSwitchableDataSource dataSource = new ForceSwitchableDataSource(provider);
+        MockSwitchListener listener = new MockSwitchListener();
+        dataSource.addListener(listener);
+
+        DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure();
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), INVALIDHOST, 3306);
+
+        SwitchableDataSourceStatus status1 = dataSource.getStatus();
+        assertFalse(status1.isForceSwitched());
+
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), INVALIDHOST, 3306);
+        SwitchableDataSourceStatus status2 = dataSource.getStatus();
+        assertFalse(status2.isForceSwitched());
+
+        Thread.sleep(5000);
+        SwitchableDataSourceStatus status3 = dataSource.getStatus();
+        assertFalse(status3.isForceSwitched());
+
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), DOMAINHOST, 3306);
+
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), INVALIDHOST, 3306);
+
+        Thread.sleep(3000);
+        SwitchableDataSourceStatus status4 = dataSource.getStatus();
+        assertTrue(status4.isForceSwitched());
+
+        dataSource.restore();
+        Thread.sleep(2000);
+        SwitchableDataSourceStatus status5 = dataSource.getStatus();
+        assertFalse(status5.isForceSwitched());
+
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), INVALIDHOST, 3306);
+        Thread.sleep(3000);
+        SwitchableDataSourceStatus status6 = dataSource.getStatus();
+        assertFalse(status6.isForceSwitched());
+    }
 }

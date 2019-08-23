@@ -23,7 +23,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     private CopyOnWriteArraySet<SwitchListener> listeners = new CopyOnWriteArraySet<>();
     private HostAndPort currentHostAndPort = new HostAndPort();
     private volatile ForceSwitchedStatus forceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
-    private ForceSwitchedStatus oldForceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
+    private volatile ForceSwitchedStatus oldForceSwitchedStatus = ForceSwitchedStatus.UnForceSwitched;
     private volatile boolean poolCreated = false;
     private boolean isNullDataSource = false;
     private final Lock lock = new ReentrantLock();

@@ -37,8 +37,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
         SingleDataSource newDataSource = createSingleDataSource(name, configure, null);
-        service = getExecutorService();
-        service.schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
+        getExecutorService().schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
         DataSourceCreateTask oldTask = oldDataSource.getTask();
@@ -47,8 +46,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void refreshDataSource(final String name, final DataSourceConfigure configure, final DataSourceCreatePoolListener listener) throws SQLException {
-        service = getExecutorService();
-        service.schedule(new Runnable() {
+        getExecutorService().schedule(new Runnable() {
             @Override
             public void run() {
                 SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
@@ -92,7 +90,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private ScheduledExecutorService getExecutorService() {
         if (service == null) {
-            synchronized (RefreshableDataSource.class) {
+            synchronized (this) {
                 if (service == null) {
                     service = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
                 }

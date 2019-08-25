@@ -132,7 +132,7 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
                         writeLog(key, domain, ip, currentIP);
 
                         // refresh datasource
-                        refreshableDataSource.refreshDataSource(key, configure);
+                        refreshableDataSource.forceRefreshDataSource(key, configure);
                     }
                 } catch (Throwable e) {
                     LOGGER.error("An error occured while executing database domain checking task.", e);

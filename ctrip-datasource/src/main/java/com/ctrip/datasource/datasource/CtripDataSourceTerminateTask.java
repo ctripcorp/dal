@@ -1,5 +1,6 @@
 package com.ctrip.datasource.datasource;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.DefaultDataSourceTerminateTask;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -8,11 +9,17 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.CatHelper;
 import com.dianping.cat.message.Transaction;
 
+import javax.sql.DataSource;
+
 public class CtripDataSourceTerminateTask extends DefaultDataSourceTerminateTask {
     private static final String DATASOURCE_CLOSE_DATASOURCE = "DataSource::closeDataSource";
 
     public CtripDataSourceTerminateTask(SingleDataSource oldDataSource) {
         super(oldDataSource);
+    }
+
+    public CtripDataSourceTerminateTask(String name, DataSource ds, DataSourceConfigure configure) {
+        super(name, ds, configure);
     }
 
     @Override

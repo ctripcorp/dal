@@ -27,13 +27,21 @@ public class DynamicClusterConfig extends ListenableSupport<ClusterConfig> imple
         return getConfig().generate();
     }
 
+    @Override
+    public boolean checkSwitchable(ClusterConfig newConfig) {
+        return false;
+    }
+
     private void init() {
         configRef.set(rawConfig.current());
         rawConfig.addListener(new Configuration.ConfigListener<ClusterConfig>() {
             @Override
             public void onLoad(ClusterConfig current) {
-                for (Listener<ClusterConfig> listener : getListeners()) {
-                    listener.onChanged(current);
+                if (getConfig().checkSwitchable(current)) {
+                    configRef.getAndSet(current);
+                    for (Listener<ClusterConfig> listener : getListeners()) {
+                        listener.onChanged(DynamicClusterConfig.this);
+                    }
                 }
             }
         });

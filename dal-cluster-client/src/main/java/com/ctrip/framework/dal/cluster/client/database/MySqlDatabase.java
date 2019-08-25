@@ -9,7 +9,6 @@ public class MySqlDatabase extends AbstractDatabase {
 
     private static final String CONNECTION_URL_PATTERN = "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=%s";
     private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
-    private static final String DEFAULT_CHARSET = "UTF-8";
 
     public MySqlDatabase(DatabaseConfigImpl databaseConfig) {
         super(databaseConfig);
@@ -18,13 +17,13 @@ public class MySqlDatabase extends AbstractDatabase {
     @Override
     protected String buildPrimaryConnectionUrl() {
         return String.format(CONNECTION_URL_PATTERN,
-                getPrimaryHost(), getPrimaryPort(), getDatabaseConfig().getDbName(), DEFAULT_CHARSET);
+                getPrimaryHost(), getPrimaryPort(), getDatabaseConfig().getDbName(), getDatabaseConfig().getCharset());
     }
 
     @Override
     protected String buildFailOverConnectionUrl() {
         return String.format(CONNECTION_URL_PATTERN,
-                getFailOverHost(), getFailOverPort(), getDatabaseConfig().getDbName(), DEFAULT_CHARSET);
+                getFailOverHost(), getFailOverPort(), getDatabaseConfig().getDbName(), getDatabaseConfig().getCharset());
     }
 
     @Override

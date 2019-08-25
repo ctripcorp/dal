@@ -1,6 +1,5 @@
 package com.ctrip.framework.dal.cluster.client.database;
 
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
 import com.ctrip.framework.dal.cluster.client.config.DatabaseConfigImpl;
 import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 
@@ -81,8 +80,7 @@ public abstract class AbstractDatabase implements Database, ConnectionString {
     @Override
     public String[] getAliasKeys() {
         DatabaseShardConfigImpl databaseShardConfig = databaseConfig.getDatabaseShardConfig();
-        String aliasKeys = isMaster() ? databaseShardConfig.getMasterKeys() : databaseShardConfig.getSlaveKeys();
-        return aliasKeys != null ? aliasKeys.split(ClusterConfigXMLConstants.KEY_SEPARATOR) : null;
+        return isMaster() ? databaseShardConfig.getMasterKeys() : databaseShardConfig.getSlaveKeys();
     }
 
     protected DatabaseConfigImpl getDatabaseConfig() {

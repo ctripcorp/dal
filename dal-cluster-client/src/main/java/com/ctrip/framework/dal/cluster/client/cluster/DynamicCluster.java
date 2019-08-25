@@ -86,7 +86,7 @@ public class DynamicCluster implements Cluster {
         clusterConfig.addListener(new Listener<ClusterConfig>() {
             @Override
             public void onChanged(ClusterConfig current) {
-                innerCluster.getAndSet(current.generate());
+                innerCluster.getAndSet(clusterConfig.generate());
             }
         });
     }

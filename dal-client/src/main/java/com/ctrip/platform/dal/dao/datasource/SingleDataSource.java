@@ -11,6 +11,8 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.Validator;
 
 import javax.sql.DataSource;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SingleDataSource implements DataSourceConfigureConstants, DataSourceCreatePoolTask {
 
@@ -21,9 +23,11 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
     private volatile String name;
     private volatile DataSourceConfigure dataSourceConfigure;
-    private DataSource dataSource;
+    private AtomicReference<DataSource> dataSourceRef = new AtomicReference<>();
     private DataSourceCreatePoolListener listener;
     private volatile boolean createPoolTaskCancelled = false;
+    private AtomicInteger referenceCount = new AtomicInteger(0);
+    private volatile boolean closed = false;
 
     // sync create pool
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
@@ -38,16 +42,17 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
         this.name = name;
         this.dataSourceConfigure = dataSourceConfigure;
         this.listener = listener;
-        createDataSource();
+        dataSourceRef.set(createDataSource());
     }
 
-    private void createDataSource() {
+    private DataSource createDataSource() {
         try {
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
             setPoolPropertiesIntoValidator(poolProperties);
-            this.dataSource = new DalTomcatDataSource(poolProperties);
+            return new DalTomcatDataSource(poolProperties);
         } catch (Throwable e) {
             LOGGER.error(String.format("Error creating datasource for %s", name), e);
+            return null;
         }
     }
 
@@ -56,7 +61,7 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
                     dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
             long startTime = System.currentTimeMillis();
-            ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).createPool();
+            ((org.apache.tomcat.jdbc.pool.DataSource) getDataSource()).createPool();
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
             if (listener != null)
@@ -88,7 +93,11 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     }
 
     public DataSource getDataSource() {
-        return dataSource;
+        if (closed) {
+            reCreateDataSource();
+            createPool();
+        }
+        return dataSourceRef.get();
     }
 
     private void setPoolPropertiesIntoValidator(PoolProperties poolProperties) {
@@ -101,6 +110,31 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
             return;
         ValidatorProxy dsValidator = (ValidatorProxy) validator;
         dsValidator.setPoolProperties(poolProperties);
+    }
+
+    public void reCreateDataSource() {
+        DataSource newDs = createDataSource();
+        if (newDs != null) {
+            DataSource oldDs = dataSourceRef.getAndSet(newDs);
+            closed = false;
+            DataSourceTerminator.getInstance().close(name, oldDs, dataSourceConfigure);
+        }
+    }
+
+    public int register() {
+        return referenceCount.incrementAndGet();
+    }
+
+    public int unRegister() {
+        return referenceCount.decrementAndGet();
+    }
+
+    public int getReferenceCount() {
+        return referenceCount.get();
+    }
+
+    public void setClosed() {
+        closed = true;
     }
 
 }

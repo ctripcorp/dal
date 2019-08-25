@@ -74,6 +74,29 @@ public class DataSourceCreator {
         return ds;
     }
 
+    public SingleDataSource forceCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+        SingleDataSource ds = targetDataSourceCache.get(configure);
+        if (ds != null) {
+            ds.reCreateDataSource();
+            service.schedule(ds, INIT_DELAY, TimeUnit.MILLISECONDS);
+        } else {
+            synchronized (targetDataSourceCache) {
+                ds = targetDataSourceCache.get(configure);
+                if (ds == null) {
+                    try {
+                        ds = asyncCreateSingleDataSource(name, configure, listener);
+                        targetDataSourceCache.put(configure, ds);
+                    } catch (Throwable t) {
+                        String msg = String.format("error when creating single datasource: %s", name);
+                        LOGGER.error(msg, t);
+                        throw new RuntimeException(msg, t);
+                    }
+                }
+            }
+        }
+        return ds;
+    }
+
     private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
         return new SingleDataSource(name, configure);
     }

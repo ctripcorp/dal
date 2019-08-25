@@ -18,6 +18,7 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
     private static final int FIXED_DELAY = 5 * 1000; // milliseconds
     private ScheduledExecutorService service = null;
 
+    private SingleDataSource singleDataSource;
     private String name;
     private DataSource dataSource;
     private DataSourceConfigure dataSourceConfigure;
@@ -27,9 +28,18 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
     private boolean isForceClosing = false;
 
     public DefaultDataSourceTerminateTask(SingleDataSource oldDataSource) {
+        this.singleDataSource = oldDataSource;
         this.name = oldDataSource.getName();
         this.dataSource = oldDataSource.getDataSource();
         this.dataSourceConfigure = oldDataSource.getDataSourceConfigure();
+        this.enqueueTime = new Date();
+        this.retryTimes = 0;
+    }
+
+    public DefaultDataSourceTerminateTask(String name, DataSource ds, DataSourceConfigure configure) {
+        this.name = name;
+        this.dataSource = ds;
+        this.dataSourceConfigure = configure;
         this.enqueueTime = new Date();
         this.retryTimes = 0;
     }
@@ -44,6 +54,11 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
         boolean success = closeDataSource(dataSource);
         if (success) {
             log(name, isForceClosing, enqueueTime.getTime());
+            singleDataSource.setClosed();
+            return;
+        }
+
+        if (singleDataSource.getReferenceCount() > 0) {
             return;
         }
 

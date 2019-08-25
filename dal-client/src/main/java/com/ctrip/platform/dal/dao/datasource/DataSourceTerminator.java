@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 
+import javax.sql.DataSource;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -32,16 +34,26 @@ public class DataSourceTerminator {
         factory = ServiceLoaderHelper.getInstance(DataSourceTerminateTaskFactory.class);
     }
 
-    public void close(final SingleDataSource oldDataSource) {
+    public void close(SingleDataSource oldDataSource) {
         DataSourceTerminateTask task;
         if (factory != null) {
             task = factory.createTask(oldDataSource);
         } else {
             task = new DefaultDataSourceTerminateTask(oldDataSource);
         }
-
         task.setScheduledExecutorService(service);
-        ScheduledFuture future = service.schedule(task, INIT_DELAY, TimeUnit.MILLISECONDS);
+        service.schedule(task, INIT_DELAY, TimeUnit.MILLISECONDS);
+    }
+
+    public void close(String name, DataSource ds, DataSourceConfigure configure) {
+        DataSourceTerminateTask task;
+        if (factory != null) {
+            task = factory.createTask(name, ds, configure);
+        } else {
+            task = new DefaultDataSourceTerminateTask(name, ds, configure);
+        }
+        task.setScheduledExecutorService(service);
+        service.schedule(task, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
 }

@@ -16,6 +16,8 @@ import java.util.Set;
  */
 public class DatabaseConfigImpl implements DatabaseConfig {
 
+    private static final String TAGS_SPLITTER = ",";
+
     private DatabaseShardConfigImpl databaseShardConfig;
     private DatabaseRole role = DatabaseRole.MASTER;
     private String ip;
@@ -70,8 +72,16 @@ public class DatabaseConfigImpl implements DatabaseConfig {
         return pwd;
     }
 
+    public String getCharset() {
+        return charset;
+    }
+
     public Integer getReadWeight() {
         return readWeight;
+    }
+
+    public Set<String> getTags() {
+        return new HashSet<>(tags);
     }
 
     public void setRole(DatabaseRole role) {
@@ -98,15 +108,17 @@ public class DatabaseConfigImpl implements DatabaseConfig {
         this.pwd = pwd;
     }
 
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
     public void setReadWeight(Integer readWeight) {
         this.readWeight = readWeight;
     }
 
     public void setTags(String tags) {
-        if (!StringUtils.isEmpty(tags)) {
-            String[] arrayTags = tags.split(",");
-            this.tags.addAll(Arrays.asList(arrayTags));
-        }
+        if (!StringUtils.isEmpty(tags))
+            this.tags.addAll(Arrays.asList(tags.split(TAGS_SPLITTER)));
     }
 
 }

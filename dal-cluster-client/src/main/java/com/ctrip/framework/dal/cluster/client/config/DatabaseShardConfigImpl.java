@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class DatabaseShardConfigImpl implements DatabaseShardConfig {
 
+    private static final String ALIAS_KEYS_SPLITTER = ",";
+
     private ClusterConfigImpl clusterConfig;
     private int shardIndex;
     private String masterDomain;
@@ -50,8 +52,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         return masterPort;
     }
 
-    public String getMasterKeys() {
-        return masterKeys;
+    public String[] getMasterKeys() {
+        return masterKeys != null ? masterKeys.split(ALIAS_KEYS_SPLITTER) : null;
     }
 
     public String getSlaveDomain() {
@@ -62,8 +64,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         return slavePort;
     }
 
-    public String getSlaveKeys() {
-        return slaveKeys;
+    public String[] getSlaveKeys() {
+        return slaveKeys != null ? slaveKeys.split(ALIAS_KEYS_SPLITTER) : null;
     }
 
     public void setMasterDomain(String masterDomain) {

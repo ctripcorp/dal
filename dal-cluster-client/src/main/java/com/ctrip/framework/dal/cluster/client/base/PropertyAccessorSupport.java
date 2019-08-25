@@ -35,6 +35,8 @@ public abstract class PropertyAccessorSupport implements PropertyAccessor {
 
     @Override
     public void merge(PropertyAccessor parentProperties) {
+        if (parentProperties == null)
+            return;
         for (String parentPropertyName : parentProperties.getPropertyNames()) {
             if (!hasProperty(parentPropertyName))
                 setProperty(parentPropertyName, parentProperties.getProperty(parentPropertyName));

@@ -1,7 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.IgnoredListenable;
+import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ShardStrategyProxy;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author c7ch23en
  */
-public class ClusterConfigImpl extends IgnoredListenable<ClusterConfig> implements ClusterConfig {
+public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> implements ClusterConfig {
 
     private String clusterName;
     private DatabaseCategory databaseCategory;
@@ -41,12 +41,25 @@ public class ClusterConfigImpl extends IgnoredListenable<ClusterConfig> implemen
         return cluster;
     }
 
+    @Override
+    public boolean checkSwitchable(ClusterConfig newConfig) {
+        if (newConfig instanceof ClusterConfigImpl) {
+            ClusterConfigImpl ref = (ClusterConfigImpl) newConfig;
+            return ref.getVersion() > version;
+        }
+        return false;
+    }
+
     public String getClusterName() {
         return clusterName;
     }
 
     public DatabaseCategory getDatabaseCategory() {
         return databaseCategory;
+    }
+
+    public long getVersion() {
+        return version;
     }
 
     public void addDatabaseShardConfig(DatabaseShardConfig databaseShardConfig) {

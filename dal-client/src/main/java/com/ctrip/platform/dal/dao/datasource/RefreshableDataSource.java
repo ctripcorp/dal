@@ -16,7 +16,8 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
-        dataSourceReference.set(createSingleDataSource(name, config));
+        SingleDataSource ds = createSingleDataSource(name, config);
+        init(ds);
     }
 
     @Override
@@ -30,14 +31,33 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         refreshDataSource(name,configure,null);
     }
 
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
+        forceRefreshDataSource(name,configure,null);
+    }
+
     public void refreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
         SingleDataSource newDataSource = asyncCreateSingleDataSource(name, configure, listener);
+        refresh(newDataSource);
+    }
+
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+        SingleDataSource newDataSource = forceCreateSingleDataSource(name, configure, listener);
+        refresh(newDataSource);
+    }
+
+    private void init(SingleDataSource newDataSource) {
+        newDataSource.register();
+        dataSourceReference.set(newDataSource);
+    }
+
+    private void refresh(SingleDataSource newDataSource) {
+        newDataSource.register();
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
         close(oldDataSource);
     }
 
     private void close(SingleDataSource oldDataSource) {
-        if (oldDataSource != null) {
+        if (oldDataSource != null && oldDataSource.unRegister() <= 0) {
             DataSourceTerminator.getInstance().close(oldDataSource);
             oldDataSource.cancelTask();
         }
@@ -49,6 +69,10 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private SingleDataSource asyncCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
         return DataSourceCreator.getInstance().getOrCreateSingleDataSource(name, configure, listener);
+    }
+
+    private SingleDataSource forceCreateSingleDataSource(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+        return DataSourceCreator.getInstance().forceCreateSingleDataSource(name, configure, listener);
     }
 
     public SingleDataSource getSingleDataSource() {

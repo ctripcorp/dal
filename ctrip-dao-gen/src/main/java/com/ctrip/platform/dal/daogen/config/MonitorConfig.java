@@ -11,9 +11,13 @@ public class MonitorConfig {
 
     private static final String SENDER = "sender";
 
-    private static final String RECIPIENT = "recipient";
+    private static final String DB_EMAIL_RECIPIENT = "dbEmailRecipient";
 
-    private static final String CC = "cc";
+    private static final String SWITCH_EMAIL_RECIPIENT = "switchEmailRecipient";
+
+    private static final String DB_EMAIL_CC = "dbEmailCc";
+
+    private static final String SWITCH_EMAIL_CC = "switchEmailCc";
 
     private static final String FILTER_TITAN_KEY = "filterTitanKey";
 
@@ -39,20 +43,36 @@ public class MonitorConfig {
         setProperty(SENDER, sender);
     }
 
-    public String getRecipient() {
-        return getProperty(RECIPIENT);
+    public String getDBEmailRecipient() {
+        return getProperty(DB_EMAIL_RECIPIENT);
     }
 
-    public void setRecipient(String recipient) {
-        setProperty(RECIPIENT, recipient);
+    public void setDBEmailRecipient(String recipient) {
+        setProperty(DB_EMAIL_RECIPIENT, recipient);
     }
 
-    public String getCc() {
-        return getProperty(CC);
+    public String getSwitchEmailRecipient() {
+        return getProperty(SWITCH_EMAIL_RECIPIENT);
     }
 
-    public void setCc(String cc) {
-        setProperty(CC, cc);
+    public void setSwitchEmailRecipient(String recipient) {
+        setProperty(SWITCH_EMAIL_RECIPIENT, recipient);
+    }
+
+    public String getDBEmailCc() {
+        return getProperty(DB_EMAIL_CC);
+    }
+
+    public void setDBEmailCc(String cc) {
+        setProperty(DB_EMAIL_CC, cc);
+    }
+
+    public String getSwitchEmailCc() {
+        return getProperty(SWITCH_EMAIL_CC);
+    }
+
+    public void setSwitchEmailCc(String cc) {
+        setProperty(SWITCH_EMAIL_CC, cc);
     }
 
     public String getFilterTitanKey() {

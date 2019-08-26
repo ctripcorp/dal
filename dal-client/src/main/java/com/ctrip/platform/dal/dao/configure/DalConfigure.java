@@ -83,11 +83,9 @@ public class DalConfigure {
     }
 
     public Set<DataBase> getAllDBs(){
-        Set<DataBase> alldbs = new HashSet<DataBase>();
+        Set<DataBase> alldbs = new HashSet<>();
         for (DatabaseSet set : this.databaseSets.values()) {
-            for (DataBase db : set.getDatabases().values()) {
-                alldbs.add(db);
-            }
+            alldbs.addAll(set.getDatabases().values());
         }
         return alldbs;
     }
@@ -95,7 +93,10 @@ public class DalConfigure {
     public void warmUpConnection(DataBase db){
         Connection conn = null;
         try {
-            conn = locator.getConnection(db.getConnectionString());
+            if (db instanceof ClusterDataBase)
+                conn = locator.getConnection(((ClusterDataBase) db).getDatabase());
+            else
+                conn = locator.getConnection(db.getConnectionString());
         } catch (Throwable e) {
             dalLogger.error(String.format("create connection to %s error", db.getName()), e);
         } finally {

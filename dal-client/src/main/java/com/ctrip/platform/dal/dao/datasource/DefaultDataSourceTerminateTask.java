@@ -54,11 +54,12 @@ public class DefaultDataSourceTerminateTask extends AbstractDataSourceTerminateT
         boolean success = closeDataSource(dataSource);
         if (success) {
             log(name, isForceClosing, enqueueTime.getTime());
-            singleDataSource.setClosed();
+            if (singleDataSource != null)
+                singleDataSource.setClosed();
             return;
         }
 
-        if (singleDataSource.getReferenceCount() > 0) {
+        if (singleDataSource != null && singleDataSource.getReferenceCount() > 0) {
             return;
         }
 

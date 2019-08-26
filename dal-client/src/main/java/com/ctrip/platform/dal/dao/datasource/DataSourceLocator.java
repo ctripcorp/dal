@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -16,20 +17,17 @@ public class DataSourceLocator {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
-//    private static final Map<String, DataSource> cache = new ConcurrentHashMap<>();
-    private static final Map<DataSourceIdentity, DataSource> dataSourceCache = new ConcurrentHashMap<>();
+    private static final Map<DataSourceIdentity, DataSource> cache = new ConcurrentHashMap<>();
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
-
     private DataSourceConfigureProvider provider;
-
     public DataSourceLocator(DataSourceConfigureProvider provider) {
         this.provider = provider;
     }
 
     // to be refactored
     public static boolean containsKey(String name) {
-        return dataSourceCache.containsKey(new DataSourceName(name));
+        return cache.containsKey(new DataSourceName(name));
     }
 
     /**
@@ -51,14 +49,14 @@ public class DataSourceLocator {
     }
 
     public DataSource getDataSource(DataSourceIdentity id) {
-        DataSource ds = dataSourceCache.get(id);
+        DataSource ds = cache.get(id);
         if (ds == null) {
-            synchronized (dataSourceCache) {
-                ds = dataSourceCache.get(id);
+            synchronized (cache) {
+                ds = cache.get(id);
                 if (ds == null) {
                     try {
                         ds = createDataSource(id);
-                        dataSourceCache.put(id, ds);
+                        cache.put(id, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating datasource: %s", id.getId());
                         LOGGER.error(msg, t);
@@ -69,20 +67,6 @@ public class DataSourceLocator {
         }
         return ds;
     }
-
-/*    private DataSource createDataSource(String name) throws SQLException {
-        IDataSourceConfigure config = provider.getDataSourceConfigure(name);
-        if (config == null) {
-            throw new SQLException("Can not find connection configure for " + name);
-        }
-
-        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(name, provider);
-        ForceSwitchableDataSource ds = new ForceSwitchableDataSource(name, dataSourceConfigureProvider);
-        provider.register(name, ds);
-        executor.execute(ds);
-
-        return ds;
-    }*/
 
     private DataSource createDataSource(DataSourceIdentity id) throws SQLException {
         DataSourceConfigure config = provider.getDataSourceConfigure(id);
@@ -98,16 +82,18 @@ public class DataSourceLocator {
         return ds;
     }
 
-    // TODO: ???????
+    public void setup(Cluster cluster) {
+    }
+
     public static Map<String, Integer> getActiveConnectionNumber() {
-        Map<String, Integer> map = new HashMap<>();/*
-        for (Map.Entry<String, DataSource> entry : cache.entrySet()) {
+        Map<String, Integer> map = new HashMap<>();
+        for (Map.Entry<DataSourceIdentity, DataSource> entry : cache.entrySet()) {
             DataSource dataSource = entry.getValue();
             if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
                 org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
-                map.put(entry.getKey(), ds.getActive());
+                map.put(entry.getKey().getId(), ds.getActive());
             }
-        }*/
+        }
         return map;
     }
 

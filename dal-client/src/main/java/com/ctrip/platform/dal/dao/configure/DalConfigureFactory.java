@@ -110,24 +110,12 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), locator);
 
-        locator.setup(getAllDbNames(databaseSets));
+        locator.setup(databaseSets.values());
 
         DatabaseSelector selector =
                 readComponent(root, DATABASE_SELECTOR, new DefaultDatabaseSelector(), SELECTOR);
 
         return new DalConfigure(name, databaseSets, logger, locator, factory, selector);
-    }
-
-    private Set<String> getAllDbNames(Map<String, DatabaseSet> databaseSets) {
-        Set<String> dbNames = new HashSet<>();
-        for (DatabaseSet dbSet : databaseSets.values()) {
-            if (dbSet instanceof DefaultDatabaseSet) {
-                for (DataBase db : dbSet.getDatabases().values()) {
-                    dbNames.add(db.getConnectionString());
-                }
-            }
-        }
-        return dbNames;
     }
 
     private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl,

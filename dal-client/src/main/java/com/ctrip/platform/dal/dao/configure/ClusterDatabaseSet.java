@@ -128,6 +128,10 @@ public class ClusterDatabaseSet implements DatabaseSet {
         return null;
     }
 
+    public Cluster getCluster() {
+        return cluster;
+    }
+
     private int getShardIndex(String shard) {
         try {
             Integer shardIndex = StringUtils.toInt(shard);

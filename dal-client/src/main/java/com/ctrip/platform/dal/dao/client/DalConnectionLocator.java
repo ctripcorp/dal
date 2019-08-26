@@ -1,15 +1,16 @@
 package com.ctrip.platform.dal.dao.client;
 
 import java.sql.Connection;
-import java.util.Set;
+import java.util.Collection;
 
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.ctrip.platform.dal.dao.configure.DalComponent;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 
 public interface DalConnectionLocator extends DalComponent {
 	
-	void setup(Set<String> dbNames);
+	void setup(Collection<DatabaseSet> databaseSets);
 	
 	Connection getConnection(String name) throws Exception;
 

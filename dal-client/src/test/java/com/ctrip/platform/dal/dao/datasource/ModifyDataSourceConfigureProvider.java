@@ -9,8 +9,8 @@ import com.ctrip.platform.dal.dao.configure.MockDataSourceConfigure;
  */
 public class ModifyDataSourceConfigureProvider implements IDataSourceConfigureProvider {
     @Override
-    public IDataSourceConfigure getDataSourceConfigure() throws Exception {
-        throw new Exception();
+    public IDataSourceConfigure getDataSourceConfigure() {
+        throw new RuntimeException();
     }
 
     @Override

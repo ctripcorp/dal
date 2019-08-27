@@ -25,8 +25,15 @@ public class DataSourceLocator {
 
     private DataSourceConfigureProvider provider;
 
+    private boolean isForceSwitch = false;
+
     public DataSourceLocator(DataSourceConfigureProvider provider) {
         this.provider = provider;
+    }
+
+    public DataSourceLocator(DataSourceConfigureProvider provider, boolean isForceSwitch) {
+        this.provider = provider;
+        this.isForceSwitch = isForceSwitch;
     }
 
     // to be refactored
@@ -75,7 +82,7 @@ public class DataSourceLocator {
 
     private DataSource createDataSource(String name) throws SQLException {
         IDataSourceConfigure config = provider.getDataSourceConfigure(name);
-        if (config == null) {
+        if (config == null && !isForceSwitch) {
             throw new SQLException("Can not find connection configure for " + name);
         }
 

@@ -18,21 +18,23 @@ public class CtripDataSourceConfigConvert implements DataSourceConfigureConvert{
     @Override
     public DataSourceConfigure desEncrypt(DataSourceConfigure dataSourceConfigure) {
         dalEncrypter = getEncrypter();
+        DataSourceConfigure encryptDataSourceConfigure = dataSourceConfigure.clone();
         String userName = dalEncrypter.desEncrypt(dataSourceConfigure.getUserName());
         String password = dalEncrypter.desEncrypt(dataSourceConfigure.getPassword());
-        dataSourceConfigure.setUserName(userName);
-        dataSourceConfigure.setPassword(password);
-        return dataSourceConfigure;
+        encryptDataSourceConfigure.setUserName(userName);
+        encryptDataSourceConfigure.setPassword(password);
+        return encryptDataSourceConfigure;
     }
 
     @Override
     public DataSourceConfigure desDecrypt(DataSourceConfigure dataSourceConfigure) {
         dalEncrypter = getEncrypter();
+        DataSourceConfigure decryptDataSourceConfigure = dataSourceConfigure.clone();
         String userName = dalEncrypter.desDecrypt(dataSourceConfigure.getUserName());
         String password = dalEncrypter.desDecrypt(dataSourceConfigure.getPassword());
-        dataSourceConfigure.setUserName(userName);
-        dataSourceConfigure.setPassword(password);
-        return dataSourceConfigure;
+        decryptDataSourceConfigure.setUserName(userName);
+        decryptDataSourceConfigure.setPassword(password);
+        return decryptDataSourceConfigure;
     }
 
     private synchronized DalEncrypter getEncrypter() {

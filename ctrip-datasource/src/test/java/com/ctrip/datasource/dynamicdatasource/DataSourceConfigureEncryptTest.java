@@ -26,10 +26,14 @@ public class DataSourceConfigureEncryptTest {
         DataSourceConfigure configure = new DataSourceConfigure("DalService2DB_w", properties);
 
         DataSourceConfigure configureEncrypt = stringConvert.desEncrypt(configure);
+        assertEquals("root", configure.getUserName());
+        assertEquals("!QAZ@WSX1qaz2wsx", configure.getPassword());
         assertNotEquals("root", configureEncrypt.getUserName());
         assertNotEquals("!QAZ@WSX1qaz2wsx", configureEncrypt.getPassword());
 
         DataSourceConfigure configureDecrypt = stringConvert.desDecrypt(configureEncrypt);
+        assertNotEquals("root", configureEncrypt.getUserName());
+        assertNotEquals("!QAZ@WSX1qaz2wsx", configureEncrypt.getPassword());
         assertEquals("root", configureDecrypt.getUserName());
         assertEquals("!QAZ@WSX1qaz2wsx", configureDecrypt.getPassword());
     }

@@ -23,6 +23,10 @@ public class DalDataSourceFactory {
         return createDataSource(allInOneKey, null, null);
     }
 
+    public DataSource createDataSource(String allInOneKey, boolean isForceSwitch) throws Exception {
+        return createDataSource(allInOneKey, null, null, isForceSwitch);
+    }
+
     /**
      * Create DataSource for given name. In case user has clog or cat configured. The name will be same for both PROD
      * and DEV environment
@@ -55,6 +59,19 @@ public class DalDataSourceFactory {
         provider.setup(names);
 
         DataSourceLocator loc = new DataSourceLocator(provider);
+        String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
+        return loc.getDataSource(keyName);
+    }
+
+    public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceSwitch) throws Exception {
+        Set<String> names = new HashSet<>();
+        names.add(allInOneKey);
+
+        TitanProvider provider = new TitanProvider();
+        provider.setSourceTypeByEnv();
+        provider.setup(names);
+
+        DataSourceLocator loc = new DataSourceLocator(provider, isForceSwitch);
         String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
         return loc.getDataSource(keyName);
     }

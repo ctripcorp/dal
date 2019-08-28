@@ -80,8 +80,6 @@ public class DataSourceConfigureManagerTest {
         String inValidKey = "name1";
         String validKey = "dalservice2db_w";
         DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new FailedQConfigPoolPropertiesProvider());
-        Map<String, String> settings = new HashMap<>();
-        DataSourceConfigureManager.getInstance().initialize(settings);
         try {
             DalDataSourceFactory factory = new DalDataSourceFactory();
             factory.createDataSource(inValidKey, true);
@@ -125,8 +123,6 @@ public class DataSourceConfigureManagerTest {
         String inValidKey = "name1";
         String validKey = "dalservice2db_w";
         DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new FailedQConfigIPDomainStatusProvider());
-        Map<String, String> settings = new HashMap<>();
-        DataSourceConfigureManager.getInstance().initialize(settings);
         try {
             DalDataSourceFactory factory = new DalDataSourceFactory();
             factory.createDataSource(inValidKey, true);

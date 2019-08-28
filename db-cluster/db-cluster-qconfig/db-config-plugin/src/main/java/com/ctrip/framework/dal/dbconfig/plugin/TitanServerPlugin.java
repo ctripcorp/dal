@@ -183,13 +183,14 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             ValidateHandler validateHandler = new ValidateHandler(pluginProp, keyProp, clientAppId, clientIp, env, fromPublicNet);
             PermissionCheckEnum permissionCheck = validateHandler.doValid();
             if (permissionCheck == PermissionCheckEnum.PASS) {
-                //拼接连接串: normal + failover
+                //拼接连接串: normal + failover + mhaUpdateTime
                 String connString_normal = CommonHelper.buildConnectionString(originalProp, false);
                 String connString_failover = CommonHelper.buildConnectionString(originalProp, true);
+                String connString_mhaUpdateTime = CommonHelper.buildMhaUpdateStartTime(originalProp);
                 //混淆连接串 [在QConfig外部做了, 这里直接返回明文]
                 //String finalContent = RC4.encrypt(connString, dataId);
                 //拼接最终连接串(2份)
-                result = buildReturnResult(connString_normal, connString_failover);
+                result = buildReturnResult(connString_normal, connString_failover, connString_mhaUpdateTime);
 
                 //log keyName in cat
                 String keyName = originalProp.getProperty(CONNECTIONSTRING_KEY_NAME);
@@ -240,11 +241,13 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
     }
 
     //build return result
-    private String buildReturnResult(String normalConnString, String failoverConnString) {
+    private String buildReturnResult(String normalConnString, String failoverConnString, String mhaUpdateStartTime) {
         StringBuilder sb = new StringBuilder();
         sb.append("normal=").append(normalConnString);
         sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
         sb.append("failover=").append(failoverConnString);
+        sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
+        sb.append("mhaUpdateStartTime=").append(mhaUpdateStartTime);
         return sb.toString();
     }
 

@@ -7,6 +7,7 @@ import com.ctrip.soa.platform.basesystem.emailservice.v1.EmailServiceClient;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailRequest;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailResponse;
 import com.dianping.cat.Cat;
+import org.apache.commons.lang.StringUtils;
 import qunar.tc.qconfig.client.MapConfig;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.util.*;
 public class EmailUtils {
     private static final String APP_PROPERTIES_CLASSPATH = "/META-INF/app.properties";
 
-    public static void sendEmail(String content, String subject) {
+    public static void sendEmail(String content, String subject, String recipientStr, String cCStr) {
         String ip = IPUtils.getExecuteIPFromQConfig();
         if (!IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
             return;
@@ -41,15 +42,19 @@ public class EmailUtils {
         sendEmailRequest.setSubject(subject);
         sendEmailRequest.setBodyContent(content);
 
-        String[] recipientArray = MonitorConfigManager.getMonitorConfig().getRecipient().split(",");
-        List<String> recipient = new ArrayList<>();
-        Collections.addAll(recipient, recipientArray);
-        sendEmailRequest.setRecipient(recipient);
+        if (StringUtils.isNotBlank(recipientStr)) {
+            String[] recipientArray = recipientStr.split(",");
+            List<String> recipient = new ArrayList<>();
+            Collections.addAll(recipient, recipientArray);
+            sendEmailRequest.setRecipient(recipient);
+        }
 
-        String[] ccArray = MonitorConfigManager.getMonitorConfig().getCc().split(",");
-        List<String> cc = new ArrayList<>();
-        Collections.addAll(cc, ccArray);
-        sendEmailRequest.setCc(cc);
+        if (StringUtils.isNotBlank(cCStr)) {
+            String[] ccArray = cCStr.split(",");
+            List<String> cc = new ArrayList<>();
+            Collections.addAll(cc, ccArray);
+            sendEmailRequest.setCc(cc);
+        }
         try {
             SendEmailResponse response = client.sendEmail(sendEmailRequest);
             if (response != null && response.getResultCode() == 1) {

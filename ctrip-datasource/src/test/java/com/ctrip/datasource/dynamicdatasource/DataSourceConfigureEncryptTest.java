@@ -36,5 +36,6 @@ public class DataSourceConfigureEncryptTest {
         assertNotEquals("!QAZ@WSX1qaz2wsx", configureEncrypt.getPassword());
         assertEquals("root", configureDecrypt.getUserName());
         assertEquals("!QAZ@WSX1qaz2wsx", configureDecrypt.getPassword());
+
     }
 }

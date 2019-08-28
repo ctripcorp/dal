@@ -4,6 +4,7 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
 import com.ctrip.platform.dal.daogen.DynamicDS.CatSwitchDSDataProvider;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
 import com.ctrip.platform.dal.daogen.util.EmailUtils;
@@ -105,7 +106,8 @@ public class DalDynamicDSTest {
         String endCheckTime = DateUtils.getEndOneWeek(checkDate);
         String content = dalDynamicDSDao.generateBodyContent(dalDynamicDSDao.getSwitchDataInRange(startCheckTime, endCheckTime));
         String subject = String.format("动态数据源切换统计(%s-%s)",startCheckTime.substring(0,8), endCheckTime.substring(0,8));
-        EmailUtils.sendEmail(content, subject);
+        EmailUtils.sendEmail(content, subject, MonitorConfigManager.getMonitorConfig().getSwitchEmailRecipient(),
+                MonitorConfigManager.getMonitorConfig().getSwitchEmailCc());
     }
 
     @Test

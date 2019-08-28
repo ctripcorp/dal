@@ -2,12 +2,16 @@ package com.ctrip.datasource.datasource.MockQConfigProvider;
 
 
 import com.ctrip.datasource.common.enums.SourceType;
+import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
+import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class DataSourceConfigureManagerTest {
@@ -46,5 +50,95 @@ public class DataSourceConfigureManagerTest {
         }
         DataSourceLocator.containsKey("name1");
         DataSourceLocator.containsKey("name2");
+    }
+
+    @Test
+    public void testCreateDataSourceAfterFailedGetPoolProperties() throws Exception {
+        String inValidKey = "name1";
+        String validKey = "dalservice2db_w";
+        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new FailedQConfigPoolPropertiesProvider());
+        Map<String, String> settings = new HashMap<>();
+        settings.put("ignoreExternalException", "true");
+        DataSourceConfigureManager.getInstance().initialize(settings);
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(inValidKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(validKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testCreateDataSourceAfterFailedGetPoolProperties2() throws Exception {
+        String inValidKey = "name1";
+        String validKey = "dalservice2db_w";
+        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new FailedQConfigPoolPropertiesProvider());
+        Map<String, String> settings = new HashMap<>();
+        DataSourceConfigureManager.getInstance().initialize(settings);
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(inValidKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(validKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testCreateDataSourceAfterFailedGetIpDomain() throws Exception{
+        String inValidKey = "name1";
+        String validKey = "dalservice2db_w";
+        DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new FailedQConfigIPDomainStatusProvider());
+        Map<String, String> settings = new HashMap<>();
+        settings.put("ignoreExternalException", "true");
+        DataSourceConfigureManager.getInstance().initialize(settings);
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(inValidKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(validKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testCreateDataSourceAfterFailedGetIpDomain2() throws Exception{
+        String inValidKey = "name1";
+        String validKey = "dalservice2db_w";
+        DataSourceConfigureManager.getInstance().setIPDomainStatusProvider(new FailedQConfigIPDomainStatusProvider());
+        Map<String, String> settings = new HashMap<>();
+        DataSourceConfigureManager.getInstance().initialize(settings);
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(inValidKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(validKey, true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
     }
 }

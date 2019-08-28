@@ -23,8 +23,8 @@ public class DalDataSourceFactory {
         return createDataSource(allInOneKey, null, null);
     }
 
-    public DataSource createDataSource(String allInOneKey, boolean isForceSwitch) throws Exception {
-        return createDataSource(allInOneKey, null, null, isForceSwitch);
+    public DataSource createDataSource(String allInOneKey, boolean isForceInitialize) throws Exception {
+        return createDataSource(allInOneKey, null, null, isForceInitialize);
     }
 
     /**
@@ -63,7 +63,7 @@ public class DalDataSourceFactory {
         return loc.getDataSource(keyName);
     }
 
-    public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceSwitch) throws Exception {
+    public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceInitialize) throws Exception {
         Set<String> names = new HashSet<>();
         names.add(allInOneKey);
 
@@ -71,7 +71,7 @@ public class DalDataSourceFactory {
         provider.setSourceTypeByEnv();
         provider.setup(names);
 
-        DataSourceLocator loc = new DataSourceLocator(provider, isForceSwitch);
+        DataSourceLocator loc = new DataSourceLocator(provider, isForceInitialize);
         String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
         return loc.getDataSource(keyName);
     }

@@ -158,4 +158,9 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
         }
         throw new DalRuntimeException(errorMsg.toString());
     }
+
+    private void validatePoolProperties() throws Exception {
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        locator.getUserPoolPropertiesConfigure()
+    }
 }

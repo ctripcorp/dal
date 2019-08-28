@@ -166,6 +166,10 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return oldOriginalProperties;
     }
 
+    public PropertiesWrapper getPoolProperties() {
+        return propertiesWrapperReference.get();
+    }
+
     private void processProperties(Properties properties, Properties appProperties,
             Map<String, Properties> datasourceProperties) {
         if (properties == null || properties.isEmpty())

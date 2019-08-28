@@ -71,6 +71,7 @@ public interface DataSourceConfigureConstants {
 
     // **********Constants**********
     String USE_LOCAL_CONFIG = "useLocalConfig";
+    String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
     String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
     String SERVICE_ADDRESS = "serviceAddress";
     String TIMEOUT = "timeout";

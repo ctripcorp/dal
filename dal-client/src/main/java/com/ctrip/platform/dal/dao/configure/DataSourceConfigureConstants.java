@@ -76,6 +76,7 @@ public interface DataSourceConfigureConstants {
     String TIMEOUT = "timeout";
     String APPID = "appid";
     String IS_DEBUG = "isDebug";
+    String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
 
     String TITAN_KEY_NORMAL = "normal";
     String TITAN_KEY_FAILOVER = "failover";

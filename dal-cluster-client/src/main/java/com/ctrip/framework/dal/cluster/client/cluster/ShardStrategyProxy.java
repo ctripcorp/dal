@@ -19,8 +19,8 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
     private Map<String, ShardStrategy> tableStrategies = new HashMap<>();
 
     public ShardStrategyProxy(ShardStrategy defaultStrategy) {
-        this.defaultStrategy = defaultStrategy;
         addStrategy(defaultStrategy);
+        this.defaultStrategy = defaultStrategy;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
     }
 
     public void addStrategy(ShardStrategy strategy) {
-        if (strategy == null)
+        if (strategy == null || strategy == defaultStrategy)
             return;
         for (String tableName : strategy.getAppliedTables()) {
             if (tableStrategies.put(tableName, strategy) != null)

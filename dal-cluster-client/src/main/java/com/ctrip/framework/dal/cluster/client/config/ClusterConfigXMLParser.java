@@ -151,6 +151,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             loadProperties((PropertyAccessor) strategy, strategyNode);
         if (strategy instanceof ConfigElement) {
             loadSubElements((ConfigElement) strategy, strategyNode);
+            ((ConfigElement) strategy).start();
         }
         boolean isDefault = Boolean.parseBoolean(getAttribute(strategyNode, DEFAULT));
         if (isDefault)

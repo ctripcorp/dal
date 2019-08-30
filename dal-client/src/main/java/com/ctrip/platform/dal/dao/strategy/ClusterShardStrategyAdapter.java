@@ -36,6 +36,7 @@ public class ClusterShardStrategyAdapter implements DalShardingStrategy {
     @Override
     public String locateDbShard(DalConfigure configure, String logicDbName, DalHints hints) {
         String tableName = hints.getString(DalHintEnum.shardingTable);
+        tableName = "person";
         DbShardContext ctx = createDbShardContext(logicDbName, hints);
         Integer shard = cluster.getDbShard(tableName, ctx);
         return shard != null ? String.valueOf(shard) : null;
@@ -94,12 +95,12 @@ public class ClusterShardStrategyAdapter implements DalShardingStrategy {
             ctx.setShardColValues(new MappedShardData(shardColValues));
         ShardData parameters = (ShardData) hints.get(DalHintEnum.parameters);
         Map<String, Object> fields = (Map<String, Object>) hints.get(DalHintEnum.fields);
-        if (parameters != null && fields != null)
-            throw new ClusterRuntimeException("parameters and fields cannot be set at the same time");
+//        if (parameters != null && fields != null)
+//            throw new ClusterRuntimeException("parameters and fields cannot be set at the same time");
         if (parameters != null)
-            ctx.setShardData(parameters);
-        else if (fields != null)
-            ctx.setShardData(new MappedShardData(fields));
+            ctx.addShardData(parameters);
+        if (fields != null)
+            ctx.addShardData(new MappedShardData(fields));
     }
 
 }

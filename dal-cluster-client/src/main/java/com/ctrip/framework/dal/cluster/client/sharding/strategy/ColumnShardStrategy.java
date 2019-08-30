@@ -5,6 +5,8 @@ import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.ShardData;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 
+import java.util.List;
+
 /**
  * @author c7ch23en
  */
@@ -35,9 +37,15 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
         if (shard != null)
             return shard;
 
-        shardValue = getDbShardValue(tableName, context.getShardData());
-        if (shardValue != null)
-            shard = calcDbShard(tableName, shardValue);
+        for (ShardData shardData : context.getShardDataCandidates()) {
+            shardValue = getDbShardValue(tableName, shardData);
+            if (shardValue != null) {
+                shard = calcDbShard(tableName, shardValue);
+                if (shard != null)
+                    return shard;
+            }
+        }
+
         return shard;
     }
 
@@ -57,9 +65,15 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
         if (shard != null)
             return shard;
 
-        shardValue = getTableShardValue(tableName, context.getShardData());
-        if (shardValue != null)
-            shard = calcTableShard(tableName, shardValue);
+        for (ShardData shardData : context.getShardDataCandidates()) {
+            shardValue = getTableShardValue(tableName, shardData);
+            if (shardValue != null) {
+                shard = calcTableShard(tableName, shardValue);
+                if (shard != null)
+                    return shard;
+            }
+        }
+
         return shard;
     }
 

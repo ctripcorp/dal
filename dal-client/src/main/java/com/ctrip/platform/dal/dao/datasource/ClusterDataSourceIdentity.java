@@ -11,7 +11,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
  */
 public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
-    private static final String ID_FORMAT = "%s-%d-%s-%s:%d"; // cluster-shard-role-host:port
+    private static final String ID_FORMAT = "%s-%d-%s-%s"; // cluster-shard-role-host:port
     private static final String MASTER = "master";
     private static final String SLAVE = "slave";
 
@@ -28,7 +28,7 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
         String role = database.isMaster() ? MASTER : SLAVE;
         ConnectionString connString = database.getConnectionString();
         id = String.format(ID_FORMAT, database.getClusterName(), database.getShardIndex(), role,
-                connString.getPrimaryHost(), connString.getPrimaryPort());
+                connString.getPrimaryHost());
         this.connectionString = new ClusterConnectionStringImpl(id, database);
     }
 

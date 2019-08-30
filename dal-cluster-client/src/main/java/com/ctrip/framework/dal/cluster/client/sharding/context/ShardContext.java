@@ -1,5 +1,8 @@
 package com.ctrip.framework.dal.cluster.client.sharding.context;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * @author c7ch23en
  */
@@ -8,7 +11,7 @@ public abstract class ShardContext {
     private String logicDbName;
     private Object shardValue;
     private ShardData shardColValues;
-    private ShardData shardData;
+    private List<ShardData> shardDataCandidates = new LinkedList<>();
 
     public ShardContext(String logicDbName) {
         this.logicDbName = logicDbName;
@@ -26,8 +29,8 @@ public abstract class ShardContext {
         return shardColValues;
     }
 
-    public ShardData getShardData() {
-        return shardData;
+    public List<ShardData> getShardDataCandidates() {
+        return new LinkedList<>(shardDataCandidates);
     }
 
     public ShardContext setShardValue(Object shardValue) {
@@ -40,8 +43,8 @@ public abstract class ShardContext {
         return this;
     }
 
-    public ShardContext setShardData(ShardData shardData) {
-        this.shardData = shardData;
+    public ShardContext addShardData(ShardData shardData) {
+        this.shardDataCandidates.add(shardData);
         return this;
     }
 

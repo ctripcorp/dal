@@ -3,11 +3,12 @@ package com.ctrip.platform.dal.dao;
 import java.util.*;
 import java.util.List;
 
+import com.ctrip.framework.dal.cluster.client.sharding.context.ShardData;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.enums.ParametersType;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
-public class StatementParameters {
+public class StatementParameters implements ShardData {
 	private static final String SQLHIDDENString = "*";
 
 	private List<StatementParameter> parameters = new LinkedList<StatementParameter>();
@@ -401,6 +402,22 @@ public class StatementParameters {
 
 	public ParametersType getExistingParametersType() {
 		return existingParametersType;
+	}
+
+	@Override
+	public Object getValue(String name) {
+		StatementParameter parameter = get(name, ParameterDirection.Input);
+		return parameter != null ? parameter.getValue() : null;
+	}
+
+	@Override
+	public Set<String> getNames() {
+		Set<String> names = new HashSet<>();
+		for (StatementParameter parameter : parameters) {
+			if (parameter.getName() != null && parameter.getDirection() == ParameterDirection.Input)
+				names.add(parameter.getName());
+		}
+		return names;
 	}
 
 	/*enum ParametersType {

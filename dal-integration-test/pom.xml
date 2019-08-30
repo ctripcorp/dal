@@ -15,9 +15,9 @@
   <packaging>pom</packaging>
 
   <properties>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
     <framework-bom.version>3.20.0</framework-bom.version>
-    <dal.version>2.0.0-SNAPSHOT</dal.version>
+    <dal.version>1.17.8</dal.version>
   </properties>
 
   <modules>

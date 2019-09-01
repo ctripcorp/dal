@@ -118,7 +118,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         for (Map.Entry<String, DalConnectionString> entry : map.entrySet()) {
             String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
             connectionStrings.put(keyName, entry.getValue());
-            dataSourceConfiguresCache.remove(keyName);
+            dataSourceConfiguresCache.remove(new DataSourceName(keyName));
         }
     }
 
@@ -126,7 +126,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     public DalConnectionString setConnectionString(String name, DalConnectionString connectionString) {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         DalConnectionString oldConnectionString = connectionStrings.put(keyName, connectionString);
-        dataSourceConfiguresCache.remove(keyName);
+        dataSourceConfiguresCache.remove(new DataSourceName(keyName));
         return (oldConnectionString instanceof DalInvalidConnectionString) ? null : oldConnectionString;
     }
 

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client</artifactId>
-    <version>1.17.9-SNAPSHOT</version>
+    <version>1.17.9</version>
     <properties>
         <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
@@ -189,8 +189,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>${file_encoding}</encoding>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>

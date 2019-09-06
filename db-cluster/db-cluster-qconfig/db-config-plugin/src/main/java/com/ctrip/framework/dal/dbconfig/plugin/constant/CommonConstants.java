@@ -39,4 +39,5 @@ public interface CommonConstants {
     String HTTP_WHITE_LIST = "http.white.list";
     String TOKEN_KEY = "token.key";
 
+    String MHA_START_TIME = "mhaStartTime";
 }

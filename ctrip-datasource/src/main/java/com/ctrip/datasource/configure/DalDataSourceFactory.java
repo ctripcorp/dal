@@ -1,6 +1,8 @@
 package com.ctrip.datasource.configure;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -11,6 +13,7 @@ import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class DalDataSourceFactory {
+    private static final String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
 
     /**
      * Create DataSource for given name. The appid and titan url will be discoved by framework foundation
@@ -21,6 +24,10 @@ public class DalDataSourceFactory {
      */
     public DataSource createDataSource(String allInOneKey) throws Exception {
         return createDataSource(allInOneKey, null, null);
+    }
+
+    public DataSource createDataSource(String allInOneKey, boolean isForceInitialize) throws Exception {
+        return createDataSource(allInOneKey, null, null, isForceInitialize);
     }
 
     /**
@@ -55,6 +62,22 @@ public class DalDataSourceFactory {
         provider.setup(names);
 
         DataSourceLocator loc = new DataSourceLocator(provider);
+        String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
+        return loc.getDataSource(keyName);
+    }
+
+    public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceInitialize) throws Exception {
+        Set<String> names = new HashSet<>();
+        names.add(allInOneKey);
+        Map<String, String> settings = new HashMap<>();
+        settings.put(IGNORE_EXTERNAL_EXCEPTION, String.valueOf(isForceInitialize));
+
+        TitanProvider provider = new TitanProvider();
+        provider.initialize(settings);
+        provider.setSourceTypeByEnv();
+        provider.setup(names);
+
+        DataSourceLocator loc = new DataSourceLocator(provider, isForceInitialize);
         String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
         return loc.getDataSource(keyName);
     }

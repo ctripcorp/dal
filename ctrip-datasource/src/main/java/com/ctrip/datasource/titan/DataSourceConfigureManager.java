@@ -123,17 +123,34 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         if (names == null || names.isEmpty())
             return;
 
-        // set ip domain status
-        IPDomainStatus status = ipDomainStatusProvider.getStatus();
-        dataSourceConfigureLocator.setIPDomainStatus(status);
-
+        try {
+            // set ip domain status
+            IPDomainStatus status = ipDomainStatusProvider.getStatus();
+            dataSourceConfigureLocator.setIPDomainStatus(status);
+        } catch (Throwable e) {
+            if (getIgnoreExternalException()) {
+                Cat.logError("fail to get IPDomainStatus configure from qconfig. ", e);
+            }
+            else {
+                throw e;
+            }
+        }
         // set connection strings
         Map<String, DalConnectionString> connectionStrings = getConnectionStrings(names, sourceType);
         dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
 
-        // set pool properties
-        DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
-        dataSourceConfigureLocator.setPoolProperties(poolProperties);
+        try {
+            // set pool properties
+            DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
+            dataSourceConfigureLocator.setPoolProperties(poolProperties);
+        } catch (Throwable e) {
+            if (getIgnoreExternalException()) {
+                Cat.logError("fail to get pool configure from qconfig. ", e);
+            }
+            else {
+                throw e;
+            }
+        }
 
         if (sourceType == SourceType.Remote)
             addConnectionStringChangedListeners(names);

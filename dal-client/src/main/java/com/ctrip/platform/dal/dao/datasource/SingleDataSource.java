@@ -11,6 +11,9 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.Validator;
 
 import javax.sql.DataSource;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.LockSupport;
 
 public class SingleDataSource implements DataSourceConfigureConstants {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -20,6 +23,7 @@ public class SingleDataSource implements DataSourceConfigureConstants {
     private DataSource dataSource;
     private DataSourceCreateTask task;
     private DataSourceCreatePoolListener listener;
+    private volatile boolean isSwitching = false;
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
 
@@ -41,6 +45,14 @@ public class SingleDataSource implements DataSourceConfigureConstants {
 
     public void setTask(DataSourceCreateTask task) {
         this.task = task;
+    }
+
+    public boolean getSwitching() {
+        return isSwitching;
+    }
+
+    public void setSwitching(boolean switching) {
+        isSwitching = switching;
     }
 
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
@@ -85,6 +97,8 @@ public class SingleDataSource implements DataSourceConfigureConstants {
             if (listener != null)
                 listener.onCreatePoolFail(e);
             isSuccess = false;
+        } finally {
+            isSwitching = false;
         }
         return isSuccess;
     }

@@ -4,8 +4,13 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 
 import javax.sql.DataSource;
 
@@ -13,19 +18,43 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.mysql.jdbc.MySQLConnection;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.jdbc.pool.PooledConnection;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
+    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
-    private volatile ScheduledExecutorService service = null;
+    private AtomicReference<String> connectionIpReference = new AtomicReference<>();
+
+    private List<DataSourceSwitchListener> dataSourceSwitchListeners = new LinkedList<>();
+
+    private ScheduledExecutorService service =
+            Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
+
+    private static ThreadPoolExecutor executor;
+
+    private Queue<Thread> waiters = new ConcurrentLinkedQueue<>();
 
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
     private static final String THREAD_NAME = "ConnectionPoolCreator";
+    private static final int CORE_POOL_SIZE = 5;
+    private static final int MAX_POOL_SIZE = 10;
+    private static final long KEEP_ALIVE_TIME = 1L;
+    private static final long TIME_OUT = 1000; //ms
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
         dataSourceReference.set(dataSource);
+        executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new CustomThreadFactory("DataSourceSwitchListener"));
+        executor.allowCoreThreadTimeOut(true);
     }
 
     @Override
@@ -37,8 +66,14 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
         SingleDataSource newDataSource = createSingleDataSource(name, configure, null);
-        getExecutorService().schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
+        executeDataSourceListener(name);
+        newDataSource.setSwitching(false);
+        for (Thread waiter : waiters) {
+            LockSupport.unpark(waiter);
+        }
+        waiters.clear();
+        getExecutorService().schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
         close(oldDataSource);
         DataSourceCreateTask oldTask = oldDataSource.getTask();
         if (oldTask != null)
@@ -76,11 +111,27 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         return dataSourceReference.get();
     }
 
-    private DataSource getDataSource() {
+    public void addDataSourceSwitchListener(DataSourceSwitchListener dataSourceSwitchListener) {
+        this.dataSourceSwitchListeners.add(dataSourceSwitchListener);
+    }
+
+    public DataSource getDataSource() {
         SingleDataSource singleDataSource = getSingleDataSource();
         if (singleDataSource == null)
             throw new IllegalStateException("SingleDataSource can't be null.");
-
+        for(;;) {
+            if (!singleDataSource.getSwitching()) {
+                break;
+            }
+            else {
+                if (singleDataSource.getSwitching()) {
+                    waiters.add(Thread.currentThread());
+                }
+                if (singleDataSource.getSwitching()) {
+                    LockSupport.park(this);
+                }
+            }
+        }
         DataSource dataSource = singleDataSource.getDataSource();
         if (dataSource == null)
             throw new IllegalStateException("DataSource can't be null.");
@@ -97,6 +148,35 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
             }
         }
         return service;
+    }
+
+    private void executeDataSourceListener(final String keyName) {
+        List<Future> futureList = new ArrayList<>();
+        for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
+            if (dataSourceSwitchListener != null) {
+                futureList.add(executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            dataSourceSwitchListener.preHandle();
+                        } catch (Throwable e) {
+                            LOGGER.error(String.format("execute datasource switch listener fail for %s", keyName), e);
+                        }
+                    }
+                }));
+            }
+        }
+        try {
+            if (!executor.awaitTermination(TIME_OUT, TimeUnit.MILLISECONDS)) {
+                for (Future future : futureList) {
+                    if (!future.isDone()) {
+                        future.cancel(true);
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error(String.format("execute datasource switch listener is interrupted for %s", keyName), e);
+        }
     }
 
     @Override

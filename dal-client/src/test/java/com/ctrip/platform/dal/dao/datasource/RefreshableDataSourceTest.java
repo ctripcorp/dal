@@ -17,7 +17,7 @@ public class RefreshableDataSourceTest {
             new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory("RefreshableDataSourceTest"));
 
     private ExecutorService executorOne = new ThreadPoolExecutor(10, 120, 60L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory("RefreshableDataSourceTest"));
+            new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory("RefreshableDataSourceTest1"));
 
     @Test
     public void testSingleTimeoutDataSourceSwitchOnce() throws Exception {
@@ -280,105 +280,148 @@ public class RefreshableDataSourceTest {
         return p1;
     }
 
-//    @Test
-//    public void testDataSourceSwitchNotify() throws Exception {
-//        Properties p1 = new Properties();
-//        p1.setProperty("userName", "root");
-//        p1.setProperty("password", "111111");
-//        p1.setProperty("connectionUrl", "jdbc:mysql://localhost:3306/test");
-//        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
-//        DataSourceConfigure configure1 = new DataSourceConfigure("test", p1);
-//
-//        Properties p2 = new Properties();
-//        p2.setProperty("userName", "root");
-//        p2.setProperty("password", "111111");
-//        p2.setProperty("connectionUrl", "jdbc:mysql://1.1.1.1:3306/test");
-//        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
-//        DataSourceConfigure configure2 = new DataSourceConfigure("test", p2);
-//
-//        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
-//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
-//        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
-//        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
-//        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
-//        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
-//        for (int i = 0; i < 100; ++i) {
-//            final int sleep = i;
-//            executorOne.submit(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        Thread.sleep(sleep + 1);
-//                    } catch (InterruptedException e) {
-//                        //ignore
-//                    }
-//                    if (listenerOne.getStep() == 10 && listenerTwo.getStep() == 20) {
-//                        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl());
-//                    }
-//                }
-//            });
-//        }
-//        new Thread( new Runnable(){
-//
-//            @Override
-//            public void run() {
-//                try {
-//                    refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
-//                } catch (Exception e) {
-//                    //ignore
-//                }
-//            }
-//        }).start();
-//
-//        List<Future> futureList = new ArrayList<>();
-//        for (int i = 0; i < 20; ++i) {
-//            final int sleep = i;
-//            futureList.add(executorOne.submit(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        Thread.sleep(sleep + 1);
-//                    } catch (Exception e) {
-//
-//                    }
-//                    refreshableDataSource.getDataSource();
-//                }
-//            }));
-//        }
-//        for (Future future : futureList) {
-//            future.get();
-//            Assert.assertEquals(10, listenerOne.getStep());
-//            Assert.assertEquals(20, listenerTwo.getStep());
-//        }
-//    }
-//
-//    @Test
-//    public void testExecuteListenerTimeOut() throws Exception {
-//        Properties p1 = new Properties();
-//        p1.setProperty("userName", "root");
-//        p1.setProperty("password", "111111");
-//        p1.setProperty("connectionUrl", "jdbc:mysql://localhost:3306/test");
-//        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
-//        DataSourceConfigure configure1 = new DataSourceConfigure("test", p1);
-//
-//        Properties p2 = new Properties();
-//        p2.setProperty("userName", "root");
-//        p2.setProperty("password", "111111");
-//        p2.setProperty("connectionUrl", "jdbc:mysql://1.1.1.1:3306/test");
-//        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
-//        DataSourceConfigure configure2 = new DataSourceConfigure("test", p2);
-//
-//        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
-//        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
-//        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
-//        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
-//        listenerOne.setSleep(1500);
-//        //listenerTwo.setSleep(1500);
-//        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
-//        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
-//        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
-//        Assert.assertEquals(1, listenerOne.getStep());
-//        Assert.assertEquals(20, listenerTwo.getStep());
-//
-//    }
+    @Test
+    public void testDataSourceSwitchNotify() throws Exception {
+        Properties p1 = new Properties();
+        p1.setProperty("userName", "root");
+        p1.setProperty("password", "111111");
+        p1.setProperty("connectionUrl", "jdbc:mysql://localhost:3306/test");
+        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure configure1 = new DataSourceConfigure("test", p1);
+
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "111111");
+        p2.setProperty("connectionUrl", "jdbc:mysql://1.1.1.1:3306/test");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure configure2 = new DataSourceConfigure("test", p2);
+
+        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
+        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
+        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
+        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
+        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
+        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
+        for (int i = 0; i < 100; ++i) {
+            final int sleep = i;
+            executorOne.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(sleep + 1);
+                    } catch (InterruptedException e) {
+                        //ignore
+                    }
+                    if (listenerOne.getStep() == 10 && listenerTwo.getStep() == 20) {
+                        Assert.assertEquals("jdbc:mysql://1.1.1.1:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl());
+                    }
+                }
+            });
+        }
+        new Thread( new Runnable(){
+
+            @Override
+            public void run() {
+                try {
+                    refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+        }).start();
+
+        List<Future> futureList = new ArrayList<>();
+        for (int i = 0; i < 20; ++i) {
+            final int sleep = i;
+            futureList.add(executorOne.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(sleep + 1);
+                    } catch (Exception e) {
+
+                    }
+                    refreshableDataSource.getDataSource();
+                }
+            }));
+        }
+        for (Future future : futureList) {
+            future.get();
+            Assert.assertEquals(10, listenerOne.getStep());
+            Assert.assertEquals(20, listenerTwo.getStep());
+        }
+    }
+
+    @Test
+    public void testExecuteListenerTimeOut() throws Exception {
+        Properties p1 = new Properties();
+        p1.setProperty("userName", "root");
+        p1.setProperty("password", "111111");
+        p1.setProperty("connectionUrl", "jdbc:mysql://localhost:3306/test");
+        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure configure1 = new DataSourceConfigure("test", p1);
+
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "111111");
+        p2.setProperty("connectionUrl", "jdbc:mysql://1.1.1.1:3306/test");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure configure2 = new DataSourceConfigure("test", p2);
+
+        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
+        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
+        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
+        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
+        listenerOne.setSleep(1500);
+        //listenerTwo.setSleep(1500);
+        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
+        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
+        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
+        Assert.assertEquals(1, listenerOne.getStep());
+        Assert.assertEquals(20, listenerTwo.getStep());
+
+    }
+
+    @Test
+    public void testGetConnection() throws Exception {
+        Properties p1 = new Properties();
+        p1.setProperty("userName", "root");
+        p1.setProperty("password", "111111");
+        p1.setProperty("connectionUrl", "jdbc:mysql://localhost:3306/test");
+        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure configure1 = new DataSourceConfigure("test", p1);
+
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "111111");
+        p2.setProperty("connectionUrl", "jdbc:mysql://1.1.1.1:3306/test");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure configure2 = new DataSourceConfigure("test", p2);
+
+        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
+        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
+        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
+        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
+        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
+        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
+
+        final CountDownLatch latch = new CountDownLatch(50);
+        for (int i = 0; i < 50; ++i) {
+            final int time = i;
+            executorOne.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(time + 1);
+                    } catch (InterruptedException e) {
+
+                    }
+                    refreshableDataSource.getDataSource();
+                    latch.countDown();
+                }
+            });
+        }
+        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
+        latch.await();
+    }
 }

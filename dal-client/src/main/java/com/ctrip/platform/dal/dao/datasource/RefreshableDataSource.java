@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -20,9 +19,6 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.mysql.jdbc.MySQLConnection;
-import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.jdbc.pool.PooledConnection;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -151,31 +147,29 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     private void executeDataSourceListener(final String keyName) {
-        List<Future> futureList = new ArrayList<>();
+        if (dataSourceSwitchListeners.size() == 0) {
+            return;
+        }
+        final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
         for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
             if (dataSourceSwitchListener != null) {
-                futureList.add(executor.submit(new Runnable() {
+                executor.submit(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             dataSourceSwitchListener.preHandle();
+                            latch.countDown();
                         } catch (Throwable e) {
                             LOGGER.error(String.format("execute datasource switch listener fail for %s", keyName), e);
                         }
                     }
-                }));
+                });
             }
         }
         try {
-            if (!executor.awaitTermination(TIME_OUT, TimeUnit.MILLISECONDS)) {
-                for (Future future : futureList) {
-                    if (!future.isDone()) {
-                        future.cancel(true);
-                    }
-                }
-            }
+            latch.await(TIME_OUT, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            LOGGER.error(String.format("execute datasource switch listener is interrupted for %s", keyName), e);
+            LOGGER.error(String.format("timeout,execute datasource switch listener is interrupted for %s", keyName), e);
         }
     }
 

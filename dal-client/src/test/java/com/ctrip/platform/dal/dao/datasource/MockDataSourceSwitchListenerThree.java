@@ -5,7 +5,7 @@ package com.ctrip.platform.dal.dao.datasource;
  */
 public class MockDataSourceSwitchListenerThree implements DataSourceSwitchListener {
     @Override
-    public void preHandle() {
+    public void execute() {
 
     }
 }

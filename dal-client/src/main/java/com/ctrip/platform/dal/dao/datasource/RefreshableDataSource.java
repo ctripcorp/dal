@@ -6,12 +6,12 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 
 import javax.sql.DataSource;
+import javax.sql.PooledConnection;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
@@ -19,6 +19,8 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.mysql.jdbc.MySQLConnection;
+import org.apache.commons.lang.StringUtils;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -27,14 +29,16 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private AtomicReference<String> connectionIpReference = new AtomicReference<>();
 
-    private List<DataSourceSwitchListener> dataSourceSwitchListeners = new LinkedList<>();
+    private CopyOnWriteArraySet<DataSourceSwitchListener> dataSourceSwitchListeners = new CopyOnWriteArraySet<>();
+
+    private AtomicBoolean isListenerExecuted = new AtomicBoolean(false);
 
     private ScheduledExecutorService service =
             Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
 
     private static ThreadPoolExecutor executor;
 
-    private Queue<Thread> waiters = new ConcurrentLinkedQueue<>();
+    private static ExecutorService getConnExecutor = Executors.newSingleThreadExecutor();
 
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
@@ -47,6 +51,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
         dataSourceReference.set(dataSource);
+        asyncGetConnection();
         executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new CustomThreadFactory("DataSourceSwitchListener"));
@@ -62,14 +67,10 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     public void refreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
         SingleDataSource newDataSource = createSingleDataSource(name, configure, null);
-        SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        executeDataSourceListener(name);
-        newDataSource.setSwitching(false);
-        for (Thread waiter : waiters) {
-            LockSupport.unpark(waiter);
-        }
-        waiters.clear();
         getExecutorService().schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
+        isListenerExecuted.set(false);
+        SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
+        asyncGetConnection();
         close(oldDataSource);
         DataSourceCreateTask oldTask = oldDataSource.getTask();
         if (oldTask != null)
@@ -83,7 +84,9 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                 SingleDataSource newDataSource = createSingleDataSource(name, configure, listener);
                 boolean isSuccess = newDataSource.createPool(name, configure);
                 if (isSuccess) {
+                    isListenerExecuted.set(false);
                     SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
+                    asyncGetConnection();
                     listener.onCreatePoolSuccess();
                     close(oldDataSource);
                     DataSourceCreateTask oldTask = oldDataSource.getTask();
@@ -115,19 +118,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         SingleDataSource singleDataSource = getSingleDataSource();
         if (singleDataSource == null)
             throw new IllegalStateException("SingleDataSource can't be null.");
-        for(;;) {
-            if (!singleDataSource.getSwitching()) {
-                break;
-            }
-            else {
-                if (singleDataSource.getSwitching()) {
-                    waiters.add(Thread.currentThread());
-                }
-                if (singleDataSource.getSwitching()) {
-                    LockSupport.park(this);
-                }
-            }
-        }
+
         DataSource dataSource = singleDataSource.getDataSource();
         if (dataSource == null)
             throw new IllegalStateException("DataSource can't be null.");
@@ -147,35 +138,67 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     private void executeDataSourceListener(final String keyName) {
-        if (dataSourceSwitchListeners.size() == 0) {
-            return;
-        }
-        final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
-        for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
-            if (dataSourceSwitchListener != null) {
-                executor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            dataSourceSwitchListener.preHandle();
-                            latch.countDown();
-                        } catch (Throwable e) {
-                            LOGGER.error(String.format("execute datasource switch listener fail for %s", keyName), e);
+        synchronized (this) {
+            if (isListenerExecuted.get()) {
+                return;
+            }
+            final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
+            for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
+                if (dataSourceSwitchListener != null) {
+                    executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                dataSourceSwitchListener.execute();
+                                latch.countDown();
+                            } catch (Throwable e) {
+                                LOGGER.error(String.format("execute datasource switch listener fail for %s", keyName), e);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            }
+            try {
+                latch.await(TIME_OUT, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                LOGGER.error(String.format("timeout,execute datasource switch listener is interrupted for %s", keyName), e);
+            } finally {
+                isListenerExecuted.set(true);
             }
         }
-        try {
-            latch.await(TIME_OUT, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            LOGGER.error(String.format("timeout,execute datasource switch listener is interrupted for %s", keyName), e);
-        }
+    }
+
+    private void asyncGetConnection() {
+        getConnExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getConnection();
+                } catch (SQLException e) {
+                    //ignore
+                }
+            }
+        });
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return getDataSource().getConnection();
+        Connection connection =  getDataSource().getConnection();
+        if (dataSourceSwitchListeners.size() > 0) {
+            String currentIp = ((MySQLConnection)(((PooledConnection)connection).getConnection())).getIO().mysqlConnection.getInetAddress().getHostAddress();
+            String oldIp = connectionIpReference.get();
+            if (StringUtils.isEmpty(oldIp)) {
+                connectionIpReference.set(currentIp);
+            }
+            else {
+                if (!oldIp.equalsIgnoreCase(currentIp)) {
+                    String keyName = getSingleDataSource().getName();
+                    executeDataSourceListener(keyName);
+                    connectionIpReference.set(currentIp);
+                }
+            }
+        }
+        return connection;
     }
 
     @Override

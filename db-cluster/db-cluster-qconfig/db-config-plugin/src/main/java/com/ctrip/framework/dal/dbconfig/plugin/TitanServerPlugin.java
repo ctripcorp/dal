@@ -164,9 +164,11 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
                 fetchParentEnable = Boolean.parseBoolean(fetchParentEnableValue);
             }
             if (!enable && fetchParentEnable) { // 禁用
+                Cat.logEvent("Titan.Plugin.Key.Disabled", dataId + ":" + profile);
                 String topProfile = envProfile.formatTopProfile();
                 String subEnv = envProfile.formatSubEnv();
                 if (FAT_PROFILE.equalsIgnoreCase(topProfile) && !Strings.isNullOrEmpty(subEnv)) { // fat env, has sub env
+                    Cat.logEvent("Titan.Plugin.FatSubEnv.Key.Disabled", dataId + ":" + subEnv);
                     Properties parentProperties = fetchParentKey(group, dataId, topProfile, getQconfigService());
                     if (parentProperties != null && parentProperties.size() != 0) {
                         encryptProp = parentProperties;

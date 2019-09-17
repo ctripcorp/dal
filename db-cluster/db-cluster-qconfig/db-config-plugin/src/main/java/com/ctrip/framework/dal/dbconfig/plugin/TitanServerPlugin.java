@@ -1,7 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
-import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.PermissionCheckEnum;
@@ -32,6 +31,7 @@ import java.util.Properties;
  */
 public class TitanServerPlugin extends ServerPluginAdapter implements TitanConstants {
 
+    private static final String FAT_PROFILE = "fat:";
     private static Logger logger = LoggerFactory.getLogger(TitanServerPlugin.class);
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
@@ -154,8 +154,27 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             // noParent check [2017-10-31]
             checkNoParent(dataId, rawProfile, envProfile, config);
 
-            //decrypt in value
+            // if fat subEnv key disabled, use parent key
             Properties encryptProp = CommonHelper.parseString2Properties(encryptText);
+            String enabledValue = encryptProp.getProperty(ENABLED);
+            boolean enable = Boolean.parseBoolean(enabledValue);
+            String fetchParentEnableValue = config.getParamValue(FETCH_PARENT_ENABLE_WHEN_SUB_DISABLED);
+            boolean fetchParentEnable = true;
+            if (!Strings.isNullOrEmpty(fetchParentEnableValue)) {
+                fetchParentEnable = Boolean.parseBoolean(fetchParentEnableValue);
+            }
+            if (!enable && fetchParentEnable) { // 禁用
+                String topProfile = envProfile.formatTopProfile();
+                String subEnv = envProfile.formatSubEnv();
+                if (FAT_PROFILE.equalsIgnoreCase(topProfile) && !Strings.isNullOrEmpty(subEnv)) { // fat env, has sub env
+                    Properties parentProperties = fetchParentKey(group, dataId, topProfile, getQconfigService());
+                    if (parentProperties != null && parentProperties.size() != 0) {
+                        encryptProp = parentProperties;
+                    }
+                }
+            }
+
+            //decrypt in value
             Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, encryptProp);
 
             //黑白名单检查
@@ -238,6 +257,12 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             t.complete();
         }
         return pluginResult;
+    }
+
+    private Properties fetchParentKey(String group, String dataId, String topProfile, QconfigService qconfigService) throws IOException, QServiceException {
+        ConfigField configField = new ConfigField(group, dataId, topProfile);
+        Properties result = QconfigServiceUtils.currentConfigWithoutPriority(qconfigService, "fetchParentKey", configField);
+        return result;
     }
 
     //build return result

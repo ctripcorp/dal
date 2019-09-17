@@ -228,6 +228,48 @@ public class TitanServerPluginTest {
     }
 
     @Test
+    public void postHandleFatSubEnvDisabled() throws Exception {
+        String profile = CommonHelper.formatProfileFromEnv("fat:fat1");
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile("fat:fat1")).anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();
+        EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
+        EasyMock.replay(request);   //保存期望结果
+        EasyMock.verify(request);
+
+        String groupId = TITAN_QCONFIG_KEYS_APPID;
+        String dataId = "titantest_lzyan_v_01";
+        long version = 1L;
+        String content = buildTitanKeyContent(titanKey, false);
+        ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
+        WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
+        PluginResult pluginResult = titanServerPlugin.postHandle(wrappedRequest);
+        assert (pluginResult != null);
+        System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
+        assert pluginResult.getCode() == PluginStatusCode.OK;
+    }
+
+    @Test
+    public void postHandleProSubEnvDisabled() throws Exception {
+        String profile = CommonHelper.formatProfileFromEnv("pro:fra-aws");
+        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile("pro:fra-aws")).anyTimes();
+        EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();
+        EasyMock.expect(request.getHeader(HEADER_NET_TYPE)).andReturn(PRIVATE_NET_TYPE).anyTimes();
+        EasyMock.replay(request);   //保存期望结果
+        EasyMock.verify(request);
+
+        String groupId = TITAN_QCONFIG_KEYS_APPID;
+        String dataId = "titantest_lzyan_v_01";
+        long version = 1L;
+        String content = buildTitanKeyContent(titanKey, false);
+        ConfigDetail configDetail = new ConfigDetail(groupId, dataId, profile, version, content);
+        WrappedRequest wrappedRequest = new WrappedRequest(request, configDetail);
+        PluginResult pluginResult = titanServerPlugin.postHandle(wrappedRequest);
+        assert (pluginResult != null);
+        System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
+        assert pluginResult.getCode() == PluginStatusCode.TITAN_KEY_DISABLE;
+    }
+
+    @Test
     public void registerPoints() throws Exception {
     }
 
@@ -243,8 +285,12 @@ public class TitanServerPluginTest {
         EasyMock.expect(request.getMethod()).andReturn("GET").anyTimes();
     }
 
-    //build test titanKey content
     private String buildTitanKeyContent(String keyName) {
+        return buildTitanKeyContent(keyName, true);
+    }
+
+    //build test titanKey content
+    private String buildTitanKeyContent(String keyName, boolean enabled) {
         if (Strings.isNullOrEmpty(keyName)) {
             keyName = "titantest_lzyan_v_01";
         }
@@ -259,7 +305,7 @@ public class TitanServerPluginTest {
         sb.append("password=1A08EF1DDB2951B79EBA0839072FBEBB02A9A77FCF74D09CCDA2ECC6C7E6C17B").append(returnFlag);
         sb.append("dbName=mysqldaltest01db").append(returnFlag);
         sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
-        sb.append("enabled=true").append(returnFlag);
+        sb.append("enabled=" + enabled).append(returnFlag);
         sb.append("permissions=100020032").append(returnFlag);
         sb.append("updateUser=lzyan").append(returnFlag);
         sb.append("createUser=lzyan").append(returnFlag);

@@ -40,4 +40,6 @@ public interface CommonConstants {
     String TOKEN_KEY = "token.key";
 
     String MHA_START_TIME = "mhaStartTime";
+
+    String FETCH_PARENT_ENABLE_WHEN_SUB_DISABLED = "fetch.parent.enable.when.sub.disabled";
 }

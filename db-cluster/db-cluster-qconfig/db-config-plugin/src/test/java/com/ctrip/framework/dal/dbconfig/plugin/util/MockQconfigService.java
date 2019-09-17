@@ -169,6 +169,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("dbName=mysqldaltest01db").append(returnFlag);
         sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
         sb.append("enabled=true").append(returnFlag);
+        sb.append("permissions=100020032,100001680").append(returnFlag);
         sb.append("updateUser=lzyan").append(returnFlag);
         sb.append("createUser=lzyan").append(returnFlag);
         sb.append("timeOut=30").append(returnFlag);

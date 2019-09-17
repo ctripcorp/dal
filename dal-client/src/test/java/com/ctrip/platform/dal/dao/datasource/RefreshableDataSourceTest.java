@@ -381,54 +381,12 @@ public class RefreshableDataSourceTest {
                 }
             }
         }).start();
-        for (int i = 0; i < 10; ++i) {
-            refreshableDataSource.getConnection();
-        }
+//        for (int i = 0; i < 10; ++i) {
+//            refreshableDataSource.getConnection();
+//        }
+        Thread.sleep(1500);
         Assert.assertEquals(1, listenerOne.getStep());
         Assert.assertEquals(20, listenerTwo.getStep());
 
-    }
-
-    @Test
-    public void testMultipleGetConnection() throws Exception {
-        Properties p1 = new Properties();
-        p1.setProperty("userName", "root");
-        p1.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p1.setProperty("connectionUrl", "jdbc:mysql://DST56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
-        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
-        final DataSourceConfigure configure1 = new DataSourceConfigure("test1", p1);
-
-        Properties p2 = new Properties();
-        p2.setProperty("userName", "root");
-        p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
-        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
-        DataSourceConfigure configure2 = new DataSourceConfigure("test2", p2);
-
-        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
-        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
-        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
-        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
-        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
-        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
-
-        final CountDownLatch latch = new CountDownLatch(50);
-        for (int i = 0; i < 50; ++i) {
-            final int time = i;
-            executorOne.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(time + 1);
-                    } catch (InterruptedException e) {
-
-                    }
-                    refreshableDataSource.getDataSource();
-                    latch.countDown();
-                }
-            });
-        }
-        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
-        latch.await();
     }
 }

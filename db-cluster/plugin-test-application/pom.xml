@@ -54,6 +54,12 @@
                 <version>1.16.16</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.60</version>
+            </dependency>
+
             <!-- test -->
             <dependency>
                 <groupId>junit</groupId>

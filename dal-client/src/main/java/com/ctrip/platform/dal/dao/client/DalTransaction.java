@@ -17,6 +17,7 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalTransactionConflictException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
+import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 
 public class DalTransaction {
     private String logicDbName;
@@ -270,13 +271,19 @@ public class DalTransaction {
 
     private void cleanup(boolean commit) {
         Connection conn = connHolder.getConn();
-        try {
-            if (commit)
+        if (commit) {
+            try {
                 conn.commit();
-            else
+            } catch (SQLException ex) {
+                throw new TransactionSystemException("Could not commit JDBC transaction", ex);
+            }
+        }
+        else {
+            try {
                 conn.rollback();
-        } catch (Throwable e) {
-            logger.error("Can not commit or rollback on current connection", e);
+            } catch (SQLException ex) {
+                throw new TransactionSystemException("Could not roll back JDBC transaction", ex);
+            }
         }
 
         try {

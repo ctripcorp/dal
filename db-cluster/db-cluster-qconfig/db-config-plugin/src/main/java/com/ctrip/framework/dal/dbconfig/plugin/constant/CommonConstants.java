@@ -41,5 +41,5 @@ public interface CommonConstants {
 
     String MHA_START_TIME = "mhaStartTime";
 
-    String FETCH_PARENT_ENABLE_WHEN_SUB_DISABLED = "fetch.parent.enable.when.sub.disabled";
+    String PARENT_ENV_LIST_CHILDREN_CAN_FETCH = "parent.env.list.children.can.fetch";
 }

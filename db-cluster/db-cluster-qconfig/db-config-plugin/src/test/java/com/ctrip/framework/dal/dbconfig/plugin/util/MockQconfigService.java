@@ -149,6 +149,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("cms.access.token=96ddbe67728bc756466a226ec050456d").append(returnFlag);
         sb.append("plugin.config.refresh.interval.ms=1000").append(returnFlag);
         sb.append("no.parent.suffix=-AWS,lpt").append(returnFlag);
+        sb.append("parent.env.list.children.can.fetch=fat").append(returnFlag);
         return sb.toString();
     }
 

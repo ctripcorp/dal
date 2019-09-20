@@ -201,7 +201,7 @@ public class CommonHelper {
     //build mha update start time
     public static String buildMhaUpdateStartTime(Properties properties) {
         String connString = null;
-        if(properties != null){
+        if(properties != null && properties.containsKey(TitanConstants.MHA_UPDATE_START_TIME)){
             connString = (String)properties.get(TitanConstants.MHA_UPDATE_START_TIME);
         }
         return connString;

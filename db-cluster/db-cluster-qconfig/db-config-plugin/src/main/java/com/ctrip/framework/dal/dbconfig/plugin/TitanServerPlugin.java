@@ -16,6 +16,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.common.exception.QServiceException;
@@ -246,8 +247,10 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         sb.append("normal=").append(normalConnString);
         sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
         sb.append("failover=").append(failoverConnString);
-        sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
-        sb.append("mhaUpdateStartTime=").append(mhaUpdateStartTime);
+        if (StringUtils.isNotEmpty(mhaUpdateStartTime)) {
+            sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
+            sb.append("mhaUpdateStartTime=").append(mhaUpdateStartTime);
+        }
         return sb.toString();
     }
 

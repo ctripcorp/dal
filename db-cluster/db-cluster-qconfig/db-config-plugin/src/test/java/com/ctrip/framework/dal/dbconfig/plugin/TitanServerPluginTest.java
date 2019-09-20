@@ -15,6 +15,7 @@ import qunar.tc.qconfig.common.util.Constants;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Properties;
 
 import static com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants.*;
 
@@ -246,6 +247,12 @@ public class TitanServerPluginTest {
         assert (pluginResult != null);
         System.out.println("pluginResult.code=" + pluginResult.getCode() + ", pluginResult.message=" + pluginResult.getMessage());
         assert pluginResult.getCode() == PluginStatusCode.OK;
+        Properties encryptProp = CommonHelper.parseString2Properties(content);
+        String InputDbName = encryptProp.getProperty("dbName");
+        String clientConfig = pluginResult.getConfigs().get(0).getContent();
+        String dbName = getDbName(clientConfig);
+        assert !Strings.isNullOrEmpty(dbName);
+        assert !InputDbName.equalsIgnoreCase(dbName);
     }
 
     @Test
@@ -285,6 +292,22 @@ public class TitanServerPluginTest {
         EasyMock.expect(request.getMethod()).andReturn("GET").anyTimes();
     }
 
+    private String getDbName(String clientConfig) throws Exception {
+        System.out.println(clientConfig);
+        Properties properties = CommonHelper.parseString2Properties(clientConfig);
+        String normal = properties.getProperty("normal");
+        String[] keyValues = normal.split(";");
+        String dbName = null;
+        for (String keyValue : keyValues) {
+            if (keyValue.startsWith("database")) {
+                String[] data = keyValue.split("=");
+                dbName = data[1];
+                break;
+            }
+        }
+        return dbName;
+    }
+
     private String buildTitanKeyContent(String keyName) {
         return buildTitanKeyContent(keyName, true);
     }
@@ -303,7 +326,7 @@ public class TitanServerPluginTest {
         sb.append("port=55111").append(returnFlag);
         sb.append("uid=DD326CA3D8F038641D6A7FF9D3948BD0").append(returnFlag);
         sb.append("password=1A08EF1DDB2951B79EBA0839072FBEBB02A9A77FCF74D09CCDA2ECC6C7E6C17B").append(returnFlag);
-        sb.append("dbName=mysqldaltest01db").append(returnFlag);
+        sb.append("dbName=mysqldaltest01db-sub").append(returnFlag);
         sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
         sb.append("enabled=" + enabled).append(returnFlag);
         sb.append("permissions=100020032").append(returnFlag);

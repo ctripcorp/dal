@@ -149,6 +149,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("cms.access.token=96ddbe67728bc756466a226ec050456d").append(returnFlag);
         sb.append("plugin.config.refresh.interval.ms=1000").append(returnFlag);
         sb.append("no.parent.suffix=-AWS,lpt").append(returnFlag);
+        sb.append("parent.env.list.children.can.fetch=fat").append(returnFlag);
         return sb.toString();
     }
 
@@ -169,6 +170,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         sb.append("dbName=mysqldaltest01db").append(returnFlag);
         sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
         sb.append("enabled=true").append(returnFlag);
+        sb.append("permissions=100020032,100001680").append(returnFlag);
         sb.append("updateUser=lzyan").append(returnFlag);
         sb.append("createUser=lzyan").append(returnFlag);
         sb.append("timeOut=30").append(returnFlag);

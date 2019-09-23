@@ -209,7 +209,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     @Override
     public Connection getConnection() throws SQLException {
         Connection connection =  getDataSource().getConnection();
-        //if (dataSourceSwitchListeners.size() > 0) {
+        if (dataSourceSwitchListeners.size() > 0) {
             String currentServer = DataSourceSwitchChecker.getDBServerName(connection, getSingleDataSource().getDataSourceConfigure());
             String oldServer = DBServerReference.get();
             if (StringUtils.isEmpty(oldServer)) {
@@ -222,7 +222,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                     DBServerReference.set(currentServer);
                 }
             }
-        //}
+        }
         return connection;
     }
 

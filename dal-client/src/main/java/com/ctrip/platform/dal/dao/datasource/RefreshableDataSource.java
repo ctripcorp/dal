@@ -4,22 +4,19 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.sql.DataSource;
-import javax.sql.PooledConnection;
 
+import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.mysql.jdbc.MySQLConnection;
 import org.apache.commons.lang.StringUtils;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
@@ -27,26 +24,29 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
-    private AtomicReference<String> connectionIpReference = new AtomicReference<>();
+    private AtomicReference<String> DBServerReference = new AtomicReference<>();
 
     private CopyOnWriteArraySet<DataSourceSwitchListener> dataSourceSwitchListeners = new CopyOnWriteArraySet<>();
 
     private AtomicBoolean isListenerExecuted = new AtomicBoolean(false);
 
-    private ScheduledExecutorService service =
-            Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
+    private ScheduledExecutorService service = null;
 
     private static ThreadPoolExecutor executor;
+
+    private ScheduledExecutorService timer = null;
 
     private static ExecutorService getConnExecutor = Executors.newSingleThreadExecutor();
 
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
-    private static final String THREAD_NAME = "ConnectionPoolCreator";
+    private static final String THREAD_NAME_POOL = "ConnectionPoolCreator";
+    private static final String THREAD_NAME_TIMER = "TimerGetConnection";
     private static final int CORE_POOL_SIZE = 5;
     private static final int MAX_POOL_SIZE = 10;
     private static final long KEEP_ALIVE_TIME = 1L;
     private static final long TIME_OUT = 1000; //ms
+    private static final long FIXED_DELAY = 60;//second
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
@@ -56,6 +56,20 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                 new LinkedBlockingQueue<Runnable>(),
                 new CustomThreadFactory("DataSourceSwitchListener"));
         executor.allowCoreThreadTimeOut(true);
+//
+//        IPDomainStatus status = DataSourceConfigureLocatorManager.getInstance().getIPDomainStatus();
+//        if (status.equals(IPDomainStatus.Domain)) {
+//            timer.scheduleWithFixedDelay(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        getConnection().close();
+//                    } catch (Exception e) {
+//                        //ignore
+//                    }
+//                }
+//            }, INIT_DELAY, FIXED_DELAY, TimeUnit.SECONDS);
+//        }
     }
 
     @Override
@@ -130,12 +144,23 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         if (service == null) {
             synchronized (this) {
                 if (service == null) {
-                    service = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME));
+                    service = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME_POOL));
                 }
             }
         }
         return service;
     }
+
+//    private ScheduledExecutorService getTimer() {
+//        if (timer == null) {
+//            synchronized (this) {
+//                if (timer == null) {
+//                    timer = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME_TIMER));
+//                }
+//            }
+//        }
+//        return timer;
+//    }
 
     private void executeDataSourceListener(final String keyName) {
         synchronized (this) {
@@ -173,7 +198,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
             @Override
             public void run() {
                 try {
-                    getConnection();
+                    getConnection().close();
                 } catch (SQLException e) {
                     //ignore
                 }
@@ -184,20 +209,20 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     @Override
     public Connection getConnection() throws SQLException {
         Connection connection =  getDataSource().getConnection();
-        if (dataSourceSwitchListeners.size() > 0) {
-            String currentIp = ((MySQLConnection)(((PooledConnection)connection).getConnection())).getIO().mysqlConnection.getInetAddress().getHostAddress();
-            String oldIp = connectionIpReference.get();
-            if (StringUtils.isEmpty(oldIp)) {
-                connectionIpReference.set(currentIp);
+        //if (dataSourceSwitchListeners.size() > 0) {
+            String currentServer = DataSourceSwitchChecker.getDBServerName(connection, getSingleDataSource().getDataSourceConfigure());
+            String oldServer = DBServerReference.get();
+            if (StringUtils.isEmpty(oldServer)) {
+                DBServerReference.set(currentServer);
             }
             else {
-                if (!oldIp.equalsIgnoreCase(currentIp)) {
+                if (!oldServer.equalsIgnoreCase(currentServer)) {
                     String keyName = getSingleDataSource().getName();
                     executeDataSourceListener(keyName);
-                    connectionIpReference.set(currentIp);
+                    DBServerReference.set(currentServer);
                 }
             }
-        }
+        //}
         return connection;
     }
 

@@ -7,11 +7,13 @@ import com.ctrip.platform.dal.dao.DalHints;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @RestController
 @RequestMapping("/")
@@ -112,4 +114,15 @@ public class DALServiceController {
     return "ok";
   }
 
+  @RequestMapping(value = "/unhealthy")
+  @ResponseBody
+  public void healthCheckException() throws Exception {
+    throw new Exception("test unhealthy");
+  }
+
+  @RequestMapping(value = "/healthy")
+  @ResponseBody
+  public String healthCheck() throws Exception {
+    return "ok";
+  }
 }

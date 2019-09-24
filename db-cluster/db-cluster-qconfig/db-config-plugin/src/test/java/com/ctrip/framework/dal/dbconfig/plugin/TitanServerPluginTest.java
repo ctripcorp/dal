@@ -228,8 +228,9 @@ public class TitanServerPluginTest {
         System.out.println("pluginResult.attribute=" + GsonUtils.Object2Json(pluginResult.getAttribute()));
     }
 
-    @Test
+//    @Test
     public void postHandleFatSubEnvDisabled() throws Exception {
+        // if subEnv key disabled, use parent key
         String profile = CommonHelper.formatProfileFromEnv("fat:fat1");
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile("fat:fat1")).anyTimes();
         EasyMock.expect(request.getHeader("X-Forwarded-For")).andReturn(privateNetIp).anyTimes();

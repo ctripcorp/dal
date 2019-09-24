@@ -35,7 +35,6 @@ import java.util.Set;
  */
 public class TitanServerPlugin extends ServerPluginAdapter implements TitanConstants {
 
-    private static final String FAT_PROFILE = "fat:";
     private static Logger logger = LoggerFactory.getLogger(TitanServerPlugin.class);
     private DataSourceCrypto dataSourceCrypto = DefaultDataSourceCrypto.getInstance();
     private KeyService keyService = Soa2KeyService.getInstance();
@@ -158,7 +157,10 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             // noParent check [2017-10-31]
             checkNoParent(dataId, rawProfile, envProfile, config);
 
-            Properties encryptProp = getEncryptedConfig(encryptText, group, dataId, envProfile, config);
+            // if subEnv key disabled, use parent key
+            // Properties encryptProp = getEncryptedConfig(encryptText, group, dataId, envProfile, config);
+            Properties encryptProp = CommonHelper.parseString2Properties(encryptText);
+
             //decrypt in value
             Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, encryptProp);
 

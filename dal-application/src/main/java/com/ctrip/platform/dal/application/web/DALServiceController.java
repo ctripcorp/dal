@@ -116,7 +116,7 @@ public class DALServiceController {
 
     @RequestMapping(value = "/unhealthy")
     @ResponseBody
-    public void healthCheckException() throws Exception {
+    public String healthCheckException() throws Exception {
         throw new Exception("test unhealthy");
     }
 

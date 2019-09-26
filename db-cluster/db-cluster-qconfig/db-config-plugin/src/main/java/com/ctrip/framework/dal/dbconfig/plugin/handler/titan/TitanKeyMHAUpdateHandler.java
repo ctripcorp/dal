@@ -23,7 +23,9 @@ import qunar.tc.qconfig.plugin.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This handler is to update titan key for MHA
@@ -88,6 +90,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
     @Override
     public PluginResult preHandle(HttpServletRequest request) {
+        request.setAttribute(MHA_START_TIME, System.currentTimeMillis());
         return PluginResult.oK();
     }
 
@@ -135,7 +138,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     Cat.logEvent(CAT_TRANSACTION_TYPE, "Site.Permission", Event.SUCCESS, "sitePermission=" + permitted);
                     if (permitted) {
                         //MHA更新titanKey文件
-                        int saveCount = updateMhaInput(mhaInputEntity);
+                        int saveCount = updateMhaInput(request, mhaInputEntity);
                         t.addData("postHandleDetail(): saveCount=" + saveCount);
                         logEventSuccess(CAT_EVENT_SUCCESS_TYPE, mhaInputEntity, profile);
                     } else {
@@ -214,7 +217,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
     }
 
-    private int updateMhaInput(MhaInputEntity mhaInputEntity) throws Exception {
+    private int updateMhaInput(HttpServletRequest request, MhaInputEntity mhaInputEntity) throws Exception {
         String group = TITAN_QCONFIG_KEYS_APPID;   //appId
         String dataId = null;   //fileName
 //        String profile = null;  //env
@@ -256,6 +259,9 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
                     //field 'mhaLastUpdate' update [2018-12-27]
                     CommonHelper.updateMhaLastUpdateInProperties(mergeProp);
+
+                    //field 'mhaUpdateStartTime' update
+                    CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, (Long)request.getAttribute(MHA_START_TIME));
 
                     if (needCheckDbConnection) {
                         //decrypt

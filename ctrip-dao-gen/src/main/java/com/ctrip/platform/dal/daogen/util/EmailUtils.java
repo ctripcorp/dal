@@ -1,11 +1,14 @@
 package com.ctrip.platform.dal.daogen.util;
 
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.CheckTimeRange;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.EmailServiceClient;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailRequest;
 import com.ctrip.soa.platform.basesystem.emailservice.v1.SendEmailResponse;
 import com.dianping.cat.Cat;
+import org.apache.commons.lang.StringUtils;
+import qunar.tc.qconfig.client.MapConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,14 +22,11 @@ import java.util.*;
 public class EmailUtils {
     private static final String APP_PROPERTIES_CLASSPATH = "/META-INF/app.properties";
 
-    public static void sendEmail(String content, Date checkDate, CheckTimeRange checkTimeRange) {
-        String startCheckTime = null;
-        String endCheckTime = null;
-        if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
-            startCheckTime = DateUtils.getStartOneWeek(checkDate);
-            endCheckTime = DateUtils.getEndOneWeek(checkDate);
+    public static void sendEmail(String content, String subject, String recipientStr, String cCStr) {
+        String ip = IPUtils.getExecuteIPFromQConfig();
+        if (!IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
+            return;
         }
-
         EmailServiceClient client = EmailServiceClient.getInstance();
         SendEmailRequest sendEmailRequest = new SendEmailRequest();
         sendEmailRequest.setAppID(getLocalAppID());
@@ -38,12 +38,23 @@ public class EmailUtils {
         calendar.add(Calendar.DAY_OF_MONTH,2);
         sendEmailRequest.setExpiredTime(calendar);
         sendEmailRequest.setSendCode("28030004");
-        sendEmailRequest.setSender("taochen@ctrip.com");
-        sendEmailRequest.setSubject(String.format("%s-%s动态数据源切换统计",startCheckTime, endCheckTime));
+        sendEmailRequest.setSender(MonitorConfigManager.getMonitorConfig().getSender());
+        sendEmailRequest.setSubject(subject);
         sendEmailRequest.setBodyContent(content);
-        List<String> recipient = new ArrayList<>();
-        recipient.add("taochen@ctrip.com");
-        sendEmailRequest.setRecipient(recipient);
+
+        if (StringUtils.isNotBlank(recipientStr)) {
+            String[] recipientArray = recipientStr.split(",");
+            List<String> recipient = new ArrayList<>();
+            Collections.addAll(recipient, recipientArray);
+            sendEmailRequest.setRecipient(recipient);
+        }
+
+        if (StringUtils.isNotBlank(cCStr)) {
+            String[] ccArray = cCStr.split(",");
+            List<String> cc = new ArrayList<>();
+            Collections.addAll(cc, ccArray);
+            sendEmailRequest.setCc(cc);
+        }
         try {
             SendEmailResponse response = client.sendEmail(sendEmailRequest);
             if (response != null && response.getResultCode() == 1) {
@@ -53,11 +64,11 @@ public class EmailUtils {
                 throw new Exception();
             }
         }catch (Exception e) {
-            Cat.logError("send email fail, time:" + checkDate.toString(), e);
+            Cat.logError("send email fail!" , e);
         }
     }
 
-    private static int getLocalAppID() {
+    public static int getLocalAppID() {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(APP_PROPERTIES_CLASSPATH);
         Properties m_appProperties = new Properties();
         if (in == null) {

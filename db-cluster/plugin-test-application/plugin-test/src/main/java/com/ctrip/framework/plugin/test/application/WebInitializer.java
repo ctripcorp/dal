@@ -16,8 +16,8 @@ public class WebInitializer extends SpringBootServletInitializer {
      */
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        System.setProperty("qserver.http.urls", "qconfigserver.publicnet.search.fraaws.tripws.com");
-        System.setProperty("qserver.https.urls", "qconfigserver.publicnet.search.fraaws.tripws.com");
+//        System.setProperty("qserver.http.urls", "qconfigserver.publicnet.search.fraaws.tripws.com");
+//        System.setProperty("qserver.https.urls", "qconfigserver.publicnet.search.fraaws.tripws.com");
 
         return application.sources(WebInitializer.class);
     }

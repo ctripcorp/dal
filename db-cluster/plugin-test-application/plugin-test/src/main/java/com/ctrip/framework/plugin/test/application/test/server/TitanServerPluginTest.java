@@ -43,6 +43,7 @@ public class TitanServerPluginTest {
             addTask();
         } catch (Exception e) {
             Cat.logError("TitanServerPluginTest init failed", e);
+            log.error("TitanServerPluginTest init failed", e);
             throw new Exception("TitanServerPluginTest init failed", e);
         }
     }
@@ -53,6 +54,7 @@ public class TitanServerPluginTest {
             public void run() {
                 String titanKeyName = configService.getTitanKeyName();
                 Transaction transaction = Cat.newTransaction("TitanServerPluginTest.GetConnectingString", titanKeyName);
+                log.info("TitanServerPluginTest get connectingString begin...");
                 try {
                     String connectingString = getConnectingString();
                     Preconditions.checkArgument(StringUtils.isNotBlank(connectingString), "connecting string is null or empty.");
@@ -63,6 +65,7 @@ public class TitanServerPluginTest {
 
                     if (connectionStrings != null) {
                         Cat.logEvent("ConnectingStrings.count", String.valueOf(connectionStrings.size()));
+                        log.info("ConnectingStrings count is {}.", connectionStrings.size());
                     }
 
                     String result = "";
@@ -80,12 +83,16 @@ public class TitanServerPluginTest {
                         result = result + tempResult + TITAN_QCONFIG_CONTENT_LINE_SPLITTER;
                     }
                     Cat.logEvent("ConnectingString", "all", Event.SUCCESS, result);
+                    log.info("ConnectingString is {}.", result);
                     List<String> cStrs = splitter1.splitToList(result);
-                    if (cStrs != null && cStrs.size() > 0)
+                    if (cStrs != null && cStrs.size() > 0) {
                         Cat.logEvent("ConnectingString", "normal", Event.SUCCESS, splitter1.splitToList(result).get(0));
-                    if (cStrs != null && cStrs.size() > 1)
+                        log.info("Normal connectingString is {}.", splitter1.splitToList(result).get(0));
+                    }
+                    if (cStrs != null && cStrs.size() > 1) {
                         Cat.logEvent("ConnectingString", "failover", Event.SUCCESS, splitter1.splitToList(result).get(1));
-
+                        log.info("Failover connectingString is {}.", splitter1.splitToList(result).get(1));
+                    }
                     transaction.setStatus(Transaction.SUCCESS);
                 } catch (Exception e) {
                     Cat.logError("Get connecting string from qconfig failed.", e);
@@ -93,6 +100,7 @@ public class TitanServerPluginTest {
                     transaction.setStatus(e);
                 } finally {
                     transaction.complete();
+                    log.info("TitanServerPluginTest get connectingString end...");
                 }
             }
         }, 0, 10, TimeUnit.SECONDS);
@@ -100,6 +108,7 @@ public class TitanServerPluginTest {
 
     private String getConnectingString() {
         Cat.logEvent("TitanServerPluginTest.GetConnectingString.httpsEnable", String.valueOf(configService.isEnableHttps()));
+        log.info("TitanServerPluginTest httpsEnable is {}.", configService.isEnableHttps());
         Feature feature = configService.isEnableHttps() ? Feature.create().setHttpsEnable(true).build() : Feature.DEFAULT;
         TypedConfig<String> typedConfig = TypedConfig.get("100010061", configService.getTitanKeyName(), feature, new TypedConfig.Parser<String>() {
             @Override
@@ -114,6 +123,7 @@ public class TitanServerPluginTest {
 
     private void addListener() {
         Cat.logEvent("TitanServerPluginTest.AddListener.httpsEnable", String.valueOf(configService.isEnableHttps()));
+        log.info("TitanServerPluginTest addListener httpsEnable is {}.", configService.isEnableHttps());
         Feature feature = configService.isEnableHttps() ? Feature.create().setHttpsEnable(true).build() : Feature.DEFAULT;
         TypedConfig<String> typedConfig = TypedConfig.get("100010061", configService.getTitanKeyName(), feature, new TypedConfig.Parser<String>() {
             @Override
@@ -126,6 +136,7 @@ public class TitanServerPluginTest {
             @Override
             public void onLoad(String content) {
                 Cat.logEvent("TitanServerPluginTest.AddListener", content);
+                log.info("TitanServerPluginTest.AddListener");
             }
         });
     }

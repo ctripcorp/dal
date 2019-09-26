@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDBDao;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
 import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.util.DateUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
@@ -42,8 +43,8 @@ public class DalDynamicDSResource {
         SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
         Date startCheckDate = sdf.parse(settingStartDate.replace('T', ' '));
         Date endCheckDate = sdf.parse(settingEndDate.replace('T', ' '));
-        String startCheckTime = dalDynamicDSDao.formatCheckTime(startCheckDate);
-        String endCheckTime = dalDynamicDSDao.formatCheckTime(endCheckDate);
+        String startCheckTime = DateUtils.formatCheckTime(startCheckDate);
+        String endCheckTime = DateUtils.formatCheckTime(endCheckDate);
         DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
         return dalDynamicDSDao.mergeSwitchData(dalDynamicDSDBDao.queryInRange(startCheckTime, endCheckTime));
     }

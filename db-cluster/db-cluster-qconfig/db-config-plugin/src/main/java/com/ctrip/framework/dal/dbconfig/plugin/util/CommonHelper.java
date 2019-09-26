@@ -198,6 +198,14 @@ public class CommonHelper {
         return connString;
     }
 
+    //build mha update start time
+    public static String buildMhaUpdateStartTime(Properties properties) {
+        String connString = null;
+        if(properties != null){
+            connString = (String)properties.get(TitanConstants.MHA_UPDATE_START_TIME);
+        }
+        return connString;
+    }
 
     //format titanKey fileName, lowercase
     public static String formatTitanFileName(String titanKey){
@@ -505,6 +513,15 @@ public class CommonHelper {
             properties.put(TitanConstants.MHA_LAST_UPDATE_TIME, mhaLastUpdate);
         } else {
             logger.warn("updateMhaLastUpdateInProperties(): properties=null, can't update 'mhaLastUpdate' ...");
+        }
+    }
+
+    //update mhaUpdateStartTime in properties
+    public static void updateMhaUpdateStartTimeInProperties(Properties properties, Long mhaUpdateStartTime) {
+        if (properties != null) {
+            properties.put(TitanConstants.MHA_UPDATE_START_TIME, String.valueOf(mhaUpdateStartTime));
+        } else {
+            logger.warn("updateMhaUpdateStartTimeInProperties(): properties=null, can't update 'mhaUpdateStartTime' ...");
         }
     }
 

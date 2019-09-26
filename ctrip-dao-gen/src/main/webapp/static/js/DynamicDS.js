@@ -5,6 +5,7 @@
         bindTitanKeySwitchData();
         bindTabSwitch();
         bindViewRangeButton();
+        bindTitanKeyButton();
     });
 
     function getDynamicDSData(settingDate, checkTitanKeys) {
@@ -97,10 +98,17 @@
         $(document.body).on("click", "#hourReport", function () {
             $("#dynamicDS").show();
             $("#switchReport").hide();
+            $("#titanKeyReport").hide();
         });
         $(document.body).on("click", "#weekReport", function () {
             $("#dynamicDS").hide();
             $("#switchReport").show();
+            $("#titanKeyReport").hide();
+        });
+        $(document.body).on("click", "#titanKeyReportTab", function () {
+            $("#dynamicDS").hide();
+            $("#switchReport").hide();
+            $("#titanKeyReport").show();
         });
     }
 
@@ -134,10 +142,17 @@
                 return;
             }
             var tableBody = "";
+            var titanKeySum = 0;
+            var titanKeySwitchCountSum = 0;
+            var clientSwitchCountSum = 0;
+            var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
             $.each(data, function (i, n) {
-                var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
                 tableBody += sprintf(rowTemplate, i + 1, n.titanKey, n.switchCount, n.appIDCount, n.ipCount, n.switchCount * n.ipCount);
+                titanKeySum++;
+                titanKeySwitchCountSum += n.switchCount;
+                clientSwitchCountSum += n.switchCount * n.ipCount;
             });
+            tableBody = sprintf(rowTemplate, "总数", titanKeySum, titanKeySwitchCountSum, "", "", clientSwitchCountSum) + tableBody;
             $("#tableDynamicDSWeek tbody").html(tableBody);
             table.show();
             loading.html("");
@@ -172,7 +187,77 @@
         });
     }
 
+    function getTitanKeyInfo() {
+        var table1 = $("#tableTitanKeyOneDay");
+        var table2 = $("#tableAbnormalTitanKey");
+        var tableDB = $("#tableTitanKeyDirectConnect");
+        var tableMySql = $("#tableTitanKeyDirectConnectMySql");
+        var tableSqlServer = $("#tableTitanKeyDirectConnectSqlServer");
+        var loading = $("#loadingSpan3");
+        var title = $("#abnormalTitanKeyTableTitle");
+        var statisticsDate = $("#statisticsDate");
+        loading.html("正在加载中。。。");
+        title.html("");
+        table1.hide();
+        table2.hide();
+        tableDB.hide();
+        tableMySql.hide();
+        tableSqlServer.hide();
+        $.getJSON("/rest/titanKeyInfoReport/getTitanKeyInfoReport", function (data) {
+            if (data === undefined || data === null) {
+                return;
+            }
+            var rowTemplate = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+            var tableBody = sprintf(rowTemplate, data.titanKeyCount, data.useMysqlCount, data.useSqlServerCount,
+                data.directConnectDBCount, data.directConnectMysqlCount, data.directConnectSqlServerCount);
+
+            var rowTemplateDB = "<tr><td>%s</td><td>%s</td><td>%s</td></tr>";
+            var tableBodyDB = sprintf(rowTemplateDB, data.titanKeyCount, data.directConnectDBCount, toPercent(data.directConnectDBCount / data.titanKeyCount));
+
+            var rowTemplateMySql = "<tr><td>%s</td><td>%s</td><td>%s</td></tr>";
+            var tableBodyMySql = sprintf(rowTemplateMySql, data.useMysqlCount, data.directConnectMysqlCount, toPercent(data.directConnectMysqlCount / data.useMysqlCount));
+
+            var rowTemplateSqlServer = "<tr><td>%s</td><td>%s</td><td>%s</td></tr>";
+            var tableBodySqlServer = sprintf(rowTemplateSqlServer, data.useSqlServerCount, data.directConnectSqlServerCount, toPercent(data.directConnectSqlServerCount / data.useSqlServerCount));
+
+
+            var tableBody1 = "";
+            $.each(data.abnormalTitanKeyList, function (i, n) {
+                var rowTemplate1 = "<tr><td>%s</td><td>%s</td><td>%s</td></tr>";
+                var serverIp = "";
+                var serverName = "";
+                if (n.serverIp !== undefined && n.serverIp !== null) {
+                    serverIp = n.serverIp;
+                }
+                if (n.serverName !== undefined && n.serverName !== null) {
+                    serverName = n.serverName;
+                }
+                tableBody1 += sprintf(rowTemplate1, n.titanKey, serverIp, serverName);
+            });
+            $("#tableTitanKeyOneDay tbody").html(tableBody);
+            $("#tableAbnormalTitanKey tbody").html(tableBody1);
+            $("#tableTitanKeyDirectConnect tbody").html(tableBodyDB);
+            $("#tableTitanKeyDirectConnectMySql tbody").html(tableBodyMySql);
+            $("#tableTitanKeyDirectConnectSqlServer tbody").html(tableBodySqlServer);
+            statisticsDate.html(data.statisticsDate);
+            table1.show();
+            table2.show();
+            tableDB.show();
+            tableMySql.show();
+            tableSqlServer.show();
+            loading.html("");
+            title.html("TitanKey配置异常统计(TitanKey配置serverIp不是ip或者serverName不是域名)");
+        });
+    }
+
+    function bindTitanKeyButton() {
+        $(document.body).on("click", "#viewTitanKeyButton", function () {
+
+        });
+    }
+
     function init(){
+        getTitanKeyInfo();
         var nowtime = new Date();
         nowtime.setHours(nowtime.getHours() - 1);
         var timeString = timeToString(nowtime);
@@ -256,5 +341,11 @@
         date.setSeconds(0);
         date.setMilliseconds(0);
         return date;
+    }
+
+    function toPercent(point){
+        var str=Number(point*100).toFixed(2);
+        str+="%";
+        return str;
     }
 })(jQuery, window, document);

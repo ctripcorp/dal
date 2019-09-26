@@ -44,6 +44,7 @@ public class MongoServerPluginTest {
             addTask();
         } catch (Exception e) {
             Cat.logError("MongoServerPluginTest init failed", e);
+            log.error("MongoServerPluginTest init failed", e);
             throw new Exception("MongoServerPluginTest init failed", e);
         }
     }
@@ -54,6 +55,7 @@ public class MongoServerPluginTest {
             public void run() {
                 String mongoClusterName = configService.getMongoClusterName();
                 Transaction transaction = Cat.newTransaction("MongoServerPluginTest.GetClusterConfig", mongoClusterName);
+                log.info("MongoServerPluginTest getClusterConfig begin...");
                 try {
                     String fileContent = getClusterConfig();
                     Preconditions.checkArgument(StringUtils.isNotBlank(fileContent), "Mongo cluster config is null or empty.");
@@ -77,6 +79,7 @@ public class MongoServerPluginTest {
                     transaction.setStatus(e);
                 } finally {
                     transaction.complete();
+                    log.info("MongoServerPluginTest getClusterConfig end...");
                 }
             }
         }, 0, 10, TimeUnit.SECONDS);
@@ -84,6 +87,7 @@ public class MongoServerPluginTest {
 
     private String getClusterConfig() {
         Cat.logEvent("MongoServerPluginTest.HttpsEnable", String.valueOf(configService.isEnableHttps()));
+        log.info("MongoServerPluginTest httpsEnable is {}.", configService.isEnableHttps());
         Feature feature = configService.isEnableHttps() ? Feature.create().setHttpsEnable(true).build() : Feature.DEFAULT;
         TypedConfig<String> typedConfig = TypedConfig.get(MONGO_PLUGIN_APP_ID, configService.getMongoClusterName(), feature, new TypedConfig.Parser<String>() {
             @Override
@@ -98,6 +102,7 @@ public class MongoServerPluginTest {
 
     private void addListener() {
         Cat.logEvent("MongoServerPluginTest.AddListener.HttpsEnable", String.valueOf(configService.isEnableHttps()));
+        log.info("MongoServerPluginTest addListener httpsEnable is {}.", configService.isEnableHttps());
         Feature feature = configService.isEnableHttps() ? Feature.create().setHttpsEnable(true).build() : Feature.DEFAULT;
         TypedConfig<String> typedConfig = TypedConfig.get(MONGO_PLUGIN_APP_ID, configService.getMongoClusterName(), feature, new TypedConfig.Parser<String>() {
             @Override
@@ -110,6 +115,7 @@ public class MongoServerPluginTest {
             @Override
             public void onLoad(String content) {
                 Cat.logEvent("MongoServerPluginTest.AddListener", content);
+                log.info("MongoServerPluginTest.AddListener");
             }
         });
     }

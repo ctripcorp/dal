@@ -19,6 +19,8 @@ public class TitanKeyInfoReportDto {
 
     private int directConnectSqlServerCount;
 
+    private String statisticsDate;
+
     private List<AbnormalTitanKey> abnormalTitanKeyList = new ArrayList<>();
 
     public int getTitanKeyCount() {
@@ -75,5 +77,13 @@ public class TitanKeyInfoReportDto {
 
     public void setAbnormalTitanKeyList(List<AbnormalTitanKey> abnormalTitanKeyList) {
         this.abnormalTitanKeyList = abnormalTitanKeyList;
+    }
+
+    public String getStatisticsDate() {
+        return statisticsDate;
+    }
+
+    public void setStatisticsDate(String statisticsDate) {
+        this.statisticsDate = statisticsDate;
     }
 }

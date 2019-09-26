@@ -1,7 +1,6 @@
 package com.ctrip.framework.dal.dbconfig.plugin;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfig;
-import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
 import com.ctrip.framework.dal.dbconfig.plugin.entity.PermissionCheckEnum;
@@ -14,8 +13,11 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.qconfig.common.exception.QServiceException;
@@ -26,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author c7ch23en
@@ -154,8 +157,11 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             // noParent check [2017-10-31]
             checkNoParent(dataId, rawProfile, envProfile, config);
 
-            //decrypt in value
+            // if subEnv key disabled, use parent key
+            // Properties encryptProp = getEncryptedConfig(encryptText, group, dataId, envProfile, config);
             Properties encryptProp = CommonHelper.parseString2Properties(encryptText);
+
+            //decrypt in value
             Properties originalProp = cryptoManager.decrypt(dataSourceCrypto, keyService, encryptProp);
 
             //黑白名单检查
@@ -183,13 +189,14 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
             ValidateHandler validateHandler = new ValidateHandler(pluginProp, keyProp, clientAppId, clientIp, env, fromPublicNet);
             PermissionCheckEnum permissionCheck = validateHandler.doValid();
             if (permissionCheck == PermissionCheckEnum.PASS) {
-                //拼接连接串: normal + failover
+                //拼接连接串: normal + failover + mhaUpdateTime
                 String connString_normal = CommonHelper.buildConnectionString(originalProp, false);
                 String connString_failover = CommonHelper.buildConnectionString(originalProp, true);
+                String connString_mhaUpdateTime = CommonHelper.buildMhaUpdateStartTime(originalProp);
                 //混淆连接串 [在QConfig外部做了, 这里直接返回明文]
                 //String finalContent = RC4.encrypt(connString, dataId);
                 //拼接最终连接串(2份)
-                result = buildReturnResult(connString_normal, connString_failover);
+                result = buildReturnResult(connString_normal, connString_failover, connString_mhaUpdateTime);
 
                 //log keyName in cat
                 String keyName = originalProp.getProperty(CONNECTIONSTRING_KEY_NAME);
@@ -239,12 +246,60 @@ public class TitanServerPlugin extends ServerPluginAdapter implements TitanConst
         return pluginResult;
     }
 
+    private Properties getEncryptedConfig(String configContent, String group, String dataId, EnvProfile envProfile, PluginConfig config) throws QServiceException, IOException {
+        Properties encryptProp = CommonHelper.parseString2Properties(configContent);
+        String enabledValue = encryptProp.getProperty(ENABLED);
+        boolean enable = Boolean.parseBoolean(enabledValue);
+
+        if (!enable) { // if subEnv key disabled, use parent key
+            String formatProfile = envProfile.formatProfile();
+            Cat.logEvent("Titan.Plugin.Key.Disabled", dataId + ":" + formatProfile);
+            String topProfile = envProfile.formatTopProfile();
+            String subEnv = envProfile.formatSubEnv();
+
+            Set<String> parentEnvs = getParentEnvsChildrenCanFetch(config);
+            String inputParentEnv = topProfile.substring(0, topProfile.length() - 1);
+            if (parentEnvs.contains(inputParentEnv) && !Strings.isNullOrEmpty(subEnv)) {
+                Cat.logEvent("Titan.Plugin.SubEnv.Key.Disabled", dataId + ":" + formatProfile);
+                Properties parentProperties = fetchParentKey(group, dataId, topProfile, getQconfigService());
+                if (parentProperties != null && parentProperties.size() != 0) {
+                    encryptProp = parentProperties;
+                }
+            }
+        }
+
+        return encryptProp;
+    }
+
+    private Set<String> getParentEnvsChildrenCanFetch(PluginConfig config) {
+        String parentEnvListChildrenCanFetch = config.getParamValue(PARENT_ENV_LIST_CHILDREN_CAN_FETCH);
+        if (Strings.isNullOrEmpty(parentEnvListChildrenCanFetch)) {
+            return ImmutableSet.of();
+        }
+
+        Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
+        List<String> parentEnvList = splitter.splitToList(parentEnvListChildrenCanFetch);
+        Set<String> result = Sets.newHashSet();
+        for (String parentEnv : parentEnvList) {
+            result.add(parentEnv.toLowerCase());
+        }
+        return result;
+    }
+
+    private Properties fetchParentKey(String group, String dataId, String topProfile, QconfigService qconfigService) throws IOException, QServiceException {
+        ConfigField configField = new ConfigField(group, dataId, topProfile);
+        Properties result = QconfigServiceUtils.currentConfigWithoutPriority(qconfigService, "fetchParentKey", configField);
+        return result;
+    }
+
     //build return result
-    private String buildReturnResult(String normalConnString, String failoverConnString) {
+    private String buildReturnResult(String normalConnString, String failoverConnString, String mhaUpdateStartTime) {
         StringBuilder sb = new StringBuilder();
         sb.append("normal=").append(normalConnString);
         sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
         sb.append("failover=").append(failoverConnString);
+        sb.append(TITAN_QCONFIG_CONTENT_LINE_SPLITTER);
+        sb.append("mhaUpdateStartTime=").append(mhaUpdateStartTime);
         return sb.toString();
     }
 

@@ -37,6 +37,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     protected boolean isDebug;
     protected String appId;
     protected boolean useLocal;
+    protected boolean ignoreExternalException = false;
     protected String databaseConfigLocation;
 
     private DalEncrypter dalEncrypter = null;
@@ -45,6 +46,10 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
 
     protected boolean getUseLocal() {
         return useLocal;
+    }
+
+    protected boolean getIgnoreExternalException() {
+        return ignoreExternalException;
     }
 
     protected String getDatabaseConfigLocation() {
@@ -66,6 +71,9 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
 
         useLocal = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
         info("Use local: " + useLocal);
+
+        ignoreExternalException = Boolean.parseBoolean(settings.get(IGNORE_EXTERNAL_EXCEPTION));
+        info("ignore external exception: " + ignoreExternalException);
 
         databaseConfigLocation = settings.get(DATABASE_CONFIG_LOCATION);
         info("DatabaseConfig location:" + (databaseConfigLocation == null ? "N/A" : databaseConfigLocation));

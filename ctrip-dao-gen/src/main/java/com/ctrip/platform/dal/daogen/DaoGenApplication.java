@@ -41,7 +41,7 @@ public class DaoGenApplication extends ResourceConfig {
 //        t1.setStatus(Transaction.SUCCESS);
 //        t1.complete();
 
-//        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservice2db_w");
-//        Cat.logEvent("Titan.MHAUpdate.TitanKey:fat", "dalservicedb");
+//        Cat.logEvent("Titan.MHAUpdate.TitanKey.Success:fat", "dalservice2db_w");
+//        Cat.logEvent("Titan.MHAUpdate.TitanKey.Success:fat", "dalservicedb");
     }
 }

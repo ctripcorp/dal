@@ -4,7 +4,11 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DalDynamicDSDao;
 import com.ctrip.platform.dal.daogen.DynamicDS.CatSwitchDSDataProvider;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.util.DateUtils;
+import com.ctrip.platform.dal.daogen.util.EmailUtils;
+import com.ctrip.platform.dal.daogen.util.IPUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import org.junit.Test;
@@ -97,8 +101,13 @@ public class DalDynamicDSTest {
 //        List<TitanKeySwitchInfoDB> titanKeySwitchInfoDBList = new ArrayList<>();
 //        titanKeySwitchInfoDBList.add(titanKeySwitchInfoDB1);
 //        titanKeySwitchInfoDBList.add(titanKeySwitchInfoDB2);
-
-        dalDynamicDSDao.sendEmail(dalDynamicDSDao.getSwitchDataInRange(new Date(), CheckTimeRange.ONE_WEEK), new Date(), CheckTimeRange.ONE_WEEK);
+        Date checkDate = new Date();
+        String startCheckTime = DateUtils.getStartOneWeek(checkDate);
+        String endCheckTime = DateUtils.getEndOneWeek(checkDate);
+        String content = dalDynamicDSDao.generateBodyContent(dalDynamicDSDao.getSwitchDataInRange(startCheckTime, endCheckTime));
+        String subject = String.format("动态数据源切换统计(%s-%s)",startCheckTime.substring(0,8), endCheckTime.substring(0,8));
+        EmailUtils.sendEmail(content, subject, MonitorConfigManager.getMonitorConfig().getSwitchEmailRecipient(),
+                MonitorConfigManager.getMonitorConfig().getSwitchEmailCc());
     }
 
     @Test
@@ -110,5 +119,20 @@ public class DalDynamicDSTest {
         List<AppIDInfo> appIDInfos = dalDynamicDSDao.getBatchAppIdIp(appIds, "pro");
         System.out.println(appIDInfos.size());
     }
+
+    @Test
+    public void testAll() {
+        DalDynamicDSDao dalDynamicDSDao = DalDynamicDSDao.getInstance();
+        Date checkDate = new Date();
+        String checkTime = dalDynamicDSDao.getNowDateString(checkDate);
+        dalDynamicDSDao.checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
+        dalDynamicDSDao.notifyByEmail(checkDate);
+    }
+
+    @Test
+    public void getExecutorIP() {
+        System.out.println(IPUtils.getExecuteIPFromQConfig());
+    }
+
 
 }

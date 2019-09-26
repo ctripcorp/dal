@@ -120,21 +120,39 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             throw new RuntimeException(e);
         }
 
-        // set pool properties
-        DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
-        dataSourceConfigureLocator.setPoolProperties(poolProperties);
+        try {
+            // set ip domain status
+            IPDomainStatus status = ipDomainStatusProvider.getStatus();
+            dataSourceConfigureLocator.setIPDomainStatus(status);
+        } catch (Throwable e) {
+            if (getIgnoreExternalException()) {
+                Cat.logError("fail to get IPDomainStatus from qconfig. ", e);
+            }
+            else {
+                throw e;
+            }
+        }
 
-        // set ip domain status
-        IPDomainStatus status = ipDomainStatusProvider.getStatus();
-        dataSourceConfigureLocator.setIPDomainStatus(status);
+        try {
+            // set pool properties
+            DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
+            dataSourceConfigureLocator.setPoolProperties(poolProperties);
+        } catch (Throwable e) {
+            if (getIgnoreExternalException()) {
+                Cat.logError("fail to get pool properties from qconfig. ", e);
+            }
+            else {
+                throw e;
+            }
+        }
 
-        boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get().booleanValue();
+        boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get();
         if (!isPoolListenerAdded) {
             addPoolPropertiesChangedListener();
             isPoolPropertiesListenerAdded.compareAndSet(false, true);
         }
 
-        boolean isStatusListenerAdded = isIPDomainStatusListenerAdded.get().booleanValue();
+        boolean isStatusListenerAdded = isIPDomainStatusListenerAdded.get();
         if (!isStatusListenerAdded) {
             addIPDomainStatusChangedListener();
             isIPDomainStatusListenerAdded.compareAndSet(false, true);

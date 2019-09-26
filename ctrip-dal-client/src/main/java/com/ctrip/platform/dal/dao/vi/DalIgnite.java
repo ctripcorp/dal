@@ -54,6 +54,8 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
 
             validateConnectionStrings();
 
+            validatePoolProperties();
+
             if (DataSourceConfigureManager.config != null)
                 configs.putAll(DataSourceConfigureManager.config);
 
@@ -157,5 +159,13 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
             }
         }
         throw new DalRuntimeException(errorMsg.toString());
+    }
+
+    private void validatePoolProperties() throws Exception {
+        DataSourceConfigureLocator locator = DataSourceConfigureLocatorManager.getInstance();
+        PropertiesWrapper wrapper = locator.getPoolProperties();
+        if (wrapper == null) {
+            throw new DalRuntimeException("An error occured while getting datasource.properties from QConfig.");
+        }
     }
 }

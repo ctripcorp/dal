@@ -15,6 +15,8 @@ import java.sql.DatabaseMetaData;
 public class DalDataSourceFactoryTest {
     private static final String name = "mysqldaltest01db_W";
 
+    private static final String NULL_CONFIGURE_NAME = "nullConfigure";
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         // DalClientFactory.initClientFactory();
@@ -53,6 +55,17 @@ public class DalDataSourceFactoryTest {
         // Reader reader = Resources.getResourceAsReader(resource);
         // SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
         // SqlSession session = sqlSessionFactory.openSession();
+    }
+
+    @Test
+    public void testDalDataSourceFactoryCreateForceSwitchDataSource() {
+        try {
+            DalDataSourceFactory factory = new DalDataSourceFactory();
+            factory.createDataSource(NULL_CONFIGURE_NAME, true);
+            Assert.assertTrue(true);
+        } catch (Throwable e) {
+            Assert.assertTrue(false);
+        }
     }
 
 }

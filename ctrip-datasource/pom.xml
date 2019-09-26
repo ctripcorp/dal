@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <properties>
         <file_encoding>UTF-8</file_encoding>
         <dal-client.version>${project.version}</dal-client.version>
@@ -22,7 +22,7 @@
         <!-- Support mybatis 3.0.1+ -->
         <mybatis.version>3.0.1</mybatis.version>
         <netty-version>3.10.5.Final</netty-version>
-        <fastjson.version>1.2.58</fastjson.version>
+        <fastjson.version>1.2.60</fastjson.version>
     </properties>
     <dependencyManagement>
         <dependencies>

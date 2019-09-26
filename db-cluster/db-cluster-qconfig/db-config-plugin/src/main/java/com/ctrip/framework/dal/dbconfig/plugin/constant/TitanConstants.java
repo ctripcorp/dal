@@ -66,6 +66,7 @@ public interface TitanConstants extends CommonConstants {
     String FREE_VERIFY_IPLIST = "freeVerifyIpList";
     String FREE_VERIFY_APPID_LIST = "freeVerifyAppIdList";
     String MHA_LAST_UPDATE_TIME = "mhaLastUpdateTime";
+    String MHA_UPDATE_START_TIME = "mhaUpdateStartTime";
 
     String CONNECTIONSTRING_PROVIDER_NAME = "providerName";
     String CONNECTIONSTRING_SERVER_NAME = "serverName";

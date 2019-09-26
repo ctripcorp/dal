@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.daogen.DynamicDS.*;
+import com.ctrip.platform.dal.daogen.config.MonitorConfigManager;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import com.ctrip.platform.dal.daogen.util.DateUtils;
 import com.ctrip.platform.dal.daogen.util.EmailUtils;
+import com.ctrip.platform.dal.daogen.util.IPUtils;
 import com.ctrip.platform.dal.daogen.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -22,6 +24,8 @@ import org.apache.commons.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by taochen on 2019/7/2.
@@ -39,8 +43,6 @@ public class DalDynamicDSDao {
 
     private static final String TITAN_KEY_GET =
             "http://qconfig.ctripcorp.com/plugins/titan/config?appid=%s&titankey=%s&env=%s";
-
-    private static final String RECEIVE_EMAIL = "rdkjdal@Ctrip.com";
 
     private static final String CMS_APPID_IP = "http://osg.ops.ctripcorp.com/api/CMSGetApp/?_version=new";
 
@@ -107,11 +109,8 @@ public class DalDynamicDSDao {
             @Override
             public void run() {
                 Date checkDate = new Date();
-                String checkTime = getBeforeOneHourDateString(checkDate);
-                if (DateUtils.checkIsSendEMailTime(checkDate)) {
-                    List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(checkDate, CheckTimeRange.ONE_WEEK);
-                    EmailUtils.sendEmail(generateBodyContent(switchDataList), checkDate, CheckTimeRange.ONE_WEEK);
-                }
+                String checkTime = DateUtils.getBeforeOneHourDateString(checkDate);
+                notifyByEmail(checkDate);
                 Cat.logEvent("DynamicDSFixJob", checkTime);
                 checkSwitchDataSource(checkTime, null, null, TriggerMethod.AUTO);
             }
@@ -182,7 +181,10 @@ public class DalDynamicDSDao {
                 for (SwitchTitanKey switchTitanKey : switchTitanKeyList) {
                     tempTitanKeyAppIDMap.put(switchTitanKey, TitanKeyStringAppIDMap.get(switchTitanKey.getTitanKey()));
                 }
-                storeToDB(tempTitanKeyAppIDMap, checkTime);
+                String ip = IPUtils.getExecuteIPFromQConfig();
+                if (IPUtils.getLocalHostIp().equalsIgnoreCase(ip)) {
+                    storeToDB(tempTitanKeyAppIDMap, checkTime);
+                }
                 titanKeySwitchCache.put(checkTime, tempTitanKeyAppIDMap);
             }
         } catch (Exception e) {
@@ -203,7 +205,14 @@ public class DalDynamicDSDao {
 
     private List<SwitchTitanKey> getTitanKeyInfo(Set<SwitchTitanKey> TitanKeys, String env) {
         List<SwitchTitanKey> TitanKeyInfoList = new ArrayList<>();
+        String[] filterTitanKeyArray = MonitorConfigManager.getMonitorConfig().getFilterTitanKey().split(",");
+        String filterTemplate = generateRegExp(filterTitanKeyArray);
+        Pattern pattern = Pattern.compile(filterTemplate);
         for (SwitchTitanKey titanKey : TitanKeys) {
+            Matcher matcher = pattern.matcher(titanKey.getTitanKey());
+            if (matcher.matches()) {
+                continue;
+            }
             String titanUrl = String.format(TITAN_KEY_GET, TITANKEY_APPID, titanKey.getTitanKey(), env);
             for (int i = 0; i < RETRY_TIME; ++i) {
                 TitanResponse response = null;
@@ -247,14 +256,8 @@ public class DalDynamicDSDao {
         dalDynamicDSDBDao.batchInsertSwitchData(titanKeySwitchInfoList);
     }
 
-    public List<TitanKeySwitchInfoDB> getSwitchDataInRange(Date nextWeekDate, CheckTimeRange checkTimeRange) {
-        String startCheckTime = null;
-        String endCheckTime = null;
+    public List<TitanKeySwitchInfoDB> getSwitchDataInRange(String startCheckTime, String endCheckTime) {
         DalDynamicDSDBDao dalDynamicDSDBDao = DalDynamicDSDBDao.getInstance();
-        if (CheckTimeRange.ONE_WEEK.equals(checkTimeRange)) {
-            startCheckTime = DateUtils.getStartOneWeek(nextWeekDate);
-            endCheckTime = DateUtils.getEndOneWeek(nextWeekDate);
-        }
         return mergeSwitchData(dalDynamicDSDBDao.queryInRange(startCheckTime, endCheckTime));
     }
 
@@ -289,14 +292,6 @@ public class DalDynamicDSDao {
             Cat.logError("get titanKey switch info error, key: " + checkTime, e);
         }
         return null;
-    }
-
-    private String getBeforeOneHourDateString(Date checkTime) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(checkTime);
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
-        Date catTransactionDate = calendar.getTime();
-        return DateUtils.formatCheckTime(catTransactionDate);
     }
 
     public List<AppIDInfo> getBatchAppIdIp(List<String> appIds, String env) {
@@ -353,20 +348,47 @@ public class DalDynamicDSDao {
         return switchAppIDList;
     }
 
-    private String generateBodyContent(List<TitanKeySwitchInfoDB> switchDataList) {
+    public void notifyByEmail(Date checkDate) {
+        if (DateUtils.checkIsSendEMailTime(checkDate)) {
+            String startCheckTime = DateUtils.getStartOneWeek(checkDate);
+            String endCheckTime = DateUtils.getEndOneWeek(checkDate);
+            List<TitanKeySwitchInfoDB> switchDataList = getSwitchDataInRange(startCheckTime, endCheckTime);
+            String subject = String.format("动态数据源切换统计(%s-%s)",startCheckTime.substring(0,8), endCheckTime.substring(0,8));
+            EmailUtils.sendEmail(generateBodyContent(switchDataList), subject, MonitorConfigManager.getMonitorConfig().getSwitchEmailRecipient(),
+                    MonitorConfigManager.getMonitorConfig().getSwitchEmailCc());
+        }
+    }
+
+    public String generateBodyContent(List<TitanKeySwitchInfoDB> switchDataList) {
         String htmlTemplate = "<entry><content><![CDATA[%s]]></content></entry>";
         String htmlTable = " <table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"80\">序号</th><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey</th>" +
-                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey切换次数</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端AppId数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端IP数量</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"120\">TitanKey切换次数</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端AppId数量</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端IP总数</th>" +
                 "<th style=\"border:1px solid #B0B0B0\" width= \"120\">客户端切换总次数</th></tr></thead><tbody>%s</tbody></table>";
         String bodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>" +
                 "<td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
         StringBuilder sb = new StringBuilder();
         int i = 0;
+        int titanKeySwitchCountSum = 0;
+        int clientSwitchCountSum = 0;
+        for (TitanKeySwitchInfoDB switchData : switchDataList) {
+            titanKeySwitchCountSum += switchData.getSwitchCount();
+            clientSwitchCountSum += switchData.getSwitchCount() * switchData.getIpCount();
+        }
+        sb.append(String.format(bodyTemplate, "总数", switchDataList.size(), titanKeySwitchCountSum, "", "", clientSwitchCountSum));
         for (TitanKeySwitchInfoDB switchData : switchDataList) {
             ++i;
             sb.append(String.format(bodyTemplate, i, switchData.getTitanKey(), switchData.getSwitchCount(), switchData.getAppIDCount(), switchData.getIpCount(), switchData.getSwitchCount() * switchData.getIpCount()));
         }
         return String.format(htmlTemplate, String.format(htmlTable, sb.toString()));
+    }
+
+    public String generateRegExp(String[] filterTitanKeyArray) {
+        StringBuilder sb = new StringBuilder();
+        for (String filterTitanKey : filterTitanKeyArray) {
+            sb.append("(").append(filterTitanKey).append(")|");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
     public String getNowDateString(Date checkTime) {

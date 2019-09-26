@@ -35,6 +35,8 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     Properties setPoolProperties(DalPoolPropertiesConfigure configure);
 
+    PropertiesWrapper getPoolProperties();
+
     DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString);
 
 }

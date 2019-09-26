@@ -21,8 +21,16 @@ public class DataSourceLocator {
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
     private DataSourceConfigureProvider provider;
+
+    private boolean isForceInitialize = false;
+
     public DataSourceLocator(DataSourceConfigureProvider provider) {
         this.provider = provider;
+    }
+
+    public DataSourceLocator(DataSourceConfigureProvider provider, boolean isForceInitialize) {
+        this.provider = provider;
+        this.isForceInitialize = isForceInitialize;
     }
 
     // to be refactored
@@ -70,7 +78,7 @@ public class DataSourceLocator {
 
     private DataSource createDataSource(DataSourceIdentity id) throws SQLException {
         DataSourceConfigure config = provider.getDataSourceConfigure(id);
-        if (config == null) {
+        if (config == null && !isForceInitialize) {
             throw new SQLException(String.format("datasource configure not found for %s", id.getId()));
         }
 

@@ -8,6 +8,7 @@
     String mySqlSpec = Configuration.get("mysql_spec");
     String dalTeamEmail = Configuration.get("dal_team_email");
     String reportPage = Configuration.get("report_page");
+    String dynamicDSPage = Configuration.get("dynamic_ds_page");
     String decryptionPage = Configuration.get("decryption_page");
     String accessPage = Configuration.get("access_page");
 
@@ -19,6 +20,7 @@
     request.setAttribute("reportPage", reportPage);
     request.setAttribute("decryptionPage", decryptionPage);
     request.setAttribute("accessPage", accessPage);
+    request.setAttribute("dynamicDSPage", dynamicDSPage);
 %>
 <nav class="navbar navbar-inverse navbar-embossed navbar-fixed-top" role="navigation">
     <div class="navbar-header">
@@ -52,6 +54,7 @@
                     </li>
                     <li><a href="javascript:;" onclick="window.open('${reportPage}', '_blank');">DAL 版本统计</a></li>
                     <li><a href="javascript:;" onclick="window.open('${accessPage}', '_blank');">DAL 接入趋势统计</a></li>
+                    <li><a href="javascript:;" onclick="window.open('${dynamicDSPage}', '_blank');">DAL 动态数据源统计</a></li>
                 </ul>
             </li>
         </ul>

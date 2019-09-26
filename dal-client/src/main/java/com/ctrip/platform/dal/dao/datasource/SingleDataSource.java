@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SingleDataSource implements DataSourceConfigureConstants, DataSourceCreatePoolTask {
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
+    private static final String DATASOURCE_CREATE_POOL = "DataSource::createPool:%s";
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
@@ -46,30 +47,40 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     }
 
     private DataSource createDataSource() {
+        long startTime = System.currentTimeMillis();
         try {
+            String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
+                    dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
             setPoolPropertiesIntoValidator(poolProperties);
-            return new DalTomcatDataSource(poolProperties);
+            DalTomcatDataSource ds =  new DalTomcatDataSource(poolProperties);
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
+            LOGGER.info(message);
+            return ds;
         } catch (Throwable e) {
-            LOGGER.error(String.format("Error creating datasource for %s", name), e);
+            String message = String.format("Error creating datasource for %s", name);
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, e, startTime);
+            LOGGER.error(message, e);
             return null;
         }
     }
 
-    private void createPool() {
+    public boolean createPool() {
+        long startTime = System.currentTimeMillis();
         try {
-            String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
+            String message = String.format("Datasource[name=%s, Driver=%s] pool created,connection url:%s", name,
                     dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
-            long startTime = System.currentTimeMillis();
             ((org.apache.tomcat.jdbc.pool.DataSource) getDataSource()).createPool();
-            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_POOL, name), message, startTime);
             LOGGER.info(message);
-            if (listener != null)
-                listener.onCreatePoolSuccess();
+            return true;
         } catch (Throwable e) {
-            LOGGER.error(String.format("Error creating pool for data source %s", name), e);
+            String message = String.format("Error creating pool for datasource %s", name);
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_POOL, name), message, e, startTime);
+            LOGGER.error(message, e);
             if (listener != null)
                 listener.onCreatePoolFail(e);
+            return false;
         }
     }
 

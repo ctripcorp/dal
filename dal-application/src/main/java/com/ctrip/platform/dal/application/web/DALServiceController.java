@@ -116,29 +116,15 @@ public class DALServiceController {
         return "ok";
     }
 
-    @RequestMapping(value = "/unhealthy")
-    @ResponseBody
-    public String healthCheckException() throws Exception {
-        throw new Exception("test unhealthy");
-    }
-
-    @RequestMapping(value = "/healthy")
-    @ResponseBody
-    public String healthCheck() throws Exception {
-        return "ok";
-    }
-
-    @RequestMapping(value = "/healthyBlank")
-    @ResponseBody
-    public void healthCheckBlank() throws Exception {
-        int i=80,j=80;
-    }
-
-    @RequestMapping(value = "/healthErrorCode")
-    public void healthCheck(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @RequestMapping(value = "/healthStatus")
+    public void healthCheck(HttpServletRequest request, HttpServletResponse response, @RequestParam boolean needFail) throws Exception {
         response.setHeader("Content-type", "application/json");
-        response.setStatus(555);
-        throw new Exception("test error code");
+        if(!needFail){
+            response.getWriter().write("ok");
+        }else {
+            response.getWriter().write("fail");
+            response.setStatus(555);
+        }
     }
 
 }

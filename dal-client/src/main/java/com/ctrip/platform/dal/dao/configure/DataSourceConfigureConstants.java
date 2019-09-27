@@ -71,12 +71,12 @@ public interface DataSourceConfigureConstants {
 
     // **********Constants**********
     String USE_LOCAL_CONFIG = "useLocalConfig";
+    String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
     String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
     String SERVICE_ADDRESS = "serviceAddress";
     String TIMEOUT = "timeout";
     String APPID = "appid";
     String IS_DEBUG = "isDebug";
-    String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
 
     String TITAN_KEY_NORMAL = "normal";
     String TITAN_KEY_FAILOVER = "failover";

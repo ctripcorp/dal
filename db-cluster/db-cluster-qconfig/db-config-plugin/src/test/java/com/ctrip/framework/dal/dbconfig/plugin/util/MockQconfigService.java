@@ -11,6 +11,7 @@ import qunar.tc.qconfig.common.exception.QServiceException;
 import qunar.tc.qconfig.common.util.ChecksumAlgorithm;
 import qunar.tc.qconfig.plugin.ConfigDetail;
 import qunar.tc.qconfig.plugin.ConfigField;
+import qunar.tc.qconfig.plugin.PluginPredicate;
 import qunar.tc.qconfig.plugin.QconfigService;
 
 import java.util.Date;
@@ -29,8 +30,18 @@ public class MockQconfigService implements QconfigService, TitanConstants {
     }
 
     @Override
+    public int batchSave(List<ConfigDetail> list, boolean b, String s, String s1, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
+        return 0;
+    }
+
+    @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic) throws QServiceException {
         return save(list, isPublic, null, null);
+    }
+
+    @Override
+    public int batchSave(List<ConfigDetail> list, boolean b, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
+        return 0;
     }
 
     private int save(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
@@ -106,6 +117,11 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         ConfigDetail cd = buildTestConfigDetail(group, null, profile);
         List<ConfigDetail> configDetailList = Lists.newArrayList(cd);
         return configDetailList;
+    }
+
+    @Override
+    public int getVersionIncrenment() {
+        return 0;
     }
 
     //build test ConfigDetail

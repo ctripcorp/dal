@@ -492,14 +492,14 @@ public class CommonHelper {
 
 
     //increase version in properties
-    public static void increaseVersionInProperties(Properties properties){
+    public static void increaseVersionInProperties(Properties properties, int versionIncrement){
         if(properties != null){
             String versionStr = properties.getProperty(TitanConstants.VERSION);
             if(Strings.isNullOrEmpty(versionStr)){
                 versionStr = "0";
             }
             long version = Long.parseLong(versionStr);
-            version = version + 1;
+            version = version + versionIncrement;
             properties.put(TitanConstants.VERSION, String.valueOf(version));
         }else{
             logger.warn("increaseVersionInProperties(): properties=null, can't increase version ...");

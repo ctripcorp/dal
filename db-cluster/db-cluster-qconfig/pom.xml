@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ctrip.framework.dal</groupId>
     <artifactId>db-cluster-qconfig</artifactId>
-    <version>1.0.14</version>
+    <version>1.0.15</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -18,7 +18,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <framework-bom.version>2.38.0</framework-bom.version>
-        <qconfig-plugin.version>1.100.1</qconfig-plugin.version>
+        <qconfig-plugin.version>1.100.14-SNAPSHOT</qconfig-plugin.version>
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
     </properties>
 

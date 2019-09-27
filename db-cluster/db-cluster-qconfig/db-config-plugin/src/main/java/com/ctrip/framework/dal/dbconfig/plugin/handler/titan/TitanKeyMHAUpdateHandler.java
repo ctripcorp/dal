@@ -18,6 +18,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import qunar.Config;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -246,6 +247,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                 List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeyMHAUpdateHandler", configFieldList);
                 if (configDetailList != null && !configDetailList.isEmpty()) {
                     ConfigDetail cd = configDetailList.get(0);
+                    cd.setOldConfigDetail(cd);
                     String encryptOldConf = cd.getContent();
 
                     Properties encryptProp = CommonHelper.parseString2Properties(encryptOldConf);
@@ -255,7 +257,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     Properties mergeProp = CommonHelper.merge(updateProp, encryptProp);
 
                     //field 'version' increase one
-                    CommonHelper.increaseVersionInProperties(mergeProp);
+                    CommonHelper.increaseVersionInProperties(mergeProp, getQconfigService().getVersionIncrenment());
 
                     //field 'mhaLastUpdate' update [2018-12-27]
                     CommonHelper.updateMhaLastUpdateInProperties(mergeProp);
@@ -288,7 +290,8 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         if (!cdList.isEmpty()) {
             int cdListSize = cdList.size();
             Cat.logEvent(CAT_TRANSACTION_TYPE, "BatchSave.Before", Event.SUCCESS, "cdListSize=" + cdListSize);
-            saveCount = QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyMHAUpdateHandler", cdList, true);
+            saveCount = QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyMHAUpdateHandler", cdList, true,
+                    QconfigServiceUtils.getTitanPluginPredicate());
             Cat.logEvent(CAT_TRANSACTION_TYPE, "BatchSave.After", Event.SUCCESS, "cdListSize=" + cdListSize);
         }
 

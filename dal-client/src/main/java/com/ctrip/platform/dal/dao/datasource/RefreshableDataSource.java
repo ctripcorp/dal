@@ -36,8 +36,6 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private ScheduledExecutorService timer = null;
 
-    private static ExecutorService getConnExecutor = Executors.newSingleThreadExecutor();
-
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
     private static final String THREAD_NAME_POOL = "ConnectionPoolCreator";
@@ -51,25 +49,10 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
         dataSourceReference.set(dataSource);
-        asyncGetConnection();
         executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new CustomThreadFactory("DataSourceSwitchListener"));
         executor.allowCoreThreadTimeOut(true);
-//
-//        IPDomainStatus status = DataSourceConfigureLocatorManager.getInstance().getIPDomainStatus();
-//        if (status.equals(IPDomainStatus.Domain)) {
-//            timer.scheduleWithFixedDelay(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        getConnection().close();
-//                    } catch (Exception e) {
-//                        //ignore
-//                    }
-//                }
-//            }, INIT_DELAY, FIXED_DELAY, TimeUnit.SECONDS);
-//        }
     }
 
     @Override
@@ -84,7 +67,6 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         getExecutorService().schedule(newDataSource.getTask(), INIT_DELAY, TimeUnit.MILLISECONDS);
         isListenerExecuted.set(false);
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        asyncGetConnection();
         close(oldDataSource);
         DataSourceCreateTask oldTask = oldDataSource.getTask();
         if (oldTask != null)
@@ -100,7 +82,6 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                 if (isSuccess) {
                     isListenerExecuted.set(false);
                     SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-                    asyncGetConnection();
                     listener.onCreatePoolSuccess();
                     close(oldDataSource);
                     DataSourceCreateTask oldTask = oldDataSource.getTask();
@@ -126,6 +107,16 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     public void addDataSourceSwitchListener(DataSourceSwitchListener dataSourceSwitchListener) {
         this.dataSourceSwitchListeners.add(dataSourceSwitchListener);
+        getTimer().scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        getConnection().close();
+                    } catch (Exception e) {
+                        //ignore
+                    }
+                }
+            }, INIT_DELAY, FIXED_DELAY, TimeUnit.SECONDS);
     }
 
     public DataSource getDataSource() {
@@ -151,16 +142,16 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         return service;
     }
 
-//    private ScheduledExecutorService getTimer() {
-//        if (timer == null) {
-//            synchronized (this) {
-//                if (timer == null) {
-//                    timer = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME_TIMER));
-//                }
-//            }
-//        }
-//        return timer;
-//    }
+    private ScheduledExecutorService getTimer() {
+        if (timer == null) {
+            synchronized (this) {
+                if (timer == null) {
+                    timer = Executors.newScheduledThreadPool(POOL_SIZE, new CustomThreadFactory(THREAD_NAME_TIMER));
+                }
+            }
+        }
+        return timer;
+    }
 
     private void executeDataSourceListener(final String keyName) {
         synchronized (this) {
@@ -191,19 +182,6 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                 isListenerExecuted.set(true);
             }
         }
-    }
-
-    private void asyncGetConnection() {
-        getConnExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    getConnection().close();
-                } catch (SQLException e) {
-                    //ignore
-                }
-            }
-        });
     }
 
     @Override

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -131,4 +133,12 @@ public class DALServiceController {
     public void healthCheckBlank() throws Exception {
         int i=80,j=80;
     }
+
+    @RequestMapping(value = "/healthErrorCode")
+    public void healthCheck(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.setHeader("Content-type", "application/json");
+        response.setStatus(555);
+        throw new Exception("test error code");
+    }
+
 }

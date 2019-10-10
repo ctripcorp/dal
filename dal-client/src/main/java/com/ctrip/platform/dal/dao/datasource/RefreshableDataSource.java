@@ -49,8 +49,8 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     private static final long TIME_OUT = 500; //ms
     private static final long FIXED_DELAY = 60;//second
 
-    private static final String SWITCH_VERSION = "SwitchVersion::%s";
-    private static final String BLOCK_CONNECTION = "Connection::blockConnection";
+    private static final String SWITCH_VERSION = "SwitchVersion:%s";
+    private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
         SingleDataSource dataSource = new SingleDataSource(name, config);
@@ -202,7 +202,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                     if (!oldServer.equalsIgnoreCase(currentServer)) {
                         final int tempSwitchVersion = ++switchVersion;
                         LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(SWITCH_VERSION, tempSwitchVersion), oldServer + " switch to " + currentServer);
-                        waiters.put(switchVersion, new DataSourceSwitchBlockThreads());
+                        waiters.put(tempSwitchVersion, new DataSourceSwitchBlockThreads());
                         executor.submit(new Runnable() {
                             @Override
                             public void run() {
@@ -235,7 +235,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
                     long startTime = System.currentTimeMillis();
                     LockSupport.parkNanos(TIME_OUT * 1000000);
                     LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(BLOCK_CONNECTION, ConnectionHelper.obtainUrl(connection)),
-                            String.valueOf(currentSwitchVersion), startTime);
+                            String.format(SWITCH_VERSION, currentSwitchVersion), startTime);
                 }
             }
         }

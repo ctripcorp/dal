@@ -326,7 +326,7 @@ public class RefreshableDataSourceTest {
                 }
             }));
         }
-        new Thread( new Runnable(){
+        new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -380,7 +380,7 @@ public class RefreshableDataSourceTest {
         refreshableDataSource.addDataSourceSwitchListener(listenerOne);
         refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
 
-        new Thread( new Runnable(){
+        new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -392,18 +392,29 @@ public class RefreshableDataSourceTest {
                 }
             }
         }).start();
-        Thread.sleep(100);
-        long startTime = System.currentTimeMillis();
-        refreshableDataSource.getConnection();
-        long endTime = System.currentTimeMillis();
-        System.out.println(endTime - startTime);
-        Assert.assertEquals(1, listenerOne.getStep());
-        Assert.assertEquals(20, listenerTwo.getStep());
+        final CountDownLatch latch = new CountDownLatch(20);
+        for (int i = 0; i < 20; ++i) {
+            executorOne.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(20);
+                        long startTime = System.currentTimeMillis();
+                        refreshableDataSource.getConnection();
+                        long endTime = System.currentTimeMillis();
+                        System.out.println(endTime - startTime);
+                    } catch (Exception e) {
 
+                    }
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
     }
 
     @Test
-    public void testGetConnectionPerformance() throws Exception{
+    public void testGetConnectionPerformance() throws Exception {
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
         p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
@@ -454,8 +465,11 @@ public class RefreshableDataSourceTest {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(1);
+                        Thread.sleep(10);
+                        long startTime = System.currentTimeMillis();
                         refreshableDataSource.getConnection();
+                        long endTime = System.currentTimeMillis();
+                        System.out.println(endTime - startTime);
                     } catch (Exception e) {
 
                     }

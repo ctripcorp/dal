@@ -4,22 +4,19 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.Queue;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import javax.sql.DataSource;
 
-import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import org.apache.commons.lang.StringUtils;
 
 public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -38,7 +35,9 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private ScheduledExecutorService timer = null;
 
-    private Queue<Thread> waiters = new ConcurrentLinkedQueue<>();
+    private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
+
+    private int switchVersion = 0;
 
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
@@ -47,7 +46,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     private static final int CORE_POOL_SIZE = 5;
     private static final int MAX_POOL_SIZE = 10;
     private static final long KEEP_ALIVE_TIME = 1L;
-    private static final long TIME_OUT = 1000; //ms
+    private static final long TIME_OUT = 500; //ms
     private static final long FIXED_DELAY = 60;//second
 
     public RefreshableDataSource(String name, DataSourceConfigure config) throws SQLException {
@@ -110,14 +109,14 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     public void addDataSourceSwitchListener(DataSourceSwitchListener dataSourceSwitchListener) {
         this.dataSourceSwitchListeners.add(dataSourceSwitchListener);
         getTimer().scheduleWithFixedDelay(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        getConnection().close();
-                    } catch (Exception e) {
-                        //ignore
-                    }
+            @Override
+            public void run() {
+                try {
+                    getConnection().close();
+                } catch (Exception e) {
+                    //ignore
                 }
+            }
         }, INIT_DELAY, FIXED_DELAY, TimeUnit.SECONDS);
     }
 
@@ -156,57 +155,73 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     private void executeDataSourceListener() {
-        synchronized (this) {
-            isListenerRunning.set(true);
-            final String keyName = getSingleDataSource().getName();
-            final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
-            for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
-                if (dataSourceSwitchListener != null) {
-                    executor.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                dataSourceSwitchListener.execute();
-                                latch.countDown();
-                            } catch (Throwable e) {
-                                LOGGER.error(String.format("execute datasource switch listener fail for %s", keyName), e);
-                            }
+        final String keyName = getSingleDataSource().getName();
+        final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
+        for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
+            if (dataSourceSwitchListener != null) {
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            dataSourceSwitchListener.execute();
+                        } catch (Throwable e) {
+                            LOGGER.error(String.format("execute datasource switch listener fail for %s", keyName), e);
                         }
-                    });
-                }
+                        latch.countDown();
+                    }
+                });
             }
-            try {
-                latch.await(TIME_OUT, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.error(String.format("timeout,execute datasource switch listener is interrupted for %s", keyName), e);
-            } finally {
-                isListenerRunning.set(false);
-                for (Thread waiter : waiters) {
-                    LockSupport.unpark(waiter);
-                }
-                waiters.clear();
-            }
+        }
+        try {
+            latch.await(TIME_OUT, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            LOGGER.error(String.format("timeout,execute datasource switch listener is interrupted for %s", keyName), e);
         }
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        Connection connection =  getDataSource().getConnection();
+        Connection connection = getDataSource().getConnection();
         if (dataSourceSwitchListeners.size() > 0) {
             String currentServer = DataSourceSwitchChecker.getDBServerName(connection, getSingleDataSource().getDataSourceConfigure());
             if (DBServerReference.compareAndSet(null, currentServer)) {
                 return connection;
             }
-            String oldServer = DBServerReference.getAndSet(currentServer);
-            if (!oldServer.equalsIgnoreCase(currentServer)) {
-                executeDataSourceListener();
-            }
-            else {
-                if (isListenerRunning.get()) {
-                    waiters.add(Thread.currentThread());
+            int currentSwitchVersion;
+            synchronized (this) {
+                String oldServer = DBServerReference.getAndSet(currentServer);
+                if (!oldServer.equalsIgnoreCase(currentServer)) {
+                    switchVersion ++;
+                    waiters.put(switchVersion, new DataSourceSwitchBlockThreads());
+                    executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                executeDataSourceListener();
+                            } catch (Throwable e) {
+                                //ignore
+                            }
+                            DataSourceSwitchBlockThreads blockThreads = waiters.get(switchVersion);
+                            if (blockThreads != null) {
+                                blockThreads.setNeedBlock(false);
+                                Thread waiter;
+                                while((waiter = blockThreads.getBlockThreads().poll()) != null) {
+                                    LockSupport.unpark(waiter);
+                                }
+                                waiters.remove(switchVersion);
+                            }
+                        }
+                    });
                 }
-                if (isListenerRunning.get()) {
-                    LockSupport.park();
+                currentSwitchVersion = switchVersion;
+            }
+            DataSourceSwitchBlockThreads blockThreads = waiters.get(currentSwitchVersion);
+            if (blockThreads != null) {
+                if (blockThreads.isNeedBlock()) {
+                    blockThreads.addBlockThread(Thread.currentThread());
+                }
+                if (blockThreads.isNeedBlock()) {
+                    LockSupport.parkNanos(TIME_OUT * 1000000);
                 }
             }
         }

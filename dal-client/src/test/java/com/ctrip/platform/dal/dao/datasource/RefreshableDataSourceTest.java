@@ -392,10 +392,9 @@ public class RefreshableDataSourceTest {
                 }
             }
         }).start();
-//        for (int i = 0; i < 10; ++i) {
-//            refreshableDataSource.getConnection();
-//        }
-        Thread.sleep(1500);
+        Thread.sleep(100);
+        refreshableDataSource.getConnection();
+        Thread.sleep(500);
         Assert.assertEquals(1, listenerOne.getStep());
         Assert.assertEquals(20, listenerTwo.getStep());
 
@@ -439,7 +438,8 @@ public class RefreshableDataSourceTest {
         DataSourceConfigure configure2 = new DataSourceConfigure("test2", p2);
 
         final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", configure1);
-        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", configure2, configure1);
+        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent1 = new DataSourceConfigureChangeEvent("test", configure2, configure1);
+        DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent2 = new DataSourceConfigureChangeEvent("test", configure1, configure2);
         final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
         final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
         refreshableDataSource.addDataSourceSwitchListener(listenerOne);
@@ -452,7 +452,7 @@ public class RefreshableDataSourceTest {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(time + 1);
+                        Thread.sleep(1);
                         refreshableDataSource.getConnection();
                     } catch (Exception e) {
 
@@ -461,7 +461,9 @@ public class RefreshableDataSourceTest {
                 }
             });
         }
-        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
+        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
+        Thread.sleep(10);
+        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent2);
         latch.await();
     }
 }

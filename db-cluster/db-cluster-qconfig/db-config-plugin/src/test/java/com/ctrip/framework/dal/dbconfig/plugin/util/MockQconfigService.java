@@ -16,6 +16,7 @@ import qunar.tc.qconfig.plugin.QconfigService;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.MONGO_CLIENT_APP_ID;
@@ -26,7 +27,7 @@ import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.MO
 public class MockQconfigService implements QconfigService, TitanConstants {
     @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
-        return save(list, isPublic, operator, remoteIp);
+        return save(list, isPublic, operator, remoteIp, null);
     }
 
     @Override
@@ -36,19 +37,27 @@ public class MockQconfigService implements QconfigService, TitanConstants {
 
     @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic) throws QServiceException {
-        return save(list, isPublic, null, null);
+        return save(list, isPublic, null, null, null);
     }
 
     @Override
     public int batchSave(List<ConfigDetail> list, boolean b, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
-        return 0;
+        return save(list, b, null, null, pluginPredicate);
     }
 
-    private int save(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
+    private int save(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
         Set<String> configFields = Sets.newHashSetWithExpectedSize(list.size());
         for (ConfigDetail configDetail : list) {
             ConfigField configField = configDetail.getConfigField();
-            configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+//            if (pluginPredicate != null && pluginPredicate.test(configDetail, getCurrentConfigDetail(configField))) {
+//                configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+//            }
+            if (pluginPredicate != null && pluginPredicate.test(configDetail, buildTestConfigDetail(configField.getGroup(), configField.getDataId(), configField.getProfile()))) {
+                configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+            }
+            if (pluginPredicate == null) {
+                configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+            }
             System.out.println("---------------save begin-----------------------");
             System.out.println(configDetail.getContent());
             System.out.println("---------------save end-----------------------");
@@ -59,6 +68,20 @@ public class MockQconfigService implements QconfigService, TitanConstants {
         }
 
         return 1;
+    }
+
+    public ConfigDetail getCurrentConfigDetail(ConfigField configField) {
+        ConfigDetail cd = buildTestConfigDetail(configField.getGroup(), configField.getDataId(), configField.getProfile());
+        try {
+            Properties currentConfig = CommonHelper.parseString2Properties(cd.getContent());
+            String currentVersion = currentConfig.getProperty(TitanConstants.VERSION);
+            currentConfig.setProperty(TitanConstants.VERSION, currentVersion + 1);
+            String currentContent = CommonHelper.parseProperties2String(currentConfig);
+            cd.setContent(currentContent);
+        } catch (Exception e) {
+            //ignore
+        }
+        return cd;
     }
 
     @Override

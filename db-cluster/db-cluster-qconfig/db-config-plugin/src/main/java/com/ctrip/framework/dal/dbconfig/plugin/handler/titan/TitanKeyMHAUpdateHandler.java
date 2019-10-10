@@ -244,7 +244,8 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                 List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeyMHAUpdateHandler", configFieldList);
                 if (configDetailList != null && !configDetailList.isEmpty()) {
                     ConfigDetail cd = configDetailList.get(0);
-                    cd.setOldConfigDetail(cd);
+                    ConfigDetail oldConfig = new ConfigDetail(cd.getConfigField(), cd.getVersion(), cd.getContent(), cd.getChecksum());
+                    cd.setOldConfigDetail(oldConfig);
                     String encryptOldConf = cd.getContent();
 
                     Properties encryptProp = CommonHelper.parseString2Properties(encryptOldConf);

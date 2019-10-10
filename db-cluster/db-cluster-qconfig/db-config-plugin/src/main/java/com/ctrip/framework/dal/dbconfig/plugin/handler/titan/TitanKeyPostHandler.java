@@ -207,7 +207,8 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
         if (configDetailList != null && !configDetailList.isEmpty()) {
             //已经存在，更新
             ConfigDetail configDetail = configDetailList.get(0);    //get first
-            configDetail.setOldConfigDetail(configDetail);
+            ConfigDetail oldConfig = new ConfigDetail(configDetail.getConfigField(), configDetail.getVersion(), configDetail.getContent(), configDetail.getChecksum());
+            configDetail.setOldConfigDetail(oldConfig);
             String encryptOldConf = configDetail.getContent();
             Properties oldProperties = CommonHelper.parseString2Properties(encryptOldConf);
 

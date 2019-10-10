@@ -517,7 +517,7 @@ public class CommonHelper {
     }
 
     //update mhaUpdateStartTime in properties
-    public static void updateMhaUpdateStartTimeInProperties(Properties properties, Long mhaUpdateStartTime) {
+    public static void updateMhaUpdateStartTimeInProperties(Properties properties, Object mhaUpdateStartTime) {
         if (properties != null) {
             properties.put(TitanConstants.MHA_UPDATE_START_TIME, String.valueOf(mhaUpdateStartTime));
         } else {

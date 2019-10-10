@@ -18,15 +18,12 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import qunar.Config;
 import qunar.tc.qconfig.plugin.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This handler is to update titan key for MHA
@@ -263,7 +260,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     CommonHelper.updateMhaLastUpdateInProperties(mergeProp);
 
                     //field 'mhaUpdateStartTime' update
-                    CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, (Long)request.getAttribute(MHA_START_TIME));
+                    CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, request.getAttribute(MHA_START_TIME));
 
                     if (needCheckDbConnection) {
                         //decrypt

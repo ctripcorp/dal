@@ -14,13 +14,13 @@ import java.util.Properties;
  */
 public class TitanPluginPredicate implements PluginPredicate<ConfigDetail> {
     @Override
-    public boolean test(ConfigDetail configDetail) {
+    public boolean test(ConfigDetail configDetail, ConfigDetail currentConfigDetail) {
         try {
-            Properties newConfig = CommonHelper.parseString2Properties(configDetail.getContent());
+            Properties currentConfig = CommonHelper.parseString2Properties(currentConfigDetail.getContent());
             Properties oldConfig = CommonHelper.parseString2Properties(configDetail.getOldConfigDetail().getContent());
-            String newVersion = newConfig.getProperty(TitanConstants.VERSION);
+            String currentVersion = currentConfig.getProperty(TitanConstants.VERSION);
             String oldVersion = oldConfig.getProperty(TitanConstants.VERSION);
-            if (oldVersion.equalsIgnoreCase(newVersion)) {
+            if (oldVersion.equalsIgnoreCase(currentVersion)) {
                 return true;
             }
         } catch (IOException e) {

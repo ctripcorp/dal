@@ -121,7 +121,7 @@ public class MockQconfigService implements QconfigService, TitanConstants {
 
     @Override
     public int getVersionIncrenment() {
-        return 0;
+        return 2;
     }
 
     //build test ConfigDetail

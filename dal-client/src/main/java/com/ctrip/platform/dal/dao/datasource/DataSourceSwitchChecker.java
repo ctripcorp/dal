@@ -52,8 +52,12 @@ public class DataSourceSwitchChecker {
         }
         finally {
             try {
-                rs.close();
-                stmt.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
             } catch (Exception ex) {
                 //ignore
             }

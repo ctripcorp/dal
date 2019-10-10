@@ -393,8 +393,10 @@ public class RefreshableDataSourceTest {
             }
         }).start();
         Thread.sleep(100);
+        long startTime = System.currentTimeMillis();
         refreshableDataSource.getConnection();
-        Thread.sleep(500);
+        long endTime = System.currentTimeMillis();
+        System.out.println(endTime - startTime);
         Assert.assertEquals(1, listenerOne.getStep());
         Assert.assertEquals(20, listenerTwo.getStep());
 

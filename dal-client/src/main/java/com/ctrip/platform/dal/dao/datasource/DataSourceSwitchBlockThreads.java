@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Created by taochen on 2019/10/9.
  */
 public class DataSourceSwitchBlockThreads {
-    private boolean needBlock = true;
+    private volatile boolean needBlock = true;
 
     private Queue<Thread> blockThreads = new ConcurrentLinkedQueue<>();
 

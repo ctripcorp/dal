@@ -23,9 +23,7 @@ import qunar.tc.qconfig.plugin.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This handler is to update titan key for MHA
@@ -246,6 +244,8 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                 List<ConfigDetail> configDetailList = QconfigServiceUtils.currentConfigWithoutPriority(getQconfigService(), "TitanKeyMHAUpdateHandler", configFieldList);
                 if (configDetailList != null && !configDetailList.isEmpty()) {
                     ConfigDetail cd = configDetailList.get(0);
+                    ConfigDetail oldConfig = new ConfigDetail(cd.getConfigField(), cd.getVersion(), cd.getContent(), cd.getChecksum());
+                    cd.setOldConfigDetail(oldConfig);
                     String encryptOldConf = cd.getContent();
 
                     Properties encryptProp = CommonHelper.parseString2Properties(encryptOldConf);
@@ -255,13 +255,13 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     Properties mergeProp = CommonHelper.merge(updateProp, encryptProp);
 
                     //field 'version' increase one
-                    CommonHelper.increaseVersionInProperties(mergeProp);
+                    CommonHelper.increaseVersionInProperties(mergeProp, getQconfigService().getVersionIncrenment());
 
                     //field 'mhaLastUpdate' update [2018-12-27]
                     CommonHelper.updateMhaLastUpdateInProperties(mergeProp);
 
                     //field 'mhaUpdateStartTime' update
-                    CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, (Long)request.getAttribute(MHA_START_TIME));
+                    CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, request.getAttribute(MHA_START_TIME));
 
                     if (needCheckDbConnection) {
                         //decrypt
@@ -288,7 +288,8 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
         if (!cdList.isEmpty()) {
             int cdListSize = cdList.size();
             Cat.logEvent(CAT_TRANSACTION_TYPE, "BatchSave.Before", Event.SUCCESS, "cdListSize=" + cdListSize);
-            saveCount = QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyMHAUpdateHandler", cdList, true);
+            saveCount = QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyMHAUpdateHandler", cdList, true,
+                    QconfigServiceUtils.getTitanPluginPredicate());
             Cat.logEvent(CAT_TRANSACTION_TYPE, "BatchSave.After", Event.SUCCESS, "cdListSize=" + cdListSize);
         }
 

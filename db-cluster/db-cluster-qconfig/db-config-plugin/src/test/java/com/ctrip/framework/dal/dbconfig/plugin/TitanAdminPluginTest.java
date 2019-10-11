@@ -56,6 +56,7 @@ public class TitanAdminPluginTest {
     public void preHandle() throws Exception {
         request.setAttribute(EasyMock.eq(REQ_ATTR_TITAN_KEY), EasyMock.anyString());
         request.setAttribute(EasyMock.eq(REQ_ATTR_ENV_PROFILE), EasyMock.anyString());
+        request.setAttribute(EasyMock.eq(MHA_START_TIME), EasyMock.anyLong());
         EasyMock.replay(request);   //保存期望结果
 
         WrappedRequest wrappedRequest = new WrappedRequest(request);
@@ -71,6 +72,7 @@ public class TitanAdminPluginTest {
         EasyMock.expect(request.getAttribute(REQ_ATTR_TITAN_KEY)).andReturn(titanKey).anyTimes();
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(new EnvProfile(profile)).anyTimes();
         EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
+        EasyMock.expect(request.getAttribute(MHA_START_TIME)).andReturn(1999999999).anyTimes();
 
         EasyMock.replay(request);   //保存期望结果
         EasyMock.verify(request);

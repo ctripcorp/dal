@@ -7,6 +7,7 @@ import com.ctrip.datasource.datasource.ConnectionListener.CtripConnectionListene
 import com.ctrip.datasource.datasource.DataSourceValidatorTest;
 import com.ctrip.datasource.datasource.MockQConfigProvider.ExceptionQConfigPoolPropertiesProviderTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
+import com.ctrip.datasource.dynamicdatasource.DataSourceConfigureEncryptTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import com.ctrip.datasource.readonly.SqlServerReadonlyTest;
 import org.junit.runner.RunWith;
@@ -47,7 +48,8 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		SqlServerReadonlyTest.class,
 		DatasourceBackgroundExecutorTest.class,
 		DalPropertiesProviderImplTest.class,
-		PoolPropertiesProviderImplTest.class
+		PoolPropertiesProviderImplTest.class,
+		DataSourceConfigureEncryptTest.class
 	})
 
 public class AllTests {

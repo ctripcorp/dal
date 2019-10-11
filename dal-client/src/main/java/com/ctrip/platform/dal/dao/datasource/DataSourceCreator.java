@@ -34,7 +34,6 @@ public class DataSourceCreator {
         else
             task = new DefaultDataSourceCreateTask(name, configure, singleDataSource);
         singleDataSource.setTask(task);
-
         return singleDataSource;
     }
 }

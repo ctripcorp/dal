@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
+import com.ctrip.platform.dal.dao.helper.ConnectionHelper;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.mysql.jdbc.MySQLConnection;
 import org.junit.Assert;
@@ -20,7 +21,7 @@ public class RefreshableDataSourceTest {
     private ExecutorService executor = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory("RefreshableDataSourceTest"));
 
-    private ExecutorService executorOne = new ThreadPoolExecutor(10, 120, 60L, TimeUnit.SECONDS,
+    private ExecutorService executorOne = new ThreadPoolExecutor(100, 100, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory("RefreshableDataSourceTest1"));
 
     @Test
@@ -458,8 +459,8 @@ public class RefreshableDataSourceTest {
         refreshableDataSource.addDataSourceSwitchListener(listenerOne);
         refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
 
-        final CountDownLatch latch = new CountDownLatch(50);
-        for (int i = 0; i < 50; ++i) {
+        final CountDownLatch latch = new CountDownLatch(100);
+        for (int i = 0; i < 100; ++i) {
             final int time = i;
             executorOne.submit(new Runnable() {
                 @Override
@@ -467,9 +468,13 @@ public class RefreshableDataSourceTest {
                     try {
                         Thread.sleep(10);
                         long startTime = System.currentTimeMillis();
-                        refreshableDataSource.getConnection();
+                        Connection connection = refreshableDataSource.getConnection();
                         long endTime = System.currentTimeMillis();
-                        System.out.println(endTime - startTime);
+                        System.out.println(startTime + ":" + (endTime - startTime));
+                        if ("jdbc:mysql://10.32.20.139:3306/llj_test".equalsIgnoreCase(ConnectionHelper.obtainUrl(connection))) {
+                            Assert.assertEquals(listenerOne.getStep(), 10);
+                            Assert.assertEquals(listenerTwo.getStep(), 20);
+                        }
                     } catch (Exception e) {
 
                     }
@@ -478,8 +483,8 @@ public class RefreshableDataSourceTest {
             });
         }
         refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
-        Thread.sleep(10);
-        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent2);
+//        Thread.sleep(10);
+//        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent2);
         latch.await();
     }
 }

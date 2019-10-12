@@ -307,11 +307,11 @@ public class RefreshableDataSourceTest {
         final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
         refreshableDataSource.addDataSourceSwitchListener(listenerOne);
         refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
-        List<Future> futureList = new ArrayList<>();
         final AtomicBoolean switched = new AtomicBoolean(false);
-        for (int i = 0; i < 100; ++i) {
+        final CountDownLatch latch = new CountDownLatch(150);
+        for (int i = 0; i < 150; ++i) {
             final int sleep = i;
-            futureList.add(executorOne.submit(new Runnable() {
+            executorOne.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -324,8 +324,9 @@ public class RefreshableDataSourceTest {
                         switched.set(true);
                         Assert.assertEquals("jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl());
                     }
+                    latch.countDown();
                 }
-            }));
+            });
         }
         new Thread(new Runnable() {
 
@@ -350,9 +351,7 @@ public class RefreshableDataSourceTest {
             }
             connection.close();
         }
-        for (Future future : futureList) {
-            future.get();
-        }
+        latch.await();
         Assert.assertTrue(switched.get());
     }
 

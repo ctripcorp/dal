@@ -31,7 +31,7 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 	public String prepareSpCall(String spName, StatementParameters parameters, Map<String, ?> fields) {
 	    String callSql;
 	    if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER))) {
-	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
+	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
 	        addParametersByIndex(parameters, fields);
 	    }else{
 	        callSql = buildCallSql(spName, fields.size());

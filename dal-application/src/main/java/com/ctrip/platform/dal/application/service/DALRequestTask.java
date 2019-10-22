@@ -93,9 +93,11 @@ public class DALRequestTask {
                     pojo.setName("mysql");
                     mySqlDao.insert(new DalHints().setIdentityBack(), pojo);
                     pojo = mySqlDao.queryByPk(pojo.getID(), null);
-                    pojo.setName("update");
-                    mySqlDao.update(null, pojo);
-                    mySqlDao.delete(null, pojo);
+                    if (pojo != null) {
+                        pojo.setName("update");
+                        mySqlDao.update(null, pojo);
+                        mySqlDao.delete(null, pojo);
+                    }
                 } catch (Exception e) {
                     log.error("mysql error", e);
                 } finally {
@@ -125,9 +127,11 @@ public class DALRequestTask {
                     pojo.setName("sqlServer");
                     sqlServerDao.insert(new DalHints().setIdentityBack(), pojo);
                     pojo = sqlServerDao.queryByPk(pojo.getID(), null);
-                    pojo.setName("update");
-                    sqlServerDao.update(null, pojo);
-                    sqlServerDao.delete(null, pojo);
+                    if (pojo != null) {
+                        pojo.setName("update");
+                        sqlServerDao.update(null, pojo);
+                        sqlServerDao.delete(null, pojo);
+                    }
                 } catch (Exception e) {
                     log.error("sqlserver error", e);
                 } finally {

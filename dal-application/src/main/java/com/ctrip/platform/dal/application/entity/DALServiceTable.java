@@ -15,7 +15,7 @@ public class DALServiceTable {
 	@Id
 	@Column(name="ID")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Type(value= Types.INTEGER)
+	@Type(value= Types.BIGINT)
 	private Integer iD;
 
 

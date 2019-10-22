@@ -31,8 +31,8 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 	public String prepareSpCall(String spName, StatementParameters parameters, Map<String, ?> fields) {
 	    String callSql;
 	    if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER))) {
-	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
-	        addParametersByIndex(parameters, fields);
+	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
+			addParametersByIndex(parameters, fields);
 	    }else{
 	        callSql = buildCallSql(spName, fields.size());
             if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
@@ -43,5 +43,22 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 
         parameters.setResultsParameter(RET_CODE, extractor);
         return callSql;
+	}
+
+	public String prepareSpCallForUpdate(String spName, StatementParameters parameters, Map<String, ?> fields) {
+		String callSql;
+		if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER))) {
+			callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
+			addParametersByIndexNotNullField(parameters, fields);
+		}else{
+			callSql = buildCallSql(spName, fields.size());
+			if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
+				addParametersByName(parameters, fields);
+			else
+				addParametersByIndex(parameters, fields);
+		}
+
+		parameters.setResultsParameter(RET_CODE, extractor);
+		return callSql;
 	}
 }

@@ -19,7 +19,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		String updateSPA = String.format(UPDATE_SPA_TPL, tableName);
 		
 		StatementParameters parameters = new StatementParameters();
-		String callSql = prepareSpCall(updateSPA, parameters, fields);
+		String callSql = prepareSpCallForUpdate(updateSPA, parameters, fields);
 
 		if (taskContext instanceof DalContextConfigure)
 			((DalContextConfigure) taskContext).addTables(tableName);

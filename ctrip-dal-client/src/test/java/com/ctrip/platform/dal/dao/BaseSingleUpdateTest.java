@@ -109,6 +109,50 @@ public abstract class BaseSingleUpdateTest {
 			}
 		}
 	}
+
+	@Test
+    public void testPrepareSpCallForUpdate() {
+	    String spName = "spA_test_u";
+        StatementParameters parameters = new StatementParameters();
+        PeopleParser parser = new PeopleParser();
+        SingleUpdateSpaTask<People> singleTask = new SingleUpdateSpaTask<>();
+        Map<String,String> settings=new HashMap<>();
+        settings.put(CALL_SP_BY_NAME,"false");
+        settings.put(CALL_SP_BY_SQLSEVER,"true");
+        settings.put(CALL_SPT,"false");
+        singleTask.initTaskSettings(settings);
+        singleTask.initialize(parser);
+
+        String noCityIDColumn = "exec spA_test_u @PeopleID=?, @Name=?, @ProvinceID=?, @CountryID=?";
+        People p1 = new People();
+        p1.setPeopleID((long)1);
+        p1.setName("test");
+        p1.setCityID(null);
+        p1.setProvinceID(-1);
+        p1.setCountryID(-1);
+        String callSql1 = singleTask.prepareSpCallForUpdate(spName, parameters, parser.getFields(p1));
+        Assert.assertEquals(callSql1, noCityIDColumn);
+
+        String noProvinceIDColumn = "exec spA_test_u @PeopleID=?, @Name=?, @CityID=?, @CountryID=?";
+        People p2 = new People();
+        p2.setPeopleID((long)1);
+        p2.setName("test");
+        p2.setCityID(-1);
+        p2.setProvinceID(null);
+        p2.setCountryID(-1);
+        String callSql2 = singleTask.prepareSpCallForUpdate(spName, parameters, parser.getFields(p2));
+        Assert.assertEquals(callSql2, noProvinceIDColumn);
+
+        String noNameCountryIDColumn = "exec spA_test_u @PeopleID=?, @CityID=?, @ProvinceID=?";
+        People p3 = new People();
+        p3.setPeopleID((long)1);
+        p3.setName(null);
+        p3.setCityID(-1);
+        p3.setProvinceID(-1);
+        p3.setCountryID(null);
+        String callSql3 = singleTask.prepareSpCallForUpdate(spName, parameters, parser.getFields(p3));
+        Assert.assertEquals(callSql3, noNameCountryIDColumn);
+    }
 	
 	@Test
 	public void testExecute() {

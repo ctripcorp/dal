@@ -58,7 +58,7 @@ public class DALServiceDao {
 	/**
 	 * Query Person by complex primary key
 	**/
-	public DALServiceTable queryByPk(Integer iD, DalHints hints)
+	public DALServiceTable queryByPk(Long iD, DalHints hints)
 			throws SQLException {
 		hints = DalHints.createIfAbsent(hints);
 		DALServiceTable pk = new DALServiceTable();

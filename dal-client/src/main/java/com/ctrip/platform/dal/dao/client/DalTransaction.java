@@ -282,7 +282,7 @@ public class DalTransaction {
             try {
                 conn.rollback();
             } catch (SQLException ex) {
-                throw new TransactionSystemException("Could not roll back JDBC transaction", ex);
+                logger.error("Could not roll back JDBC transaction", ex);
             }
         }
 

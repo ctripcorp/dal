@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.client.DatabaseCategory.CustomConnection;
+import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 import org.junit.*;
 import com.ctrip.platform.dal.dao.task.SqlServerTestInitializer;
 
@@ -51,6 +53,11 @@ public class DalTransactionTest {
         conn = DalClientFactory.getDalConfigure().getLocator().getConnection("SqlSvrShard_" + shard);
         return new DalConnection(conn, true, String.valueOf(shard), DbMeta.createIfAbsent(logicDbName, DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory(), conn));
     }
+
+    private DalConnection getCustomDalConnection() throws Exception {
+		Connection conn = new CustomConnection();
+		return new DalConnection(conn, true, null, null);
+	}
 
 	@Test
 	public void testDalTransaction() {
@@ -203,6 +210,26 @@ public class DalTransactionTest {
 		}finally {
 			if(test != null && test.getConnection() != null)
 				test.getConnection().close();
+		}
+	}
+
+	@Test
+	public void testEndTransactionCommitError() {
+		DalTransaction test = null;
+		try {
+			test = new DalTransaction(getCustomDalConnection(), logicDbName);
+			assertEquals(0, test.getLevel());
+			int level = test.startTransaction();
+			assertEquals(1, test.getLevel());
+
+			test.endTransaction(level);
+
+			fail();
+		} catch (Exception e) {
+			assertEquals(0, test.getLevel());
+			if (!(e instanceof TransactionSystemException)) {
+				fail();
+			}
 		}
 	}
 

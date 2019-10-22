@@ -3,6 +3,7 @@ package com.ctrip.framework.dal.dbconfig.plugin.util;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.exception.DbConfigPluginException;
 import com.dianping.cat.Cat;
+import org.apache.commons.lang3.StringUtils;
 import qunar.tc.qconfig.plugin.ConfigDetail;
 import qunar.tc.qconfig.plugin.PluginPredicate;
 
@@ -20,7 +21,7 @@ public class TitanPluginPredicate implements PluginPredicate<ConfigDetail> {
             Properties oldConfig = CommonHelper.parseString2Properties(configDetail.getOldConfigDetail().getContent());
             String currentVersion = currentConfig.getProperty(TitanConstants.VERSION);
             String oldVersion = oldConfig.getProperty(TitanConstants.VERSION);
-            if (oldVersion.equalsIgnoreCase(currentVersion)) {
+            if (StringUtils.isEmpty(oldVersion) || oldVersion.equalsIgnoreCase(currentVersion)) {
                 return true;
             }
         } catch (IOException e) {

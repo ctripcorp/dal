@@ -31,34 +31,27 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 	public String prepareSpCall(String spName, StatementParameters parameters, Map<String, ?> fields) {
 	    String callSql;
 	    if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER))) {
-	        callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
-			addParametersByIndex(parameters, fields);
+	        callSql = prepareSpCallForSqlServer(spName, parameters, fields);
 	    }else{
-	        callSql = buildCallSql(spName, fields.size());
-            if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
-                addParametersByName(parameters, fields);
-            else
-                addParametersByIndex(parameters, fields);
+	        callSql = prepareSpCallForNameOrSpt(spName, parameters, fields);
 	    }        
 
         parameters.setResultsParameter(RET_CODE, extractor);
         return callSql;
 	}
 
-	public String prepareSpCallForUpdate(String spName, StatementParameters parameters, Map<String, ?> fields) {
-		String callSql;
-		if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_SQLSEVER))) {
-			callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
-			addParametersByIndexNotNullField(parameters, fields);
-		}else{
-			callSql = buildCallSql(spName, fields.size());
-			if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
-				addParametersByName(parameters, fields);
-			else
-				addParametersByIndex(parameters, fields);
-		}
+	protected String prepareSpCallForSqlServer(String spName, StatementParameters parameters, Map<String, ?> fields) {
+	    String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
+        addParametersByIndex(parameters, fields);
+        return callSql;
+    }
 
-		parameters.setResultsParameter(RET_CODE, extractor);
-		return callSql;
-	}
+    protected String prepareSpCallForNameOrSpt(String spName, StatementParameters parameters, Map<String, ?> fields) {
+	    String callSql = buildCallSql(spName, fields.size());
+        if(Boolean.parseBoolean(getTaskSetting(CALL_SP_BY_NAME)))
+            addParametersByName(parameters, fields);
+        else
+            addParametersByIndex(parameters, fields);
+        return callSql;
+    }
 }

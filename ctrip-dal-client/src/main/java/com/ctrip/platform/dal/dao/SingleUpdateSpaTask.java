@@ -19,7 +19,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		String updateSPA = String.format(UPDATE_SPA_TPL, tableName);
 		
 		StatementParameters parameters = new StatementParameters();
-		String callSql = prepareSpCallForUpdate(updateSPA, parameters, fields);
+		String callSql = prepareSpCall(updateSPA, parameters, fields);
 
 		if (taskContext instanceof DalContextConfigure)
 			((DalContextConfigure) taskContext).addTables(tableName);
@@ -30,4 +30,11 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		} else
 			throw new DalRuntimeException("The client is not instance of DalClient");
 	}
+
+	@Override
+    protected String prepareSpCallForSqlServer(String spName, StatementParameters parameters, Map<String, ?> fields) {
+        String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
+        addParametersByIndexNotNullField(parameters, fields);
+        return callSql;
+    }
 }

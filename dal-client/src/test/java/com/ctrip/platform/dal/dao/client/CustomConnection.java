@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.client.DatabaseCategory;
+package com.ctrip.platform.dal.dao.client;
 
 import java.sql.*;
 import java.util.Map;

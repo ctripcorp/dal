@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.client.DatabaseCategory.CustomConnection;
 import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 import org.junit.*;
 import com.ctrip.platform.dal.dao.task.SqlServerTestInitializer;

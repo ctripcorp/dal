@@ -30,4 +30,11 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 		} else
 			throw new DalRuntimeException("The client is not instance of DalClient");
 	}
+
+	@Override
+    protected String prepareSpCallForSqlServer(String spName, StatementParameters parameters, Map<String, ?> fields) {
+        String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
+        addParametersByIndexNotNullField(parameters, fields);
+        return callSql;
+    }
 }

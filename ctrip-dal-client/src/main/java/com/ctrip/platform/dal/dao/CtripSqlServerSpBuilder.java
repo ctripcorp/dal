@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.Map;
+
 public class CtripSqlServerSpBuilder {
     private static final String SQLSERVER_TMPL_CALL = "exec %s %s";
     private static final String SQLSERVER_TMPL_SET_VALUE = "@%s=?";
@@ -14,6 +16,17 @@ public class CtripSqlServerSpBuilder {
                 valuesSb.append(COLUMN_SEPARATOR);
         }
 
+        return String.format(SQLSERVER_TMPL_CALL, spName, valuesSb.toString());
+    }
+
+    public static String buildSqlServerCallSqlNotNullField(String spName, Map<String, ?> fields) {
+        StringBuilder valuesSb = new StringBuilder();
+        for (Map.Entry<String, ?> field : fields.entrySet()) {
+            if (field.getValue() != null) {
+                valuesSb.append(String.format(SQLSERVER_TMPL_SET_VALUE, field.getKey())).append(COLUMN_SEPARATOR);
+            }
+        }
+        valuesSb = valuesSb.delete(valuesSb.length() - 2, valuesSb.length());
         return String.format(SQLSERVER_TMPL_CALL, spName, valuesSb.toString());
     }
 }

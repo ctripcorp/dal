@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 
 public abstract class ConnectionAction<T> {
     public DalEventEnum operation;
@@ -297,6 +298,9 @@ public abstract class ConnectionAction<T> {
     }
 
     private void handleException(Throwable e) throws SQLException {
+        if (e instanceof TransactionSystemException) {
+            throw (TransactionSystemException) e;
+        }
         if (e != null)
             throw e instanceof SQLException ? (SQLException) e : DalException.wrap(e);
     }

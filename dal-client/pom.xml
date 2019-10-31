@@ -7,7 +7,6 @@
     <version>2.0.1-SNAPSHOT</version>
     <properties>
         <dal-cluster.version>1.0.1-SNAPSHOT</dal-cluster.version>
-        <ver.version>${project.version}</ver.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
         <commons-codec-version>1.8</commons-codec-version>
         <sqljdbc-version>6.4.0.jre7.ctrip</sqljdbc-version>

@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.platform.dal.dao.*;
+import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,6 +24,10 @@ public class DalTransactionManagerTest {
 	
 	private static DalConnectionManager getDalConnectionManager() throws Exception {
 		return new DalConnectionManager(logicDbName, DalClientFactory.getDalConfigure());
+	}
+
+	private static CustomDalConnectionManager getCustomDalConnectionManager() throws Exception {
+		return new CustomDalConnectionManager(logicDbName, DalClientFactory.getDalConfigure());
 	}
 	
 	@Test
@@ -181,6 +186,26 @@ public class DalTransactionManagerTest {
 		} catch (Exception e) {
 			assertFalse(DalTransactionManager.isInTransaction());
 			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testDoInTransactionCommitFail() {
+		final DalHints hints = new DalHints();
+		try {
+			final DalTransactionManager test = new DalTransactionManager(getCustomDalConnectionManager());
+			ConnectionAction<?> action = new ConnectionAction<Object>() {
+				public Object execute(){
+					return new Object();
+				}
+			};
+			test.doInTransaction(action, hints);
+			fail();
+		} catch (Exception e) {
+		    e.printStackTrace();
+            if (!(e instanceof TransactionSystemException)) {
+                fail();
+            }
 		}
 	}
 

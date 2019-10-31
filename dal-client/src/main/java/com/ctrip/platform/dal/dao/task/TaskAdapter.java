@@ -237,6 +237,20 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 	}
 
 	/**
+	 * According to DBA, call SP by parameter name will invoke sp_sproc_columns to get SP metadata,  this is a
+	 * very costly operation. To avoid the cost, it is required to call sp by parameter index instead of name
+	 */
+	public void addParametersByIndexNotNullField(StatementParameters parameters,
+									 Map<String, ?> entries) {
+		int index = parameters.size() + 1;
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			if (entry.getValue() != null) {
+				addParameterByIndex(parameters, index++, entry.getKey(), entry.getValue());
+			}
+		}
+	}
+
+	/**
 	 * According to DBA, call SP by parameter name will invoke sp_sproc_columns to get SP metadata,  this is a 
 	 * very costly operation. To avoid the cost, it is required to call sp by parameter index instead of name
 	 */

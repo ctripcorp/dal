@@ -8,7 +8,7 @@ public class MockDataSourceSwitchListenerOne implements DataSourceSwitchListener
 
     private int sleep = 100;
     @Override
-    public void preHandle() {
+    public void execute() {
         try {
             Thread.sleep(sleep);
         } catch (InterruptedException e) {

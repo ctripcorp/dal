@@ -15,8 +15,8 @@ public class DALServiceTable {
 	@Id
 	@Column(name="ID")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Type(value= Types.BIGINT)
-	private Long iD;
+	@Type(value= Types.INTEGER)
+	private Integer iD;
 
 
 	@Column(name="Name")
@@ -31,11 +31,11 @@ public class DALServiceTable {
 //	@Type(value= Types.TIMESTAMP)
 //	private Timestamp birth;
 
-	public Long getID() {
+	public Integer getID() {
 		return iD;
 	}
 
-	public void setID(Long iD) {
+	public void setID(Integer iD) {
 
 		this.iD = iD;
 	}

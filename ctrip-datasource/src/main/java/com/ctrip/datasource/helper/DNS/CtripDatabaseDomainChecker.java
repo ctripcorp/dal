@@ -128,7 +128,7 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
                         continue;
 
                     if (!ip.equals(currentIP)) {
-                        ipMap.put(key, ip);
+                        ipMap.put(key, currentIP);
                         writeLog(key, domain, ip, currentIP);
 
                         // refresh datasource

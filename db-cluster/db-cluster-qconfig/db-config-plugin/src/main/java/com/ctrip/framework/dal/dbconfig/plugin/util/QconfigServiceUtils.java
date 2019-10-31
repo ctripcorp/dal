@@ -9,6 +9,7 @@ import qunar.tc.qconfig.common.bean.PaginationResult;
 import qunar.tc.qconfig.common.exception.QServiceException;
 import qunar.tc.qconfig.plugin.ConfigDetail;
 import qunar.tc.qconfig.plugin.ConfigField;
+import qunar.tc.qconfig.plugin.PluginPredicate;
 import qunar.tc.qconfig.plugin.QconfigService;
 
 import java.io.IOException;
@@ -22,8 +23,10 @@ public class QconfigServiceUtils {
     private static final String TITAN_PLUGIN_TRANSACTION_WRITE = "TitanQconfigPlugin.Qconfig.Write";
     private static final String TITAN_PLUGIN_TRANSACTION_READ = "TitanQconfigPlugin.Qconfig.Read";
 
+    private static final PluginPredicate<ConfigDetail> titanPluginPredicate = new TitanPluginPredicate();
+
     // batch save
-    public static int batchSave(QconfigService qconfigService, String handlerName, List<ConfigDetail> configDetails, boolean isPublic, String operator, String ip) throws QServiceException {
+    public static int batchSave(QconfigService qconfigService, String handlerName, List<ConfigDetail> configDetails, boolean isPublic, String operator, String ip, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
         checkParameter(qconfigService, handlerName);
         int result = 0;
         if (configDetails != null && !configDetails.isEmpty()) {
@@ -32,8 +35,12 @@ public class QconfigServiceUtils {
                 t.addData("*count", configDetails.size());
                 if (!Strings.isNullOrEmpty(operator) && !Strings.isNullOrEmpty(ip)) {
                     result = qconfigService.batchSave(configDetails, isPublic, operator, ip);
-                } else {
+                }
+                else if (pluginPredicate == null) {
                     result = qconfigService.batchSave(configDetails, isPublic);
+                }
+                else {
+                    result = qconfigService.batchSave(configDetails, isPublic, pluginPredicate);
                 }
                 t.setStatus(Message.SUCCESS);
             } catch (Exception e) {
@@ -49,7 +56,11 @@ public class QconfigServiceUtils {
 
     // batch save
     public static int batchSave(QconfigService qconfigService, String handlerName, List<ConfigDetail> configDetails, boolean isPublic) throws QServiceException {
-        return batchSave(qconfigService, handlerName, configDetails, isPublic, null, null);
+        return batchSave(qconfigService, handlerName, configDetails, isPublic, null, null, null);
+    }
+
+    public static int batchSave(QconfigService qconfigService, String handlerName, List<ConfigDetail> configDetails, boolean isPublic, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
+        return batchSave(qconfigService, handlerName, configDetails, isPublic, null, null, pluginPredicate);
     }
 
     public static PaginationResult<ConfigDetail> query(QconfigService qconfigService, String handlerName, ConfigField configField, int currentPage, int pageSize) throws QServiceException {
@@ -146,6 +157,10 @@ public class QconfigServiceUtils {
             contentProp = new Properties();
         }
         return contentProp;
+    }
+
+    public static PluginPredicate<ConfigDetail> getTitanPluginPredicate() {
+        return titanPluginPredicate;
     }
 
 }

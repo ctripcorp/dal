@@ -219,7 +219,7 @@ public class TitanKeyForceDataWashHandler extends BaseAdminHandler implements Ti
                     cd.setVersion(-2);  //修改
                     cd.setContent(newEncText);
                 }
-                QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyForceDataWashHandler", cdList, true, operator, remoteIp);
+                QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyForceDataWashHandler", cdList, true, operator, remoteIp, null);
                 String savedDataIds = sb.toString();
                 Cat.logEvent("TitanQconfigPlugin.SslCode.DataWash", "TitanFile.reEncrypt", Event.SUCCESS, "savedDataIds=[" + savedDataIds + "] data wash success!");
             }

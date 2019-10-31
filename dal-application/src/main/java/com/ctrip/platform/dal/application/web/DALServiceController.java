@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -114,21 +116,15 @@ public class DALServiceController {
         return "ok";
     }
 
-    @RequestMapping(value = "/unhealthy")
-    @ResponseBody
-    public String healthCheckException() throws Exception {
-        throw new Exception("test unhealthy");
+    @RequestMapping(value = "/healthStatus")
+    public void healthCheck(HttpServletRequest request, HttpServletResponse response, @RequestParam boolean needFail) throws Exception {
+        response.setHeader("Content-type", "application/json");
+        if(!needFail){
+            response.getWriter().write("ok");
+        }else {
+            response.getWriter().write("fail");
+            response.setStatus(555);
+        }
     }
 
-    @RequestMapping(value = "/healthy")
-    @ResponseBody
-    public String healthCheck() throws Exception {
-        return "ok";
-    }
-
-    @RequestMapping(value = "/healthyBlank")
-    @ResponseBody
-    public void healthCheckBlank() throws Exception {
-        int i=80,j=80;
-    }
 }

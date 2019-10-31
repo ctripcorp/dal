@@ -207,6 +207,8 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
         if (configDetailList != null && !configDetailList.isEmpty()) {
             //已经存在，更新
             ConfigDetail configDetail = configDetailList.get(0);    //get first
+            ConfigDetail oldConfig = new ConfigDetail(configDetail.getConfigField(), configDetail.getVersion(), configDetail.getContent(), configDetail.getChecksum());
+            configDetail.setOldConfigDetail(oldConfig);
             String encryptOldConf = configDetail.getContent();
             Properties oldProperties = CommonHelper.parseString2Properties(encryptOldConf);
 
@@ -215,7 +217,7 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
             //merge update
             Properties mergeProp = CommonHelper.merge(rawProp, oldDecryptProp);
             //field 'version' increase one    [2017-09-01]
-            CommonHelper.increaseVersionInProperties(mergeProp);
+            CommonHelper.increaseVersionInProperties(mergeProp, getQconfigService().getVersionIncrenment());
 
             //check db connection
             checkDbConnection(config, mergeProp, env);
@@ -228,7 +230,8 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
             configDetail.setContent(encryptText);
 
             //save to qconfig with public
-            QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyPostHandler", Lists.newArrayList(configDetail), true);
+            QconfigServiceUtils.batchSave(getQconfigService(), "TitanKeyPostHandler", Lists.newArrayList(configDetail), true,
+                    QconfigServiceUtils.getTitanPluginPredicate());
 
             // 更新索引文件 [2018-09-26]
             boolean indexUpdateEnabled = false;
@@ -256,7 +259,7 @@ public class TitanKeyPostHandler extends BaseAdminHandler implements TitanConsta
             //新增
 
             //field 'version' increase one    [2017-09-01]
-            CommonHelper.increaseVersionInProperties(rawProp);
+            CommonHelper.increaseVersionInProperties(rawProp, getQconfigService().getVersionIncrenment());
 
             //check db connection
             checkDbConnection(config, rawProp, env);

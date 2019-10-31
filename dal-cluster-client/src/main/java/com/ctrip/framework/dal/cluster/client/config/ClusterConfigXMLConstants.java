@@ -25,22 +25,20 @@ public interface ClusterConfigXMLConstants {
     String INDEX = "index";
     String MASTER_DOMAIN = "masterDomain";
     String MASTER_PORT = "masterPort";
-    String MASTER_KEYS = "masterKey";
+    String MASTER_KEYS = "masterTitanKeys";
     String SLAVE_DOMAIN = "slaveDomain";
     String SLAVE_PORT = "slavePort";
-    String SLAVE_KEYS = "slaveKey";
+    String SLAVE_KEYS = "slaveTitanKeys";
     String ROLE = "role";
     String IP = "ip";
     String PORT = "port";
     String DB_NAME = "dbName";
     String UID = "uid";
-    String PWD = "pwd";
+    String PWD = "password";
     String READ_WEIGHT = "readWeight";
     String TAGS = "tags";
     String VALUE = "value";
     String DEFAULT = "default";
     String CLASS = "class";
-
-    String KEY_SEPARATOR = ",";
 
 }

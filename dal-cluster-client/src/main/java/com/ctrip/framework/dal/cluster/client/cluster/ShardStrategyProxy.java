@@ -25,27 +25,28 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
 
     @Override
     public Integer getDbShard(String tableName, DbShardContext context) {
-        return getTableStrategy(tableName).getDbShard(tableName, context);
+        return getAndCheckTableStrategy(tableName).getDbShard(tableName, context);
     }
 
     @Override
     public boolean tableShardingEnabled(String tableName) {
-        return getTableStrategy(tableName).tableShardingEnabled(tableName);
+        ShardStrategy strategy = getTableStrategy(tableName);
+        return strategy != null && strategy.tableShardingEnabled(tableName);
     }
 
     @Override
     public String getTableShard(String tableName, TableShardContext context) {
-        return getTableStrategy(tableName).getTableShard(tableName, context);
+        return getAndCheckTableStrategy(tableName).getTableShard(tableName, context);
     }
 
     @Override
     public Set<String> getAllTableShards(String tableName) {
-        return getTableStrategy(tableName).getAllTableShards(tableName);
+        return getAndCheckTableStrategy(tableName).getAllTableShards(tableName);
     }
 
     @Override
     public String getTableShardSeparator(String tableName) {
-        return getTableStrategy(tableName).getTableShardSeparator(tableName);
+        return getAndCheckTableStrategy(tableName).getTableShardSeparator(tableName);
     }
 
     @Override
@@ -57,9 +58,20 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
         ShardStrategy strategy = tableStrategies.get(tableName);
         if (strategy == null)
             strategy = defaultStrategy;
+        return strategy;
+    }
+
+    private ShardStrategy getAndCheckTableStrategy(String tableName) {
+        ShardStrategy strategy = tableStrategies.get(tableName);
+        if (strategy == null)
+            strategy = defaultStrategy;
+        checkShardStrategy(strategy, tableName);
+        return strategy;
+    }
+
+    private void checkShardStrategy(ShardStrategy strategy, String tableName) {
         if (strategy == null)
             throw new ClusterRuntimeException(String.format("shard strategy not found for table '%s'", tableName));
-        return strategy;
     }
 
     public void addStrategy(ShardStrategy strategy) {

@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.service.builder;
 
-import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseCluster;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseDatabase;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseShard;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
 import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;

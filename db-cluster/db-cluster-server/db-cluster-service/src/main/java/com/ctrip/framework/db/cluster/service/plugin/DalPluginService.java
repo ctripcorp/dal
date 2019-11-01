@@ -3,7 +3,7 @@ package com.ctrip.framework.db.cluster.service.plugin;
 import com.ctrip.framework.db.cluster.domain.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.DalClusterGetResponse;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.DalClusterUpdateRequest;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.util.HttpUtils;

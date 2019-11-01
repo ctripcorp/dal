@@ -1,6 +1,6 @@
 package com.ctrip.framework.db.cluster.service;
 
-import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.domain.PluginStatusCode;
 import com.ctrip.framework.db.cluster.entity.Cluster;

@@ -33,4 +33,8 @@ public class ResponseModel {
         return new ResponseModel(ResponseStatus.FORBIDDEN.getStatus(), ResponseStatus.FORBIDDEN.getDesc(), null);
     }
 
+    public static ResponseModel forbiddenResponse(final String message) {
+        return new ResponseModel(ResponseStatus.FORBIDDEN.getStatus(), ResponseStatus.FORBIDDEN.getDesc(), message);
+    }
+
 }

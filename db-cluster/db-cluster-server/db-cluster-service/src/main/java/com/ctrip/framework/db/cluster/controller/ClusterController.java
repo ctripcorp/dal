@@ -4,6 +4,7 @@ import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
+import com.ctrip.framework.db.cluster.util.IpUtils;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.ResponseModel;
@@ -75,7 +76,8 @@ public class ClusterController {
 
             // access check
             if (!siteAccessChecker.isAllowed(request)) {
-                return ResponseModel.forbiddenResponse();
+                String ip = IpUtils.getRequestIp(request);
+                return ResponseModel.forbiddenResponse(String.format("Ip address is not in the whitelist, ip = %s", ip));
             }
 
             final ClusterDTO clusterDTO;

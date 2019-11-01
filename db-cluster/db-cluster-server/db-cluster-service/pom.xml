@@ -2,21 +2,20 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ctrip.framework.dal</groupId>
-        <artifactId>db-cluster</artifactId>
-        <version>1.0.1</version>
+        <artifactId>db-cluster-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-
     <artifactId>db-cluster-service</artifactId>
     <packaging>war</packaging>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.ctrip.framework.dal</groupId>
             <artifactId>db-cluster-common</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.ctrip.framework</groupId>
             <artifactId>vi</artifactId>
@@ -70,13 +69,16 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- for test -->
 
+        <!-- java mail begin-->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.5</version>
         </dependency>
+        <!-- java mail end-->
+
+        <!-- for test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
@@ -90,6 +92,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
 </project>

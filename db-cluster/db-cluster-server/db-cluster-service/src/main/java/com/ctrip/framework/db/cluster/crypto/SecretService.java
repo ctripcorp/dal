@@ -1,7 +1,7 @@
 package com.ctrip.framework.db.cluster.crypto;
 
-import com.ctrip.framework.db.cluster.config.ConfigService;
-import com.ctrip.framework.db.cluster.util.HttpUtil;
+import com.ctrip.framework.db.cluster.service.config.ConfigService;
+import com.ctrip.framework.db.cluster.util.HttpUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -38,7 +38,7 @@ public class SecretService {
             t.addData("sslcode", keyServiceUri);
 
             String requestBody = "{\"SslCode\":\"" + sslCode + "\",\"InputString\":\"String\",\"EncryptionType\":\"0\"}";
-            String responseBody = HttpUtil.getInstance().sendPost(keyServiceUri, null, requestBody);
+            String responseBody = HttpUtils.getInstance().sendPost(keyServiceUri, null, requestBody);
             signature = parseBody(responseBody);
 
             t.setStatus(Message.SUCCESS);

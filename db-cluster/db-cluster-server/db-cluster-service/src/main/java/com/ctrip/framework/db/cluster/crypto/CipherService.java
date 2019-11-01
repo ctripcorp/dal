@@ -1,5 +1,6 @@
 package com.ctrip.framework.db.cluster.crypto;
 
+import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.dianping.cat.Cat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class CipherService {
         secretKeySpec = new SecretKeySpec(enCodeFormat, "AES");
     }
 
-    public String encrypt(String content) throws Exception {
+    public String encrypt(String content) {
         Cipher cipher = encryptCipher.get();
         try {
             byte[] byteContent = content.getBytes("utf-8");
@@ -60,11 +61,11 @@ public class CipherService {
             return parseByte2HexStr(result);
         } catch (Exception e) {
             Cat.logError(e);
-            throw e;
+            throw new DBClusterServiceException("加密失败.");
         }
     }
 
-    public String decrypt(String content) throws Exception {
+    public String decrypt(String content) {
         Cipher cipher = decryptCipher.get();
         try {
             byte[] byteContent = parseHexStr2Byte(content);
@@ -73,7 +74,7 @@ public class CipherService {
             return new String(result);
         } catch (Exception e) {
             Cat.logError(e);
-            throw e;
+            throw new DBClusterServiceException("解密失败.");
         }
     }
 

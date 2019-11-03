@@ -3,7 +3,10 @@ package com.ctrip.framework.dal.dbconfig.plugin;
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandlerDispatcher;
-import com.ctrip.framework.dal.dbconfig.plugin.handler.titan.*;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.dal.DalClusterAddHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.dal.DalClusterGetHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.dal.DalClusterReleaseHandler;
+import com.ctrip.framework.dal.dbconfig.plugin.handler.dal.DalClusterUpdateHandler;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import qunar.tc.qconfig.plugin.PluginRegisterPoint;
@@ -14,9 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * @author c7ch23en
+ * Created by shenjie on 2019/4/24.
  */
-public class TitanAdminPlugin extends AdminPluginAdapter {
+public class DalAdminPlugin extends AdminPluginAdapter {
 
     private AdminHandlerDispatcher dispatcher;
 
@@ -25,28 +28,10 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
         dispatcher = new AdminHandlerDispatcher();
         PluginConfigManager pluginConfigManager = getPluginConfigManager();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
-        TitanKeyMHAUpdateHandler titanKeyMHAUpdateHandler = new TitanKeyMHAUpdateHandler(getQconfigService(), pluginConfigManager);
-        KeyListByDbNameHandler keyListByDbNameHandler = new KeyListByDbNameHandler(getQconfigService(), pluginConfigManager);
-
-        adminHandlers.add(new TitanKeyPostHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyForceDataWashHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyGetHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyListByTimeHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyListHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(titanKeyMHAUpdateHandler);
-        adminHandlers.add(new TitanKeySSLCodeGetHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeySSLCodeUpdateHandler(getQconfigService(), pluginConfigManager));
-
-        adminHandlers.add(new DbNameListHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(keyListByDbNameHandler);
-        adminHandlers.add(new WhiteListAddHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new WhiteListDeleteHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new IndexBuildHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyPermissionMergeHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new FreeVerifyAddHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new FreeVerifyDeleteHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyUpdateHandler(getQconfigService(), pluginConfigManager, keyListByDbNameHandler, titanKeyMHAUpdateHandler));
-
+        adminHandlers.add(new DalClusterAddHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(new DalClusterReleaseHandler(getQconfigService(), pluginConfigManager));
+//        adminHandlers.add(new DalClusterUpdateHandler(getQconfigService(), pluginConfigManager));
+//        adminHandlers.add(new DalClusterGetHandler(getQconfigService(), pluginConfigManager));
 
         for (AdminHandler handler : adminHandlers) {
             dispatcher.register(handler);
@@ -90,12 +75,11 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
     @Override
     public List<PluginRegisterPoint> registerPoints() {
         List<PluginRegisterPoint> registerPointList = new ImmutableList.Builder<PluginRegisterPoint>()
-                .add(PluginRegisterPoint.ADM_TITAN_GET)
-                .add(PluginRegisterPoint.ADM_TITAN_POST)
-                .add(PluginRegisterPoint.ADM_TITAN_PUT)
-                .add(PluginRegisterPoint.ADM_TITAN_DELETE)
+                .add(PluginRegisterPoint.ADM_DAL_GET)
+                .add(PluginRegisterPoint.ADM_DAL_POST)
+                .add(PluginRegisterPoint.ADM_DAL_PUT)
+                .add(PluginRegisterPoint.ADM_DAL_DELETE)
                 .build();
         return registerPointList;
     }
-
 }

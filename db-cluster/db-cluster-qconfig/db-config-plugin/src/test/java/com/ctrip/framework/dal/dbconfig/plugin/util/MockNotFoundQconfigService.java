@@ -2,9 +2,6 @@ package com.ctrip.framework.dal.dbconfig.plugin.util;
 
 import com.ctrip.framework.dal.dbconfig.plugin.constant.DalConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.constant.TitanConstants;
-import com.ctrip.framework.dal.dbconfig.plugin.entity.dal.configure.*;
-import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterEntity;
-import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.Node;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -16,53 +13,31 @@ import qunar.tc.qconfig.plugin.ConfigField;
 import qunar.tc.qconfig.plugin.PluginPredicate;
 import qunar.tc.qconfig.plugin.QconfigService;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
-import static com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants.MONGO_CLIENT_APP_ID;
-
 /**
- * Created by lzyan on 2017/9/6.
+ * Created by shenjie on 2019/5/7.
  */
-public class MockQconfigService implements QconfigService, TitanConstants, DalConstants {
+public class MockNotFoundQconfigService implements QconfigService, TitanConstants, DalConstants {
     @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
-        return save(list, isPublic, operator, remoteIp, null);
-    }
-
-    @Override
-    public int batchSave(List<ConfigDetail> list, boolean b, String s, String s1, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
-        return 0;
+        return save(list, isPublic, operator, remoteIp);
     }
 
     @Override
     public int batchSave(List<ConfigDetail> list, boolean isPublic) throws QServiceException {
-        return save(list, isPublic, null, null, null);
+        return save(list, isPublic, null, null);
     }
 
-    @Override
-    public int batchSave(List<ConfigDetail> list, boolean b, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
-        return save(list, b, null, null, pluginPredicate);
-    }
-
-    private int save(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
+    private int save(List<ConfigDetail> list, boolean isPublic, String operator, String remoteIp) throws QServiceException {
         Set<String> configFields = Sets.newHashSetWithExpectedSize(list.size());
         for (ConfigDetail configDetail : list) {
             ConfigField configField = configDetail.getConfigField();
-//            if (pluginPredicate != null && pluginPredicate.test(configDetail, getCurrentConfigDetail(configField))) {
-//                configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
-//            }
-            if (pluginPredicate != null && pluginPredicate.test(configDetail, buildTestConfigDetail(configField.getGroup(), configField.getDataId(), configField.getProfile()))) {
-                configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
-            }
-            if (pluginPredicate == null) {
-                configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
-            }
-            System.out.println("---------------save begin-----------------------");
+            configFields.add(configField.getGroup() + "-" + configField.getDataId() + "-" + configField.getProfile());
+            System.out.println("------------------qconfig service begin-------------------");
             System.out.println(configDetail.getContent());
-            System.out.println("---------------save end-----------------------");
+            System.out.println("------------------qconfig service end---------------------");
         }
 
         if (configFields.size() != list.size()) {
@@ -70,20 +45,6 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
         }
 
         return 1;
-    }
-
-    public ConfigDetail getCurrentConfigDetail(ConfigField configField) {
-        ConfigDetail cd = buildTestConfigDetail(configField.getGroup(), configField.getDataId(), configField.getProfile());
-        try {
-            Properties currentConfig = CommonHelper.parseString2Properties(cd.getContent());
-            String currentVersion = currentConfig.getProperty(TitanConstants.VERSION);
-            currentConfig.setProperty(TitanConstants.VERSION, currentVersion + 1);
-            String currentContent = CommonHelper.parseProperties2String(currentConfig);
-            cd.setContent(currentContent);
-        } catch (Exception e) {
-            //ignore
-        }
-        return cd;
     }
 
     @Override
@@ -102,40 +63,13 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
     @Override
     public List<ConfigDetail> currentConfigWithoutPriority(List<ConfigField> list) throws QServiceException {
         String groupId = list.get(0).getGroup();
-        String dataId = list.get(0).getDataId();
         if (TITAN_QCONFIG_PLUGIN_APPID.equals(groupId)) {
             String profile = "fat:";
-            ConfigField configField = new ConfigField(groupId, dataId, profile);
+            ConfigField configField = new ConfigField(groupId, TITAN_QCONFIG_PLUGIN_CONFIG_FILE, profile);
             ConfigDetail cd = new ConfigDetail();
-            if (dataId.equalsIgnoreCase(TITAN_QCONFIG_PLUGIN_CONFIG_FILE)) {
-                cd.setConfigField(list.get(0));
-                cd.setVersion(1L);
-                cd.setContent(buildPluginConfigFileContent());
-            } else {
-                cd.setConfigField(configField);
-                cd.setVersion(1L);
-                cd.setContent(buildDBNameKeyContent());
-            }
-            return Lists.newArrayList(cd);
-
-        } else if (CLUSTER_CONFIG_STORE_APP_ID.equals(groupId)) {
-            ConfigDetail cd = new ConfigDetail();
-            cd.setConfigField(list.get(0));
+            cd.setConfigField(configField);
             cd.setVersion(1L);
-            cd.setContent(buildTestMysqlClusterContent(null));
-            return Lists.newArrayList(cd);
-        } else if (TITAN_QCONFIG_KEYS_APPID.equals(groupId)) {
-            ConfigDetail cd = new ConfigDetail();
-            cd.setConfigField(list.get(0));
-            cd.setVersion(1L);
-            cd.setContent(buildTestTitanKeyContent(null));
-
-            return Lists.newArrayList(cd);
-        } else if (MONGO_CLIENT_APP_ID.equals(groupId)) {
-            ConfigDetail cd = new ConfigDetail();
-            cd.setConfigField(list.get(0));
-            cd.setVersion(1L);
-            cd.setContent(buildTestMongoClusterContent(null));
+            cd.setContent(buildPluginConfigFileContent());
             return Lists.newArrayList(cd);
         } else {
             return Lists.newArrayList();
@@ -149,7 +83,7 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
 
     @Override
     public String getClientAppid() {
-        return "100020032";
+        return "100007326";
     }
 
     @Override
@@ -157,11 +91,6 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
         ConfigDetail cd = buildTestConfigDetail(group, null, profile);
         List<ConfigDetail> configDetailList = Lists.newArrayList(cd);
         return configDetailList;
-    }
-
-    @Override
-    public int getVersionIncrenment() {
-        return 2;
     }
 
     //build test ConfigDetail
@@ -207,18 +136,14 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
         sb.append("index.dbName.key.shard.num=30").append(returnFlag);
         sb.append("plugin.config.refresh.interval.ms=1000").append(returnFlag);
         sb.append("no.parent.suffix=-AWS,lpt").append(returnFlag);
-        sb.append("parent.env.list.children.can.fetch=fat").append(returnFlag);
-        return sb.toString();
-    }
 
-    private String buildDBNameKeyContent() {
-        return "mysqldaltest01db=mysqldaltest01db_W";
+        return sb.toString();
     }
 
     //build titan test content
     public String buildTestTitanKeyContent(String keyName) {
         if (Strings.isNullOrEmpty(keyName)) {
-            keyName = "mysqldaltest01db_W";
+            keyName = "titantest_lzyan_v_01";
         }
         String returnFlag = "\n";
         StringBuilder sb = new StringBuilder();
@@ -232,7 +157,6 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
         sb.append("dbName=mysqldaltest01db").append(returnFlag);
         sb.append("providerName=MySql.Data.MySqlClient").append(returnFlag);
         sb.append("enabled=true").append(returnFlag);
-        sb.append("permissions=100020032,100001680").append(returnFlag);
         sb.append("updateUser=lzyan").append(returnFlag);
         sb.append("createUser=lzyan").append(returnFlag);
         sb.append("timeOut=30").append(returnFlag);
@@ -241,58 +165,18 @@ public class MockQconfigService implements QconfigService, TitanConstants, DalCo
         return sb.toString();
     }
 
-
-    //build titan test content
-    public String buildTestMysqlClusterContent(String clusterName) {
-        if (Strings.isNullOrEmpty(clusterName)) {
-            clusterName = "demoCluster";
-        }
-        Database database = new Database("master", "127.0.0.1", 8080, "demoDbShard01",
-                "35CC911241C1F1DD3241DA6FCB4B1A56", "B66C59EC4E2A996F781594974B191279", 1, "sun");
-        DatabaseShard databaseShard = new DatabaseShard(0, "masterDomain", "slaveDomain", 8080, 8080,
-                "masterTitanKey", "slaveTitanKey", Lists.newArrayList(database, database));
-
-        DatabaseShards databaseShards = new DatabaseShards(Lists.newArrayList(databaseShard, databaseShard));
-
-        Cluster cluster = new Cluster(clusterName, "mysql", 1, databaseShards);
-        cluster.setSslCode("VZ00000000000441");
-        cluster.setOperator("testUser");
-        cluster.setUpdateTime(DalClusterUtils.formatDate(new Date()));
-
-        DalConfigure dalConfigure = new DalConfigure(cluster);
-        String content = null;
-        try {
-            content = XmlUtils.toXml(dalConfigure);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return content;
+    @Override
+    public int batchSave(List<ConfigDetail> configDetails, boolean isPublic, String operator, String ip, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
+        throw new QServiceException("unsupported operation");
     }
 
-
-    //build test content
-    public String buildTestMongoClusterContent(String clusterName) {
-        if (Strings.isNullOrEmpty(clusterName)) {
-            clusterName = "demoMongoCluster";
-        }
-
-        MongoClusterEntity mongoCluster = new MongoClusterEntity();
-        Node node = new Node("mongo.node.host", 55944);
-
-        mongoCluster.setNodes(Lists.newArrayList(node, node, node));
-        mongoCluster.setClusterName(clusterName);
-        mongoCluster.setClusterType("sharding");
-        mongoCluster.setDbName("mongoDBName");
-        mongoCluster.setUserId("35CC911241C1F1DD3241DA6FCB4B1A56");
-        mongoCluster.setPassword("B66C59EC4E2A996F781594974B191279");
-        mongoCluster.setVersion(1);
-        mongoCluster.setOperator("testUser");
-        mongoCluster.setSslCode("VZ00000000000441");
-        mongoCluster.setEnabled(true);
-        mongoCluster.setUpdateTime(new Date());
-
-        String content = GsonUtils.t2Json(mongoCluster);
-        return content;
+    @Override
+    public int batchSave(List<ConfigDetail> configDetails, boolean isPublic, PluginPredicate<ConfigDetail> pluginPredicate) throws QServiceException {
+        return batchSave(configDetails, isPublic, null, null, pluginPredicate);
     }
 
+    @Override
+    public int getVersionIncrenment() {
+        return 1;
+    }
 }

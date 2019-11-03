@@ -215,7 +215,7 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
 
     }
 
-    private int updateMhaInput(HttpServletRequest request, MhaInputEntity mhaInputEntity) throws Exception {
+    protected int updateMhaInput(HttpServletRequest request, MhaInputEntity mhaInputEntity) throws Exception {
         String group = TITAN_QCONFIG_KEYS_APPID;   //appId
         String dataId = null;   //fileName
 //        String profile = null;  //env
@@ -260,8 +260,10 @@ public class TitanKeyMHAUpdateHandler extends BaseAdminHandler implements TitanC
                     //field 'mhaLastUpdate' update [2018-12-27]
                     CommonHelper.updateMhaLastUpdateInProperties(mergeProp);
 
-                    //field 'mhaUpdateStartTime' update
-                    CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, request.getAttribute(MHA_START_TIME));
+                    if (request != null) {
+                        //field 'mhaUpdateStartTime' update
+                        CommonHelper.updateMhaUpdateStartTimeInProperties(mergeProp, request.getAttribute(MHA_START_TIME));
+                    }
 
                     if (needCheckDbConnection) {
                         //decrypt

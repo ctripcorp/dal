@@ -1,9 +1,8 @@
-package com.ctrip.framework.dal.dbconfig.plugin.handler.mongo;
+package com.ctrip.framework.dal.dbconfig.plugin.handler.dal;
 
 import com.ctrip.framework.dal.dbconfig.plugin.config.PluginConfigManager;
-import com.ctrip.framework.dal.dbconfig.plugin.constant.MongoConstants;
 import com.ctrip.framework.dal.dbconfig.plugin.context.EnvProfile;
-import com.ctrip.framework.dal.dbconfig.plugin.entity.mongo.MongoClusterGetOutputEntity;
+import com.ctrip.framework.dal.dbconfig.plugin.entity.dal.DalClusterEntity;
 import com.ctrip.framework.dal.dbconfig.plugin.handler.AdminHandler;
 import com.ctrip.framework.dal.dbconfig.plugin.util.GsonUtils;
 import com.ctrip.framework.dal.dbconfig.plugin.util.MockQconfigService;
@@ -18,20 +17,23 @@ import qunar.tc.qconfig.plugin.QconfigService;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.ctrip.framework.dal.dbconfig.plugin.constant.CommonConstants.*;
+
 /**
- * Created by shenjie on 2019/5/29.
+ * Created by shenjie on 2019/8/9.
  */
-public class MongoClusterGetHandlerTest implements MongoConstants {
-    private String clusterName = "demoMongoCluster";
+public class DalClusterGetHandlerTest {
     private String env = "fat";
-    private String subEnv = "fat12";
+    private String subEnv = "fat22";
+    private String operator = "testUser";
+    private String clusterName = "dalClusterTest";
     private HttpServletRequest request;
     private AdminHandler handler;
 
-    public MongoClusterGetHandlerTest() {
+    public DalClusterGetHandlerTest() {
         QconfigService service = new MockQconfigService();
         PluginConfigManager pluginConfigManager = PluginConfigManager.getInstance(service);
-        handler = new MongoClusterGetHandler(service, pluginConfigManager);
+        handler = new DalClusterGetHandler(service, pluginConfigManager);
     }
 
     @Before
@@ -54,7 +56,7 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
     }
 
     @Test
-    public void testPostHandle() {
+    public void testPostHandle1() {
         EnvProfile profile = new EnvProfile(env);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
         EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName).anyTimes();
@@ -65,15 +67,14 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
 
-        MongoClusterGetOutputEntity mongoCluster = (MongoClusterGetOutputEntity) result.getAttribute();
-        Assert.assertTrue(mongoCluster instanceof MongoClusterGetOutputEntity);
+        DalClusterEntity dalCluster = (DalClusterEntity) result.getAttribute();
+        Assert.assertTrue(dalCluster instanceof DalClusterEntity);
 
-        String data = GsonUtils.t2Json(mongoCluster);
-        System.out.println("-------------Get mongo cluster begin------------------------------");
+        String data = GsonUtils.t2Json(dalCluster);
+        System.out.println("-------------Get dal cluster begin------------------------------");
         System.out.println(data);
-        System.out.println("-------------Get mongo cluster end------------------------------");
+        System.out.println("-------------Get dal cluster end------------------------------");
     }
-
 
     @Test
     public void testPostHandleSubEnv() {
@@ -87,46 +88,13 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
 
-        MongoClusterGetOutputEntity mongoCluster = (MongoClusterGetOutputEntity) result.getAttribute();
-        Assert.assertTrue(mongoCluster instanceof MongoClusterGetOutputEntity);
+        DalClusterEntity dalCluster = (DalClusterEntity) result.getAttribute();
+        Assert.assertTrue(dalCluster instanceof DalClusterEntity);
 
-        String data = GsonUtils.t2Json(mongoCluster);
-        System.out.println("-------------Get mongo cluster begin------------------------------");
+        String data = GsonUtils.t2Json(dalCluster);
+        System.out.println("-------------Get dal cluster begin------------------------------");
         System.out.println(data);
-        System.out.println("-------------Get mongo cluster end------------------------------");
-    }
-
-
-    //    @Test
-    public void testPostHandleNotExist() {
-        EnvProfile profile = new EnvProfile(env, subEnv);
-        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
-        EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName + "test").anyTimes();
-        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
-        EasyMock.replay(request);
-
-        boolean isSuccess = true;
-        try {
-            PluginResult result = handler.postHandle(request);
-        } catch (Exception e) {
-            System.out.println("exception:" + e.getMessage());
-            isSuccess = false;
-        }
-        assert !isSuccess;
-    }
-
-    //    @Test
-    public void testPostHandleContentEmpty() {
-        EnvProfile profile = new EnvProfile(env, subEnv);
-        EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
-        EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName + "test").anyTimes();
-        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.1").anyTimes();
-        EasyMock.replay(request);
-
-        PluginResult result = handler.postHandle(request);
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result.getCode(), PluginStatusCode.OK);
-        Assert.assertNull(result.getAttribute());
+        System.out.println("-------------Get dal cluster end------------------------------");
     }
 
     @Test
@@ -134,12 +102,11 @@ public class MongoClusterGetHandlerTest implements MongoConstants {
         EnvProfile profile = new EnvProfile(env, subEnv);
         EasyMock.expect(request.getAttribute(REQ_ATTR_ENV_PROFILE)).andReturn(profile).anyTimes();
         EasyMock.expect(request.getAttribute(REQ_ATTR_CLUSTER_NAME)).andReturn(clusterName).anyTimes();
-        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.2").anyTimes();
+        EasyMock.expect(request.getAttribute(PluginConstant.REMOTE_IP)).andReturn("127.0.0.10").anyTimes();
         EasyMock.replay(request);
 
         PluginResult result = handler.postHandle(request);
         Assert.assertNotNull(result);
         Assert.assertNotEquals(result.getCode(), PluginStatusCode.OK);
     }
-
 }

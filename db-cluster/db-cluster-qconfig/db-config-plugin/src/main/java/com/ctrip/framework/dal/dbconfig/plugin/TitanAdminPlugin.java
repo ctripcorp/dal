@@ -45,7 +45,7 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
         adminHandlers.add(new TitanKeyPermissionMergeHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new FreeVerifyAddHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new FreeVerifyDeleteHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyUpdateHandler(getQconfigService(), pluginConfigManager, keyListByDbNameHandler, titanKeyMHAUpdateHandler));
+//        adminHandlers.add(new TitanKeyUpdateHandler(getQconfigService(), pluginConfigManager, keyListByDbNameHandler, titanKeyMHAUpdateHandler));
 
 
         for (AdminHandler handler : adminHandlers) {

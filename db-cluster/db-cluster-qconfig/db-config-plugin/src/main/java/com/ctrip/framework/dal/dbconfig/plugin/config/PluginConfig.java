@@ -82,7 +82,7 @@ public class PluginConfig {
         String topProfile = envProfile.formatTopProfile();
         logger.info("refresh(): refresh [{}] plugin configs begin ...", topProfile);
 
-         Properties newPluginConfigs = getPluginConfigs();
+        Properties newPluginConfigs = getPluginConfigs();
         Cat.logEvent("Plugin.Config.Refresh", topProfile);
         int newPluginConfigSize = (newPluginConfigs == null ? 0 : newPluginConfigs.size());
         logger.info("refresh(): get [{}] new plugin configs, config size is {}", topProfile, newPluginConfigSize);

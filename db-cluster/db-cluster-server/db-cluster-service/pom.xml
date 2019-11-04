@@ -18,6 +18,7 @@
             <groupId>com.ctrip.framework.dal</groupId>
             <artifactId>db-cluster-common</artifactId>
         </dependency>-->
+        <!-- ctrip -->
         <dependency>
             <groupId>com.ctrip.framework</groupId>
             <artifactId>vi</artifactId>
@@ -38,20 +39,34 @@
             <groupId>qunar.common</groupId>
             <artifactId>common-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
+
+        <!-- dal -->
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>ctrip-dal-client</artifactId>
         </dependency>
+
+        <!--fireman-->
+        <dependency>
+            <groupId>com.ctrip.framework.fireman</groupId>
+            <artifactId>fireman</artifactId>
+        </dependency>
+
+        <!-- lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- servlet -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>

@@ -13,6 +13,10 @@ public class Constants {
     // appId
     public static final String TITAN_PLUGIN_APPID = "100010061";
     public static final String MONGO_CLIENT_APPID = "100019648";
+    public static final String DAL_CLUSTER_SERVICE_APPID = "100020032";
+
+    // titan key name
+    public static final String TITAN_KEY_NAME = "fxdalclusterdb_w";
 
     // logic db name
     public static final String DATABASE_SET_NAME = "dalclusterdemodb_w";

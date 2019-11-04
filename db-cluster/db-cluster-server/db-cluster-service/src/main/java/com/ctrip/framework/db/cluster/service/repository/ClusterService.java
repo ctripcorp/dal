@@ -353,7 +353,7 @@ public class ClusterService {
                 if (writeUsers.size() > 1) {
                     throw new IllegalStateException(
                             String.format(
-                                    "每个shard最多只能存在一个write, clusterName = %s, zoneId = %s, shardIndex = %s",
+                                    "每个shard最多只能存在一个write账号, clusterName = %s, zoneId = %s, shardIndex = %s",
                                     clusterName, zoneId, shardDTO.getShardIndex()
                             )
                     );

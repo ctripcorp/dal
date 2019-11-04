@@ -23,7 +23,8 @@
         <java.version>1.8</java.version>
         <framework-bom.version>3.26.0</framework-bom.version>
         <spring-boot.version>1.4.3.RELEASE</spring-boot.version>
-        <dal.version>2.0.0</dal.version>
+        <dal.version>1.18.4</dal.version>
+        <fireman.version>1.0.10</fireman.version>
         <lombok.version>1.16.16</lombok.version>
         <junit.version>4.12</junit.version>
         <mockito-all.version>2.0.2-beta</mockito-all.version>
@@ -71,6 +72,13 @@
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-dal-client</artifactId>
                 <version>${dal.version}</version>
+            </dependency>
+
+            <!--fireman-->
+            <dependency>
+                <groupId>com.ctrip.framework.fireman</groupId>
+                <artifactId>fireman</artifactId>
+                <version>${fireman.version}</version>
             </dependency>
 
             <!-- lombok -->

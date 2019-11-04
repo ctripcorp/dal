@@ -27,7 +27,7 @@ public class ConfigService {
     private static final String KEY_SECRET_SERVICE_URL = "secretServiceUrl";
     private static final String KEY_SSL_CODE = "sslCode";
     private static final String KEY_DB_CONNECTION_CHECK_URL = "dbConnectionCheckUrl";
-    private static final String KEY_DB_CONNECTION_CHECK_ENABLE = "dbConnectionCheckEnable";
+    private static final String KEY_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES = "dbConnectionCheckEnabledReleaseTypes";
     private static final String KEY_PLUGIN_RETRY_TIMES = "pluginRetryTimes";
     private static final String KEY_MAIL_RECEIVERS = "mailReceivers";
     private static final String KEY_HTTP_READ_TIMEOUT_IN_MS = "httpReadTimeoutInMs";
@@ -40,7 +40,6 @@ public class ConfigService {
     private static final String KEY_PORT_REGEX = "portRegex";
     private static final String KEY_IPV4_REGEX = "ipv4Regex";
     private static final String KEY_IPV6_REGEX = "ipv6Regex";
-    private static final String KEY_ZONE_IDS = "";
     // TODO: 2019/11/1 临时
     private static final String KEY_QCONFIG_PLUGIN_SWITCH = "qconfigPluginSwitch";
 
@@ -50,7 +49,8 @@ public class ConfigService {
     private static final String DEFAULT_PLUGIN_TITAN_URL = "http://qconfig.ctripcorp.com/plugins/titan/config";
     private static final String DEFAULT_PLUGIN_MONGO_URL = "http://qconfig.ctripcorp.com/plugins/mongo/config";
     private static final String DEFAULT_PLUGIN_DAL_URL = "http://qconfig.ctripcorp.com/plugins/dal/config";
-    private static final boolean DEFAULT_DB_CONNECTION_CHECK_ENABLE = true;
+    private static final String DEFAULT_DB_CONNECTION_CHECK_URL = "http://mysqlapi.db.ctripcorp.com:8080/database/checktitanconnect";
+    private static final String DEFAULT_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES = "normal_release";
     private static final int DEFAULT_PLUGIN_RETRY_TIMES = 1;
     private static final String DEFAULT_MAIL_RECEIVERS = "shenjie@ctrip.com";
     private static final int DEFAULT_HTTP_READ_TIMEOUT_IN_MS = 10000;
@@ -75,7 +75,7 @@ public class ConfigService {
     private volatile String secretServiceUrl;
     private volatile String sslCode;
     private volatile String dbConnectionCheckUrl;
-    private volatile boolean dbConnectionCheckEnable;
+    private volatile Set<String> dbConnectionCheckEnabledReleaseTypes;
     private volatile int pluginReTryTimes;
     private volatile Set<String> mailReceivers;
     private volatile int httpReadTimeoutInMs;
@@ -108,8 +108,10 @@ public class ConfigService {
         allowedIps = string2Set(configMap.getString(KEY_ALLOWED_IPS, ""));
         secretServiceUrl = configMap.getString(KEY_SECRET_SERVICE_URL, "");
         sslCode = configMap.getString(KEY_SSL_CODE, "");
-        dbConnectionCheckUrl = configMap.getString(KEY_DB_CONNECTION_CHECK_URL, "");
-        dbConnectionCheckEnable = configMap.getBoolean(KEY_DB_CONNECTION_CHECK_ENABLE, DEFAULT_DB_CONNECTION_CHECK_ENABLE);
+        dbConnectionCheckUrl = configMap.getString(KEY_DB_CONNECTION_CHECK_URL, DEFAULT_DB_CONNECTION_CHECK_URL);
+        dbConnectionCheckEnabledReleaseTypes = string2Set(
+                configMap.getString(KEY_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES, DEFAULT_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES)
+        );
         pluginReTryTimes = configMap.getInt(KEY_PLUGIN_RETRY_TIMES, DEFAULT_PLUGIN_RETRY_TIMES);
         mailReceivers = string2Set(configMap.getString(KEY_MAIL_RECEIVERS, DEFAULT_MAIL_RECEIVERS));
         httpReadTimeoutInMs = configMap.getInt(KEY_HTTP_READ_TIMEOUT_IN_MS, DEFAULT_HTTP_READ_TIMEOUT_IN_MS);
@@ -131,7 +133,7 @@ public class ConfigService {
         if (StringUtils.isNotBlank(s)) {
             return Sets.newHashSet(s.split(DELIMITER));
         }
-        return null;
+        return Sets.newHashSet();
     }
 
     public String getPluginTitanUrl() {
@@ -150,8 +152,8 @@ public class ConfigService {
         return dbConnectionCheckUrl;
     }
 
-    public boolean enableDBConnectionCheck() {
-        return dbConnectionCheckEnable;
+    public Set<String> getDbConnectionCheckEnabledReleaseTypes() {
+        return dbConnectionCheckEnabledReleaseTypes;
     }
 
     public Set<String> getAllowedIps() {

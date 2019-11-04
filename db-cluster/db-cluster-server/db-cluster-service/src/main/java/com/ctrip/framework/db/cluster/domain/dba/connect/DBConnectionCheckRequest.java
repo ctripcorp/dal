@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.domain;
+package com.ctrip.framework.db.cluster.domain.dba.connect;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.domain;
+package com.ctrip.framework.db.cluster.domain.dba.connect;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 @Builder
 public class DBConnectionCheckResponse {
+
     private boolean success;
+
     private String message;
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class SiteAccessChecker {
         }
 
         Set<String> allowedIps = configService.getAllowedIps();
-        if (allowedIps == null) {
+        if (CollectionUtils.isEmpty(allowedIps)) {
             return false;
         }
 

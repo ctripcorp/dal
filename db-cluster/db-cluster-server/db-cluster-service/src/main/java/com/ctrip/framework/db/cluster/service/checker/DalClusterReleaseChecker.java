@@ -157,8 +157,8 @@ public class DalClusterReleaseChecker {
 
     private void checkDbConnection(ClusterVo cluster, String env) {
         // check clusters db connection
-        if (configService.enableDBConnectionCheck()) {
-            dbConnectionChecker.checkDBConnection(cluster, env);
-        }
+//        if (configService.enableDBConnectionCheck()) {
+        dbConnectionChecker.checkDBConnection(cluster, env);
+//        }
     }
 }

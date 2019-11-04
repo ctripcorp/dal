@@ -69,7 +69,7 @@ public class ReadHealthSchedule {
     }
 
     private void initTask() {
-        this.task = clusterName -> {
+        this.task = clusterName -> runnerThreadPool.submit(() -> {
             try {
                 final ClusterDTO cluster = clusterService.findUnDeletedClusterDTO(clusterName);
                 if (null == cluster) {
@@ -120,87 +120,89 @@ public class ReadHealthSchedule {
                     return;
                 }
 
-                readInstances.forEach(instance ->
-                        runnerThreadPool.submit(() -> {
-                            // health check
-                            final String username = cipherService.decrypt(readUserOptional.get().getUsername());
-                            final String password = cipherService.decrypt(readUserOptional.get().getPassword());
-                            // url like : "jdbc:mysql://localhost:3306/mysqljdbc";
-                            final String url = "jdbc:mysql://" + instance.getIp() +
-                                    ":" + instance.getPort() +
-                                    "/" + instance.getDbName();
+                readInstances.forEach(instance -> {
+                    // health check
+                    final String username = cipherService.decrypt(readUserOptional.get().getUsername());
+                    final String password = cipherService.decrypt(readUserOptional.get().getPassword());
+                    // url like : "jdbc:mysql://localhost:3306/mysqljdbc";
+                    final String url = "jdbc:mysql://" + instance.getIp() +
+                            ":" + instance.getPort() +
+                            "/" + instance.getDbName();
 
-                            Connection connection;
+                    Connection connection;
+                    try {
+                        // single connection
+                        // TODO: 2019/11/4 socket timeout
+                        connection = DriverManager.getConnection(url, username, password);
+                        DriverManager.setLoginTimeout(1);
+                    } catch (SQLException e) {
+                        log.error(String.format("[ReadHealthSchedule] unable to get connection, try again later, clusterName = %s, " +
+                                "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
+
+                        // retry
+                        try {
+                            TimeUnit.SECONDS.sleep(3);
+                        } catch (InterruptedException ignore) {
+                            // never, ignore
+                        }
+
+                        try {
+                            // TODO: 2019/11/4 socket timeout
+                            connection = DriverManager.getConnection(url, username, password);
+                            DriverManager.setLoginTimeout(1);
+                        } catch (SQLException e1) {
+                            log.error(String.format("[ReadHealthSchedule] unable to get connection second times, put out it, clusterName = %s, " +
+                                    "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e1);
+                            // putout
+                            putout(instance, clusterName, "unable to get connection twice, when health schedule");
+                            return;
+                        }
+                    }
+
+                    if (null != connection) {
+                        CallableStatement callableStatement = null;
+                        ResultSet resultSet = null;
+
+                        try {
+                            callableStatement = connection.prepareCall(mysql_latency_sp);
+                            callableStatement.execute();
+                            resultSet = callableStatement.getResultSet();
+                            final ResultSetMetaData metaData = resultSet.getMetaData();
+                            if (resultSet.next()) {
+                                for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                                    final String columnLabel = metaData.getColumnLabel(i);
+                                    final Object value = resultSet.getObject(columnLabel);
+                                    System.out.println("sp result : columnName = " + columnLabel + ", value = " + value);
+                                }
+                            }
+
+                            // TODO: 2019/11/3 if ... putout, else putin
+                            putout(instance, clusterName, String.format("Master-slave replication delay exceeds threshold = %s s", delay_threshold));
+                            putin(instance, clusterName, String.format("Master-slave replication delay is less than threshold = %s s", delay_threshold));
+
+                        } catch (SQLException e) {
+                            log.error(String.format("[ReadHealthSchedule] call sp = %s fail, maybe sp error, or sp not exists, clusterName = %s, " +
+                                    "ip = %s, port = %s", mysql_latency_sp, clusterName, instance.getIp(), instance.getPort()), e);
+                        } finally {
                             try {
-                                // single connection
-                                connection = DriverManager.getConnection(url, username, password);
+                                if (null != resultSet) {
+                                    resultSet.close();
+                                }
+                                if (null != callableStatement) {
+                                    callableStatement.close();
+                                }
+                                connection.close();
                             } catch (SQLException e) {
-                                log.error(String.format("[ReadHealthSchedule] unable to get connection, try again later, clusterName = %s, " +
-                                        "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
-
-                                // retry
-                                try {
-                                    TimeUnit.SECONDS.sleep(3);
-                                } catch (InterruptedException ignore) {
-                                    // never, ignore
-                                }
-
-                                try {
-                                    connection = DriverManager.getConnection(url, username, password);
-                                } catch (SQLException e1) {
-                                    log.error(String.format("[ReadHealthSchedule] unable to get connection second times, put out it, clusterName = %s, " +
-                                            "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e1);
-                                    // putout
-                                    putout(instance, clusterName, "unable to get connection twice, when health schedule");
-                                    return;
-                                }
+                                // ignore
                             }
-
-                            if (null != connection) {
-                                CallableStatement callableStatement = null;
-                                ResultSet resultSet = null;
-
-                                try {
-                                    callableStatement = connection.prepareCall(mysql_latency_sp);
-                                    callableStatement.execute();
-                                    resultSet = callableStatement.getResultSet();
-                                    final ResultSetMetaData metaData = resultSet.getMetaData();
-                                    if (resultSet.next()) {
-                                        for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                                            final String columnLabel = metaData.getColumnLabel(i);
-                                            final Object value = resultSet.getObject(columnLabel);
-                                            System.out.println("sp result : columnName = " + columnLabel + ", value = " + value);
-                                        }
-                                    }
-
-                                    // TODO: 2019/11/3 if ... putout, else putin
-                                    putout(instance, clusterName, String.format("Master-slave replication delay exceeds threshold = %s s", delay_threshold));
-                                    putin(instance, clusterName, String.format("Master-slave replication delay is less than threshold = %s s", delay_threshold));
-
-                                } catch (SQLException e) {
-                                    log.error(String.format("[ReadHealthSchedule] call sp = %s fail, maybe sp error, or sp not exists, clusterName = %s, " +
-                                            "ip = %s, port = %s", mysql_latency_sp, clusterName, instance.getIp(), instance.getPort()), e);
-                                } finally {
-                                    try {
-                                        if (null != resultSet) {
-                                            resultSet.close();
-                                        }
-                                        if (null != callableStatement) {
-                                            callableStatement.close();
-                                        }
-                                        connection.close();
-                                    } catch (SQLException e) {
-                                        // ignore
-                                    }
-                                }
-                            }
-                        })
-                );
+                        }
+                    }
+                });
             } catch (SQLException e) {
                 log.error(String.format("ReadHealthSchedule running error, " +
                         "ignore this cluster health task, clusterName = %s", clusterName), e);
             }
-        };
+        });
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)

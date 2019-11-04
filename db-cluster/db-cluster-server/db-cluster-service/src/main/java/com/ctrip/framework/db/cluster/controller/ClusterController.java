@@ -4,6 +4,7 @@ import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
+import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.IpUtils;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
@@ -115,7 +116,7 @@ public class ClusterController {
                 return ResponseModel.forbiddenResponse();
             }
 
-            clusterService.release(Lists.newArrayList(clusterName), operator);
+            clusterService.release(Lists.newArrayList(clusterName), operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("Release cluster success");
 

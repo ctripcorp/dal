@@ -1,7 +1,7 @@
 package com.ctrip.framework.db.cluster.service;
 
-import com.ctrip.framework.db.cluster.domain.DBConnectionCheckRequest;
-import com.ctrip.framework.db.cluster.domain.DBConnectionCheckResponse;
+import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckRequest;
+import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckResponse;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.util.HttpUtils;
@@ -10,8 +10,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,10 +19,11 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@AllArgsConstructor
 public class DBConnectionService {
 
-    @Autowired
-    private ConfigService configService;
+    private final ConfigService configService;
+
 
     private DBConnectionCheckResponse check(DBConnectionCheckRequest connectionCheckRequest) {
         Transaction t = Cat.newTransaction("DB.Cluster.Service.DBConnectionCheck", connectionCheckRequest.getDbName());

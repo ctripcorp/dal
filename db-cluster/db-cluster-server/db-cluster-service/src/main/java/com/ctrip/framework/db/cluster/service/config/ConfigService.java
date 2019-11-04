@@ -1,6 +1,7 @@
 package com.ctrip.framework.db.cluster.service.config;
 
 import com.ctrip.framework.db.cluster.util.Constants;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ConfigService {
     private static final String KEY_SECRET_SERVICE_URL = "secretServiceUrl";
     private static final String KEY_SSL_CODE = "sslCode";
     private static final String KEY_DB_CONNECTION_CHECK_URL = "dbConnectionCheckUrl";
+    private static final String KEY_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES = "dbConnectionCheckEnabledReleaseTypes";
     private static final String KEY_DB_CONNECTION_CHECK_ENABLE = "dbConnectionCheckEnable";
     private static final String KEY_PLUGIN_RETRY_TIMES = "pluginRetryTimes";
     private static final String KEY_MAIL_RECEIVERS = "mailReceivers";
@@ -50,6 +52,8 @@ public class ConfigService {
     private static final String DEFAULT_PLUGIN_TITAN_URL = "http://qconfig.ctripcorp.com/plugins/titan/config";
     private static final String DEFAULT_PLUGIN_MONGO_URL = "http://qconfig.ctripcorp.com/plugins/mongo/config";
     private static final String DEFAULT_PLUGIN_DAL_URL = "http://qconfig.ctripcorp.com/plugins/dal/config";
+    private static final String DEFAULT_DB_CONNECTION_CHECK_URL = "http://mysqlapi.db.ctripcorp.com:8080/database/checktitanconnect";
+    private static final String DEFAULT_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES = "normal_release";
     private static final boolean DEFAULT_DB_CONNECTION_CHECK_ENABLE = true;
     private static final int DEFAULT_PLUGIN_RETRY_TIMES = 1;
     private static final String DEFAULT_MAIL_RECEIVERS = "shenjie@ctrip.com";
@@ -75,6 +79,7 @@ public class ConfigService {
     private volatile String secretServiceUrl;
     private volatile String sslCode;
     private volatile String dbConnectionCheckUrl;
+    private volatile Set<String> dbConnectionCheckEnabledReleaseTypes;
     private volatile boolean dbConnectionCheckEnable;
     private volatile int pluginReTryTimes;
     private volatile Set<String> mailReceivers;
@@ -108,7 +113,10 @@ public class ConfigService {
         allowedIps = string2Set(configMap.getString(KEY_ALLOWED_IPS, ""));
         secretServiceUrl = configMap.getString(KEY_SECRET_SERVICE_URL, "");
         sslCode = configMap.getString(KEY_SSL_CODE, "");
-        dbConnectionCheckUrl = configMap.getString(KEY_DB_CONNECTION_CHECK_URL, "");
+        dbConnectionCheckUrl = configMap.getString(KEY_DB_CONNECTION_CHECK_URL, DEFAULT_DB_CONNECTION_CHECK_URL);
+        dbConnectionCheckEnabledReleaseTypes = string2Set(
+                configMap.getString(KEY_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES, DEFAULT_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES)
+        );
         dbConnectionCheckEnable = configMap.getBoolean(KEY_DB_CONNECTION_CHECK_ENABLE, DEFAULT_DB_CONNECTION_CHECK_ENABLE);
         pluginReTryTimes = configMap.getInt(KEY_PLUGIN_RETRY_TIMES, DEFAULT_PLUGIN_RETRY_TIMES);
         mailReceivers = string2Set(configMap.getString(KEY_MAIL_RECEIVERS, DEFAULT_MAIL_RECEIVERS));
@@ -131,7 +139,7 @@ public class ConfigService {
         if (StringUtils.isNotBlank(s)) {
             return Sets.newHashSet(s.split(DELIMITER));
         }
-        return null;
+        return Sets.newHashSet();
     }
 
     public String getPluginTitanUrl() {
@@ -148,6 +156,10 @@ public class ConfigService {
 
     public String getDBConnectionCheckUrl() {
         return dbConnectionCheckUrl;
+    }
+
+    public Set<String> getDbConnectionCheckEnabledReleaseTypes() {
+        return dbConnectionCheckEnabledReleaseTypes;
     }
 
     public boolean enableDBConnectionCheck() {

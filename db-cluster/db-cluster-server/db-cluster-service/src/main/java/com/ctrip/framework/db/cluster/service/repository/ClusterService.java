@@ -3,6 +3,7 @@ package com.ctrip.framework.db.cluster.service.repository;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.dao.ClusterDao;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
+import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckRequest;
 import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
@@ -14,6 +15,8 @@ import com.ctrip.framework.db.cluster.entity.Shard;
 import com.ctrip.framework.db.cluster.entity.ShardInstance;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.schedule.ReadHealthRegistration;
+import com.ctrip.framework.db.cluster.service.DBConnectionService;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.DalPluginService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
@@ -42,6 +45,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +84,9 @@ public class ClusterService {
 
     @Resource
     private ConfigService configService;
+
+    @Resource
+    private DBConnectionService dbConnectionService;
 
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
@@ -187,7 +194,7 @@ public class ClusterService {
 
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    public void release(final List<String> clusterNames, final String operator) throws SQLException {
+    public void release(final List<String> clusterNames, final String operator, final String releaseType) throws SQLException {
         // valid
         final List<ClusterDTO> clusterDTOs = Lists.newArrayListWithExpectedSize(clusterNames.size());
         clusterNames.forEach(clusterName -> {
@@ -207,7 +214,7 @@ public class ClusterService {
         // TODO: 2019/11/1 临时
         if (configService.isQconfigPluginSwitch()) {
             final List<ReleaseCluster> releaseClusters = clusterDTOs.stream()
-                    .map(this::constructReleaseCluster)
+                    .map(cluster -> constructReleaseCluster(cluster, releaseType))
                     .collect(Collectors.toList());
             final PluginResponse response = dalPluginService.releaseClusters(releaseClusters, Constants.ENV, operator);
             log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
@@ -226,6 +233,9 @@ public class ClusterService {
         });
 
         clusterDao.update(clusters);
+
+        // registry health schedule
+        ReadHealthRegistration.getRegistration().registryToSchedule(clusterNames);
     }
 
     private void releaseValid(final ClusterDTO cluster) {
@@ -325,10 +335,22 @@ public class ClusterService {
                     );
                 }
                 // TODO: 2019/10/28 暂时write/read user maxsize == 1, 不允许存在etl账号
-                final long writeUserCount = users.stream().filter(user -> "write".equalsIgnoreCase(user.getPermission())).count();
-                final long readUserCount = users.stream().filter(user -> "read".equalsIgnoreCase(user.getPermission())).count();
-                final long etlUserCount = users.stream().filter(user -> "etl".equalsIgnoreCase(user.getTag())).count();
-                if (writeUserCount > 1) {
+                final List<UserDTO> writeUsers = users.stream().filter(
+                        user -> Constants.OPERATION_WRITE.equalsIgnoreCase(user.getPermission())
+                ).collect(Collectors.toList());
+
+                final List<UserDTO> readUsers = users.stream().filter(
+                        user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
+                                && !Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag())
+                ).collect(Collectors.toList());
+
+
+                final List<UserDTO> etlUsers = users.stream().filter(
+                        user -> Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag())
+                                && Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag())
+                ).collect(Collectors.toList());
+
+                if (writeUsers.size() > 1) {
                     throw new IllegalStateException(
                             String.format(
                                     "每个shard最多只能存在一个write, clusterName = %s, zoneId = %s, shardIndex = %s",
@@ -337,7 +359,7 @@ public class ClusterService {
                     );
                 }
 
-                if (readUserCount > 1) {
+                if (readUsers.size() > 1) {
                     throw new IllegalStateException(
                             String.format(
                                     "每个shard最多只能存在一个read账号, clusterName = %s, zoneId = %s, shardIndex = %s",
@@ -346,7 +368,7 @@ public class ClusterService {
                     );
                 }
 
-                if (etlUserCount > 0) {
+                if (etlUsers.size() > 0) {
                     throw new IllegalStateException(
                             String.format(
                                     "暂时不支持etl账号, clusterName = %s, zoneId = %s, shardIndex = %s",
@@ -358,7 +380,8 @@ public class ClusterService {
         });
     }
 
-    private ReleaseCluster constructReleaseCluster(final ClusterDTO cluster) {
+
+    private ReleaseCluster constructReleaseCluster(final ClusterDTO cluster, final String releaseType) {
         final List<ReleaseShard> shardRequests = Lists.newArrayList();
 
         // todo 暂时只有一个zone
@@ -369,15 +392,20 @@ public class ClusterService {
                     .findFirst();
 
             final Optional<UserDTO> readUserOptional = shard.getUsers().stream()
-                    // TODO: 2019/10/27 暂时不考虑etl user
                     .filter(user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
                             && !Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag()))
                     .findFirst();
 
+            // TODO: 2019/10/27 暂时不考虑etl user
+//            final Optional<UserDTO> etlUserOptional = shard.getUsers().stream()
+//                    .filter(user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
+//                            && Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag()))
+//                    .findFirst();
+
             if (!writeUserOptional.isPresent() && !readUserOptional.isPresent()) {
                 throw new IllegalStateException(
                         String.format(
-                                "每个shard至少存在一个write或read权限的账号, clusterName = %s, shardIndex = %s",
+                                "每个shard至少存在一个write或read权限, 且非etl的账号, clusterName = %s, shardIndex = %s",
                                 cluster.getClusterName(), shard.getShardIndex()
                         )
                 );
@@ -385,6 +413,9 @@ public class ClusterService {
 
             // construct databaseRequest
             final List<ReleaseDatabase> databaseRequests = Lists.newArrayList();
+            // construct connect check requests,
+            final List<DBConnectionCheckRequest> connectionRequests = Lists.newArrayList();
+
             // write user
             if (writeUserOptional.isPresent()) {
                 final UserDTO writeUser = writeUserOptional.get();
@@ -396,16 +427,29 @@ public class ClusterService {
                                     cluster.getClusterName(), shard.getShardIndex())
                     );
                 } else {
+                    final String username = cipherService.decrypt(writeUser.getUsername());
+                    final String password = cipherService.decrypt(writeUser.getPassword());
                     final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
                             .ip(master.getIp())
                             .port(master.getPort())
                             .role(Constants.ROLE_MASTER)
                             .dbName(master.getDbName())
-                            .uid(cipherService.decrypt(writeUser.getUsername()))
-                            .password(cipherService.decrypt(writeUser.getPassword()))
+                            .uid(username)
+                            .password(password)
                             .readWeight(master.getReadWeight())
                             .build();
                     databaseRequests.add(databaseRequest);
+
+                    final DBConnectionCheckRequest domainRequest = constructConnectionCheckRequest(
+                            shard.getMasterDomain(), shard.getMasterPort(), cluster.getDbCategory(),
+                            username, password, shard.getDbName()
+                    );
+                    final DBConnectionCheckRequest ipRequest = constructConnectionCheckRequest(
+                            master.getIp(), master.getPort(), cluster.getDbCategory(),
+                            username, password, shard.getDbName()
+                    );
+                    connectionRequests.add(domainRequest);
+                    connectionRequests.add(ipRequest);
                 }
             }
             // read user
@@ -422,31 +466,67 @@ public class ClusterService {
                                         cluster.getClusterName(), shard.getShardIndex())
                         );
                     } else {
+                        final String username = cipherService.decrypt(readUser.getUsername());
+                        final String password = cipherService.decrypt(readUser.getPassword());
                         final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
                                 .ip(master.getIp())
                                 .port(master.getPort())
                                 .role(Constants.ROLE_SLAVE)
                                 .dbName(master.getDbName())
-                                .uid(cipherService.decrypt(readUser.getUsername()))
-                                .password(cipherService.decrypt(readUser.getPassword()))
+                                .uid(cipherService.decrypt(username))
+                                .password(cipherService.decrypt(password))
                                 .readWeight(master.getReadWeight())
                                 .build();
                         databaseRequests.add(databaseRequest);
                     }
                 } else {
+                    final String username = cipherService.decrypt(readUser.getUsername());
+                    final String password = cipherService.decrypt(readUser.getPassword());
                     reads.forEach(read -> {
                         final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
                                 .ip(read.getIp())
                                 .port(read.getPort())
                                 .role(Constants.ROLE_SLAVE)
                                 .dbName(read.getDbName())
-                                .uid(cipherService.decrypt(readUser.getUsername()))
-                                .password(cipherService.decrypt(readUser.getPassword()))
+                                .uid(cipherService.decrypt(username))
+                                .password(cipherService.decrypt(password))
                                 .readWeight(read.getReadWeight())
                                 .build();
                         databaseRequests.add(databaseRequest);
+
+                        final DBConnectionCheckRequest ipRequest = constructConnectionCheckRequest(
+                                read.getIp(), read.getPort(), cluster.getDbCategory(),
+                                username, password, shard.getDbName()
+
+                        );
+                        connectionRequests.add(ipRequest);
                     });
+
+                    final DBConnectionCheckRequest domainRequest = constructConnectionCheckRequest(
+                            shard.getReadDomain(), shard.getReadPort(), cluster.getDbCategory(),
+                            username, password, shard.getDbName()
+
+                    );
+                    connectionRequests.add(domainRequest);
                 }
+            }
+
+            // connect check
+            final Set<String> enabledReleaseTypes = configService.getDbConnectionCheckEnabledReleaseTypes();
+            if (enabledReleaseTypes.contains(releaseType)) {
+                connectionRequests.forEach(request -> {
+                    final boolean isValid = dbConnectionService.checkConnection(request);
+                    if (!isValid) {
+                        // invalid
+                        throw new IllegalStateException(
+                                String.format(
+                                        "db connection check result: this database cannot be connected, the release stops, " +
+                                                "clusterName = %s, ip = %s, port = %s, dbName = %s",
+                                        cluster.getClusterName(), request.getHost(), request.getPort(), request.getDbName()
+                                )
+                        );
+                    }
+                });
             }
 
             // construct shardRequest
@@ -471,6 +551,21 @@ public class ClusterService {
                 .databaseShards(shardRequests)
                 .build();
     }
+
+    private DBConnectionCheckRequest constructConnectionCheckRequest(final String host, final Integer port,
+                                                                     final String dbCategory, final String username,
+                                                                     final String password, final String dbName) {
+        return DBConnectionCheckRequest.builder()
+                .dbType(dbCategory)
+                .env(Constants.ENV)
+                .host(host)
+                .port(port)
+                .user(username)
+                .password(password)
+                .dbName(dbName)
+                .build();
+    }
+
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
     public void switches(final List<ClusterSwitchesVo> clusterSwitchesVos, final String operator) throws SQLException {
@@ -622,7 +717,10 @@ public class ClusterService {
         shardInstanceService.updateShardInstances(updatedShardInstances);
 
         // batch release
-        release(clusterSwitchesVos.stream().map(ClusterSwitchesVo::getClusterName).collect(Collectors.toList()), operator);
+        release(
+                clusterSwitchesVos.stream().map(ClusterSwitchesVo::getClusterName).collect(Collectors.toList()),
+                operator, Constants.RELEASE_TYPE_SWITCH_RELEASE
+        );
 
         // batch switch titan keys
         if (!CollectionUtils.isEmpty(mhaUpdateDatas)) {

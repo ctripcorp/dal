@@ -93,8 +93,7 @@ public class ClusterService {
     public void createCluster(final ClusterDTO clusterDTO) throws SQLException {
         final String clusterName = clusterDTO.getClusterName();
         final Cluster cluster = findCluster(
-                clusterName, Lists.newArrayList(Deleted.un_deleted),
-                Lists.newArrayList(Enabled.enabled, Enabled.un_enabled)
+                clusterName, Deleted.un_deleted, null
         );
         if (null == cluster) {
             // not exists
@@ -134,8 +133,7 @@ public class ClusterService {
 
     public ClusterDTO findUnDeletedClusterDTO(final String clusterName) throws SQLException {
         final Cluster cluster = findCluster(
-                clusterName, Lists.newArrayList(Deleted.un_deleted),
-                Lists.newArrayList(Enabled.enabled, Enabled.un_enabled)
+                clusterName, Deleted.un_deleted, null
         );
         if (null == cluster) {
             return null;
@@ -148,8 +146,7 @@ public class ClusterService {
 
     public ClusterDTO findEffectiveClusterDTO(final String clusterName) throws SQLException {
         final Cluster cluster = findCluster(
-                clusterName, Lists.newArrayList(Deleted.un_deleted),
-                Lists.newArrayList(Enabled.enabled)
+                clusterName, Deleted.un_deleted, Enabled.enabled
         );
         if (null == cluster) {
             return null;
@@ -176,8 +173,8 @@ public class ClusterService {
     }
 
     public Cluster findCluster(final String clusterName,
-                               final List<Deleted> deleted,
-                               final List<Enabled> enabled) throws SQLException {
+                               final Deleted deleted,
+                               final Enabled enabled) throws SQLException {
         final List<Cluster> clusters = findClusters(Lists.newArrayList(clusterName), deleted, enabled);
         if (CollectionUtils.isEmpty(clusters)) {
             return null;
@@ -187,8 +184,8 @@ public class ClusterService {
     }
 
     public List<Cluster> findClusters(final List<String> clusterNames,
-                                      final List<Deleted> deleted,
-                                      final List<Enabled> enabled) throws SQLException {
+                                      final Deleted deleted,
+                                      final Enabled enabled) throws SQLException {
         return clusterDao.findClusters(clusterNames, deleted, enabled);
     }
 

@@ -42,6 +42,12 @@ public class UserController {
             }
 
             final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            if (null == clusterDTO) {
+                ResponseModel response = ResponseModel.successResponse();
+                response.setMessage(String.format("cluster not exists, clusterName = %s", clusterName));
+                return response;
+            }
+
             userService.addUsers(shardIndex, userVos, clusterDTO);
 
             ResponseModel response = ResponseModel.successResponse();

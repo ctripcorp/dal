@@ -12,10 +12,11 @@ public class ReadHealthRegistration {
 
     private static ReadHealthRegistration registration;
 
-    private final Set<String> targetClusters = Sets.newCopyOnWriteArraySet();
+    private final Set<String> targetClusters;
+
 
     private ReadHealthRegistration() {
-
+        this.targetClusters = Sets.newCopyOnWriteArraySet();
     }
 
     public static ReadHealthRegistration getRegistration() {
@@ -29,12 +30,12 @@ public class ReadHealthRegistration {
         return registration;
     }
 
-    public void registryToSchedule(final String clusterName) {
-        targetClusters.add(clusterName);
-    }
-
     public void registryToSchedule(final List<String> clusterNames) {
         targetClusters.addAll(clusterNames);
+    }
+
+    public void removeFromSchedule(final String clusterName) {
+        targetClusters.remove(clusterName);
     }
 
     public Set<String> getTargetClusters() {

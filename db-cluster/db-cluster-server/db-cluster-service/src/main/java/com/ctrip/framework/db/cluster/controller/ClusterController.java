@@ -1,6 +1,9 @@
 package com.ctrip.framework.db.cluster.controller;
 
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
+import com.ctrip.framework.db.cluster.entity.Cluster;
+import com.ctrip.framework.db.cluster.enums.Deleted;
+import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
@@ -11,7 +14,6 @@ import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.ResponseModel;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.ClusterSwitchesVo;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by shenjie on 2019/3/5.
@@ -73,6 +76,7 @@ public class ClusterController {
                                       HttpServletRequest request) {
 
         try {
+            // format parameter
             clusterName = Utils.format(clusterName);
 
             // access check
@@ -90,7 +94,7 @@ public class ClusterController {
 
             if (null == clusterDTO) {
                 ResponseModel response = ResponseModel.successResponse();
-                response.setMessage(String.format("cluster not exists, clusterName = %s", clusterName));
+                response.setMessage(String.format("cluster does not exists, clusterName = %s", clusterName));
                 return response;
             }
 
@@ -103,12 +107,46 @@ public class ClusterController {
         }
     }
 
+    @GetMapping(value = "/clusters")
+    public ResponseModel queryClusters(@RequestParam(name = "operator") String operator,
+                                       @RequestParam(name = "effective", required = false, defaultValue = "true") Boolean effective,
+                                       HttpServletRequest request) {
+
+        try {
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                String ip = IpUtils.getRequestIp(request);
+                return ResponseModel.forbiddenResponse(String.format("Ip address is not in the whitelist, ip = %s", ip));
+            }
+
+            final List<String> clusterNames;
+            if (effective) {
+                clusterNames = clusterService.findClusters(
+                        null, Deleted.un_deleted, Enabled.enabled
+                ).stream().map(Cluster::getClusterName).collect(Collectors.toList());
+            } else {
+                clusterNames = clusterService.findClusters(
+                        null, Deleted.un_deleted, null
+                ).stream().map(Cluster::getClusterName).collect(Collectors.toList());
+            }
+
+            ResponseModel response = ResponseModel.successResponse(clusterNames);
+            response.setMessage("Query clusters success");
+            return response;
+
+        } catch (Exception e) {
+            log.error("Query clusters failed.", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
+
     @PostMapping(value = "/clusters/{clusterName}/releases")
     public ResponseModel releaseCluster(@PathVariable String clusterName,
                                         @RequestParam(name = "operator") String operator,
                                         HttpServletRequest request) {
 
         try {
+            // format parameter
             clusterName = Utils.format(clusterName);
 
             // access check

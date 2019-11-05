@@ -18,7 +18,6 @@ import javax.annotation.Resource;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -38,7 +37,7 @@ public class ReadHealthSchedule {
 
     private Consumer<String> task;
 
-    private final Set<String> targetClusters;
+    private final ReadHealthRegistration registration;
 
     private final ScheduledExecutorService timer;
 
@@ -54,7 +53,7 @@ public class ReadHealthSchedule {
     private ShardInstanceService shardInstanceService;
 
     public ReadHealthSchedule() {
-        this.targetClusters = ReadHealthRegistration.getRegistration().getTargetClusters();
+        this.registration = ReadHealthRegistration.getRegistration();
         this.timer = Executors.newSingleThreadScheduledExecutor(new DalServiceThreadFactory("ReadHealthScheduleThread"));
         this.runnerThreadPool = new ThreadPoolExecutor(
                 16, 16, DEFAULT_KEEPER_ALIVE_TIME_SECONDS, TimeUnit.SECONDS,
@@ -73,7 +72,7 @@ public class ReadHealthSchedule {
             try {
                 final ClusterDTO cluster = clusterService.findUnDeletedClusterDTO(clusterName);
                 if (null == cluster) {
-                    targetClusters.remove(clusterName);
+                    registration.removeFromSchedule(clusterName);
                     log.info(String.format("[ReadHealthSchedule] cluster is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
@@ -81,7 +80,7 @@ public class ReadHealthSchedule {
 
                 final List<ZoneDTO> zones = cluster.getZones();
                 if (CollectionUtils.isEmpty(zones)) {
-                    targetClusters.remove(clusterName);
+                    registration.removeFromSchedule(clusterName);
                     log.info(String.format("[ReadHealthSchedule] zones is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
@@ -91,7 +90,7 @@ public class ReadHealthSchedule {
                         zone -> zone.getShards().stream()
                 ).collect(Collectors.toList());
                 if (CollectionUtils.isEmpty(shards)) {
-                    targetClusters.remove(clusterName);
+                    registration.removeFromSchedule(clusterName);
                     log.info(String.format("[ReadHealthSchedule] shards is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
@@ -101,7 +100,7 @@ public class ReadHealthSchedule {
                         shard -> shard.getReads().stream()
                 ).collect(Collectors.toList());
                 if (CollectionUtils.isEmpty(readInstances)) {
-                    targetClusters.remove(clusterName);
+                    registration.removeFromSchedule(clusterName);
                     log.info(String.format("[ReadHealthSchedule] read instances is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
@@ -114,7 +113,7 @@ public class ReadHealthSchedule {
                         )
                 ).findFirst();
                 if (!readUserOptional.isPresent()) {
-                    targetClusters.remove(clusterName);
+                    registration.removeFromSchedule(clusterName);
                     log.info(String.format("[ReadHealthSchedule] read user is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
@@ -148,13 +147,18 @@ public class ReadHealthSchedule {
 
                         try {
                             // TODO: 2019/11/4 socket timeout
+                            // TODO: 2019/11/5 connection check
                             connection = DriverManager.getConnection(url, username, password);
                             DriverManager.setLoginTimeout(1);
                         } catch (SQLException e1) {
                             log.error(String.format("[ReadHealthSchedule] unable to get connection second times, put out it, clusterName = %s, " +
                                     "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e1);
                             // putout
-                            putout(instance, clusterName, "unable to get connection twice, when health schedule");
+                            try {
+                                putout(instance, clusterName, "unable to get connection twice, when health schedule");
+                            } catch (SQLException e2) {
+                                // ignore
+                            }
                             return;
                         }
                     }
@@ -163,6 +167,7 @@ public class ReadHealthSchedule {
                         CallableStatement callableStatement = null;
                         ResultSet resultSet = null;
 
+                        Integer delay = 0;
                         try {
                             callableStatement = connection.prepareCall(mysql_latency_sp);
                             callableStatement.execute();
@@ -173,12 +178,9 @@ public class ReadHealthSchedule {
                                     final String columnLabel = metaData.getColumnLabel(i);
                                     final Object value = resultSet.getObject(columnLabel);
                                     System.out.println("sp result : columnName = " + columnLabel + ", value = " + value);
+                                    // TODO: 2019/11/5 delay = ...
                                 }
                             }
-
-                            // TODO: 2019/11/3 if ... putout, else putin
-                            putout(instance, clusterName, String.format("Master-slave replication delay exceeds threshold = %s s", delay_threshold));
-                            putin(instance, clusterName, String.format("Master-slave replication delay is less than threshold = %s s", delay_threshold));
 
                         } catch (SQLException e) {
                             log.error(String.format("[ReadHealthSchedule] call sp = %s fail, maybe sp error, or sp not exists, clusterName = %s, " +
@@ -196,6 +198,14 @@ public class ReadHealthSchedule {
                                 // ignore
                             }
                         }
+
+                        try {
+                            // TODO: 2019/11/3 if ... putout, else putin
+                            putout(instance, clusterName, String.format("Master-slave replication delay exceeds threshold = %s s", delay_threshold));
+                            putin(instance, clusterName, String.format("Master-slave replication delay is less than threshold = %s s", delay_threshold));
+                        } catch (SQLException e) {
+                            // ignore
+                        }
                     }
                 });
             } catch (SQLException e) {
@@ -206,7 +216,7 @@ public class ReadHealthSchedule {
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    void putout(final ShardInstanceDTO instance, final String clusterName, final String reason) {
+    void putout(final ShardInstanceDTO instance, final String clusterName, final String reason) throws SQLException {
         if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.un_enabled.getCode()) {
             // un_enabled now, do nothing.
             return;
@@ -225,16 +235,17 @@ public class ReadHealthSchedule {
             );
 
             // TODO: 2019/11/3 cat
-            log.info(String.format("[ReadHealthSchedule] put out shard instance, reason : %s, clusterName = %s, ip = %s, port = %s",
-                    reason, clusterName, instance.getIp(), instance.getPort()));
+            log.info(String.format("[ReadHealthSchedule] put out shard instance, reason : %s, clusterName = %s, " +
+                            "ip = %s, port = %s", reason, clusterName, instance.getIp(), instance.getPort()));
         } catch (SQLException e) {
             log.error(String.format("[ReadHealthSchedule] put out shard instance error, clusterName = %s" +
                     "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
+            throw e;
         }
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    void putin(final ShardInstanceDTO instance, final String clusterName, final String reason) {
+    void putin(final ShardInstanceDTO instance, final String clusterName, final String reason) throws SQLException {
         if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()) {
             // enabled now, do nothing.
             return;
@@ -253,17 +264,18 @@ public class ReadHealthSchedule {
             );
 
             // TODO: 2019/11/3 cat
-            log.info(String.format("[ReadHealthSchedule] put int shard instance, reason : %s, clusterName = %s, ip = %s, port = %s",
-                    reason, clusterName, instance.getIp(), instance.getPort()));
+            log.info(String.format("[ReadHealthSchedule] put int shard instance, reason : %s, clusterName = %s, " +
+                            "ip = %s, port = %s", reason, clusterName, instance.getIp(), instance.getPort()));
         } catch (SQLException e) {
             log.error(String.format("[ReadHealthSchedule] put int shard instance error, clusterName = %s" +
                     "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
+            throw e;
         }
     }
 
     private void initSchedule() {
         timer.scheduleAtFixedRate(
-                () -> targetClusters.forEach(task),
+                () -> registration.getTargetClusters().forEach(task),
                 1, 10, TimeUnit.SECONDS
         );
     }

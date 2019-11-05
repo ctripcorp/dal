@@ -45,8 +45,7 @@ public class DalClusterProvider {
 
     protected ClusterVo getCluster(String clusterName) throws SQLException {
         Cluster clusterInDB = clusterService.findCluster(
-                clusterName, Lists.newArrayList(Deleted.un_deleted),
-                Lists.newArrayList(Enabled.enabled, Enabled.un_enabled)
+                clusterName, Deleted.un_deleted, null
         );
         Preconditions.checkNotNull(clusterInDB, "cluster[" + clusterName + "]不存在");
 

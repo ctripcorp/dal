@@ -54,8 +54,7 @@ public class DalClusterConfigBuilder {
 
     private ReleaseCluster buildCluster(String clusterName, String userTag, List<ReleaseShard> databaseShards) throws SQLException {
         Cluster cluster = clusterService.findCluster(
-                clusterName, Lists.newArrayList(Deleted.un_deleted),
-                Lists.newArrayList(Enabled.enabled, Enabled.un_enabled)
+                clusterName, Deleted.un_deleted, null
         );
 
         // ignore default userTag fileName suffix

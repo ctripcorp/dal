@@ -9,11 +9,11 @@ import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -43,14 +43,21 @@ public class ClusterDao {
         return client.query(builder, hints);
     }
 
-    public List<Cluster> findClusters(final List<String> clusterNames, final List<Deleted> deleted, final List<Enabled> enabled) throws SQLException {
+    public List<Cluster> findClusters(final List<String> clusterNames, final Deleted deleted, final Enabled enabled) throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder();
         builder.selectAll();
-        builder.inNullable("cluster_name", clusterNames, Types.VARCHAR, false);
-        builder.and();
-        builder.inNullable("deleted", deleted.stream().map(Deleted::getCode).collect(Collectors.toList()), Types.TINYINT, false);
-        builder.and();
-        builder.inNullable("enabled", enabled.stream().map(Enabled::getCode).collect(Collectors.toList()), Types.TINYINT, false);
+        // deleted
+        builder.equal("deleted", deleted.getCode(), Types.TINYINT, false);
+        // cluster_name
+        if (!CollectionUtils.isEmpty(clusterNames)) {
+            builder.and();
+            builder.inNullable("cluster_name", clusterNames, Types.VARCHAR, false);
+        }
+        // enabled
+        if (null != enabled) {
+            builder.and();
+            builder.equal("enabled", enabled.getCode(), Types.TINYINT, false);
+        }
         return client.query(builder, new DalHints());
     }
 

@@ -73,6 +73,11 @@
                 <artifactId>ctrip-dal-client</artifactId>
                 <version>${dal.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>ctrip-datasource</artifactId>
+                <version>${dal.version}</version>
+            </dependency>
 
             <!--fireman-->
             <dependency>

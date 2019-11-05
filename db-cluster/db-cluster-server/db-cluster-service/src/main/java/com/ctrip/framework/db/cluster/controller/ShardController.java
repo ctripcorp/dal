@@ -4,9 +4,8 @@ import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.domain.dto.ShardDTO;
 import com.ctrip.framework.db.cluster.domain.dto.ZoneDTO;
 import com.ctrip.framework.db.cluster.entity.Cluster;
-import com.ctrip.framework.db.cluster.entity.ShardInstance;
+import com.ctrip.framework.db.cluster.entity.Shard;
 import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.DalClusterManager;
 import com.ctrip.framework.db.cluster.service.TitanSyncService;
@@ -25,13 +24,11 @@ import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,19 +57,33 @@ public class ShardController {
 
     @PostMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
     public ResponseModel addShards(@PathVariable String clusterName, @PathVariable String zoneId,
-                                   @RequestParam(name = "operator") String operator, @RequestBody final ShardVo[] shards) {
+                                   @RequestParam(name = "operator") String operator, @RequestBody final ShardVo[] shardVos) {
 
         try {
             // format parameter
             clusterName = Utils.format(clusterName);
             zoneId = Utils.format(zoneId);
-            final List<ShardVo> addedShards = Lists.newArrayList(shards);
+            final List<ShardVo> addedShards = Lists.newArrayList(shardVos);
 
-            // valid and converter
-            final List<ShardDTO> shardDTOS = addShardsValidAndConverter(clusterName, zoneId, addedShards);
+            // parameter valid
+            addedShardsValid(addedShards);
+
+            // cluster exists
+            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            clusterExistsValid(clusterDTO);
+
+            // zone exists
+            final ZoneDTO existsZone = zonesExistsValidAndReturn(clusterDTO, zoneId);
+
+            // shardIndex/dbName duplicated
+            final List<ShardDTO> existsShards = existsZone.getShards();
+            shardDuplicatedValid(existsShards, addedShards);
+
+            // cluster has been released
+            clusterHasBeenReleasedValid(clusterDTO);
 
             // save
-            shardService.createShards(shardDTOS);
+            shardService.createShards(converterToDto(addedShards, clusterDTO.getClusterEntityId(), zoneId));
 
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("add shards success");
@@ -83,8 +94,54 @@ public class ShardController {
         }
     }
 
-    private List<ShardDTO> addShardsValidAndConverter(final String clusterName, String zoneId,
-                                                      final List<ShardVo> addedShards) throws SQLException {
+    @DeleteMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
+    public ResponseModel deleteShards(@PathVariable String clusterName, @PathVariable String zoneId,
+                                      @RequestParam(name = "operator") String operator, @RequestBody Integer[] shardIndexes) {
+
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
+            zoneId = Utils.format(zoneId);
+            final List<Integer> deletedShardIndexes = Lists.newArrayList(shardIndexes);
+
+            // cluster exists
+            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            clusterExistsValid(clusterDTO);
+
+            // zone exists
+            final ZoneDTO existsZone = zonesExistsValidAndReturn(clusterDTO, zoneId);
+
+            // shardIndex does not exists
+            final List<ShardDTO> existsShards = existsZone.getShards();
+            shardIndexesDoesNotExistsValid(existsShards, deletedShardIndexes);
+
+            // cluster has been released
+            clusterHasBeenReleasedValid(clusterDTO);
+
+            // delete
+            final List<Shard> deletedShards = Lists.newArrayListWithExpectedSize(deletedShardIndexes.size());
+            deletedShardIndexes.forEach(deletedShardIndex -> {
+                final Integer shardId = existsShards.stream()
+                        .filter(existsShard -> existsShard.getShardIndex().equals(deletedShardIndex))
+                        .map(ShardDTO::getShardEntityId).collect(Collectors.toList()).get(0);
+                final Shard deletedShard = Shard.builder()
+                        .id(shardId)
+                        .deleted(Deleted.deleted.getCode())
+                        .build();
+                deletedShards.add(deletedShard);
+            });
+            shardService.updateShards(deletedShards);
+
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("delete shards success");
+            return response;
+        } catch (Exception e) {
+            log.error("delete shards failed.", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
+
+    private void addedShardsValid(final List<ShardVo> addedShards) {
         // shards valid
         Preconditions.checkArgument(
                 !CollectionUtils.isEmpty(addedShards), "Newly added shards are not allowed to be empty."
@@ -109,30 +166,31 @@ public class ShardController {
 
         // shards correct
         addedShards.forEach(ShardVo::correct);
+    }
 
-        // cluster does not exists
-        final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+    private void clusterExistsValid(final ClusterDTO clusterDTO) {
         Preconditions.checkArgument(null != clusterDTO, "cluster does not exists.");
+    }
 
-        // cluster has been released
-        Preconditions.checkArgument(
-                clusterDTO.getClusterReleaseVersion() == 0,
-                "The cluster has been released, and it is not allowed to add shards."
-        );
-
+    private ZoneDTO zonesExistsValidAndReturn(final ClusterDTO clusterDTO, String zoneId) {
         // zone does not exists
         final Optional<ZoneDTO> zoneOptional = clusterDTO.getZones().stream()
                 .filter(zone -> zone.getZoneId().equalsIgnoreCase(zoneId)).findFirst();
         Preconditions.checkArgument(zoneOptional.isPresent(), "zone does not exists.");
 
-        // shard exists
-        final List<ShardDTO> existsShards = zoneOptional.get().getShards();
-        if (!CollectionUtils.isEmpty(existsShards)) {
+        return zoneOptional.get();
+    }
 
-            // shardIndex duplicated
+    private void shardDuplicatedValid(final List<ShardDTO> existsShards, final List<ShardVo> addedShards) {
+        if (!CollectionUtils.isEmpty(existsShards)) {
+            // shardIndex exists
             final List<Integer> existsShardIndexes = existsShards.stream()
                     .map(ShardDTO::getShardIndex).collect(Collectors.toList());
-            distinctSortedAddedShardIndexes.forEach(addedShardIndex -> {
+
+            final List<Integer> addedShardIndexes = addedShards.stream()
+                    .map(ShardVo::getShardIndex).collect(Collectors.toList());
+
+            addedShardIndexes.forEach(addedShardIndex -> {
                 if (existsShardIndexes.contains(addedShardIndex)) {
                     throw new IllegalArgumentException(
                             String.format("Newly shardIndex %s and existing shardIndex duplicated.", addedShardIndex)
@@ -140,10 +198,14 @@ public class ShardController {
                 }
             });
 
-            // dbName duplicated
+            // dbName exists
             final List<String> existsDbNames = existsShards.stream()
                     .map(ShardDTO::getDbName).collect(Collectors.toList());
-            distinctAddedDbNames.forEach(addedDbName -> {
+
+            final List<String> addedDbNames = addedShards.stream()
+                    .map(ShardVo::getDbName).collect(Collectors.toList());
+
+            addedDbNames.forEach(addedDbName -> {
                 if (existsDbNames.contains(addedDbName)) {
                     throw new IllegalArgumentException(
                             String.format("Newly dbName %s and existing dbName duplicated.", addedDbName)
@@ -151,28 +213,45 @@ public class ShardController {
                 }
             });
         }
+    }
 
+    private void shardIndexesDoesNotExistsValid(final List<ShardDTO> existsShards,
+                                                final List<Integer> deletedShardIndexes) {
+
+        if (CollectionUtils.isEmpty(existsShards)) {
+            throw new IllegalArgumentException("All the shardIndex you want to deleted do not exists.");
+        }
+
+        final List<Integer> existsShardIndexes = existsShards.stream()
+                .map(ShardDTO::getShardIndex).collect(Collectors.toList());
+
+        deletedShardIndexes.forEach(deletedShardIndex -> {
+            if (!existsShardIndexes.contains(deletedShardIndex)) {
+                throw new IllegalArgumentException(
+                        String.format("The shardIndex %s you want to deleted do not exists.", deletedShardIndex)
+                );
+            }
+        });
+    }
+
+    private void clusterHasBeenReleasedValid(final ClusterDTO clusterDTO) {
+        // cluster has been released
+        Preconditions.checkArgument(
+                clusterDTO.getClusterReleaseVersion() == 0,
+                "The cluster has been released, and it is not allowed to add shards."
+        );
+    }
+
+    private List<ShardDTO> converterToDto(final List<ShardVo> addedShards,
+                                          final Integer clusterId, final String zoneId) {
         // converter
         return addedShards.stream().map(shardVo -> {
             final ShardDTO shardDTO = shardVo.toDTO();
-            shardDTO.setClusterEntityId(0);
+            shardDTO.setClusterEntityId(clusterId);
             shardDTO.setZoneId(zoneId);
             return shardDTO;
         }).collect(Collectors.toList());
     }
-
-    @DeleteMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
-    public ResponseModel deleteShards(@PathVariable String clusterName, @PathVariable String zoneId,
-                                      @RequestParam(name = "operator") String operator, @RequestBody String[] shardIndexes) {
-
-
-        ResponseModel response = ResponseModel.successResponse();
-        response.setMessage("delete shards success");
-        return response;
-    }
-
-
-
 
 
     // deprecated

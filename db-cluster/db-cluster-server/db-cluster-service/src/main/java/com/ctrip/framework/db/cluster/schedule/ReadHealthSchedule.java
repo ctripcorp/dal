@@ -131,7 +131,7 @@ public class ReadHealthSchedule {
                     Connection connection;
                     try {
                         // single connection
-                        // TODO: 2019/11/4 socket timeout
+                        // TODO: 2019/11/4 socket timeout, update to connection pool
                         connection = DriverManager.getConnection(url, username, password);
                         DriverManager.setLoginTimeout(1);
                     } catch (SQLException e) {
@@ -274,7 +274,7 @@ public class ReadHealthSchedule {
     }
 
     private void initSchedule() {
-        timer.scheduleAtFixedRate(
+        timer.scheduleWithFixedDelay(
                 () -> registration.getTargetClusters().forEach(task),
                 1, 10, TimeUnit.SECONDS
         );

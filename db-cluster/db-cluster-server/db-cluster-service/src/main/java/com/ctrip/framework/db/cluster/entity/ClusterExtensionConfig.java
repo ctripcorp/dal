@@ -45,7 +45,7 @@ public class ClusterExtensionConfig implements DalPojo {
      * 扩展配置内容
      */
     @Column(name = "content")
-    @Type(value = Types.LONGVARBINARY)
+    @Type(value = Types.VARBINARY)
     private String content;
 
     /**

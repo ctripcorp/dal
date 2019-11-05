@@ -11,6 +11,30 @@ public enum ClusterExtensionConfigType {
         this.name = name;
     }
 
+    public static Integer getTypeCode(final String name) {
+        for (ClusterExtensionConfigType type : ClusterExtensionConfigType.values()) {
+            if (type.getName().equals(name)) {
+                return type.getCode();
+            }
+        }
+
+        throw new IllegalArgumentException(
+                String.format("ClusterExtensionConfigType can't be match, name parameter is %s.", name)
+        );
+    }
+
+    public static String getTypeName(final Integer code) {
+        for (ClusterExtensionConfigType type : ClusterExtensionConfigType.values()) {
+            if (type.getCode() == code) {
+                return type.getName();
+            }
+        }
+
+        throw new IllegalArgumentException(
+                String.format("ClusterExtensionConfigType can't be match, code parameter is %s.", code)
+        );
+    }
+
     private int code;
 
     private String name;

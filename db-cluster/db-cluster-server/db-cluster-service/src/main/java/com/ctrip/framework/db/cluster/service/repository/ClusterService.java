@@ -11,8 +11,10 @@ import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.MhaUpdateData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanMhaUpdateRequest;
 import com.ctrip.framework.db.cluster.entity.Cluster;
+import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
 import com.ctrip.framework.db.cluster.entity.Shard;
 import com.ctrip.framework.db.cluster.entity.ShardInstance;
+import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.schedule.ReadHealthRegistration;
@@ -69,6 +71,9 @@ public class ClusterService {
 
     @Resource
     private ShardInstanceService shardInstanceService;
+
+    @Resource
+    private ClusterExtensionConfigService clusterExtensionConfigService;
 
     @Resource
     private CipherService cipherService;
@@ -140,8 +145,12 @@ public class ClusterService {
         }
 
         final Integer clusterId = cluster.getId();
+
+        // cluster extension configs
+        final List<ClusterExtensionConfig> configs = clusterExtensionConfigService.findUnDeletedConfigs(clusterId);
+        // zones
         final List<ZoneDTO> zones = clusterSetService.findUnDeletedByClusterId(clusterId);
-        return componentClusterDTO(cluster, zones);
+        return componentClusterDTO(cluster, zones, configs);
     }
 
     public ClusterDTO findEffectiveClusterDTO(final String clusterName) throws SQLException {
@@ -153,11 +162,16 @@ public class ClusterService {
         }
 
         final Integer clusterId = cluster.getId();
+
+        // cluster extension configs
+        final List<ClusterExtensionConfig> configs = clusterExtensionConfigService.findUnDeletedConfigs(clusterId);
+        // zones
         final List<ZoneDTO> zones = clusterSetService.findEffectiveByClusterId(clusterId);
-        return componentClusterDTO(cluster, zones);
+        return componentClusterDTO(cluster, zones, configs);
     }
 
-    private ClusterDTO componentClusterDTO(final Cluster cluster, final List<ZoneDTO> zones) {
+    private ClusterDTO componentClusterDTO(final Cluster cluster, final List<ZoneDTO> zones,
+                                           final List<ClusterExtensionConfig> configs) {
         return ClusterDTO.builder()
                 .clusterEntityId(cluster.getId())
                 .clusterName(cluster.getClusterName())
@@ -169,6 +183,7 @@ public class ClusterService {
                 .clusterReleaseVersion(cluster.getReleaseVersion())
                 .clusterUpdateTime(cluster.getUpdateTime())
                 .zones(zones)
+                .configs(configs)
                 .build();
     }
 
@@ -540,12 +555,24 @@ public class ClusterService {
             shardRequests.add(shardRequest);
         });
 
+        // construct extension configs
+        final Map<String, String> extensionConfigsMap = Maps.newHashMap();
+        final List<ClusterExtensionConfig> configs = cluster.getConfigs();
+        if (!CollectionUtils.isEmpty(configs)) {
+            configs.forEach(config -> {
+                final String key = ClusterExtensionConfigType.getTypeName(config.getType());
+                final String value = config.getContent();
+                extensionConfigsMap.put(key, value);
+            });
+        }
+
         // construct clusterRequest
         return ReleaseCluster.builder()
                 .clusterName(cluster.getClusterName())
                 .dbCategory(cluster.getDbCategory())
                 .version(cluster.getClusterReleaseVersion() + 1)
                 .databaseShards(shardRequests)
+                .extensionConfigs(extensionConfigsMap)
                 .build();
     }
 

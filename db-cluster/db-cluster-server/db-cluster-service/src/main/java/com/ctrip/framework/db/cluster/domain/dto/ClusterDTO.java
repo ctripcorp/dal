@@ -1,5 +1,6 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
+import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.google.common.collect.Lists;
@@ -43,6 +44,8 @@ public class ClusterDTO {
 
     // Cascade info
     private List<ZoneDTO> zones;
+
+    private List<ClusterExtensionConfig> configs;
 
 
     public ClusterVo toVo() {

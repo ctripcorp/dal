@@ -16,5 +16,5 @@ public class ClusterExtensionConfigVo {
 
     private String content;
 
-    private Integer type;
+    private String typeName;
 }

@@ -165,10 +165,15 @@ public class ShardController {
     public ResponseModel deleteShards(@PathVariable String clusterName, @PathVariable String zoneId,
                                       @RequestParam(name = "operator") String operator, @RequestBody String[] shardIndexes) {
 
+
         ResponseModel response = ResponseModel.successResponse();
         response.setMessage("delete shards success");
         return response;
     }
+
+
+
+
 
     // deprecated
     @RequestMapping(value = "/add", method = RequestMethod.POST)

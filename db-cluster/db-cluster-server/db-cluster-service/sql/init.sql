@@ -101,6 +101,20 @@ CREATE TABLE `user_info` (
   KEY `index_datachange_lasttime` (`datachange_lasttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='user_info表';
 
+-- done
+DROP TABLE IF EXISTS `cluster_extension_config`;
+CREATE TABLE `cluster_extension_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `cluster_id` int(11) NOT NULL COMMENT 'cluster_id',
+  `content` text NOT NULL COMMENT '扩展配置内容, maxsize=64KB',
+  `type` tinyint NOT NULL COMMENT '扩展配置类型, 0:ShardStrategies; 1:IdGenerators',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '是否删除, 0:否; 1:是',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `datachange_lasttime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `index_datachange_lasttime` (`datachange_lasttime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集群扩展配置';
+
 DROP TABLE IF EXISTS `titan_key`;
 CREATE TABLE `titan_key` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',

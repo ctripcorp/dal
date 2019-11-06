@@ -52,9 +52,10 @@ public class ReadHealthSchedule {
     @Resource
     private ShardInstanceService shardInstanceService;
 
+
     public ReadHealthSchedule() {
         this.registration = ReadHealthRegistration.getRegistration();
-        this.timer = Executors.newSingleThreadScheduledExecutor(new DalServiceThreadFactory("ReadHealthScheduleThread"));
+        this.timer = Executors.newSingleThreadScheduledExecutor(new DalServiceThreadFactory("ReadHealthScheduleTimerThread"));
         this.runnerThreadPool = new ThreadPoolExecutor(
                 16, 16, DEFAULT_KEEPER_ALIVE_TIME_SECONDS, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(), new DalServiceThreadFactory("ReadHealthScheduleRunnerThread")

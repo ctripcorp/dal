@@ -1,11 +1,7 @@
 package com.ctrip.framework.db.cluster.service.builder;
 
-import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.MhaUpdateData;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanKeyInfo;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanUpdateDBData;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanUpdateRequest;
-import com.ctrip.framework.db.cluster.entity.Shard;
-import com.ctrip.framework.db.cluster.entity.ShardUser;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.add.TitanKeyInfo;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
 import com.ctrip.framework.db.cluster.service.repository.ShardService;
 import com.ctrip.framework.db.cluster.service.repository.TitanKeyService;
@@ -18,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -69,45 +64,6 @@ public class TitanKeyBuilder {
         return requestTitanKeys;
     }
 
-    public TitanUpdateRequest buildTitanUpdateRequest(List<ShardVo> shards, String env) throws SQLException {
-        List<MhaUpdateData> mhaUpdateData = Lists.newArrayList();
-        List<TitanUpdateDBData> titanUpdateDBData = Lists.newArrayList();
-        for (ShardVo shard : shards) {
-            DatabaseVo master = shard.getMaster();
-            InstanceVo masterInstance = master.getInstances().get(0);
-            List<Shard> shardsInDB = shardService.findShardsByDbName(shard.getDbName());
-            if (shardsInDB == null || shardsInDB.isEmpty()) {
-                // build titan update data
-                TitanUpdateDBData oneShardTitanUpdateDBData = TitanUpdateDBData.builder()
-                        .dbName(shard.getDbName())
-                        .domain(master.getDomain())
-                        .ip(masterInstance.getIp())
-                        .port(masterInstance.getPort())
-                        .build();
-                titanUpdateDBData.add(oneShardTitanUpdateDBData);
-            } else {
-                // find master titanKeys
-                List<ShardUser> users = userService.findUsersByShardIdAndOperationType(shardsInDB.get(0).getId(), Constants.OPERATION_WRITE);
-                List<TitanKey> masterTitanKeys = Lists.newArrayList();
-                for (ShardUser user : users) {
-                    List<TitanKey> titanKeys = titanKeyService.findTitanKeysByUserId(user.getId());
-                    masterTitanKeys.addAll(titanKeys);
-                }
-
-
-                // build mha update data
-                List<MhaUpdateData> oneShardMhaUpdateData = buildMhaUpdateData(masterTitanKeys, master);
-                mhaUpdateData.addAll(oneShardMhaUpdateData);
-            }
-        }
-        TitanUpdateRequest request = TitanUpdateRequest.builder()
-                .env(env)
-                .mhaData(mhaUpdateData)
-                .dbData(titanUpdateDBData)
-                .build();
-        return request;
-    }
-
     private TitanKeyInfo buildTitanKey(String dbCategory, TitanKeyVo titanKey, ShardVo shard, UserVo user, String serverName, String serverIp, Integer port) {
         String providerName = dbCategory.equalsIgnoreCase(Constants.MYSQL_DB) ?
                 Constants.MYSQL_PROVIDER_NAME : Constants.SQL_SERVER_PROVIDER_NAME;
@@ -142,17 +98,17 @@ public class TitanKeyBuilder {
         return userMap;
     }
 
-    private List<MhaUpdateData> buildMhaUpdateData(List<TitanKey> titanKeys, DatabaseVo master) {
-        List<MhaUpdateData> mhaUpdateData = Lists.newArrayList();
+    private List<TitanKeyMhaUpdateData> buildMhaUpdateData(List<TitanKey> titanKeys, DatabaseVo master) {
+        List<TitanKeyMhaUpdateData> titanKeyMhaUpdateData = Lists.newArrayList();
         InstanceVo masterInstance = master.getInstances().get(0);
         for (TitanKey titanKey : titanKeys) {
-            MhaUpdateData data = MhaUpdateData.builder()
+            TitanKeyMhaUpdateData data = TitanKeyMhaUpdateData.builder()
                     .keyName(titanKey.getName())
                     .server(masterInstance.getIp())
                     .port(masterInstance.getPort())
                     .build();
-            mhaUpdateData.add(data);
+            titanKeyMhaUpdateData.add(data);
         }
-        return mhaUpdateData;
+        return titanKeyMhaUpdateData;
     }
 }

@@ -4,6 +4,7 @@ import com.ctrip.framework.db.cluster.dao.TitanKeyDao;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.dal.create.TitanKeyVo;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,17 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@AllArgsConstructor
 public class TitanKeyService {
 
-    @Autowired
-    private TitanKeyDao titanKeyDao;
+    private final TitanKeyDao titanKeyDao;
 
+
+    public void create(List<TitanKey> titanKeys) throws SQLException {
+        titanKeyDao.batchInsert(titanKeys);
+    }
+
+    // deprecated
     public void add(List<TitanKeyVo> titanKeys, Map<String, Integer> userIds) throws SQLException {
         if (userIds == null || userIds.isEmpty()) {
             return;
@@ -31,10 +38,10 @@ public class TitanKeyService {
             Integer userId = userIds.get(titanKeyVo.getUid());
             TitanKey titanKey = TitanKey.builder()
                     .name(titanKeyVo.getKeyName())
-                    .userId(userId)
-                    .extParam(titanKeyVo.getExtParam())
-                    .timeout(titanKeyVo.getTimeOut())
-                    .status(Utils.getStatusCode(titanKeyVo.getEnabled()))
+//                    .userId(userId)
+//                    .extParam(titanKeyVo.getExtParam())
+//                    .timeout(titanKeyVo.getTimeOut())
+//                    .status(Utils.getStatusCode(titanKeyVo.getEnabled()))
                     .createUser(titanKeyVo.getCreateUser())
                     .updateUser(titanKeyVo.getUpdateUser())
                     .permissions(titanKeyVo.getPermissions())
@@ -46,7 +53,9 @@ public class TitanKeyService {
     }
 
     public List<TitanKey> findTitanKeysByUserId(Integer userId) throws SQLException {
-        TitanKey titanKey = TitanKey.builder().userId(userId).build();
+        TitanKey titanKey = TitanKey.builder()
+//                .userId(userId)
+                .build();
         List<TitanKey> titanKeys = titanKeyDao.queryBy(titanKey);
         return titanKeys;
     }

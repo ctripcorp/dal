@@ -2,19 +2,16 @@ package com.ctrip.framework.db.cluster.service;
 
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.domain.PluginStatusCode;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanKeyInfo;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanUpdateRequest;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.add.TitanKeyInfo;
 import com.ctrip.framework.db.cluster.service.builder.TitanKeyBuilder;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
-import com.ctrip.framework.db.cluster.vo.dal.create.ShardVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import qunar.concurrent.NamedThreadFactory;
 
 import javax.annotation.PostConstruct;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -57,29 +54,6 @@ public class TitanSyncService {
                 }
             }
         });
-    }
-
-
-    public void updateTitanKeysAsync(List<ShardVo> shardVos, String env, String operator) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    updateTitanKeys(shardVos, env, operator);
-                } catch (SQLException e) {
-                    log.error("Update titan keys failed.", e);
-                }
-            }
-        });
-    }
-
-    protected void updateTitanKeys(List<ShardVo> shardVos, String env, String operator) throws SQLException {
-        TitanUpdateRequest request = titanKeyBuilder.buildTitanUpdateRequest(shardVos, env);
-
-        PluginResponse titanUpdateResponse = titanPluginService.switchTitanKey(request, operator);
-        if (titanUpdateResponse != null && PluginStatusCode.OK != titanUpdateResponse.getStatus()) {
-            log.error("Update titan keys to plugin failed, error message is {}", titanUpdateResponse.getMessage());
-        }
     }
 
     protected void addTitanKeys(ClusterVo cluster, String env) {

@@ -11,8 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PluginResponse {
+
     private int status;
+
     private String message;
+
     private Object data;
 
     public static PluginResponse successPluginResponse() {
@@ -21,5 +24,9 @@ public class PluginResponse {
 
     public static PluginResponse failPluginResponse(int status, String message) {
         return new PluginResponse(status, message, null);
+    }
+
+    public boolean isSuccess() {
+        return 0 == status;
     }
 }

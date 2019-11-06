@@ -1,6 +1,5 @@
-package com.ctrip.framework.db.cluster.domain.plugin.titan;
+package com.ctrip.framework.db.cluster.domain.plugin.titan.get;
 
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanKeyGetData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TitanKeyGetResponse {
+
     private int status;
+
     private String message;
+
     private TitanKeyGetData data;
 }

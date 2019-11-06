@@ -1,14 +1,17 @@
-package com.ctrip.framework.db.cluster.domain.plugin.titan;
+package com.ctrip.framework.db.cluster.domain.plugin.titan.get;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Created by shenjie on 2019/3/18.
+ * Created by shenjie on 2019/4/9.
  */
 @Data
-@Builder
-public class TitanKeyInfo {
+@NoArgsConstructor
+@AllArgsConstructor
+public class TitanKeyGetData {
+    private String subEnv;
     private String keyName;
     private String providerName;
     private String serverName;
@@ -18,13 +21,16 @@ public class TitanKeyInfo {
     private String password;
     private String dbName;
     private String extParam;
-    private int timeOut;
-    private boolean enabled;
+    private Integer timeOut = 15;
+    private String sslCode;
+    private Boolean enabled = true;
     private String createUser;
     private String updateUser;
     private String whiteList;
     private String blackList;
+    private Integer id;
     private String permissions;
     private String freeVerifyIpList;
     private String freeVerifyAppIdList;
+    private String mhaLastUpdateTime;
 }

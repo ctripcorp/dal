@@ -8,8 +8,8 @@ import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.MhaUpdateData;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanMhaUpdateRequest;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateRequest;
 import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
 import com.ctrip.framework.db.cluster.entity.Shard;
@@ -17,6 +17,7 @@ import com.ctrip.framework.db.cluster.entity.ShardInstance;
 import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.schedule.ReadHealthRegistration;
 import com.ctrip.framework.db.cluster.service.DBConnectionService;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
@@ -630,7 +631,7 @@ public class ClusterService {
         final List<Shard> updatedShards = Lists.newArrayList();
         final List<ShardInstance> updatedShardInstances = Lists.newArrayList();
         final List<ShardInstanceDTO> createdShardInstances = Lists.newArrayList();
-        final List<MhaUpdateData> mhaUpdateDatas = Lists.newArrayList();
+        final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateDatas = Lists.newArrayList();
 
         clusterSwitchesVos.forEach(clusterSwitchesVo -> clusterSwitchesVo.getShards().forEach(shardSwitchesVo -> {
             final ShardDTO shardDTO = effectiveShardDTOsMap.get(clusterSwitchesVo.getClusterName())
@@ -691,12 +692,12 @@ public class ClusterService {
                                     }
                                 }
                         ).forEach(titanKey -> {
-                            final MhaUpdateData mhaUpdateData = MhaUpdateData.builder()
+                            final TitanKeyMhaUpdateData titanKeyMhaUpdateData = TitanKeyMhaUpdateData.builder()
                                     .keyName(titanKey)
                                     .server(switchInstanceMaster.getIp())
                                     .port(switchInstanceMaster.getPort())
                                     .build();
-                            mhaUpdateDatas.add(mhaUpdateData);
+                            titanKeyMhaUpdateDatas.add(titanKeyMhaUpdateData);
                         });
                     }
                 }
@@ -747,16 +748,22 @@ public class ClusterService {
         );
 
         // batch switch titan keys
-        if (!CollectionUtils.isEmpty(mhaUpdateDatas)) {
+        if (!CollectionUtils.isEmpty(titanKeyMhaUpdateDatas)) {
             // TODO: 2019/11/1 临时
             if (configService.isQconfigPluginSwitch()) {
-                final TitanMhaUpdateRequest request = TitanMhaUpdateRequest.builder()
-                        .data(mhaUpdateDatas)
+                final TitanKeyMhaUpdateRequest request = TitanKeyMhaUpdateRequest.builder()
+                        .data(titanKeyMhaUpdateDatas)
                         .env(Constants.ENV)
                         .build();
                 final PluginResponse response = titanPluginService.mhaUpdate(request, operator);
-                log.info(String.format("MhaUpdate Titan Key: %s. Result Code: %s; Result Msg: %s", request.toString(),
-                        response.getStatus(), response.getMessage()));
+                if (response.isSuccess()) {
+                    log.info(String.format("MhaUpdate Titan Key success, titanKey = %s, ", request.toString()));
+                } else {
+                    throw new DBClusterServiceException(
+                            String.format("mhaUpdate titan key error, titanKey = %s, message = %s",
+                                    request.toString(), response.getMessage())
+                    );
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.ctrip.framework.db.cluster.domain.plugin.titan.switches;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,9 +10,13 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class MhaUpdateData {
+@AllArgsConstructor
+public class TitanKeyMhaUpdateData {
+
     @SerializedName("keyname")
     private String keyName;
+
     private String server;
+
     private Integer port;
 }

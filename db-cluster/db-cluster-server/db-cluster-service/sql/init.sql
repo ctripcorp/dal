@@ -115,23 +115,32 @@ CREATE TABLE `cluster_extension_config` (
   KEY `index_datachange_lasttime` (`datachange_lasttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集群扩展配置';
 
+-- done
 DROP TABLE IF EXISTS `titan_key`;
 CREATE TABLE `titan_key` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `name` varchar(128) NOT NULL DEFAULT '' COMMENT 'titan key名称',
-  `user_id` int(11) NOT NULL DEFAULT 0 COMMENT 'user_id',
-  `ext_param` varchar(128) NOT NULL DEFAULT '' COMMENT '其他参数',
-  `timeout` int(11) NOT NULL DEFAULT 15 COMMENT '超时时间',
-  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态',
-  `create_user` varchar(64) NOT NULL DEFAULT '' COMMENT '创建人',
-  `update_user` varchar(64) NOT NULL DEFAULT '' COMMENT '修改人',
-  `permissions` varchar(128) COMMENT '权限允许的应用',
+  `sub_env` varchar(20) NOT NULL DEFAULT '' COMMENT '子环境',
+  `enabled` tinyint NOT NULL DEFAULT 1 COMMENT '是否可用, 0:禁用; 1:启用',
+  `provider_name` varchar(128) NOT NULL DEFAULT '' COMMENT '驱动名称',
+  `create_user` varchar(128) NOT NULL DEFAULT '' COMMENT '创建用户',
+  `update_user` varchar(128) NOT NULL DEFAULT '' COMMENT '最后修改用户',
+  `permissions` varchar(1024) COMMENT '权限允许的应用',
   `free_verify_ips` varchar(128) COMMENT '免校验的ip地址',
   `free_verify_apps` varchar(128) COMMENT '免cms关系校验的应用',
+  `mha_last_update_time` timestamp COMMENT '最后切换时间',
+  `domain` varchar(128) NOT NULL COMMENT '域名',
+  `ip` varchar(64) NOT NULL COMMENT 'ip地址',
+  `port` int(11) NOT NULL COMMENT '端口',
+  `username` varchar(128) COMMENT '用户名',
+  `password` varchar(128) COMMENT '密码',
+  `db_name` varchar(64) NOT NULL DEFAULT '' COMMENT '数据库名称',
+  `ext_params` varchar(128) NOT NULL DEFAULT '' COMMENT '其他参数',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `datachange_lasttime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_name` (`name`),
+  UNIQUE KEY `unique_name_sub_env` (`name`, `sub_env`),
   KEY `index_datachange_lasttime` (`datachange_lasttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='titan_key表';
+
 

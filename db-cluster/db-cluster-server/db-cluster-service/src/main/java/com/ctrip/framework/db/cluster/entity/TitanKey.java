@@ -40,42 +40,36 @@ public class TitanKey {
     private String name;
 
     /**
-     * user_id
+     * 子环境
      */
-    @Column(name = "user_id")
-    @Type(value = Types.INTEGER)
-    private Integer userId;
-
-    /**
-     * 其他参数
-     */
-    @Column(name = "ext_param")
+    @Column(name = "sub_env")
     @Type(value = Types.VARCHAR)
-    private String extParam;
+    private String subEnv;
 
     /**
-     * 超时时间
+     * 是否可用
      */
-    @Column(name = "timeout")
-    @Type(value = Types.INTEGER)
-    private Integer timeout;
-
-    /**
-     * 状态
-     */
-    @Column(name = "status")
+    @Column(name = "enabled")
     @Type(value = Types.TINYINT)
-    private Integer status;
+    private Integer enabled;
 
     /**
-     * 创建人
+     * 驱动名称
+     */
+    @Column(name = "provider_name")
+    @Type(value = Types.VARCHAR)
+    private String providerName;
+
+
+    /**
+     * 创建用户
      */
     @Column(name = "create_user")
     @Type(value = Types.VARCHAR)
     private String createUser;
 
     /**
-     * 修改人
+     * 最后修改用户
      */
     @Column(name = "update_user")
     @Type(value = Types.VARCHAR)
@@ -101,6 +95,60 @@ public class TitanKey {
     @Column(name = "free_verify_apps")
     @Type(value = Types.VARCHAR)
     private String freeVerifyApps;
+
+    /**
+     * 最后切换时间
+     */
+    @Column(name = "mha_last_update_time")
+    @Type(value = Types.TIMESTAMP)
+    private Timestamp mhaLastUpdateTime;
+
+    /**
+     * 域名
+     */
+    @Column(name = "domain")
+    @Type(value = Types.VARCHAR)
+    private String domain;
+
+    // ip地址
+    @Column(name = "ip")
+    @Type(value = Types.VARCHAR)
+    private String ip;
+
+    /**
+     * 端口
+     */
+    @Column(name = "port")
+    @Type(value = Types.INTEGER)
+    private Integer port;
+
+    /**
+     * username
+     */
+    @Column(name = "username")
+    @Type(value = Types.VARCHAR)
+    private String username;
+
+    /**
+     * 密码
+     */
+    @Column(name = "password")
+    @Type(value = Types.VARCHAR)
+    private String password;
+
+    /**
+     * 数据库名称
+     */
+    @Column(name = "db_name")
+    @Type(value = Types.VARCHAR)
+    private String dbName;
+
+    /**
+     * 其他参数
+     */
+    @Column(name = "ext_params")
+    @Type(value = Types.VARCHAR)
+    private String extParams;
 
     /**
      * 创建时间

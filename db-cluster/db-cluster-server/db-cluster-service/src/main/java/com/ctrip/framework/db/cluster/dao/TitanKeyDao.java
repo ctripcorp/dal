@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 /**
@@ -22,6 +23,13 @@ public class TitanKeyDao {
 
     public TitanKeyDao() throws SQLException {
         this.client = new DalTableDao<>(new DalDefaultJpaParser<>(TitanKey.class));
+    }
+
+    public List<TitanKey> queryByNames(final List<String> names) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+        builder.inNullable("name", names, Types.VARCHAR, false);
+        return client.query(builder, new DalHints());
     }
 
     /**

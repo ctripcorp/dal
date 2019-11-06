@@ -17,4 +17,9 @@ public class TitanKeyPageResponse {
     private String message;
 
     private TitanKeyPageData data;
+
+
+    public boolean isSuccess() {
+        return 0 == status;
+    }
 }

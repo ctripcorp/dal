@@ -28,6 +28,14 @@ public class TitanKeyService {
         titanKeyDao.batchInsert(titanKeys);
     }
 
+    public void update(List<TitanKey> titanKeys) throws SQLException {
+        titanKeyDao.update(titanKeys);
+    }
+
+    public List<TitanKey> findTitanKeys(final List<String> keyNames) throws SQLException {
+        return titanKeyDao.queryByNames(keyNames);
+    }
+
     // deprecated
     public void add(List<TitanKeyVo> titanKeys, Map<String, Integer> userIds) throws SQLException {
         if (userIds == null || userIds.isEmpty()) {

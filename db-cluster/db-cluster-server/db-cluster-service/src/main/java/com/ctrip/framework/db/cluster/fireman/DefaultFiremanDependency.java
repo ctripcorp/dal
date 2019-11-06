@@ -35,7 +35,7 @@ public class DefaultFiremanDependency implements FiremanDependency {
     @Override
     public ForceSwitchableDataSource getDataSource() {
         try {
-            return (ForceSwitchableDataSource) new DalDataSourceFactory().createDataSource(Constants.TITAN_KEY_NAME);
+            return (ForceSwitchableDataSource) new DalDataSourceFactory().createDataSource(Constants.TITAN_KEY_NAME, true);
         } catch (Exception e) {
             logger.error("fireman get dal forceSwitchableDatasource fail", e);
             throw new DalRuntimeException("get datasource error");

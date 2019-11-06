@@ -18,7 +18,7 @@ import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
-import com.ctrip.framework.db.cluster.schedule.ReadHealthRegistration;
+import com.ctrip.framework.db.cluster.schedule.FreshnessScheduleRegistration;
 import com.ctrip.framework.db.cluster.service.DBConnectionService;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.DalPluginService;
@@ -247,8 +247,8 @@ public class ClusterService {
 
         clusterDao.update(clusters);
 
-        // registry health schedule
-        ReadHealthRegistration.getRegistration().registryToSchedule(clusterNames);
+        // registry read freshness schedule
+        FreshnessScheduleRegistration.getRegistration().registryToSchedule(clusterNames);
     }
 
     private void releaseValid(final ClusterDTO cluster) {

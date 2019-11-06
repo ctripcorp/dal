@@ -8,22 +8,22 @@ import java.util.Set;
 /**
  * Created by @author zhuYongMing on 2019/11/3.
  */
-public class ReadHealthRegistration {
+public class FreshnessScheduleRegistration {
 
-    private static ReadHealthRegistration registration;
+    private static FreshnessScheduleRegistration registration;
 
     private final Set<String> targetClusters;
 
 
-    private ReadHealthRegistration() {
+    private FreshnessScheduleRegistration() {
         this.targetClusters = Sets.newCopyOnWriteArraySet();
     }
 
-    public static ReadHealthRegistration getRegistration() {
+    public static FreshnessScheduleRegistration getRegistration() {
         if (registration == null) {
-            synchronized (ReadHealthRegistration.class) {
+            synchronized (FreshnessScheduleRegistration.class) {
                 if (registration == null) {
-                    registration = new ReadHealthRegistration();
+                    registration = new FreshnessScheduleRegistration();
                 }
             }
         }

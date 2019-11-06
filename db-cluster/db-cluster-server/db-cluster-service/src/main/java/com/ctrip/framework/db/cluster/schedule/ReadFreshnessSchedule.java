@@ -11,7 +11,6 @@ import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
@@ -29,7 +28,7 @@ import static com.ctrip.framework.db.cluster.util.thread.DefaultExecutorFactory.
  */
 @Slf4j
 //@Component
-public class ReadHealthSchedule {
+public class ReadFreshnessSchedule {
 
     private final static String mysql_latency_sp = "{call sp_getslavestatus}";
 
@@ -37,7 +36,7 @@ public class ReadHealthSchedule {
 
     private Consumer<String> task;
 
-    private final ReadHealthRegistration registration;
+    private final FreshnessScheduleRegistration registration;
 
     private final ScheduledExecutorService timer;
 
@@ -53,8 +52,8 @@ public class ReadHealthSchedule {
     private ShardInstanceService shardInstanceService;
 
 
-    public ReadHealthSchedule() {
-        this.registration = ReadHealthRegistration.getRegistration();
+    public ReadFreshnessSchedule() {
+        this.registration = FreshnessScheduleRegistration.getRegistration();
         this.timer = Executors.newSingleThreadScheduledExecutor(new DalServiceThreadFactory("ReadHealthScheduleTimerThread"));
         this.runnerThreadPool = new ThreadPoolExecutor(
                 16, 16, DEFAULT_KEEPER_ALIVE_TIME_SECONDS, TimeUnit.SECONDS,
@@ -74,7 +73,7 @@ public class ReadHealthSchedule {
                 final ClusterDTO cluster = clusterService.findUnDeletedClusterDTO(clusterName);
                 if (null == cluster) {
                     registration.removeFromSchedule(clusterName);
-                    log.info(String.format("[ReadHealthSchedule] cluster is not exists or deleted, " +
+                    log.info(String.format("[ReadFreshnessSchedule] cluster is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
                 }
@@ -82,7 +81,7 @@ public class ReadHealthSchedule {
                 final List<ZoneDTO> zones = cluster.getZones();
                 if (CollectionUtils.isEmpty(zones)) {
                     registration.removeFromSchedule(clusterName);
-                    log.info(String.format("[ReadHealthSchedule] zones is not exists or deleted, " +
+                    log.info(String.format("[ReadFreshnessSchedule] zones is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
                 }
@@ -92,7 +91,7 @@ public class ReadHealthSchedule {
                 ).collect(Collectors.toList());
                 if (CollectionUtils.isEmpty(shards)) {
                     registration.removeFromSchedule(clusterName);
-                    log.info(String.format("[ReadHealthSchedule] shards is not exists or deleted, " +
+                    log.info(String.format("[ReadFreshnessSchedule] shards is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
                 }
@@ -102,7 +101,7 @@ public class ReadHealthSchedule {
                 ).collect(Collectors.toList());
                 if (CollectionUtils.isEmpty(readInstances)) {
                     registration.removeFromSchedule(clusterName);
-                    log.info(String.format("[ReadHealthSchedule] read instances is not exists or deleted, " +
+                    log.info(String.format("[ReadFreshnessSchedule] read instances is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
                 }
@@ -115,7 +114,7 @@ public class ReadHealthSchedule {
                 ).findFirst();
                 if (!readUserOptional.isPresent()) {
                     registration.removeFromSchedule(clusterName);
-                    log.info(String.format("[ReadHealthSchedule] read user is not exists or deleted, " +
+                    log.info(String.format("[ReadFreshnessSchedule] read user is not exists or deleted, " +
                             "remove this cluster from health schedule, clusterName = %s", clusterName));
                     return;
                 }
@@ -136,7 +135,7 @@ public class ReadHealthSchedule {
                         connection = DriverManager.getConnection(url, username, password);
                         DriverManager.setLoginTimeout(1);
                     } catch (SQLException e) {
-                        log.error(String.format("[ReadHealthSchedule] unable to get connection, try again later, clusterName = %s, " +
+                        log.error(String.format("[ReadFreshnessSchedule] unable to get connection, try again later, clusterName = %s, " +
                                 "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
 
                         // retry
@@ -152,7 +151,7 @@ public class ReadHealthSchedule {
                             connection = DriverManager.getConnection(url, username, password);
                             DriverManager.setLoginTimeout(1);
                         } catch (SQLException e1) {
-                            log.error(String.format("[ReadHealthSchedule] unable to get connection second times, put out it, clusterName = %s, " +
+                            log.error(String.format("[ReadFreshnessSchedule] unable to get connection second times, put out it, clusterName = %s, " +
                                     "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e1);
                             // putout
                             try {
@@ -184,7 +183,7 @@ public class ReadHealthSchedule {
                             }
 
                         } catch (SQLException e) {
-                            log.error(String.format("[ReadHealthSchedule] call sp = %s fail, maybe sp error, or sp not exists, clusterName = %s, " +
+                            log.error(String.format("[ReadFreshnessSchedule] call sp = %s fail, maybe sp error, or sp not exists, clusterName = %s, " +
                                     "ip = %s, port = %s", mysql_latency_sp, clusterName, instance.getIp(), instance.getPort()), e);
                         } finally {
                             try {
@@ -210,7 +209,7 @@ public class ReadHealthSchedule {
                     }
                 });
             } catch (SQLException e) {
-                log.error(String.format("ReadHealthSchedule running error, " +
+                log.error(String.format("ReadFreshnessSchedule running error, " +
                         "ignore this cluster health task, clusterName = %s", clusterName), e);
             }
         });
@@ -236,10 +235,10 @@ public class ReadHealthSchedule {
             );
 
             // TODO: 2019/11/3 cat
-            log.info(String.format("[ReadHealthSchedule] put out shard instance, reason : %s, clusterName = %s, " +
+            log.info(String.format("[ReadFreshnessSchedule] put out shard instance, reason : %s, clusterName = %s, " +
                             "ip = %s, port = %s", reason, clusterName, instance.getIp(), instance.getPort()));
         } catch (SQLException e) {
-            log.error(String.format("[ReadHealthSchedule] put out shard instance error, clusterName = %s" +
+            log.error(String.format("[ReadFreshnessSchedule] put out shard instance error, clusterName = %s" +
                     "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
             throw e;
         }
@@ -265,10 +264,10 @@ public class ReadHealthSchedule {
             );
 
             // TODO: 2019/11/3 cat
-            log.info(String.format("[ReadHealthSchedule] put int shard instance, reason : %s, clusterName = %s, " +
+            log.info(String.format("[ReadFreshnessSchedule] put int shard instance, reason : %s, clusterName = %s, " +
                             "ip = %s, port = %s", reason, clusterName, instance.getIp(), instance.getPort()));
         } catch (SQLException e) {
-            log.error(String.format("[ReadHealthSchedule] put int shard instance error, clusterName = %s" +
+            log.error(String.format("[ReadFreshnessSchedule] put int shard instance error, clusterName = %s" +
                     "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
             throw e;
         }

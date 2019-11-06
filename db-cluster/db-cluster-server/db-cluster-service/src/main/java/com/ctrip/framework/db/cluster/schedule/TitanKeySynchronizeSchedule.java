@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * Created by @author zhuYongMing on 2019/11/6.
  */
 @Slf4j
-@Component
+//@Component
 public class TitanKeySynchronizeSchedule {
 
     private static final Integer pageSize = 1000;

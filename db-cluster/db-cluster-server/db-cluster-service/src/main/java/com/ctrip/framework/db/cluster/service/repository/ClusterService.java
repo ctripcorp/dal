@@ -8,8 +8,8 @@ import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.MhaUpdateData;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanMhaUpdateRequest;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateRequest;
 import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
 import com.ctrip.framework.db.cluster.entity.Shard;
@@ -630,7 +630,7 @@ public class ClusterService {
         final List<Shard> updatedShards = Lists.newArrayList();
         final List<ShardInstance> updatedShardInstances = Lists.newArrayList();
         final List<ShardInstanceDTO> createdShardInstances = Lists.newArrayList();
-        final List<MhaUpdateData> mhaUpdateDatas = Lists.newArrayList();
+        final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateData = Lists.newArrayList();
 
         clusterSwitchesVos.forEach(clusterSwitchesVo -> clusterSwitchesVo.getShards().forEach(shardSwitchesVo -> {
             final ShardDTO shardDTO = effectiveShardDTOsMap.get(clusterSwitchesVo.getClusterName())
@@ -691,12 +691,12 @@ public class ClusterService {
                                     }
                                 }
                         ).forEach(titanKey -> {
-                            final MhaUpdateData mhaUpdateData = MhaUpdateData.builder()
+                            final TitanKeyMhaUpdateData titanKeyMhaUpdateData = TitanKeyMhaUpdateData.builder()
                                     .keyName(titanKey)
                                     .server(switchInstanceMaster.getIp())
                                     .port(switchInstanceMaster.getPort())
                                     .build();
-                            mhaUpdateDatas.add(mhaUpdateData);
+                            titanKeyMhaUpdateData.add(titanKeyMhaUpdateData);
                         });
                     }
                 }
@@ -747,11 +747,11 @@ public class ClusterService {
         );
 
         // batch switch titan keys
-        if (!CollectionUtils.isEmpty(mhaUpdateDatas)) {
+        if (!CollectionUtils.isEmpty(titanKeyMhaUpdateData)) {
             // TODO: 2019/11/1 临时
             if (configService.isQconfigPluginSwitch()) {
-                final TitanMhaUpdateRequest request = TitanMhaUpdateRequest.builder()
-                        .data(mhaUpdateDatas)
+                final TitanKeyMhaUpdateRequest request = TitanKeyMhaUpdateRequest.builder()
+                        .data(titanKeyMhaUpdateData)
                         .env(Constants.ENV)
                         .build();
                 final PluginResponse response = titanPluginService.mhaUpdate(request, operator);

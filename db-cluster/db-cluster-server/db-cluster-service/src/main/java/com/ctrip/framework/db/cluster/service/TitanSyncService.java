@@ -2,8 +2,8 @@ package com.ctrip.framework.db.cluster.service;
 
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.domain.PluginStatusCode;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanKeyInfo;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.TitanUpdateRequest;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.add.TitanKeyInfo;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.update.TitanKeyUpdateRequest;
 import com.ctrip.framework.db.cluster.service.builder.TitanKeyBuilder;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
@@ -74,7 +74,7 @@ public class TitanSyncService {
     }
 
     protected void updateTitanKeys(List<ShardVo> shardVos, String env, String operator) throws SQLException {
-        TitanUpdateRequest request = titanKeyBuilder.buildTitanUpdateRequest(shardVos, env);
+        TitanKeyUpdateRequest request = titanKeyBuilder.buildTitanUpdateRequest(shardVos, env);
 
         PluginResponse titanUpdateResponse = titanPluginService.switchTitanKey(request, operator);
         if (titanUpdateResponse != null && PluginStatusCode.OK != titanUpdateResponse.getStatus()) {

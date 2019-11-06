@@ -10,7 +10,9 @@ import java.util.List;
  */
 @Data
 @Builder
-public class TitanMhaUpdateRequest {
-    private List<MhaUpdateData> data;
+public class TitanKeyMhaUpdateRequest {
+
+    private List<TitanKeyMhaUpdateData> data;
+
     private String env;
 }

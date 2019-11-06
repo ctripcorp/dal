@@ -29,11 +29,13 @@ import java.util.List;
 public class DalPluginService {
 
     private static final String release = "/release";
+
+    private final ConfigService configService;
+
+
     // below are deprecated
     private static final String UPDATE = "/update";
     private static final String GET = "/info";
-
-    private final ConfigService configService;
 
     public PluginResponse releaseClusters(List<ReleaseCluster> clusters, String env, String operator) {
         Transaction t = Cat.newTransaction("Dal.Plugin.AddCluster", "addClusters");
@@ -56,6 +58,8 @@ public class DalPluginService {
         return pluginResponse;
     }
 
+
+    // below are deprecated
     public PluginResponse updateClusters(List<ReleaseCluster> clusters, String env, String operator) {
         DalClusterUpdateRequest updateRequest = DalClusterUpdateRequest.builder()
                 .env(env)

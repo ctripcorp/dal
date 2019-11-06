@@ -181,14 +181,14 @@ public class DalClusterProvider {
                 .builder()
                 .keyName(titanKeyInDB.getName())
                 .uid(uid)
-                .extParam(titanKeyInDB.getExtParam())
-                .timeOut(titanKeyInDB.getTimeout())
+//                .extParam(titanKeyInDB.getExtParam())
+//                .timeOut(titanKeyInDB.getTimeout())
                 .createUser(titanKeyInDB.getCreateUser())
                 .updateUser(titanKeyInDB.getUpdateUser())
                 .permissions(titanKeyInDB.getPermissions())
                 .freeVerifyAppIdList(titanKeyInDB.getFreeVerifyApps())
                 .freeVerifyIpList(titanKeyInDB.getFreeVerifyIps())
-                .enabled(Utils.getEnabled(titanKeyInDB.getStatus()))
+//                .enabled(Utils.getEnabled(titanKeyInDB.getStatus()))
                 .build();
 
         return titanKey;

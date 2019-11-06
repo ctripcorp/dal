@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.domain.plugin.titan;
+package com.ctrip.framework.db.cluster.domain.plugin.titan.update;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class TitanUpdateDBData {
+public class TitanKeyUpdateDBData {
     private String dbName;
     private String domain;
     private String ip;

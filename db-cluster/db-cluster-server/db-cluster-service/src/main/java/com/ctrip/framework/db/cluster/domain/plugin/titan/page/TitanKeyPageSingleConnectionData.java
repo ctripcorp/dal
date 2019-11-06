@@ -10,11 +10,19 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TitanKeyPageResponse {
+public class TitanKeyPageSingleConnectionData {
 
-    private int status;
+    private String server;
 
-    private String message;
+    private String serverIp;
 
-    private TitanKeyPageData data;
+    private Integer port;
+
+    private String uid;
+
+    private String password;
+
+    private String dbName;
+
+    private String extParam;
 }

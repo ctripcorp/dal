@@ -2,10 +2,6 @@ package com.ctrip.framework.db.cluster.service.builder;
 
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.add.TitanKeyInfo;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.update.TitanKeyUpdateDBData;
-import com.ctrip.framework.db.cluster.domain.plugin.titan.update.TitanKeyUpdateRequest;
-import com.ctrip.framework.db.cluster.entity.Shard;
-import com.ctrip.framework.db.cluster.entity.ShardUser;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
 import com.ctrip.framework.db.cluster.service.repository.ShardService;
 import com.ctrip.framework.db.cluster.service.repository.TitanKeyService;
@@ -18,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -67,45 +62,6 @@ public class TitanKeyBuilder {
         }
 
         return requestTitanKeys;
-    }
-
-    public TitanKeyUpdateRequest buildTitanUpdateRequest(List<ShardVo> shards, String env) throws SQLException {
-        List<TitanKeyMhaUpdateData> titanKeyMhaUpdateData = Lists.newArrayList();
-        List<TitanKeyUpdateDBData> titanKeyUpdateDBData = Lists.newArrayList();
-        for (ShardVo shard : shards) {
-            DatabaseVo master = shard.getMaster();
-            InstanceVo masterInstance = master.getInstances().get(0);
-            List<Shard> shardsInDB = shardService.findShardsByDbName(shard.getDbName());
-            if (shardsInDB == null || shardsInDB.isEmpty()) {
-                // build titan update data
-                TitanKeyUpdateDBData oneShardTitanKeyUpdateDBData = TitanKeyUpdateDBData.builder()
-                        .dbName(shard.getDbName())
-                        .domain(master.getDomain())
-                        .ip(masterInstance.getIp())
-                        .port(masterInstance.getPort())
-                        .build();
-                titanKeyUpdateDBData.add(oneShardTitanKeyUpdateDBData);
-            } else {
-                // find master titanKeys
-                List<ShardUser> users = userService.findUsersByShardIdAndOperationType(shardsInDB.get(0).getId(), Constants.OPERATION_WRITE);
-                List<TitanKey> masterTitanKeys = Lists.newArrayList();
-                for (ShardUser user : users) {
-                    List<TitanKey> titanKeys = titanKeyService.findTitanKeysByUserId(user.getId());
-                    masterTitanKeys.addAll(titanKeys);
-                }
-
-
-                // build mha update data
-                List<TitanKeyMhaUpdateData> oneShardTitanKeyMhaUpdateData = buildMhaUpdateData(masterTitanKeys, master);
-                titanKeyMhaUpdateData.addAll(oneShardTitanKeyMhaUpdateData);
-            }
-        }
-        TitanKeyUpdateRequest request = TitanKeyUpdateRequest.builder()
-                .env(env)
-                .mhaData(titanKeyMhaUpdateData)
-                .dbData(titanKeyUpdateDBData)
-                .build();
-        return request;
     }
 
     private TitanKeyInfo buildTitanKey(String dbCategory, TitanKeyVo titanKey, ShardVo shard, UserVo user, String serverName, String serverIp, Integer port) {

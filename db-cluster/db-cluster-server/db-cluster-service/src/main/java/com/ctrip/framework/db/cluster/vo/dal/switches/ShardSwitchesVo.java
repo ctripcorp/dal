@@ -74,25 +74,4 @@ public class ShardSwitchesVo {
             read.correct();
         }
     }
-
-    public ShardDTO toShardDTO(final Integer clusterId, final String zoneId) {
-
-
-
-
-
-
-
-        return ShardDTO.builder()
-                .clusterEntityId(clusterId)
-                .zoneId(zoneId)
-                .masterDomain(null != master ? master.getDomain() : null)
-                .masterPort(null != master ? master.getPort() : null)
-                .slaveDomain(null != slave ? slave.getDomain() : null)
-                .slavePort(null != slave ? slave.getPort() : null)
-                .readDomain(null != read ? read.getDomain() : null)
-                .readPort(null != read ? read.getPort() : null)
-
-                .build();
-    }
 }

@@ -23,6 +23,8 @@ public class ConfigService {
     private static final String KEY_PLUGIN_TITAN_URL = "pluginTitanUrl";
     private static final String KEY_PLUGIN_MONGO_URL = "pluginMongoUrl";
     private static final String KEY_PLUGIN_DAL_URL = "pluginDalUrl";
+    private static final String KEY_QCONFIG_REST_API_URL = "qconfigRestApiUrl";
+    private static final String KEY_QCONFIG_REST_API_TOKEN = "qconfigRestApiToken";
     private static final String KEY_ALLOWED_IPS = "allowedIps";
     private static final String KEY_SECRET_SERVICE_URL = "secretServiceUrl";
     private static final String KEY_SSL_CODE = "sslCode";
@@ -49,6 +51,8 @@ public class ConfigService {
     private static final String DEFAULT_PLUGIN_TITAN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
     private static final String DEFAULT_PLUGIN_MONGO_URL = "http://qconfig.ctripcorp.com/plugins/mongo/config";
     private static final String DEFAULT_PLUGIN_DAL_URL = "http://qconfig.ctripcorp.com/plugins/dal/config";
+    private static final String DEFAULT_QCONFIG_REST_API_URL = "http://qconfig.ctripcorp.com/restapi";
+    private static final String DEFAULT_QCONFIG_REST_API_TOKEN = "4860EB8C49F291DC5D5AB96E7812CB86";
     private static final String DEFAULT_DB_CONNECTION_CHECK_URL = "http://mysqlapi.db.ctripcorp.com:8080/database/checktitanconnect";
     private static final String DEFAULT_DB_CONNECTION_CHECK_ENABLED_RELEASE_TYPES = "normal_release";
     private static final int DEFAULT_PLUGIN_RETRY_TIMES = 1;
@@ -71,6 +75,8 @@ public class ConfigService {
     private volatile String pluginTitanUrl;
     private volatile String pluginMongoUrl;
     private volatile String pluginDalUrl;
+    private volatile String qconfigRestApiUrl;
+    private volatile String qconfigRestApiToken;
     private volatile Set<String> allowedIps;
     private volatile String secretServiceUrl;
     private volatile String sslCode;
@@ -105,6 +111,8 @@ public class ConfigService {
         pluginTitanUrl = configMap.getString(KEY_PLUGIN_TITAN_URL, DEFAULT_PLUGIN_TITAN_URL);
         pluginMongoUrl = configMap.getString(KEY_PLUGIN_MONGO_URL, DEFAULT_PLUGIN_MONGO_URL);
         pluginDalUrl = configMap.getString(KEY_PLUGIN_DAL_URL, DEFAULT_PLUGIN_DAL_URL);
+        qconfigRestApiUrl = configMap.getString(KEY_QCONFIG_REST_API_URL, DEFAULT_QCONFIG_REST_API_URL);
+        qconfigRestApiToken = configMap.getString(KEY_QCONFIG_REST_API_TOKEN, DEFAULT_QCONFIG_REST_API_TOKEN);
         allowedIps = string2Set(configMap.getString(KEY_ALLOWED_IPS, ""));
         secretServiceUrl = configMap.getString(KEY_SECRET_SERVICE_URL, "");
         sslCode = configMap.getString(KEY_SSL_CODE, "");
@@ -146,6 +154,14 @@ public class ConfigService {
 
     public String getPluginDalUrl() {
         return pluginDalUrl;
+    }
+
+    public String getQConfigRestApiUrl() {
+        return qconfigRestApiUrl;
+    }
+
+    public String getQConfigRestApiToken() {
+        return qconfigRestApiToken;
     }
 
     public String getDBConnectionCheckUrl() {

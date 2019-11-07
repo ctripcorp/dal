@@ -1,8 +1,10 @@
 package com.ctrip.framework.db.cluster.schedule;
 
 import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageResponse;
+import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageSingleConnectionData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageSingleData;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
+import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.service.repository.TitanKeyService;
 import com.ctrip.framework.db.cluster.util.Constants;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -60,25 +63,26 @@ public class TitanKeySynchronizeSchedule {
                                     pageNo, pageSize, Constants.ENV
                             );
 
-                            if (titanKeyPageResponse.isSuccess()) {
+                            if (titanKeyPageResponse.isLegal()) {
                                 // consumer
                                 consumerTitanKeys(titanKeyPageResponse.getData().getData());
 
                                 // dynamic totalPage
                                 totalPage = titanKeyPageResponse.getData().getTotalPage();
                             } else {
-                                log.error(String.format("titanKeys synchronize schedule error, message = %s, pageNo = %d, pageSize = %d",
-                                        titanKeyPageResponse.getMessage(), pageNo, pageSize));
+                                log.error(String.format(
+                                        "titanKeys synchronize schedule page query titanKeys result illegal, status = %d, message = %s, result = %s",
+                                        titanKeyPageResponse.getStatus(), titanKeyPageResponse.getMessage(), titanKeyPageResponse.getData())
+                                );
                             }
                         } catch (Exception e) {
-                            log.error(String.format("titanKeys synchronize schedule error, pageNo = %d, pageSize = %d",
+                            log.error(String.format("titanKeys synchronize schedule error, ignore this batch, pageNo = %d, pageSize = %d",
                                     pageNo, pageSize), e);
                         }
                     }
 
-                    // TODO: 2019/11/7  delete by mark column
                     log.info("end titanKeys synchronize schedule.");
-                }, 1, 10, TimeUnit.MINUTES
+                }, 0, 1, TimeUnit.MINUTES
         );
     }
 
@@ -89,12 +93,12 @@ public class TitanKeySynchronizeSchedule {
         try {
             final List<TitanKey> insertTitanKeys = Lists.newArrayList();
             final List<TitanKey> updateTitanKeys = Lists.newArrayList();
-            final List<TitanKey> localTitanKeys = titanKeyService.findTitanKeys(remoteKeyNames);
+            final List<TitanKey> localTitanKeys = titanKeyService.findByKeyNames(remoteKeyNames);
 
             remoteKeys.forEach(remote -> {
                 final Optional<TitanKey> localKey = localTitanKeys.stream().filter(
-                        local -> remote.getName().equals(local.getName())
-                                && remote.getSubEnv().equals(local.getSubEnv())
+                        local -> Objects.equals(remote.getName(), local.getName())
+                                && Objects.equals(remote.getSubEnv(), local.getSubEnv())
                 ).findFirst();
 
                 if (localKey.isPresent()) {
@@ -121,19 +125,67 @@ public class TitanKeySynchronizeSchedule {
     }
 
     private boolean compareIdentical(final TitanKeyPageSingleData remote, final TitanKey local) {
+        final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
-        return true;
+        return Objects.equals(local.getName(), remote.getName())
+                && Objects.equals(local.getSubEnv(), remote.getSubEnv())
+                && Objects.equals(Enabled.getEnabled(local.getEnabled()), Enabled.getEnabled(remote.getEnabled()))
+                && Objects.equals(local.getProviderName(), remote.getProviderName())
+                && Objects.equals(local.getCreateUser(), remote.getCreateUser())
+                && Objects.equals(local.getUpdateUser(), remote.getUpdateUser())
+                && Objects.equals(local.getPermissions(), remote.getPermissions())
+                && Objects.equals(local.getFreeVerifyIps(), remote.getFreeVerifyIpList())
+                && Objects.equals(local.getFreeVerifyApps(), remote.getFreeVerifyAppIdList())
+                && Objects.equals(local.getMhaLastUpdateTime(), remote.getMhaLastUpdateTime())
+                && Objects.equals(local.getDomain(), connectionInfo.getServer())
+                && Objects.equals(local.getIp(), connectionInfo.getServerIp())
+                && Objects.equals(local.getPort(), connectionInfo.getPort())
+                && Objects.equals(local.getDbName(), connectionInfo.getDbName())
+                && Objects.equals(local.getExtParams(), connectionInfo.getExtParam());
     }
 
     private TitanKey toInsertTitanKey(final TitanKeyPageSingleData remote) {
-        return TitanKey.builder()
+        final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
+        return TitanKey.builder()
+                .name(remote.getName())
+                .subEnv(remote.getSubEnv())
+                .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
+                .providerName(remote.getProviderName())
+                .createUser(remote.getCreateUser())
+                .updateUser(remote.getUpdateUser())
+                .permissions(remote.getPermissions())
+                .freeVerifyIps(remote.getFreeVerifyIpList())
+                .freeVerifyApps(remote.getFreeVerifyAppIdList())
+                .mhaLastUpdateTime(remote.getMhaLastUpdateTime())
+                .domain(connectionInfo.getServer())
+                .ip(connectionInfo.getServerIp())
+                .port(connectionInfo.getPort())
+                .dbName(connectionInfo.getDbName())
+                .extParams(connectionInfo.getExtParam())
                 .build();
     }
 
     private TitanKey toUpdateTitanKey(final TitanKeyPageSingleData remote, final Integer localKeyId) {
-        return TitanKey.builder()
+        final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
+        return TitanKey.builder()
+                .id(localKeyId)
+                .name(remote.getName())
+                .subEnv(remote.getSubEnv())
+                .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
+                .providerName(remote.getProviderName())
+                .createUser(remote.getCreateUser())
+                .updateUser(remote.getUpdateUser())
+                .permissions(remote.getPermissions())
+                .freeVerifyIps(remote.getFreeVerifyIpList())
+                .freeVerifyApps(remote.getFreeVerifyAppIdList())
+                .mhaLastUpdateTime(remote.getMhaLastUpdateTime())
+                .domain(connectionInfo.getServer())
+                .ip(connectionInfo.getServerIp())
+                .port(connectionInfo.getPort())
+                .dbName(connectionInfo.getDbName())
+                .extParams(connectionInfo.getExtParam())
                 .build();
     }
 }

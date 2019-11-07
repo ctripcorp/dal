@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.domain.dba.connect;
+package com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain;
 
 import lombok.Builder;
 import lombok.Data;

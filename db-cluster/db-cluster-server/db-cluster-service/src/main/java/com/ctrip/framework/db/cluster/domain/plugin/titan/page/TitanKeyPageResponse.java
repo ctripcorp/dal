@@ -19,7 +19,7 @@ public class TitanKeyPageResponse {
     private TitanKeyPageData data;
 
 
-    public boolean isSuccess() {
-        return 0 == status;
+    public boolean isLegal() {
+        return  0 == status && data.isLegal();
     }
 }

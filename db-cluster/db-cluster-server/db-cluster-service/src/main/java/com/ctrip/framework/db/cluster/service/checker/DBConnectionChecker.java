@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.service.checker;
 
-import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckRequest;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckRequest;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
-import com.ctrip.framework.db.cluster.service.DBConnectionService;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.DBConnectionService;
 import com.ctrip.framework.db.cluster.vo.dal.create.*;
 import com.dianping.cat.Cat;
 import com.google.common.collect.Lists;

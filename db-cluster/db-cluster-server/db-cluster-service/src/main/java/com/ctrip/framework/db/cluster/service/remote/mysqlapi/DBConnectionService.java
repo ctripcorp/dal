@@ -1,7 +1,7 @@
-package com.ctrip.framework.db.cluster.service;
+package com.ctrip.framework.db.cluster.service.remote.mysqlapi;
 
-import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckRequest;
-import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckResponse;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckRequest;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckResponse;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.util.HttpUtils;

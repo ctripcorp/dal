@@ -32,6 +32,19 @@ public class TitanKeyDao {
         return client.query(builder, new DalHints());
     }
 
+    public List<TitanKey> queryByDomains(final List<String> domains) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+        builder.inNullable("domain", domains, Types.VARCHAR, false);
+        return client.query(builder, new DalHints());
+    }
+
+    public List<TitanKey> findKeyNameAndSubEnv() throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.select("name", "sub_env");
+        return client.query(builder, new DalHints());
+    }
+
     /**
      * Query TitanKey by the specified ID
      * The ID must be a number

@@ -3,23 +3,20 @@ package com.ctrip.framework.db.cluster.service.repository;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.dao.ClusterDao;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
-import com.ctrip.framework.db.cluster.domain.dba.connect.DBConnectionCheckRequest;
+import com.ctrip.framework.db.cluster.entity.*;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckRequest;
 import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateRequest;
-import com.ctrip.framework.db.cluster.entity.Cluster;
-import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
-import com.ctrip.framework.db.cluster.entity.Shard;
-import com.ctrip.framework.db.cluster.entity.ShardInstance;
 import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.schedule.FreshnessScheduleRegistration;
-import com.ctrip.framework.db.cluster.service.DBConnectionService;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.DBConnectionService;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.DalPluginService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
@@ -37,9 +34,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.unidal.tuple.Pair;
 
 import javax.annotation.Resource;
 import java.sql.SQLException;
@@ -72,6 +69,9 @@ public class ClusterService {
 
     @Resource
     private ShardInstanceService shardInstanceService;
+
+    @Resource
+    private TitanKeyService titanKeyService;
 
     @Resource
     private ClusterExtensionConfigService clusterExtensionConfigService;
@@ -631,7 +631,8 @@ public class ClusterService {
         final List<Shard> updatedShards = Lists.newArrayList();
         final List<ShardInstance> updatedShardInstances = Lists.newArrayList();
         final List<ShardInstanceDTO> createdShardInstances = Lists.newArrayList();
-        final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateDatas = Lists.newArrayList();
+        // titan key switch target
+        final Map<String, Pair<String, Integer>> domainIpPortPair = Maps.newHashMap();
 
         clusterSwitchesVos.forEach(clusterSwitchesVo -> clusterSwitchesVo.getShards().forEach(shardSwitchesVo -> {
             final ShardDTO shardDTO = effectiveShardDTOsMap.get(clusterSwitchesVo.getClusterName())
@@ -679,27 +680,28 @@ public class ClusterService {
                     updatedShardInstances.add(invalided);
 
                     // titan
-                    final List<UserDTO> effectiveUsers = shardDTO.getUsers();
-                    if (!CollectionUtils.isEmpty(effectiveUsers)) {
-                        effectiveUsers.stream().filter(
-                                userDTO -> Constants.OPERATION_WRITE.equalsIgnoreCase(userDTO.getPermission())
-                        ).map(UserDTO::getTitanKeys).flatMap(
-                                titanKeys -> {
-                                    if (titanKeys.contains(",")) {
-                                        return Lists.newArrayList(titanKeys.split(",")).stream().filter(StringUtils::isNotBlank);
-                                    } else {
-                                        return Lists.newArrayList(titanKeys).stream();
-                                    }
-                                }
-                        ).forEach(titanKey -> {
-                            final TitanKeyMhaUpdateData titanKeyMhaUpdateData = TitanKeyMhaUpdateData.builder()
-                                    .keyName(titanKey)
-                                    .server(switchInstanceMaster.getIp())
-                                    .port(switchInstanceMaster.getPort())
-                                    .build();
-                            titanKeyMhaUpdateDatas.add(titanKeyMhaUpdateData);
-                        });
-                    }
+//                    final List<UserDTO> effectiveUsers = shardDTO.getUsers();
+//                    if (!CollectionUtils.isEmpty(effectiveUsers)) {
+//                        effectiveUsers.stream().filter(
+//                                userDTO -> Constants.OPERATION_WRITE.equalsIgnoreCase(userDTO.getPermission())
+//                        ).map(UserDTO::getTitanKeys).flatMap(
+//                                titanKeys -> {
+//                                    if (titanKeys.contains(",")) {
+//                                        return Lists.newArrayList(titanKeys.split(",")).stream().filter(StringUtils::isNotBlank);
+//                                    } else {
+//                                        return Lists.newArrayList(titanKeys).stream();
+//                                    }
+//                                }
+//                        ).forEach(titanKey -> {
+//                            final TitanKeyMhaUpdateData titanKeyMhaUpdateData = TitanKeyMhaUpdateData.builder()
+//                                    .keyName(titanKey)
+//                                    .server(switchInstanceMaster.getIp())
+//                                    .port(switchInstanceMaster.getPort())
+//                                    .build();
+//                            titanKeyMhaUpdateDatas.add(titanKeyMhaUpdateData);
+//                        });
+//                    }
+                    domainIpPortPair.put(master.getDomain(), new Pair<>(switchInstanceMaster.getIp(), switchInstanceMaster.getPort()));
                 }
             }
 
@@ -748,23 +750,52 @@ public class ClusterService {
         );
 
         // batch switch titan keys
-        if (!CollectionUtils.isEmpty(titanKeyMhaUpdateDatas)) {
-            // TODO: 2019/11/1 临时
-            if (configService.isQconfigPluginSwitch()) {
-                final TitanKeyMhaUpdateRequest request = TitanKeyMhaUpdateRequest.builder()
-                        .data(titanKeyMhaUpdateDatas)
-                        .env(Constants.ENV)
-                        .build();
-                final PluginResponse response = titanPluginService.mhaUpdate(request, operator);
-                if (response.isSuccess()) {
-                    log.info(String.format("MhaUpdate Titan Key success, titanKey = %s, ", request.toString()));
-                } else {
-                    throw new DBClusterServiceException(
-                            String.format("mhaUpdate titan key error, titanKey = %s, message = %s",
-                                    request.toString(), response.getMessage())
-                    );
-                }
+        if (!CollectionUtils.isEmpty(domainIpPortPair)) {
+            final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateDatas = Lists.newArrayList();
+            final List<String> domains = domainIpPortPair.entrySet().stream()
+                    .map(Map.Entry::getKey).collect(Collectors.toList());
+            final List<TitanKey> titanKeys = titanKeyService.findByDomains(domains);
+
+            // database titan key miss
+            if (titanKeys.size() != domains.size()) {
+                // TODO: 2019/11/8 cat
+                log.error(
+                        String.format(
+                                "When switching clusters, the titanKeys found in the database is miss, and the target domain is as follows: " +
+                                        "domains = %s, the domains found in the database is as follows : domains = %s, " +
+                                        "maybe the titanKey synchronize schedule is miss data, please pay attention to this case.",
+                                domains.toString(), titanKeys.stream().map(TitanKey::getDomain).collect(Collectors.toList())
+                        )
+                );
             }
+
+            // construct
+            titanKeys.forEach(titanKey -> {
+                // each titanKey
+                final Pair<String, Integer> ipAndPort = domainIpPortPair.get(titanKey.getDomain());
+                final TitanKeyMhaUpdateData titanKeyMhaUpdateData = TitanKeyMhaUpdateData.builder()
+                        .keyName(titanKey.getName())
+                        .server(ipAndPort.getKey())
+                        .port(ipAndPort.getValue())
+                        .build();
+                titanKeyMhaUpdateDatas.add(titanKeyMhaUpdateData);
+            });
+
+            // switch titanKey
+            final TitanKeyMhaUpdateRequest request = TitanKeyMhaUpdateRequest.builder()
+                    .data(titanKeyMhaUpdateDatas)
+                    .env(Constants.ENV)
+                    .build();
+            final PluginResponse response = titanPluginService.mhaUpdate(request, operator);
+            if (response.isSuccess()) {
+                log.info(String.format("MhaUpdate Titan Key success, titanKey = %s, ", request.toString()));
+            } else {
+                throw new DBClusterServiceException(
+                        String.format("mhaUpdate titan key error, titanKey = %s, message = %s",
+                                request.toString(), response.getMessage())
+                );
+            }
+
         }
     }
 

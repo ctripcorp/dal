@@ -32,8 +32,16 @@ public class TitanKeyService {
         titanKeyDao.update(titanKeys);
     }
 
-    public List<TitanKey> findTitanKeys(final List<String> keyNames) throws SQLException {
+    public List<TitanKey> findByKeyNames(final List<String> keyNames) throws SQLException {
         return titanKeyDao.queryByNames(keyNames);
+    }
+
+    public List<TitanKey> findByDomains(final List<String> domains) throws SQLException {
+        return titanKeyDao.queryByDomains(domains);
+    }
+
+    public List<TitanKey> findKeyNameAndSubEnv() throws SQLException {
+        return titanKeyDao.findKeyNameAndSubEnv();
     }
 
     // deprecated

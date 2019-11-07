@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.domain.dba.connect;
+package com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;

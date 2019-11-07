@@ -3,6 +3,8 @@ package com.ctrip.framework.db.cluster.domain.plugin.titan.page;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Timestamp;
 
@@ -12,6 +14,7 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class TitanKeyPageSingleData {
 
     private Integer id; // ignore
@@ -47,4 +50,9 @@ public class TitanKeyPageSingleData {
     private Timestamp mhaLastUpdateTime;
 
     private TitanKeyPageSingleConnectionData connectionInfo;
+
+
+    public boolean isLegal() {
+        return StringUtils.isNoneBlank(name) && null != connectionInfo;
+    }
 }

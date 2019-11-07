@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 public class MongoPluginService {
 
-    private static final String ADD_OPERATOR = "/createClusterSets";
+    private static final String ADD_OPERATOR = "/add";
     private static final String GET_OPERATOR = "/info";
     private static final String UPDATE_OPERATOR = "/update";
 

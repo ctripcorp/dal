@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.application.entity.DALServiceTable;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +19,21 @@ import java.util.concurrent.Executors;
 
 @Service
 public class DALRequestTask {
-    private ExecutorService executor = Executors.newFixedThreadPool(2);
+
+    private ExecutorService executor = Executors.newFixedThreadPool(4);
     private static Logger log = LoggerFactory.getLogger(Application.class);
     private int qps = 100;
     private int delay = 40;
-    public MySQLThread mySQLThread;
-    public SQLServerThread sqlServerThread;
+    private SQLThread mySQLThread;
+    private SQLThread clusterThread;
+    private SQLThread sqlServerThread;
 
     @Autowired
     private DalApplicationConfig dalApplicationConfig;
-
     @Autowired
     private DALServiceDao mySqlDao;
-
+    @Autowired
+    private DALServiceDao clusterDao;
     @Autowired
     private DALServiceDao sqlServerDao;
 
@@ -38,15 +41,16 @@ public class DALRequestTask {
     private void init() throws Exception {
         try {
             qps = Integer.parseInt(dalApplicationConfig.getQPS());
-            delay = (1 * 1000 / qps) * 4;
+            delay = (1000 / qps) * 4;
         } catch (Exception e) {
             Cat.logError("get qps from QConfig error", e);
         }
 
         try {
-            mySQLThread = new MySQLThread(delay);
-            sqlServerThread = new SQLServerThread(delay);
-            addTask();
+            mySQLThread = new SQLThread(mySqlDao, delay);
+            clusterThread = new SQLThread(clusterDao, delay);
+            sqlServerThread = new SQLThread(sqlServerDao, delay);
+            startTasks();
             Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS, String.format("executor start with qps %s", getQps()));
         } catch (Exception e) {
             log.error("DALRequestTask init error", e);
@@ -58,18 +62,20 @@ public class DALRequestTask {
         executor.shutdownNow();
     }
 
-    public void cancelThreadTask() {
+    public void cancelTasks() {
         mySQLThread.exit = true;
+        clusterThread.exit = true;
         sqlServerThread.exit = true;
     }
 
-    private void addTask() {
+    private void startTasks() {
         executor.submit(mySQLThread);
+        executor.submit(clusterThread);
         executor.submit(sqlServerThread);
     }
 
     public void restart() throws Exception {
-        cancelThreadTask();
+        cancelTasks();
         init();
     }
 
@@ -77,71 +83,43 @@ public class DALRequestTask {
         return qps;
     }
 
-    private class MySQLThread extends Thread {
+    private static class SQLThread extends Thread {
         public volatile boolean exit = false;
-        private int mysqlDelay;
+        private final DALServiceDao dao;
+        private final long delay;
 
-        public MySQLThread(int delay) {
-            this.mysqlDelay = delay;
+        public SQLThread(DALServiceDao dao, long delay) {
+            this.dao = dao;
+            this.delay = delay;
         }
 
         @Override
         public void run() {
             while (!exit) {
+                Transaction t = Cat.newTransaction("DAL.App.Task", dao.getDatabaseName());
                 try {
                     DALServiceTable pojo = new DALServiceTable();
-                    pojo.setName("mysql");
-                    mySqlDao.insert(new DalHints().setIdentityBack(), pojo);
-                    pojo = mySqlDao.queryByPk(pojo.getID(), null);
+                    pojo.setName("insertName");
+                    dao.insert(new DalHints().setIdentityBack(), pojo);
+                    pojo = dao.queryByPk(pojo.getID(), null);
                     if (pojo != null) {
-                        pojo.setName("update");
-                        mySqlDao.update(null, pojo);
-                        mySqlDao.delete(null, pojo);
+                        pojo.setName("updateName");
+                        dao.update(null, pojo);
+                        dao.delete(null, pojo);
                     }
+                    t.setStatus(Transaction.SUCCESS);
                 } catch (Exception e) {
-                    log.error("mysql error", e);
+                    log.error(dao.getDatabaseName() + " error", e);
+                    t.setStatus(e);
                 } finally {
+                    t.complete();
                     try {
-                        Thread.sleep(mysqlDelay);
+                        Thread.sleep(delay);
                     } catch (Exception e) {
-
                     }
                 }
             }
         }
     }
 
-    private class SQLServerThread extends Thread {
-        public volatile boolean exit = false;
-        private int sqlDelay;
-
-        public SQLServerThread(int delay) {
-            this.sqlDelay = delay;
-        }
-
-        @Override
-        public void run() {
-            while (!exit) {
-                try {
-                    DALServiceTable pojo = new DALServiceTable();
-                    pojo.setName("sqlServer");
-                    sqlServerDao.insert(new DalHints().setIdentityBack(), pojo);
-                    pojo = sqlServerDao.queryByPk(pojo.getID(), null);
-                    if (pojo != null) {
-                        pojo.setName("update");
-                        sqlServerDao.update(null, pojo);
-                        sqlServerDao.delete(null, pojo);
-                    }
-                } catch (Exception e) {
-                    log.error("sqlserver error", e);
-                } finally {
-                    try {
-                        Thread.sleep(sqlDelay);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
-        }
-    }
 }

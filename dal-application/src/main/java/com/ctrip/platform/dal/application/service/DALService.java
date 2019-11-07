@@ -20,14 +20,15 @@ public class DALService {
 
   @Autowired
   private DALServiceDao mySqlDao;
-
+  @Autowired
+  private DALServiceDao clusterDao;
   @Autowired
   private DALServiceDao sqlServerDao;
 
   private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   public List<DALServiceTable> queryAllMySql() throws Exception {
-      return mySqlDao.queryAll(null);
+      return clusterDao.queryAll(null);
   }
 
   public List<DALServiceTable> queryAllSqlServer() throws Exception {
@@ -35,7 +36,7 @@ public class DALService {
   }
 
   public DALServiceTable queryMySql(DALServiceTable pojo) throws Exception {
-      return mySqlDao.queryByPk(pojo,null);
+      return clusterDao.queryByPk(pojo,null);
   }
 
   public DALServiceTable querySqlServer(DALServiceTable pojo) throws Exception {
@@ -43,7 +44,7 @@ public class DALService {
   }
 
   public void deleteMySql(DALServiceTable pojo) throws Exception {
-    mySqlDao.delete(null,pojo);
+    clusterDao.delete(null,pojo);
   }
 
   public void deleteSqlServer(DALServiceTable pojo) throws Exception {
@@ -51,7 +52,7 @@ public class DALService {
   }
 
   public DALServiceTable updateMySql(DALServiceTable pojo) throws Exception {
-    mySqlDao.update(null,pojo);
+    clusterDao.update(null,pojo);
     return queryMySql(pojo);
   }
 
@@ -65,13 +66,18 @@ public class DALService {
     return mySqlDao.queryByPk(pojo,null);
   }
 
+  public DALServiceTable insertCluster(DALServiceTable pojo) throws Exception {
+    clusterDao.insert(new DalHints().setIdentityBack(),pojo);
+    return clusterDao.queryByPk(pojo,null);
+  }
+
   public DALServiceTable insertSqlServer(DALServiceTable pojo) throws Exception {
     sqlServerDao.insert(new DalHints().setIdentityBack(),pojo);
     return sqlServerDao.queryByPk(pojo,null);
   }
 
   public int deleteMySqlAll() throws Exception{
-    return mySqlDao.deleteAll();
+    return clusterDao.deleteAll();
   }
 
   public int deleteSqlServerAll() throws Exception{

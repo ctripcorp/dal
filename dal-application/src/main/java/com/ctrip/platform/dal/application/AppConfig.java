@@ -25,6 +25,11 @@ public class AppConfig {
     }
 
     @Bean
+    public DALServiceDao clusterDao() throws SQLException {
+        return new DALServiceDao("dal_demo_cluster");
+    }
+
+    @Bean
     public DALServiceDao sqlServerDao() throws SQLException {
         return new DALServiceDao("DalSQLServerTest");
     }

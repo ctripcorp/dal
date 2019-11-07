@@ -65,7 +65,7 @@ public class DALServiceController {
         return dalService.insertSqlServer(testPojo);
     }
 
-    @RequestMapping("/welcome")
+    @RequestMapping("/")
     public ModelAndView welcomePage() {
         return new ModelAndView("welcome");
     }

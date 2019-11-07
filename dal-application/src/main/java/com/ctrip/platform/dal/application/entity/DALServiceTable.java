@@ -9,7 +9,7 @@ import java.sql.Types;
 
 @Entity
 @Database(name="DalMySqlTest")
-@Table(name="DALServiceTable")
+@Table(name="dalservicetable")
 public class DALServiceTable {
 
 	@Id

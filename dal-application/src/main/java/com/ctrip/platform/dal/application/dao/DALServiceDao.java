@@ -32,6 +32,11 @@ public class DALServiceDao {
 	private DalQueryDao queryDaoSqlServer = null;
 	private DalRowMapper<DALServiceTable> personGenRowMapper = null;
     private static Logger log= LoggerFactory.getLogger(DALServiceDao.class);
+    private String databaseName = DATA_BASE;
+
+    public String getDatabaseName() {
+    	return databaseName;
+	}
 
 	public DALServiceDao() throws SQLException {
 		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(DALServiceTable.class));
@@ -41,6 +46,7 @@ public class DALServiceDao {
 	}
 
 	public DALServiceDao(String DATA_BASE) throws SQLException {
+    	this.databaseName = DATA_BASE;
 		this.client = new DalTableDao<>(DALServiceTable.class,DATA_BASE);
 		this.personGenRowMapper = new DalDefaultJpaMapper<>(DALServiceTable.class);
 		this.queryDao = new DalQueryDao(DATA_BASE);

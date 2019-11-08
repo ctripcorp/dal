@@ -1,16 +1,16 @@
 package com.ctrip.framework.db.cluster.service;
 
 import com.alibaba.fastjson.JSON;
-import com.ctrip.framework.db.cluster.entity.ClusterListResponse;
-import com.ctrip.framework.db.cluster.entity.ClusterResponse;
-import com.ctrip.framework.db.cluster.entity.HttpMethod;
+import com.ctrip.framework.db.cluster.entity.*;
 import com.ctrip.framework.db.cluster.utils.EnvUtil;
 import com.ctrip.framework.db.cluster.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by taochen on 2019/11/6.
@@ -24,7 +24,10 @@ public class ClusterService {
     private static final String DB_CLUSTER_GET_CLUSTERS_PRO = "http://service.dbcluster.ctripcorp.com/api/dal/v1/clusters/?operator=%s&effective=%s";
 
     private static final String ADMIN_USER = "chentao";
-    public ClusterResponse getCluster() {
+
+    private ConcurrentHashMap<String, Cluster> clusterCache = new ConcurrentHashMap<>();
+
+    public ClusterResponse getCluster(String clusterName) {
         String clusters = "{\n" +
                 "    \"status\": 200,\n" +
                 "    \"message\": \"Query cluster success\",\n" +
@@ -98,6 +101,7 @@ public class ClusterService {
                 "    }\n" +
                 "}";
         ClusterResponse clusterResponse = JSON.parseObject(clusters, ClusterResponse.class);
+        clusterCache.put(clusterResponse.getResult().getClusterName(), clusterResponse.getResult());
         return clusterResponse;
     }
 
@@ -116,5 +120,9 @@ public class ClusterService {
         }
         //ClusterListResponse clusterListResponse = JSON.parseObject(clusters, ClusterListResponse.class);
         return clusterListResponse;
+    }
+
+    public List<Zone> findClusterZones(String clusterName) {
+        return clusterCache.get(clusterName).getZones();
     }
 }

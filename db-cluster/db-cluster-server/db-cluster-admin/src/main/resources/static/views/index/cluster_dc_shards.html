@@ -8,23 +8,22 @@
     	<span>详情</span>
     </h3>
     <div>
-        <ul class="nav nav-tabs padding-18 tab-size-bigger" ng-if="dcs && dcs.length">
-            <li ng-repeat="dc in dcs" ng-class="{'active': currentDcName == dc.dcName}">
-                <a ng-click="switchDc(dc)" data-toggle="tab">
-                    {{dc.dcName}}
+        <ul class="nav nav-tabs padding-18 tab-size-bigger" ng-if="zones && zones.length">
+            <li ng-repeat="zone in zones" ng-class="{'active': currentZoneId == zone.zoneId}">
+                <a ng-click="switchZone(zone)" data-toggle="tab">
+                    {{zone.zoneId}}
                 </a>
             </li>
         </ul>
 
-        <div ng-if="dcs && dcs.length">
+        <div ng-if="zones && zones.length">
             <div class="col-xs-12">
                 <div class="panel panel-primary" style="margin-top: 15px;" ng-repeat="shard in shards">
                     <header class="panel-heading">
                         <div class="row">
-                            <div class="col-md-6">{{shard.shardTbl.shardName}}</div>
+                            <div class="col-md-6">shard{{shard.shardIndex}}</div>
                             <div class="col-md-6 text-right">
-                                <a class="btn btn-primary btn-sm" ng-if="routeAvail === true" href="/#/chain/{{clusterName}}/{{currentDcName}}">Proxy-Chain</a>
-                            	<a class="btn btn-primary btn-sm" href="/#/cluster_dc_shard_update?clusterName={{clusterName}}&shardName={{shard.shardTbl.shardName}}&currentDcName={{currentDcName}}">编辑</a>
+                            	<a class="btn btn-primary btn-sm" href="">编辑</a>
                             </div>
                         </div>
                     </header>
@@ -47,17 +46,37 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="shardInstance in shard">
-                            <td title="{{redis.runId}}">
-                                <span class="label label-info" ng-if="instance.master === true">
-                                    Master</span>  Redis
+                        <tr ng-click="showInstanceConfirm('master')">
+                            <td >
+                                <span class="label label-info">Master</span>
                             </td>
-                            <td ng-bind="shardInstance.domain">
+                            <td ng-bind="shard.master.domain">
                             </td>
-                            <td ng-bind="shardInstance.port">
+                            <td ng-bind="shard.master.port">
                             </td>
-                            <td ng-bind="shardInstance.instances.length"></td>
+                            <td ng-bind="shard.master.instances.length"></td>
+                        </tr>
 
+                        <tr ng-click="showInstanceConfirm('slave')">
+                            <td >
+                                <span class="label label-info">Slave</span>
+                            </td>
+                            <td ng-bind="shard.slave.domain">
+                            </td>
+                            <td ng-bind="shard.slave.port">
+                            </td>
+                            <td ng-bind="shard.slave.instances.length"></td>
+                        </tr>
+
+                        <tr ng-click="showInstanceConfirm('read')">
+                            <td >
+                                <span class="label label-info">Read</span>
+                            </td>
+                            <td ng-bind="shard.Read.domain">
+                            </td>
+                            <td ng-bind="shard.Read.port">
+                            </td>
+                            <td ng-bind="shard.Read.instances.length"></td>
                         </tr>
 
                         </tbody>
@@ -66,7 +85,7 @@
             </div>
         </div>
 
-        <div ng-if="(!dcs || !dcs.length) && clusterName">
+        <div ng-if="(!zones || !zones.length) && clusterName">
             无shards
         </div>
     </div>

@@ -4,9 +4,9 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
             method: 'GET',
             url: '/console/clusters/:clusterName'
         },
-        find_cluster_dcs: {
+        find_cluster_zones: {
             method: 'GET',
-            url: '/console/clusters/:clusterName/dcs',
+            url: '/console/clusters/:clusterName/zones',
             isArray: true
         },
         find_all_clusters: {
@@ -125,9 +125,9 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
     	return d.promise;
     }
     
-    function findClusterDCs(clusterName) {
+    function findClusterZones(clusterName) {
         var d = $q.defer();
-        resource.find_cluster_dcs({
+        resource.find_cluster_zones({
                                       clusterName: clusterName
                                   },
                                   function (result) {
@@ -292,7 +292,7 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
 
     return {
         load_cluster: loadCluster,
-        findClusterDCs: findClusterDCs,
+        findClusterZones: findClusterZones,
         findAllClusters: findAllClusters,
         findClustersByActiveDcName: findClustersByActiveDcName,
         createCluster: createCluster,

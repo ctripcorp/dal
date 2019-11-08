@@ -1,0 +1,74 @@
+<div>
+    <h3 class="header smaller lighter blue">
+    	&nbsp;&nbsp;&nbsp;&nbsp;
+    	<a href="/#/cluster_list">Cluster List</a>
+        <span> > </span>
+    	<a href="/#/cluster_list?clusterName={{clusterName}}">{{clusterName}}</a>
+    	<span> > </span>
+    	<span>详情</span>
+    </h3>
+    <div>
+        <ul class="nav nav-tabs padding-18 tab-size-bigger" ng-if="dcs && dcs.length">
+            <li ng-repeat="dc in dcs" ng-class="{'active': currentDcName == dc.dcName}">
+                <a ng-click="switchDc(dc)" data-toggle="tab">
+                    {{dc.dcName}}
+                </a>
+            </li>
+        </ul>
+
+        <div ng-if="dcs && dcs.length">
+            <div class="col-xs-12">
+                <div class="panel panel-primary" style="margin-top: 15px;" ng-repeat="shard in shards">
+                    <header class="panel-heading">
+                        <div class="row">
+                            <div class="col-md-6">{{shard.shardTbl.shardName}}</div>
+                            <div class="col-md-6 text-right">
+                                <a class="btn btn-primary btn-sm" ng-if="routeAvail === true" href="/#/chain/{{clusterName}}/{{currentDcName}}">Proxy-Chain</a>
+                            	<a class="btn btn-primary btn-sm" href="/#/cluster_dc_shard_update?clusterName={{clusterName}}&shardName={{shard.shardTbl.shardName}}&currentDcName={{currentDcName}}">编辑</a>
+                            </div>
+                        </div>
+                    </header>
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>
+                                角色
+                            </th>
+                            <th>
+                                域名
+                            </th>
+                            <th>
+                                端口
+                            </th>
+                            <th>
+                            	实例数
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="shardInstance in shard">
+                            <td title="{{redis.runId}}">
+                                <span class="label label-info" ng-if="instance.master === true">
+                                    Master</span>  Redis
+                            </td>
+                            <td ng-bind="shardInstance.domain">
+                            </td>
+                            <td ng-bind="shardInstance.port">
+                            </td>
+                            <td ng-bind="shardInstance.instances.length"></td>
+
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="(!dcs || !dcs.length) && clusterName">
+            无shards
+        </div>
+    </div>
+</div>
+

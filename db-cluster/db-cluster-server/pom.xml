@@ -28,6 +28,7 @@
         <lombok.version>1.16.16</lombok.version>
         <junit.version>4.12</junit.version>
         <mockito-all.version>2.0.2-beta</mockito-all.version>
+        <fastjson.version>1.2.60</fastjson.version>
     </properties>
 
     <dependencyManagement>
@@ -84,6 +85,12 @@
                 <groupId>com.ctrip.framework.fireman</groupId>
                 <artifactId>fireman</artifactId>
                 <version>${fireman.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
 
             <!-- lombok -->

@@ -31,6 +31,15 @@
             <artifactId>cat-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.ctrip.platform</groupId>
+            <artifactId>ctrip-dal-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

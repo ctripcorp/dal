@@ -15,10 +15,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ctrip.framework.dal</groupId>
-            <artifactId>db-cluster-common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.ctrip.framework</groupId>
             <artifactId>vi</artifactId>
         </dependency>

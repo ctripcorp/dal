@@ -2,6 +2,7 @@ package com.ctrip.framework.db.cluster.service.repository;
 
 import com.ctrip.framework.db.cluster.dao.TitanKeyDao;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
+import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.dal.create.TitanKeyVo;
 import lombok.AllArgsConstructor;
@@ -36,8 +37,8 @@ public class TitanKeyService {
         return titanKeyDao.queryByNames(keyNames);
     }
 
-    public List<TitanKey> findByDomains(final List<String> domains) throws SQLException {
-        return titanKeyDao.queryByDomains(domains);
+    public List<TitanKey> findByDomains(final List<String> domains, final Enabled enabled) throws SQLException {
+        return titanKeyDao.queryByDomains(domains, enabled);
     }
 
     public List<TitanKey> findKeyNameAndSubEnv() throws SQLException {

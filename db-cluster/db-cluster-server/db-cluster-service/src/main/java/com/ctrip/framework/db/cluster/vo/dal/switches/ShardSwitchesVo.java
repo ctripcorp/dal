@@ -1,9 +1,7 @@
 package com.ctrip.framework.db.cluster.vo.dal.switches;
 
-import com.ctrip.framework.db.cluster.domain.dto.ShardDTO;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,8 +40,13 @@ public class ShardSwitchesVo {
 
         // master
         if (null != master) {
-            Preconditions.checkArgument(StringUtils.isNotBlank(
-                    master.getDomain()), "如果master节点存在, 即表示需要对master节点信息进行切换, 此时要求master domain也必须存在."
+            Preconditions.checkArgument(
+                    StringUtils.isNotBlank(master.getDomain()),
+                    "如果master节点存在, 即表示需要对master节点信息进行切换, 此时要求master domain也必须存在."
+            );
+            Preconditions.checkArgument(
+                    null != master.getInstance(),
+                    "如果master节点存在, 即表示需要对master节点信息进行切换, 此时master instance字段必须存在."
             );
             Preconditions.checkArgument(CollectionUtils.isEmpty(master.getInstances()), "master instances字段不能赋值.");
             master.valid(regexMatcher);

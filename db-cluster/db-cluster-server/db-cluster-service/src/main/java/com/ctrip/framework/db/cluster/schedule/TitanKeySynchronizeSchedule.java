@@ -12,6 +12,7 @@ import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -115,12 +116,34 @@ public class TitanKeySynchronizeSchedule {
                 }
             });
 
-            titanKeyService.create(insertTitanKeys);
-            titanKeyService.update(updateTitanKeys);
+            if (!CollectionUtils.isEmpty(insertTitanKeys)) {
+                titanKeyService.create(insertTitanKeys);
+            }
+
+            if (!CollectionUtils.isEmpty(updateTitanKeys)) {
+                titanKeyService.update(updateTitanKeys);
+            }
 
         } catch (SQLException e) {
             log.error(String.format("titanKeys synchronize schedule consumer titanKeys error, keyNames = %s",
                     remoteKeyNames.toString()), e);
+        }
+    }
+
+    private void splitInsert(final List<TitanKey> insertTitanKeys) {
+        try {
+            titanKeyService.create(insertTitanKeys);
+        } catch (Exception e) {
+            final int insertKeySize = insertTitanKeys.size();
+            if (insertKeySize != 1) {
+                final List<TitanKey> left = insertTitanKeys.stream().limit(insertKeySize / 2).collect(Collectors.toList());
+                insertTitanKeys.removeAll(left); // The other half
+
+                splitInsert(left);
+                splitInsert(insertTitanKeys); // The other half
+            } else {
+                log.error("titanKeys synchronize schedule, unExpect titanKeys = %s", insertTitanKeys.get(0).toString());
+            }
         }
     }
 
@@ -171,8 +194,8 @@ public class TitanKeySynchronizeSchedule {
 
         return TitanKey.builder()
                 .id(localKeyId)
-                .name(remote.getName())
-                .subEnv(remote.getSubEnv())
+//                .name(remote.getName())
+//                .subEnv(remote.getSubEnv())
                 .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
                 .providerName(remote.getProviderName())
                 .createUser(remote.getCreateUser())

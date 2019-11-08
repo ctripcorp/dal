@@ -754,7 +754,7 @@ public class ClusterService {
             final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateDatas = Lists.newArrayList();
             final List<String> domains = domainIpPortPair.entrySet().stream()
                     .map(Map.Entry::getKey).collect(Collectors.toList());
-            final List<TitanKey> titanKeys = titanKeyService.findByDomains(domains);
+            final List<TitanKey> titanKeys = titanKeyService.findByDomains(domains, Enabled.enabled);
 
             // database titan key miss
             if (titanKeys.size() != domains.size()) {

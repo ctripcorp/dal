@@ -37,13 +37,14 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
 
     public ForceSwitchableDataSource(IDataSourceConfigureProvider provider) throws SQLException {
         this(getIDataSourceConfigure(provider) == null ? NULL_DATASOURCE : getIDataSourceConfigure(provider).getConnectionUrl(), provider);
-        if (getIDataSourceConfigure(provider) == null) {
-            isNullDataSource = true;
-        }
     }
 
     public ForceSwitchableDataSource(String name, IDataSourceConfigureProvider provider) throws SQLException {
-        super(name, DataSourceConfigure.valueOf(getIDataSourceConfigure(provider) == null ? new DataSourceConfigure() : getIDataSourceConfigure(provider)));
+        this(new DataSourceName(name), provider);
+    }
+
+    public ForceSwitchableDataSource(DataSourceIdentity id, IDataSourceConfigureProvider provider) throws SQLException {
+        super(id, DataSourceConfigure.valueOf(getIDataSourceConfigure(provider) == null ? new DataSourceConfigure() : getIDataSourceConfigure(provider)));
         if (getIDataSourceConfigure(provider) == null) {
             isNullDataSource = true;
         }

@@ -83,7 +83,7 @@ public class DataSourceLocator {
         }
 
         SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(id, provider);
-        ForceSwitchableDataSource ds = new ForceSwitchableDataSource(id.getId(), dataSourceConfigureProvider);
+        ForceSwitchableDataSource ds = new ForceSwitchableDataSource(id, dataSourceConfigureProvider);
         provider.register(id, ds);
         executor.execute(ds);
 

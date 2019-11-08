@@ -37,6 +37,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     private volatile ScheduledExecutorService timer = null;
 
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
+    private DataSourceIdentity id;
 
     private static int switchVersion = 0;
 
@@ -54,8 +55,21 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     private static final String THREAD_NAME = "DataSourceRefresher";
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
+        this.id = new DataSourceName(name);
         SingleDataSource ds = createSingleDataSource(name, config);
-        init(ds);
+        LOGGER.info(String.format("new RefreshableDataSource '%s', use SingleDataSource '%s' ref count [%d]", name, ds.getName(), ds.getReferenceCount()));
+        dataSourceReference.set(ds);
+        executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new CustomThreadFactory("DataSourceSwitchListener"));
+        executor.allowCoreThreadTimeOut(true);
+    }
+
+    public RefreshableDataSource(DataSourceIdentity id, DataSourceConfigure config) {
+        this.id = id;
+        SingleDataSource ds = createSingleDataSource(id.getId(), config);
+        LOGGER.info(String.format("new RefreshableDataSource '%s', use SingleDataSource '%s' ref count [%d]", id.getId(), ds.getName(), ds.getReferenceCount()));
+        dataSourceReference.set(ds);
         executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new CustomThreadFactory("DataSourceSwitchListener"));
@@ -87,14 +101,9 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         refresh(newDataSource);
     }
 
-    private void init(SingleDataSource newDataSource) {
-        newDataSource.register();
-        dataSourceReference.set(newDataSource);
-    }
-
     private void refresh(SingleDataSource newDataSource) {
-        newDataSource.register();
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
+        LOGGER.info(String.format("switch RefreshableDataSource '%s', use SingleDataSource '%s' ref count [%d]", id.getId(), newDataSource.getName(), newDataSource.getReferenceCount()));
         close(oldDataSource);
     }
 
@@ -112,11 +121,15 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         }, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
-    private void close(SingleDataSource oldDataSource) {
-        if (oldDataSource != null && oldDataSource.unRegister() <= 0) {
-            DataSourceTerminator.getInstance().close(oldDataSource);
-            oldDataSource.cancelTask();
+    public void close() {
+        SingleDataSource ds = dataSourceReference.get();
+        if (ds != null) {
+            close(ds);
         }
+    }
+
+    private void close(SingleDataSource oldDataSource) {
+        DataSourceCreator.getInstance().returnDataSource(oldDataSource);
     }
 
     private SingleDataSource createSingleDataSource(String name, DataSourceConfigure configure) {
@@ -137,6 +150,10 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     public SingleDataSource getSingleDataSource() {
         return dataSourceReference.get();
+    }
+
+    public DataSourceIdentity getId() {
+        return id;
     }
 
     public void addDataSourceSwitchListener(DataSourceSwitchListener dataSourceSwitchListener) {

@@ -50,6 +50,7 @@ public class DataSourceCreator {
                 }
             }
         }
+        ds.register();
         return ds;
     }
 
@@ -70,6 +71,7 @@ public class DataSourceCreator {
                 }
             }
         }
+        ds.register();
         return ds;
     }
 
@@ -90,6 +92,7 @@ public class DataSourceCreator {
                 }
             }
         }
+        ds.register();
         return ds;
     }
 
@@ -113,7 +116,20 @@ public class DataSourceCreator {
                 }
             }
         }
+        ds.register();
         return ds;
+    }
+
+    public void returnDataSource(SingleDataSource ds) {
+        if (ds != null) {
+            ds.unRegister();
+            if (ds.getReferenceCount() <= 0) {
+                DataSourceConfigure config = ds.getDataSourceConfigure();
+                targetDataSourceCache.remove(config, ds);
+                DataSourceTerminator.getInstance().close(ds);
+                ds.cancelTask();
+            }
+        }
     }
 
     private SingleDataSource createDataSource(String name, DataSourceConfigure configure) {

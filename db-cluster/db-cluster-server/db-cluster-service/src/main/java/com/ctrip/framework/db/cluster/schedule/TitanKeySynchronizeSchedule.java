@@ -130,23 +130,6 @@ public class TitanKeySynchronizeSchedule {
         }
     }
 
-    private void splitInsert(final List<TitanKey> insertTitanKeys) {
-        try {
-            titanKeyService.create(insertTitanKeys);
-        } catch (Exception e) {
-            final int insertKeySize = insertTitanKeys.size();
-            if (insertKeySize != 1) {
-                final List<TitanKey> left = insertTitanKeys.stream().limit(insertKeySize / 2).collect(Collectors.toList());
-                insertTitanKeys.removeAll(left); // The other half
-
-                splitInsert(left);
-                splitInsert(insertTitanKeys); // The other half
-            } else {
-                log.error("titanKeys synchronize schedule, unExpect titanKeys = %s", insertTitanKeys.get(0).toString());
-            }
-        }
-    }
-
     private boolean compareIdentical(final TitanKeyPageSingleData remote, final TitanKey local) {
         final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 

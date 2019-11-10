@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 //@Component
-public class TitanKeyExistsSchedule {
+public class TitanKeysExistsSchedule {
 
     private final ScheduledExecutorService timer;
 
@@ -37,7 +37,7 @@ public class TitanKeyExistsSchedule {
     private final QConfigService qConfigService;
 
 
-    public TitanKeyExistsSchedule(final TitanKeyService titanKeyService, final QConfigService qConfigService) {
+    public TitanKeysExistsSchedule(final TitanKeyService titanKeyService, final QConfigService qConfigService) {
         this.timer = Executors.newSingleThreadScheduledExecutor(
                 new DalServiceThreadFactory("TitanKeyExistsScheduleTimerThread")
         );

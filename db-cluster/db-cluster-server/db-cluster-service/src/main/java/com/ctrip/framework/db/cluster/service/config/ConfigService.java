@@ -1,6 +1,8 @@
 package com.ctrip.framework.db.cluster.service.config;
 
 import com.ctrip.framework.db.cluster.util.Constants;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -8,8 +10,10 @@ import qunar.agile.Conf;
 import qunar.tc.qconfig.client.MapConfig;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by shenjie on 2019/3/5.
@@ -18,6 +22,7 @@ import java.util.Set;
 public class ConfigService {
 
     private static final String DELIMITER = ",";
+    private static final String COLON = ":";
 
     // qconfig key
     private static final String KEY_PLUGIN_TITAN_URL = "pluginTitanUrl";
@@ -33,6 +38,8 @@ public class ConfigService {
     private static final String KEY_PLUGIN_RETRY_TIMES = "pluginRetryTimes";
     private static final String KEY_MAIL_RECEIVERS = "mailReceivers";
     private static final String KEY_HTTP_READ_TIMEOUT_IN_MS = "httpReadTimeoutInMs";
+    private static final String KEY_FRESHNESS_ENABLED = "freshnessEnabled";
+    private static final String KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = "freshnessClusterEnabledAndThresholdSecond";
 
     private static final String KEY_CLUSTER_NAME_REGEX = "clusterNameRegex";
     private static final String KEY_DB_NAME_REGEX = "dbNameRegex";
@@ -46,7 +53,6 @@ public class ConfigService {
     private static final String KEY_QCONFIG_PLUGIN_SWITCH = "qconfigPluginSwitch";
 
 
-
     // qconfig default value
     private static final String DEFAULT_PLUGIN_TITAN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
     private static final String DEFAULT_PLUGIN_MONGO_URL = "http://qconfig.ctripcorp.com/plugins/mongo/config";
@@ -58,6 +64,8 @@ public class ConfigService {
     private static final int DEFAULT_PLUGIN_RETRY_TIMES = 1;
     private static final String DEFAULT_MAIL_RECEIVERS = "shenjie@ctrip.com";
     private static final int DEFAULT_HTTP_READ_TIMEOUT_IN_MS = 10000;
+    private static final boolean DEFAULT_FRESHNESS_ENABLED = true;
+    private static final String DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = ""; // example:"cluster1:5,cluster2:2,cluster3:10"
 
     private static final String DEFAULT_CLUSTER_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
     private static final String DEFAULT_DB_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
@@ -85,6 +93,8 @@ public class ConfigService {
     private volatile int pluginReTryTimes;
     private volatile Set<String> mailReceivers;
     private volatile int httpReadTimeoutInMs;
+    private volatile boolean freshnessEnabled;
+    private volatile Map<String, Integer> freshnessClusterEnabledAndThresholdSecond;
 
     // 正则表达式
     private volatile String clusterNameRegex;
@@ -123,6 +133,10 @@ public class ConfigService {
         pluginReTryTimes = configMap.getInt(KEY_PLUGIN_RETRY_TIMES, DEFAULT_PLUGIN_RETRY_TIMES);
         mailReceivers = string2Set(configMap.getString(KEY_MAIL_RECEIVERS, DEFAULT_MAIL_RECEIVERS));
         httpReadTimeoutInMs = configMap.getInt(KEY_HTTP_READ_TIMEOUT_IN_MS, DEFAULT_HTTP_READ_TIMEOUT_IN_MS);
+        freshnessEnabled = configMap.getBoolean(KEY_FRESHNESS_ENABLED, DEFAULT_FRESHNESS_ENABLED);
+        freshnessClusterEnabledAndThresholdSecond = convertClusterFreshnessThresholdSecond(
+                configMap.getString(KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND, DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND)
+        );
 
         clusterNameRegex = configMap.getString(KEY_CLUSTER_NAME_REGEX, DEFAULT_CLUSTER_NAME_REGEX);
         dbNameRegex = configMap.getString(KEY_DB_NAME_REGEX, DEFAULT_DB_NAME_REGEX);
@@ -137,11 +151,33 @@ public class ConfigService {
         qconfigPluginSwitch = configMap.getBoolean(KEY_QCONFIG_PLUGIN_SWITCH, DEFAULT_QCONFIG_PLUGIN_SWITCH);
     }
 
-    private Set<String> string2Set(String s) {
+    Set<String> string2Set(String s) {
         if (StringUtils.isNotBlank(s)) {
-            return Sets.newHashSet(s.split(DELIMITER));
+            return Sets.newHashSet(s.split(DELIMITER)).stream()
+                    .filter(StringUtils::isNotBlank).map(String::trim)
+                    .collect(Collectors.toSet());
         }
         return Sets.newHashSet();
+    }
+
+    Map<String, Integer> convertClusterFreshnessThresholdSecond(final String str) {
+        if (StringUtils.isBlank(str)) {
+            return Maps.newHashMap();
+        } else {
+            final List<String> clusterThresholdPairs = Lists.newArrayList(str.split(DELIMITER)).stream()
+                    .filter(StringUtils::isNotBlank).map(String::trim)
+                    .collect(Collectors.toList());
+
+            final Map<String, Integer> clusterThresholdMap = Maps.newHashMapWithExpectedSize(clusterThresholdPairs.size());
+            clusterThresholdPairs.forEach(pair -> {
+                final String[] split = pair.split(COLON);
+                if (split.length == 2) {
+                    clusterThresholdMap.put(split[0].trim(), Integer.valueOf(split[1].trim()));
+                }
+            });
+
+            return clusterThresholdMap;
+        }
     }
 
     public String getPluginTitanUrl() {
@@ -226,6 +262,14 @@ public class ConfigService {
 
     public int getHttpReadTimeoutInMs() {
         return httpReadTimeoutInMs;
+    }
+
+    public boolean getFreshnessEnabled() {
+        return freshnessEnabled;
+    }
+
+    public Map<String, Integer> getFreshnessClusterEnabledAndThresholdSecond() {
+        return freshnessClusterEnabledAndThresholdSecond;
     }
 
     public boolean isQconfigPluginSwitch() {

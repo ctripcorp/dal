@@ -4,6 +4,8 @@ import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.entity.ShardInstance;
 import com.ctrip.framework.db.cluster.enums.ShardInstanceHealthStatus;
+import com.ctrip.framework.db.cluster.service.config.ConfigService;
+import com.ctrip.framework.db.cluster.service.remote.mysqlapi.DBConnectionService;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
 import com.ctrip.framework.db.cluster.service.repository.ShardInstanceService;
 import com.ctrip.framework.db.cluster.util.Constants;
@@ -11,13 +13,17 @@ import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -30,20 +36,19 @@ import static com.ctrip.framework.db.cluster.util.thread.DefaultExecutorFactory.
 //@Component
 public class ReadFreshnessSchedule {
 
-    private final static String mysql_latency_sp = "{call sp_getslavestatus}";
+    private static final String showSlaveCommand = "show slave status";
 
-    private final static int delay_threshold = 10;
+    private final static int default_threshold = 10;
 
-    private Consumer<String> task;
+    private BiConsumer<String, Integer> task;
 
     private final FreshnessScheduleRegistration registration;
 
     private final ScheduledExecutorService timer;
 
-    private final ThreadPoolExecutor runnerThreadPool;
+    private final ThreadPoolExecutor clusterThreadPool;
 
-    @Resource
-    private CipherService cipherService;
+    private final ThreadPoolExecutor instanceThreadPool;
 
     @Resource
     private ClusterService clusterService;
@@ -51,24 +56,37 @@ public class ReadFreshnessSchedule {
     @Resource
     private ShardInstanceService shardInstanceService;
 
+    @Resource
+    private CipherService cipherService;
+
+    @Resource
+    private ConfigService configService;
+
+    @Resource
+    private DBConnectionService dbConnectionService;
+
 
     public ReadFreshnessSchedule() {
         this.registration = FreshnessScheduleRegistration.getRegistration();
-        this.timer = Executors.newSingleThreadScheduledExecutor(new DalServiceThreadFactory("ReadHealthScheduleTimerThread"));
-        this.runnerThreadPool = new ThreadPoolExecutor(
+        this.timer = Executors.newSingleThreadScheduledExecutor(new DalServiceThreadFactory("ReadFreshnessScheduleTimerThread"));
+        this.clusterThreadPool = new ThreadPoolExecutor(
+                8, 8, DEFAULT_KEEPER_ALIVE_TIME_SECONDS, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(), new DalServiceThreadFactory("ReadFreshnessScheduleClusterThread")
+        );
+        this.instanceThreadPool = new ThreadPoolExecutor(
                 16, 16, DEFAULT_KEEPER_ALIVE_TIME_SECONDS, TimeUnit.SECONDS,
-                new LinkedBlockingDeque<>(), new DalServiceThreadFactory("ReadHealthScheduleRunnerThread")
+                new LinkedBlockingDeque<>(), new DalServiceThreadFactory("ReadFreshnessScheduleInstanceThread")
         );
         initTask();
         initSchedule();
     }
 
-    public void executeTaskOnceTime(final String clusterName) {
-        task.accept(clusterName);
+    public void executeTaskOnceTime(final String clusterName, final Integer thresholdSecond) {
+        task.accept(clusterName, thresholdSecond);
     }
 
     private void initTask() {
-        this.task = clusterName -> runnerThreadPool.submit(() -> {
+        this.task = (clusterName, thresholdSecond) -> clusterThreadPool.submit(() -> {
             try {
                 final ClusterDTO cluster = clusterService.findUnDeletedClusterDTO(clusterName);
                 if (null == cluster) {
@@ -119,95 +137,89 @@ public class ReadFreshnessSchedule {
                     return;
                 }
 
-                readInstances.forEach(instance -> {
-                    // health check
+                final CountDownLatch latch = new CountDownLatch(readInstances.size());
+                final List<ShardInstanceDTO> pullInInstances = Lists.newArrayList();
+                final List<ShardInstanceDTO> pulloutInstances = Lists.newArrayList();
+                readInstances.forEach(instance -> instanceThreadPool.submit(() -> {
+                    // freshness check
                     final String username = cipherService.decrypt(readUserOptional.get().getUsername());
                     final String password = cipherService.decrypt(readUserOptional.get().getPassword());
-                    // url like : "jdbc:mysql://localhost:3306/mysqljdbc";
+                    // url like : "jdbc:mysql://localhost:3306/mysql";
                     final String url = "jdbc:mysql://" + instance.getIp() +
                             ":" + instance.getPort() +
                             "/" + instance.getDbName();
 
-                    Connection connection;
-                    try {
-                        // single connection
-                        // TODO: 2019/11/4 socket timeout, update to connection pool
-                        connection = DriverManager.getConnection(url, username, password);
-                        DriverManager.setLoginTimeout(1);
+                    final PoolProperties properties = new PoolProperties();
+                    properties.setUrl(url);
+                    properties.setDriverClassName("com.mysql.jdbc.Driver");
+                    properties.setUsername(username);
+                    properties.setPassword(password);
+                    properties.setMaxActive(1);
+                    properties.setInitialSize(1);
+                    // 建立连接超时时间1s，等待请求返回超时时间threshold
+                    final String connectionProperties = "connectTimeout=1000;socketTimeout=" + thresholdSecond * 1000;
+                    properties.setConnectionProperties(connectionProperties);
+                    final DataSource datasource = new DataSource();
+                    datasource.setPoolProperties(properties);
+
+                    try (final Connection connection = datasource.getConnection();
+                         final Statement statement = connection.createStatement();
+                         final ResultSet resultSet = statement.executeQuery(showSlaveCommand)) {
+
+                        boolean ioThread = false;
+                        boolean sqlThread = false;
+                        Integer behindSecond = Integer.MAX_VALUE;
+
+                        if (resultSet.next()) {
+                            ioThread = "YES".equalsIgnoreCase(resultSet.getString("Slave_IO_Running"));
+                            sqlThread = "YES".equalsIgnoreCase(resultSet.getString("Slave_SQL_Running"));
+                            behindSecond = Integer.valueOf(resultSet.getString("Seconds_Behind_Master"));
+                        }
+
+                        if (ioThread && sqlThread && behindSecond <= thresholdSecond) {
+                            pullInInstances.add(instance);
+                        } else {
+                            pulloutInstances.add(instance);
+                        }
                     } catch (SQLException e) {
-                        log.error(String.format("[ReadFreshnessSchedule] unable to get connection, try again later, clusterName = %s, " +
-                                "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
-
-                        // retry
-                        try {
-                            TimeUnit.SECONDS.sleep(3);
-                        } catch (InterruptedException ignore) {
-                            // never, ignore
+                        /*// exception : connect timeout, socketTimeout, connect reject, Insufficient permissions
+                        // putout: socketTimeout, connect reject
+                        if (e instanceof SQLException) {
+                            putout(instance, clusterName,
+                                    String.format(
+                                            ""
+                                    )
+                            );
                         }
 
-                        try {
-                            // TODO: 2019/11/4 socket timeout
-                            // TODO: 2019/11/5 connection check
-                            connection = DriverManager.getConnection(url, username, password);
-                            DriverManager.setLoginTimeout(1);
-                        } catch (SQLException e1) {
-                            log.error(String.format("[ReadFreshnessSchedule] unable to get connection second times, put out it, clusterName = %s, " +
-                                    "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e1);
-                            // putout
-                            try {
-                                putout(instance, clusterName, "unable to get connection twice, when health schedule");
-                            } catch (SQLException e2) {
-                                // ignore
+                        // check again: connect timeout
+                        if (e instanceof SQLException) {
+                            final boolean isValid = dbConnectionService.checkConnection();
+                            if (!isValid) {
+                                putout(instance, clusterName,
+                                        String.format(
+                                                ""
+                                        )
+                                );
                             }
-                            return;
                         }
+
+                        // ignore: Insufficient permissions
+                        if (e instanceof SQLException) {
+                            // cat
+                        }*/
+                    } finally {
+                        datasource.close();
                     }
+                    latch.countDown();
+                }));
 
-                    if (null != connection) {
-                        CallableStatement callableStatement = null;
-                        ResultSet resultSet = null;
-
-                        Integer delay = 0;
-                        try {
-                            callableStatement = connection.prepareCall(mysql_latency_sp);
-                            callableStatement.execute();
-                            resultSet = callableStatement.getResultSet();
-                            final ResultSetMetaData metaData = resultSet.getMetaData();
-                            if (resultSet.next()) {
-                                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                                    final String columnLabel = metaData.getColumnLabel(i);
-                                    final Object value = resultSet.getObject(columnLabel);
-                                    System.out.println("sp result : columnName = " + columnLabel + ", value = " + value);
-                                    // TODO: 2019/11/5 delay = ...
-                                }
-                            }
-
-                        } catch (SQLException e) {
-                            log.error(String.format("[ReadFreshnessSchedule] call sp = %s fail, maybe sp error, or sp not exists, clusterName = %s, " +
-                                    "ip = %s, port = %s", mysql_latency_sp, clusterName, instance.getIp(), instance.getPort()), e);
-                        } finally {
-                            try {
-                                if (null != resultSet) {
-                                    resultSet.close();
-                                }
-                                if (null != callableStatement) {
-                                    callableStatement.close();
-                                }
-                                connection.close();
-                            } catch (SQLException e) {
-                                // ignore
-                            }
-                        }
-
-                        try {
-                            // TODO: 2019/11/3 if ... putout, else putin
-                            putout(instance, clusterName, String.format("Master-slave replication delay exceeds threshold = %s s", delay_threshold));
-                            putin(instance, clusterName, String.format("Master-slave replication delay is less than threshold = %s s", delay_threshold));
-                        } catch (SQLException e) {
-                            // ignore
-                        }
-                    }
-                });
+                try {
+                    latch.await();
+                    trig(pullInInstances, pulloutInstances, clusterName);
+                } catch (InterruptedException e) {
+                    // never, ignore
+                }
             } catch (SQLException e) {
                 log.error(String.format("ReadFreshnessSchedule running error, " +
                         "ignore this cluster health task, clusterName = %s", clusterName), e);
@@ -216,18 +228,45 @@ public class ReadFreshnessSchedule {
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    void putout(final ShardInstanceDTO instance, final String clusterName, final String reason) throws SQLException {
-        if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.un_enabled.getCode()) {
-            // un_enabled now, do nothing.
+    private void trig(final List<ShardInstanceDTO> pullInInstances,
+                      final List<ShardInstanceDTO> pulloutInstances,
+                      final String clusterName) {
+
+        final List<ShardInstanceDTO> actualPullInInstances = pullInInstances.stream().filter(instance ->
+                // pull in origin health status is un_enabled instance
+                instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.un_enabled.getCode()
+        ).collect(Collectors.toList());
+        final List<ShardInstanceDTO> actualPulloutInstances = pulloutInstances.stream().filter(instance ->
+                // pullout origin health status is enabled instance
+                instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()
+        ).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(actualPullInInstances) && CollectionUtils.isEmpty(actualPulloutInstances)) {
+            // do nothing, ignore
             return;
         }
 
-        final ShardInstance shardInstance = ShardInstance.builder()
-                .id(instance.getShardInstanceEntityId())
-                .healthStatus(ShardInstanceHealthStatus.un_enabled.getCode())
-                .build();
+
+        final List<ShardInstance> updatedInstance = Lists.newArrayListWithExpectedSize(
+                actualPullInInstances.size() + actualPulloutInstances.size()
+        );
+        actualPullInInstances.forEach(instance -> {
+            final ShardInstance updated = ShardInstance.builder()
+                    .id(instance.getShardInstanceEntityId())
+                    .healthStatus(ShardInstanceHealthStatus.enabled.getCode())
+                    .build();
+            updatedInstance.add(updated);
+        });
+        actualPulloutInstances.forEach(instance -> {
+            final ShardInstance updated = ShardInstance.builder()
+                    .id(instance.getShardInstanceEntityId())
+                    .healthStatus(ShardInstanceHealthStatus.un_enabled.getCode())
+                    .build();
+            updatedInstance.add(updated);
+        });
+
         try {
-            shardInstanceService.update(shardInstance);
+            shardInstanceService.updateShardInstances(updatedInstance);
             clusterService.release(
                     Lists.newArrayList(clusterName),
                     Constants.HEALTH_SCHEDULE_OPERATOR,
@@ -235,48 +274,33 @@ public class ReadFreshnessSchedule {
             );
 
             // TODO: 2019/11/3 cat
-            log.info(String.format("[ReadFreshnessSchedule] put out shard instance, reason : %s, clusterName = %s, " +
-                            "ip = %s, port = %s", reason, clusterName, instance.getIp(), instance.getPort()));
-        } catch (SQLException e) {
-            log.error(String.format("[ReadFreshnessSchedule] put out shard instance error, clusterName = %s" +
-                    "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
-            throw e;
-        }
-    }
-
-    @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    void putin(final ShardInstanceDTO instance, final String clusterName, final String reason) throws SQLException {
-        if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()) {
-            // enabled now, do nothing.
-            return;
-        }
-
-        final ShardInstance shardInstance = ShardInstance.builder()
-                .id(instance.getShardInstanceEntityId())
-                .healthStatus(ShardInstanceHealthStatus.enabled.getCode())
-                .build();
-        try {
-            shardInstanceService.update(shardInstance);
-            clusterService.release(
-                    Lists.newArrayList(clusterName),
-                    Constants.HEALTH_SCHEDULE_OPERATOR,
-                    Constants.RELEASE_TYPE_HEALTH_SCHEDULE_RELEASE
+            log.info(
+                    String.format(
+                            "[ReadFreshnessSchedule] release done, clusterName = %s, pull in ips = %s, pullout ips = %s.",
+                            clusterName, actualPullInInstances.stream().map(ShardInstanceDTO::getIp).collect(Collectors.toList()).toString(),
+                            actualPulloutInstances.stream().map(ShardInstanceDTO::getIp).collect(Collectors.toList()).toString()
+                    )
             );
-
-            // TODO: 2019/11/3 cat
-            log.info(String.format("[ReadFreshnessSchedule] put int shard instance, reason : %s, clusterName = %s, " +
-                            "ip = %s, port = %s", reason, clusterName, instance.getIp(), instance.getPort()));
         } catch (SQLException e) {
-            log.error(String.format("[ReadFreshnessSchedule] put int shard instance error, clusterName = %s" +
-                    "ip = %s, port = %s", clusterName, instance.getIp(), instance.getPort()), e);
-            throw e;
+            log.error("[ReadFreshnessSchedule] release error.", e);
         }
     }
 
     private void initSchedule() {
         timer.scheduleWithFixedDelay(
-                () -> registration.getTargetClusters().forEach(task),
-                1, 10, TimeUnit.SECONDS
+                () -> {
+                    if (configService.getFreshnessEnabled()) {
+                        final Map<String, Integer> clusterThresholdSecondMap = configService.getFreshnessClusterEnabledAndThresholdSecond();
+                        registration.getTargetClusters().forEach(clusterName -> {
+                            Integer threshold = clusterThresholdSecondMap.get(clusterName);
+                            if (null != threshold) {
+                                // if threshold lte 0, default_threshold
+                                threshold = threshold <= 0 ? default_threshold : threshold;
+                                task.accept(clusterName, threshold);
+                            }
+                        });
+                    }
+                }, 1, 10, TimeUnit.SECONDS
         );
     }
 }

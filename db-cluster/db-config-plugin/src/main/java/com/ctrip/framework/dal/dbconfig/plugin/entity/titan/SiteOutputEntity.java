@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 public class SiteOutputEntity {
     //field
     private Integer id;    //[2017-10-12]
+    private String titanKey; // dataId [cc, 2019-11-11]
     private String name;     //keyName
     private String subEnv;
     private Boolean enabled = Boolean.valueOf(true);
@@ -53,6 +54,29 @@ public class SiteOutputEntity {
         this.mhaLastUpdateTime = mhaLastUpdateTime;
         this.connectionString = buildConnectionString();
     }
+    public SiteOutputEntity(Integer id, String titanKey, String name, String subEnv, Boolean enabled, String connectionString, String sslCode,
+                            String providerName, Integer timeOut, String createUser, String updateUser,
+                            String whiteList, String blackList, String permissions, String freeVerifyIpList,
+                            String freeVerifyAppIdList, String mhaLastUpdateTime, ConnectionInfo connectionInfo ){
+        this.connectionInfo = connectionInfo;
+        this.id = id;
+        this.titanKey = titanKey;
+        this.name = name;
+        this.subEnv = subEnv;
+        this.enabled = enabled;
+        this.sslCode = sslCode;
+        this.providerName = providerName;
+        this.timeOut = timeOut;
+        this.createUser = createUser;
+        this.updateUser = updateUser;
+        this.whiteList = whiteList;
+        this.blackList = blackList;
+        this.permissions = permissions;
+        this.freeVerifyIpList = freeVerifyIpList;
+        this.freeVerifyAppIdList = freeVerifyAppIdList;
+        this.mhaLastUpdateTime = mhaLastUpdateTime;
+        this.connectionString = buildConnectionString();
+    }
 
     //setter/getter
     public Integer getId() {
@@ -60,6 +84,14 @@ public class SiteOutputEntity {
     }
     public SiteOutputEntity setId(Integer id) {
         this.id = id;
+        return this;
+    }
+
+    public String getTitanKey() {
+        return titanKey;
+    }
+    public SiteOutputEntity setTitanKey(String titanKey) {
+        this.titanKey = titanKey;
         return this;
     }
 
@@ -223,6 +255,7 @@ public class SiteOutputEntity {
         StringBuilder sb = new StringBuilder();
         sb.append("SiteOutputEntity{");
         sb.append("id='").append(id).append('\'');
+        sb.append(", titanKey='").append(titanKey).append('\'');
         sb.append(", name='").append(name).append('\'');
         sb.append(", subEnv='").append(subEnv).append('\'');
         sb.append(", connectionString='").append(connectionString).append('\'');

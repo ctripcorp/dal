@@ -97,7 +97,6 @@ public class TitanKeyListByTimeHandler extends BaseAdminHandler implements Titan
                     ConfigField cf = null;
                     for(ConfigDetail cd : cdList){
                         cf = cd.getConfigField();
-                        String tmpProfile = cf.getProfile();
                         String content = cd.getContent();
                         //decrypt in value
                         String encryptText = content;
@@ -107,7 +106,7 @@ public class TitanKeyListByTimeHandler extends BaseAdminHandler implements Titan
 
                         //设置信息到SiteOutputEntity
                         boolean encodePwd = false;
-                        SiteOutputEntity siteOutputEntity = CommonHelper.buildSiteOutputEntity(decryptProp, encodePwd, tmpProfile);
+                        SiteOutputEntity siteOutputEntity = CommonHelper.buildSiteOutputEntity(decryptProp, encodePwd, cf);
                         siteOutputEntity.setConnectionString(null); //No need this connString
                         siteOutputEntityList.add(siteOutputEntity);
                     }//End <for>

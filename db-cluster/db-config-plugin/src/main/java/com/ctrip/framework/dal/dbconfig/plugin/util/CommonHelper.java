@@ -430,7 +430,7 @@ public class CommonHelper {
 
     //
     //build SiteOutputEntity
-    public static SiteOutputEntity buildSiteOutputEntity(Properties properties, boolean encodePwd, String profile) throws Exception {
+    public static SiteOutputEntity buildSiteOutputEntity(Properties properties, boolean encodePwd, ConfigField cf) throws Exception {
         SiteOutputEntity siteOutputEntity = null;
         //Properties properties = parseString2Properties(configuration);
         if(properties != null){
@@ -445,7 +445,7 @@ public class CommonHelper {
             connectionInfo.setExtParam(properties.getProperty(TitanConstants.CONNECTIONSTRING_EXT_PARAM));
 
             //prepare other
-            String subEnv = getSubEnvFromProfile(profile);
+            String subEnv = getSubEnvFromProfile(cf.getProfile());
             String enabled = properties.getProperty(TitanConstants.ENABLED);
             String timeOut = properties.getProperty(TitanConstants.TIMEOUT);
             String sslCode = properties.getProperty(TitanConstants.SSLCODE);
@@ -462,6 +462,7 @@ public class CommonHelper {
             //compose
             siteOutputEntity = new SiteOutputEntity();
             siteOutputEntity.setId((id==null ? null : Integer.valueOf(id)));
+            siteOutputEntity.setTitanKey(cf.getDataId());
             siteOutputEntity.setName(properties.getProperty(TitanConstants.CONNECTIONSTRING_KEY_NAME));
             siteOutputEntity.setSubEnv(subEnv);
             siteOutputEntity.setEnabled((enabled==null ? true : Boolean.parseBoolean(enabled)));

@@ -170,7 +170,6 @@ public class TitanKeyListHandler extends BaseAdminHandler implements TitanConsta
             public void run() {
                 try {
                     ConfigField cf = cd.getConfigField();
-                    String tmpProfile = cf.getProfile();
                     String content = cd.getContent();
                     //decrypt in value
                     String encryptText = content;
@@ -180,7 +179,7 @@ public class TitanKeyListHandler extends BaseAdminHandler implements TitanConsta
 
                     //设置信息到SiteOutputEntity
                     boolean encodePwd = true;
-                    SiteOutputEntity siteOutputEntity = CommonHelper.buildSiteOutputEntity(decryptProp, encodePwd, tmpProfile);
+                    SiteOutputEntity siteOutputEntity = CommonHelper.buildSiteOutputEntity(decryptProp, encodePwd, cf);
                     siteOutputEntityList.add(siteOutputEntity);
                 } catch (Exception e) {
                     Cat.logError("run(): decrypt and collect siteOutputEntity fail!", e);

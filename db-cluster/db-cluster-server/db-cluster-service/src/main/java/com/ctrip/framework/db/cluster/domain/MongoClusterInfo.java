@@ -16,7 +16,7 @@ public class MongoClusterInfo {
     private String clusterType;
     private String dbName;
     private String userId;
-    private List<Node> nodes;
+    private List<NodeInfo> nodes;
     private Map<String, String> extraProperties;
     private Boolean enabled = true;
     private Integer version;

@@ -1,15 +1,16 @@
 package com.ctrip.framework.db.cluster.controller;
 
-import com.ctrip.framework.db.cluster.config.ConfigService;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
-import com.ctrip.framework.db.cluster.domain.MongoCluster;
 import com.ctrip.framework.db.cluster.domain.MongoClusterGetResponse;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
-import com.ctrip.framework.db.cluster.domain.ResponseModel;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
-import com.ctrip.framework.db.cluster.service.PluginMongoService;
-import com.ctrip.framework.db.cluster.util.IpUtil;
-import com.ctrip.framework.db.cluster.util.ValidityChecker;
+import com.ctrip.framework.db.cluster.service.config.ConfigService;
+import com.ctrip.framework.db.cluster.service.plugin.MongoPluginService;
+import com.ctrip.framework.db.cluster.util.Constants;
+import com.ctrip.framework.db.cluster.util.IpUtils;
+import com.ctrip.framework.db.cluster.util.MongoValidityChecker;
+import com.ctrip.framework.db.cluster.vo.ResponseModel;
+import com.ctrip.framework.db.cluster.vo.mongo.MongoClusterVo;
 import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -27,29 +28,27 @@ import javax.servlet.http.HttpServletRequest;
 public class MongoClusterController {
 
     @Autowired
-    private PluginMongoService pluginMongoService;
+    private MongoPluginService mongoPluginService;
     @Autowired
     private CipherService cipherService;
     @Autowired
     private ConfigService configService;
     @Autowired
-    private ValidityChecker validityChecker;
+    private MongoValidityChecker mongoValidityChecker;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseModel add(@RequestBody MongoCluster mongoCluster,
-                             @RequestParam(name = "env", required = false) String env,
+    public ResponseModel add(@RequestBody MongoClusterVo mongoClusterVo,
+                             @RequestParam(name = "env", required = false, defaultValue = Constants.ENV_PRO) String env,
                              @RequestParam(name = "subenv", required = false) String subEnv,
                              @RequestParam(name = "operator", required = false) String operator,
                              HttpServletRequest request) {
         try {
-            if (!validityChecker.checkAllowedIp(IpUtil.getRequestIp(request), configService.getAllowedIps())) {
+            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator为空");
+            if (!IpUtils.checkAllowedIp(request, configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            env = validityChecker.checkAndGetEnv(env);
-            validityChecker.checkOperator(operator);
-
-            validityChecker.checkMongoCluster(mongoCluster);
+            mongoValidityChecker.checkMongoCluster(mongoClusterVo);
 
             // 加密用户名和密码
 //            String userId = cipherService.encrypt(mongoCluster.getUserId());
@@ -58,12 +57,13 @@ public class MongoClusterController {
 //            mongoCluster.setPassword(password);
 
             // 新增cluster，version=1
-            mongoCluster.setVersion(1);
-            mongoCluster.setBu(null);
-            mongoCluster.setProdLine(null);
-            mongoCluster.setContacts(null);
+            mongoClusterVo.setVersion(1);
+            mongoClusterVo.setBu(null);
+            mongoClusterVo.setProdLine(null);
+            mongoClusterVo.setContacts(null);
 
-            PluginResponse response = pluginMongoService.add(mongoCluster, env, subEnv, operator);
+            PluginResponse response = mongoPluginService.add(mongoClusterVo, env, subEnv, operator);
+
             if (response.getStatus() == 0) {
                 return ResponseModel.successResponse();
             } else {
@@ -81,7 +81,7 @@ public class MongoClusterController {
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public ResponseModel update(@RequestBody MongoCluster mongoCluster,
+    public ResponseModel update(@RequestBody MongoClusterVo mongoClusterVo,
                                 @RequestParam(name = "env", required = false) String env,
                                 @RequestParam(name = "subenv", required = false) String subEnv,
                                 @RequestParam(name = "operator", required = false) String operator,
@@ -89,16 +89,17 @@ public class MongoClusterController {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(env), "env为空");
             Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator为空");
-            if (!validityChecker.checkAllowedIp(IpUtil.getRequestIp(request), configService.getAllowedIps())) {
+            if (!IpUtils.checkAllowedIp(request, configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            Preconditions.checkNotNull(mongoCluster, "Cluster信息为空");
-            String clusterName = mongoCluster.getClusterName();
+            Preconditions.checkNotNull(mongoClusterVo, "Cluster信息为空");
+            String clusterName = mongoClusterVo.getClusterName();
             Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clusterName为空");
             // todo:校验cluster
 
-            PluginResponse response = pluginMongoService.update(mongoCluster, env, subEnv, operator);
+            PluginResponse response = mongoPluginService.update(mongoClusterVo, env, subEnv, operator);
+
             if (response.getStatus() == 0) {
                 return ResponseModel.successResponse(response.getData());
             } else {
@@ -123,11 +124,12 @@ public class MongoClusterController {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername为空");
             Preconditions.checkArgument(StringUtils.isNotBlank(env), "env为空");
-            if (!validityChecker.checkAllowedIp(IpUtil.getRequestIp(request), configService.getAllowedIps())) {
+            if (!IpUtils.checkAllowedIp(request, configService.getAllowedIps())) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            MongoClusterGetResponse response = pluginMongoService.get(clusterName, env, subEnv);
+            MongoClusterGetResponse response = mongoPluginService.get(clusterName, env, subEnv);
+
             if (response.getStatus() == 0) {
                 return ResponseModel.successResponse(response.getData());
             } else {

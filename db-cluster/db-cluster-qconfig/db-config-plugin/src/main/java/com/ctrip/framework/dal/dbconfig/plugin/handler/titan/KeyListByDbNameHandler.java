@@ -93,12 +93,10 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
             boolean sitePermission = checkPermission(clientIp, envProfile);
             if (sitePermission) {
                 //get data from index file - (db-key)
-                String indexPrefix = pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_PREFIX);
-                int indexNumber = Integer.parseInt(pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_NUM));
-                Set<String> keySet = getKeyFromIndex(envProfile.formatProfile(), indexPrefix, indexNumber, dbName);
+                Set<String> titanKeyNames = getTitanKeyNames(pluginConfig, envProfile.formatProfile(), dbName);
 
                 //set into return result
-                pluginResult.setAttribute(keySet);
+                pluginResult.setAttribute(titanKeyNames);
 
             } else {
                 t.addData("postHandleDetail(): sitePermission=false, not allow to read index!");
@@ -115,6 +113,13 @@ public class KeyListByDbNameHandler extends BaseAdminHandler implements TitanCon
             t.complete();
         }
         return pluginResult;
+    }
+
+    protected Set<String> getTitanKeyNames(PluginConfig pluginConfig, String profile, String dbName) throws Exception {
+        String indexPrefix = pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_PREFIX);
+        int indexNumber = Integer.parseInt(pluginConfig.getParamValue(INDEX_DBNAME_KEY_SHARD_NUM));
+        Set<String> titanKeyNames = getKeyFromIndex(profile, indexPrefix, indexNumber, dbName);
+        return titanKeyNames;
     }
 
 

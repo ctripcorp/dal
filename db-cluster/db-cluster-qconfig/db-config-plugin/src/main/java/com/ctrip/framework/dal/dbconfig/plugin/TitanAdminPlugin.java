@@ -25,23 +25,27 @@ public class TitanAdminPlugin extends AdminPluginAdapter {
         dispatcher = new AdminHandlerDispatcher();
         PluginConfigManager pluginConfigManager = getPluginConfigManager();
         List<AdminHandler> adminHandlers = Lists.newArrayList();
+        TitanKeyMHAUpdateHandler titanKeyMHAUpdateHandler = new TitanKeyMHAUpdateHandler(getQconfigService(), pluginConfigManager);
+        KeyListByDbNameHandler keyListByDbNameHandler = new KeyListByDbNameHandler(getQconfigService(), pluginConfigManager);
+
         adminHandlers.add(new TitanKeyPostHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeyForceDataWashHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeyGetHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeyListByTimeHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeyListHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new TitanKeyMHAUpdateHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(titanKeyMHAUpdateHandler);
         adminHandlers.add(new TitanKeySSLCodeGetHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeySSLCodeUpdateHandler(getQconfigService(), pluginConfigManager));
 
         adminHandlers.add(new DbNameListHandler(getQconfigService(), pluginConfigManager));
-        adminHandlers.add(new KeyListByDbNameHandler(getQconfigService(), pluginConfigManager));
+        adminHandlers.add(keyListByDbNameHandler);
         adminHandlers.add(new WhiteListAddHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new WhiteListDeleteHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new IndexBuildHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new TitanKeyPermissionMergeHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new FreeVerifyAddHandler(getQconfigService(), pluginConfigManager));
         adminHandlers.add(new FreeVerifyDeleteHandler(getQconfigService(), pluginConfigManager));
+//        adminHandlers.add(new TitanKeyUpdateHandler(getQconfigService(), pluginConfigManager, keyListByDbNameHandler, titanKeyMHAUpdateHandler));
 
 
         for (AdminHandler handler : adminHandlers) {

@@ -1,6 +1,9 @@
 package com.ctrip.framework.db.cluster.util;
 
-import com.ctrip.framework.db.cluster.config.ConfigService;
+import com.ctrip.framework.db.cluster.service.config.ConfigService;
+import com.google.common.base.Preconditions;
+import lombok.AllArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,60 +14,67 @@ import java.util.regex.Pattern;
  * Created by pcxie on 2019/3/25.
  */
 @Component
+@AllArgsConstructor
 public class RegexMatcher {
 
-    @Autowired
-    private ConfigService configService;
+    private final ConfigService configService;
 
     public boolean password(String password) {
-        Pattern pattern = Pattern.compile(configService.getPasswordRegex(), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(configService.getPasswordRegex());
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
 
     public boolean userId(String userName) {
-        Pattern pattern = Pattern.compile(configService.getUserNameRegex(), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(configService.getUserNameRegex());
         Matcher matcher = pattern.matcher(userName);
         return matcher.matches();
     }
 
-    public boolean host(String host) {
-        return hostName(host) || ipv4(host) || ipv6(host);
+    public boolean ip(String ip) {
+        return ipv4(ip) || ipv6(ip);
     }
 
-    public boolean hostName(String hostName) {
-        Pattern pattern = Pattern.compile(configService.getHostNameRegex(), Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(hostName);
+    public boolean domain(String domain) {
+        Pattern pattern = Pattern.compile(configService.getDomainRegex());
+        Matcher matcher = pattern.matcher(domain);
         return matcher.matches();
     }
 
     public boolean ipv6(String ipv6) {
-        Pattern pattern = Pattern.compile(configService.getIpv6Regex(), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(configService.getIpv6Regex());
         Matcher matcher = pattern.matcher(ipv6);
         return matcher.matches();
     }
 
     public boolean ipv4(String ipv4) {
-        Pattern pattern = Pattern.compile(configService.getIpv4Regex(), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(configService.getIpv4Regex());
         Matcher matcher = pattern.matcher(ipv4);
         return matcher.matches();
     }
 
     public boolean port(String port) {
-        Pattern pattern = Pattern.compile(configService.getPortRegex(), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(configService.getPortRegex());
         Matcher matcher = pattern.matcher(port);
         return matcher.matches();
     }
 
-    public boolean clusterType(String clusterInfo) {
-        if (clusterInfo.equalsIgnoreCase("Replication") || clusterInfo.equalsIgnoreCase("Sharding")) {
+    public boolean clusterType(String clusterType) {
+        if (clusterType.equalsIgnoreCase("Replication") || clusterType.equalsIgnoreCase("Sharding")) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean checkOperateType(String operateType) {
+        if (operateType.equalsIgnoreCase(Constants.OPERATION_WRITE) || operateType.equalsIgnoreCase(Constants.OPERATION_READ)) {
             return true;
         }
         return false;
     }
 
     public boolean dbName(String dbName) {
-        Pattern pattern = Pattern.compile(configService.getDbNameRegex(), Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(configService.getDbNameRegex());
         Matcher matcher = pattern.matcher(dbName);
         return matcher.matches();
     }
@@ -74,5 +84,4 @@ public class RegexMatcher {
         Matcher matcher = pattern.matcher(clusterName);
         return matcher.matches();
     }
-
 }

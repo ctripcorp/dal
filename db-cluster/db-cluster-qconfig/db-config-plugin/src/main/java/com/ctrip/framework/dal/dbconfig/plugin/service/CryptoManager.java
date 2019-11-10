@@ -30,15 +30,20 @@ public class CryptoManager {
 
 
     //encrypt raw configuration's value
-    public Properties encrypt(DataSourceCrypto dataSourceCrypto, KeyService keyService, Properties properties) throws Exception {
+    public Properties encrypt(DataSourceCrypto dataSourceCrypto, KeyService keyService, Properties properties, String sslCode) throws Exception {
         Properties retProp = new Properties();
         if (properties != null) {
-            String sslCode = config.getParamValue(TitanConstants.SSLCODE);
             String keyServiceUri = config.getParamValue(TitanConstants.KEYSERVICE_SOA_URL);
             KeyInfo keyInfo = keyService.getKeyInfo(sslCode, keyServiceUri);
             retProp = encrypt(dataSourceCrypto, keyInfo, properties);
         }
         return retProp;
+    }
+
+    //encrypt raw configuration's value
+    public Properties encrypt(DataSourceCrypto dataSourceCrypto, KeyService keyService, Properties properties) throws Exception {
+        String sslCode = config.getParamValue(TitanConstants.SSLCODE);
+        return encrypt(dataSourceCrypto, keyService, properties, sslCode);
     }
 
     //encrypt raw configuration's value

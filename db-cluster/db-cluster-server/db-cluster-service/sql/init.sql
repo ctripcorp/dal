@@ -128,7 +128,7 @@ CREATE TABLE `titan_key` (
   `permissions` varchar(10240) COMMENT '权限允许的应用',
   `free_verify_ips` varchar(2048) COMMENT '免校验的ip地址',
   `free_verify_apps` varchar(2048) COMMENT '免cms关系校验的应用',
-  `mha_last_update_time` timestamp NULL COMMENT '最后切换时间',
+  `mha_last_update_time` varchar(64) COMMENT '最后切换时间',
   `domain` varchar(128) NOT NULL DEFAULT '' COMMENT '域名',
   `ip` varchar(64) COMMENT 'ip地址',
   `port` int(11) COMMENT '端口',

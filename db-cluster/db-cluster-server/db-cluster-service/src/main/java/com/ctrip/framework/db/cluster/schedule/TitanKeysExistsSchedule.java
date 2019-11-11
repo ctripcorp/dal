@@ -9,7 +9,6 @@ import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
  * Created by @author zhuYongMing on 2019/11/7.
  */
 @Slf4j
-@AllArgsConstructor
 //@Component
 public class TitanKeysExistsSchedule {
 
@@ -59,7 +57,7 @@ public class TitanKeysExistsSchedule {
                     // Map<subEnv, List<keyName>>
                     final Map<String, List<String>> subEnvAndKeyNames = Maps.newHashMap();
                     subEnv.forEach(sub -> {
-                        final QConfigFileNameResponse fileNameResponse = qConfigService.queryFileNames(Constants.ENV, sub);
+                        final QConfigFileNameResponse fileNameResponse = qConfigService.queryFileNames(sub);
                         if (fileNameResponse.isLegal()) {
                             subEnvAndKeyNames.put(sub, fileNameResponse.getData().getNormal());
                         } else {

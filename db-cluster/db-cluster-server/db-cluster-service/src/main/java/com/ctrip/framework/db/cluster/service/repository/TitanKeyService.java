@@ -5,6 +5,7 @@ import com.ctrip.framework.db.cluster.entity.TitanKey;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.dal.create.TitanKeyVo;
+import com.ctrip.platform.dal.dao.DalHints;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+
+import static com.ctrip.platform.dal.dao.DalHintEnum.updateNullField;
 
 /**
  * Created by shenjie on 2019/3/22.
@@ -30,7 +33,7 @@ public class TitanKeyService {
     }
 
     public void update(List<TitanKey> titanKeys) throws SQLException {
-        titanKeyDao.update(titanKeys);
+        titanKeyDao.update(new DalHints(updateNullField), titanKeys);
     }
 
     public List<TitanKey> findByKeyNames(final List<String> keyNames) throws SQLException {

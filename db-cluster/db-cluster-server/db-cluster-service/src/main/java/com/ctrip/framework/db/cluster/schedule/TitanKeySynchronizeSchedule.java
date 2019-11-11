@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 //@Component
 public class TitanKeySynchronizeSchedule {
 
-    private static final Integer pageSize = 1000;
+    private static final Integer pageSize = 5000;
 
     private static final Integer initPageNo = 1;
 
@@ -89,7 +89,9 @@ public class TitanKeySynchronizeSchedule {
 
     private void consumerTitanKeys(final List<TitanKeyPageSingleData> remoteKeys) {
         final List<String> remoteKeyNames = remoteKeys.stream()
-                .map(TitanKeyPageSingleData::getName).collect(Collectors.toList());
+//                .map(TitanKeyPageSingleData::getName)
+                .map(TitanKeyPageSingleData::getTitanKey)
+                .collect(Collectors.toList());
 
         try {
             final List<TitanKey> insertTitanKeys = Lists.newArrayList();
@@ -98,7 +100,8 @@ public class TitanKeySynchronizeSchedule {
 
             remoteKeys.forEach(remote -> {
                 final Optional<TitanKey> localKey = localTitanKeys.stream().filter(
-                        local -> Objects.equals(remote.getName(), local.getName())
+//                        local -> Objects.equals(remote.getName(), local.getName())
+                        local -> Objects.equals(remote.getTitanKey(), local.getName())
                                 && Objects.equals(remote.getSubEnv(), local.getSubEnv())
                 ).findFirst();
 
@@ -133,7 +136,8 @@ public class TitanKeySynchronizeSchedule {
     private boolean compareIdentical(final TitanKeyPageSingleData remote, final TitanKey local) {
         final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
-        return Objects.equals(local.getName(), remote.getName())
+        return Objects.equals(local.getName(), remote.getTitanKey())
+//                Objects.equals(local.getName(), remote.getName())
                 && Objects.equals(local.getSubEnv(), remote.getSubEnv())
                 && Objects.equals(Enabled.getEnabled(local.getEnabled()), Enabled.getEnabled(remote.getEnabled()))
                 && Objects.equals(local.getProviderName(), remote.getProviderName())
@@ -154,7 +158,8 @@ public class TitanKeySynchronizeSchedule {
         final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
         return TitanKey.builder()
-                .name(remote.getName())
+//                .name(remote.getName())
+                .name(remote.getTitanKey())
                 .subEnv(remote.getSubEnv())
                 .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
                 .providerName(remote.getProviderName())
@@ -178,7 +183,8 @@ public class TitanKeySynchronizeSchedule {
         return TitanKey.builder()
                 .id(localKeyId)
 //                .name(remote.getName())
-//                .subEnv(remote.getSubEnv())
+                .name(remote.getTitanKey())
+                .subEnv(remote.getSubEnv())
                 .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
                 .providerName(remote.getProviderName())
                 .createUser(remote.getCreateUser())

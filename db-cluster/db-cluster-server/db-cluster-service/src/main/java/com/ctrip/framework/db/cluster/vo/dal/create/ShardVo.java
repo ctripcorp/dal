@@ -35,6 +35,8 @@ public class ShardVo {
 
     private DatabaseVo read;
 
+    private List<UserVo> users;
+
 
     public Integer deprGetIndex() {
         return null;

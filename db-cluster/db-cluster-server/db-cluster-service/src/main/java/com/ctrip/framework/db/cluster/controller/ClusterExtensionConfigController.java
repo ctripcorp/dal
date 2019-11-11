@@ -1,6 +1,7 @@
 package com.ctrip.framework.db.cluster.controller;
 
-import com.ctrip.framework.db.cluster.entity.Cluster;
+import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
+import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
 import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.ResponseStatus;
@@ -13,11 +14,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Created by @author zhuYongMing on 2019/11/5.
@@ -36,22 +37,77 @@ public class ClusterExtensionConfigController {
     @PostMapping(value = "/clusters/{clusterName}/extensionConfigs")
     public ResponseModel createExtensionConfig(@PathVariable String clusterName,
                                                @RequestParam(name = "operator") String operator,
-                                               @RequestBody ClusterExtensionConfigVo[] addedConfigs) {
+                                               @RequestBody ClusterExtensionConfigVo configVo) {
 
         try {
             // format parameter
             clusterName = Utils.format(clusterName);
-            final List<ClusterExtensionConfigVo> configs = Lists.newArrayList(addedConfigs);
 
             // valid
-            valid(configs);
+            configVo.valid();
 
             // cluster exists
-            final Cluster cluster = clusterService.findCluster(clusterName, Deleted.un_deleted, null);
+            final ClusterDTO cluster = clusterService.findUnDeletedClusterDTO(clusterName);
             Preconditions.checkArgument(null != cluster, "cluster does not exists.");
 
-            // save
-            clusterExtensionConfigService.create(cluster.getId(), configs);
+            final List<ClusterExtensionConfig> existsConfigs = cluster.getConfigs();
+
+            final List<ClusterExtensionConfig> addedConfigs = Lists.newArrayList();
+            final List<ClusterExtensionConfig> updatedConfigs = Lists.newArrayList();
+
+            final String shardStrategies = configVo.getShardStrategies();
+            if (null != shardStrategies) {
+                final Optional<ClusterExtensionConfig> existsShardStrategies = existsConfigs.stream()
+                        .filter(existsConfig ->
+                                ClusterExtensionConfigType.shards_strategies.getCode() == existsConfig.getType()
+                        ).findFirst();
+                if (existsShardStrategies.isPresent()) {
+                    final ClusterExtensionConfig updated = ClusterExtensionConfig.builder()
+                            .id(existsShardStrategies.get().getId())
+                            .content(shardStrategies)
+                            .build();
+                    updatedConfigs.add(updated);
+                } else {
+                    final ClusterExtensionConfig added = ClusterExtensionConfig.builder()
+                            .clusterId(cluster.getClusterEntityId())
+                            .content(shardStrategies)
+                            .type(ClusterExtensionConfigType.shards_strategies.getCode())
+                            .deleted(Deleted.un_deleted.getCode())
+                            .build();
+                    addedConfigs.add(added);
+                }
+            }
+
+            final String idGenerators = configVo.getIdGenerators();
+            if (null != idGenerators) {
+                final Optional<ClusterExtensionConfig> existsIdGenerators = existsConfigs.stream()
+                        .filter(existsConfig ->
+                                ClusterExtensionConfigType.id_generators.getCode() == existsConfig.getType()
+                        ).findFirst();
+                if (existsIdGenerators.isPresent()) {
+                    final ClusterExtensionConfig updated = ClusterExtensionConfig.builder()
+                            .id(existsIdGenerators.get().getId())
+                            .content(idGenerators)
+                            .build();
+                    updatedConfigs.add(updated);
+                } else {
+                    final ClusterExtensionConfig added = ClusterExtensionConfig.builder()
+                            .clusterId(cluster.getClusterEntityId())
+                            .content(idGenerators)
+                            .type(ClusterExtensionConfigType.id_generators.getCode())
+                            .deleted(Deleted.un_deleted.getCode())
+                            .build();
+                    addedConfigs.add(added);
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(addedConfigs)) {
+                clusterExtensionConfigService.create(addedConfigs);
+            }
+
+            if (!CollectionUtils.isEmpty(updatedConfigs)) {
+                clusterExtensionConfigService.update(updatedConfigs);
+            }
 
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("create extension configs success.");
@@ -60,18 +116,5 @@ public class ClusterExtensionConfigController {
             log.error("create extension configs error.", e);
             return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
         }
-    }
-
-    private void valid(final List<ClusterExtensionConfigVo> addedConfigs) {
-        final List<String> allTypes = Lists.newArrayList(ClusterExtensionConfigType.values())
-                .stream().map(ClusterExtensionConfigType::getName).collect(Collectors.toList());
-
-        addedConfigs.forEach(config -> {
-            // content can't be empty
-            Preconditions.checkArgument(StringUtils.isNoneBlank(config.getContent()), "config content can't be empty.");
-
-            // type name is correct
-            Preconditions.checkArgument(allTypes.contains(config.getTypeName()));
-        });
     }
 }

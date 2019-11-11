@@ -18,6 +18,10 @@ public class Cluster {
     private int version;
     @XmlElement(name = "DatabaseShards")
     private DatabaseShards shards;
+    @XmlElement(name = "ShardStrategies")
+    private String shardStrategies;
+    @XmlElement(name = "IdGenerators")
+    private String idGenerators;
     @XmlElement(name = "SslCode")
     private String sslCode;
     @XmlElement(name = "Operator")
@@ -67,6 +71,22 @@ public class Cluster {
         this.shards = shards;
     }
 
+    public String getShardStrategies() {
+        return shardStrategies;
+    }
+
+    public void setShardStrategies(String shardStrategies) {
+        this.shardStrategies = shardStrategies;
+    }
+
+    public String getIdGenerators() {
+        return idGenerators;
+    }
+
+    public void setIdGenerators(String idGenerators) {
+        this.idGenerators = idGenerators;
+    }
+
     public String getSslCode() {
         return sslCode;
     }
@@ -98,6 +118,8 @@ public class Cluster {
                 ", category='" + category + '\'' +
                 ", version=" + version +
                 ", shards=" + shards +
+                ", shardStrategies=" + shardStrategies +
+                ", idGenerators=" + idGenerators +
                 ", sslCode='" + sslCode + '\'' +
                 ", operator='" + operator + '\'' +
                 ", updateTime=" + updateTime +

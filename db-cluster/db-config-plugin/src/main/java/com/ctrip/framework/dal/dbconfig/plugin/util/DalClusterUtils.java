@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -77,7 +78,7 @@ public class DalClusterUtils {
     }
 
     public static DalConfigure formatCluster2Configure(DalClusterEntity dalCluster) {
-        List<DatabaseShard> shards = Lists.newArrayListWithCapacity(dalCluster.getDatabaseShards().size());
+        List<DatabaseShard> shards = new ArrayList<>();
         for (DatabaseShardInfo shardInfo : dalCluster.getDatabaseShards()) {
             DatabaseShard shard = new DatabaseShard(shardInfo.getIndex(), shardInfo.getMasterDomain(), shardInfo.getSlaveDomain(),
                     shardInfo.getMasterPort(), shardInfo.getSlavePort(),
@@ -94,6 +95,8 @@ public class DalClusterUtils {
 
         DatabaseShards databaseShards = new DatabaseShards(shards);
         Cluster cluster = new Cluster(dalCluster.getClusterName(), dalCluster.getDbCategory(), dalCluster.getVersion(), databaseShards);
+        cluster.setShardStrategies(dalCluster.getShardStrategies());
+        cluster.setIdGenerators(dalCluster.getIdGenerators());
         cluster.setSslCode(dalCluster.getSslCode());
         cluster.setOperator(dalCluster.getOperator());
         cluster.setUpdateTime(DalClusterUtils.formatDate(new Date()));
@@ -140,6 +143,8 @@ public class DalClusterUtils {
         dalCluster.setSslCode(cluster.getSslCode());
         dalCluster.setOperator(cluster.getOperator());
         dalCluster.setDatabaseShards(targetShards);
+        dalCluster.setShardStrategies(cluster.getShardStrategies());
+        dalCluster.setIdGenerators(cluster.getIdGenerators());
         return dalCluster;
     }
 

@@ -11,6 +11,8 @@ public class DalClusterEntity {
     private String dbCategory;
     private int version;
     private List<DatabaseShardInfo> databaseShards;
+    private String shardStrategies;
+    private String idGenerators;
     private String operator;
     private String sslCode;
 
@@ -56,6 +58,22 @@ public class DalClusterEntity {
         this.databaseShards = databaseShards;
     }
 
+    public String getShardStrategies() {
+        return shardStrategies;
+    }
+
+    public void setShardStrategies(String shardStrategies) {
+        this.shardStrategies = shardStrategies;
+    }
+
+    public String getIdGenerators() {
+        return idGenerators;
+    }
+
+    public void setIdGenerators(String idGenerators) {
+        this.idGenerators = idGenerators;
+    }
+
     public String getOperator() {
         return operator;
     }
@@ -79,6 +97,8 @@ public class DalClusterEntity {
                 ", category='" + dbCategory + '\'' +
                 ", version=" + version +
                 ", databaseShards=" + databaseShards +
+                ", shardStrategies=" + shardStrategies +
+                ", idGenerators=" + idGenerators +
                 ", operator='" + operator + '\'' +
                 ", sslCode='" + sslCode + '\'' +
                 '}';

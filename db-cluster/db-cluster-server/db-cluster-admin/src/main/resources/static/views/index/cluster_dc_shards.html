@@ -21,7 +21,7 @@
                 <div class="panel panel-primary" style="margin-top: 15px;" ng-repeat="shard in shards">
                     <header class="panel-heading">
                         <div class="row">
-                            <div class="col-md-6">shard{{shard.shardIndex}}</div>
+                            <div class="col-md-6">shard{{shard.shardIndex}}({ shard.dbName })</div>
                             <div class="col-md-6 text-right">
                             	<a class="btn btn-primary btn-sm" href="">编辑</a>
                             </div>
@@ -46,7 +46,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-click="showInstanceConfirm('master')">
+                        <tr ng-click="showInstanceConfirm('master', $index)">
                             <td >
                                 <span class="label label-info">Master</span>
                             </td>
@@ -57,7 +57,7 @@
                             <td ng-bind="shard.master.instances.length"></td>
                         </tr>
 
-                        <tr ng-click="showInstanceConfirm('slave')">
+                        <tr ng-click="showInstanceConfirm('slave', $index)">
                             <td >
                                 <span class="label label-info">Slave</span>
                             </td>
@@ -68,7 +68,7 @@
                             <td ng-bind="shard.slave.instances.length"></td>
                         </tr>
 
-                        <tr ng-click="showInstanceConfirm('read')">
+                        <tr ng-click="showInstanceConfirm('read', $index)">
                             <td >
                                 <span class="label label-info">Read</span>
                             </td>
@@ -89,5 +89,12 @@
             无shards
         </div>
     </div>
+
+    <dbclusterconfirmdialog dbcluster-dialog-id="'InstanceInfoConfirm'" dbcluster-title="'实例信息'"
+                            dbcluster-detail="instances"
+                            dbcluster-show-cancel-btn="true"
+                            dbcluster-confirm="changeConfig"
+                            dbcluster-cancel="updateConfig"
+    ></dbclusterconfirmdialog>
 </div>
 

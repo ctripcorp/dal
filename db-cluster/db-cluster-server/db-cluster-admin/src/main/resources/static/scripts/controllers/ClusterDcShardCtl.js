@@ -1,13 +1,15 @@
 index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '$window','$interval', '$location', 'toastr', 'AppUtil', 'ClusterService', 'ShardService', 'HealthCheckService', 'ProxyService',
     function ($rootScope, $scope, $stateParams, $window, $interval, $location, toastr, AppUtil, ClusterService, ShardService, HealthCheckService, ProxyService) {
 
-        $scope.zones, $scope.shards;
         $scope.clusterName = $stateParams.clusterName;
 
+        $scope.zones; $scope.shards; $scope.instances;
         $scope.switchZone = switchZone;
         $scope.loadCluster = loadCluster;
+        $scope.loadClusterZones = loadClusterZones;
         $scope.loadShards = loadShards;
         $scope.existsRoute = existsRoute;
+        $scope.showInstanceConfirm = showInstanceConfirm;
         
         if ($scope.clusterName) {
             loadCluster();
@@ -15,11 +17,20 @@ index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '
         
         function switchZone(zone) {
             $scope.currentZoneId = zone.zoneId;
-            existsRoute($scope.activeDcName, $scope.currentDcName);
-            loadShards($scope.clusterName, dc.dcName);
+            //existsRoute($scope.activeDcName, $scope.currentDcName);
+            loadShards($scope.clusterName, zone.zoneId);
         }
 
         function loadCluster() {
+            ClusterService.loadCluster($scope.clusterName)
+                .then(function (result) {
+                    loadClusterZones();
+                }, function (result) {
+                    toastr.error(AppUtil.errorMsg(result));
+                });
+        }
+
+        function loadClusterZones() {
             ClusterService.findClusterZones($scope.clusterName)
                 .then(function (result) {
                     if (!result || result.length === 0) {
@@ -51,8 +62,8 @@ index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '
 
         }
 
-        function loadShards(clusterName, dcName) {
-            ShardService.findClusterDcShards(clusterName, dcName)
+        function loadShards(clusterName, zoneId) {
+            ShardService.findClusterZoneShards(clusterName, zoneId)
                 .then(function (result) {
                     $scope.shards = result;
                 }, function (result) {
@@ -60,7 +71,14 @@ index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '
                 });
         }
 
-
+        function showInstanceConfirm(role, shardIndex) {
+            ShardService.findClusterZoneShardInstances($scope.clusterName, $scope.currentZoneId, shardIndex, role)
+                .then(function (result) {
+                    $scope.instances = result;
+                } , function (result) {
+                    toastr.error(AppUtil.errorMsg(result));
+                });
+        }
 
         function existsRoute(activeDcName, backupDcName) {
             ProxyService.existsRouteBetween(activeDcName, backupDcName)

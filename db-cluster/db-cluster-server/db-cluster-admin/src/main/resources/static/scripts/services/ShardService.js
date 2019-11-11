@@ -1,13 +1,14 @@
 services.service('ShardService', ['$resource', '$q', function ($resource, $q) {
     var resource = $resource('', {}, {
-        find_cluster_dc_shards: {
+        find_cluster_zone_shards: {
             method: 'GET',
-            url: '/console/clusters/:clusterName/dcs/:dcName/shards',
+            url: '/console/clusters/:clusterName/zones/:zoneId/shards',
             isArray: true
         },
-        find_cluster_dc_shard: {
-        	method: 'GET',
-        	url: '/console/clusters/:clusterName/dcs/:dcName/shards/:shardName'
+        find_cluster_dc_shard_instances: {
+        	method: 'POST',
+        	url: '/console/clusters/:clusterName/zones/:zoneId/shards/:shardIndex',
+            isArray: true
         },
         find_cluster_shards: {
             method: 'GET',
@@ -36,11 +37,11 @@ services.service('ShardService', ['$resource', '$q', function ($resource, $q) {
         }
     });
 
-    function findClusterDcShards(clusterName, dcName) {
+    function findClusterZoneShards(clusterName, zoneId) {
         var d = $q.defer();
-        resource.find_cluster_dc_shards({
+        resource.find_cluster_zone_shards({
                                             clusterName: clusterName,
-                                            dcName: dcName
+                                            zoneId: zoneId
                                         },
                                         function (result) {
                                             d.resolve(result);
@@ -50,13 +51,13 @@ services.service('ShardService', ['$resource', '$q', function ($resource, $q) {
         return d.promise;
     }
     
-    function findClusterDcShard(clusterName, dcName,shardName) {
+    function findClusterZoneShardInstances(clusterName, zoneId, shardIndex, role) {
         var d = $q.defer();
-        resource.find_cluster_dc_shard({
+        resource.find_cluster_dc_shard_instances({
                                             clusterName: clusterName,
-                                            dcName: dcName,
-                                            shardName: shardName
-                                        },
+                                            zoneId: zoneId,
+                                            shardIndex: shardIndex
+                                        }, role,
                                         function (result) {
                                             d.resolve(result);
                                         }, function (result) {
@@ -154,8 +155,8 @@ services.service('ShardService', ['$resource', '$q', function ($resource, $q) {
     }
 
     return {
-        findClusterDcShards: findClusterDcShards,
-        findClusterDcShard: findClusterDcShard,
+        findClusterZoneShards: findClusterZoneShards,
+        findClusterZoneShardInstances: findClusterZoneShardInstances,
         findClusterShards: findClusterShards,
         createShard: create_shard,
         deleteShard: delete_shard,

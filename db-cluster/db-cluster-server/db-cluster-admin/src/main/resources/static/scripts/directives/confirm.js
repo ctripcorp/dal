@@ -6,12 +6,12 @@ directive_module.directive('xpipeconfirmdialog', function ($compile, $window) {
         transclude: true,
         replace: true,
         scope: {
-            dialogId: '=xpipeDialogId',
-            title: '=xpipeTitle',
-            detail: '=xpipeDetail',
-            showCancelBtn: '=xpipeShowCancelBtn',
-            doConfirm: '=xpipeConfirm',
-            doCancel: '=xpipeCancel'
+            dialogId: '=dbclusterDialogId',
+            title: '=dbclusterTitle',
+            detail: '=dbclusterDetail',
+            showCancelBtn: '=dbclusterShowCancelBtn',
+            doConfirm: '=dbclusterConfirm',
+            doCancel: '=dbclusterCancel'
         },
         link: function (scope, element, attrs) {
 

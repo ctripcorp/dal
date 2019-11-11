@@ -7,9 +7,7 @@ import com.ctrip.framework.db.cluster.utils.HttpUtil;
 import com.dianping.cat.Cat;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -124,5 +122,40 @@ public class ClusterService {
 
     public List<Zone> findClusterZones(String clusterName) {
         return clusterCache.get(clusterName).getZones();
+    }
+
+    public List<Shard> getShards(String clusterName, String zoneId) {
+        List<Shard> shardList = new ArrayList<>();
+        for (Zone zone : clusterCache.get(clusterName).getZones()) {
+            if (zone.getZoneId().equals(zoneId)) {
+                shardList = zone.getShards();
+            }
+        }
+        return shardList;
+    }
+
+    public List<Instance> getInstancesByZoneIdAndShardIndex(String clusterName, String zoneId, int shardIndex, String role) {
+        List<Instance> reslut = new ArrayList<>();
+        List<Zone> zoneList = clusterCache.get(clusterName).getZones();
+        List<Shard> shardList = null;
+        for (Zone zone : zoneList) {
+            if (zone.getZoneId().equals(zoneId)) {
+                shardList = zone.getShards();
+                break;
+            }
+        }
+        if (shardList != null) {
+            Shard shard = shardList.get(shardIndex);
+            if (ClusterConstant.SHARD_ROLE_MASTER.equalsIgnoreCase(role)) {
+                reslut = Arrays.asList(shard.getMaster().getInstance());
+            }
+            else if (ClusterConstant.SHARD_ROLE_SLAVE.equalsIgnoreCase(role)) {
+                reslut = shard.getSlave().getInstances();
+            }
+            else {
+                reslut = shard.getRead().getInstances();
+            }
+        }
+        return reslut;
     }
 }

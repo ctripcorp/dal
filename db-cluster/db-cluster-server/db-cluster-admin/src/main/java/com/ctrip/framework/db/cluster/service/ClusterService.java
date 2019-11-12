@@ -21,84 +21,28 @@ public class ClusterService {
 
     private static final String DB_CLUSTER_GET_CLUSTERS_PRO = "http://service.dbcluster.ctripcorp.com/api/dal/v1/clusters/?operator=%s&effective=%s";
 
+    private static final String DB_CLUSTER_GET_CLUSTER_INFO_FAT = "http://service.dbcluster.fat-1.qa.nt.ctripcorp.com/api/dal/v1/clusters/%s?operator=%s&effective=%s";
+
+    private static final String DB_CLUSTER_GET_CLUSTER_INFO_UAT = "http://service.dbcluster.uat.qa.nt.ctripcorp.com/api/dal/v1/clusters/%s?operator=%s&effective=%s";
+
+    private static final String DB_CLUSTER_GET_CLUSTER_INFO_PRO = "http://service.dbcluster.ctripcorp.com/api/dal/v1/clusters/%s?operator=%s&effective=%s";
+
     private static final String ADMIN_USER = "chentao";
 
     private ConcurrentHashMap<String, Cluster> clusterCache = new ConcurrentHashMap<>();
 
     public ClusterResponse getCluster(String clusterName) {
-        String clusters = "{\n" +
-                "    \"status\": 200,\n" +
-                "    \"message\": \"Query cluster success\",\n" +
-                "    \"result\": {\n" +
-                "        \"clusterName\": \"mockcluster1\",\n" +
-                "        \"dbCategory\": \"mysql\",\n" +
-                "        \"enabled\": true,\n" +
-                "        \"zones\": [\n" +
-                "            {\n" +
-                "                \"zoneId\": \"shajq\",\n" +
-                "                \"enabled\": true,\n" +
-                "                \"shards\": [\n" +
-                "                    {\n" +
-                "                        \"shardIndex\": 0,\n" +
-                "                        \"dbName\": \"mockdb00\",\n" +
-                "                        \"master\": {\n" +
-                "                            \"domain\": \"switchedmasterdomain\",\n" +
-                "                            \"port\": 12345,\n" +
-                "                            \"instance\": {\n" +
-                "                                \"ip\": \"100.100.100.100\",\n" +
-                "                                \"port\": 11223,\n" +
-                "                                \"readWeight\": 1,\n" +
-                "                                \"tags\": \"\",\n" +
-                "                                \"memberStatus\": true,\n" +
-                "                                \"healthStatus\": true\n" +
-                "                            },\n" +
-                "                            \"instances\": null\n" +
-                "                        },\n" +
-                "                        \"slave\": {\n" +
-                "                            \"domain\": \"mockSlaveDomain\",\n" +
-                "                            \"port\": 12345,\n" +
-                "                            \"instance\": null,\n" +
-                "                            \"instances\": [\n" +
-                "                                {\n" +
-                "                                    \"ip\": \"10.2.2.2\",\n" +
-                "                                    \"port\": 12345,\n" +
-                "                                    \"readWeight\": 1,\n" +
-                "                                    \"tags\": \"\",\n" +
-                "                                    \"memberStatus\": true,\n" +
-                "                                    \"healthStatus\": true\n" +
-                "                                }\n" +
-                "                            ]\n" +
-                "                        },\n" +
-                "                        \"read\": {\n" +
-                "                            \"domain\": \"mockReadDomain\",\n" +
-                "                            \"port\": 12345,\n" +
-                "                            \"instance\": null,\n" +
-                "                            \"instances\": [\n" +
-                "                                {\n" +
-                "                                    \"ip\": \"10.3.3.3\",\n" +
-                "                                    \"port\": 12345,\n" +
-                "                                    \"readWeight\": 1,\n" +
-                "                                    \"tags\": \"\",\n" +
-                "                                    \"memberStatus\": true,\n" +
-                "                                    \"healthStatus\": true\n" +
-                "                                },\n" +
-                "                                {\n" +
-                "                                    \"ip\": \"10.4.4.4\",\n" +
-                "                                    \"port\": 12345,\n" +
-                "                                    \"readWeight\": 1,\n" +
-                "                                    \"tags\": \"\",\n" +
-                "                                    \"memberStatus\": true,\n" +
-                "                                    \"healthStatus\": true\n" +
-                "                                }\n" +
-                "                            ]\n" +
-                "                        }\n" +
-                "                    }\n" +
-                "                ]\n" +
-                "            }\n" +
-                "        ]\n" +
-                "    }\n" +
-                "}";
-        ClusterResponse clusterResponse = JSON.parseObject(clusters, ClusterResponse.class);
+        String env = EnvUtil.getEnv();
+        String url = "FAT".equalsIgnoreCase(env) ? DB_CLUSTER_GET_CLUSTER_INFO_FAT : "UAT".equalsIgnoreCase(env) ?
+                DB_CLUSTER_GET_CLUSTER_INFO_UAT : DB_CLUSTER_GET_CLUSTER_INFO_PRO;
+        String formatUrl = String.format(url, clusterName, ADMIN_USER, "true");
+        ClusterResponse clusterResponse = null;
+        try {
+            Map<String, String> parameters = new HashMap<>();
+            clusterResponse = HttpUtil.getJSONEntity(ClusterResponse.class, formatUrl, parameters, HttpMethod.HttpGet);
+        } catch (Exception e) {
+            Cat.logError("get cluster[" + clusterName +"] fail!", e);
+        }
         clusterCache.put(clusterResponse.getResult().getClusterName(), clusterResponse.getResult());
         return clusterResponse;
     }

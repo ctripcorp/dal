@@ -291,7 +291,7 @@ services.service('ClusterService', ['$resource', '$q', function ($resource, $q) 
     }
 
     return {
-        load_cluster: loadCluster,
+        loadCluster: loadCluster,
         findClusterZones: findClusterZones,
         findAllClusters: findAllClusters,
         findClustersByActiveDcName: findClustersByActiveDcName,

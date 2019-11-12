@@ -1,5 +1,5 @@
 /**  确认框 */
-directive_module.directive('xpipeconfirmdialog', function ($compile, $window) {
+directive_module.directive('dbclusterconfirmdialog', function ($compile, $window) {
     return {
         restrict: 'E',
         templateUrl: '../../views/directives/confirm-dialog.html',
@@ -8,23 +8,11 @@ directive_module.directive('xpipeconfirmdialog', function ($compile, $window) {
         scope: {
             dialogId: '=dbclusterDialogId',
             title: '=dbclusterTitle',
-            detail: '=dbclusterDetail',
-            showCancelBtn: '=dbclusterShowCancelBtn',
-            doConfirm: '=dbclusterConfirm',
-            doCancel: '=dbclusterCancel'
+            instances: '=dbclusterInstances',
+            showCancelBtn: '=dbclusterShowCancelBtn'
         },
         link: function (scope, element, attrs) {
 
-            scope.confirm = function () {
-                if (scope.doConfirm){
-                    scope.doConfirm();
-                }
-            };
-            scope.cancel = function () {
-                if (scope.doCancel) {
-                    scope.doCancel();
-                }
-            };
 
         }
     }

@@ -78,6 +78,7 @@ index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '
                 } , function (result) {
                     toastr.error(AppUtil.errorMsg(result));
                 });
+            $('#instanceInfoConfirm').modal('show');
         }
 
         function existsRoute(activeDcName, backupDcName) {

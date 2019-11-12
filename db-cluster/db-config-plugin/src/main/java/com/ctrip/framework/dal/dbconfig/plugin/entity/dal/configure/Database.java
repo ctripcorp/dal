@@ -23,7 +23,7 @@ public class Database {
     private String dbName;
     @XmlAttribute(name = "uid")
     private String uid;
-    @XmlAttribute(name = "password")
+    @XmlAttribute(name = "pwd")
     private String password;
     @XmlAttribute(name = "readWeight")
     private int readWeight;
@@ -116,7 +116,7 @@ public class Database {
                 ", port=" + port +
                 ", dbName='" + dbName + '\'' +
                 ", uid='" + uid + '\'' +
-                ", password='" + password + '\'' +
+                ", pwd='" + "******" + '\'' +
                 ", readWeight=" + readWeight +
                 ", tags='" + tags + '\'' +
                 '}';

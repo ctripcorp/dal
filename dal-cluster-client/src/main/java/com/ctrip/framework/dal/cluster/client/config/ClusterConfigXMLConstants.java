@@ -34,7 +34,7 @@ public interface ClusterConfigXMLConstants {
     String PORT = "port";
     String DB_NAME = "dbName";
     String UID = "uid";
-    String PWD = "password";
+    String PWD = "pwd";
     String READ_WEIGHT = "readWeight";
     String TAGS = "tags";
     String VALUE = "value";

@@ -486,4 +486,87 @@ public class RefreshableDataSourceTest {
 //        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent2);
         latch.await();
     }
+
+
+    /* ------- dal cluster cases ------- */
+
+    @Test
+    public void testReusedSingleDataSource() {
+        Properties p1 = new Properties();
+        p1.setProperty("userName", "root");
+        p1.setProperty("password", "!QAZ@WSX1qaz2wsx");
+        p1.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure config1 = new DataSourceConfigure("config1", p1);
+        DataSourceConfigure config2 = new DataSourceConfigure("config2", p1);
+
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
+        p2.setProperty("connectionUrl", "jdbc:mysql://dst56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure config3 = new DataSourceConfigure("config3", p2);
+
+        RefreshableDataSource ds1 = new RefreshableDataSource("ds1", config1);
+        RefreshableDataSource ds2 = new RefreshableDataSource("ds2", config2);
+        RefreshableDataSource ds3 = new RefreshableDataSource("ds3", config3);
+
+        Assert.assertSame(ds1.getSingleDataSource(), ds2.getSingleDataSource());
+        Assert.assertNotSame(ds1.getSingleDataSource(), ds3.getSingleDataSource());
+    }
+
+    @Test
+    public void testDataSourceSwitch() throws Exception {
+        Properties p1 = new Properties();
+        p1.setProperty("userName", "root");
+        p1.setProperty("password", "!QAZ@WSX1qaz2wsx");
+        p1.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
+        p2.setProperty("connectionUrl", "jdbc:mysql://dst56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+
+        DataSourceConfigure config1 = new DataSourceConfigure("config1", p1);
+        RefreshableDataSource ds1 = new RefreshableDataSource("ds1", config1);
+
+        DataSourceConfigure config2 = new DataSourceConfigure("config2", p2);
+        RefreshableDataSource ds2 = new RefreshableDataSource("ds2", config2);
+
+        SingleDataSource sds1 = ds1.getSingleDataSource();
+        SingleDataSource sds2 = ds2.getSingleDataSource();
+        Assert.assertNotSame(sds1, sds2);
+        Assert.assertEquals(1, sds1.getReferenceCount());
+        Assert.assertEquals(1, sds2.getReferenceCount());
+
+        ds1.refreshDataSource(config2.getName(), config2);
+        Assert.assertSame(ds1.getSingleDataSource(), sds2);
+        Assert.assertEquals(0, sds1.getReferenceCount());
+        Assert.assertEquals(2, sds2.getReferenceCount());
+
+        RefreshableDataSource ds3 = new RefreshableDataSource("ds3", config1);
+        RefreshableDataSource ds4 = new RefreshableDataSource("ds4", config2);
+        SingleDataSource sds3 = ds3.getSingleDataSource();
+        SingleDataSource sds4 = ds4.getSingleDataSource();
+        Assert.assertNotSame(sds1, sds3);
+        Assert.assertSame(sds2, sds4);
+        Assert.assertEquals(0, sds1.getReferenceCount());
+        Assert.assertEquals(3, sds2.getReferenceCount());
+        Assert.assertEquals(1, sds3.getReferenceCount());
+
+        RefreshableDataSource ds5 = new RefreshableDataSource("ds5", config2);
+        SingleDataSource sds5 = ds5.getSingleDataSource();
+        ds3.close();
+        Assert.assertSame(sds2, sds5);
+        Assert.assertEquals(0, sds3.getReferenceCount());
+        Assert.assertEquals(4, sds2.getReferenceCount());
+
+        RefreshableDataSource ds6 = new RefreshableDataSource("ds6", config1);
+        SingleDataSource sds6 = ds6.getSingleDataSource();
+        Assert.assertNotSame(sds3, sds6);
+        Assert.assertEquals(0, sds3.getReferenceCount());
+        Assert.assertEquals(1, sds6.getReferenceCount());
+    }
 }

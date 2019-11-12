@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.sql.logging.DalCatLoggerTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+    com.ctrip.platform.dal.cluster.AllTests.class,
     com.ctrip.platform.dal.codegen.AllTests.class,
     com.ctrip.platform.dal.dao.AllTests.class, 
     CtripDalConfigLoaderTest.class, 

@@ -78,7 +78,7 @@ public class DalClusterUtils {
     }
 
     public static DalConfigure formatCluster2Configure(DalClusterEntity dalCluster) {
-        List<DatabaseShard> shards = new ArrayList<>();
+        List<DatabaseShard> shards = Lists.newArrayListWithCapacity(dalCluster.getDatabaseShards().size());
         for (DatabaseShardInfo shardInfo : dalCluster.getDatabaseShards()) {
             DatabaseShard shard = new DatabaseShard(shardInfo.getIndex(), shardInfo.getMasterDomain(), shardInfo.getSlaveDomain(),
                     shardInfo.getMasterPort(), shardInfo.getSlavePort(),

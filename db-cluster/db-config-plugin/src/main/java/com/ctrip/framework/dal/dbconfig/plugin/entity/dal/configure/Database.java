@@ -26,14 +26,14 @@ public class Database {
     @XmlAttribute(name = "pwd")
     private String password;
     @XmlAttribute(name = "readWeight")
-    private int readWeight;
+    private Integer readWeight;
     @XmlAttribute(name = "tags")
     private String tags;
 
     public Database() {
     }
 
-    public Database(String role, String ip, int port, String dbName, String uid, String password, int readWeight, String tags) {
+    public Database(String role, String ip, int port, String dbName, String uid, String password, Integer readWeight, String tags) {
         this.role = role;
         this.ip = ip;
         this.port = port;
@@ -92,11 +92,11 @@ public class Database {
         this.password = password;
     }
 
-    public int getReadWeight() {
+    public Integer getReadWeight() {
         return readWeight;
     }
 
-    public void setReadWeight(int readWeight) {
+    public void setReadWeight(Integer readWeight) {
         this.readWeight = readWeight;
     }
 

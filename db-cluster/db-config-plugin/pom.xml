@@ -13,9 +13,6 @@
     <version>2.0.1</version>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <framework-bom.version>2.38.0</framework-bom.version>
         <qconfig-plugin.version>1.100.14</qconfig-plugin.version>
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
@@ -119,4 +116,23 @@
             <artifactId>httpclient</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <compilerArgs>
+                            <arg>-XDignore.symbol.file</arg>
+                        </compilerArgs>
+                        <fork>true</fork>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

@@ -74,6 +74,16 @@ public class TitanProvider implements IntegratedConfigProvider {
     }
 
     @Override
+    public void unregister(String name) {
+        unregister(new DataSourceName(name));
+    }
+
+    @Override
+    public void unregister(DataSourceIdentity id) {
+        dataSourceConfigureManager.unregister(id);
+    }
+
+    @Override
     public ClusterConfig getClusterConfig(String clusterName) {
         return clusterConfigProvider.getClusterConfig(clusterName);
     }

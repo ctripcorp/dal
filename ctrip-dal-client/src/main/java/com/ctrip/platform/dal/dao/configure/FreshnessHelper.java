@@ -33,8 +33,6 @@ public class FreshnessHelper implements FreshnessReader {
     
     public int getSlaveFreshness(String logicDbName, String slaveConnectionString) {
         DatabaseSet dbSet = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
-        if (dbSet instanceof ClusterDatabaseSet)
-            return INVALID;
 
         DatabaseCategory category = dbSet.getDatabaseCategory();
         

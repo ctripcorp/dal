@@ -40,7 +40,11 @@ public class DynamicClusterConfig extends ListenableSupport<ClusterConfig> imple
                 if (getConfig().checkSwitchable(current)) {
                     configRef.getAndSet(current);
                     for (Listener<ClusterConfig> listener : getListeners()) {
-                        listener.onChanged(DynamicClusterConfig.this);
+                        try {
+                            listener.onChanged(DynamicClusterConfig.this);
+                        } catch (Throwable t) {
+                            // ignore
+                        }
                     }
                 }
             }

@@ -620,6 +620,11 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         dataSourceConfigureChangeListeners.put(id, listener);
     }
 
+    public void unregister(DataSourceIdentity id) {
+        dataSourceConfigureChangeListeners.remove(id);
+        dataSourceConfigureLocator.removeDataSourceConfigure(id);
+    }
+
     private Map<DataSourceIdentity, DataSourceConfigureChangeListener> copyChangeListeners(
             Map<DataSourceIdentity, DataSourceConfigureChangeListener> map) {
         if (map == null || map.isEmpty())

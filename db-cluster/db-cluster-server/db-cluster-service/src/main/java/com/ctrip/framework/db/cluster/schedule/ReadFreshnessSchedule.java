@@ -11,20 +11,25 @@ import com.ctrip.framework.db.cluster.service.repository.ShardInstanceService;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
+import com.dianping.cat.Cat;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.net.SocketTimeoutException;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.ctrip.framework.db.cluster.util.thread.DefaultExecutorFactory.DEFAULT_KEEPER_ALIVE_TIME_SECONDS;
@@ -33,7 +38,7 @@ import static com.ctrip.framework.db.cluster.util.thread.DefaultExecutorFactory.
  * Created by @author zhuYongMing on 2019/11/1.
  */
 @Slf4j
-//@Component
+@Component
 public class ReadFreshnessSchedule {
 
     private static final String showSlaveCommand = "show slave status";
@@ -147,7 +152,8 @@ public class ReadFreshnessSchedule {
                     // url like : "jdbc:mysql://localhost:3306/mysql";
                     final String url = "jdbc:mysql://" + instance.getIp() +
                             ":" + instance.getPort() +
-                            "/" + instance.getDbName();
+                            "/" + instance.getDbName() +
+                            "?useSSL=false";
 
                     final PoolProperties properties = new PoolProperties();
                     properties.setUrl(url);
@@ -155,6 +161,8 @@ public class ReadFreshnessSchedule {
                     properties.setUsername(username);
                     properties.setPassword(password);
                     properties.setMaxActive(1);
+                    properties.setMaxIdle(1);
+                    properties.setMinIdle(1);
                     properties.setInitialSize(1);
                     // 建立连接超时时间1s，等待请求返回超时时间threshold
                     final String connectionProperties = "connectTimeout=1000;socketTimeout=" + thresholdSecond * 1000;
@@ -168,46 +176,78 @@ public class ReadFreshnessSchedule {
 
                         boolean ioThread = false;
                         boolean sqlThread = false;
-                        Integer behindSecond = Integer.MAX_VALUE;
+                        Integer secondBehindMaster = Integer.MAX_VALUE;
 
                         if (resultSet.next()) {
                             ioThread = "YES".equalsIgnoreCase(resultSet.getString("Slave_IO_Running"));
                             sqlThread = "YES".equalsIgnoreCase(resultSet.getString("Slave_SQL_Running"));
-                            behindSecond = Integer.valueOf(resultSet.getString("Seconds_Behind_Master"));
+                            secondBehindMaster = Integer.valueOf(resultSet.getString("Seconds_Behind_Master"));
                         }
 
-                        if (ioThread && sqlThread && behindSecond <= thresholdSecond) {
-                            pullInInstances.add(instance);
+                        if (ioThread && sqlThread && secondBehindMaster <= thresholdSecond) {
+                            // pull in origin health status is un_enabled instance
+                            if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.un_enabled.getCode()) {
+                                pullInInstances.add(instance);
+                                // cat
+                                final Map<String, String> pullInMap = Maps.newHashMapWithExpectedSize(1);
+                                pullInMap.put("pull in reason", String.format("ioThread = true, sqlThread = true, secondBehindMaster = %d.", secondBehindMaster));
+                                Cat.logEvent("Schedule.Read.Freshness.PullIn", clusterName + "-" + instance.getIp(), "waring", pullInMap);
+                            }
                         } else {
-                            pulloutInstances.add(instance);
-                        }
-                    } catch (SQLException e) {
-                        /*// exception : connect timeout, socketTimeout, connect reject, Insufficient permissions
-                        // putout: socketTimeout, connect reject
-                        if (e instanceof SQLException) {
-                            putout(instance, clusterName,
-                                    String.format(
-                                            ""
-                                    )
-                            );
-                        }
-
-                        // check again: connect timeout
-                        if (e instanceof SQLException) {
-                            final boolean isValid = dbConnectionService.checkConnection();
-                            if (!isValid) {
-                                putout(instance, clusterName,
-                                        String.format(
-                                                ""
-                                        )
-                                );
+                            // pullout origin health status is enabled instance
+                            if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()) {
+                                pulloutInstances.add(instance);
+                                // cat
+                                final Map<String, String> pulloutMap = Maps.newHashMapWithExpectedSize(1);
+                                pulloutMap.put("pullout reason", String.format("ioThread = %s, sqlThread = %s, secondBehindMaster = %d.", ioThread, sqlThread, secondBehindMaster));
+                                Cat.logEvent("Schedule.Read.Freshness.Pullout", clusterName + "-" + instance.getIp(), "waring", pulloutMap);
                             }
                         }
+                    } catch (Exception e) {
+                        final String exceptionMessage = e.getMessage();
+                        // exception : socketTimeout, Access denied, connect reject, connect timeout, Insufficient permissions
+                        // pullout: socketTimeout
+                        if (e instanceof CommunicationsException && e.getCause() instanceof SocketTimeoutException) {
+                            if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()) {
+                                pulloutInstances.add(instance);
+                                // cat
+                                final Map<String, String> pulloutMap = Maps.newHashMapWithExpectedSize(1);
+                                pulloutMap.put("pullout reason", String.format("socket timeout, exception = %s", e.toString()));
+                                Cat.logEvent("Schedule.Read.Freshness.Pullout", clusterName + "-" + instance.getIp(), "waring", pulloutMap);
+                            }
+                        } else if (e instanceof SQLException && StringUtils.isNotBlank(exceptionMessage) && exceptionMessage.contains("Access denied for user")) {
+                            // pullout: Access denied
+                            if (instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()) {
+                                pulloutInstances.add(instance);
+                                // cat
+                                final Map<String, String> pulloutMap = Maps.newHashMapWithExpectedSize(1);
+                                pulloutMap.put("pullout reason", String.format("Access denied, exception = %s", e.toString()));
+                                Cat.logEvent("Schedule.Read.Freshness.Pullout", clusterName + "-" + instance.getIp(), "waring", pulloutMap);
+                            }
+                        } else {
+                            // other
+                            final Map<String, String> pulloutMap = Maps.newHashMapWithExpectedSize(1);
+                            pulloutMap.put("pullout reason", String.format("other exception = %s", e.toString()));
+                            Cat.logEvent("Schedule.Read.Freshness.Error", clusterName + "-" + instance.getIp(), "error", pulloutMap);
+                        }
+                        // pullout: connect reject
+
+                        // check again: connect timeout
+//                        if (e instanceof SQLException) {
+//                            final boolean isValid = dbConnectionService.checkConnection();
+//                            if (!isValid) {
+//                                putout(instance, clusterName,
+//                                        String.format(
+//                                                ""
+//                                        )
+//                                );
+//                            }
+//                        }
 
                         // ignore: Insufficient permissions
-                        if (e instanceof SQLException) {
-                            // cat
-                        }*/
+//                        if (e instanceof SQLException) {
+//                            // cat
+//                        }
                     } finally {
                         datasource.close();
                     }
@@ -228,36 +268,21 @@ public class ReadFreshnessSchedule {
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    private void trig(final List<ShardInstanceDTO> pullInInstances,
-                      final List<ShardInstanceDTO> pulloutInstances,
-                      final String clusterName) {
-
-        final List<ShardInstanceDTO> actualPullInInstances = pullInInstances.stream().filter(instance ->
-                // pull in origin health status is un_enabled instance
-                instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.un_enabled.getCode()
-        ).collect(Collectors.toList());
-        final List<ShardInstanceDTO> actualPulloutInstances = pulloutInstances.stream().filter(instance ->
-                // pullout origin health status is enabled instance
-                instance.getShardInstanceHealthStatus() == ShardInstanceHealthStatus.enabled.getCode()
-        ).collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(actualPullInInstances) && CollectionUtils.isEmpty(actualPulloutInstances)) {
-            // do nothing, ignore
-            return;
-        }
-
+    void trig(final List<ShardInstanceDTO> pullInInstances,
+              final List<ShardInstanceDTO> pulloutInstances,
+              final String clusterName) {
 
         final List<ShardInstance> updatedInstance = Lists.newArrayListWithExpectedSize(
-                actualPullInInstances.size() + actualPulloutInstances.size()
+                pullInInstances.size() + pulloutInstances.size()
         );
-        actualPullInInstances.forEach(instance -> {
+        pullInInstances.forEach(instance -> {
             final ShardInstance updated = ShardInstance.builder()
                     .id(instance.getShardInstanceEntityId())
                     .healthStatus(ShardInstanceHealthStatus.enabled.getCode())
                     .build();
             updatedInstance.add(updated);
         });
-        actualPulloutInstances.forEach(instance -> {
+        pulloutInstances.forEach(instance -> {
             final ShardInstance updated = ShardInstance.builder()
                     .id(instance.getShardInstanceEntityId())
                     .healthStatus(ShardInstanceHealthStatus.un_enabled.getCode())
@@ -265,21 +290,17 @@ public class ReadFreshnessSchedule {
             updatedInstance.add(updated);
         });
 
+        if (CollectionUtils.isEmpty(updatedInstance)) {
+            // do nothing
+            return;
+        }
+
         try {
             shardInstanceService.updateShardInstances(updatedInstance);
             clusterService.release(
                     Lists.newArrayList(clusterName),
                     Constants.HEALTH_SCHEDULE_OPERATOR,
                     Constants.RELEASE_TYPE_HEALTH_SCHEDULE_RELEASE
-            );
-
-            // TODO: 2019/11/3 cat
-            log.info(
-                    String.format(
-                            "[ReadFreshnessSchedule] release done, clusterName = %s, pull in ips = %s, pullout ips = %s.",
-                            clusterName, actualPullInInstances.stream().map(ShardInstanceDTO::getIp).collect(Collectors.toList()).toString(),
-                            actualPulloutInstances.stream().map(ShardInstanceDTO::getIp).collect(Collectors.toList()).toString()
-                    )
             );
         } catch (SQLException e) {
             log.error("[ReadFreshnessSchedule] release error.", e);

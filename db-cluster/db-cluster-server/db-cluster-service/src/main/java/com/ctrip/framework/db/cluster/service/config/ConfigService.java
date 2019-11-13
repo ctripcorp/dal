@@ -49,9 +49,6 @@ public class ConfigService {
     private static final String KEY_PORT_REGEX = "portRegex";
     private static final String KEY_IPV4_REGEX = "ipv4Regex";
     private static final String KEY_IPV6_REGEX = "ipv6Regex";
-    // TODO: 2019/11/1 临时
-    private static final String KEY_QCONFIG_PLUGIN_SWITCH = "qconfigPluginSwitch";
-
 
     // qconfig default value
     private static final String DEFAULT_PLUGIN_TITAN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
@@ -75,9 +72,6 @@ public class ConfigService {
     private static final String DEFAULT_PORT_REGEX = "^[0-9]{1,5}$";
     private static final String DEFAULT_IPV4_REGEX = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$";
     private static final String DEFAULT_IPV6_REGEX = "^([\\da-fA-F]{1,4}:){6}((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|::([\\da−fA−F]1,4:)0,4((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|::([\\da−fA−F]1,4:)0,4((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|^([\\da-fA-F]{1,4}:):([\\da-fA-F]{1,4}:){0,3}((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)2:([\\da−fA−F]1,4:)0,2((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)2:([\\da−fA−F]1,4:)0,2((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|^([\\da-fA-F]{1,4}:){3}:([\\da-fA-F]{1,4}:){0,1}((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)4:((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)4:((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|^([\\da-fA-F]{1,4}:){7}[\\da-fA-F]{1,4}|:((:[\\da−fA−F]1,4)1,6|:)|:((:[\\da−fA−F]1,4)1,6|:)|^[\\da-fA-F]{1,4}:((:[\\da-fA-F]{1,4}){1,5}|:)|([\\da−fA−F]1,4:)2((:[\\da−fA−F]1,4)1,4|:)|([\\da−fA−F]1,4:)2((:[\\da−fA−F]1,4)1,4|:)|^([\\da-fA-F]{1,4}:){3}((:[\\da-fA-F]{1,4}){1,3}|:)|([\\da−fA−F]1,4:)4((:[\\da−fA−F]1,4)1,2|:)|([\\da−fA−F]1,4:)4((:[\\da−fA−F]1,4)1,2|:)|^([\\da-fA-F]{1,4}:){5}:([\\da-fA-F]{1,4})?|([\\da−fA−F]1,4:)6:|([\\da−fA−F]1,4:)6:";
-    // TODO: 2019/11/1 临时
-    private static final boolean DEFAULT_QCONFIG_PLUGIN_SWITCH = false;
-
 
     // qconfig key
     private volatile String pluginTitanUrl;
@@ -105,8 +99,6 @@ public class ConfigService {
     private volatile String portRegex;
     private volatile String ipv4Regex;
     private volatile String ipv6Regex;
-    // TODO: 2019/11/1 临时
-    private volatile boolean qconfigPluginSwitch;
 
     @PostConstruct
     private void init() {
@@ -146,9 +138,6 @@ public class ConfigService {
         portRegex = configMap.getString(KEY_PORT_REGEX, DEFAULT_PORT_REGEX);
         ipv4Regex = configMap.getString(KEY_IPV4_REGEX, DEFAULT_IPV4_REGEX);
         ipv6Regex = configMap.getString(KEY_IPV6_REGEX, DEFAULT_IPV6_REGEX);
-
-        // TODO: 2019/11/1 临时
-        qconfigPluginSwitch = configMap.getBoolean(KEY_QCONFIG_PLUGIN_SWITCH, DEFAULT_QCONFIG_PLUGIN_SWITCH);
     }
 
     Set<String> string2Set(String s) {
@@ -270,9 +259,5 @@ public class ConfigService {
 
     public Map<String, Integer> getFreshnessClusterEnabledAndThresholdSecond() {
         return freshnessClusterEnabledAndThresholdSecond;
-    }
-
-    public boolean isQconfigPluginSwitch() {
-        return qconfigPluginSwitch;
     }
 }

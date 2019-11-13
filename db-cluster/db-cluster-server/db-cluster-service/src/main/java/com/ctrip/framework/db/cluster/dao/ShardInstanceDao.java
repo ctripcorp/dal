@@ -30,6 +30,40 @@ public class ShardInstanceDao {
         this.client = new DalTableDao<>(new DalDefaultJpaParser<>(ShardInstance.class));
     }
 
+
+    public List<ShardInstance> findUnDeletedByShardIds(List<Integer> shardIds) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+        builder.inNullable("shard_id", shardIds, Types.INTEGER, false);
+        builder.and();
+        builder.equal("deleted", Deleted.un_deleted.getCode(), Types.TINYINT, false);
+        return client.query(builder, new DalHints());
+    }
+
+    public List<ShardInstance> findEffectiveByShardIds(List<Integer> shardIds) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+        builder.inNullable("shard_id", shardIds, Types.INTEGER, false);
+        builder.and();
+        builder.equal("deleted", Deleted.un_deleted.getCode(), Types.TINYINT, false);
+        builder.and();
+        builder.equal("member_status", ShardInstanceMemberStatus.enabled.getCode(), Types.TINYINT, false);
+        builder.and();
+        builder.equal("health_status", ShardInstanceHealthStatus.enabled.getCode(), Types.TINYINT, false);
+        return client.query(builder, new DalHints());
+    }
+
+    public List<ShardInstance> findUnDeletedByShardIdsAndRole(final List<Integer> shardIds, final String role) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+        builder.inNullable("shard_id", shardIds, Types.INTEGER, false);
+        builder.and();
+        builder.equal("deleted", Deleted.un_deleted.getCode(), Types.TINYINT, false);
+        builder.and();
+        builder.equal("role", role, Types.VARCHAR, false);
+        return client.query(builder, new DalHints());
+    }
+
     /**
      * Query ShardInstance by the specified ID
      * The ID must be a number
@@ -138,28 +172,6 @@ public class ShardInstanceDao {
         SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("id", ASC);
 
         return client.query(builder, hints);
-    }
-
-    public List<ShardInstance> findUnDeletedByShardIds(List<Integer> shardIds) throws SQLException {
-        SelectSqlBuilder builder = new SelectSqlBuilder();
-        builder.selectAll();
-        builder.inNullable("shard_id", shardIds, Types.INTEGER, false);
-        builder.and();
-        builder.equal("deleted", Deleted.un_deleted.getCode(), Types.TINYINT, false);
-        return client.query(builder, new DalHints());
-    }
-
-    public List<ShardInstance> findEffectiveByShardIds(List<Integer> shardIds) throws SQLException {
-        SelectSqlBuilder builder = new SelectSqlBuilder();
-        builder.selectAll();
-        builder.inNullable("shard_id", shardIds, Types.INTEGER, false);
-        builder.and();
-        builder.equal("deleted", Deleted.un_deleted.getCode(), Types.TINYINT, false);
-        builder.and();
-        builder.equal("member_status", ShardInstanceMemberStatus.enabled.getCode(), Types.TINYINT, false);
-        builder.and();
-        builder.equal("health_status", ShardInstanceHealthStatus.enabled.getCode(), Types.TINYINT, false);
-        return client.query(builder, new DalHints());
     }
 
     /**

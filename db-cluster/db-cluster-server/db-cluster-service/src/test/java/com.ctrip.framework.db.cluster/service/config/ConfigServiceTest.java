@@ -1,11 +1,14 @@
 package com.ctrip.framework.db.cluster.service.config;
 
+import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by @author zhuYongMing on 2019/11/10.

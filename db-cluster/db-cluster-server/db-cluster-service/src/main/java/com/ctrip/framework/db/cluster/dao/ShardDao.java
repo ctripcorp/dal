@@ -1,12 +1,14 @@
 package com.ctrip.framework.db.cluster.dao;
 
 import com.ctrip.framework.db.cluster.entity.Shard;
+import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -26,6 +28,21 @@ public class ShardDao {
         this.client = new DalTableDao<>(new DalDefaultJpaParser<>(Shard.class));
     }
 
+    public List<Shard> findShards(final List<Integer> clusterIds, final Deleted deleted) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+        // deleted
+        builder.equal("deleted", deleted.getCode(), Types.TINYINT, false);
+        // clusterIds
+        if (!CollectionUtils.isEmpty(clusterIds)) {
+            builder.and();
+            builder.inNullable("cluster_id", clusterIds, Types.VARCHAR, false);
+        }
+        return client.query(builder, new DalHints());
+    }
+
+
+    // deprecated
     public List<Shard> findShardsByDBNames(List<String> dbNames) throws SQLException {
         return findShardsByDBNames(null, dbNames);
     }

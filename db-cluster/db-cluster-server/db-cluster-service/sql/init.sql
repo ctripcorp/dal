@@ -140,6 +140,8 @@ CREATE TABLE `titan_key` (
   `datachange_lasttime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name_sub_env` (`name`, `sub_env`),
+  KEY `index_name` (`name`),
+  KEY `index_domain` (`domain`),
   KEY `index_datachange_lasttime` (`datachange_lasttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='titan_key表';
 

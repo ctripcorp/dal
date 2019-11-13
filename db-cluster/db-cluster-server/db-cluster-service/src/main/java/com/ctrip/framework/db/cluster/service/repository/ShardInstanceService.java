@@ -54,9 +54,22 @@ public class ShardInstanceService {
         return shardInstanceDao.findEffectiveByShardIds(shardIds);
     }
 
+    public List<ShardInstance> findByShardIdAndRole(Integer shardId, String role) throws SQLException {
+        ShardInstance shardInstance = ShardInstance.builder()
+                .shardId(shardId)
+                .role(role)
+                .build();
+        return shardInstanceDao.queryBy(shardInstance);
+    }
+
+    public List<ShardInstance> findUnDeletedByShardIdsAndRole(final List<Integer> shardIds, final String role) throws SQLException {
+        return shardInstanceDao.findUnDeletedByShardIdsAndRole(shardIds, role);
+    }
+
     public void updateShardInstances(final List<ShardInstance> shardInstances) throws SQLException {
         shardInstanceDao.update(shardInstances);
     }
+
 
     // deprecated
     public int add(ShardInstance shardReadInstance) throws SQLException {
@@ -68,14 +81,6 @@ public class ShardInstanceService {
                 .shardId(shardId)
                 .build();
 
-        return shardInstanceDao.queryBy(shardInstance);
-    }
-
-    public List<ShardInstance> findByShardIdAndRole(Integer shardId, String role) throws SQLException {
-        ShardInstance shardInstance = ShardInstance.builder()
-                .shardId(shardId)
-                .role(role)
-                .build();
         return shardInstanceDao.queryBy(shardInstance);
     }
 

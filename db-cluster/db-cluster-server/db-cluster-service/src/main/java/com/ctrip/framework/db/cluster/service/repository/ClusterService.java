@@ -4,6 +4,7 @@ import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.dao.ClusterDao;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.entity.*;
+import com.ctrip.framework.db.cluster.enums.ShardInstanceMemberStatus;
 import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckRequest;
 import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
@@ -631,7 +632,7 @@ public class ClusterService {
         clusterSwitchesVos.forEach(clusterSwitchesVo -> {
             final String clusterName = clusterSwitchesVo.getClusterName();
             try {
-                final ClusterDTO effective = findEffectiveClusterDTO(clusterName);
+                final ClusterDTO effective = findUnDeletedClusterDTO(clusterName);
 
                 // invalid cluster
                 if (null == effective) {
@@ -709,33 +710,9 @@ public class ClusterService {
                             .deleted(Deleted.deleted.getCode())
                             .build();
                     updatedShardInstances.add(invalided);
-
-                    // titan
-//                    final List<UserDTO> effectiveUsers = shardDTO.getUsers();
-//                    if (!CollectionUtils.isEmpty(effectiveUsers)) {
-//                        effectiveUsers.stream().filter(
-//                                userDTO -> Constants.OPERATION_WRITE.equalsIgnoreCase(userDTO.getPermission())
-//                        ).map(UserDTO::getTitanKeys).flatMap(
-//                                titanKeys -> {
-//                                    if (titanKeys.contains(",")) {
-//                                        return Lists.newArrayList(titanKeys.split(",")).stream().filter(StringUtils::isNotBlank);
-//                                    } else {
-//                                        return Lists.newArrayList(titanKeys).stream();
-//                                    }
-//                                }
-//                        ).forEach(titanKey -> {
-//                            final TitanKeyMhaUpdateData titanKeyMhaUpdateData = TitanKeyMhaUpdateData.builder()
-//                                    .keyName(titanKey)
-//                                    .server(switchInstanceMaster.getIp())
-//                                    .port(switchInstanceMaster.getPort())
-//                                    .build();
-//                            titanKeyMhaUpdateDatas.add(titanKeyMhaUpdateData);
-//                        });
-//                    }
                     domainIpPortPair.put(master.getDomain(), new Pair<>(switchInstanceMaster.getIp(), switchInstanceMaster.getPort()));
                 }
             }
-
 
             final List<ShardInstanceDTO> currentSlaveInstances = shardDTO.getSlaves();
             final DatabaseSwitchesVo slave = shardSwitchesVo.getSlave();
@@ -774,11 +751,11 @@ public class ClusterService {
         // invalid shardInstance
         shardInstanceService.updateShardInstances(updatedShardInstances);
 
-        // batch release
-        release(
-                clusterSwitchesVos.stream().map(ClusterSwitchesVo::getClusterName).collect(Collectors.toList()),
-                operator, Constants.RELEASE_TYPE_SWITCH_RELEASE
-        );
+        // batch release, If it has been released, it will be automatically released when switching
+        final List<String> releaseClusters = effectiveClusterDTOMap.values().stream()
+                .filter(cluster -> cluster.getClusterReleaseVersion() > 0)
+                .map(ClusterDTO::getClusterName).collect(Collectors.toList());
+        release(releaseClusters, operator, Constants.RELEASE_TYPE_SWITCH_RELEASE);
 
         // batch switch titan keys
         if (!CollectionUtils.isEmpty(domainIpPortPair)) {
@@ -826,7 +803,6 @@ public class ClusterService {
                                 request.toString(), response.getMessage())
                 );
             }
-
         }
     }
 
@@ -856,6 +832,7 @@ public class ClusterService {
                             .id(currentInstance.getShardInstanceEntityId())
                             .readWeight(switchInstance.getReadWeight())
                             .tags(switchInstance.getTags())
+                            .memberStatus(ShardInstanceMemberStatus.enabled.getCode())
                             .build();
                     updatedShardInstances.add(updated);
                     currentInstances.remove(currentInstance);

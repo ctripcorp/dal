@@ -1,10 +1,13 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
+import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.enums.ShardInstanceHealthStatus;
 import com.ctrip.framework.db.cluster.enums.ShardInstanceMemberStatus;
 import com.ctrip.framework.db.cluster.vo.dal.create.DatabaseVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.InstanceVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.ShardVo;
+import com.ctrip.framework.db.cluster.vo.dal.create.UserVo;
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -129,12 +132,25 @@ public class ShardDTO {
                     .build();
         }
 
+        final List<UserVo> userVos = Lists.newArrayListWithExpectedSize(users.size());
+        users.forEach(user -> {
+            UserVo userVo = UserVo.builder()
+                    .username(user.getUsername())
+                    .permission(user.getPermission())
+                    .tag(user.getTag())
+                    .enabled(Enabled.getEnabled(user.getUserEnabled()).convertToBoolean())
+                    .titanKey(user.getTitanKeys())
+                    .build();
+            userVos.add(userVo);
+        });
+
         return ShardVo.builder()
                 .shardIndex(shardIndex)
                 .dbName(dbName)
                 .master(masterDatabaseVo)
                 .slave(slaveDatabaseVo)
                 .read(readDatabaseVo)
+                .users(userVos)
                 .build();
     }
 }

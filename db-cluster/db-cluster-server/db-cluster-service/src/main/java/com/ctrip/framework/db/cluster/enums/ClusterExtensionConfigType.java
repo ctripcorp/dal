@@ -2,8 +2,8 @@ package com.ctrip.framework.db.cluster.enums;
 
 public enum ClusterExtensionConfigType {
 
-    shards_strategies(0, "ShardStrategies"),
-    id_generators(1, "IdGenerators"),
+    shards_strategies(0, "shardStrategies"),
+    id_generators(1, "idGenerators"),
     ;
 
     ClusterExtensionConfigType(int code, String name) {
@@ -11,27 +11,27 @@ public enum ClusterExtensionConfigType {
         this.name = name;
     }
 
-    public static Integer getTypeCode(final String name) {
-        for (ClusterExtensionConfigType type : ClusterExtensionConfigType.values()) {
-            if (type.getName().equals(name)) {
-                return type.getCode();
-            }
-        }
-
-        throw new IllegalArgumentException(
-                String.format("ClusterExtensionConfigType can't be match, name parameter is %s.", name)
-        );
-    }
-
-    public static String getTypeName(final Integer code) {
+    public static ClusterExtensionConfigType getType(final Integer code) {
         for (ClusterExtensionConfigType type : ClusterExtensionConfigType.values()) {
             if (type.getCode() == code) {
-                return type.getName();
+                return type;
             }
         }
 
         throw new IllegalArgumentException(
                 String.format("ClusterExtensionConfigType can't be match, code parameter is %s.", code)
+        );
+    }
+
+    public static ClusterExtensionConfigType getType(final String name) {
+        for (ClusterExtensionConfigType type : ClusterExtensionConfigType.values()) {
+            if (type.getName().equals(name)) {
+                return type;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                String.format("ClusterExtensionConfigType can't be match, name parameter is %s.", name)
         );
     }
 

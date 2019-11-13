@@ -100,8 +100,8 @@ public class TitanKey {
      * 最后切换时间
      */
     @Column(name = "mha_last_update_time")
-    @Type(value = Types.TIMESTAMP)
-    private Timestamp mhaLastUpdateTime;
+    @Type(value = Types.VARCHAR)
+    private String mhaLastUpdateTime;
 
     /**
      * 域名

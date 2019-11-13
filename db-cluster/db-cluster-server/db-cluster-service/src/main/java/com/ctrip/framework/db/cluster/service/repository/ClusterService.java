@@ -48,6 +48,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType.id_generators;
+import static com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType.shards_strategies;
+
 /**
  * Created by shenjie on 2019/3/5.
  */
@@ -224,15 +227,12 @@ public class ClusterService {
         });
 
         // call dal plugin, if request fail, throw exception, transaction rollback.
-        // TODO: 2019/11/1 临时
-        if (configService.isQconfigPluginSwitch()) {
-            final List<ReleaseCluster> releaseClusters = clusterDTOs.stream()
-                    .map(cluster -> constructReleaseCluster(cluster, releaseType))
-                    .collect(Collectors.toList());
-            final PluginResponse response = dalPluginService.releaseClusters(releaseClusters, Constants.ENV, operator);
-            log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
-                    response.getStatus(), response.getMessage()));
-        }
+        final List<ReleaseCluster> releaseClusters = clusterDTOs.stream()
+                .map(cluster -> constructReleaseCluster(cluster, releaseType))
+                .collect(Collectors.toList());
+        final PluginResponse response = dalPluginService.releaseClusters(releaseClusters, Constants.ENV, operator);
+        log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
+                response.getStatus(), response.getMessage()));
 
         // update db
         final List<Cluster> clusters = Lists.newArrayListWithExpectedSize(clusterDTOs.size());
@@ -271,6 +271,31 @@ public class ClusterService {
             throw new IllegalStateException(
                     String.format("目前每个cluster仅支持一个zone, clusterName = %s", clusterName)
             );
+        }
+
+        // extension configs
+        final List<ClusterExtensionConfig> configs = cluster.getConfigs();
+        if (!CollectionUtils.isEmpty(configs)) {
+            // duplicate config type
+            Preconditions.checkArgument(
+                    configs.stream().map(ClusterExtensionConfig::getType).distinct().count() == configs.size(),
+                    String.format("cluster仅支持两类额外配置, shardStrategies和idGenerators, 且每个cluster每类配置的数量最多为1条, clusterName = %s", clusterName)
+            );
+
+            if (configs.size() > 2) {
+                throw new IllegalStateException(
+                        String.format("cluster仅支持两类额外配置, shardStrategies和idGenerators, " +
+                                "且每个cluster每类配置的数量最多为1条, clusterName = %s", clusterName)
+                );
+            } else {
+                configs.forEach(config ->
+                        Preconditions.checkArgument(
+                                Lists.newArrayList(ClusterExtensionConfigType.values()).
+                                        stream().map(ClusterExtensionConfigType::getCode)
+                                        .collect(Collectors.toList()).contains(config.getType()),
+                                "cluster仅支持两类额外配置, shardStrategies和idGenerators.")
+                );
+            }
         }
 
         zones.forEach(zoneDTO -> {
@@ -486,8 +511,8 @@ public class ClusterService {
                                 .port(master.getPort())
                                 .role(Constants.ROLE_SLAVE)
                                 .dbName(master.getDbName())
-                                .uid(cipherService.decrypt(username))
-                                .password(cipherService.decrypt(password))
+                                .uid(username)
+                                .password(password)
                                 .readWeight(master.getReadWeight())
                                 .build();
                         databaseRequests.add(databaseRequest);
@@ -501,8 +526,8 @@ public class ClusterService {
                                 .port(read.getPort())
                                 .role(Constants.ROLE_SLAVE)
                                 .dbName(read.getDbName())
-                                .uid(cipherService.decrypt(username))
-                                .password(cipherService.decrypt(password))
+                                .uid(username)
+                                .password(password)
                                 .readWeight(read.getReadWeight())
                                 .build();
                         databaseRequests.add(databaseRequest);
@@ -557,14 +582,19 @@ public class ClusterService {
         });
 
         // construct extension configs
-        final Map<String, String> extensionConfigsMap = Maps.newHashMap();
+        String shardStrategies = null;
+        String idGenerators = null;
         final List<ClusterExtensionConfig> configs = cluster.getConfigs();
         if (!CollectionUtils.isEmpty(configs)) {
-            configs.forEach(config -> {
-                final String key = ClusterExtensionConfigType.getTypeName(config.getType());
-                final String value = config.getContent();
-                extensionConfigsMap.put(key, value);
-            });
+            for (ClusterExtensionConfig config : configs) {
+                if (shards_strategies.equals(ClusterExtensionConfigType.getType(config.getType()))) {
+                    shardStrategies = config.getContent();
+                }
+
+                if (id_generators.equals(ClusterExtensionConfigType.getType(config.getType()))) {
+                    idGenerators = config.getContent();
+                }
+            }
         }
 
         // construct clusterRequest
@@ -573,7 +603,8 @@ public class ClusterService {
                 .dbCategory(cluster.getDbCategory())
                 .version(cluster.getClusterReleaseVersion() + 1)
                 .databaseShards(shardRequests)
-                .extensionConfigs(extensionConfigsMap)
+                .shardStrategies(shardStrategies)
+                .idGenerators(idGenerators)
                 .build();
     }
 
@@ -754,20 +785,20 @@ public class ClusterService {
             final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateDatas = Lists.newArrayList();
             final List<String> domains = domainIpPortPair.entrySet().stream()
                     .map(Map.Entry::getKey).collect(Collectors.toList());
-            final List<TitanKey> titanKeys = titanKeyService.findByDomains(domains);
+            final List<TitanKey> titanKeys = titanKeyService.findByDomains(domains, Enabled.enabled);
 
             // database titan key miss
-            if (titanKeys.size() != domains.size()) {
-                // TODO: 2019/11/8 cat
-                log.error(
-                        String.format(
-                                "When switching clusters, the titanKeys found in the database is miss, and the target domain is as follows: " +
-                                        "domains = %s, the domains found in the database is as follows : domains = %s, " +
-                                        "maybe the titanKey synchronize schedule is miss data, please pay attention to this case.",
-                                domains.toString(), titanKeys.stream().map(TitanKey::getDomain).collect(Collectors.toList())
-                        )
-                );
-            }
+//            if (titanKeys.size() != domains.size()) {
+//                // TODO: 2019/11/8 cat
+//                log.error(
+//                        String.format(
+//                                "When switching clusters, the titanKeys found in the database is miss, and the target domain is as follows: " +
+//                                        "domains = %s, the domains found in the database is as follows : domains = %s, " +
+//                                        "maybe the titanKey synchronize schedule is miss data, please pay attention to this case.",
+//                                domains.toString(), titanKeys.stream().map(TitanKey::getDomain).collect(Collectors.toList())
+//                        )
+//                );
+//            }
 
             // construct
             titanKeys.forEach(titanKey -> {

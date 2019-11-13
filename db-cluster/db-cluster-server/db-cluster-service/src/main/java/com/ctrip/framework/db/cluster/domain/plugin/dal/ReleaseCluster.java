@@ -21,6 +21,7 @@ public class ReleaseCluster {
 
     private List<ReleaseShard> databaseShards;
 
-    // <ShardStrategies, content>, <IdGenerators, content>
-    private Map<String, String> extensionConfigs;
+    private String shardStrategies;
+
+    private String idGenerators;
 }

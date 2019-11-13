@@ -17,29 +17,31 @@ import java.sql.Timestamp;
 @ToString
 public class TitanKeyPageSingleData {
 
-    private Integer id; // ignore
+//    private Integer id; // ignore
 
     private String name;
+
+    private String titanKey;
 
     private String subEnv;
 
     private Boolean enabled;
 
-    private String connectionString; // ignore
+//    private String connectionString; // ignore
 
-    private String sslCode; // ignore
+//    private String sslCode; // ignore
 
     private String providerName;
 
-    private Integer timeOut; // ignore
+//    private Integer timeOut; // ignore
 
     private String createUser;
 
     private String updateUser;
 
-    private String whiteList; // ignore
+//    private String whiteList; // ignore
 
-    private String blackList; // ignore
+//    private String blackList; // ignore
 
     private String permissions;
 
@@ -47,7 +49,7 @@ public class TitanKeyPageSingleData {
 
     private String freeVerifyAppIdList;
 
-    private Timestamp mhaLastUpdateTime;
+    private String mhaLastUpdateTime;
 
     private TitanKeyPageSingleConnectionData connectionInfo;
 

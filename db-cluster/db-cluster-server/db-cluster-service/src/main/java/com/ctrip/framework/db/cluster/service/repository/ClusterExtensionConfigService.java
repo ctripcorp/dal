@@ -2,10 +2,7 @@ package com.ctrip.framework.db.cluster.service.repository;
 
 import com.ctrip.framework.db.cluster.dao.ClusterExtensionConfigDao;
 import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
-import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
 import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.vo.dal.create.ClusterExtensionConfigVo;
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,17 +21,12 @@ public class ClusterExtensionConfigService {
     private final ClusterExtensionConfigDao clusterExtensionConfigDao;
 
 
-    public void create(final Integer clusterId, final List<ClusterExtensionConfigVo> addedConfigs) throws SQLException {
-        final List<ClusterExtensionConfig> configs = Lists.newArrayListWithExpectedSize(addedConfigs.size());
-        addedConfigs.forEach(addedConfig -> {
-            final ClusterExtensionConfig config = ClusterExtensionConfig.builder()
-                    .clusterId(clusterId)
-                    .content(addedConfig.getContent())
-                    .type(ClusterExtensionConfigType.getTypeCode(addedConfig.getTypeName()))
-                    .build();
-            configs.add(config);
-        });
-        clusterExtensionConfigDao.insert(configs);
+    public void create(final List<ClusterExtensionConfig> addedConfigs) throws SQLException {
+        clusterExtensionConfigDao.insert(addedConfigs);
+    }
+
+    public void update(final List<ClusterExtensionConfig> updatedConfigs) throws SQLException {
+        clusterExtensionConfigDao.update(updatedConfigs);
     }
 
     public List<ClusterExtensionConfig> findUnDeletedConfigs(final Integer clusterId) throws SQLException {

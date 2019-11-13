@@ -2,22 +2,44 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header panel-primary">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                        ng-click="cancel()"><span
-                        aria-hidden="true">&times;</span></button>
+
                 <h4 class="modal-title">{{title}}</h4>
             </div>
             <div class="modal-body">
-                <pre>{{detail}}</pre>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" ng-show="showCancelBtn"
-                        ng-click="cancel()">
-                    取消</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"
-                        ng-click="confirm()">
-                    确定
-                </button>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>
+                            实例ip
+                        </th>
+                        <th>
+                            实例端口
+                        </th>
+                        <th>
+                            读权重
+                        </th>
+                        <th>
+                            实例标签
+                        </th>
+                        <th>
+                            人为控制可用
+                        </th>
+                        <th>
+                            健康检测
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="instance in instances">
+                            <td ng-bind="instance.ip"></td>
+                            <td ng-bind="instance.port"></td>
+                            <td ng-bind="instance.readWeight"></td>
+                            <td ng-bind="instance.tags"></td>
+                            <td ng-bind="instance.memberStatus"></td>
+                            <td ng-bind="instance.healthStatus"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

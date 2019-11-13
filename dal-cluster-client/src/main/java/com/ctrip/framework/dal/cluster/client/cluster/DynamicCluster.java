@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.cluster;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
@@ -16,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author c7ch23en
  */
-public class DynamicCluster implements Cluster {
+public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> implements Cluster {
 
     private ClusterConfig clusterConfig;
     private AtomicReference<Cluster> innerCluster = new AtomicReference<>();
@@ -86,9 +87,23 @@ public class DynamicCluster implements Cluster {
         clusterConfig.addListener(new Listener<ClusterConfig>() {
             @Override
             public void onChanged(ClusterConfig current) {
-                innerCluster.getAndSet(clusterConfig.generate());
+                doSwitch(current);
             }
         });
+    }
+
+    public void doSwitch(ClusterConfig current) {
+        Cluster curr = clusterConfig.generate();
+        Cluster prev = innerCluster.getAndSet(curr);
+        // TODO: TO BE REFACTORED
+        ClusterSwitchedEvent event = new ClusterSwitchedEvent(curr, prev);
+        for (Listener<ClusterSwitchedEvent> listener : getListeners()) {
+            try {
+                listener.onChanged(event);
+            } catch (Throwable t) {
+                // ignore
+            }
+        }
     }
 
     private Cluster getInnerCluster() {

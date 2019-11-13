@@ -1,9 +1,12 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.strategy.ClusterShardStrategyAdapter;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -20,11 +23,14 @@ public class ClusterDatabaseSet implements DatabaseSet {
     private String databaseSetName;
     private Cluster cluster;
     private ClusterShardStrategyAdapter shardStrategy;
+    private DalConnectionLocator locator;
 
-    public ClusterDatabaseSet(String name, Cluster cluster) {
+    public ClusterDatabaseSet(String name, Cluster cluster, DalConnectionLocator locator) {
         this.databaseSetName = name;
         this.cluster = cluster;
         this.shardStrategy = new ClusterShardStrategyAdapter(cluster);
+        this.locator = locator;
+        registerListener();
     }
 
     @Override
@@ -141,6 +147,16 @@ public class ClusterDatabaseSet implements DatabaseSet {
         } catch (Throwable t) {
             throw new DalRuntimeException(String.format("illegal shard: %s", shard));
         }
+    }
+
+    private void registerListener() {
+        cluster.addListener(new Listener<ClusterSwitchedEvent>() {
+            @Override
+            public void onChanged(ClusterSwitchedEvent event) {
+                locator.uninstallCluster(event.getPrevious());
+                locator.setupCluster(event.getCurrent());
+            }
+        });
     }
 
 }

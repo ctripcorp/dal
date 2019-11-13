@@ -121,14 +121,11 @@ public class DataSourceCreator {
     }
 
     public void returnDataSource(SingleDataSource ds) {
-        if (ds != null) {
-            ds.unRegister();
-            if (ds.getReferenceCount() <= 0) {
-                DataSourceConfigure config = ds.getDataSourceConfigure();
-                targetDataSourceCache.remove(config, ds);
-                DataSourceTerminator.getInstance().close(ds);
-                ds.cancelTask();
-            }
+        if (ds != null && ds.unregister() <= 0) {
+            DataSourceConfigure config = ds.getDataSourceConfigure();
+            targetDataSourceCache.remove(config, ds);
+            ds.cancelTask();
+            DataSourceTerminator.getInstance().close(ds);
         }
     }
 

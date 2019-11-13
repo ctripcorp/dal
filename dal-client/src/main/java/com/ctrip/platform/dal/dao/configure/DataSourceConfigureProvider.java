@@ -55,4 +55,8 @@ public interface DataSourceConfigureProvider extends DalComponent {
 
     void register(DataSourceIdentity id, DataSourceConfigureChangeListener listener);
 
+    void unregister(String dbName);
+
+    void unregister(DataSourceIdentity id);
+
 }

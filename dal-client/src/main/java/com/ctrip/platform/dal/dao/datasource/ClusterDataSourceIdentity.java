@@ -11,7 +11,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
  */
 public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
-    private static final String ID_FORMAT = "%s-%d-%s-%s"; // cluster-shard-role-host:port
+    private static final String ID_FORMAT = "%s-%d-%s-%s"; // cluster-shard-role-host
     private static final String MASTER = "master";
     private static final String SLAVE = "slave";
 

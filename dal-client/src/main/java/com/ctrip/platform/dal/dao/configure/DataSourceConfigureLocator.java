@@ -17,6 +17,8 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id);
 
+    void removeDataSourceConfigure(DataSourceIdentity id);
+
     Set<String> getDataSourceConfigureKeySet();
 
     Map<String, DalConnectionString> getAllConnectionStrings();

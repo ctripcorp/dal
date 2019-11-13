@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import java.sql.Connection;
 import java.util.Collection;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.ctrip.platform.dal.dao.configure.DalComponent;
@@ -17,5 +18,9 @@ public interface DalConnectionLocator extends DalComponent {
 	Connection getConnection(Database database) throws Exception;
 
 	ClusterConfigProvider getClusterConfigProvider();
+
+	void setupCluster(Cluster cluster);
+
+	void uninstallCluster(Cluster cluster);
 
 }

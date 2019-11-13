@@ -132,4 +132,12 @@ public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
     @Override
     public void register(DataSourceIdentity id, DataSourceConfigureChangeListener listener) {}
 
+    @Override
+    public void unregister(String dbName) {
+    }
+
+    @Override
+    public void unregister(DataSourceIdentity id) {
+    }
+
 }

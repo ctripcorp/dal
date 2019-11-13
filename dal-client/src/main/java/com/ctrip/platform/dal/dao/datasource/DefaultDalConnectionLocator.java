@@ -1,11 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import java.sql.Connection;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
@@ -69,6 +67,22 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
     @Override
     public ClusterConfigProvider getClusterConfigProvider() {
         return provider;
+    }
+
+    @Override
+    public void setupCluster(Cluster cluster) {
+        List<Database> databases = cluster.getDatabases();
+        for (Database database : databases) {
+            locator.getDataSource(new ClusterDataSourceIdentity(database));
+        }
+    }
+
+    @Override
+    public void uninstallCluster(Cluster cluster) {
+        List<Database> databases = cluster.getDatabases();
+        for (Database database : databases) {
+            locator.removeDataSource(new ClusterDataSourceIdentity(database));
+        }
     }
 
 }

@@ -189,7 +189,7 @@ public class DalConfigureFactory implements DalConfigConstants {
         List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
         for (int i = 0; i < clusterList.size(); i++) {
             Cluster cluster = readCluster(clusterList.get(i), provider);
-            databaseSets.put(cluster.getClusterName(), new ClusterDatabaseSet(cluster.getClusterName(), cluster));
+            databaseSets.put(cluster.getClusterName(), new ClusterDatabaseSet(cluster.getClusterName(), cluster, locator));
         }
 
         List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);

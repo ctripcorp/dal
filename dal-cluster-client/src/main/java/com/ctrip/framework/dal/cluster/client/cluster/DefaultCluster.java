@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.cluster;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -13,7 +14,7 @@ import java.util.*;
 /**
  * @author c7ch23en
  */
-public class DefaultCluster implements Cluster {
+public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> implements Cluster {
 
     private ClusterConfigImpl clusterConfig;
     private Map<Integer, DatabaseShard> databaseShards = new HashMap<>();

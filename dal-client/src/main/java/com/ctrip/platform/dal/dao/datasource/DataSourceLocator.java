@@ -50,9 +50,8 @@ public class DataSourceLocator {
      *
      * @param name
      * @return DataSource
-     * @throws NamingException
      */
-    public DataSource getDataSource(String name) throws Exception {
+    public DataSource getDataSource(String name) {
         return getDataSource(new DataSourceName(name));
     }
 
@@ -74,6 +73,13 @@ public class DataSourceLocator {
             }
         }
         return ds;
+    }
+
+    public void removeDataSource(DataSourceIdentity id) {
+        DataSource ds = cache.remove(id);
+        if (ds instanceof RefreshableDataSource) {
+            ((RefreshableDataSource) ds).close();
+        }
     }
 
     private DataSource createDataSource(DataSourceIdentity id) throws SQLException {

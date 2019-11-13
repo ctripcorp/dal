@@ -57,7 +57,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     public RefreshableDataSource(String name, DataSourceConfigure config) {
         this.id = new DataSourceName(name);
         SingleDataSource ds = createSingleDataSource(name, config);
-        LOGGER.info(String.format("new RefreshableDataSource '%s', use SingleDataSource '%s' ref count [%d]", name, ds.getName(), ds.getReferenceCount()));
+        LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", name, ds.getName(), ds.getReferenceCount()));
         dataSourceReference.set(ds);
         executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
@@ -68,7 +68,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     public RefreshableDataSource(DataSourceIdentity id, DataSourceConfigure config) {
         this.id = id;
         SingleDataSource ds = createSingleDataSource(id.getId(), config);
-        LOGGER.info(String.format("new RefreshableDataSource '%s', use SingleDataSource '%s' ref count [%d]", id.getId(), ds.getName(), ds.getReferenceCount()));
+        LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", id.getId(), ds.getName(), ds.getReferenceCount()));
         dataSourceReference.set(ds);
         executor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
@@ -103,7 +103,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
 
     private void refresh(SingleDataSource newDataSource) {
         SingleDataSource oldDataSource = dataSourceReference.getAndSet(newDataSource);
-        LOGGER.info(String.format("switch RefreshableDataSource '%s', use SingleDataSource '%s' ref count [%d]", id.getId(), newDataSource.getName(), newDataSource.getReferenceCount()));
+        LOGGER.info(String.format("switch RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", id.getId(), newDataSource.getName(), newDataSource.getReferenceCount()));
         close(oldDataSource);
     }
 
@@ -122,6 +122,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
     }
 
     public void close() {
+        LOGGER.info(String.format("close RefreshableDataSource '%s'", id.getId()));
         SingleDataSource ds = dataSourceReference.get();
         if (ds != null) {
             close(ds);

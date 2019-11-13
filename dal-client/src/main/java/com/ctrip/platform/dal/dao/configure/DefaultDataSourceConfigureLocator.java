@@ -79,6 +79,11 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return configure;
     }
 
+    @Override
+    public void removeDataSourceConfigure(DataSourceIdentity id) {
+        dataSourceConfiguresCache.remove(id);
+    }
+
     private DalConnectionString getConnectionString(DataSourceIdentity id) {
         if (id instanceof ClusterDataSourceIdentity)
             return ((ClusterDataSourceIdentity) id).getDalConnectionString();

@@ -18,6 +18,8 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
     private static final String DATASOURCE_CREATE_POOL = "DataSource::createPool:%s";
+    private static final String DATASOURCE_REGISTER_DATASOURCE = "DataSource::registerDataSource:%s";
+    private static final String DATASOURCE_UNREGISTER_DATASOURCE = "DataSource::unregisterDataSource:%s";
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
@@ -133,11 +135,21 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     }
 
     public int register() {
-        return referenceCount.incrementAndGet();
+        int refCount = referenceCount.incrementAndGet();
+        String message = String.format("Datasource [name=%s, driver=%s] registered, connection url=%s, ref count=%d",
+                name, dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl(), refCount);
+        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_REGISTER_DATASOURCE, name), message);
+        LOGGER.info(message);
+        return refCount;
     }
 
-    public int unRegister() {
-        return referenceCount.decrementAndGet();
+    public int unregister() {
+        int refCount = referenceCount.decrementAndGet();
+        String message = String.format("Datasource [name=%s, driver=%s] unregistered, connection url=%s, ref count=%d",
+                name, dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl(), refCount);
+        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_UNREGISTER_DATASOURCE, name), message);
+        LOGGER.info(message);
+        return refCount;
     }
 
     public int getReferenceCount() {

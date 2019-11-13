@@ -63,10 +63,13 @@ public class FreshnessSelector implements DatabaseSelector {
             freshnessCache.clear();
             DalConfigure configure = DalClientFactory.getDalConfigure();
             for (String logicDbName : configure.getDatabaseSetNames()) {
+                DatabaseSet dbSet = configure.getDatabaseSet(logicDbName);
+                // ignore dal cluster
+                if (dbSet instanceof ClusterDatabaseSet) {
+                    continue;
+                }
                 Map<String, Integer> logicDbFreshnessMap = new ConcurrentHashMap<>();
                 freshnessCache.put(logicDbName, logicDbFreshnessMap);
-
-                DatabaseSet dbSet = configure.getDatabaseSet(logicDbName);
                 for (Map.Entry<String, DataBase> dbEntry : dbSet.getDatabases().entrySet()) {
                     if (!dbEntry.getValue().isMaster())
                         logicDbFreshnessMap.put(dbEntry.getValue().getConnectionString(), INVALID);
@@ -153,6 +156,11 @@ public class FreshnessSelector implements DatabaseSelector {
     public DataBase select(SelectionContext context) throws DalException {
         // Will check if already initialized
         initialize();
+
+        // skip filter for dal cluster
+        DatabaseSet dbSet = DalClientFactory.getDalConfigure().getDatabaseSet(context.getLogicDbName());
+        if (dbSet instanceof ClusterDatabaseSet)
+            return defaultSelector.select(context);
 
         Integer freshness = context.getHints().getInt(DalHintEnum.freshness);
         List<DataBase> slaves = context.getSlaves();

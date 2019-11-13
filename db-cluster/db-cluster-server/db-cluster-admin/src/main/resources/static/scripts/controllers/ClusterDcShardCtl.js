@@ -1,65 +1,57 @@
 index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '$window','$interval', '$location', 'toastr', 'AppUtil', 'ClusterService', 'ShardService', 'HealthCheckService', 'ProxyService',
     function ($rootScope, $scope, $stateParams, $window, $interval, $location, toastr, AppUtil, ClusterService, ShardService, HealthCheckService, ProxyService) {
 
-        $scope.dcs, $scope.shards;
         $scope.clusterName = $stateParams.clusterName;
-        $scope.routeAvail = false;
-        $scope.activeDcName;
-        
-        $scope.switchDc = switchDc;
+
+        $scope.zones; $scope.shards; $scope.instances;
+        $scope.switchZone = switchZone;
         $scope.loadCluster = loadCluster;
+        $scope.loadClusterZones = loadClusterZones;
         $scope.loadShards = loadShards;
-        $scope.gotoHickwall = gotoHickwall;
         $scope.existsRoute = existsRoute;
+        $scope.showInstanceConfirm = showInstanceConfirm;
         
         if ($scope.clusterName) {
             loadCluster();
         }
         
-        function switchDc(dc) {
-            $scope.currentDcName = dc.dcName;
-            existsRoute($scope.activeDcName, $scope.currentDcName);
-            loadShards($scope.clusterName, dc.dcName);
+        function switchZone(zone) {
+            $scope.currentZoneId = zone.zoneId;
+            //existsRoute($scope.activeDcName, $scope.currentDcName);
+            loadShards($scope.clusterName, zone.zoneId);
         }
 
         function loadCluster() {
-            ClusterService.findClusterDCs($scope.clusterName)
+            ClusterService.loadCluster($scope.clusterName)
+                .then(function (result) {
+                    loadClusterZones();
+                }, function (result) {
+                    toastr.error(AppUtil.errorMsg(result));
+                });
+        }
+
+        function loadClusterZones() {
+            ClusterService.findClusterZones($scope.clusterName)
                 .then(function (result) {
                     if (!result || result.length === 0) {
-                        $scope.dcs = [];
+                        $scope.zones = [];
                         $scope.shards = [];
                         return;
                     }
-                    $scope.dcs = result;
-                    
-                    // TODO [marsqing] do not re-get dc data when switch dc
-                    if($scope.dcs && $scope.dcs.length > 0) {
-	                    $scope.dcs.forEach(function(dc){
-	                    	if(dc.dcName === $stateParams.currentDcName) {
-			                    $scope.currentDcName = dc.dcName;
+                    $scope.zones = result;
+
+                    if($scope.zones && $scope.zones.length > 0) {
+	                    $scope.zones.forEach(function(zones){
+	                    	if(zones.zoneId === $stateParams.currentZoneId) {
+			                    $scope.currentZoneId = zones.zoneId;
 	                    	}
 	                    });
 	                    
-	                    if(!$scope.currentDcName) {
-                            ClusterService.load_cluster($stateParams.clusterName).then(function(result) {
-                                var cluster = result;
-                                var filteredDc = $scope.dcs.filter(function(dc) {
-                                    return dc.id === cluster.activedcId;
-                                })
-                                if(filteredDc.length > 0) {
-                                    $scope.currentDcName = filteredDc[0].dcName;
-                                    $scope.activeDcName = filteredDc[0].dcName;
-                                } else {
-                                    $scope.currentDcName = $scope.dcs[0].dcName; 
-                                }
-
-                                loadShards($scope.clusterName, $scope.currentDcName);
-                            }, function(result) {
-                                $scope.currentDcName = $scope.dcs[0].dcName; 
-                                loadShards($scope.clusterName, $scope.currentDcName);
-                            });
+	                    if(!$scope.currentZoneId) {
+                            $scope.currentZoneId = $scope.zones[0].zoneId;
+                            loadShards($scope.clusterName, $scope.currentZoneId);
 	                    } else {
-                            loadShards($scope.clusterName, $scope.currentDcName);
+                            loadShards($scope.clusterName, $scope.currentZoneId);
                         }
                     }
 
@@ -70,35 +62,23 @@ index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '
 
         }
 
-        function loadShards(clusterName, dcName) {
-            ShardService.findClusterDcShards(clusterName, dcName)
+        function loadShards(clusterName, zoneId) {
+            ShardService.findClusterZoneShards(clusterName, zoneId)
                 .then(function (result) {
                     $scope.shards = result;
                 }, function (result) {
                     toastr.error(AppUtil.errorMsg(result));
                 });
         }
-        
-        function healthCheck() {
-        	if($scope.shards) {
-        		$scope.shards.forEach(function(shard) {
-        			shard.redises.forEach(function(redis) {
-        				HealthCheckService.getReplDelay(redis.redisIp, redis.redisPort)
-        					.then(function(result) {
-        						redis.delay = result.delay;
-        					});
-        			});
-        		});
-        	}
-        }
 
-        function gotoHickwall(clusterName, shardName, redisIp, redisPort) {
-        	HealthCheckService.getHickwallAddr(clusterName, shardName, redisIp, redisPort)
-        		.then(function(result) {
-        			if(result.addr) {
-        				$window.open(result.addr, '_blank');	
-        			}
-        		});
+        function showInstanceConfirm(role, shardIndex) {
+            ShardService.findClusterZoneShardInstances($scope.clusterName, $scope.currentZoneId, shardIndex, role)
+                .then(function (result) {
+                    $scope.instances = result;
+                } , function (result) {
+                    toastr.error(AppUtil.errorMsg(result));
+                });
+            $('#instanceInfoConfirm').modal('show');
         }
 
         function existsRoute(activeDcName, backupDcName) {
@@ -109,9 +89,5 @@ index_module.controller('ClusterCtl', ['$rootScope', '$scope', '$stateParams', '
                     $scope.routeAvail = false;
                 });
         }
-        
-        $scope.refreshHealthStatus = $interval(healthCheck, 2000);
-        $scope.$on('$destroy', function() {
-            $interval.cancel($scope.refreshHealthStatus);
-          });
+
     }]);

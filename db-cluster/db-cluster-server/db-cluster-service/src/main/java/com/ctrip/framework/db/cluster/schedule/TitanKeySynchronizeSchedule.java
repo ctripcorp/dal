@@ -12,6 +12,7 @@ import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -26,10 +27,10 @@ import java.util.stream.Collectors;
  * Created by @author zhuYongMing on 2019/11/6.
  */
 @Slf4j
-//@Component
+@Component
 public class TitanKeySynchronizeSchedule {
 
-    private static final Integer pageSize = 1000;
+    private static final Integer pageSize = 5000;
 
     private static final Integer initPageNo = 1;
 
@@ -88,7 +89,9 @@ public class TitanKeySynchronizeSchedule {
 
     private void consumerTitanKeys(final List<TitanKeyPageSingleData> remoteKeys) {
         final List<String> remoteKeyNames = remoteKeys.stream()
-                .map(TitanKeyPageSingleData::getName).collect(Collectors.toList());
+//                .map(TitanKeyPageSingleData::getName)
+                .map(TitanKeyPageSingleData::getTitanKey)
+                .collect(Collectors.toList());
 
         try {
             final List<TitanKey> insertTitanKeys = Lists.newArrayList();
@@ -97,7 +100,8 @@ public class TitanKeySynchronizeSchedule {
 
             remoteKeys.forEach(remote -> {
                 final Optional<TitanKey> localKey = localTitanKeys.stream().filter(
-                        local -> Objects.equals(remote.getName(), local.getName())
+//                        local -> Objects.equals(remote.getName(), local.getName())
+                        local -> Objects.equals(remote.getTitanKey(), local.getName())
                                 && Objects.equals(remote.getSubEnv(), local.getSubEnv())
                 ).findFirst();
 
@@ -115,8 +119,13 @@ public class TitanKeySynchronizeSchedule {
                 }
             });
 
-            titanKeyService.create(insertTitanKeys);
-            titanKeyService.update(updateTitanKeys);
+            if (!CollectionUtils.isEmpty(insertTitanKeys)) {
+                titanKeyService.create(insertTitanKeys);
+            }
+
+            if (!CollectionUtils.isEmpty(updateTitanKeys)) {
+                titanKeyService.update(updateTitanKeys);
+            }
 
         } catch (SQLException e) {
             log.error(String.format("titanKeys synchronize schedule consumer titanKeys error, keyNames = %s",
@@ -127,7 +136,8 @@ public class TitanKeySynchronizeSchedule {
     private boolean compareIdentical(final TitanKeyPageSingleData remote, final TitanKey local) {
         final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
-        return Objects.equals(local.getName(), remote.getName())
+        return Objects.equals(local.getName(), remote.getTitanKey())
+//                Objects.equals(local.getName(), remote.getName())
                 && Objects.equals(local.getSubEnv(), remote.getSubEnv())
                 && Objects.equals(Enabled.getEnabled(local.getEnabled()), Enabled.getEnabled(remote.getEnabled()))
                 && Objects.equals(local.getProviderName(), remote.getProviderName())
@@ -148,7 +158,8 @@ public class TitanKeySynchronizeSchedule {
         final TitanKeyPageSingleConnectionData connectionInfo = remote.getConnectionInfo();
 
         return TitanKey.builder()
-                .name(remote.getName())
+//                .name(remote.getName())
+                .name(remote.getTitanKey())
                 .subEnv(remote.getSubEnv())
                 .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
                 .providerName(remote.getProviderName())
@@ -171,7 +182,8 @@ public class TitanKeySynchronizeSchedule {
 
         return TitanKey.builder()
                 .id(localKeyId)
-                .name(remote.getName())
+//                .name(remote.getName())
+                .name(remote.getTitanKey())
                 .subEnv(remote.getSubEnv())
                 .enabled(Enabled.getEnabled(remote.getEnabled()).getCode())
                 .providerName(remote.getProviderName())

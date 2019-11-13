@@ -1,6 +1,7 @@
 package com.ctrip.framework.db.cluster.dao;
 
 import com.ctrip.framework.db.cluster.entity.TitanKey;
+import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
@@ -32,10 +33,12 @@ public class TitanKeyDao {
         return client.query(builder, new DalHints());
     }
 
-    public List<TitanKey> queryByDomains(final List<String> domains) throws SQLException {
+    public List<TitanKey> queryByDomains(final List<String> domains, final Enabled enabled) throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder();
         builder.selectAll();
         builder.inNullable("domain", domains, Types.VARCHAR, false);
+        builder.and();
+        builder.equal("enabled", enabled.getCode(), Types.TINYINT, false);
         return client.query(builder, new DalHints());
     }
 

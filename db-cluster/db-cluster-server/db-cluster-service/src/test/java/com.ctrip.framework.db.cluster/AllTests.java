@@ -1,5 +1,6 @@
 package com.ctrip.framework.db.cluster;
 
+import com.ctrip.framework.db.cluster.service.config.ConfigServiceTest;
 import com.ctrip.framework.db.cluster.service.repository.ClusterServiceTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -9,7 +10,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ClusterServiceTest.class,
+        ConfigServiceTest.class,
+        ClusterServiceTest.class,
 })
 public class AllTests {
 

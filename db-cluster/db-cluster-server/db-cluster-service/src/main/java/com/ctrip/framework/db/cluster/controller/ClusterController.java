@@ -1,5 +1,6 @@
 package com.ctrip.framework.db.cluster.controller;
 
+import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.enums.Deleted;
@@ -37,6 +38,8 @@ public class ClusterController {
     private final ClusterService clusterService;
 
     private final RegexMatcher regexMatcher;
+
+    private final CipherService cipherService;
 
 
     @PostMapping(value = "/clusters")
@@ -98,6 +101,15 @@ public class ClusterController {
                 return response;
             }
 
+            clusterDTO.getZones().forEach(
+                    zone -> zone.getShards().forEach(
+                            shard -> shard.getUsers().forEach(
+                                    user -> {
+                                        user.setUsername(cipherService.decrypt(user.getUsername()));
+                                    }
+                            )
+                    )
+            );
             ResponseModel response = ResponseModel.successResponse(clusterDTO.toVo());
             response.setMessage("Query cluster success");
             return response;
@@ -119,18 +131,26 @@ public class ClusterController {
                 return ResponseModel.forbiddenResponse(String.format("Ip address is not in the whitelist, ip = %s", ip));
             }
 
-            final List<String> clusterNames;
+            final List<Cluster> clusters;
             if (effective) {
-                clusterNames = clusterService.findClusters(
+                clusters = clusterService.findClusters(
                         null, Deleted.un_deleted, Enabled.enabled
-                ).stream().map(Cluster::getClusterName).collect(Collectors.toList());
+                );
             } else {
-                clusterNames = clusterService.findClusters(
+                clusters = clusterService.findClusters(
                         null, Deleted.un_deleted, null
-                ).stream().map(Cluster::getClusterName).collect(Collectors.toList());
+                );
             }
 
-            ResponseModel response = ResponseModel.successResponse(clusterNames);
+            final List<ClusterVo> clusterVos = clusters.stream().map(
+                    cluster -> ClusterVo.builder()
+                            .clusterName(cluster.getClusterName())
+                            .dbCategory(cluster.getDbCategory())
+                            .enabled(Enabled.getEnabled(cluster.getEnabled()).convertToBoolean())
+                            .build()
+            ).collect(Collectors.toList());
+
+            ResponseModel response = ResponseModel.successResponse(clusterVos);
             response.setMessage("Query clusters success");
             return response;
 

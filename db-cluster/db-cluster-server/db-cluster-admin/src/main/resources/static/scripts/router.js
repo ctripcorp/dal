@@ -10,13 +10,13 @@ index_module.config(function ($stateProvider, $urlRouterProvider) {
             controller: 'ClusterShardCtl'
         })
         .state('cluster_dc_shards', {
-            url: '/cluster_dc_shards/:clusterName/:currentDcName',
+            url: '/cluster_dc_shards/:clusterName/:currentZoneId',
             params: {
                 clusterName: {
                     value: '',
                     squash: false
                 },
-                currentDcName: {
+                currentZoneId: {
                     value: '',
                     squash: false
                 }

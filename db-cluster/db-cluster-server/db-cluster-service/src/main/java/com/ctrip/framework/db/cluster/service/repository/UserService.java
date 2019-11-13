@@ -104,18 +104,15 @@ public class UserService {
         if (titanKeyNames != null && !titanKeyNames.isEmpty()) {
             String[] titanKeyNameArr = titanKeyNames.split(",");
             for (String titanKeyName : titanKeyNameArr) {
-                // TODO: 2019/11/1 临时
-                if (configService.isQconfigPluginSwitch()) {
-                    TitanKeyGetData titanKeyData = queryTitanKey(titanKeyName);
-                    if (titanKeyData != null) {
-                        validateTitanKey(titanKeyData, ctx);
-                        user.setPassword(RC4.decrypt(titanKeyData.getPassword()));
-                    } else {
-                        TitanKeyInfo newTitanKey = prepareTitanKey(titanKeyName, ctx);
-                        PluginResponse response = titanPluginService.addTitanKey(newTitanKey, Constants.ENV);
-                        log.info(String.format("Add Titan Key: %s. Result Code: %s; Result Msg: %s", titanKeyName,
-                                response.getStatus(), response.getMessage()));
-                    }
+                TitanKeyGetData titanKeyData = queryTitanKey(titanKeyName);
+                if (titanKeyData != null) {
+                    validateTitanKey(titanKeyData, ctx);
+                    user.setPassword(RC4.decrypt(titanKeyData.getPassword()));
+                } else {
+                    TitanKeyInfo newTitanKey = prepareTitanKey(titanKeyName, ctx);
+                    PluginResponse response = titanPluginService.addTitanKey(newTitanKey, Constants.ENV);
+                    log.info(String.format("Add Titan Key: %s. Result Code: %s; Result Msg: %s", titanKeyName,
+                            response.getStatus(), response.getMessage()));
                 }
             }
         }

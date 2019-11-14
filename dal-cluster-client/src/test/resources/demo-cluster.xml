@@ -1,5 +1,5 @@
 <DAL>
-    <Cluster name="demoCluster" dbCategory="mysql" version="1">
+    <Cluster name="demo-cluster" dbCategory="mysql" version="1">
         <DatabaseShards>
             <DatabaseShard index="0" masterDomain="demodbshard00.mysql.db.ctripcorp.com" slaveDomain="demodbshard00read.mysql.db.ctripcorp.com">
                 <Database ip="10.25.44.1" port="55944" dbName="demoDbShard00" uid="user_w" pwd="xyzw" readWeight="0"/>

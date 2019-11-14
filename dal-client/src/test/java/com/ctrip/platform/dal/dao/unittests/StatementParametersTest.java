@@ -24,14 +24,14 @@ public class StatementParametersTest {
         assertEquals(2, test2.size());
         assertEquals(2, test3.size());
 
-        assertEquals(1, (long) test.get(0).getValue());
-        assertEquals(2, (long) test.get(1).getValue());
+        assertEquals(1, (Number) test.get(0).getValue());
+        assertEquals(2, (Number) test.get(1).getValue());
 
-        assertEquals(2, (long) test2.get(0).getValue());
-        assertEquals(2, (long) test2.get(1).getValue());
+        assertEquals(2, (Number) test2.get(0).getValue());
+        assertEquals(2, (Number) test2.get(1).getValue());
 
-        assertEquals(3, (long) test3.get(0).getValue());
-        assertEquals(2, (long) test3.get(1).getValue());
+        assertEquals(3, (Number) test3.get(0).getValue());
+        assertEquals(2, (Number) test3.get(1).getValue());
     }
 
     @Test
@@ -113,16 +113,16 @@ public class StatementParametersTest {
 
         // check index
         assertEquals(1, test2.get(0).getIndex());
-        assertEquals(1, (long) test2.get(0).getValue());
+        assertEquals(1, (Number) test2.get(0).getValue());
         assertEquals(2, test2.get(1).getIndex());
-        assertEquals(2, (long) test2.get(1).getValue());
+        assertEquals(2, (Number) test2.get(1).getValue());
 
         assertEquals(3, test2.get(2).getIndex());
         assertEquals(4, test2.get(3).getIndex());
         assertEquals(5, test2.get(4).getIndex());
-        assertEquals(1, (long) test2.get(2).getValue());
-        assertEquals(2, (long) test2.get(3).getValue());
-        assertEquals(3, (long) test2.get(4).getValue());
+        assertEquals(1, (Number) test2.get(2).getValue());
+        assertEquals(2, (Number) test2.get(3).getValue());
+        assertEquals(3, (Number) test2.get(4).getValue());
 
         assertEquals(5, test2.size());
     }
@@ -137,13 +137,13 @@ public class StatementParametersTest {
 
         test.buildParameters();
         assertEquals(1, test.get(0).getIndex());
-        assertEquals(50, (long) test.get(0).getValue());
+        assertEquals(50, (Number) test.get(0).getValue());
 
         assertEquals(2, test.get(1).getIndex());
-        assertEquals(20, (long) test.get(1).getValue());
+        assertEquals(20, (Number) test.get(1).getValue());
 
         assertEquals(3, test.get(2).getIndex());
-        assertEquals(60, (long) test.get(2).getValue());
+        assertEquals(60, (Number) test.get(2).getValue());
     }
 
     @Test
@@ -155,13 +155,13 @@ public class StatementParametersTest {
 
         test.buildParameters();
         assertEquals(1, test.get(0).getIndex());
-        assertEquals(50, (long) test.get(0).getValue());
+        assertEquals(50, (Number) test.get(0).getValue());
 
         assertEquals(2, test.get(1).getIndex());
-        assertEquals(60, (long) test.get(1).getValue());
+        assertEquals(60, (Number) test.get(1).getValue());
 
         assertEquals(3, test.get(2).getIndex());
-        assertEquals(20, (long) test.get(2).getValue());
+        assertEquals(20, (Number) test.get(2).getValue());
     }
 
     @Test
@@ -175,15 +175,15 @@ public class StatementParametersTest {
         test.buildParameters();
         assertEquals(1, test.get(0).getIndex());
         assertEquals("param1", test.get(0).getName());
-        assertEquals(10, (long) test.get(0).getValue());
+        assertEquals(10, (Number) test.get(0).getValue());
 
         assertEquals(2, test.get(1).getIndex());
         assertEquals("param2", test.get(1).getName());
-        assertEquals(20, (long) test.get(1).getValue());
+        assertEquals(20, (Number) test.get(1).getValue());
 
         assertEquals(3, test.get(2).getIndex());
         assertEquals("param5", test.get(2).getName());
-        assertEquals(50, (long) test.get(2).getValue());
+        assertEquals(50, (Number) test.get(2).getValue());
 
 //      test for api StatementParameters set(String name, Object value)
         StatementParameters test2=new StatementParameters();
@@ -193,15 +193,15 @@ public class StatementParametersTest {
         test2.buildParameters();
         assertEquals(1, test2.get(0).getIndex());
         assertEquals("param8", test2.get(0).getName());
-        assertEquals(80, (long) test2.get(0).getValue());
+        assertEquals(80, (Number) test2.get(0).getValue());
 
         assertEquals(2, test2.get(1).getIndex());
         assertEquals("param3", test2.get(1).getName());
-        assertEquals(30, (long) test2.get(1).getValue());
+        assertEquals(30, (Number) test2.get(1).getValue());
 
         assertEquals(3, test2.get(2).getIndex());
         assertEquals("param10", test2.get(2).getName());
-        assertEquals(100, (long) test2.get(2).getValue());
+        assertEquals(100, (Number) test2.get(2).getValue());
     }
 
     @Test
@@ -249,15 +249,15 @@ public class StatementParametersTest {
         test.buildParameters();
         assertEquals(1, test.get(0).getIndex());
         assertEquals("param2", test.get(0).getName());
-        assertEquals(50, (long) test.get(0).getValue());
+        assertEquals(50, (Number) test.get(0).getValue());
 
         assertEquals(2, test.get(1).getIndex());
         assertEquals("param1", test.get(1).getName());
-        assertEquals(20, (long) test.get(1).getValue());
+        assertEquals(20, (Number) test.get(1).getValue());
 
         assertEquals(3, test.get(2).getIndex());
         assertEquals("param3", test.get(2).getName());
-        assertEquals(60, (long) test.get(2).getValue());
+        assertEquals(60, (Number) test.get(2).getValue());
     }
 
     @Test

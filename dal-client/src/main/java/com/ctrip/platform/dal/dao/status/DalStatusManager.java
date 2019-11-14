@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.status;
 
 import java.lang.management.ManagementFactory;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +36,7 @@ public class DalStatusManager {
 	private static AtomicReference<HAStatus> haStatusRef = new AtomicReference<>();
 	private static AtomicReference<MarkdownStatus> markdownStatusRef = new AtomicReference<>();
 	private static Map<String, DatabaseSetStatus> logicDbs = new ConcurrentHashMap<>();
-	private static Map<String, DataSourceStatus> dataSources = new ConcurrentHashMap<>();
+	private static final Map<String, DataSourceStatus> dataSources = new ConcurrentHashMap<>();
 	
 	public static void initialize(DalConfigure config) throws Exception {
 		if(initialized.get() == true)
@@ -144,7 +145,24 @@ public class DalStatusManager {
 	}
 	
 	public static DataSourceStatus getDataSourceStatus(String dbName) {
-		return dataSources.get(dbName);
+		DataSourceStatus status = dataSources.get(dbName);
+		if (status == null) {
+			synchronized (dataSources) {
+				status = dataSources.get(dbName);
+				if (status == null) {
+					Set<String> names = new HashSet<>();
+					names.add(dbName);
+					try {
+						registerDataSources(names);
+						status = dataSources.get(dbName);
+					} catch (Exception e) {
+						status = new DataSourceStatus(dbName);
+						dataSources.put(dbName, status);
+					}
+				}
+			}
+		}
+		return status;
 	}
 	
 	public static boolean containsDataSourceStatus(String dbName) {

@@ -14,7 +14,7 @@ public class DefaultLocalConfigProviderTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultLocalConfigProviderTest.class);
 
-    @Test
+//    @Test
     public void test() {
         ClusterConfigProvider provider = new DefaultLocalConfigProvider("demo-cluster");
         ClusterConfig config = provider.getClusterConfig();

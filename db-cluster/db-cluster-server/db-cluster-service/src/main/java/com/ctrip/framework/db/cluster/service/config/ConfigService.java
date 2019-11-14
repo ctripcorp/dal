@@ -40,6 +40,8 @@ public class ConfigService {
     private static final String KEY_HTTP_READ_TIMEOUT_IN_MS = "httpReadTimeoutInMs";
     private static final String KEY_FRESHNESS_ENABLED = "freshnessEnabled";
     private static final String KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = "freshnessClusterEnabledAndThresholdSecond";
+    private static final String KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES = "titanKeySynchronizeScheduleDelayMinutes";
+    private static final String KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE = "titanKeySynchronizeSchedulePageSize";
 
     private static final String KEY_CLUSTER_NAME_REGEX = "clusterNameRegex";
     private static final String KEY_DB_NAME_REGEX = "dbNameRegex";
@@ -63,6 +65,8 @@ public class ConfigService {
     private static final int DEFAULT_HTTP_READ_TIMEOUT_IN_MS = 10000;
     private static final boolean DEFAULT_FRESHNESS_ENABLED = true;
     private static final String DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = ""; // example:"cluster1:5,cluster2:2,cluster3:10"
+    private static final int DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES = 1;
+    private static final int DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE = 5000;
 
     private static final String DEFAULT_CLUSTER_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
     private static final String DEFAULT_DB_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
@@ -89,6 +93,8 @@ public class ConfigService {
     private volatile int httpReadTimeoutInMs;
     private volatile boolean freshnessEnabled;
     private volatile Map<String, Integer> freshnessClusterEnabledAndThresholdSecond;
+    private volatile int titanKeySynchronizeScheduleDelayMinutes;
+    private volatile int titanKeySynchronizeSchedulePageSize;
 
     // 正则表达式
     private volatile String clusterNameRegex;
@@ -129,6 +135,13 @@ public class ConfigService {
         freshnessClusterEnabledAndThresholdSecond = convertClusterFreshnessThresholdSecond(
                 configMap.getString(KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND, DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND)
         );
+        titanKeySynchronizeScheduleDelayMinutes = configMap.getInt(
+                KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES, DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES
+        );
+        titanKeySynchronizeSchedulePageSize = configMap.getInt(
+                KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE, DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE
+        );
+
 
         clusterNameRegex = configMap.getString(KEY_CLUSTER_NAME_REGEX, DEFAULT_CLUSTER_NAME_REGEX);
         dbNameRegex = configMap.getString(KEY_DB_NAME_REGEX, DEFAULT_DB_NAME_REGEX);
@@ -259,5 +272,13 @@ public class ConfigService {
 
     public Map<String, Integer> getFreshnessClusterEnabledAndThresholdSecond() {
         return freshnessClusterEnabledAndThresholdSecond;
+    }
+
+    public int getTitanKeySynchronizeScheduleDelayMinutes() {
+        return titanKeySynchronizeScheduleDelayMinutes;
+    }
+
+    public int getTitanKeySynchronizeSchedulePageSize() {
+        return titanKeySynchronizeSchedulePageSize;
     }
 }

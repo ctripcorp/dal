@@ -16,8 +16,8 @@
 
   <properties>
     <java.version>1.8</java.version>
-    <framework-bom.version>3.34.0</framework-bom.version>
-    <dal.version>2.0.1-SNAPSHOT</dal.version>
+    <framework-bom.version>3.28.0</framework-bom.version>
+    <dal.version>2.0.1</dal.version>
     <fastjson.version>1.2.62</fastjson.version>
   </properties>
 

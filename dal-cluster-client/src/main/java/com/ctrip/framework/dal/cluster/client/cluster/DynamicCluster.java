@@ -9,6 +9,7 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
+import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 
 import java.util.List;
 import java.util.Set;
@@ -81,6 +82,11 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
     @Override
     public List<Database> getSlavesOnShard(int shardIndex) {
         return getInnerCluster().getSlavesOnShard(shardIndex);
+    }
+
+    @Override
+    public ClusterIdGeneratorConfig getIdGeneratorConfig() {
+        return getInnerCluster().getIdGeneratorConfig();
     }
 
     private void registerListener() {

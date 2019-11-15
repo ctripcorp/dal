@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.strategy.ClusterShardStrategyAdapter;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.ctrip.platform.dal.sharding.idgen.ClusterIdGeneratorConfigAdapter;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 
 import java.sql.SQLException;
@@ -24,12 +25,14 @@ public class ClusterDatabaseSet implements DatabaseSet {
     private Cluster cluster;
     private ClusterShardStrategyAdapter shardStrategy;
     private DalConnectionLocator locator;
+    private ClusterIdGeneratorConfigAdapter idGeneratorConfig;
 
     public ClusterDatabaseSet(String name, Cluster cluster, DalConnectionLocator locator) {
         this.databaseSetName = name;
         this.cluster = cluster;
         this.shardStrategy = new ClusterShardStrategyAdapter(cluster);
         this.locator = locator;
+        this.idGeneratorConfig = new ClusterIdGeneratorConfigAdapter(cluster);
         registerListener();
     }
 
@@ -130,8 +133,7 @@ public class ClusterDatabaseSet implements DatabaseSet {
 
     @Override
     public IIdGeneratorConfig getIdGenConfig() {
-        // TODO: cluster idgen support
-        return null;
+        return idGeneratorConfig;
     }
 
     public Cluster getCluster() {

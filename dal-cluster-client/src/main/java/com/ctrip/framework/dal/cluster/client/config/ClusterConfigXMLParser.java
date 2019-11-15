@@ -5,8 +5,10 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
+import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
+import com.ctrip.framework.dal.cluster.client.util.ServiceLoaderUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -25,6 +27,8 @@ import java.util.List;
  * @author c7ch23en
  */
 public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfigXMLConstants {
+
+    private volatile IdGeneratorConfigXMLParser idGeneratorConfigXMLParser;
 
     @Override
     public ClusterConfig parse(String content) {
@@ -81,6 +85,18 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             List<Node> customStrategyNodes = getChildNodes(shardStrategiesNode, CUSTOM_STRATEGY);
             for (Node customStrategyNode :customStrategyNodes)
                 parseCustomStrategy(clusterConfig, customStrategyNode);
+        }
+
+        Node idGeneratorsNode = getChildNode(clusterNode, ID_GENERATORS);
+        if (idGeneratorsNode != null) {
+            List<Node> idGeneratorNodes = getChildNodes(idGeneratorsNode, ID_GENERATOR);
+            if (idGeneratorNodes.size() > 1)
+                throw new ClusterRuntimeException("multiple idGenerators configured");
+            if (idGeneratorNodes.size() == 1) {
+                Node idGeneratorNode = idGeneratorNodes.get(0);
+                ClusterIdGeneratorConfig idGeneratorConfig = getIdGeneratorConfigXMLParser().parse(name, idGeneratorNode);
+                clusterConfig.setIdGeneratorConfig(idGeneratorConfig);
+            }
         }
 
         return clusterConfig;
@@ -221,6 +237,19 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             }
         }
         return defaultValue;
+    }
+
+    private IdGeneratorConfigXMLParser getIdGeneratorConfigXMLParser() {
+        if (idGeneratorConfigXMLParser == null) {
+            synchronized (this) {
+                if (idGeneratorConfigXMLParser == null) {
+                    idGeneratorConfigXMLParser = ServiceLoaderUtils.getInstance(IdGeneratorConfigXMLParser.class);
+                    if (idGeneratorConfigXMLParser == null)
+                        throw new ClusterRuntimeException("load IdGeneratorConfigXMLParser failed");
+                }
+            }
+        }
+        return idGeneratorConfigXMLParser;
     }
 
 }

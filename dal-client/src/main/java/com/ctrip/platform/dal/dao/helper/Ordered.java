@@ -1,11 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
-public interface Ordered{
+import com.ctrip.framework.dal.cluster.client.base.ComponentOrdered;
 
-    int HIGHEST_PRECEDENCE = Integer.MIN_VALUE;
-
-    int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
-
-    int getOrder();
-
+public interface Ordered extends ComponentOrdered {
 }

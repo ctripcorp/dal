@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.helper;
 import java.sql.SQLException;
 import java.util.*;
 
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
@@ -61,6 +60,22 @@ public class DalShardingHelper {
         DalConfigure config = DalClientFactory.getDalConfigure();
 
         DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+        String shardId = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
+        if (shardId == null)
+            return false;
+
+        // Fail fast asap
+        dbSet.validate(shardId);
+        hints.inShard(shardId);
+
+        return true;
+    }
+
+    public static boolean locateShardId(String logicDbName, DalHints hints, RequestContext ctx) throws SQLException {
+        DalConfigure config = DalClientFactory.getDalConfigure();
+
+        DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
+        // TODO: ...
         String shardId = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
         if (shardId == null)
             return false;

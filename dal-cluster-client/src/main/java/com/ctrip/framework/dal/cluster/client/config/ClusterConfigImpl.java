@@ -6,6 +6,8 @@ import com.ctrip.framework.dal.cluster.client.cluster.DefaultCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ShardStrategyProxy;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
+import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGenerator;
+import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
 
 import java.util.LinkedList;
@@ -22,6 +24,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private List<DatabaseShardConfig> databaseShardConfigs = new LinkedList<>();
     private ShardStrategy defaultShardStrategy;
     private List<ShardStrategy> shardStrategies = new LinkedList<>();
+    private ClusterIdGeneratorConfig idGeneratorConfig;
 
     public ClusterConfigImpl(String clusterName, DatabaseCategory databaseCategory, long version) {
         this.clusterName = clusterName;
@@ -38,6 +41,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         for (ShardStrategy strategy : shardStrategies)
             shardStrategy.addStrategy(strategy);
         cluster.setShardStrategy(shardStrategy);
+        cluster.setIdGeneratorConfig(idGeneratorConfig);
         return cluster;
     }
 
@@ -78,6 +82,10 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     public void addShardStrategy(ShardStrategy shardStrategy) {
         if (shardStrategy != null)
             shardStrategies.add(shardStrategy);
+    }
+
+    public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
+        this.idGeneratorConfig = idGeneratorConfig;
     }
 
 }

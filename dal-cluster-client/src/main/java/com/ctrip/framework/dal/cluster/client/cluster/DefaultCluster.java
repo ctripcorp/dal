@@ -8,6 +8,7 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
+import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     private ClusterConfigImpl clusterConfig;
     private Map<Integer, DatabaseShard> databaseShards = new HashMap<>();
     private ShardStrategyProxy shardStrategyProxy;
+    private ClusterIdGeneratorConfig idGeneratorConfig;
 
     public DefaultCluster(ClusterConfigImpl clusterConfig) {
         this.clusterConfig = clusterConfig;
@@ -84,12 +86,21 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
         return databaseShards.get(shardIndex).getSlaves();
     }
 
+    @Override
+    public ClusterIdGeneratorConfig getIdGeneratorConfig() {
+        return idGeneratorConfig;
+    }
+
     public void addDatabaseShard(DatabaseShard databaseShard) {
         databaseShards.put(databaseShard.getShardIndex(), databaseShard);
     }
 
     public void setShardStrategy(ShardStrategyProxy shardStrategyProxy) {
         this.shardStrategyProxy = shardStrategyProxy;
+    }
+
+    public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
+        this.idGeneratorConfig = idGeneratorConfig;
     }
 
 }

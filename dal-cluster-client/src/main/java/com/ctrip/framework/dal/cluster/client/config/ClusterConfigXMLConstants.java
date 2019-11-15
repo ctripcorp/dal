@@ -17,6 +17,8 @@ public interface ClusterConfigXMLConstants {
     String PROPERTY = "Property";
     String TABLES = "Tables";
     String TABLE = "Table";
+    String ID_GENERATORS = "IdGenerators";
+    String ID_GENERATOR = "IdGenerator";
 
     // XML attributes
     String NAME = "name";

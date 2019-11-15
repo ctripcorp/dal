@@ -153,6 +153,9 @@ public class DalConfigure {
                 continue;
             }
             String sequenceDbName = idGenConfig.getSequenceDbName();
+            if (null == sequenceDbName) {
+                continue;
+            }
             Map<String, DataBase> dbs = dbSet.getDatabases();
             if (dbs != null) {
                 for (DataBase db : dbs.values()) {

@@ -9,8 +9,9 @@ public class DalRequestContext implements RequestContext {
         return logicTableName;
     }
 
-    public void setLogicTableName(String logicTableName) {
+    public DalRequestContext setLogicTableName(String logicTableName) {
         this.logicTableName = logicTableName;
+        return this;
     }
 
 }

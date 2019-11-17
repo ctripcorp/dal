@@ -71,22 +71,6 @@ public class DalShardingHelper {
         return true;
     }
 
-    public static boolean locateShardId(String logicDbName, DalHints hints, RequestContext ctx) throws SQLException {
-        DalConfigure config = DalClientFactory.getDalConfigure();
-
-        DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
-        // TODO: ...
-        String shardId = dbSet.getStrategy().locateDbShard(config, logicDbName, hints);
-        if (shardId == null)
-            return false;
-
-        // Fail fast asap
-        dbSet.validate(shardId);
-        hints.inShard(shardId);
-
-        return true;
-    }
-
     /**
      * Locate table shard id by hints.
      *
@@ -165,18 +149,30 @@ public class DalShardingHelper {
      */
     public static Map<String, Map<Integer, Map<String, ?>>> shuffle(String logicDbName, String shardId,
             List<Map<String, ?>> daoPojos) throws SQLException {
-        Map<String, Map<Integer, Map<String, ?>>> shuffled = getPojosGroupedByShardId(logicDbName, shardId, daoPojos);
+        return shuffle(logicDbName, shardId, daoPojos, null);
+    }
+
+    public static Map<String, Map<Integer, Map<String, ?>>> shuffle(String logicDbName, String shardId,
+                                                                    List<Map<String, ?>> daoPojos, DalHints hints) throws SQLException {
+        Map<String, Map<Integer, Map<String, ?>>> shuffled = getPojosGroupedByShardId(logicDbName, shardId, daoPojos, hints);
         validateShardIdsExistInDBSet(logicDbName, shuffled.keySet());
         return shuffled;
     }
 
     public static Map<String, Map<Integer, Map<String, ?>>> getPojosGroupedByShardId(String logicDbName, String shardId,
-            List<Map<String, ?>> daoPojos) throws SQLException {
+                                                                                     List<Map<String, ?>> daoPojos) throws SQLException {
+        return getPojosGroupedByShardId(logicDbName, shardId, daoPojos, null);
+    }
+
+    public static Map<String, Map<Integer, Map<String, ?>>> getPojosGroupedByShardId(String logicDbName, String shardId,
+                                                                                     List<Map<String, ?>> daoPojos, DalHints hints) throws SQLException {
         Map<String, Map<Integer, Map<String, ?>>> shuffled = new HashMap<>();
         DalConfigure config = DalClientFactory.getDalConfigure();
         DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
         DalShardingStrategy strategy = dbSet.getStrategy();
         DalHints tmpHints = new DalHints();
+        if (hints != null)
+            tmpHints.setRequestContext(hints.getRequestContext());
         for (int i = 0; i < daoPojos.size(); i++) {
             Map<String, ?> pojo = daoPojos.get(i);
 
@@ -214,12 +210,21 @@ public class DalShardingHelper {
      * @throws SQLException
      */
     public static Map<String, List<?>> shuffle(String logicDbName, List<?> parameters) throws SQLException {
-        Map<String, List<?>> shuffled = getParamsGroupedByShardId(logicDbName, parameters);
+        return shuffle(logicDbName, parameters, null);
+    }
+
+    public static Map<String, List<?>> shuffle(String logicDbName, List<?> parameters, DalHints hints) throws SQLException {
+        Map<String, List<?>> shuffled = getParamsGroupedByShardId(logicDbName, parameters, hints);
         validateShardIdsExistInDBSet(logicDbName, shuffled.keySet());
         return shuffled;
     }
 
     public static Map<String, List<?>> getParamsGroupedByShardId(String logicDbName, List<?> parameters)
+            throws SQLException {
+        return getParamsGroupedByShardId(logicDbName, parameters, null);
+    }
+
+    public static Map<String, List<?>> getParamsGroupedByShardId(String logicDbName, List<?> parameters, DalHints hints)
             throws SQLException {
         Map<String, List<?>> shuffled = new HashMap<>();
 
@@ -229,6 +234,8 @@ public class DalShardingHelper {
         DalShardingStrategy strategy = dbSet.getStrategy();
 
         DalHints tmpHints = new DalHints();
+        if (hints != null)
+            tmpHints.setRequestContext(hints.getRequestContext());
         for (int i = 0; i < parameters.size(); i++) {
             Object value = parameters.get(i);
 
@@ -366,7 +373,7 @@ public class DalShardingHelper {
             return;
 
         Set<String> notNullShardIds =
-                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos).keySet());
+                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos, hints).keySet());
         if (notNullShardIds.size() > 1)
             logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST, "");
 
@@ -390,7 +397,7 @@ public class DalShardingHelper {
             shardId = hints.getShardId();
             isSameShard(shardId);
         } else {
-            detectDistributedTransaction(getPojosGroupedByShardId(logicDbName, shardId, daoPojos).keySet());
+            detectDistributedTransaction(getPojosGroupedByShardId(logicDbName, shardId, daoPojos, hints).keySet());
         }
     }
 

@@ -6,6 +6,7 @@ import com.ctrip.framework.dal.cluster.client.sharding.context.*;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.helper.RequestContext;
 
 import java.util.Map;
 
@@ -35,8 +36,10 @@ public class ClusterShardStrategyAdapter implements DalShardingStrategy {
 
     @Override
     public String locateDbShard(DalConfigure configure, String logicDbName, DalHints hints) {
-        String tableName = hints.getString(DalHintEnum.shardingTable);
-        tableName = "person";
+        String tableName = null;
+        RequestContext reqCtx = hints.getRequestContext();
+        if (reqCtx != null)
+            tableName = reqCtx.getLogicTableName();
         DbShardContext ctx = createDbShardContext(logicDbName, hints);
         Integer shard = cluster.getDbShard(tableName, ctx);
         return shard != null ? String.valueOf(shard) : null;

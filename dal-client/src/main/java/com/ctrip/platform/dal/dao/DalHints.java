@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import com.ctrip.platform.dal.dao.client.DalHA;
+import com.ctrip.platform.dal.dao.helper.RequestContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
@@ -28,6 +29,8 @@ public class DalHints {
     // It is not so nice to put keyholder here, but to make Task stateless, I have no other choice
     private KeyHolder keyHolder;
 
+    private RequestContext ctx;
+
     private static final Object NULL = new Object();
 
     public KeyHolder getKeyHolder() {
@@ -36,6 +39,15 @@ public class DalHints {
 
     public DalHints setKeyHolder(KeyHolder keyHolder) {
         this.keyHolder = keyHolder;
+        return this;
+    }
+
+    public RequestContext getRequestContext() {
+        return ctx;
+    }
+
+    public DalHints setRequestContext(RequestContext ctx) {
+        this.ctx = ctx;
         return this;
     }
 
@@ -58,6 +70,7 @@ public class DalHints {
             newHints.setFields(new LinkedHashMap<String, Object>(fields));
 
         newHints.keyHolder = keyHolder;
+        newHints.ctx = ctx;
         return newHints;
     }
 
@@ -507,5 +520,13 @@ public class DalHints {
 
     public DalHints selectByNames() {
         return set(DalHintEnum.selectByNames);
+    }
+
+    public DalHints specifyTableName(String tableName) {
+        return set(DalHintEnum.specifiedTableName, tableName);
+    }
+
+    public String getSpecifiedTableName() {
+        return getString(DalHintEnum.specifiedTableName);
     }
 }

@@ -270,8 +270,8 @@ public enum DalHintEnum {
     tableShardBy,
 
     /*
-     * Table used for sharding.
+     * Table for the sql.
      */
-    shardingTable
+    specifiedTableName
 
 }

@@ -11,6 +11,8 @@ import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.LogContext;
+import com.ctrip.platform.dal.dao.helper.DalRequestContext;
+import com.ctrip.platform.dal.dao.helper.RequestContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -29,7 +31,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	public DalBulkTaskRequest(String logicDbName, String rawTableName, DalHints hints, List<T> rawPojos, BulkTask<K, T> task) {
 		this.logicDbName = logicDbName;
 		this.rawTableName = rawTableName;
-		this.hints = hints;
+		this.hints = hints.clone();
 		this.rawPojos = rawPojos;
 		this.task = task;
 		this.caller = LogContext.getRequestCaller();
@@ -44,10 +46,6 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
     public boolean isAsynExecution() {
         return hints.isAsyncExecution();
     }
-	
-/*	@Override
-	public void validate() throws SQLException {
-	}*/
 
 	@Override
 	public void validateAndPrepare() throws SQLException {
@@ -66,6 +64,19 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 		detectBulkTaskDistributedTransaction(logicDbName, hints, daoPojos);
 		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
+
+		prepareRequestContext(hints);
+	}
+
+	private void prepareRequestContext(DalHints hints) {
+		hints.setRequestContext(null);
+		if (task instanceof TaskAdapter) {
+			RequestContext ctx = new DalRequestContext().setLogicTableName(((TaskAdapter) task).rawTableName);
+			hints.setRequestContext(ctx);
+		} else if (hints.getSpecifiedTableName() != null) {
+			RequestContext ctx = new DalRequestContext().setLogicTableName(hints.getSpecifiedTableName());
+			hints.setRequestContext(ctx);
+		}
 	}
 
 	@Override
@@ -74,7 +85,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			return false;
 		
 		if(isShardingEnabled(logicDbName)) {
-			shuffled = shuffle(logicDbName, hints.getShardId(), daoPojos);
+			shuffled = shuffle(logicDbName, hints.getShardId(), daoPojos, hints);
 			// Only in one or no shard
 			return shuffled.size() <= 1 ? false : true;
 		}

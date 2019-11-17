@@ -15,7 +15,9 @@ import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.DalRequestContext;
 import com.ctrip.platform.dal.dao.helper.DalShardingHelper;
+import com.ctrip.platform.dal.dao.helper.RequestContext;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.sqlbuilder.AbstractFreeSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
@@ -66,6 +68,25 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     public void validateAndPrepare() throws SQLException {
         DalShardingHelper.detectDistributedTransaction(shards);
         taskContext = task.createTaskContext();
+
+        prepareRequestContext(hints);
+    }
+
+    private void prepareRequestContext(DalHints hints) {
+        hints.setRequestContext(null);
+        if (task instanceof TaskAdapter) {
+            RequestContext ctx = new DalRequestContext().setLogicTableName(((TaskAdapter) task).rawTableName);
+            hints.setRequestContext(ctx);
+        } else if (builder instanceof AbstractFreeSqlBuilder) {
+            List<AbstractFreeSqlBuilder.Table> tables = ((AbstractFreeSqlBuilder) builder).getTables();
+            if (tables != null && tables.size() == 1) {
+                RequestContext ctx = new DalRequestContext().setLogicTableName(tables.get(0).getTableName());
+                hints.setRequestContext(ctx);
+            }
+        } else if (hints.getSpecifiedTableName() != null) {
+            RequestContext ctx = new DalRequestContext().setLogicTableName(hints.getSpecifiedTableName());
+            hints.setRequestContext(ctx);
+        }
     }
 
     @Override
@@ -133,7 +154,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             // The new code gen will set hints shardBy to indicate this is a potential cross shard operation
             // Check parameters. It can only surpport DB shard at this level
             StatementParameter parameter = parameters.get(hints.getShardBy(), ParameterDirection.Input);
-            parametersByShard = DalShardingHelper.shuffle(logicDbName, (List) parameter.getValue());
+            parametersByShard = DalShardingHelper.shuffle(logicDbName, (List) parameter.getValue(), hints);
             shards = parametersByShard.keySet();
         } else if (dalPropertiesLocator.getImplicitAllShardsSwitch() == ImplicitAllShardsSwitch.ON) {
             // implicit all shards if no shard can be located

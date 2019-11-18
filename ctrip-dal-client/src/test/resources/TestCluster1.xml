@@ -12,15 +12,19 @@
             <ModStrategy default="true">
                 <Property name="dbShardColumn" value="CountryID"/>
                 <Property name="dbShardMod" value="2"/>
-                <Property name="tableShardColumn" value="CityID"/>
-                <Property name="tableShardMod" value="4"/>
-                <Property name="tableShardSeparator" value="_"/>
                 <Tables>
                     <Property name="tableSharding" value="true"/>
+                    <Property name="tableShardColumn" value="CityID"/>
+                    <Property name="tableShardMod" value="4"/>
+                    <Property name="tableShardSeparator" value="_"/>
                     <Table name="person">
                     </Table>
                 </Tables>
             </ModStrategy>
         </ShardStrategies>
+        <IdGenerators>
+            <IdGenerator>
+            </IdGenerator>
+        </IdGenerators>
     </Cluster>
 </DAL>

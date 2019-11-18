@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author c7ch23en
  */
-public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfigXMLConstants {
+public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfigValidator, ClusterConfigXMLConstants {
 
     private volatile IdGeneratorConfigXMLParser idGeneratorConfigXMLParser;
 
@@ -79,24 +79,12 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
 
         Node shardStrategiesNode = getChildNode(clusterNode, SHARD_STRATEGIES);
         if (shardStrategiesNode != null) {
-            List<Node> modStrategyNodes = getChildNodes(shardStrategiesNode, MOD_STRATEGY);
-            for (Node modStrategyNode : modStrategyNodes)
-                parseModStrategy(clusterConfig, modStrategyNode);
-            List<Node> customStrategyNodes = getChildNodes(shardStrategiesNode, CUSTOM_STRATEGY);
-            for (Node customStrategyNode :customStrategyNodes)
-                parseCustomStrategy(clusterConfig, customStrategyNode);
+            parseShardStrategies(clusterConfig, shardStrategiesNode);
         }
 
         Node idGeneratorsNode = getChildNode(clusterNode, ID_GENERATORS);
         if (idGeneratorsNode != null) {
-            List<Node> idGeneratorNodes = getChildNodes(idGeneratorsNode, ID_GENERATOR);
-            if (idGeneratorNodes.size() > 1)
-                throw new ClusterRuntimeException("multiple idGenerators configured");
-            if (idGeneratorNodes.size() == 1) {
-                Node idGeneratorNode = idGeneratorNodes.get(0);
-                ClusterIdGeneratorConfig idGeneratorConfig = getIdGeneratorConfigXMLParser().parse(name, idGeneratorNode);
-                clusterConfig.setIdGeneratorConfig(idGeneratorConfig);
-            }
+            parseIdGenerators(clusterConfig, idGeneratorsNode);
         }
 
         return clusterConfig;
@@ -146,6 +134,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         if (!StringUtils.isEmpty(readWeight))
             databaseConfig.setReadWeight(Integer.parseInt(readWeight));
         databaseConfig.setTags(getAttribute(databaseNode, TAGS));
+    }
+
+    private void parseShardStrategies(ClusterConfigImpl clusterConfig, Node strategiesNode) {
+        for (Node modStrategyNode : getChildNodes(strategiesNode, MOD_STRATEGY))
+            parseModStrategy(clusterConfig, modStrategyNode);
+        for (Node customStrategyNode : getChildNodes(strategiesNode, CUSTOM_STRATEGY))
+            parseCustomStrategy(clusterConfig, customStrategyNode);
     }
 
     private void parseModStrategy(ClusterConfigImpl clusterConfig, Node strategyNode) {
@@ -202,6 +197,17 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
     }
 
+    private void parseIdGenerators(ClusterConfigImpl clusterConfig, Node idGeneratorsNode) {
+        List<Node> idGeneratorNodes = getChildNodes(idGeneratorsNode, ID_GENERATOR);
+        if (idGeneratorNodes.size() > 1)
+            throw new ClusterRuntimeException("multiple idGenerators configured");
+        if (idGeneratorNodes.size() == 1) {
+            Node idGeneratorNode = idGeneratorNodes.get(0);
+            ClusterIdGeneratorConfig idGeneratorConfig = getIdGeneratorConfigXMLParser().parse(clusterConfig.getClusterName(), idGeneratorNode);
+            clusterConfig.setIdGeneratorConfig(idGeneratorConfig);
+        }
+    }
+
     private List<Node> getChildNodes(Node parent, String name) {
         List<Node> nodes = new ArrayList<>();
         NodeList children = parent.getChildNodes();
@@ -250,6 +256,39 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             }
         }
         return idGeneratorConfigXMLParser;
+    }
+
+    @Override
+    public void validateShardStrategies(String clusterName, String config) {
+        parseShardStrategies(buildClusterConfigForValidation(clusterName), buildXmlNode(fillShardStrategiesNodeContent(config)));
+    }
+
+    @Override
+    public void validateIdGenerators(String clusterName, String config) {
+        parseIdGenerators(buildClusterConfigForValidation(clusterName), buildXmlNode(fillIdGeneratorsNodeContent(config)));
+    }
+
+    private ClusterConfigImpl buildClusterConfigForValidation(String clusterName) {
+        return new ClusterConfigImpl(clusterName, DatabaseCategory.MYSQL, 1);
+    }
+
+    private String fillShardStrategiesNodeContent(String config) {
+        return String.format("<%s>%s</%s>", SHARD_STRATEGIES, config, SHARD_STRATEGIES);
+    }
+
+    private String fillIdGeneratorsNodeContent(String config) {
+        return String.format("<%s>%s</%s>", ID_GENERATORS, config, ID_GENERATORS);
+    }
+
+    private Node buildXmlNode(String content) {
+        StringReader reader = new StringReader(content);
+        InputSource source = new InputSource(reader);
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
+            return doc.getDocumentElement();
+        } catch (Throwable t) {
+            throw new ClusterRuntimeException("parse xml content error", t);
+        }
     }
 
 }

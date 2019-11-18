@@ -1,4 +1,4 @@
-package com.ctrip.framework.dal.cluster.client;
+package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigProvider;
@@ -7,16 +7,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author c7ch23en
- */
-public class DefaultLocalConfigProviderTest {
+public class ClusterConfigParserTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultLocalConfigProviderTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterConfigParserTest.class);
 
     @Test
     public void test() {
-        ClusterConfigProvider provider = new DefaultLocalConfigProvider("demo-cluster");
+        ClusterConfigProvider provider = new DefaultLocalConfigProvider("TestCluster");
         ClusterConfig config = provider.getClusterConfig();
         LOGGER.info(String.format("cluster config: %s", config.toString()));
     }

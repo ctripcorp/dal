@@ -1,13 +1,20 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
 import com.ctrip.framework.dal.cluster.client.config.IdGeneratorConfigXMLParser;
+import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
-import com.ctrip.platform.dal.exceptions.DalConfigException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.sharding.idgen.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,9 +24,50 @@ public class DefaultIdGeneratorConfigXMLParser implements IdGeneratorConfigXMLPa
 
     private IdGeneratorFactoryManager idGenFactoryManager = new IdGeneratorFactoryManager();
 
+    public DefaultIdGeneratorConfigXMLParser() {}
+
+    @Override
+    public ClusterIdGeneratorConfig parse(String clusterName, String content) {
+        StringReader reader = new StringReader(content);
+        InputSource source = new InputSource(reader);
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
+            return parse(clusterName, doc);
+        } catch (Throwable t) {
+            throw new DalRuntimeException("parse cluster IdGenerator config error", t);
+        }
+    }
+
+    @Override
+    public ClusterIdGeneratorConfig parse(String clusterName, InputStream stream) {
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+            return parse(clusterName, doc);
+        } catch (Throwable t) {
+            throw new ClusterConfigException("parse cluster IdGenerator config error", t);
+        }
+    }
+
+    private ClusterIdGeneratorConfig parse(String clusterName, Document doc) {
+        Element root = doc.getDocumentElement();
+        if (root == null || !ClusterConfigXMLConstants.ID_GENERATORS.equalsIgnoreCase(root.getTagName()))
+            throw new ClusterConfigException("root element should be <IdGenerators>");
+        List<Node> idGeneratorNodes = getChildNodes(root, ID_GENERATOR);
+        if (idGeneratorNodes.size() > 1)
+            throw new DalRuntimeException("the count of <IdGenerator> nodes should be only one");
+        if (idGeneratorNodes.size() == 0)
+            throw new DalRuntimeException("<IdGenerator> node does not exist");
+        return parse(clusterName, idGeneratorNodes.get(0));
+    }
+
     @Override
     public ClusterIdGeneratorConfig parse(String logicDbName, Node idGeneratorNode) {
         return getIdGenConfig(logicDbName, idGeneratorNode);
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 
     private IIdGeneratorConfig getIdGenConfig(String logicDbName, Node idGeneratorNode) {

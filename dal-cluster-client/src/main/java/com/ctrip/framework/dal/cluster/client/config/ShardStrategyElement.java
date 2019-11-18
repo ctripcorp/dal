@@ -32,7 +32,7 @@ public abstract class ShardStrategyElement extends PropertyAccessorSupport imple
     protected String getTableProperty(String tableName, String propertyName, String defaultValue) {
         PropertyAccessor properties = tableProperties.get(tableName);
         if (properties == null)
-            throw new ClusterRuntimeException(String.format("table '%s' undefined", tableName));
+            properties = this;
         String property = properties.getProperty(propertyName);
         return property != null ? property : defaultValue;
     }

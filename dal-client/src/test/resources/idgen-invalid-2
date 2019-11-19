@@ -1,0 +1,20 @@
+<idGenerator>
+    <includes>
+        <include>
+            <tables>
+                <table>table1</table>
+                <table>table2</table>
+            </tables>
+        </include>
+    </includes>
+</idGenerator>
+<idGenerator>
+    <excludes>
+        <exclude>
+            <tables>
+                <table>table1</table>
+                <table>table2</table>
+            </tables>
+        </exclude>
+    </excludes>
+</idGenerator>

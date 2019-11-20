@@ -29,6 +29,21 @@ public class MultipleSqlBuilder implements SqlBuilder {
 		mergers.add(merger);
 		return this;
 	}
+
+    public <T> MultipleSqlBuilder addQuery(String sqlStr, StatementParameters parameters) {
+        String[] sqls = sqlStr.split(";");
+        if (sqls.length > 1) {
+            for (int i = 0; i < sqls.length; ++i) {
+                StatementParameters statementParameters = new StatementParameters();
+                statementParameters.add(parameters.get(i));
+                queryUnits.add(new QueryUnit(sqls[i], statementParameters, null));
+            }
+        }
+        else {
+            queryUnits.add(new QueryUnit(sqlStr, parameters, null));
+        }
+        return this;
+    }
 		
 	/**
 	 * This mapper instance maybe used in more than one thread. Make sure it is thread safe.
@@ -112,8 +127,11 @@ public class MultipleSqlBuilder implements SqlBuilder {
 	
 	public List<DalResultSetExtractor<?>> getExtractors() {
 		List<DalResultSetExtractor<?>> extractors = new ArrayList<>();
-		for(QueryUnit unit: queryUnits)
-			extractors.add(unit.extractor);
+		for(QueryUnit unit: queryUnits) {
+            if (unit.extractor != null) {
+                extractors.add(unit.extractor);
+            }
+        }
 		return extractors;
 	}
 	

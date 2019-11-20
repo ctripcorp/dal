@@ -12,7 +12,6 @@ import com.ctrip.framework.db.cluster.entity.User;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
-import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.RC4;
@@ -46,8 +45,6 @@ public class UserService {
     private final CipherService cipherService;
 
     private final TitanPluginService titanPluginService;
-
-    private final ConfigService configService;
 
 
     public void addUsers(int shardIndex, List<UserVo> users, final ClusterDTO clusterDTO) {

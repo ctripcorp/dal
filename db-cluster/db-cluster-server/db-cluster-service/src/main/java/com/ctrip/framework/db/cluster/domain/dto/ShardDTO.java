@@ -132,17 +132,19 @@ public class ShardDTO {
                     .build();
         }
 
-        final List<UserVo> userVos = Lists.newArrayListWithExpectedSize(users.size());
-        users.forEach(user -> {
-            UserVo userVo = UserVo.builder()
-                    .username(user.getUsername())
-                    .permission(user.getPermission())
-                    .tag(user.getTag())
-                    .enabled(Enabled.getEnabled(user.getUserEnabled()).convertToBoolean())
-                    .titanKey(user.getTitanKeys())
-                    .build();
-            userVos.add(userVo);
-        });
+        final List<UserVo> userVos = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(users)) {
+            users.forEach(user -> {
+                UserVo userVo = UserVo.builder()
+                        .username(user.getUsername())
+                        .permission(user.getPermission())
+                        .tag(user.getTag())
+                        .enabled(Enabled.getEnabled(user.getUserEnabled()).convertToBoolean())
+                        .titanKey(user.getTitanKeys())
+                        .build();
+                userVos.add(userVo);
+            });
+        }
 
         return ShardVo.builder()
                 .shardIndex(shardIndex)

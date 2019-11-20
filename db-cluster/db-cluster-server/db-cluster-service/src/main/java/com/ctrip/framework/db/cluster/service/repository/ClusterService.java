@@ -217,21 +217,18 @@ public class ClusterService {
      * 2.1、找不到有效的zone，报错；2.2、找到，发主环境，删所有子环境。
      */
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    public void release(final Map<String, List<String>> clusterNameAndReleaseZoneIdsMap,
+    public void release(final List<String> clusterNames
                         final String operator, final String releaseType) throws SQLException {
 
-        final Map<ClusterDTO, List<String>> clusterDTOAndReleaseZoneIdsMap = Maps.newHashMapWithExpectedSize(
-                clusterNameAndReleaseZoneIdsMap.size()
-        );
-
-        clusterNameAndReleaseZoneIdsMap.forEach((clusterName, releaseZoneIds) -> {
+        final List<ClusterDTO> clusterDTOs = Lists.newArrayListWithExpectedSize(clusterNames.size());
+        clusterNames.forEach(clusterName -> {
             try {
                 final ClusterDTO cluster = findEffectiveClusterDTO(clusterName);
                 if (null == cluster) {
                     throw new IllegalStateException(String.format("cluster is deleted or not enabled, clusterName = %s", clusterName));
                 }
                 releaseValid(cluster);
-                clusterDTOAndReleaseZoneIdsMap.put(cluster, releaseZoneIds);
+                clusterDTOs.add(cluster);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -248,7 +245,6 @@ public class ClusterService {
                 response.getStatus(), response.getMessage()));
 
         // update db
-        final Set<ClusterDTO> clusterDTOs = clusterDTOAndReleaseZoneIdsMap.keySet();
         final List<Cluster> releaseClusters = Lists.newArrayListWithExpectedSize(clusterDTOs.size());
         clusterDTOs.forEach(clusterDTO -> {
             final Cluster updatedCluster = Cluster.builder()
@@ -449,18 +445,16 @@ public class ClusterService {
     }
 
 
-    private List<ReleaseCluster> constructReleases(final Map<ClusterDTO, List<String>> clusterDTOAndReleaseZoneIdsMap,
+    private List<ReleaseCluster> constructReleases(final List<ClusterDTO> clusterDTOs,
                                                    final String releaseType) {
         final List<ReleaseCluster> releases = Lists.newArrayList();
-        clusterDTOAndReleaseZoneIdsMap.forEach((cluster, releaseZoneIds) -> {
+        clusterDTOs.forEach(cluster -> {
             final List<ReleaseShard> shardRequests = Lists.newArrayList();
             final List<ZoneDTO> releaseZones = cluster.getZones();
 
             final ClusterType clusterType = ClusterType.getType(cluster.getType());
             if (ClusterType.drc.equals(clusterType)) {
-                if (!CollectionUtils.isEmpty(releaseZoneIds)) {
 
-                }
             }
         });
 

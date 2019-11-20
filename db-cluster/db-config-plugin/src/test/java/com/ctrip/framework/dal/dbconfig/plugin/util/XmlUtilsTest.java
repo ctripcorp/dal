@@ -5,9 +5,12 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -99,4 +102,38 @@ public class XmlUtilsTest {
 
         return dalConfigure;
     }
+
+    @Test
+    public void testXmlConvert() throws Exception {
+        DalConfigure input = generateExtendedDalConfigure();
+        String serverContent = XmlUtils.toXml(input);
+        DalConfigure output = (DalConfigure) XmlUtils.fromXml(serverContent, DalConfigure.class);
+        String clientContent = XmlUtils.toXml(output);
+        Assert.assertEquals(serverContent, clientContent);
+    }
+
+    private DalConfigure generateExtendedDalConfigure() {
+        Database masterDatabase = new Database("master", "10.28.11.1", 55944, "bbzmembersinfoshard1db",
+                "w_bbzminfo1", "123456", 1, null);
+        Database slaveDatabase1 = new Database("slave", "10.28.33.1", 55944, "bbzmembersinfoshard1db",
+                "w_bbzminfo1_r", "123456", 1, "");
+        Database slaveDatabase2 = new Database("slave", "10.28.44.1", 55944, "bbzmembersinfoshard1db",
+                "w_bbzminfo1_r", "123456", 1, "");
+        DatabaseShard databaseShard = new DatabaseShard(0, "masterDomain", "slaveDomain", 55944, 55944,
+                "masterTitanKey", "slaveTitanKey", Lists.newArrayList(masterDatabase, slaveDatabase1, slaveDatabase2));
+
+        DatabaseShards databaseShards = new DatabaseShards(Lists.newArrayList(databaseShard, databaseShard));
+        Cluster cluster = new Cluster("clusterbbzmembersinfo", "mysql", 1, databaseShards);
+        cluster.setSslCode("VZ00000000000441");
+        cluster.setOperator("testUser");
+        cluster.setUpdateTime(DalClusterUtils.formatDate(new Date()));
+
+        cluster.setShardStrategiesText("<ModStrategy><Property name=\"dbShardColumn\" value=\"id\"/><Property name=\"dbShardMod\" value=\"4\"/><Tables><Table name=\"strategy_meta\"/></Tables></ModStrategy><CustomStrategy class=\"cluster.FltShardStrategy\" default=\"true\"><Property name=\"dbShardColumn\" value=\"age\"/><Property name=\"dbShardMod\" value=\"4\"/></CustomStrategy>");
+        cluster.setIdGeneratorsText("<IdGenerator><includes><include><tables><table>person</table></tables></include></includes></IdGenerator>");
+
+        DalConfigure dalConfigure = new DalConfigure(cluster);
+
+        return dalConfigure;
+    }
+
 }

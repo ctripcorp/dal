@@ -20,6 +20,7 @@ import com.ctrip.framework.db.cluster.vo.dal.switches.ClusterSwitchesVo;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.unidal.tuple.Pair;
@@ -172,24 +173,21 @@ public class ClusterController {
 
     @PostMapping(value = "/clusters/{clusterName}/releases")
     public ResponseModel releaseCluster(@PathVariable String clusterName,
-                                        @RequestParam(name = "zoneId", required = false) String zoneId,
+                                        @RequestParam(name = "releaseZoneId", required = false) String releaseZoneId,
                                         @RequestParam(name = "operator") String operator,
                                         HttpServletRequest request) {
 
         try {
             // format parameter
             clusterName = Utils.format(clusterName);
-            zoneId = Utils.format(zoneId);
+            releaseZoneId = Utils.format(releaseZoneId);
 
             // access check
             if (!siteAccessChecker.isAllowed(request)) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            final Pair<String, String> clusterNameAndZoneIdPair = new Pair<>(clusterName, zoneId);
-            final List<Pair<String, String>> pairs = Lists.newArrayListWithExpectedSize(1);
-            pairs.add(clusterNameAndZoneIdPair);
-            clusterService.release(pairs, operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
+            clusterService.release(releaseZoneId, clusterName, operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("Release cluster success");
 

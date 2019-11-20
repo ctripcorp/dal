@@ -31,6 +31,10 @@ public class ClusterSetService {
     private final ShardService shardService;
 
 
+    public List<ClusterSet> findCusterSets(final ClusterSet queryClusterSet) throws SQLException {
+        return clusterSetDao.queryBy(queryClusterSet);
+    }
+
     public void createClusterSets(final List<ZoneDTO> zoneDTOs) throws SQLException {
         // create zones
         final List<ClusterSet> zones = Lists.newArrayListWithExpectedSize(zoneDTOs.size());
@@ -59,7 +63,6 @@ public class ClusterSetService {
             shardService.createShards(shardDTOs);
         }
     }
-
 
     public List<ZoneDTO> findUnDeletedByClusterId(final Integer clusterId) throws SQLException {
         // find unDeleted Zones by clusterId

@@ -3,13 +3,14 @@ package com.ctrip.framework.db.cluster.service.repository;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.dao.ClusterDao;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.delete.DeleteCluster;
 import com.ctrip.framework.db.cluster.entity.*;
 import com.ctrip.framework.db.cluster.entity.enums.*;
 import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckRequest;
 import com.ctrip.framework.db.cluster.domain.dto.*;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseDatabase;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseShard;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateRequest;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
@@ -21,7 +22,6 @@ import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
-import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.ClusterSwitchesVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.DatabaseSwitchesVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.InstanceSwitchedVo;
@@ -32,9 +32,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.unidal.tuple.Pair;
 
 import javax.annotation.Resource;
@@ -209,6 +209,35 @@ public class ClusterService {
         return clusterDao.findClusters(clusterNames, deleted, enabled);
     }
 
+    @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
+    public void release(final String releaseZoneId, final String clusterName,
+                        final String operator, final String releaseType) throws SQLException {
+
+        if (StringUtils.isNotBlank(releaseZoneId)) {
+            final Cluster cluster = findCluster(clusterName, Deleted.un_deleted, Enabled.enabled);
+            if (null == cluster) {
+                throw new IllegalArgumentException(String.format("cluster not exists, clusterName = %s", clusterName));
+            }
+
+            final ClusterSet queryClusterSet = ClusterSet.builder()
+                    .clusterId(cluster.getId())
+                    .setId(releaseZoneId)
+                    .build();
+            final List<ClusterSet> clusterSets = clusterSetService.findCusterSets(queryClusterSet);
+            if (CollectionUtils.isEmpty(clusterSets)) {
+                throw new IllegalArgumentException(
+                        String.format("releaseZone not exists, clusterName = %s, releaseZoneId = %s", clusterName, releaseZoneId)
+                );
+            }
+
+            final Cluster updateCluster = Cluster.builder()
+                    .zoneId(releaseZoneId)
+                    .build();
+            clusterDao.update(updateCluster);
+        }
+
+        release(Lists.newArrayList(clusterName), operator, releaseType);
+    }
 
     /**
      * 1、类型为drc集群,
@@ -217,7 +246,7 @@ public class ClusterService {
      * 2.1、找不到有效的zone，报错；2.2、找到，发主环境，删所有子环境。
      */
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    public void release(final List<String> clusterNames
+    public void release(final List<String> clusterNames,
                         final String operator, final String releaseType) throws SQLException {
 
         final List<ClusterDTO> clusterDTOs = Lists.newArrayListWithExpectedSize(clusterNames.size());
@@ -235,27 +264,135 @@ public class ClusterService {
         });
 
         // call dal plugin, if request fail, throw exception, transaction rollback.
-//        final List<ReleaseCluster> releaseClusters = clusterDTOAndZoneIdPairs.stream()
-//                .map(cluster -> constructReleaseCluster(cluster, releaseType))
-//                .collect(Collectors.toList());
+        final List<ReleaseCluster> releaseClusters = Lists.newArrayList();
+        final List<DeleteCluster> deleteClusters = Lists.newArrayList();
+        for (ClusterDTO cluster : clusterDTOs) {
+            // construct extension configs
+            String shardStrategies = null;
+            String idGenerators = null;
+            final List<ClusterExtensionConfig> configs = cluster.getConfigs();
+            if (!CollectionUtils.isEmpty(configs)) {
+                for (ClusterExtensionConfig config : configs) {
+                    if (shards_strategies.equals(ClusterExtensionConfigType.getType(config.getType()))) {
+                        shardStrategies = config.getContent();
+                    }
 
+                    if (id_generators.equals(ClusterExtensionConfigType.getType(config.getType()))) {
+                        idGenerators = config.getContent();
+                    }
+                }
+            }
 
-        final PluginResponse response = dalPluginService.releaseClusters(releaseClusters, Constants.ENV, operator);
+            final List<ZoneDTO> zones = cluster.getZones();
+            final ClusterType clusterType = ClusterType.getType(cluster.getType());
+            // drc type
+            if (ClusterType.drc.equals(clusterType)) {
+                // add all zones to sub env
+                for (ZoneDTO zone : zones) {
+                    final List<ReleaseShard> shardRequests = Lists.newArrayList();
+                    zone.getShards().forEach(shard -> {
+                        final ReleaseShard releaseShard = constructReleaseShard(
+                                cluster.getClusterName(), cluster.getDbCategory(), shard, releaseType
+                        );
+                        shardRequests.add(releaseShard);
+                    });
+
+                    // construct clusterRequest
+                    final ReleaseCluster release = ReleaseCluster.builder()
+                            .clusterName(cluster.getClusterName())
+                            .subEnv(zone.getZoneId())
+                            .dbCategory(cluster.getDbCategory())
+                            .version(cluster.getClusterReleaseVersion() + 1)
+                            .databaseShards(shardRequests)
+                            .shardStrategies(shardStrategies)
+                            .idGenerators(idGenerators)
+                            .build();
+                    releaseClusters.add(release);
+                    // TODO: 2019/11/21 If only one of jq or rb exists, both are released, qconfig switch.
+                }
+
+                // delete father env
+                final DeleteCluster deleteCluster = DeleteCluster.builder()
+                        .clusterName(cluster.getClusterName())
+                        .build();
+                deleteClusters.add(deleteCluster);
+
+            } else if (ClusterType.normal.equals(clusterType)) {
+                // normal type, if releaseZoneId is blank & there is only one zone, the zone is release zone
+                final String releaseZoneId = cluster.getZoneId();
+                final ZoneDTO releaseZone;
+                if (StringUtils.isBlank(releaseZoneId)) {
+                    // zones size must eq 1, because release valid already check it.
+                    releaseZone = zones.get(0);
+                    // fill cluster_info zoneId
+                    final Cluster updateCluster = Cluster.builder()
+                            .zoneId(releaseZoneId)
+                            .build();
+                    clusterDao.update(updateCluster);
+                } else {
+                    final Optional<ZoneDTO> releaseZoneOptional = zones.stream()
+                            .filter(zone -> releaseZoneId.equals(zone.getZoneId()))
+                            .findFirst();
+                    if (releaseZoneOptional.isPresent()) {
+                        releaseZone = releaseZoneOptional.get();
+                    } else {
+                        // never, already valid
+                        throw new IllegalStateException(
+                                String.format(
+                                        "普通类型的集群, 发布时指定生效的zone必须存在于当前zones之中, clusterName = %s",
+                                        cluster.getClusterName()
+                                )
+                        );
+                    }
+                }
+
+                final List<ReleaseShard> shardRequests = Lists.newArrayList();
+                releaseZone.getShards().forEach(shard -> {
+                    final ReleaseShard releaseShard = constructReleaseShard(
+                            cluster.getClusterName(), cluster.getDbCategory(), shard, releaseType
+                    );
+                    shardRequests.add(releaseShard);
+                });
+
+                // construct clusterRequest
+                final ReleaseCluster release = ReleaseCluster.builder()
+                        .clusterName(cluster.getClusterName())
+                        .dbCategory(cluster.getDbCategory())
+                        .version(cluster.getClusterReleaseVersion() + 1)
+                        .databaseShards(shardRequests)
+                        .shardStrategies(shardStrategies)
+                        .idGenerators(idGenerators)
+                        .build();
+                releaseClusters.add(release);
+
+                // delete all sub env
+                final DeleteCluster deleteCluster = DeleteCluster.builder()
+                        .clusterName(cluster.getClusterName())
+                        .subEnv("all")
+                        .build();
+                deleteClusters.add(deleteCluster);
+            }
+        }
+
+        final PluginResponse releaseResponse = dalPluginService.releaseClusters(releaseClusters, operator);
         log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
-                response.getStatus(), response.getMessage()));
+                releaseResponse.getStatus(), releaseResponse.getMessage()));
+
+//        final PluginResponse deleteResponse = dalPluginService.deleteClusters(deleteClusters, operator);
+//        log.info(String.format("Delete Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
+//                deleteResponse.getStatus(), deleteResponse.getMessage()));
 
         // update db
-        final List<Cluster> releaseClusters = Lists.newArrayListWithExpectedSize(clusterDTOs.size());
+        final List<Cluster> updatedClusters = Lists.newArrayListWithExpectedSize(clusterDTOs.size());
         clusterDTOs.forEach(clusterDTO -> {
             final Cluster updatedCluster = Cluster.builder()
                     .id(clusterDTO.getClusterEntityId())
                     .releaseVersion(clusterDTO.getClusterReleaseVersion() + 1)
                     .releaseTime(Timestamp.valueOf(LocalDateTime.now()))
                     .build();
-            releaseClusters.add(updatedCluster);
+            updatedClusters.add(updatedCluster);
         });
-
-        clusterDao.update(releaseClusters);
+        clusterDao.update(updatedClusters);
 
         // registry read freshness schedule
         FreshnessScheduleRegistration.getRegistration().registryToSchedule(
@@ -288,9 +425,15 @@ public class ClusterService {
             }
         } else if (ClusterType.normal.equals(clusterType)) {
             final String usageZoneId = cluster.getZoneId();
+            if (StringUtils.isBlank(usageZoneId) && zones.size() != 1) {
+                throw new IllegalStateException(
+                        String.format("普通类型的集群, 若存在多个zone, 发布时必须指定生效一个zone, clusterName = %s", clusterName)
+                );
+            }
+
             if (!zones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList()).contains(usageZoneId)) {
                 throw new IllegalStateException(
-                        String.format("普通类型的集群, 发布时必须指定使用哪个zone进行发布, clusterName = %s", clusterName)
+                        String.format("普通类型的集群, 发布时指定生效的zone必须存在于当前集群所有zones之中, clusterName = %s", clusterName)
                 );
             }
         } else {
@@ -444,202 +587,163 @@ public class ClusterService {
         });
     }
 
+    private ReleaseShard constructReleaseShard(final String clusterName, final String dbCategory,
+                                               final ShardDTO shard, final String releaseType) {
+        // TODO: 2019/11/1 write, read账号目前只有一个
+        final Optional<UserDTO> writeUserOptional = shard.getUsers().stream()
+                .filter(user -> Constants.OPERATION_WRITE.equalsIgnoreCase(user.getPermission()))
+                .findFirst();
 
-    private List<ReleaseCluster> constructReleases(final List<ClusterDTO> clusterDTOs,
-                                                   final String releaseType) {
-        final List<ReleaseCluster> releases = Lists.newArrayList();
-        clusterDTOs.forEach(cluster -> {
-            final List<ReleaseShard> shardRequests = Lists.newArrayList();
-            final List<ZoneDTO> releaseZones = cluster.getZones();
+        final Optional<UserDTO> readUserOptional = shard.getUsers().stream()
+                .filter(user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
+                        && !Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag()))
+                .findFirst();
 
-            final ClusterType clusterType = ClusterType.getType(cluster.getType());
-            if (ClusterType.drc.equals(clusterType)) {
+        // TODO: 2019/10/27 暂时不考虑etl user
+//                    final Optional<UserDTO> etlUserOptional = shard.getUsers().stream()
+//                            .filter(user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
+//                                    && Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag()))
+//                            .findFirst();
 
-            }
-        });
+        if (!writeUserOptional.isPresent() && !readUserOptional.isPresent()) {
+            throw new IllegalStateException(
+                    String.format(
+                            "每个shard至少存在一个write或read权限, 且非etl的账号, clusterName = %s, shardIndex = %s",
+                            clusterName, shard.getShardIndex()
+                    )
+            );
+        }
 
-        cluster.getZones().get(0).getShards().forEach(shard -> {
-            // TODO: 2019/11/1 write, read账号目前只有一个
-            final Optional<UserDTO> writeUserOptional = shard.getUsers().stream()
-                    .filter(user -> Constants.OPERATION_WRITE.equalsIgnoreCase(user.getPermission()))
-                    .findFirst();
+        // construct databaseRequest
+        final List<ReleaseDatabase> databaseRequests = Lists.newArrayList();
+        // construct connect check requests,
+        final List<DBConnectionCheckRequest> connectionRequests = Lists.newArrayList();
 
-            final Optional<UserDTO> readUserOptional = shard.getUsers().stream()
-                    .filter(user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
-                            && !Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag()))
-                    .findFirst();
-
-            // TODO: 2019/10/27 暂时不考虑etl user
-//            final Optional<UserDTO> etlUserOptional = shard.getUsers().stream()
-//                    .filter(user -> Constants.OPERATION_READ.equalsIgnoreCase(user.getPermission())
-//                            && Constants.USER_TAG_ETL.equalsIgnoreCase(user.getTag()))
-//                    .findFirst();
-
-            if (!writeUserOptional.isPresent() && !readUserOptional.isPresent()) {
+        // write user
+        if (writeUserOptional.isPresent()) {
+            final UserDTO writeUser = writeUserOptional.get();
+            final ShardInstanceDTO master = shard.getMaster();
+            if (null == master) {
                 throw new IllegalStateException(
                         String.format(
-                                "每个shard至少存在一个write或read权限, 且非etl的账号, clusterName = %s, shardIndex = %s",
-                                cluster.getClusterName(), shard.getShardIndex()
-                        )
+                                "shard中如果存在write权限账号, 必须存在Master角色的节点信息, clusterName = %s, shardIndex = %s",
+                                clusterName, shard.getShardIndex())
                 );
+            } else {
+                final String username = cipherService.decrypt(writeUser.getUsername());
+                final String password = cipherService.decrypt(writeUser.getPassword());
+                final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
+                        .ip(master.getIp())
+                        .port(master.getPort())
+                        .role(Constants.ROLE_MASTER)
+                        .dbName(master.getDbName())
+                        .uid(username)
+                        .password(password)
+                        .readWeight(master.getReadWeight())
+                        .build();
+                databaseRequests.add(databaseRequest);
+
+                final DBConnectionCheckRequest domainRequest = constructConnectionCheckRequest(
+                        shard.getMasterDomain(), shard.getMasterPort(), dbCategory,
+                        username, password, shard.getDbName()
+                );
+                final DBConnectionCheckRequest ipRequest = constructConnectionCheckRequest(
+                        master.getIp(), master.getPort(), dbCategory,
+                        username, password, shard.getDbName()
+                );
+                connectionRequests.add(domainRequest);
+                connectionRequests.add(ipRequest);
             }
-
-            // construct databaseRequest
-            final List<ReleaseDatabase> databaseRequests = Lists.newArrayList();
-            // construct connect check requests,
-            final List<DBConnectionCheckRequest> connectionRequests = Lists.newArrayList();
-
-            // write user
-            if (writeUserOptional.isPresent()) {
-                final UserDTO writeUser = writeUserOptional.get();
+        }
+        // read user
+        if (readUserOptional.isPresent()) {
+            final UserDTO readUser = readUserOptional.get();
+            final List<ShardInstanceDTO> reads = shard.getReads();
+            if (CollectionUtils.isEmpty(reads)) {
+                // read nodes empty, see master info
                 final ShardInstanceDTO master = shard.getMaster();
                 if (null == master) {
                     throw new IllegalStateException(
                             String.format(
-                                    "shard中如果存在write权限账号, 必须存在Master角色的节点信息, clusterName = %s, shardIndex = %s",
-                                    cluster.getClusterName(), shard.getShardIndex())
+                                    "shard中如果存在read权限账号, 必须存在至少一个slave角色的节点信息, 或者存在Master角色的节点信息" +
+                                            ", clusterName = %s, shardIndex = %s",
+                                    clusterName, shard.getShardIndex()
+                            )
                     );
                 } else {
-                    final String username = cipherService.decrypt(writeUser.getUsername());
-                    final String password = cipherService.decrypt(writeUser.getPassword());
+                    final String username = cipherService.decrypt(readUser.getUsername());
+                    final String password = cipherService.decrypt(readUser.getPassword());
                     final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
                             .ip(master.getIp())
                             .port(master.getPort())
-                            .role(Constants.ROLE_MASTER)
+                            .role(Constants.ROLE_SLAVE)
                             .dbName(master.getDbName())
                             .uid(username)
                             .password(password)
                             .readWeight(master.getReadWeight())
                             .build();
                     databaseRequests.add(databaseRequest);
+                }
+            } else {
+                final String username = cipherService.decrypt(readUser.getUsername());
+                final String password = cipherService.decrypt(readUser.getPassword());
+                reads.forEach(read -> {
+                    final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
+                            .ip(read.getIp())
+                            .port(read.getPort())
+                            .role(Constants.ROLE_SLAVE)
+                            .dbName(read.getDbName())
+                            .uid(username)
+                            .password(password)
+                            .readWeight(read.getReadWeight())
+                            .build();
+                    databaseRequests.add(databaseRequest);
 
-                    final DBConnectionCheckRequest domainRequest = constructConnectionCheckRequest(
-                            shard.getMasterDomain(), shard.getMasterPort(), cluster.getDbCategory(),
-                            username, password, shard.getDbName()
-                    );
                     final DBConnectionCheckRequest ipRequest = constructConnectionCheckRequest(
-                            master.getIp(), master.getPort(), cluster.getDbCategory(),
+                            read.getIp(), read.getPort(), dbCategory,
                             username, password, shard.getDbName()
+
                     );
-                    connectionRequests.add(domainRequest);
                     connectionRequests.add(ipRequest);
-                }
-            }
-            // read user
-            if (readUserOptional.isPresent()) {
-                final UserDTO readUser = readUserOptional.get();
-                final List<ShardInstanceDTO> reads = shard.getReads();
-                if (CollectionUtils.isEmpty(reads)) {
-                    // read nodes empty, see master info
-                    final ShardInstanceDTO master = shard.getMaster();
-                    if (null == master) {
-                        throw new IllegalStateException(
-                                String.format(
-                                        "shard中如果存在read权限账号, 必须存在至少一个slave角色的节点信息, 或者存在Master角色的节点信息, clusterName = %s, shardIndex = %s",
-                                        cluster.getClusterName(), shard.getShardIndex())
-                        );
-                    } else {
-                        final String username = cipherService.decrypt(readUser.getUsername());
-                        final String password = cipherService.decrypt(readUser.getPassword());
-                        final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
-                                .ip(master.getIp())
-                                .port(master.getPort())
-                                .role(Constants.ROLE_SLAVE)
-                                .dbName(master.getDbName())
-                                .uid(username)
-                                .password(password)
-                                .readWeight(master.getReadWeight())
-                                .build();
-                        databaseRequests.add(databaseRequest);
-                    }
-                } else {
-                    final String username = cipherService.decrypt(readUser.getUsername());
-                    final String password = cipherService.decrypt(readUser.getPassword());
-                    reads.forEach(read -> {
-                        final ReleaseDatabase databaseRequest = ReleaseDatabase.builder()
-                                .ip(read.getIp())
-                                .port(read.getPort())
-                                .role(Constants.ROLE_SLAVE)
-                                .dbName(read.getDbName())
-                                .uid(username)
-                                .password(password)
-                                .readWeight(read.getReadWeight())
-                                .build();
-                        databaseRequests.add(databaseRequest);
-
-                        final DBConnectionCheckRequest ipRequest = constructConnectionCheckRequest(
-                                read.getIp(), read.getPort(), cluster.getDbCategory(),
-                                username, password, shard.getDbName()
-
-                        );
-                        connectionRequests.add(ipRequest);
-                    });
-
-                    final DBConnectionCheckRequest domainRequest = constructConnectionCheckRequest(
-                            shard.getReadDomain(), shard.getReadPort(), cluster.getDbCategory(),
-                            username, password, shard.getDbName()
-
-                    );
-                    connectionRequests.add(domainRequest);
-                }
-            }
-
-            // connect check
-            final Set<String> enabledReleaseTypes = configService.getDbConnectionCheckEnabledReleaseTypes();
-            if (enabledReleaseTypes.contains(releaseType)) {
-                connectionRequests.forEach(request -> {
-                    final boolean isValid = dbConnectionService.checkConnection(request);
-                    if (!isValid) {
-                        // invalid
-                        throw new IllegalStateException(
-                                String.format(
-                                        "db connection check result: this database cannot be connected, the release stops, " +
-                                                "clusterName = %s, ip = %s, port = %s, dbName = %s",
-                                        cluster.getClusterName(), request.getHost(), request.getPort(), request.getDbName()
-                                )
-                        );
-                    }
                 });
-            }
 
-            // construct shardRequest
-            final ReleaseShard shardRequest = ReleaseShard.builder()
-                    .index(shard.getShardIndex())
-                    .masterDomain(writeUserOptional.isPresent() ? shard.getMasterDomain() : null)
-                    .masterPort(writeUserOptional.isPresent() ? shard.getMasterPort() : null)
-                    .masterTitanKeys(writeUserOptional.map(UserDTO::getTitanKeys).orElse(null))
-                    .slaveDomain(readUserOptional.isPresent() ? shard.getReadDomain() : null)
-                    .slavePort(readUserOptional.isPresent() ? shard.getReadPort() : null)
-                    .slaveTitanKeys(readUserOptional.map(UserDTO::getTitanKeys).orElse(null))
-                    .databases(databaseRequests)
-                    .build();
-            shardRequests.add(shardRequest);
-        });
+                final DBConnectionCheckRequest domainRequest = constructConnectionCheckRequest(
+                        shard.getReadDomain(), shard.getReadPort(), dbCategory,
+                        username, password, shard.getDbName()
 
-        // construct extension configs
-        String shardStrategies = null;
-        String idGenerators = null;
-        final List<ClusterExtensionConfig> configs = cluster.getConfigs();
-        if (!CollectionUtils.isEmpty(configs)) {
-            for (ClusterExtensionConfig config : configs) {
-                if (shards_strategies.equals(ClusterExtensionConfigType.getType(config.getType()))) {
-                    shardStrategies = config.getContent();
-                }
-
-                if (id_generators.equals(ClusterExtensionConfigType.getType(config.getType()))) {
-                    idGenerators = config.getContent();
-                }
+                );
+                connectionRequests.add(domainRequest);
             }
         }
 
-        // construct clusterRequest
-        return ReleaseCluster.builder()
-                .clusterName(cluster.getClusterName())
-                .dbCategory(cluster.getDbCategory())
-                .version(cluster.getClusterReleaseVersion() + 1)
-                .databaseShards(shardRequests)
-                .shardStrategies(shardStrategies)
-                .idGenerators(idGenerators)
+        // connect check
+        final Set<String> enabledReleaseTypes = configService.getDbConnectionCheckEnabledReleaseTypes();
+        if (enabledReleaseTypes.contains(releaseType)) {
+            connectionRequests.forEach(request -> {
+                final boolean isValid = dbConnectionService.checkConnection(request);
+                if (!isValid) {
+                    // invalid
+                    throw new IllegalStateException(
+                            String.format(
+                                    "db connection check result: this database cannot be connected, the release stops, " +
+                                            "clusterName = %s, ip = %s, port = %s, dbName = %s",
+                                    clusterName, request.getHost(), request.getPort(), request.getDbName()
+                            )
+                    );
+                }
+            });
+        }
+
+        // construct shardRequest
+        return ReleaseShard.builder()
+                .index(shard.getShardIndex())
+                .masterDomain(writeUserOptional.isPresent() ? shard.getMasterDomain() : null)
+                .masterPort(writeUserOptional.isPresent() ? shard.getMasterPort() : null)
+                .masterTitanKeys(writeUserOptional.map(UserDTO::getTitanKeys).orElse(null))
+                .slaveDomain(readUserOptional.isPresent() ? shard.getReadDomain() : null)
+                .slavePort(readUserOptional.isPresent() ? shard.getReadPort() : null)
+                .slaveTitanKeys(readUserOptional.map(UserDTO::getTitanKeys).orElse(null))
+                .databases(databaseRequests)
                 .build();
     }
 
@@ -960,59 +1064,5 @@ public class ClusterService {
             // argument correct
             cluster.correct();
         });
-    }
-
-
-    // deprecated
-    public Integer addAndGetId(final ClusterVo clusterVo) throws SQLException {
-        Cluster cluster = Cluster.builder()
-                .clusterName(clusterVo.getClusterName())
-                .dbCategory(clusterVo.getDbCategory())
-                .enabled(Enabled.enabled.getCode())
-                .deleted(Deleted.un_deleted.getCode())
-                .releaseVersion(0)
-                .build();
-
-        KeyHolder keyHolder = new KeyHolder();
-        clusterDao.insertWithKeyHolder(keyHolder, cluster);
-        return keyHolder.getKey().intValue();
-    }
-
-    public Cluster findById(Integer clusterId) throws SQLException {
-        return clusterDao.queryByPk(clusterId);
-    }
-
-    public List<Cluster> findByIds(List<Integer> clusterIds) throws SQLException {
-        List<Cluster> clusters = Lists.newArrayList();
-        for (Integer clusterId : clusterIds) {
-            Cluster cluster = findById(clusterId);
-            clusters.add(cluster);
-        }
-        return clusters;
-    }
-
-    public List<Cluster> findByClusterNames(List<String> clusterNames) throws SQLException {
-        return clusterDao.findByClusterNames(clusterNames);
-    }
-
-    public int update(Cluster cluster) throws SQLException {
-        return clusterDao.update(null, cluster);
-    }
-
-    public int[] update(List<Cluster> clusters) throws SQLException {
-        return clusterDao.update(null, clusters);
-    }
-
-    public int[] updateReleaseInfo(List<String> clusterNames) throws SQLException {
-        List<Cluster> clusters = findByClusterNames(clusterNames);
-
-        for (Cluster cluster : clusters) {
-            // increase version
-            int version = cluster.getReleaseVersion() + 1;
-            cluster.setReleaseVersion(version);
-            cluster.setReleaseTime(new Timestamp(System.currentTimeMillis()));
-        }
-
-        return update(clusters);
     }
 }

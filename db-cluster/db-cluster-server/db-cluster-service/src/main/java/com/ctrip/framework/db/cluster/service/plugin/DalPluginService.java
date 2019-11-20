@@ -1,9 +1,11 @@
 package com.ctrip.framework.db.cluster.service.plugin;
 
 import com.ctrip.framework.db.cluster.domain.*;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.delete.DeleteCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseCluster;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
+import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.HttpUtils;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.dianping.cat.Cat;
@@ -28,17 +30,41 @@ public class DalPluginService {
 
     private static final String release = "/release";
 
+    private static final String delete = "/delete";
+
     private final ConfigService configService;
 
 
-    public PluginResponse releaseClusters(List<ReleaseCluster> clusters, String env, String operator) {
+    public PluginResponse releaseClusters(final List<ReleaseCluster> clusters,
+                                          final String operator) {
         Transaction t = Cat.newTransaction("Dal.Plugin.Release", "Release");
         PluginResponse pluginResponse;
         try {
             List<NameValuePair> urlParams = Lists.newArrayList();
-            urlParams.add(new BasicNameValuePair("env", env));
+            urlParams.add(new BasicNameValuePair("env", Constants.ENV));
             urlParams.add(new BasicNameValuePair("operator", operator));
             String url = configService.getPluginDalUrl() + release;
+            String requestBody = Utils.gson.toJson(clusters);
+            String responseBody = HttpUtils.getInstance().sendPost(url, urlParams, requestBody, configService.getHttpReadTimeoutInMs());
+            pluginResponse = Utils.gson.fromJson(responseBody, PluginResponse.class);
+            t.setStatus(Message.SUCCESS);
+        } catch (Exception e) {
+            t.setStatus(e);
+            throw new DBClusterServiceException(e);
+        } finally {
+            t.complete();
+        }
+        return pluginResponse;
+    }
+
+    public PluginResponse deleteClusters(final List<DeleteCluster> clusters, final String operator) {
+        Transaction t = Cat.newTransaction("Dal.Plugin.Delete", "Delete");
+        PluginResponse pluginResponse;
+        try {
+            List<NameValuePair> urlParams = Lists.newArrayList();
+            urlParams.add(new BasicNameValuePair("env", Constants.ENV));
+            urlParams.add(new BasicNameValuePair("operator", operator));
+            String url = configService.getPluginDalUrl() + delete;
             String requestBody = Utils.gson.toJson(clusters);
             String responseBody = HttpUtils.getInstance().sendPost(url, urlParams, requestBody, configService.getHttpReadTimeoutInMs());
             pluginResponse = Utils.gson.fromJson(responseBody, PluginResponse.class);

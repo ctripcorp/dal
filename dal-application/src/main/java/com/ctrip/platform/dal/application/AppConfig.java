@@ -26,7 +26,7 @@ public class AppConfig {
 
     @Bean
     public DALServiceDao clusterDao() throws SQLException {
-        return new DALServiceDao("dal20test");
+        return new DALServiceDao("dbadalclustertest01db");
     }
 
     @Bean

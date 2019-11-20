@@ -1,6 +1,5 @@
 package com.ctrip.framework.db.cluster.vo;
 
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

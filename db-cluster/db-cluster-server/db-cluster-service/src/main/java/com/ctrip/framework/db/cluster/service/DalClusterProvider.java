@@ -2,11 +2,9 @@ package com.ctrip.framework.db.cluster.service;
 
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.entity.*;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
 import com.ctrip.framework.db.cluster.service.repository.*;
 import com.ctrip.framework.db.cluster.util.Constants;
-import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.dal.create.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;

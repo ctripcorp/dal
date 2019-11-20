@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.schedule;
 
 import com.ctrip.framework.db.cluster.entity.*;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.service.remote.qconfig.QConfigService;
 import com.ctrip.framework.db.cluster.service.remote.qconfig.domain.QConfigFileDetailResponse;
 import com.ctrip.framework.db.cluster.service.repository.*;

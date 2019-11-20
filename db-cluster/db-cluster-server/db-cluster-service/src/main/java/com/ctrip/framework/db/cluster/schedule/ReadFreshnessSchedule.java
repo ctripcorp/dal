@@ -3,7 +3,7 @@ package com.ctrip.framework.db.cluster.schedule;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.entity.ShardInstance;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceHealthStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceHealthStatus;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.remote.mysqlapi.DBConnectionService;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
@@ -226,9 +226,11 @@ public class ReadFreshnessSchedule {
                             }
                         } else {
                             // other
+                            pulloutInstances.add(instance);
+                            // cat
                             final Map<String, String> pulloutMap = Maps.newHashMapWithExpectedSize(1);
                             pulloutMap.put("pullout reason", String.format("other exception = %s", e.toString()));
-                            Cat.logEvent("Schedule.Read.Freshness.Error", clusterName + "-" + instance.getIp(), "error", pulloutMap);
+                            Cat.logEvent("Schedule.Read.Freshness.Pullout", clusterName + "-" + instance.getIp(), "error", pulloutMap);
                         }
                         // pullout: connect reject
 

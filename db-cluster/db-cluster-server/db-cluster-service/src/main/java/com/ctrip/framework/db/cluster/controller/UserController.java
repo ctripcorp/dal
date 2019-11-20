@@ -1,7 +1,7 @@
 package com.ctrip.framework.db.cluster.controller;
 
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
+import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
 import com.ctrip.framework.db.cluster.service.repository.UserService;

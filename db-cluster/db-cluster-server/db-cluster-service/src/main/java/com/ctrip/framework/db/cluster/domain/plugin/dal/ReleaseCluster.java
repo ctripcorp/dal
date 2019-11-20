@@ -15,6 +15,8 @@ public class ReleaseCluster {
 
     private String clusterName;
 
+    private String subEnv;
+
     private String dbCategory;
 
     private Integer version;

@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.enums;
+package com.ctrip.framework.db.cluster.vo;
 
 /**
  * Created by shenjie on 2019/3/5.

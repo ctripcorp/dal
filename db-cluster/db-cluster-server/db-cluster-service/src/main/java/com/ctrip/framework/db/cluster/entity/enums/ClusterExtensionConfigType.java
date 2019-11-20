@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.enums;
+package com.ctrip.framework.db.cluster.entity.enums;
 
 public enum ClusterExtensionConfigType {
 

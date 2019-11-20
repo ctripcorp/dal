@@ -2,7 +2,7 @@ package com.ctrip.framework.db.cluster.service.repository;
 
 import com.ctrip.framework.db.cluster.dao.ClusterExtensionConfigDao;
 import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
-import com.ctrip.framework.db.cluster.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

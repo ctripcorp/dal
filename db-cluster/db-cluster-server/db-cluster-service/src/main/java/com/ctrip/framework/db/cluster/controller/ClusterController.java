@@ -3,12 +3,13 @@ package com.ctrip.framework.db.cluster.controller;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.entity.Cluster;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
+import com.ctrip.framework.db.cluster.util.Constants;
+import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
-import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.IpUtils;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
@@ -19,8 +20,10 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.unidal.tuple.Pair;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -145,6 +148,8 @@ public class ClusterController {
             final List<ClusterVo> clusterVos = clusters.stream().map(
                     cluster -> ClusterVo.builder()
                             .clusterName(cluster.getClusterName())
+                            .type(ClusterType.getType(cluster.getType()).getName())
+                            .zoneId(cluster.getZoneId())
                             .dbCategory(cluster.getDbCategory())
                             .enabled(Enabled.getEnabled(cluster.getEnabled()).convertToBoolean())
                             .build()
@@ -162,19 +167,24 @@ public class ClusterController {
 
     @PostMapping(value = "/clusters/{clusterName}/releases")
     public ResponseModel releaseCluster(@PathVariable String clusterName,
+                                        @RequestParam(name = "zoneId", required = false) String zoneId,
                                         @RequestParam(name = "operator") String operator,
                                         HttpServletRequest request) {
 
         try {
             // format parameter
             clusterName = Utils.format(clusterName);
+            zoneId = Utils.format(zoneId);
 
             // access check
             if (!siteAccessChecker.isAllowed(request)) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            clusterService.release(Lists.newArrayList(clusterName), operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
+            final Pair<String, String> clusterNameAndZoneIdPair = new Pair<>(clusterName, zoneId);
+            final List<Pair<String, String>> pairs = Lists.newArrayListWithExpectedSize(1);
+            pairs.add(clusterNameAndZoneIdPair);
+            clusterService.release(pairs, operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("Release cluster success");
 

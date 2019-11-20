@@ -2,9 +2,9 @@ package com.ctrip.framework.db.cluster.controller;
 
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
-import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ClusterExtensionConfigType;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.repository.ClusterExtensionConfigService;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
 import com.ctrip.framework.db.cluster.util.Utils;

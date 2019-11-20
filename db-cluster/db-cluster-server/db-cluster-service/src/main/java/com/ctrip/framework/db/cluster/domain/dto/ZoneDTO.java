@@ -1,6 +1,6 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.vo.dal.create.ZoneVo;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;

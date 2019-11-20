@@ -4,7 +4,7 @@ import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageRespo
 import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageSingleConnectionData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageSingleData;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.service.repository.TitanKeyService;

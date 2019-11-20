@@ -1,10 +1,9 @@
 package com.ctrip.framework.db.cluster.dao;
 
-import com.ctrip.framework.db.cluster.entity.Shard;
 import com.ctrip.framework.db.cluster.entity.ShardInstance;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceHealthStatus;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceMemberStatus;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceHealthStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceMemberStatus;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;

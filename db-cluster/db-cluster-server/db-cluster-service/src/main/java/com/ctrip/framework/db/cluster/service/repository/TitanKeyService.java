@@ -2,13 +2,11 @@ package com.ctrip.framework.db.cluster.service.repository;
 
 import com.ctrip.framework.db.cluster.dao.TitanKeyDao;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
-import com.ctrip.framework.db.cluster.enums.Enabled;
-import com.ctrip.framework.db.cluster.util.Utils;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.vo.dal.create.TitanKeyVo;
 import com.ctrip.platform.dal.dao.DalHints;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;

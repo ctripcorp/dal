@@ -145,4 +145,6 @@ CREATE TABLE `titan_key` (
   KEY `index_datachange_lasttime` (`datachange_lasttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='titan_key表';
 
-
+-- done
+ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `type` tinyint NOT NULL DEFAULT 0 COMMENT '集群类型, e.g,0:普通集群; 1:DRC集群' AFTER `cluster_name`;
+ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `zone_id` varchar(16) NOT NULL DEFAULT "" COMMENT '集群类型为普通类型时, zoneId对应的zone是该集群所有应用都在使用的zone' AFTER `type`;

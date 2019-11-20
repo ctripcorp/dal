@@ -1,7 +1,8 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
 import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,10 @@ public class ClusterDTO {
 
     private String clusterName;
 
+    private Integer type;
+
+    private String zoneId;
+
     private String dbCategory;
 
     private Integer clusterEnabled;
@@ -51,6 +56,8 @@ public class ClusterDTO {
     public ClusterVo toVo() {
         return ClusterVo.builder()
                 .clusterName(clusterName)
+                .type(ClusterType.getType(type).getName())
+                .zoneId(zoneId)
                 .dbCategory(dbCategory)
                 .enabled(Enabled.getEnabled(clusterEnabled).convertToBoolean())
                 .zones(CollectionUtils.isEmpty(zones) ? Lists.newArrayList() : zones.stream().map(ZoneDTO::toVo).collect(Collectors.toList()))

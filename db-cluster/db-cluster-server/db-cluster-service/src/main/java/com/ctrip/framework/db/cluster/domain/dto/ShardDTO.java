@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
-import com.ctrip.framework.db.cluster.enums.Enabled;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceHealthStatus;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceMemberStatus;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceHealthStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceMemberStatus;
 import com.ctrip.framework.db.cluster.vo.dal.create.DatabaseVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.InstanceVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.ShardVo;
@@ -132,17 +132,19 @@ public class ShardDTO {
                     .build();
         }
 
-        final List<UserVo> userVos = Lists.newArrayListWithExpectedSize(users.size());
-        users.forEach(user -> {
-            UserVo userVo = UserVo.builder()
-                    .username(user.getUsername())
-                    .permission(user.getPermission())
-                    .tag(user.getTag())
-                    .enabled(Enabled.getEnabled(user.getUserEnabled()).convertToBoolean())
-                    .titanKey(user.getTitanKeys())
-                    .build();
-            userVos.add(userVo);
-        });
+        final List<UserVo> userVos = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(users)) {
+            users.forEach(user -> {
+                UserVo userVo = UserVo.builder()
+                        .username(user.getUsername())
+                        .permission(user.getPermission())
+                        .tag(user.getTag())
+                        .enabled(Enabled.getEnabled(user.getUserEnabled()).convertToBoolean())
+                        .titanKey(user.getTitanKeys())
+                        .build();
+                userVos.add(userVo);
+            });
+        }
 
         return ShardVo.builder()
                 .shardIndex(shardIndex)

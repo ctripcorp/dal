@@ -41,6 +41,21 @@ public class Cluster implements DalPojo {
     private String clusterName;
 
     /**
+     * 集群类型, 0:普通集群; 1:DRC集群
+     */
+    @Column(name = "type")
+    @Type(value = Types.TINYINT)
+    private Integer type;
+
+    /**
+     * 集群类型为普通类型时,
+     * zoneId对应的zone是该集群所有应用都在使用的zone
+     */
+    @Column(name = "zone_id")
+    @Type(value = Types.VARCHAR)
+    private String zoneId;
+
+    /**
      * 数据库类型
      */
     @Column(name = "db_category")

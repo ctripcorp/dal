@@ -4,7 +4,7 @@ import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.dao.ClusterDao;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
 import com.ctrip.framework.db.cluster.entity.*;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceMemberStatus;
+import com.ctrip.framework.db.cluster.entity.enums.*;
 import com.ctrip.framework.db.cluster.service.remote.mysqlapi.domain.DBConnectionCheckRequest;
 import com.ctrip.framework.db.cluster.domain.dto.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseCluster;
@@ -12,9 +12,6 @@ import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseDatabase;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.ReleaseShard;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateData;
 import com.ctrip.framework.db.cluster.domain.plugin.titan.switches.TitanKeyMhaUpdateRequest;
-import com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.schedule.FreshnessScheduleRegistration;
 import com.ctrip.framework.db.cluster.service.remote.mysqlapi.DBConnectionService;
@@ -37,6 +34,7 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.unidal.tuple.Pair;
 
 import javax.annotation.Resource;
@@ -49,8 +47,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType.id_generators;
-import static com.ctrip.framework.db.cluster.enums.ClusterExtensionConfigType.shards_strategies;
+import static com.ctrip.framework.db.cluster.entity.enums.ClusterExtensionConfigType.id_generators;
+import static com.ctrip.framework.db.cluster.entity.enums.ClusterExtensionConfigType.shards_strategies;
 
 /**
  * Created by shenjie on 2019/3/5.
@@ -180,6 +178,8 @@ public class ClusterService {
         return ClusterDTO.builder()
                 .clusterEntityId(cluster.getId())
                 .clusterName(cluster.getClusterName())
+                .type(cluster.getType())
+                .zoneId(cluster.getZoneId())
                 .dbCategory(cluster.getDbCategory())
                 .clusterEnabled(cluster.getEnabled())
                 .clusterDeleted(cluster.getDeleted())
@@ -210,52 +210,67 @@ public class ClusterService {
     }
 
 
+    /**
+     * 1、类型为drc集群,
+     * 1.1、若有大于等于2个有效zone，将所有zone发布至子环境，删除父环境；1.2、若只有1个zone，报错。
+     * 2、类型为normal, 找cluster_info表中zoneId,
+     * 2.1、找不到有效的zone，报错；2.2、找到，发主环境，删所有子环境。
+     */
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    public void release(final List<String> clusterNames, final String operator, final String releaseType) throws SQLException {
-        // valid
-        final List<ClusterDTO> clusterDTOs = Lists.newArrayListWithExpectedSize(clusterNames.size());
-        clusterNames.forEach(clusterName -> {
+    public void release(final Map<String, List<String>> clusterNameAndReleaseZoneIdsMap,
+                        final String operator, final String releaseType) throws SQLException {
+
+        final Map<ClusterDTO, List<String>> clusterDTOAndReleaseZoneIdsMap = Maps.newHashMapWithExpectedSize(
+                clusterNameAndReleaseZoneIdsMap.size()
+        );
+
+        clusterNameAndReleaseZoneIdsMap.forEach((clusterName, releaseZoneIds) -> {
             try {
                 final ClusterDTO cluster = findEffectiveClusterDTO(clusterName);
                 if (null == cluster) {
-                    throw new IllegalStateException(String.format("cluster is not exists, clusterName = %s", clusterName));
+                    throw new IllegalStateException(String.format("cluster is deleted or not enabled, clusterName = %s", clusterName));
                 }
                 releaseValid(cluster);
-                clusterDTOs.add(cluster);
+                clusterDTOAndReleaseZoneIdsMap.put(cluster, releaseZoneIds);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
 
         // call dal plugin, if request fail, throw exception, transaction rollback.
-        final List<ReleaseCluster> releaseClusters = clusterDTOs.stream()
-                .map(cluster -> constructReleaseCluster(cluster, releaseType))
-                .collect(Collectors.toList());
+//        final List<ReleaseCluster> releaseClusters = clusterDTOAndZoneIdPairs.stream()
+//                .map(cluster -> constructReleaseCluster(cluster, releaseType))
+//                .collect(Collectors.toList());
+
+
         final PluginResponse response = dalPluginService.releaseClusters(releaseClusters, Constants.ENV, operator);
         log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
                 response.getStatus(), response.getMessage()));
 
         // update db
-        final List<Cluster> clusters = Lists.newArrayListWithExpectedSize(clusterDTOs.size());
+        final Set<ClusterDTO> clusterDTOs = clusterDTOAndReleaseZoneIdsMap.keySet();
+        final List<Cluster> releaseClusters = Lists.newArrayListWithExpectedSize(clusterDTOs.size());
         clusterDTOs.forEach(clusterDTO -> {
             final Cluster updatedCluster = Cluster.builder()
                     .id(clusterDTO.getClusterEntityId())
                     .releaseVersion(clusterDTO.getClusterReleaseVersion() + 1)
                     .releaseTime(Timestamp.valueOf(LocalDateTime.now()))
                     .build();
-            clusters.add(updatedCluster);
+            releaseClusters.add(updatedCluster);
         });
 
-        clusterDao.update(clusters);
+        clusterDao.update(releaseClusters);
 
         // registry read freshness schedule
-        FreshnessScheduleRegistration.getRegistration().registryToSchedule(clusterNames);
+        FreshnessScheduleRegistration.getRegistration().registryToSchedule(
+                clusterDTOs.stream().map(ClusterDTO::getClusterName).collect(Collectors.toList())
+        );
     }
 
     private void releaseValid(final ClusterDTO cluster) {
         final String clusterName = cluster.getClusterName();
 
-        // zones exists
+        // zones
         final List<ZoneDTO> zones = cluster.getZones();
         if (CollectionUtils.isEmpty(zones)) {
             throw new IllegalStateException(String.format("zones is empty, clusterName = %s", clusterName));
@@ -267,10 +282,24 @@ public class ClusterService {
                     String.format("zoneId不允许相同, zoneId比较是否相同不区分大小写, clusterName = %s", clusterName)
             );
         }
-        // todo 目前每个cluster仅支持一个zone
-        if (zones.size() != 1) {
+
+        final ClusterType clusterType = ClusterType.getType(cluster.getType());
+        if (ClusterType.drc.equals(clusterType)) {
+            if (zones.size() == 1) {
+                throw new IllegalStateException(
+                        String.format("drc类型的集群, 必须有1个以上数量的zone, clusterName = %s.", clusterName)
+                );
+            }
+        } else if (ClusterType.normal.equals(clusterType)) {
+            final String usageZoneId = cluster.getZoneId();
+            if (!zones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList()).contains(usageZoneId)) {
+                throw new IllegalStateException(
+                        String.format("普通类型的集群, 发布时必须指定使用哪个zone进行发布, clusterName = %s", clusterName)
+                );
+            }
+        } else {
             throw new IllegalStateException(
-                    String.format("目前每个cluster仅支持一个zone, clusterName = %s", clusterName)
+                    String.format("暂不支持发布除drc/普通以外类型的集群, clusterName = %s, clusterType = %s", clusterName, clusterType.getName())
             );
         }
 
@@ -300,7 +329,7 @@ public class ClusterService {
         }
 
         zones.forEach(zoneDTO -> {
-            // shards exists
+            // shards
             final String zoneId = zoneDTO.getZoneId();
             final List<ShardDTO> shards = zoneDTO.getShards();
             if (CollectionUtils.isEmpty(shards)) {
@@ -420,10 +449,21 @@ public class ClusterService {
     }
 
 
-    private ReleaseCluster constructReleaseCluster(final ClusterDTO cluster, final String releaseType) {
-        final List<ReleaseShard> shardRequests = Lists.newArrayList();
+    private List<ReleaseCluster> constructReleases(final Map<ClusterDTO, List<String>> clusterDTOAndReleaseZoneIdsMap,
+                                                   final String releaseType) {
+        final List<ReleaseCluster> releases = Lists.newArrayList();
+        clusterDTOAndReleaseZoneIdsMap.forEach((cluster, releaseZoneIds) -> {
+            final List<ReleaseShard> shardRequests = Lists.newArrayList();
+            final List<ZoneDTO> releaseZones = cluster.getZones();
 
-        // todo 暂时只有一个zone
+            final ClusterType clusterType = ClusterType.getType(cluster.getType());
+            if (ClusterType.drc.equals(clusterType)) {
+                if (!CollectionUtils.isEmpty(releaseZoneIds)) {
+
+                }
+            }
+        });
+
         cluster.getZones().get(0).getShards().forEach(shard -> {
             // TODO: 2019/11/1 write, read账号目前只有一个
             final Optional<UserDTO> writeUserOptional = shard.getUsers().stream()

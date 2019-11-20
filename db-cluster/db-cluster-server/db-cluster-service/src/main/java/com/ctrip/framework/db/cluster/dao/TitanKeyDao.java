@@ -1,7 +1,7 @@
 package com.ctrip.framework.db.cluster.dao;
 
 import com.ctrip.framework.db.cluster.entity.TitanKey;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;

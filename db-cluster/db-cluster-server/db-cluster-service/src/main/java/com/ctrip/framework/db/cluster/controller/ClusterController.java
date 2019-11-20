@@ -2,6 +2,7 @@ package com.ctrip.framework.db.cluster.controller;
 
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
+import com.ctrip.framework.db.cluster.domain.dto.UserDTO;
 import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
 import com.ctrip.framework.db.cluster.entity.enums.Deleted;
@@ -19,6 +20,7 @@ import com.ctrip.framework.db.cluster.vo.dal.switches.ClusterSwitchesVo;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.unidal.tuple.Pair;
 
@@ -106,11 +108,14 @@ public class ClusterController {
 
             clusterDTO.getZones().forEach(
                     zone -> zone.getShards().forEach(
-                            shard -> shard.getUsers().forEach(
-                                    user -> {
-                                        user.setUsername(cipherService.decrypt(user.getUsername()));
-                                    }
-                            )
+                            shard -> {
+                                final List<UserDTO> users = shard.getUsers();
+                                if (!CollectionUtils.isEmpty(users)) {
+                                    users.forEach(
+                                            user -> user.setUsername(cipherService.decrypt(user.getUsername()))
+                                    );
+                                }
+                            }
                     )
             );
             ResponseModel response = ResponseModel.successResponse(clusterDTO.toVo());

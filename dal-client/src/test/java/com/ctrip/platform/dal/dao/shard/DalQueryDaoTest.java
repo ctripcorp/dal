@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 public abstract class DalQueryDaoTest {
 	private String logicDbName;
 	private DatabaseCategory dbCategory;
-	private DalQueryDao dao;
+	protected DalQueryDao dao;
 	private final static String TABLE_NAME = "dal_client_test";
 
 	public DalQueryDaoTest(String DATABASE_NAME, DatabaseCategory dbCategory){
@@ -634,6 +634,10 @@ public abstract class DalQueryDaoTest {
 		return dao.query(builder, hints.inAllShards());
 	}
 
+	public List queryMultipleAllShardsUseLocalVariable(DalHints hints) throws SQLException {
+	    return null;
+    }
+
 	@Test
 	public void testQueryMultipleAllShards() {
 		if(dbCategory == DatabaseCategory.Oracle)
@@ -641,8 +645,9 @@ public abstract class DalQueryDaoTest {
 
 		try {
 			List list = queryMultipleAllShards(new DalHints());
-
+            List list1 = queryMultipleAllShardsUseLocalVariable(new DalHints());
 			assertMultipleResult(list);
+            assertMultipleResult1(list1);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -658,9 +663,16 @@ public abstract class DalQueryDaoTest {
 			DalHints hints = new DalHints();
 			List list = queryMultipleAllShards(hints.asyncExecution());
 
+            DalHints hints1 = new DalHints();
+            List list1 = queryMultipleAllShardsUseLocalVariable(hints1.asyncExecution());
+
 			assertNull(list);
+            assertNull(list1);
+
 			list = (List)hints.getAsyncResult().get();
+			list1 = (List)hints1.getAsyncResult().get();
 			assertMultipleResult(list);
+            assertMultipleResult1(list1);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -679,6 +691,10 @@ public abstract class DalQueryDaoTest {
 		assertEquals(6, ((List)list.get(6)).size());
 		assertEquals(6, ((List)list.get(7)).size());
 	}
+
+    public void assertMultipleResult1(List list) {
+	    return;
+    }
 
 	@Test
 	public void testQueryListAllShardsWithCallback() {

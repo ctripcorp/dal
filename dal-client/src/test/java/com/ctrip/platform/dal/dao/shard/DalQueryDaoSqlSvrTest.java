@@ -5,11 +5,18 @@ import com.ctrip.platform.dal.dao.DalClient;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
+import com.ctrip.platform.dal.dao.sqlbuilder.MultipleSqlBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class DalQueryDaoSqlSvrTest extends DalQueryDaoTest {
@@ -119,4 +126,44 @@ public class DalQueryDaoSqlSvrTest extends DalQueryDaoTest {
 		}
 	}
 
+	@Override
+	public List queryMultipleAllShardsUseLocalVariable(DalHints hints) throws SQLException {
+		String declareSql = "DECLARE @id int,@type int";
+		String[] sqls = new String[4];
+		//这其实是两个sql，用;分隔开，方便参数化设置
+		sqls[0] = "SET @id = ?;SET @type = ?";
+		sqls[1] = "select id from " + TABLE_NAME + " where id = @id and type = @type";
+		sqls[2] = "select type from " + TABLE_NAME + " where id = @id and type = @type";
+		sqls[3] = "select quantity from " + TABLE_NAME + " where id = @id and type = @type";
+
+		int i = 0;
+		try {
+			MultipleSqlBuilder multipleSqlBuilder = new MultipleSqlBuilder();
+			//针对sqlserver 需要先声明变量，才能set
+			multipleSqlBuilder.addQuery(declareSql, new StatementParameters());
+			for (String sql : sqls) {
+				++i;
+				if (i == 1) {
+					StatementParameters parameters = new StatementParameters();
+					parameters.set(1, Types.INTEGER,1);
+					parameters.set(2, Types.INTEGER,0);
+					multipleSqlBuilder.addQuery(sql, parameters);
+				}
+				else {
+					multipleSqlBuilder.addQuery(sql, new StatementParameters(), new DalObjectRowMapper<Object>());
+				}
+			}
+			return dao.query(multipleSqlBuilder, hints.inAllShards());
+		} catch (Exception e) {
+			throw new SQLException();
+		}
+	}
+
+    @Override
+    public void assertMultipleResult1(List list) {
+        assertEquals(3, list.size());
+        assertEquals(1, ((List)list.get(0)).size());
+        assertEquals(1, ((List)list.get(1)).size());
+        assertEquals(1, ((List)list.get(2)).size());
+    }
 }

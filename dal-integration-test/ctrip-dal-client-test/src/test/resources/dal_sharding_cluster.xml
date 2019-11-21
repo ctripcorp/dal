@@ -1,0 +1,23 @@
+<DAL>
+    <Cluster name="dal_sharding_cluster" dbCategory="mysql" version="2">
+        <DatabaseShards>
+            <DatabaseShard index="0" masterDomain="10.32.20.139" masterPort="3306" masterTitanKeys="">
+                <Database role="master" ip="10.32.20.139" port="3306" dbName="llj_crossshardbymod_0" uid="root" pwd="!QAZ@WSX1qaz2wsx" readWeight="1"/>
+            </DatabaseShard>
+            <DatabaseShard index="1" masterDomain="10.32.20.139" masterPort="3306" masterTitanKeys="">
+                <Database role="master" ip="10.32.20.139" port="3306" dbName="llj_crossshardbymod_1" uid="root" pwd="!QAZ@WSX1qaz2wsx" readWeight="1"/>
+            </DatabaseShard>
+            <DatabaseShard index="2" masterDomain="10.32.20.139" masterPort="3306" masterTitanKeys="">
+                <Database role="master" ip="10.32.20.139" port="3306" dbName="llj_crossshardbymod_2" uid="root" pwd="!QAZ@WSX1qaz2wsx" readWeight="1"/>
+            </DatabaseShard>
+            <DatabaseShard index="3" masterDomain="10.32.20.139" masterPort="3306" masterTitanKeys="">
+                <Database role="master" ip="10.32.20.139" port="3306" dbName="llj_crossshardbymod_3" uid="root" pwd="!QAZ@WSX1qaz2wsx" readWeight="1"/>
+            </DatabaseShard>
+        </DatabaseShards>
+        <ShardStrategies><ModStrategy><Property name="dbShardColumn" value="id"/><Property name="dbShardMod" value="4"/><Tables><Table name="strategy_meta"/></Tables></ModStrategy><CustomStrategy class="cluster.FltShardStrategy" default="true"><Property name="dbShardColumn" value="age"/><Property name="dbShardMod" value="4"/></CustomStrategy></ShardStrategies>
+        <!--<IdGenerators><IdGenerator><includes><include><tables><table>person</table></tables></include></includes></IdGenerator></IdGenerators>-->
+        <SslCode>VZ00000000000441</SslCode>
+        <Operator>zhuyongming</Operator>
+        <UpdateTime>2019-11-19 20:37:56</UpdateTime>
+    </Cluster>
+</DAL>

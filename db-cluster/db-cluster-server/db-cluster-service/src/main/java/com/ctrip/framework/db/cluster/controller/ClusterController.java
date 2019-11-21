@@ -187,10 +187,13 @@ public class ClusterController {
                 return ResponseModel.forbiddenResponse();
             }
 
-            clusterService.release(releaseZoneId, clusterName, operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
+            // release
+            clusterService.assignZoneRelease(
+                    releaseZoneId, clusterName, operator, Constants.RELEASE_TYPE_NORMAL_RELEASE)
+            ;
+
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("Release cluster success");
-
             return response;
         } catch (Exception e) {
             log.error(String.format("Release cluster failed, clusterName = %s .", clusterName), e);
@@ -223,128 +226,55 @@ public class ClusterController {
         }
     }
 
-    // deprecated
-//    @RequestMapping(value = "/add", method = RequestMethod.POST)
-//    public ResponseModel releaseClusters(@RequestBody ClusterVo cluster,
-//                                    @RequestParam(name = "operator", required = false) String operator,
-//                                    HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            // check cluster
-//            dalClusterValidityChecker.checkCluster(cluster, operator);
-//
-//            // createClusterSets cluster to db
-//            dalClusterManager.releaseClusters(cluster);
-//
-//            // sync titanKeys to plugin
-//            titanSyncService.addTitanKeysAsync(cluster, Constants.ENV);
-//
-//            return ResponseModel.successResponse();
-//
-//        } catch (Exception e) {
-//            log.error("Add dal cluster info failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
-//
-//    @RequestMapping(value = "/release", method = RequestMethod.GET)
-//    public ResponseModel releaseAll(@RequestParam(name = "clustername", required = false) String clusterName,
-//                                    @RequestParam(name = "operator", required = false) String operator,
-//                                    HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername参数为空");
-//            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            dalClusterReleaseService.addClusters(clusterName, Constants.ENV, operator);
-//            return ResponseModel.successResponse();
-//
-//        } catch (Exception e) {
-//            log.error("Release dal cluster failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
+    @PutMapping(value = "/clusters/{clusterName}/types/drc")
+    public ResponseModel transformToDrc(@PathVariable String clusterName,
+                                        @RequestParam(name = "operator") String operator,
+                                        HttpServletRequest request) {
 
-//    @RequestMapping(value = "/switch", method = RequestMethod.POST)
-//    public ResponseModel switchCluster(@RequestBody DatabaseGroupVo databases,
-//                                       @RequestParam(name = "operator", required = false) String operator,
-//                                       HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            // check databases
-//            dalClusterValidityChecker.checkDatabases(databases);
-//
-//            String env = Constants.ENV;
-//            // update cluster(db, qconfig)
-//            List<ShardVo> shards = databases.getDatabases();
-//            updateAndReleaseCluster(shards, env, operator);
-//
-//            // update titanKeys to qconfig
-//            titanSyncService.updateTitanKeysAsync(shards, env, operator);
-//
-//            return ResponseModel.successResponse();
-//
-//        } catch (Exception e) {
-//            log.error("Switch dal cluster failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
 
-//    @RequestMapping(value = "/info", method = RequestMethod.GET)
-//    public ResponseModel get(@RequestParam(name = "clustername", required = false) String clusterName,
-//                             HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            clusterName = Utils.format(clusterName);
-//            ClusterVo cluster = dalClusterManager.getCluster(clusterName);
-//            SecurityUtil.encryptPassword(cluster);
-//
-//            return ResponseModel.successResponse(cluster);
-//
-//        } catch (Exception e) {
-//            log.error("Get dal cluster failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
 
-//    @RequestMapping(value = "/delete", method = RequestMethod.GET)
-//    public ResponseModel delete(@RequestParam(name = "name") String name) {
-//        return null;
-//    }
+            clusterService.transformToDrc(clusterName, operator);
 
-//    private void updateAndReleaseCluster(List<ShardVo> shards, String env, String operator) throws SQLException {
-//        // update cluster shards in db
-//        DalClient client = DalClientFactory.getClient(Constants.DATABASE_SET_NAME);
-//        List<DalCommand> dalCommands = Lists.newArrayList();
-//        dalCommands.add(new DalCommand() {
-//            public boolean execute(DalClient client) throws SQLException {
-//                dalClusterManager.updateShards(shards);
-//                return true;
-//            }
-//        });
-//
-//        // update clusters to plugin
-//        dalCommands.add(new DalCommand() {
-//            public boolean execute(DalClient client) throws SQLException {
-//                dalClusterReleaseService.updateClusters(shards, env, operator);
-//                return true;
-//            }
-//        });
-//        DalHints hints = new DalHints();
-//        client.execute(dalCommands, hints);
-//    }
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("Transform to drc cluster success");
+            return response;
+        } catch (Exception e) {
+            log.error("Transform to drc type cluster", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
+
+    @PutMapping(value = "/clusters/{clusterName}/types/normal")
+    public ResponseModel transformToNormal(@PathVariable String clusterName,
+                                           @RequestParam(name = "releaseZoneId") String releaseZoneId,
+                                           @RequestParam(name = "operator") String operator,
+                                           HttpServletRequest request) {
+
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
+            releaseZoneId = Utils.format(releaseZoneId);
+
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
+
+            clusterService.transformToNormal(clusterName, releaseZoneId, operator);
+
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("Transform to normal cluster success");
+            return response;
+        } catch (Exception e) {
+            log.error("Transform to normal cluster failed", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
 }

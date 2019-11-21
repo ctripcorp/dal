@@ -64,6 +64,10 @@ public class ClusterSetService {
         }
     }
 
+    public void updateClusterSets(final List<ClusterSet> updatedClusterSets) throws SQLException {
+        clusterSetDao.update(updatedClusterSets);
+    }
+
     public List<ZoneDTO> findUnDeletedByClusterId(final Integer clusterId) throws SQLException {
         // find unDeleted Zones by clusterId
         final ClusterSet queryClusterSet = ClusterSet.builder()

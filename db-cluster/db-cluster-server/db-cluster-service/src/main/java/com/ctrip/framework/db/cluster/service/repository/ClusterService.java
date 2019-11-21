@@ -210,13 +210,13 @@ public class ClusterService {
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
-    public void release(final String releaseZoneId, final String clusterName,
-                        final String operator, final String releaseType) throws SQLException {
+    public void assignZoneRelease(final String releaseZoneId, final String clusterName,
+                                  final String operator, final String releaseType) throws SQLException {
 
         if (StringUtils.isNotBlank(releaseZoneId)) {
             final Cluster cluster = findCluster(clusterName, Deleted.un_deleted, Enabled.enabled);
             if (null == cluster) {
-                throw new IllegalArgumentException(String.format("cluster not exists, clusterName = %s", clusterName));
+                throw new IllegalArgumentException("cluster does not exists");
             }
 
             final ClusterSet queryClusterSet = ClusterSet.builder()
@@ -231,6 +231,7 @@ public class ClusterService {
             }
 
             final Cluster updateCluster = Cluster.builder()
+                    .id(cluster.getId())
                     .zoneId(releaseZoneId)
                     .build();
             clusterDao.update(updateCluster);
@@ -314,6 +315,7 @@ public class ClusterService {
                 // delete father env
                 final DeleteCluster deleteCluster = DeleteCluster.builder()
                         .clusterName(cluster.getClusterName())
+                        .subEnv("")
                         .build();
                 deleteClusters.add(deleteCluster);
 
@@ -366,11 +368,13 @@ public class ClusterService {
                 releaseClusters.add(release);
 
                 // delete all sub env
-                final DeleteCluster deleteCluster = DeleteCluster.builder()
-                        .clusterName(cluster.getClusterName())
-                        .subEnv("all")
-                        .build();
-                deleteClusters.add(deleteCluster);
+                zones.forEach(zone -> {
+                    final DeleteCluster deleteCluster = DeleteCluster.builder()
+                            .clusterName(cluster.getClusterName())
+                            .subEnv(zone.getZoneId())
+                            .build();
+                    deleteClusters.add(deleteCluster);
+                });
             }
         }
 
@@ -1064,5 +1068,59 @@ public class ClusterService {
             // argument correct
             cluster.correct();
         });
+    }
+
+    @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
+    public void transformToDrc(final String clusterName,
+                               final String operator) throws SQLException {
+
+        final Cluster cluster = findCluster(clusterName, Deleted.un_deleted, Enabled.enabled);
+        if (null == cluster) {
+            throw new IllegalArgumentException("cluster does not exists.");
+        }
+
+        // update type, remove release zoneId
+        final Cluster updateCluster = Cluster.builder()
+                .id(cluster.getId())
+                .type(ClusterType.drc.getCode())
+                .zoneId("")
+                .build();
+        clusterDao.update(updateCluster);
+
+        // release
+        release(Lists.newArrayList(clusterName), operator, Constants.RELEASE_TYPE_TRANSFORM_RELEASE);
+    }
+
+    @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
+    public void transformToNormal(final String clusterName, final String releaseZoneId,
+                                  final String operator) throws SQLException {
+
+        final Cluster cluster = findCluster(clusterName, Deleted.un_deleted, Enabled.enabled);
+        if (null == cluster) {
+            throw new IllegalArgumentException("cluster does not exists.");
+        }
+
+        // release zoneId exists valid
+        final ClusterSet queryClusterSet = ClusterSet.builder()
+                .clusterId(cluster.getId())
+                .setId(releaseZoneId)
+                .build();
+        final List<ClusterSet> clusterSets = clusterSetService.findCusterSets(queryClusterSet);
+        if (CollectionUtils.isEmpty(clusterSets)) {
+            throw new IllegalArgumentException(
+                    String.format("releaseZone not exists, clusterName = %s, releaseZoneId = %s", clusterName, releaseZoneId)
+            );
+        }
+
+        // update type, assign release zoneId
+        final Cluster updateCluster = Cluster.builder()
+                .id(cluster.getId())
+                .type(ClusterType.normal.getCode())
+                .zoneId(releaseZoneId)
+                .build();
+        clusterDao.update(updateCluster);
+
+        // release
+        release(Lists.newArrayList(clusterName), operator, Constants.RELEASE_TYPE_TRANSFORM_RELEASE);
     }
 }

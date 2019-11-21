@@ -5,6 +5,7 @@ import com.ctrip.framework.db.cluster.domain.dto.ShardDTO;
 import com.ctrip.framework.db.cluster.domain.dto.ZoneDTO;
 import com.ctrip.framework.db.cluster.entity.Shard;
 import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
 import com.ctrip.framework.db.cluster.service.repository.ShardService;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ShardController {
 
+    private final SiteAccessChecker siteAccessChecker;
+
     private final ClusterService clusterService;
 
     private final ShardService shardService;
@@ -42,9 +46,16 @@ public class ShardController {
 
     @PostMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
     public ResponseModel addShards(@PathVariable String clusterName, @PathVariable String zoneId,
-                                   @RequestParam(name = "operator") String operator, @RequestBody final ShardVo[] shardVos) {
+                                   @RequestParam(name = "operator") String operator,
+                                   @RequestBody final ShardVo[] shardVos,
+                                   final HttpServletRequest request) {
 
         try {
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
+
             // format parameter
             clusterName = Utils.format(clusterName);
             zoneId = Utils.format(zoneId);
@@ -81,9 +92,16 @@ public class ShardController {
 
     @DeleteMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
     public ResponseModel deleteShards(@PathVariable String clusterName, @PathVariable String zoneId,
-                                      @RequestParam(name = "operator") String operator, @RequestBody Integer[] shardIndexes) {
+                                      @RequestParam(name = "operator") String operator,
+                                      @RequestBody Integer[] shardIndexes,
+                                      final HttpServletRequest request) {
 
         try {
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
+
             // format parameter
             clusterName = Utils.format(clusterName);
             zoneId = Utils.format(zoneId);
@@ -133,6 +151,9 @@ public class ShardController {
         );
         addedShards.forEach(shard -> shard.valid(regexMatcher));
 
+        // shards correct
+        addedShards.forEach(ShardVo::correct);
+
         // shardIndex repeated valid
         final List<Integer> distinctSortedAddedShardIndexes = addedShards.stream()
                 .map(ShardVo::getShardIndex).distinct().sorted().collect(Collectors.toList());
@@ -148,9 +169,6 @@ public class ShardController {
                 distinctAddedDbNames.size() == addedShards.size(),
                 "Newly added dbName are not allowed to be repeated."
         );
-
-        // shards correct
-        addedShards.forEach(ShardVo::correct);
     }
 
     private void clusterExistsValid(final ClusterDTO clusterDTO) {

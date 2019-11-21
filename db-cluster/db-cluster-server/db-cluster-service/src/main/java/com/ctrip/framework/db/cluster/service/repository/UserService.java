@@ -12,7 +12,6 @@ import com.ctrip.framework.db.cluster.entity.User;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
-import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.RC4;
@@ -46,8 +45,6 @@ public class UserService {
     private final CipherService cipherService;
 
     private final TitanPluginService titanPluginService;
-
-    private final ConfigService configService;
 
 
     public void addUsers(int shardIndex, List<UserVo> users, final ClusterDTO clusterDTO) {
@@ -104,18 +101,15 @@ public class UserService {
         if (titanKeyNames != null && !titanKeyNames.isEmpty()) {
             String[] titanKeyNameArr = titanKeyNames.split(",");
             for (String titanKeyName : titanKeyNameArr) {
-                // TODO: 2019/11/1 临时
-                if (configService.isQconfigPluginSwitch()) {
-                    TitanKeyGetData titanKeyData = queryTitanKey(titanKeyName);
-                    if (titanKeyData != null) {
-                        validateTitanKey(titanKeyData, ctx);
-                        user.setPassword(RC4.decrypt(titanKeyData.getPassword()));
-                    } else {
-                        TitanKeyInfo newTitanKey = prepareTitanKey(titanKeyName, ctx);
-                        PluginResponse response = titanPluginService.addTitanKey(newTitanKey, Constants.ENV);
-                        log.info(String.format("Add Titan Key: %s. Result Code: %s; Result Msg: %s", titanKeyName,
-                                response.getStatus(), response.getMessage()));
-                    }
+                TitanKeyGetData titanKeyData = queryTitanKey(titanKeyName);
+                if (titanKeyData != null) {
+                    validateTitanKey(titanKeyData, ctx);
+                    user.setPassword(RC4.decrypt(titanKeyData.getPassword()));
+                } else {
+                    TitanKeyInfo newTitanKey = prepareTitanKey(titanKeyName, ctx);
+                    PluginResponse response = titanPluginService.addTitanKey(newTitanKey, Constants.ENV);
+                    log.info(String.format("Add Titan Key: %s. Result Code: %s; Result Msg: %s", titanKeyName,
+                            response.getStatus(), response.getMessage()));
                 }
             }
         }

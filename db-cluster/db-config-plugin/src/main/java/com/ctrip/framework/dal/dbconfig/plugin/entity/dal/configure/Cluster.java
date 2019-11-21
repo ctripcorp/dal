@@ -1,5 +1,8 @@
 package com.ctrip.framework.dal.dbconfig.plugin.entity.dal.configure;
 
+import com.ctrip.framework.dal.dbconfig.plugin.constant.DalConstants;
+import com.ctrip.framework.dal.dbconfig.plugin.util.XmlUtils;
+
 import javax.xml.bind.annotation.*;
 
 /**
@@ -19,9 +22,9 @@ public class Cluster {
     @XmlElement(name = "DatabaseShards")
     private DatabaseShards shards;
     @XmlElement(name = "ShardStrategies")
-    private String shardStrategies;
+    private ShardStrategies shardStrategies;
     @XmlElement(name = "IdGenerators")
-    private String idGenerators;
+    private IdGenerators idGenerators;
     @XmlElement(name = "SslCode")
     private String sslCode;
     @XmlElement(name = "Operator")
@@ -71,20 +74,30 @@ public class Cluster {
         this.shards = shards;
     }
 
-    public String getShardStrategies() {
+    public ShardStrategies getShardStrategies() {
         return shardStrategies;
     }
 
-    public void setShardStrategies(String shardStrategies) {
+    public void setShardStrategies(ShardStrategies shardStrategies) {
         this.shardStrategies = shardStrategies;
     }
 
-    public String getIdGenerators() {
+    public void setShardStrategiesText(String shardStrategies) {
+        String wrapped = XmlUtils.wrap(DalConstants.SHARD_STRATEGIES, shardStrategies);
+        setShardStrategies((ShardStrategies) XmlUtils.fromXml(wrapped, ShardStrategies.class));
+    }
+
+    public IdGenerators getIdGenerators() {
         return idGenerators;
     }
 
-    public void setIdGenerators(String idGenerators) {
+    public void setIdGenerators(IdGenerators idGenerators) {
         this.idGenerators = idGenerators;
+    }
+
+    public void setIdGeneratorsText(String idGenerators) {
+        String wrapped = XmlUtils.wrap(DalConstants.ID_GENERATORS, idGenerators);
+        setIdGenerators((IdGenerators) XmlUtils.fromXml(wrapped, IdGenerators.class));
     }
 
     public String getSslCode() {
@@ -125,4 +138,5 @@ public class Cluster {
                 ", updateTime=" + updateTime +
                 '}';
     }
+
 }

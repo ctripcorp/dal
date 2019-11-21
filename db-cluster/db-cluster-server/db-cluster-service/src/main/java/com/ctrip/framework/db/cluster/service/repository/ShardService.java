@@ -84,6 +84,10 @@ public class ShardService {
         }
     }
 
+    public List<Shard> findShards(final List<Integer> clusterIds, final Deleted deleted) throws SQLException {
+        return shardDao.findShards(clusterIds, deleted);
+    }
+
     public List<ShardDTO> findUnDeletedByClusterId(final Integer clusterId) throws SQLException {
         final Shard queryShard = Shard.builder()
                 .clusterId(clusterId)
@@ -321,10 +325,11 @@ public class ShardService {
         return shardDao.findShardsByDBNames(dbNames);
     }
 
-    public List<Shard> findShardsByClusterId(Integer clusterId) throws SQLException {
-        Shard shard = Shard.builder().clusterId(clusterId).build();
-        List<Shard> shards = shardDao.queryBy(shard);
-        return shards;
+    public List<Shard> findShardsByClusterId(final Integer clusterId) throws SQLException {
+        Shard queryShard = Shard.builder()
+                .clusterId(clusterId)
+                .build();
+        return shardDao.queryBy(queryShard);
     }
 
     public Shard findShardsByClusterIdAndShardIndex(Integer clusterId, Integer shardIndex) throws SQLException {

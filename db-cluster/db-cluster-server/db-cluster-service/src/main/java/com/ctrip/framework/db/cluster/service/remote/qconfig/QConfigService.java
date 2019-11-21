@@ -70,7 +70,7 @@ public class QConfigService {
             urlParams.add(new BasicNameValuePair("token", configService.getQConfigRestApiToken()));
             urlParams.add(new BasicNameValuePair("groupid", Constants.DAL_CLUSTER_SERVICE_APPID));
 
-            final String url = configService.getQConfigRestApiUrl() + String.format(sub_env, env);
+            final String url = configService.getQConfigRestApiUrl() + String.format(sub_env, env.toLowerCase());
             String response = HttpUtils.getInstance().sendGet(url, urlParams, configService.getHttpReadTimeoutInMs());
             QConfigSubEnvResponse subEnvResponse = Utils.gson.fromJson(response, QConfigSubEnvResponse.class);
             t.setStatus(Message.SUCCESS);

@@ -7,6 +7,7 @@ import com.ctrip.framework.db.cluster.service.remote.qconfig.domain.QConfigSubEn
 import com.ctrip.framework.db.cluster.service.repository.TitanKeyService;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.thread.DalServiceThreadFactory;
+import com.dianping.cat.Cat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
  * Created by @author zhuYongMing on 2019/11/7.
  */
 @Slf4j
-//@Component
+@Component
 public class TitanKeysExistsSchedule {
 
     private final ScheduledExecutorService timer;
@@ -59,7 +60,11 @@ public class TitanKeysExistsSchedule {
                     subEnv.forEach(sub -> {
                         final QConfigFileNameResponse fileNameResponse = qConfigService.queryFileNames(sub);
                         if (fileNameResponse.isLegal()) {
-                            subEnvAndKeyNames.put(sub, fileNameResponse.getData().getNormal());
+                            subEnvAndKeyNames.put(
+                                    sub.toLowerCase(),
+                                    fileNameResponse.getData().getNormal().stream()
+                                            .map(String::toLowerCase).collect(Collectors.toList())
+                            );
                         } else {
                             log.error(String.format(
                                     "titanKeys exists schedule query fileNames result illegal, subEnv = %s, status = %d, message = %s, result = %s",
@@ -77,7 +82,6 @@ public class TitanKeysExistsSchedule {
                     );
                 }
             } catch (Exception e) {
-                // TODO: 2019/11/7 cat
                 log.error("titanKeys exists schedule remote call qconfig error.", e);
             }
 
@@ -90,9 +94,9 @@ public class TitanKeysExistsSchedule {
             final List<TitanKey> titanKeys = titanKeyService.findKeyNameAndSubEnv();
             final Map<String, List<String>> existSubEnvAndKeyNames = titanKeys.stream().collect(
                     Collectors.groupingBy(
-                            TitanKey::getSubEnv,
+                            titanKey -> titanKey.getSubEnv().toLowerCase(),
                             Collectors.mapping(
-                                    TitanKey::getName, Collectors.toList()
+                                    titanKey -> titanKey.getName().toLowerCase(), Collectors.toList()
                             )
                     )
             );
@@ -101,27 +105,53 @@ public class TitanKeysExistsSchedule {
             final Map<String, List<String>> missingSubEnvAndKeyNames = Maps.newHashMap();
             remoteSubEnvAndKeyNames.forEach((subEnv, remoteKeyNames) -> {
                 // each subEnv
-                final List<String> existsKeyNames = existSubEnvAndKeyNames.get(subEnv);
+                List<String> existsKeyNames = existSubEnvAndKeyNames.get(subEnv);
+                if (CollectionUtils.isEmpty(existsKeyNames)) {
+                    if (!CollectionUtils.isEmpty(remoteKeyNames)) {
+                        missingSubEnvAndKeyNames.put(subEnv, remoteKeyNames);
+                    }
+                    return;
+                }
+
+                // remoteKeyNames sort
+                remoteKeyNames = remoteKeyNames.stream().sorted().collect(Collectors.toList());
+                // existsKeyNames sort
+                existsKeyNames = existsKeyNames.stream().sorted().collect(Collectors.toList());
+
+                // compare
                 if (!existsKeyNames.equals(remoteKeyNames)) {
                     // excess
                     final List<String> excess = Lists.newArrayList(existsKeyNames);
                     excess.removeAll(remoteKeyNames);
-                    excessSubEnvAndKeyNames.put(subEnv, excess);
+                    if (!CollectionUtils.isEmpty(excess)) {
+                        excessSubEnvAndKeyNames.put(subEnv, excess);
+                    }
 
                     // missing
                     final List<String> missing = Lists.newArrayList(remoteKeyNames);
                     missing.removeAll(existsKeyNames);
-                    missingSubEnvAndKeyNames.put(subEnv, missing);
+                    if (!CollectionUtils.isEmpty(missing)) {
+                        missingSubEnvAndKeyNames.put(subEnv, missing);
+                    }
                 }
+                existSubEnvAndKeyNames.remove(subEnv);
             });
 
+            if (!CollectionUtils.isEmpty(existSubEnvAndKeyNames)) {
+                existSubEnvAndKeyNames.forEach(excessSubEnvAndKeyNames::put);
+            }
+
             if (!CollectionUtils.isEmpty(excessSubEnvAndKeyNames)) {
-                // TODO: 2019/11/8 cat
+                final Map<String, String> nameValuePairs = Maps.newHashMapWithExpectedSize(1);
+                nameValuePairs.put("excess keys", excessSubEnvAndKeyNames.toString());
+                Cat.logEvent("Schedule.TitanKeys.Exists", "excess", "warning", nameValuePairs);
                 log.error(String.format("titanKey exists schedule, excess keys = %s", excessSubEnvAndKeyNames.toString()));
             }
 
             if (!CollectionUtils.isEmpty(missingSubEnvAndKeyNames)) {
-                // TODO: 2019/11/8 cat
+                final Map<String, String> nameValuePairs = Maps.newHashMapWithExpectedSize(1);
+                nameValuePairs.put("missing keys", missingSubEnvAndKeyNames.toString());
+                Cat.logEvent("Schedule.TitanKeys.Exists", "missing", "warning", nameValuePairs);
                 log.error(String.format("titanKey exists schedule, missing keys = %s", missingSubEnvAndKeyNames.toString()));
             }
 

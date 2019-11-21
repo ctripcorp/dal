@@ -5,6 +5,7 @@ import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageSingl
 import com.ctrip.framework.db.cluster.domain.plugin.titan.page.TitanKeyPageSingleData;
 import com.ctrip.framework.db.cluster.entity.TitanKey;
 import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.service.repository.TitanKeyService;
 import com.ctrip.framework.db.cluster.util.Constants;
@@ -27,10 +28,8 @@ import java.util.stream.Collectors;
  * Created by @author zhuYongMing on 2019/11/6.
  */
 @Slf4j
-//@Component
+@Component
 public class TitanKeySynchronizeSchedule {
-
-    private static final Integer pageSize = 5000;
 
     private static final Integer initPageNo = 1;
 
@@ -42,13 +41,17 @@ public class TitanKeySynchronizeSchedule {
 
     private final TitanKeyService titanKeyService;
 
+    private final ConfigService configService;
 
-    public TitanKeySynchronizeSchedule(final TitanPluginService titanPluginService, final TitanKeyService titanKeyService) {
+
+    public TitanKeySynchronizeSchedule(final TitanPluginService titanPluginService, final TitanKeyService titanKeyService,
+                                       final ConfigService configService) {
         this.timer = Executors.newSingleThreadScheduledExecutor(
                 new DalServiceThreadFactory("TitanKeySynchronizeScheduleTimerThread")
         );
         this.titanPluginService = titanPluginService;
         this.titanKeyService = titanKeyService;
+        this.configService = configService;
         initSchedule();
     }
 
@@ -58,6 +61,7 @@ public class TitanKeySynchronizeSchedule {
                     log.info("start titanKeys synchronize schedule.");
 
                     int totalPage = initTotalPage;
+                    final int pageSize = configService.getTitanKeySynchronizeSchedulePageSize();
                     for (int pageNo = initPageNo; pageNo <= totalPage; pageNo++) {
                         try {
                             final TitanKeyPageResponse titanKeyPageResponse = titanPluginService.pageQueryTitanKeys(
@@ -83,7 +87,7 @@ public class TitanKeySynchronizeSchedule {
                     }
 
                     log.info("end titanKeys synchronize schedule.");
-                }, 0, 1, TimeUnit.MINUTES
+                }, 0, configService.getTitanKeySynchronizeScheduleDelayMinutes(), TimeUnit.MINUTES
         );
     }
 

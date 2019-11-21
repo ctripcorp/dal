@@ -3,6 +3,7 @@ package com.ctrip.framework.db.cluster.service.remote.qconfig.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Created by @author zhuYongMing on 2019/11/11.
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class QConfigFileDetailResponse {
 
     private Integer status;

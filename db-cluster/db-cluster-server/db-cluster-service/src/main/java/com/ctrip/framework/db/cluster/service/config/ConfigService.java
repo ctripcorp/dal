@@ -40,6 +40,8 @@ public class ConfigService {
     private static final String KEY_HTTP_READ_TIMEOUT_IN_MS = "httpReadTimeoutInMs";
     private static final String KEY_FRESHNESS_ENABLED = "freshnessEnabled";
     private static final String KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = "freshnessClusterEnabledAndThresholdSecond";
+    private static final String KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES = "titanKeySynchronizeScheduleDelayMinutes";
+    private static final String KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE = "titanKeySynchronizeSchedulePageSize";
 
     private static final String KEY_CLUSTER_NAME_REGEX = "clusterNameRegex";
     private static final String KEY_DB_NAME_REGEX = "dbNameRegex";
@@ -49,9 +51,6 @@ public class ConfigService {
     private static final String KEY_PORT_REGEX = "portRegex";
     private static final String KEY_IPV4_REGEX = "ipv4Regex";
     private static final String KEY_IPV6_REGEX = "ipv6Regex";
-    // TODO: 2019/11/1 临时
-    private static final String KEY_QCONFIG_PLUGIN_SWITCH = "qconfigPluginSwitch";
-
 
     // qconfig default value
     private static final String DEFAULT_PLUGIN_TITAN_URL = "http://qconfig.ctripcorp.com/plugins/titan";
@@ -66,6 +65,8 @@ public class ConfigService {
     private static final int DEFAULT_HTTP_READ_TIMEOUT_IN_MS = 10000;
     private static final boolean DEFAULT_FRESHNESS_ENABLED = true;
     private static final String DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = ""; // example:"cluster1:5,cluster2:2,cluster3:10"
+    private static final int DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES = 1;
+    private static final int DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE = 5000;
 
     private static final String DEFAULT_CLUSTER_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
     private static final String DEFAULT_DB_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
@@ -75,9 +76,6 @@ public class ConfigService {
     private static final String DEFAULT_PORT_REGEX = "^[0-9]{1,5}$";
     private static final String DEFAULT_IPV4_REGEX = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$";
     private static final String DEFAULT_IPV6_REGEX = "^([\\da-fA-F]{1,4}:){6}((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|::([\\da−fA−F]1,4:)0,4((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|::([\\da−fA−F]1,4:)0,4((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|^([\\da-fA-F]{1,4}:):([\\da-fA-F]{1,4}:){0,3}((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)2:([\\da−fA−F]1,4:)0,2((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)2:([\\da−fA−F]1,4:)0,2((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|^([\\da-fA-F]{1,4}:){3}:([\\da-fA-F]{1,4}:){0,1}((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)4:((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|([\\da−fA−F]1,4:)4:((25[0−5]|2[0−4]\\d|[01]?\\d\\d?)\\.)3(25[0−5]|2[0−4]\\d|[01]?\\d\\d?)|^([\\da-fA-F]{1,4}:){7}[\\da-fA-F]{1,4}|:((:[\\da−fA−F]1,4)1,6|:)|:((:[\\da−fA−F]1,4)1,6|:)|^[\\da-fA-F]{1,4}:((:[\\da-fA-F]{1,4}){1,5}|:)|([\\da−fA−F]1,4:)2((:[\\da−fA−F]1,4)1,4|:)|([\\da−fA−F]1,4:)2((:[\\da−fA−F]1,4)1,4|:)|^([\\da-fA-F]{1,4}:){3}((:[\\da-fA-F]{1,4}){1,3}|:)|([\\da−fA−F]1,4:)4((:[\\da−fA−F]1,4)1,2|:)|([\\da−fA−F]1,4:)4((:[\\da−fA−F]1,4)1,2|:)|^([\\da-fA-F]{1,4}:){5}:([\\da-fA-F]{1,4})?|([\\da−fA−F]1,4:)6:|([\\da−fA−F]1,4:)6:";
-    // TODO: 2019/11/1 临时
-    private static final boolean DEFAULT_QCONFIG_PLUGIN_SWITCH = false;
-
 
     // qconfig key
     private volatile String pluginTitanUrl;
@@ -95,6 +93,8 @@ public class ConfigService {
     private volatile int httpReadTimeoutInMs;
     private volatile boolean freshnessEnabled;
     private volatile Map<String, Integer> freshnessClusterEnabledAndThresholdSecond;
+    private volatile int titanKeySynchronizeScheduleDelayMinutes;
+    private volatile int titanKeySynchronizeSchedulePageSize;
 
     // 正则表达式
     private volatile String clusterNameRegex;
@@ -105,8 +105,6 @@ public class ConfigService {
     private volatile String portRegex;
     private volatile String ipv4Regex;
     private volatile String ipv6Regex;
-    // TODO: 2019/11/1 临时
-    private volatile boolean qconfigPluginSwitch;
 
     @PostConstruct
     private void init() {
@@ -137,6 +135,13 @@ public class ConfigService {
         freshnessClusterEnabledAndThresholdSecond = convertClusterFreshnessThresholdSecond(
                 configMap.getString(KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND, DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND)
         );
+        titanKeySynchronizeScheduleDelayMinutes = configMap.getInt(
+                KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES, DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES
+        );
+        titanKeySynchronizeSchedulePageSize = configMap.getInt(
+                KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE, DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE
+        );
+
 
         clusterNameRegex = configMap.getString(KEY_CLUSTER_NAME_REGEX, DEFAULT_CLUSTER_NAME_REGEX);
         dbNameRegex = configMap.getString(KEY_DB_NAME_REGEX, DEFAULT_DB_NAME_REGEX);
@@ -146,9 +151,6 @@ public class ConfigService {
         portRegex = configMap.getString(KEY_PORT_REGEX, DEFAULT_PORT_REGEX);
         ipv4Regex = configMap.getString(KEY_IPV4_REGEX, DEFAULT_IPV4_REGEX);
         ipv6Regex = configMap.getString(KEY_IPV6_REGEX, DEFAULT_IPV6_REGEX);
-
-        // TODO: 2019/11/1 临时
-        qconfigPluginSwitch = configMap.getBoolean(KEY_QCONFIG_PLUGIN_SWITCH, DEFAULT_QCONFIG_PLUGIN_SWITCH);
     }
 
     Set<String> string2Set(String s) {
@@ -272,7 +274,11 @@ public class ConfigService {
         return freshnessClusterEnabledAndThresholdSecond;
     }
 
-    public boolean isQconfigPluginSwitch() {
-        return qconfigPluginSwitch;
+    public int getTitanKeySynchronizeScheduleDelayMinutes() {
+        return titanKeySynchronizeScheduleDelayMinutes;
+    }
+
+    public int getTitanKeySynchronizeSchedulePageSize() {
+        return titanKeySynchronizeSchedulePageSize;
     }
 }

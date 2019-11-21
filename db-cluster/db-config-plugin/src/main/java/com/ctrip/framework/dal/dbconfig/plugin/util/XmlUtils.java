@@ -25,38 +25,35 @@ public class XmlUtils {
 
     /**
      * 将对象直接转换成String类型的 XML输出
-     *
-     * @param obj
-     * @return
      */
-    public static String toXml(Object obj) throws Exception {
-        // 创建输出流
-        StringWriter sw = new StringWriter();
-        // 利用jdk中自带的转换类实现
-        JAXBContext context = JAXBContext.newInstance(obj.getClass());
-
-        Marshaller marshaller = context.createMarshaller();
-        // 格式化xml输出的格式
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-        marshaller.setProperty(CharacterEscapeHandler.class.getName(), characterNoEscapeHandler);
-        // 将对象转换成输出流形式的xml
-        marshaller.marshal(obj, sw);
-
-        return sw.toString();
+    public static String toXml(Object obj) {
+        try (StringWriter sw = new StringWriter()) {
+            JAXBContext context = JAXBContext.newInstance(obj.getClass());
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            marshaller.marshal(obj, sw);
+            return sw.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("object to xml exception", e);
+        }
     }
 
     /**
      * 将String类型的xml转换成对象
      */
-    public static Object fromXml(String xmlContent, Class clazz) throws Exception {
-        Object xmlObject = null;
-        JAXBContext context = JAXBContext.newInstance(clazz);
-        // 进行将Xml转成对象的核心接口
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-        StringReader sr = new StringReader(xmlContent);
-        xmlObject = unmarshaller.unmarshal(sr);
-        return xmlObject;
+    public static Object fromXml(String xmlContent, Class clazz) {
+        try (StringReader sr = new StringReader(xmlContent)) {
+            JAXBContext context = JAXBContext.newInstance(clazz);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+            return unmarshaller.unmarshal(sr);
+        } catch (Exception e) {
+            throw new RuntimeException("xml to object exception", e);
+        }
+    }
+
+    public static String wrap(String parent, String content) {
+        return String.format("<%s>%s</%s>", parent, content, parent);
     }
 
 }

@@ -17,7 +17,11 @@ public class MappedShardData implements ShardData {
 
     @Override
     public Object getValue(String name) {
-        return data.get(name);
+        for (String key : data.keySet()) {
+            if (key != null && key.equalsIgnoreCase(name))
+                return data.get(key);
+        }
+        return null;
     }
 
     @Override

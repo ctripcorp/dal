@@ -52,12 +52,12 @@ public class ModShardStrategy extends ColumnShardStrategy implements ShardStrate
         return allShards;
     }
 
-    private int getModResult(int mod, Object shardValue) {
+    protected int getModResult(int mod, Object shardValue) {
         long longValue = getLongValue(shardValue);
         return (int) longValue % mod;
     }
 
-    private Long getLongValue(Object value) {
+    protected Long getLongValue(Object value) {
         if (value instanceof Long)
             return (Long) value;
         if (value instanceof Number)

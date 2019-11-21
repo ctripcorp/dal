@@ -343,13 +343,19 @@ public class RefreshableDataSourceTest {
 
 
         while (true) {
-            Connection connection = refreshableDataSource.getConnection();
-            String currentServer = DataSourceSwitchChecker.getDBServerName(connection, refreshableDataSource.getSingleDataSource().getDataSourceConfigure());
-            System.out.println(currentServer);
-            if ("DST56614".equalsIgnoreCase(currentServer)) {
-                break;
+            try {
+                Connection connection = refreshableDataSource.getConnection();
+                String currentServer = DataSourceSwitchChecker.getDBServerName(connection, refreshableDataSource.getSingleDataSource().getDataSourceConfigure());
+                System.out.println(currentServer);
+                if ("DST56614".equalsIgnoreCase(currentServer)) {
+                    break;
+                }
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                Thread.sleep(10);
             }
-            connection.close();
         }
         latch.await();
         Assert.assertTrue(switched.get());
@@ -517,6 +523,8 @@ public class RefreshableDataSourceTest {
 
     @Test
     public void testDataSourceSwitch() throws Exception {
+        DataSourceCreator.getInstance().returnAllDataSources();
+
         Properties p1 = new Properties();
         p1.setProperty("userName", "root");
         p1.setProperty("password", "!QAZ@WSX1qaz2wsx");

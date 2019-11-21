@@ -163,7 +163,7 @@ public class DalSqlTaskRequestTest {
 		Set<String> shards = new HashSet<>();
 		shards.add("0");
 		shards.add("1");
-		hints.inAllShards();
+		hints.inShards(shards);
 		test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, null, null);
 		assertTrue(test.isCrossShard());
 	}

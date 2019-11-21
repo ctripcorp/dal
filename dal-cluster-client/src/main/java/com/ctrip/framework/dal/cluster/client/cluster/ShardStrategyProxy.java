@@ -55,6 +55,8 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
     }
 
     private ShardStrategy getTableStrategy(String tableName) {
+        if (tableName == null)
+            throw new ClusterRuntimeException("table name is necessary");
         ShardStrategy strategy = tableStrategies.get(tableName);
         if (strategy == null)
             strategy = defaultStrategy;
@@ -62,16 +64,10 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
     }
 
     private ShardStrategy getAndCheckTableStrategy(String tableName) {
-        ShardStrategy strategy = tableStrategies.get(tableName);
-        if (strategy == null)
-            strategy = defaultStrategy;
-        checkShardStrategy(strategy, tableName);
-        return strategy;
-    }
-
-    private void checkShardStrategy(ShardStrategy strategy, String tableName) {
+        ShardStrategy strategy = getTableStrategy(tableName);
         if (strategy == null)
             throw new ClusterRuntimeException(String.format("shard strategy not found for table '%s'", tableName));
+        return strategy;
     }
 
     public void addStrategy(ShardStrategy strategy) {

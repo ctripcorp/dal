@@ -47,11 +47,12 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         this.logicDbName = logicDbName;
         this.builder = builder;
         this.parameters = builder.buildParameters();
-        this.hints = hints.clone();
+        this.hints = hints != null ? hints.clone() : new DalHints();
         this.task = task;
         this.merger = merger;
-        this.shards = getShards();
         this.caller = LogContext.getRequestCaller();
+        prepareRequestContext();
+        this.shards = getShards();
     }
 
     @Override
@@ -68,11 +69,9 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     public void validateAndPrepare() throws SQLException {
         DalShardingHelper.detectDistributedTransaction(shards);
         taskContext = task.createTaskContext();
-
-        prepareRequestContext(hints);
     }
 
-    private void prepareRequestContext(DalHints hints) {
+    private void prepareRequestContext() {
         hints.setRequestContext(null);
         if (task instanceof TaskAdapter) {
             RequestContext ctx = new DalRequestContext().setLogicTableName(((TaskAdapter) task).rawTableName);

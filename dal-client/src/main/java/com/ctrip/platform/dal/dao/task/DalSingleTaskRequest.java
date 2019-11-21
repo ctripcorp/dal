@@ -33,8 +33,9 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
     private DalSingleTaskRequest(String logicDbName, DalHints hints, SingleTask<T> task) {
         this.logicDbName = logicDbName;
         this.task = task;
-        this.hints = hints.clone();
+        this.hints = hints != null ? hints.clone() : new DalHints();
         this.caller = LogContext.getRequestCaller();
+        prepareRequestContext();
     }
 
     public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
@@ -84,11 +85,9 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
 
         detectDistributedTransaction(logicDbName, hints, daoPojos);
         dalTaskContext = task.createTaskContext();
-
-        prepareRequestContext(hints);
     }
 
-    private void prepareRequestContext(DalHints hints) {
+    private void prepareRequestContext() {
         hints.setRequestContext(null);
         if (task instanceof TaskAdapter) {
             RequestContext ctx = new DalRequestContext().setLogicTableName(((TaskAdapter) task).rawTableName);

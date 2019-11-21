@@ -143,4 +143,9 @@ public class DataSourceCreator {
         return ds;
     }
 
+    protected void returnAllDataSources() {
+        for (SingleDataSource ds : targetDataSourceCache.values())
+            returnDataSource(ds);
+    }
+
 }

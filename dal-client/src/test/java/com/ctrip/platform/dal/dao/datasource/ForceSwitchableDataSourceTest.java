@@ -205,7 +205,7 @@ public class ForceSwitchableDataSourceTest {
         MockSwitchListener listener = new MockSwitchListener();
         dataSource.addListener(listener);
 
-        assertEquals("nullDataSource", dataSource.getSingleDataSource().getName());
+        assertTrue("nullDataSource".equalsIgnoreCase(dataSource.getSingleDataSource().getName()));
         SwitchableDataSourceStatus status0 = dataSource.getStatus();
         assertFalse(status0.isForceSwitched());
         assertFalse(status0.isPoolCreated());

@@ -31,10 +31,11 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	public DalBulkTaskRequest(String logicDbName, String rawTableName, DalHints hints, List<T> rawPojos, BulkTask<K, T> task) {
 		this.logicDbName = logicDbName;
 		this.rawTableName = rawTableName;
-		this.hints = hints.clone();
+		this.hints = hints != null ? hints.clone() : new DalHints();
 		this.rawPojos = rawPojos;
 		this.task = task;
 		this.caller = LogContext.getRequestCaller();
+		prepareRequestContext();
 	}
 
     @Override
@@ -64,11 +65,9 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 		detectBulkTaskDistributedTransaction(logicDbName, hints, daoPojos);
 		taskContext = task.createTaskContext(hints, daoPojos, rawPojos);
-
-		prepareRequestContext(hints);
 	}
 
-	private void prepareRequestContext(DalHints hints) {
+	private void prepareRequestContext() {
 		hints.setRequestContext(null);
 		if (task instanceof TaskAdapter) {
 			RequestContext ctx = new DalRequestContext().setLogicTableName(((TaskAdapter) task).rawTableName);

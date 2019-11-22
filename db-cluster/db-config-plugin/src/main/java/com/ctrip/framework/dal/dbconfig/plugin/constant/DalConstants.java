@@ -10,4 +10,7 @@ public interface DalConstants extends CommonConstants {
     String PASSWORD = "password";
     String SSL_CODE = "sslCode";
 
+    String SHARD_STRATEGIES = "ShardStrategies";
+    String ID_GENERATORS = "IdGenerators";
+
 }

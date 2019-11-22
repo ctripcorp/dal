@@ -95,8 +95,8 @@ public class DalClusterUtils {
 
         DatabaseShards databaseShards = new DatabaseShards(shards);
         Cluster cluster = new Cluster(dalCluster.getClusterName(), dalCluster.getDbCategory(), dalCluster.getVersion(), databaseShards);
-        cluster.setShardStrategies(dalCluster.getShardStrategies());
-        cluster.setIdGenerators(dalCluster.getIdGenerators());
+        cluster.setShardStrategiesText(dalCluster.getShardStrategies());
+        cluster.setIdGeneratorsText(dalCluster.getIdGenerators());
         cluster.setSslCode(dalCluster.getSslCode());
         cluster.setOperator(dalCluster.getOperator());
         cluster.setUpdateTime(DalClusterUtils.formatDate(new Date()));
@@ -143,8 +143,11 @@ public class DalClusterUtils {
         dalCluster.setSslCode(cluster.getSslCode());
         dalCluster.setOperator(cluster.getOperator());
         dalCluster.setDatabaseShards(targetShards);
-        dalCluster.setShardStrategies(cluster.getShardStrategies());
-        dalCluster.setIdGenerators(cluster.getIdGenerators());
+
+        // TODO: to be deprecated
+        dalCluster.setShardStrategies(cluster.getShardStrategies().toString());
+        dalCluster.setIdGenerators(cluster.getIdGenerators().toString());
+
         return dalCluster;
     }
 

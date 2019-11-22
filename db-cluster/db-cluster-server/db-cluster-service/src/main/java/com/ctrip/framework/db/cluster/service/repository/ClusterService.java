@@ -769,6 +769,9 @@ public class ClusterService {
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
     public void switches(final List<ClusterSwitchesVo> clusterSwitchesVos, final String operator) throws SQLException {
 
+        // correct
+        clusterSwitchesVos.forEach(ClusterSwitchesVo::correct);
+
         // Map<clusterName, ClusterDTO>
         final Map<String, ClusterDTO> effectiveClusterDTOMap = Maps.newLinkedHashMapWithExpectedSize(clusterSwitchesVos.size());
         clusterSwitchesVos.forEach(clusterSwitchesVo -> {
@@ -1074,9 +1077,6 @@ public class ClusterService {
                     }
                 });
             }
-
-            // argument correct
-            cluster.correct();
         });
     }
 

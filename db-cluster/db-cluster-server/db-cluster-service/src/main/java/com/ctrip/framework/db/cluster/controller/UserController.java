@@ -7,6 +7,7 @@ import com.ctrip.framework.db.cluster.service.repository.ClusterService;
 import com.ctrip.framework.db.cluster.service.repository.UserService;
 import com.ctrip.framework.db.cluster.vo.ResponseModel;
 import com.ctrip.framework.db.cluster.vo.dal.create.UserVo;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class UserController {
     @PostMapping(value = "/clusters/{clusterName}/shards/{shardIndex}/users")
     public ResponseModel createUsers(@PathVariable(name = "clusterName") final String clusterName,
                                      @PathVariable(name = "shardIndex") final int shardIndex,
-                                     @RequestBody final List<UserVo> userVos,
+                                     @RequestBody final UserVo[] userVos,
                                      @RequestParam(name = "operator") final String operator,
                                      final HttpServletRequest request) {
         try {
@@ -48,7 +49,7 @@ public class UserController {
                 return response;
             }
 
-            userService.addUsers(shardIndex, userVos, clusterDTO);
+            userService.addUsers(shardIndex, Lists.newArrayList(userVos), clusterDTO);
 
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("Create users success");

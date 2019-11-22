@@ -166,9 +166,10 @@ public class ClusterSetController {
 
     private List<ZoneDTO> converterToDTO(final List<ZoneVo> addedZones, final Integer clusterId) {
         return addedZones.stream().map(addedZoneVo -> {
-            final ZoneDTO zoneDTO = addedZoneVo.toDTO();
-            zoneDTO.setClusterEntityId(clusterId);
-            return zoneDTO;
+            final ZoneDTO zone = addedZoneVo.toDTO();
+            zone.setClusterEntityId(clusterId);
+            zone.getShards().forEach(shard -> shard.setClusterEntityId(clusterId));
+            return zone;
         }).collect(Collectors.toList());
     }
 

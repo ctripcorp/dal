@@ -3,6 +3,7 @@ package com.ctrip.framework.db.cluster.controller;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.domain.dto.UserDTO;
+import com.ctrip.framework.db.cluster.domain.dto.ZoneDTO;
 import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
 import com.ctrip.framework.db.cluster.entity.enums.Deleted;
@@ -28,6 +29,7 @@ import org.unidal.tuple.Pair;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -107,17 +109,17 @@ public class ClusterController {
                 return response;
             }
 
-            clusterDTO.getZones().forEach(
-                    zone -> zone.getShards().forEach(
-                            shard -> {
-                                final List<UserDTO> users = shard.getUsers();
-                                if (!CollectionUtils.isEmpty(users)) {
-                                    users.forEach(
-                                            user -> user.setUsername(cipherService.decrypt(user.getUsername()))
-                                    );
-                                }
-                            }
-                    )
+            // The same user between multiple zones, so get first zone
+            final Optional<ZoneDTO> firstZone = clusterDTO.getZones().stream().findFirst();
+            firstZone.ifPresent(zoneDTO -> zoneDTO.getShards().forEach(
+                    shard -> {
+                        final List<UserDTO> users = shard.getUsers();
+                        if (!CollectionUtils.isEmpty(users)) {
+                            users.forEach(
+                                    user -> user.setUsername(cipherService.decrypt(user.getUsername()))
+                            );
+                        }
+                    })
             );
             ResponseModel response = ResponseModel.successResponse(clusterDTO.toVo());
             response.setMessage("Query cluster success");

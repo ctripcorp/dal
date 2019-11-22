@@ -154,10 +154,13 @@ public class ClusterSetController {
                 .collect(Collectors.toList());
 
         addedZones.stream().map(ZoneVo::getZoneId).forEach(
-                addedZoneId -> Preconditions.checkArgument(
-                        existsZoneIds.contains(addedZoneId),
-                        String.format("Newly zoneId %s and existing zoneId duplicated.", addedZoneId)
-                )
+                addedZoneId -> {
+                    if (existsZoneIds.contains(addedZoneId)) {
+                        throw new IllegalArgumentException(
+                                String.format("Newly zoneId %s and existing zoneId duplicated.", addedZoneId)
+                        );
+                    }
+                }
         );
     }
 

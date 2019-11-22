@@ -67,8 +67,7 @@ public class UserService {
         List<ZoneVo> zones = cluster.getZones();
         if (zones == null || zones.size() == 0)
             throw new DBClusterServiceException("no zone info");
-        if (zones.size() > 1)
-            throw new UnsupportedOperationException("more than one zone found");
+        // TODO: 2019/11/22 titanKey for each zone.
         List<ShardVo> shards = cluster.getZones().get(0).getShards();
         for (ShardVo shard : shards) {
             if (shard.getShardIndex() == shardIndex)
@@ -146,10 +145,10 @@ public class UserService {
 
     private void validateTitanKey(TitanKeyGetData titanKeyData, UserInfoContext ctx) {
         Preconditions.checkArgument(ctx.dbName.equalsIgnoreCase(titanKeyData.getDbName()), "dbName unmatched with titan key");
-        Preconditions.checkArgument(ctx.domain.equalsIgnoreCase(titanKeyData.getServerName()), "domain unmatched with titan key");
-        String titanKeyIp = titanKeyData.getServerIp();
-        Preconditions.checkArgument(titanKeyIp == null || titanKeyIp.isEmpty() || titanKeyIp.equalsIgnoreCase(ctx.ip), "ip unmatched with titan key");
-        Preconditions.checkArgument(ctx.port == Integer.parseInt(titanKeyData.getPort()), "port unmatched with titan key");
+//        Preconditions.checkArgument(ctx.domain.equalsIgnoreCase(titanKeyData.getServerName()), "domain unmatched with titan key");
+//        String titanKeyIp = titanKeyData.getServerIp();
+//        Preconditions.checkArgument(titanKeyIp == null || titanKeyIp.isEmpty() || titanKeyIp.equalsIgnoreCase(ctx.ip), "ip unmatched with titan key");
+//        Preconditions.checkArgument(ctx.port == Integer.parseInt(titanKeyData.getPort()), "port unmatched with titan key");
         Preconditions.checkArgument(ctx.uid.equals(titanKeyData.getUid()), "uid unmatched with titan key");
         Preconditions.checkArgument(ctx.pwd == null || ctx.pwd.isEmpty(), "pwd should be empty");
     }

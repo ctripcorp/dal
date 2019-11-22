@@ -948,9 +948,11 @@ public class ClusterService {
         }
     }
 
-    private void componentSwitchRead(final List<InstanceSwitchedVo> switchInstances, final List<ShardInstanceDTO> currentInstances,
+    private void componentSwitchRead(final List<InstanceSwitchedVo> switchInstances,
+                                     final List<ShardInstanceDTO> currentInstances,
                                      final ShardDTO shardDTO, final String role,
-                                     final List<ShardInstance> updatedShardInstances, final List<ShardInstanceDTO> createdShardInstances) {
+                                     final List<ShardInstance> updatedShardInstances,
+                                     final List<ShardInstanceDTO> createdShardInstances) {
 
         if (CollectionUtils.isEmpty(switchInstances)) {
             currentInstances.forEach(currentInstance -> {
@@ -1025,9 +1027,13 @@ public class ClusterService {
             // invalid zoneId
             final String zoneId = cluster.getZoneId();
             final List<ZoneDTO> effectiveZones = effective.getZones();
-            if (CollectionUtils.isEmpty(effectiveZones) || !effectiveZones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList()).contains(zoneId)) {
+            if (CollectionUtils.isEmpty(effectiveZones) ||
+                    !effectiveZones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList()).contains(zoneId)) {
                 throw new IllegalArgumentException(
-                        String.format("集群下的zone不存在或已被删除或已被禁用, 本次发布不执行, clusterNames = %s, zoneId = %s", clusterName, zoneId)
+                        String.format(
+                                "集群下的zone不存在或已被删除或已被禁用, 本次发布不执行, clusterNames = %s, zoneId = %s",
+                                clusterName, zoneId
+                        )
                 );
             }
 
@@ -1037,7 +1043,10 @@ public class ClusterService {
             ).collect(Collectors.toList()).get(0).getShards();
             if (CollectionUtils.isEmpty(effectiveShardDTOs)) {
                 throw new IllegalArgumentException(
-                        String.format("clusterNames = %s, zoneId = %s 下所有的shard均不存在或已被删除或已被禁用, 本次发布不执行.", clusterName, zoneId)
+                        String.format(
+                                "clusterNames = %s, zoneId = %s 下所有的shard均不存在或已被删除或已被禁用, 本次发布不执行.",
+                                clusterName, zoneId
+                        )
                 );
             } else {
                 final List<Integer> effectiveShardIndexes = effectiveShardDTOs.stream()
@@ -1057,7 +1066,8 @@ public class ClusterService {
                     if (!effectiveShardIndexes.contains(switchShardIndex)) {
                         throw new IllegalArgumentException(
                                 String.format(
-                                        "参数中含有不存在或已被删除或已被禁用的shard, 本次发布不执行, clusterName = %s, zoneId = %s, shardIndex = %s.",
+                                        "参数中含有不存在或已被删除或已被禁用的shard, 本次发布不执行, clusterName = %s, " +
+                                                "zoneId = %s, shardIndex = %s.",
                                         clusterName, zoneId, switchShardIndex
                                 )
                         );

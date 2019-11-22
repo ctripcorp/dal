@@ -150,7 +150,7 @@ public class UserService {
         String titanKeyIp = titanKeyData.getServerIp();
         Preconditions.checkArgument(titanKeyIp == null || titanKeyIp.isEmpty() || titanKeyIp.equalsIgnoreCase(ctx.ip), "ip unmatched with titan key");
         Preconditions.checkArgument(ctx.port == Integer.parseInt(titanKeyData.getPort()), "port unmatched with titan key");
-        Preconditions.checkArgument(ctx.uid.equalsIgnoreCase(titanKeyData.getUid()), "uid unmatched with titan key");
+        Preconditions.checkArgument(ctx.uid.equals(titanKeyData.getUid()), "uid unmatched with titan key");
         Preconditions.checkArgument(ctx.pwd == null || ctx.pwd.isEmpty(), "pwd should be empty");
     }
 

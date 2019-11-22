@@ -121,6 +121,18 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                        <div class="scroll table-size">
+                            <div><span id="unUseDynamicDSTitanKeyTableTitle" style="font-size: 20px">未使用Dal动态数据源的TitanKey统计(使用域名访问数据库)</span></div>
+                            <table id="tableUnUseDynamicDSTitanKey" class="table table-striped table-bordered" style="width: 400px">
+                                <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>TitanKey     </th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                         </div>
                     </div>
                 </div>

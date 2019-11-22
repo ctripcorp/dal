@@ -23,6 +23,8 @@ public class TitanKeyInfoReportDto {
 
     private List<AbnormalTitanKey> abnormalTitanKeyList = new ArrayList<>();
 
+    private List<String> unUseDynamicDSTitanKey = new ArrayList<>();
+
     public int getTitanKeyCount() {
         return titanKeyCount;
     }
@@ -85,5 +87,13 @@ public class TitanKeyInfoReportDto {
 
     public void setStatisticsDate(String statisticsDate) {
         this.statisticsDate = statisticsDate;
+    }
+
+    public List<String> getUnUseDynamicDSTitanKey() {
+        return unUseDynamicDSTitanKey;
+    }
+
+    public void setUnUseDynamicDSTitanKey(List<String> unUseDynamicDSTitanKey) {
+        this.unUseDynamicDSTitanKey = unUseDynamicDSTitanKey;
     }
 }

@@ -59,17 +59,17 @@ public class TitanKeyInfoReportDao {
                 Date checkDate = new Date();
                 if (DateUtils.checkIsSendEMailTime(checkDate)) {
                     String subject = "TitanKey IP直连统计(" + DateUtils.getBeforeOneDay(checkDate).substring(0,8) +  ")";
-                    EmailUtils.sendEmail(generateBodyContent(), subject, MonitorConfigManager.getMonitorConfig().getDBEmailRecipient(),
-                            MonitorConfigManager.getMonitorConfig().getDBEmailCc());
+//                    EmailUtils.sendEmail(generateBodyContent(), subject, MonitorConfigManager.getMonitorConfig().getDBEmailRecipient(),
+//                            MonitorConfigManager.getMonitorConfig().getDBEmailCc());
                 }
             }
         }, initDelay, FIXED_RATE, TimeUnit.SECONDS);
     }
 
     public void getTiTanKeyInfoReport() {
-        Env envEntity = Foundation.server().getEnv();
-        String env = envEntity.name().toLowerCase();
-        //String env = "pro";
+//        Env envEntity = Foundation.server().getEnv();
+//        String env = envEntity.name().toLowerCase();
+        String env = "pro";
         int total = getTitanKeyTotal(env);
         TitanKeyPluginsResponse response = callTitanPluginsAPI(env, total);
         if (response == null) {
@@ -81,6 +81,7 @@ public class TitanKeyInfoReportDao {
         int directConnectMysqlCount = 0;
         int directConnectSqlServerCount = 0;
         List<AbnormalTitanKey> abnormalTitanKeys = new ArrayList<>();
+        List<String> unUseDynamicDSTitanKey = new ArrayList<>();
         for (TitanKeyAPIInfo titanKeyAPIInfo : response.getData().getData()) {
             //过滤子环境
             if (StringUtils.isEmpty(titanKeyAPIInfo.getSubEnv())) {
@@ -92,7 +93,7 @@ public class TitanKeyInfoReportDao {
                     if (StringUtils.isNotBlank(serverIp) && IPUtils.isIPAddress(serverIp)) {
                         directConnectMysqlCount++;
                     }
-                    else if (StringUtils.isNotBlank(serverName) && IPUtils.isIPAddress(serverName)) {
+                    else if (StringUtils.isNotBlank(serverName) && (IPUtils.isIPAddress(serverName) || IPUtils.isSlaveDomain(serverName))) {
                         directConnectMysqlCount++;
                     }
                 }
@@ -113,6 +114,10 @@ public class TitanKeyInfoReportDao {
                     abnormalTitanKey.setServerName(serverName);
                     abnormalTitanKeys.add(abnormalTitanKey);
                 }
+                if ((StringUtils.isNotBlank(serverIp) && !IPUtils.isIPAddress(serverIp)) ||
+                        (StringUtils.isEmpty(serverIp) && StringUtils.isNotBlank(serverName) && !IPUtils.isIPAddress(serverName))) {
+                    unUseDynamicDSTitanKey.add(titanKeyAPIInfo.getName());
+                }
             }
         }
         titanKeyInfoReportDto.setTitanKeyCount(titanKeyCount);
@@ -123,6 +128,7 @@ public class TitanKeyInfoReportDao {
         titanKeyInfoReportDto.setDirectConnectSqlServerCount(directConnectSqlServerCount);
         titanKeyInfoReportDto.setAbnormalTitanKeyList(abnormalTitanKeys);
         titanKeyInfoReportDto.setStatisticsDate(DateUtils.formatDate(new Date()));
+        titanKeyInfoReportDto.setUnUseDynamicDSTitanKey(unUseDynamicDSTitanKey);
     }
 
     private int getTitanKeyTotal(String env) {
@@ -192,13 +198,23 @@ public class TitanKeyInfoReportDao {
 
         String htmlAbnormalTitanKeyTable = "<div style=\"margin-top: 20px\"><span style=\"font-size: 20px\">TitanKey配置异常统计(TitanKey配置serverIp不是ip或者serverName不是域名)</span></div><table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey     </th>" +
                 "<th style=\"border:1px solid #B0B0B0\" width= \"120\">ServerIp</th><th style=\"border:1px solid #B0B0B0\" width= \"120\">ServerName   </th></tr></thead><tbody>%s</tbody></table>";
-        String abnormalTitanKeyBodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td>";
+        String htmlUnUseDynamicDSTitanKeyTable = "<div style=\"margin-top: 20px\"><span style=\"font-size: 20px\">未使用Dal动态数据源的TitanKey统计(使用域名访问数据库)</span></div><table style=\"border-collapse:collapse\"><thead><tr><th style=\"border:1px solid #B0B0B0\" width= \"60\">序号</th>" +
+                "<th style=\"border:1px solid #B0B0B0\" width= \"200\">TitanKey     </th></tr></thead><tbody>%s</tbody></table>";
+        String abnormalTitanKeyBodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
+        String unUseDynamicDSTitanKeyBodyTemplate = "<tr><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td><td style=\"border:1px solid #B0B0B0;text-align: center\">%s</td></tr>";
         StringBuilder sb = new StringBuilder();
         for (AbnormalTitanKey abnormalTitanKey : titanKeyInfoReportDto.getAbnormalTitanKeyList()) {
             sb.append(String.format(abnormalTitanKeyBodyTemplate, abnormalTitanKey.getTitanKey(), abnormalTitanKey.getServerIp(), abnormalTitanKey.getServerName()));
         }
         String abnormalTitanKeyTableContent = String.format(htmlAbnormalTitanKeyTable, sb.toString());
 
-        return String.format(htmlTemplate, titanKeyTableDBContent + titanKeyTableMySqlContent + titanKeyTableSqlServerContent + abnormalTitanKeyTableContent );
+        StringBuilder stringBuilder = new StringBuilder();
+        int index = 0;
+        for (String name : titanKeyInfoReportDto.getUnUseDynamicDSTitanKey()) {
+            stringBuilder.append(String.format(unUseDynamicDSTitanKeyBodyTemplate, ++index, name));
+        }
+        String unUseDynamicDSTitanKeyContent = String.format(htmlUnUseDynamicDSTitanKeyTable, stringBuilder.toString());
+
+        return String.format(htmlTemplate, titanKeyTableDBContent + titanKeyTableMySqlContent + titanKeyTableSqlServerContent + abnormalTitanKeyTableContent + unUseDynamicDSTitanKeyContent);
     }
 }

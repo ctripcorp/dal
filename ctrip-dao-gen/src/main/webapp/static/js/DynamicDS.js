@@ -190,16 +190,20 @@
     function getTitanKeyInfo() {
         var table1 = $("#tableTitanKeyOneDay");
         var table2 = $("#tableAbnormalTitanKey");
+        var table3 = $("#tableUnUseDynamicDSTitanKey");
         var tableDB = $("#tableTitanKeyDirectConnect");
         var tableMySql = $("#tableTitanKeyDirectConnectMySql");
         var tableSqlServer = $("#tableTitanKeyDirectConnectSqlServer");
         var loading = $("#loadingSpan3");
         var title = $("#abnormalTitanKeyTableTitle");
+        var titleUnUse = $("#unUseDynamicDSTitanKeyTableTitle");
         var statisticsDate = $("#statisticsDate");
         loading.html("正在加载中。。。");
         title.html("");
+        titleUnUse.html("");
         table1.hide();
         table2.hide();
+        table3.hide();
         tableDB.hide();
         tableMySql.hide();
         tableSqlServer.hide();
@@ -234,19 +238,30 @@
                 }
                 tableBody1 += sprintf(rowTemplate1, n.titanKey, serverIp, serverName);
             });
+
+            var tableBody2 = "";
+            $.each(data.unUseDynamicDSTitanKey, function (i, n) {
+                var rowTemplate1 = "<tr><td>%s</td><td>%s</td></tr>";
+
+                tableBody2 += sprintf(rowTemplate1, i + 1, n.name);
+            });
+
             $("#tableTitanKeyOneDay tbody").html(tableBody);
             $("#tableAbnormalTitanKey tbody").html(tableBody1);
+            $("#tableUnUseDynamicDSTitanKey tbody").html(tableBody2);
             $("#tableTitanKeyDirectConnect tbody").html(tableBodyDB);
             $("#tableTitanKeyDirectConnectMySql tbody").html(tableBodyMySql);
             $("#tableTitanKeyDirectConnectSqlServer tbody").html(tableBodySqlServer);
             statisticsDate.html(data.statisticsDate);
             table1.show();
             table2.show();
+            table3.show();
             tableDB.show();
             tableMySql.show();
             tableSqlServer.show();
             loading.html("");
             title.html("TitanKey配置异常统计(TitanKey配置serverIp不是ip或者serverName不是域名)");
+            titleUnUse.html("未使用Dal动态数据源的TitanKey统计(使用域名访问数据库)");
         });
     }
 

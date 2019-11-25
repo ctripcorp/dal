@@ -132,6 +132,8 @@
       <add  name="dao_test_mysql_dbShard_7" databaseType="Slave" sharding="1" connectionString="dal_shard_0"/>
       <add  name="dao_test_mysql_dbShard_9" databaseType="Slave" sharding="1" connectionString="dal_shard_1"/>
     </databaseSet>
+    <cluster name="clusterName1"/>
+    <cluster name="clusterName2" alias="DbSetName"/>
   </databaseSets>
   <LogListener enabled="true">
   	  <logger>com.ctrip.platform.dal.dao.client.DefaultLogger</logger>

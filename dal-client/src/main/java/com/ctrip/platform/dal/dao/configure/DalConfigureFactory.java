@@ -188,8 +188,10 @@ public class DalConfigureFactory implements DalConfigConstants {
         ClusterConfigProvider provider = locator.getClusterConfigProvider();
         List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
         for (int i = 0; i < clusterList.size(); i++) {
-            Cluster cluster = readCluster(clusterList.get(i), provider);
-            databaseSets.put(cluster.getClusterName(), new ClusterDatabaseSet(cluster.getClusterName(), cluster, locator));
+            Node node = clusterList.get(i);
+            String name = getDatabaseSetName(node);
+            Cluster cluster = readCluster(node, provider);
+            databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator));
         }
 
         List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
@@ -207,6 +209,10 @@ public class DalConfigureFactory implements DalConfigConstants {
             throw new DalConfigException("empty cluster name");
         ClusterConfig config = provider.getClusterConfig(name);
         return new DynamicCluster(config);
+    }
+
+    private String getDatabaseSetName(Node clusterNode) {
+        return getAttribute(clusterNode, ALIAS, getAttribute(clusterNode, NAME));
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {

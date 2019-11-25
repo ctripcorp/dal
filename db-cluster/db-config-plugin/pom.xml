@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ctrip.framework.dal</groupId>
     <artifactId>db-config-plugin</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 
     <properties>
         <framework-bom.version>2.38.0</framework-bom.version>

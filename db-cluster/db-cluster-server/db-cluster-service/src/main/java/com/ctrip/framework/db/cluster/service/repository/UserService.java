@@ -12,7 +12,6 @@ import com.ctrip.framework.db.cluster.entity.User;
 import com.ctrip.framework.db.cluster.enums.Deleted;
 import com.ctrip.framework.db.cluster.enums.Enabled;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
-import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.TitanPluginService;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.RC4;
@@ -46,8 +45,6 @@ public class UserService {
     private final CipherService cipherService;
 
     private final TitanPluginService titanPluginService;
-
-    private final ConfigService configService;
 
 
     public void addUsers(int shardIndex, List<UserVo> users, final ClusterDTO clusterDTO) {
@@ -153,7 +150,7 @@ public class UserService {
         String titanKeyIp = titanKeyData.getServerIp();
         Preconditions.checkArgument(titanKeyIp == null || titanKeyIp.isEmpty() || titanKeyIp.equalsIgnoreCase(ctx.ip), "ip unmatched with titan key");
         Preconditions.checkArgument(ctx.port == Integer.parseInt(titanKeyData.getPort()), "port unmatched with titan key");
-        Preconditions.checkArgument(ctx.uid.equalsIgnoreCase(titanKeyData.getUid()), "uid unmatched with titan key");
+        Preconditions.checkArgument(ctx.uid.equals(titanKeyData.getUid()), "uid unmatched with titan key");
         Preconditions.checkArgument(ctx.pwd == null || ctx.pwd.isEmpty(), "pwd should be empty");
     }
 

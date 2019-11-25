@@ -47,12 +47,6 @@ public class ZoneVo {
                     String.format("同一zone下, dbName不允许相同, dbName比较是否相同不区分大小写, zoneId = %s.", zoneId)
             );
 
-            // TODO: 2019/10/30 临时: shards size == 1, 且shardIndex = 0
-            Preconditions.checkArgument(
-                    shards.size() == 1 && 0 == shards.get(0).getShardIndex(),
-                    String.format("目前每个zone内只允许存在1个shard, 且shardIndex = 0, zoneId = %s", zoneId)
-            );
-
             shards.forEach(shardVo -> shardVo.valid(regexMatcher));
         }
     }

@@ -17,11 +17,23 @@ import java.util.regex.Pattern;
  * Created by taochen on 2019/7/26.
  */
 public class IPUtils {
+    private static final String DOMAIN_READ = "read";
+
+    private static final String DOMAIN_SLAVE = "slave";
+
     public static boolean isIPAddress(String ipAddress) {
         String ipTemplate = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";
         Pattern pattern = Pattern.compile(ipTemplate);
         Matcher matcher = pattern.matcher(ipAddress);
         return matcher.matches();
+    }
+
+    public static boolean isSlaveDomain(String serverName) {
+        boolean result = false;
+        if (serverName.contains(DOMAIN_SLAVE) || serverName.contains(DOMAIN_READ)) {
+            result =  true;
+        }
+        return result;
     }
 
     public static String getLocalHostIp() {

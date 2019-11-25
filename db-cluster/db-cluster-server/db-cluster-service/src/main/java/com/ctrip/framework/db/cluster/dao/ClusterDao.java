@@ -29,20 +29,6 @@ public class ClusterDao {
         this.client = new DalTableDao<>(new DalDefaultJpaParser<>(Cluster.class));
     }
 
-    // deprecated
-    public List<Cluster> findByClusterNames(List<String> clusterNames) throws SQLException {
-        return findByClusterNames(null, clusterNames);
-    }
-
-    // deprecated
-    public List<Cluster> findByClusterNames(DalHints hints, List<String> clusterNames) throws SQLException {
-        hints = DalHints.createIfAbsent(hints);
-        SelectSqlBuilder builder = new SelectSqlBuilder();
-        builder.selectAll();
-        builder.inNullable("cluster_name", clusterNames, Types.VARCHAR, false);
-        return client.query(builder, hints);
-    }
-
     public List<Cluster> findClusters(final List<String> clusterNames, final Deleted deleted, final Enabled enabled) throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder();
         builder.selectAll();

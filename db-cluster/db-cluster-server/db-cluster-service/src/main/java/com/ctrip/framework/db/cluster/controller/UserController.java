@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * Created by shenjie on 2019/3/14.
@@ -42,7 +41,7 @@ public class UserController {
                 return ResponseModel.forbiddenResponse();
             }
 
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             if (null == clusterDTO) {
                 ResponseModel response = ResponseModel.successResponse();
                 response.setMessage(String.format("cluster not exists, clusterName = %s", clusterName));
@@ -59,19 +58,4 @@ public class UserController {
             return ResponseModel.failResponse(ResponseStatus.ERROR, t.getMessage());
         }
     }
-
-//    @RequestMapping(value = "/update", method = RequestMethod.POST)
-//    public ResponseModel update() {
-//        return null;
-//    }
-//
-//    @RequestMapping(value = "/query", method = RequestMethod.GET)
-//    public ResponseModel query(@RequestParam(name = "name") long name) {
-//        return null;
-//    }
-//
-//    @RequestMapping(value = "/delete", method = RequestMethod.GET)
-//    public ResponseModel delete(@RequestParam(name = "name") long name) {
-//        return null;
-//    }
 }

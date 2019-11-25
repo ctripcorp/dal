@@ -47,9 +47,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ctrip.framework.db.cluster.entity.enums.ClusterExtensionConfigType.id_generators;
-import static com.ctrip.framework.db.cluster.entity.enums.ClusterExtensionConfigType.shards_strategies;
-
 /**
  * Created by shenjie on 2019/3/5.
  */
@@ -74,9 +71,6 @@ public class ClusterService {
 
     @Resource
     private TitanKeyService titanKeyService;
-
-    @Resource
-    private ClusterExtensionConfigService clusterExtensionConfigService;
 
     @Resource
     private CipherService cipherService;
@@ -139,6 +133,10 @@ public class ClusterService {
         }
     }
 
+    public void updateCluster(final Cluster updateCluster) throws SQLException {
+        clusterDao.update(updateCluster);
+    }
+
     public ClusterDTO findUnDeletedClusterDTO(final String clusterName) throws SQLException {
         final Cluster cluster = findCluster(
                 clusterName, Deleted.un_deleted, null
@@ -148,12 +146,9 @@ public class ClusterService {
         }
 
         final Integer clusterId = cluster.getId();
-
-        // cluster extension configs
-        final List<ClusterExtensionConfig> configs = clusterExtensionConfigService.findUnDeletedConfigs(clusterId);
         // zones
         final List<ZoneDTO> zones = clusterSetService.findUnDeletedByClusterId(clusterId);
-        return componentClusterDTO(cluster, zones, configs);
+        return componentClusterDTO(cluster, zones);
     }
 
     public ClusterDTO findEffectiveClusterDTO(final String clusterName) throws SQLException {
@@ -165,21 +160,21 @@ public class ClusterService {
         }
 
         final Integer clusterId = cluster.getId();
-
-        // cluster extension configs
-        final List<ClusterExtensionConfig> configs = clusterExtensionConfigService.findUnDeletedConfigs(clusterId);
         // zones
         final List<ZoneDTO> zones = clusterSetService.findEffectiveByClusterId(clusterId);
-        return componentClusterDTO(cluster, zones, configs);
+        return componentClusterDTO(cluster, zones);
     }
 
-    private ClusterDTO componentClusterDTO(final Cluster cluster, final List<ZoneDTO> zones,
-                                           final List<ClusterExtensionConfig> configs) {
+    private ClusterDTO componentClusterDTO(final Cluster cluster, final List<ZoneDTO> zones) {
         return ClusterDTO.builder()
                 .clusterEntityId(cluster.getId())
                 .clusterName(cluster.getClusterName())
                 .type(cluster.getType())
                 .zoneId(cluster.getZoneId())
+                .unitStrategyId(cluster.getUnitStrategyId())
+                .unitStrategyName(cluster.getUnitStrategyName())
+                .shardStrategies(cluster.getShardStrategies())
+                .idGenerators(cluster.getIdGenerators())
                 .dbCategory(cluster.getDbCategory())
                 .clusterEnabled(cluster.getEnabled())
                 .clusterDeleted(cluster.getDeleted())
@@ -188,7 +183,6 @@ public class ClusterService {
                 .clusterReleaseVersion(cluster.getReleaseVersion())
                 .clusterUpdateTime(cluster.getUpdateTime())
                 .zones(zones)
-                .configs(configs)
                 .build();
     }
 
@@ -268,22 +262,6 @@ public class ClusterService {
         final List<ReleaseCluster> releaseClusters = Lists.newArrayList();
         final List<DeleteCluster> deleteClusters = Lists.newArrayList();
         for (ClusterDTO cluster : clusterDTOs) {
-            // construct extension configs
-            String shardStrategies = null;
-            String idGenerators = null;
-            final List<ClusterExtensionConfig> configs = cluster.getConfigs();
-            if (!CollectionUtils.isEmpty(configs)) {
-                for (ClusterExtensionConfig config : configs) {
-                    if (shards_strategies.equals(ClusterExtensionConfigType.getType(config.getType()))) {
-                        shardStrategies = config.getContent();
-                    }
-
-                    if (id_generators.equals(ClusterExtensionConfigType.getType(config.getType()))) {
-                        idGenerators = config.getContent();
-                    }
-                }
-            }
-
             final List<ZoneDTO> zones = cluster.getZones();
             final ClusterType clusterType = ClusterType.getType(cluster.getType());
             // drc type
@@ -305,8 +283,10 @@ public class ClusterService {
                             .dbCategory(cluster.getDbCategory())
                             .version(cluster.getClusterReleaseVersion() + 1)
                             .databaseShards(shardRequests)
-                            .shardStrategies(shardStrategies)
-                            .idGenerators(idGenerators)
+                            .type(ClusterType.drc.getName())
+                            .unitStrategyId(cluster.getUnitStrategyId())
+                            .shardStrategies(cluster.getShardStrategies())
+                            .idGenerators(cluster.getIdGenerators())
                             .build();
                     releaseClusters.add(release);
                     // TODO: 2019/11/21 If only one of jq or rb exists, both are released, qconfig switch.
@@ -362,8 +342,9 @@ public class ClusterService {
                         .dbCategory(cluster.getDbCategory())
                         .version(cluster.getClusterReleaseVersion() + 1)
                         .databaseShards(shardRequests)
-                        .shardStrategies(shardStrategies)
-                        .idGenerators(idGenerators)
+                        .type(ClusterType.normal.getName())
+                        .shardStrategies(cluster.getShardStrategies())
+                        .idGenerators(cluster.getIdGenerators())
                         .build();
                 releaseClusters.add(release);
 
@@ -378,6 +359,7 @@ public class ClusterService {
             }
         }
 
+        // TODO: 2019/11/25 release clusters, delete clusters is a transaction operation.
         final PluginResponse releaseResponse = dalPluginService.releaseClusters(releaseClusters, operator);
         log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
                 releaseResponse.getStatus(), releaseResponse.getMessage()));
@@ -407,13 +389,8 @@ public class ClusterService {
     private void releaseValid(final ClusterDTO cluster) {
         final String clusterName = cluster.getClusterName();
 
-        // zones
-        final List<ZoneDTO> zones = cluster.getZones();
-        if (CollectionUtils.isEmpty(zones)) {
-            throw new IllegalStateException(String.format("zones is empty, clusterName = %s", clusterName));
-        }
-
         // zoneId
+        final List<ZoneDTO> zones = cluster.getZones();
         if (zones.stream().map(ZoneDTO::getZoneId).distinct().count() != zones.size()) {
             throw new IllegalStateException(
                     String.format("zoneId不允许相同, zoneId比较是否相同不区分大小写, clusterName = %s", clusterName)
@@ -422,7 +399,7 @@ public class ClusterService {
 
         final ClusterType clusterType = ClusterType.getType(cluster.getType());
         if (ClusterType.drc.equals(clusterType)) {
-            if (zones.size() == 1) {
+            if (zones.size() <= 1) {
                 throw new IllegalStateException(
                         String.format("drc类型的集群, 必须有1个以上数量的zone, clusterName = %s.", clusterName)
                 );
@@ -444,31 +421,6 @@ public class ClusterService {
             throw new IllegalStateException(
                     String.format("暂不支持发布除drc/普通以外类型的集群, clusterName = %s, clusterType = %s", clusterName, clusterType.getName())
             );
-        }
-
-        // extension configs
-        final List<ClusterExtensionConfig> configs = cluster.getConfigs();
-        if (!CollectionUtils.isEmpty(configs)) {
-            // duplicate config type
-            Preconditions.checkArgument(
-                    configs.stream().map(ClusterExtensionConfig::getType).distinct().count() == configs.size(),
-                    String.format("cluster仅支持两类额外配置, shardStrategies和idGenerators, 且每个cluster每类配置的数量最多为1条, clusterName = %s", clusterName)
-            );
-
-            if (configs.size() > 2) {
-                throw new IllegalStateException(
-                        String.format("cluster仅支持两类额外配置, shardStrategies和idGenerators, " +
-                                "且每个cluster每类配置的数量最多为1条, clusterName = %s", clusterName)
-                );
-            } else {
-                configs.forEach(config ->
-                        Preconditions.checkArgument(
-                                Lists.newArrayList(ClusterExtensionConfigType.values()).
-                                        stream().map(ClusterExtensionConfigType::getCode)
-                                        .collect(Collectors.toList()).contains(config.getType()),
-                                "cluster仅支持两类额外配置, shardStrategies和idGenerators.")
-                );
-            }
         }
 
         zones.forEach(zoneDTO -> {
@@ -769,15 +721,15 @@ public class ClusterService {
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
     public void switches(final List<ClusterSwitchesVo> clusterSwitchesVos, final String operator) throws SQLException {
 
-        // correct
-        clusterSwitchesVos.forEach(ClusterSwitchesVo::correct);
-
         // Map<clusterName, ClusterDTO>
         final Map<String, ClusterDTO> effectiveClusterDTOMap = Maps.newLinkedHashMapWithExpectedSize(clusterSwitchesVos.size());
         clusterSwitchesVos.forEach(clusterSwitchesVo -> {
+            // correct
+            clusterSwitchesVo.correct();
+
             final String clusterName = clusterSwitchesVo.getClusterName();
             try {
-                final ClusterDTO effective = findUnDeletedClusterDTO(clusterName);
+                final ClusterDTO effective = findEffectiveClusterDTO(clusterName);
 
                 // invalid cluster
                 if (null == effective) {

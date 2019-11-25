@@ -1,60 +1,83 @@
 package com.ctrip.framework.db.cluster.dao;
 
-import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
+import com.ctrip.framework.db.cluster.entity.TableConfig;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 
 /**
- * Created by @author zhuYongMing on 2019/11/5.
+ * Created by @author zhuYongMing on 2019/11/26.
  */
 @Component
-public class ClusterExtensionConfigDao {
+public class TableConfigDao {
 
     private static final boolean ASC = true;
-    private DalTableDao<ClusterExtensionConfig> client;
+    private DalTableDao<TableConfig> client;
 
-    public ClusterExtensionConfigDao() throws SQLException {
-        this.client = new DalTableDao<>(new DalDefaultJpaParser<>(ClusterExtensionConfig.class));
+    public TableConfigDao() throws SQLException {
+        this.client = new DalTableDao<>(new DalDefaultJpaParser<>(TableConfig.class));
+    }
+
+    public List<TableConfig> find(final Integer clusterId, final Deleted deleted,
+                                  final List<String> tableNames) throws SQLException {
+        SelectSqlBuilder builder = new SelectSqlBuilder();
+        builder.selectAll();
+
+        // clusterId
+        builder.equal("cluster_id", clusterId, Types.INTEGER, false);
+
+        // deleted
+        builder.and();
+        builder.equal("deleted", deleted.getCode(), Types.TINYINT, false);
+
+        // tableNames
+        if (!CollectionUtils.isEmpty(tableNames)) {
+            builder.and();
+            builder.inNullable("table_name", tableNames, Types.VARCHAR, false);
+        }
+        return client.query(builder, new DalHints());
     }
 
     /**
-     * Query ClusterExtensionConfig by the specified ID
+     * Query TableConfig by the specified ID
      * The ID must be a number
      */
-    public ClusterExtensionConfig queryByPk(Number id)
+    public TableConfig queryByPk(Number id)
             throws SQLException {
         return queryByPk(id, null);
     }
 
     /**
-     * Query ClusterExtensionConfig by the specified ID
+     * Query TableConfig by the specified ID
      * The ID must be a number
      */
-    public ClusterExtensionConfig queryByPk(Number id, DalHints hints)
+    public TableConfig queryByPk(Number id, DalHints hints)
             throws SQLException {
         hints = DalHints.createIfAbsent(hints);
         return client.queryByPk(id, hints);
     }
 
     /**
-     * Query ClusterExtensionConfig by ClusterExtensionConfig instance which the primary key is set
+     * Query TableConfig by TableConfig instance which the primary key is set
      */
-    public ClusterExtensionConfig queryByPk(ClusterExtensionConfig pk)
+    public TableConfig queryByPk(TableConfig pk)
             throws SQLException {
         return queryByPk(pk, null);
     }
 
     /**
-     * Query ClusterExtensionConfig by ClusterExtensionConfig instance which the primary key is set
+     * Query TableConfig by TableConfig instance which the primary key is set
      */
-    public ClusterExtensionConfig queryByPk(ClusterExtensionConfig pk, DalHints hints)
+    public TableConfig queryByPk(TableConfig pk, DalHints hints)
             throws SQLException {
         hints = DalHints.createIfAbsent(hints);
         return client.queryByPk(pk, hints);
@@ -64,7 +87,7 @@ public class ClusterExtensionConfigDao {
      * Query against sample pojo. All not null attributes of the passed in pojo
      * will be used as search criteria.
      */
-    public List<ClusterExtensionConfig> queryBy(ClusterExtensionConfig sample)
+    public List<TableConfig> queryBy(TableConfig sample)
             throws SQLException {
         return queryBy(sample, null);
     }
@@ -73,7 +96,7 @@ public class ClusterExtensionConfigDao {
      * Query against sample pojo. All not null attributes of the passed in pojo
      * will be used as search criteria.
      */
-    public List<ClusterExtensionConfig> queryBy(ClusterExtensionConfig sample, DalHints hints)
+    public List<TableConfig> queryBy(TableConfig sample, DalHints hints)
             throws SQLException {
         hints = DalHints.createIfAbsent(hints);
         return client.queryBy(sample, hints);
@@ -96,18 +119,18 @@ public class ClusterExtensionConfigDao {
     }
 
     /**
-     * Query ClusterExtensionConfig with paging function
+     * Query TableConfig with paging function
      * The pageSize and pageNo must be greater than zero.
      */
-    public List<ClusterExtensionConfig> queryAllByPage(int pageNo, int pageSize) throws SQLException {
+    public List<TableConfig> queryAllByPage(int pageNo, int pageSize) throws SQLException {
         return queryAllByPage(pageNo, pageSize, null);
     }
 
     /**
-     * Query ClusterExtensionConfig with paging function
+     * Query TableConfig with paging function
      * The pageSize and pageNo must be greater than zero.
      */
-    public List<ClusterExtensionConfig> queryAllByPage(int pageNo, int pageSize, DalHints hints) throws SQLException {
+    public List<TableConfig> queryAllByPage(int pageNo, int pageSize, DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
         SelectSqlBuilder builder = new SelectSqlBuilder();
@@ -119,14 +142,14 @@ public class ClusterExtensionConfigDao {
     /**
      * Get all records from table
      */
-    public List<ClusterExtensionConfig> queryAll() throws SQLException {
+    public List<TableConfig> queryAll() throws SQLException {
         return queryAll(null);
     }
 
     /**
      * Get all records from table
      */
-    public List<ClusterExtensionConfig> queryAll(DalHints hints) throws SQLException {
+    public List<TableConfig> queryAll(DalHints hints) throws SQLException {
         hints = DalHints.createIfAbsent(hints);
 
         SelectSqlBuilder builder = new SelectSqlBuilder().selectAll().orderBy("id", ASC);
@@ -141,7 +164,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int insert(ClusterExtensionConfig daoPojo) throws SQLException {
+    public int insert(TableConfig daoPojo) throws SQLException {
         return insert(null, daoPojo);
     }
 
@@ -153,7 +176,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int insert(DalHints hints, ClusterExtensionConfig daoPojo) throws SQLException {
+    public int insert(DalHints hints, TableConfig daoPojo) throws SQLException {
         if (null == daoPojo) {
             return 0;
         }
@@ -168,7 +191,7 @@ public class ClusterExtensionConfigDao {
      * @param daoPojos list of pojos to be inserted
      * @return how many rows been affected
      */
-    public int[] insert(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] insert(List<TableConfig> daoPojos) throws SQLException {
         return insert(null, daoPojos);
     }
 
@@ -183,7 +206,7 @@ public class ClusterExtensionConfigDao {
      * @param daoPojos list of pojos to be inserted
      * @return how many rows been affected
      */
-    public int[] insert(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] insert(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }
@@ -201,7 +224,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int insertWithKeyHolder(KeyHolder keyHolder, ClusterExtensionConfig daoPojo) throws SQLException {
+    public int insertWithKeyHolder(KeyHolder keyHolder, TableConfig daoPojo) throws SQLException {
         return insert(null, keyHolder, daoPojo);
     }
 
@@ -216,7 +239,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int insert(DalHints hints, KeyHolder keyHolder, ClusterExtensionConfig daoPojo) throws SQLException {
+    public int insert(DalHints hints, KeyHolder keyHolder, TableConfig daoPojo) throws SQLException {
         if (null == daoPojo) {
             return 0;
         }
@@ -234,7 +257,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] insertWithKeyHolder(KeyHolder keyHolder, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] insertWithKeyHolder(KeyHolder keyHolder, List<TableConfig> daoPojos) throws SQLException {
         return insert(null, keyHolder, daoPojos);
     }
 
@@ -252,7 +275,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] insert(DalHints hints, KeyHolder keyHolder, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] insert(DalHints hints, KeyHolder keyHolder, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }
@@ -268,7 +291,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected for inserting each of the pojo
      * @throws SQLException
      */
-    public int[] batchInsert(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] batchInsert(List<TableConfig> daoPojos) throws SQLException {
         return batchInsert(null, daoPojos);
     }
 
@@ -281,7 +304,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected for inserting each of the pojo
      * @throws SQLException
      */
-    public int[] batchInsert(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] batchInsert(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }
@@ -297,7 +320,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int combinedInsert(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int combinedInsert(List<TableConfig> daoPojos) throws SQLException {
         return combinedInsert(null, daoPojos);
     }
 
@@ -310,7 +333,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int combinedInsert(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int combinedInsert(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return 0;
         }
@@ -329,7 +352,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int combinedInsertWithKeyHolder(KeyHolder keyHolder, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int combinedInsertWithKeyHolder(KeyHolder keyHolder, List<TableConfig> daoPojos) throws SQLException {
         return combinedInsert(null, keyHolder, daoPojos);
     }
 
@@ -345,7 +368,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return 0;
         }
@@ -360,7 +383,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int delete(ClusterExtensionConfig daoPojo) throws SQLException {
+    public int delete(TableConfig daoPojo) throws SQLException {
         return delete(null, daoPojo);
     }
 
@@ -372,7 +395,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int delete(DalHints hints, ClusterExtensionConfig daoPojo) throws SQLException {
+    public int delete(DalHints hints, TableConfig daoPojo) throws SQLException {
         if (null == daoPojo) {
             return 0;
         }
@@ -387,7 +410,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] delete(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] delete(List<TableConfig> daoPojos) throws SQLException {
         return delete(null, daoPojos);
     }
 
@@ -399,7 +422,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] delete(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] delete(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }
@@ -415,7 +438,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected for deleting each of the pojo
      * @throws SQLException
      */
-    public int[] batchDelete(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] batchDelete(List<TableConfig> daoPojos) throws SQLException {
         return batchDelete(null, daoPojos);
     }
 
@@ -428,7 +451,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected for deleting each of the pojo
      * @throws SQLException
      */
-    public int[] batchDelete(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] batchDelete(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }
@@ -445,7 +468,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int update(ClusterExtensionConfig daoPojo) throws SQLException {
+    public int update(TableConfig daoPojo) throws SQLException {
         return update(null, daoPojo);
     }
 
@@ -461,7 +484,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int update(DalHints hints, ClusterExtensionConfig daoPojo) throws SQLException {
+    public int update(DalHints hints, TableConfig daoPojo) throws SQLException {
         if (null == daoPojo) {
             return 0;
         }
@@ -478,7 +501,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] update(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] update(List<TableConfig> daoPojos) throws SQLException {
         return update(null, daoPojos);
     }
 
@@ -494,7 +517,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] update(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] update(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }
@@ -508,7 +531,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] batchUpdate(List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] batchUpdate(List<TableConfig> daoPojos) throws SQLException {
         return batchUpdate(null, daoPojos);
     }
 
@@ -518,7 +541,7 @@ public class ClusterExtensionConfigDao {
      * @return how many rows been affected
      * @throws SQLException
      */
-    public int[] batchUpdate(DalHints hints, List<ClusterExtensionConfig> daoPojos) throws SQLException {
+    public int[] batchUpdate(DalHints hints, List<TableConfig> daoPojos) throws SQLException {
         if (null == daoPojos || daoPojos.size() <= 0) {
             return new int[0];
         }

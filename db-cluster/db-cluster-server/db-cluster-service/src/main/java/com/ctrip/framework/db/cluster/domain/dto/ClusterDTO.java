@@ -1,6 +1,5 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
-import com.ctrip.framework.db.cluster.entity.ClusterExtensionConfig;
 import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
 import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
@@ -33,6 +32,14 @@ public class ClusterDTO {
 
     private String zoneId;
 
+    private Integer unitStrategyId;
+
+    private String unitStrategyName;
+
+    private String shardStrategies;
+
+    private String idGenerators;
+
     private String dbCategory;
 
     private Integer clusterEnabled;
@@ -49,8 +56,6 @@ public class ClusterDTO {
 
     // Cascade info
     private List<ZoneDTO> zones;
-
-    private List<ClusterExtensionConfig> configs;
 
 
     public ClusterVo toVo() {

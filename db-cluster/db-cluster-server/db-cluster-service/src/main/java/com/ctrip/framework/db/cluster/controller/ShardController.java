@@ -65,7 +65,7 @@ public class ShardController {
             addedShardsValid(addedShards);
 
             // cluster exists
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             clusterExistsValid(clusterDTO);
 
             // zone exists
@@ -108,7 +108,7 @@ public class ShardController {
             final List<Integer> deletedShardIndexes = Lists.newArrayList(shardIndexes);
 
             // cluster exists
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             clusterExistsValid(clusterDTO);
 
             // zone exists

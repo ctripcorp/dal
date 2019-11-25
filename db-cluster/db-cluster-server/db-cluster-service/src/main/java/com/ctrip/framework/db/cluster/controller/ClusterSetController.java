@@ -60,7 +60,7 @@ public class ClusterSetController {
             addedZonesValid(addedZones);
 
             // cluster exists valid
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             clusterExistsValid(clusterDTO);
 
             // zone duplicated valid
@@ -96,7 +96,7 @@ public class ClusterSetController {
             }
 
             // cluster exists valid
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             clusterExistsValid(clusterDTO);
 
             // deleted zoneIds does not exists

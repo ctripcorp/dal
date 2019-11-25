@@ -16,18 +16,18 @@ import com.ctrip.framework.db.cluster.util.IpUtils;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.ResponseModel;
+import com.ctrip.framework.db.cluster.vo.dal.create.ClusterConfigVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.ClusterSwitchesVo;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
-import org.unidal.tuple.Pair;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -276,6 +276,44 @@ public class ClusterController {
             return response;
         } catch (Exception e) {
             log.error("Transform to normal cluster failed", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/clusters/{clusterName}/configs")
+    public ResponseModel createClusterConfig(@PathVariable String clusterName,
+                                             @RequestParam(name = "operator") String operator,
+                                             @RequestBody ClusterConfigVo configVo) {
+
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
+            // valid
+            configVo.valid();
+            // cluster exists
+            final Cluster cluster = clusterService.findCluster(clusterName, Deleted.un_deleted, Enabled.enabled);
+            Preconditions.checkArgument(null != cluster, "cluster does not exists.");
+
+            final String shardStrategies = configVo.getShardStrategies();
+            final String idGenerators = configVo.getIdGenerators();
+            final Integer unitStrategyId = configVo.getUnitStrategyId();
+            final String unitStrategyName = configVo.getUnitStrategyName();
+
+            // if exists, update it.
+            final Cluster updateCluster = Cluster.builder()
+                    .id(cluster.getId())
+                    .shardStrategies(StringUtils.isNotBlank(shardStrategies) ? shardStrategies : null)
+                    .idGenerators(StringUtils.isNotBlank(idGenerators) ? idGenerators : null)
+                    .unitStrategyId(unitStrategyId != null && unitStrategyId != 0 ? unitStrategyId : null)
+                    .unitStrategyName(StringUtils.isNotBlank(unitStrategyName) ? unitStrategyName : null)
+                    .build();
+            clusterService.updateCluster(updateCluster);
+
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("create cluster configs success.");
+            return response;
+        } catch (Exception e) {
+            log.error("create cluster configs error.", e);
             return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
         }
     }

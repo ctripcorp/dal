@@ -145,6 +145,28 @@ CREATE TABLE `titan_key` (
   KEY `index_datachange_lasttime` (`datachange_lasttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='titan_key表';
 
--- done
 ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `type` tinyint NOT NULL DEFAULT 0 COMMENT '集群类型, e.g,0:普通集群; 1:DRC集群' AFTER `cluster_name`;
 ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `zone_id` varchar(16) NOT NULL DEFAULT "" COMMENT '集群类型为普通类型时, zoneId对应的zone是该集群所有应用都在使用的zone' AFTER `type`;
+ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `unit_strategy_id` int(11) NOT NULL DEFAULT 0 COMMENT '单元化策略id' AFTER `zone_id`;
+ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `unit_strategy_name` varchar(64) NOT NULL DEFAULT "" COMMENT '单元化策略名称' AFTER `unit_strategy_id`;
+ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `shard_strategies` text NULL COMMENT '分片策略' AFTER `unit_strategy_name`;
+ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `id_generators` text NULL COMMENT 'id生成策略' AFTER `shard_strategies`;
+
+-- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `unit_strategy_id`;
+-- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `unit_strategy_name`;
+-- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `shard_strategies`;
+-- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `id_generators`;
+DROP TABLE IF EXISTS `cluster_extension_config`;
+
+DROP TABLE IF EXISTS `table_config`;
+CREATE TABLE `table_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `cluster_id` int(11) NOT NULL DEFAULT 0 COMMENT 'cluster_id',
+  `table_name` varchar(128) NOT NULL DEFAULT "" COMMENT '表名',
+  `unit_shard_column` varchar(128) NOT NULL DEFAULT "" COMMENT '单元化字段名',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '是否删除, 0:否; 1:是',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `datachange_lasttime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `index_datachange_lasttime` (`datachange_lasttime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='table_config表';

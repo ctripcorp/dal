@@ -44,7 +44,7 @@ public class QmqApiTest {
       public boolean execute(DalClient client) throws SQLException {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(someLogicDBName, DalTransactionManager.getLogicDbName());
-        assertEquals("DalService2DB_W", DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName());
+        assertTrue("DalService2DB_W".equalsIgnoreCase(DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()));
         assertEquals(someShardId, DalTransactionManager.getCurrentShardId());
 
         return true;

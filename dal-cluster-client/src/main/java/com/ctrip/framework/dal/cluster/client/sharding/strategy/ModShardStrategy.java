@@ -54,7 +54,7 @@ public class ModShardStrategy extends ColumnShardStrategy implements ShardStrate
 
     protected int getModResult(int mod, Object shardValue) {
         long longValue = getLongValue(shardValue);
-        return (int) longValue % mod;
+        return (int) (longValue % mod);
     }
 
     protected Long getLongValue(Object value) {

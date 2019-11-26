@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.dao.DalTableDao;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -26,10 +27,14 @@ public class TitanKeyDao {
         this.client = new DalTableDao<>(new DalDefaultJpaParser<>(TitanKey.class));
     }
 
-    public List<TitanKey> queryByNames(final List<String> names) throws SQLException {
+    public List<TitanKey> queryByNamesAndSubEnv(final List<String> names, final String subEnv) throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder();
         builder.selectAll();
         builder.inNullable("name", names, Types.VARCHAR, false);
+        if (null != subEnv) {
+            builder.and();
+            builder.equal("sub_env", subEnv, Types.VARCHAR, false);
+        }
         return client.query(builder, new DalHints());
     }
 

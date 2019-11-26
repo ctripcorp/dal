@@ -10,8 +10,6 @@ import com.ctrip.framework.db.cluster.entity.ShardInstance;
 import com.ctrip.framework.db.cluster.entity.User;
 import com.ctrip.framework.db.cluster.entity.enums.Deleted;
 import com.ctrip.framework.db.cluster.util.Constants;
-import com.ctrip.framework.db.cluster.vo.dal.create.DatabaseVo;
-import com.ctrip.framework.db.cluster.vo.dal.create.ShardVo;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -281,59 +279,7 @@ public class ShardService {
         shardDao.update(shards);
     }
 
-    // deprecated
-    public int addAndGetId(ShardVo shardVo, int clusterId) throws SQLException {
-        String masterDomain = null;
-        String candidateMasterDomain = null;
-        String slaveDomain = null;
-        DatabaseVo master = shardVo.getMaster();
-        if (master != null) {
-            masterDomain = master.getDomain();
-        }
-
-        DatabaseVo slave = shardVo.getSlave();
-        if (slave != null) {
-            candidateMasterDomain = slave.getDomain();
-        }
-
-        DatabaseVo read = shardVo.getRead();
-        if (read != null) {
-            slaveDomain = read.getDomain();
-        }
-
-        Shard shard = Shard.builder()
-                .shardIndex(shardVo.deprGetIndex())
-                .clusterId(clusterId)
-                .dbName(shardVo.getDbName())
-                .masterDomain(masterDomain)
-                .slaveDomain(slaveDomain)
-                .build();
-
-        KeyHolder shardKeyHolder = new KeyHolder();
-        shardDao.insert(null, shardKeyHolder, shard);
-
-        return shardKeyHolder.getKey().intValue();
+    public List<Shard> findByAllDomain(final String domain, final Deleted deleted) throws SQLException {
+        return shardDao.findByAllDomain(domain, deleted);
     }
-
-    public List<Shard> findShardsByDbName(String dbName) throws SQLException {
-        Shard shard = Shard.builder().dbName(dbName).build();
-        List<Shard> shards = shardDao.queryBy(shard);
-        return shards;
-    }
-
-    public List<Shard> findShardsByDBNames(List<String> dbNames) throws SQLException {
-        return shardDao.findShardsByDBNames(dbNames);
-    }
-
-    public List<Shard> findShardsByClusterId(final Integer clusterId) throws SQLException {
-        Shard queryShard = Shard.builder()
-                .clusterId(clusterId)
-                .build();
-        return shardDao.queryBy(queryShard);
-    }
-
-    public Shard findShardsByClusterIdAndShardIndex(Integer clusterId, Integer shardIndex) throws SQLException {
-        return shardDao.findShardsByClusterIdAndShardIndex(clusterId, shardIndex);
-    }
-
 }

@@ -1,8 +1,10 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
+import com.ctrip.framework.db.cluster.entity.TableConfig;
 import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
 import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
+import com.ctrip.framework.db.cluster.vo.dal.create.TableConfigVo;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,15 +59,33 @@ public class ClusterDTO {
     // Cascade info
     private List<ZoneDTO> zones;
 
+    private List<TableConfig> tableConfigs;
+
 
     public ClusterVo toVo() {
         return ClusterVo.builder()
                 .clusterName(clusterName)
                 .type(ClusterType.getType(type).getName())
                 .zoneId(zoneId)
+                .unitStrategyId(unitStrategyId)
+                .unitStrategyName(unitStrategyName)
                 .dbCategory(dbCategory)
                 .enabled(Enabled.getEnabled(clusterEnabled).convertToBoolean())
-                .zones(CollectionUtils.isEmpty(zones) ? Lists.newArrayList() : zones.stream().map(ZoneDTO::toVo).collect(Collectors.toList()))
+                .zones(
+                        CollectionUtils.isEmpty(zones) ?
+                                Lists.newArrayList() :
+                                zones.stream().map(ZoneDTO::toVo).collect(Collectors.toList())
+                )
+                .tableConfigs(
+                        CollectionUtils.isEmpty(tableConfigs) ?
+                                Lists.newArrayList() :
+                                tableConfigs.stream().map(
+                                        tableConfig -> TableConfigVo.builder()
+                                                .tableName(tableConfig.getTableName())
+                                                .unitShardColumn(tableConfig.getUnitShardColumn())
+                                                .build()
+                                ).collect(Collectors.toList())
+                )
                 .build();
     }
 }

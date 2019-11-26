@@ -38,18 +38,6 @@ public class ShardVo {
     private List<UserVo> users;
 
 
-    public Integer deprGetIndex() {
-        return null;
-    }
-
-    public List<UserVo> deprGetUsers() {
-        return null;
-    }
-
-    public List<TitanKeyVo> deprGetTitanKeys() {
-        return null;
-    }
-
     public void valid(final RegexMatcher regexMatcher) {
         // shardIndex
         Preconditions.checkNotNull(shardIndex, "shardIndex不允许为空.");

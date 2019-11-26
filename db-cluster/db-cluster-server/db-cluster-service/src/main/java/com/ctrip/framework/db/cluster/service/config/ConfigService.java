@@ -42,7 +42,8 @@ public class ConfigService {
     private static final String KEY_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = "freshnessClusterEnabledAndThresholdSecond";
     private static final String KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES = "titanKeySynchronizeScheduleDelayMinutes";
     private static final String KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE = "titanKeySynchronizeSchedulePageSize";
-    private static final String KEY_DISTINGUISH_JQ_AND_RB = "distinguishJqAndRb";
+    private static final String KEY_ZONES = "zones";
+    private static final String KEY_MERGE_ZONE = "mergeZone";
 
     private static final String KEY_CLUSTER_NAME_REGEX = "clusterNameRegex";
     private static final String KEY_DB_NAME_REGEX = "dbNameRegex";
@@ -68,7 +69,9 @@ public class ConfigService {
     private static final String DEFAULT_FRESHNESS_CLUSTER_ENABLED_AND_THRESHOLD_SECOND = ""; // example:"cluster1:5,cluster2:2,cluster3:10"
     private static final int DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_DELAY_MINUTES = 1;
     private static final int DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE = 5000;
-    private static final boolean DEFAULT_DISTINGUISH_JQ_AND_RB = true;
+    private static final String DEFAULT_ZONES = "shajq,shaoy,shafq,sharb";
+    // TODO: 2019/11/26 update dynamic release
+    private static final String DEFAULT_MERGE_ZONE = "shajq,sharb"; // example:"shajq,sharb;shafq,shaoy,xxx" 金桥日坂机房不区分, 福泉欧阳xxx机房三者不区分
 
     private static final String DEFAULT_CLUSTER_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
     private static final String DEFAULT_DB_NAME_REGEX = "^[a-zA-Z0-9_-]+$";
@@ -97,7 +100,8 @@ public class ConfigService {
     private volatile Map<String, Integer> freshnessClusterEnabledAndThresholdSecond;
     private volatile int titanKeySynchronizeScheduleDelayMinutes;
     private volatile int titanKeySynchronizeSchedulePageSize;
-    private volatile boolean distinguishJqAndRb;
+    private volatile Set<String> zones;
+    private volatile Set<String> mergeZones;
 
     // 正则表达式
     private volatile String clusterNameRegex;
@@ -144,8 +148,8 @@ public class ConfigService {
         titanKeySynchronizeSchedulePageSize = configMap.getInt(
                 KEY_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE, DEFAULT_TITAN_KEY_SYNCHRONIZE_SCHEDULE_PAGE_SIZE
         );
-        distinguishJqAndRb = configMap.getBoolean(KEY_DISTINGUISH_JQ_AND_RB, DEFAULT_DISTINGUISH_JQ_AND_RB);
-
+        zones = string2Set(configMap.getString(KEY_ZONES, DEFAULT_ZONES));
+        mergeZones = string2Set(configMap.getString(KEY_MERGE_ZONE, DEFAULT_MERGE_ZONE));
 
         clusterNameRegex = configMap.getString(KEY_CLUSTER_NAME_REGEX, DEFAULT_CLUSTER_NAME_REGEX);
         dbNameRegex = configMap.getString(KEY_DB_NAME_REGEX, DEFAULT_DB_NAME_REGEX);
@@ -286,7 +290,11 @@ public class ConfigService {
         return titanKeySynchronizeSchedulePageSize;
     }
 
-    public boolean getDistinguishJqAndRb() {
-        return distinguishJqAndRb;
+    public Set<String> getZones() {
+        return zones;
+    }
+
+    public Set<String> getMergeZones() {
+        return mergeZones;
     }
 }

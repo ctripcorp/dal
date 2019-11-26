@@ -70,6 +70,9 @@ public class ClusterService {
     private ShardInstanceService shardInstanceService;
 
     @Resource
+    private TableConfigService tableConfigService;
+
+    @Resource
     private TitanKeyService titanKeyService;
 
     @Resource
@@ -148,7 +151,15 @@ public class ClusterService {
         final Integer clusterId = cluster.getId();
         // zones
         final List<ZoneDTO> zones = clusterSetService.findUnDeletedByClusterId(clusterId);
-        return componentClusterDTO(cluster, zones);
+        // tableConfigs
+        List<TableConfig> tableConfigs = Lists.newArrayList();
+        if (ClusterType.drc.getCode() == cluster.getType()) {
+            tableConfigs = tableConfigService.findTableConfigs(
+                    clusterId, Deleted.un_deleted, null
+            );
+        }
+
+        return componentClusterDTO(cluster, zones, tableConfigs);
     }
 
     public ClusterDTO findEffectiveClusterDTO(final String clusterName) throws SQLException {
@@ -162,10 +173,19 @@ public class ClusterService {
         final Integer clusterId = cluster.getId();
         // zones
         final List<ZoneDTO> zones = clusterSetService.findEffectiveByClusterId(clusterId);
-        return componentClusterDTO(cluster, zones);
+        // tableConfigs
+        List<TableConfig> tableConfigs = Lists.newArrayList();
+        if (ClusterType.drc.getCode() == cluster.getType()) {
+            tableConfigs = tableConfigService.findTableConfigs(
+                    clusterId, Deleted.un_deleted, null
+            );
+        }
+
+        return componentClusterDTO(cluster, zones, tableConfigs);
     }
 
-    private ClusterDTO componentClusterDTO(final Cluster cluster, final List<ZoneDTO> zones) {
+    private ClusterDTO componentClusterDTO(final Cluster cluster, final List<ZoneDTO> zones,
+                                           final List<TableConfig> tableConfigs) {
         return ClusterDTO.builder()
                 .clusterEntityId(cluster.getId())
                 .clusterName(cluster.getClusterName())
@@ -183,6 +203,7 @@ public class ClusterService {
                 .clusterReleaseVersion(cluster.getReleaseVersion())
                 .clusterUpdateTime(cluster.getUpdateTime())
                 .zones(zones)
+                .tableConfigs(tableConfigs)
                 .build();
     }
 
@@ -201,6 +222,10 @@ public class ClusterService {
                                       final Deleted deleted,
                                       final Enabled enabled) throws SQLException {
         return clusterDao.findClusters(clusterNames, deleted, enabled);
+    }
+
+    public List<Cluster> findCluster(final Cluster queryCluster) throws SQLException {
+        return clusterDao.queryBy(queryCluster);
     }
 
     @DalTransactional(logicDbName = Constants.DATABASE_SET_NAME)
@@ -289,7 +314,51 @@ public class ClusterService {
                             .idGenerators(cluster.getIdGenerators())
                             .build();
                     releaseClusters.add(release);
-                    // TODO: 2019/11/21 If only one of jq or rb exists, both are released, qconfig switch.
+                }
+
+                // merge zones
+                final List<String> releaseZoneIds = zones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList());
+                final Set<String> mergeZones = configService.getMergeZones();
+                if (!CollectionUtils.isEmpty(mergeZones) && mergeZones.size() == 2) {
+                    // mergeZone = jq&rb now
+                    final List<String> releaseZoneIdsExistsMergeZone = Lists.newArrayList();
+                    releaseZoneIds.forEach(zoneId -> {
+                        if (mergeZones.contains(zoneId)) {
+                            releaseZoneIdsExistsMergeZone.add(zoneId);
+                        }
+                    });
+
+                    if (releaseZoneIdsExistsMergeZone.size() == 1) {
+                        final String releaseZoneIdExistsMergeZone = releaseZoneIdsExistsMergeZone.get(0);
+                        final Optional<String> otherMergeZoneOptional = mergeZones.stream()
+                                .filter(mergeZone -> !releaseZoneIdExistsMergeZone.equalsIgnoreCase(mergeZone))
+                                .findFirst();
+                        if (otherMergeZoneOptional.isPresent()) {
+                            // must is present
+                            final String otherMergeZone = otherMergeZoneOptional.get();
+                            final Optional<ReleaseCluster> existsMergeZoneReleaseClusterOptional = releaseClusters
+                                    .stream().filter(releaseCluster -> releaseCluster.getSubEnv()
+                                            .equalsIgnoreCase(releaseZoneIdExistsMergeZone)
+                                    ).findFirst();
+                            if (existsMergeZoneReleaseClusterOptional.isPresent()) {
+                                // must is present
+                                final ReleaseCluster existsMergeZoneReleaseCluster = existsMergeZoneReleaseClusterOptional.get();
+                                // construct clusterRequest
+                                final ReleaseCluster otherMergeZoneReleaseCluster = ReleaseCluster.builder()
+                                        .clusterName(existsMergeZoneReleaseCluster.getClusterName())
+                                        .subEnv(otherMergeZone)
+                                        .dbCategory(existsMergeZoneReleaseCluster.getDbCategory())
+                                        .version(existsMergeZoneReleaseCluster.getVersion())
+                                        .databaseShards(existsMergeZoneReleaseCluster.getDatabaseShards())
+                                        .type(existsMergeZoneReleaseCluster.getType())
+                                        .unitStrategyId(existsMergeZoneReleaseCluster.getUnitStrategyId())
+                                        .shardStrategies(existsMergeZoneReleaseCluster.getShardStrategies())
+                                        .idGenerators(existsMergeZoneReleaseCluster.getIdGenerators())
+                                        .build();
+                                releaseClusters.add(otherMergeZoneReleaseCluster);
+                            }
+                        }
+                    }
                 }
 
                 // delete father env
@@ -349,10 +418,11 @@ public class ClusterService {
                 releaseClusters.add(release);
 
                 // delete all sub env
-                zones.forEach(zone -> {
+                final Set<String> zoneIds = configService.getZones();
+                zoneIds.forEach(zoneId -> {
                     final DeleteCluster deleteCluster = DeleteCluster.builder()
                             .clusterName(cluster.getClusterName())
-                            .subEnv(zone.getZoneId())
+                            .subEnv(zoneId)
                             .build();
                     deleteClusters.add(deleteCluster);
                 });

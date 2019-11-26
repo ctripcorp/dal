@@ -33,15 +33,17 @@ public class ClusterVo {
 
     private String zoneId; // view
 
+    private Integer unitStrategyId; // view
+
+    private String unitStrategyName; // view
+
     private String dbCategory;
 
     private Boolean enabled; // view
 
     private List<ZoneVo> zones;
 
-    public List<ShardVo> deprGetShards() {
-        return null;
-    }
+    private List<TableConfigVo> tableConfigs; // view
 
 
     public void valid(final RegexMatcher regexMatcher) {

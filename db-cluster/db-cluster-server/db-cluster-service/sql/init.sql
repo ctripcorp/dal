@@ -156,7 +156,6 @@ ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `id_generators` text NULL COMMEN
 -- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `unit_strategy_name`;
 -- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `shard_strategies`;
 -- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `id_generators`;
-DROP TABLE IF EXISTS `cluster_extension_config`;
 
 DROP TABLE IF EXISTS `table_config`;
 CREATE TABLE `table_config` (

@@ -41,34 +41,19 @@ public class ShardDao {
         return client.query(builder, new DalHints());
     }
 
-
-    // deprecated
-    public List<Shard> findShardsByDBNames(List<String> dbNames) throws SQLException {
-        return findShardsByDBNames(null, dbNames);
-    }
-
-    public List<Shard> findShardsByDBNames(DalHints hints, List<String> dbNames) throws SQLException {
-        hints = DalHints.createIfAbsent(hints);
+    public List<Shard> findByAllDomain(final String domain, final Deleted deleted) throws SQLException {
         SelectSqlBuilder builder = new SelectSqlBuilder();
         builder.selectAll();
-        builder.inNullable("db_name", dbNames, Types.VARCHAR, false);
-        return client.query(builder, hints);
-    }
+        // deleted
+        builder.equal("deleted", deleted.getCode(), Types.TINYINT, false);
+        // domain
+        builder.equal("master_domain", domain, Types.VARCHAR, false);
+        builder.or();
+        builder.equal("slave_domain", domain, Types.VARCHAR, false);
+        builder.or();
+        builder.equal("read_domain", domain, Types.VARCHAR, false);
 
-    public Shard findShardsByClusterIdAndShardIndex(Integer clusterId, Integer shardIndex) throws SQLException {
-        return findShardsByClusterIdAndShardIndex(clusterId, shardIndex, null);
-    }
-
-    public Shard findShardsByClusterIdAndShardIndex(Integer clusterId, Integer shardIndex, DalHints hints) throws SQLException {
-        hints = DalHints.createIfAbsent(hints);
-        SelectSqlBuilder builder = new SelectSqlBuilder();
-        builder.selectAll();
-        builder.equal("cluster_id", clusterId, Types.INTEGER, false);
-        builder.and();
-        builder.equal("shard_index", shardIndex, Types.INTEGER, false);
-        builder.requireSingle();
-
-        return client.queryObject(builder, hints);
+        return client.query(builder, new DalHints());
     }
 
     /**

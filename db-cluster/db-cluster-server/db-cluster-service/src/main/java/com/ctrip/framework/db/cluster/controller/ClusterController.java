@@ -158,6 +158,8 @@ public class ClusterController {
                             .clusterName(cluster.getClusterName())
                             .type(ClusterType.getType(cluster.getType()).getName())
                             .zoneId(cluster.getZoneId())
+                            .unitStrategyId(cluster.getUnitStrategyId())
+                            .unitStrategyName(cluster.getUnitStrategyName())
                             .dbCategory(cluster.getDbCategory())
                             .enabled(Enabled.getEnabled(cluster.getEnabled()).convertToBoolean())
                             .build()

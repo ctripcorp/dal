@@ -100,7 +100,7 @@ public class TitanKeySynchronizeSchedule {
         try {
             final List<TitanKey> insertTitanKeys = Lists.newArrayList();
             final List<TitanKey> updateTitanKeys = Lists.newArrayList();
-            final List<TitanKey> localTitanKeys = titanKeyService.findByKeyNames(remoteKeyNames);
+            final List<TitanKey> localTitanKeys = titanKeyService.queryByNamesAndSubEnv(remoteKeyNames, null);
 
             remoteKeys.forEach(remote -> {
                 final Optional<TitanKey> localKey = localTitanKeys.stream().filter(

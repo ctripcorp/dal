@@ -46,6 +46,8 @@ public class ShardDao {
         builder.selectAll();
         // deleted
         builder.equal("deleted", deleted.getCode(), Types.TINYINT, false);
+        builder.and();
+
         // domain
         builder.equal("master_domain", domain, Types.VARCHAR, false);
         builder.or();

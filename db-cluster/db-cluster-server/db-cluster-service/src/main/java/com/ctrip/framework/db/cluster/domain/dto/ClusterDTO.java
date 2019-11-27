@@ -63,12 +63,14 @@ public class ClusterDTO {
 
 
     public ClusterVo toVo() {
+        final ClusterType clusterType = ClusterType.getType(type);
+
         return ClusterVo.builder()
                 .clusterName(clusterName)
-                .type(ClusterType.getType(type).getName())
+                .type(clusterType.getName())
                 .zoneId(zoneId)
-                .unitStrategyId(unitStrategyId)
-                .unitStrategyName(unitStrategyName)
+                .unitStrategyId(ClusterType.drc.equals(clusterType) ? unitStrategyId : null)
+                .unitStrategyName(ClusterType.drc.equals(clusterType) ? unitStrategyName : null)
                 .dbCategory(dbCategory)
                 .enabled(Enabled.getEnabled(clusterEnabled).convertToBoolean())
                 .zones(

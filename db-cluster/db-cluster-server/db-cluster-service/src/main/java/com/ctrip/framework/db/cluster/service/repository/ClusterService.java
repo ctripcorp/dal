@@ -28,6 +28,7 @@ import com.ctrip.framework.db.cluster.vo.dal.switches.InstanceSwitchedVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.ShardSwitchesVo;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.ctrip.platform.dal.dao.annotation.DalTransactional;
+import com.ctrip.platform.dal.exceptions.DalException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -377,7 +378,8 @@ public class ClusterService {
                     releaseZone = zones.get(0);
                     // fill cluster_info zoneId
                     final Cluster updateCluster = Cluster.builder()
-                            .zoneId(releaseZoneId)
+                            .id(cluster.getClusterEntityId())
+                            .zoneId(releaseZone.getZoneId())
                             .build();
                     clusterDao.update(updateCluster);
                 } else {
@@ -431,8 +433,17 @@ public class ClusterService {
 
         // TODO: 2019/11/25 release clusters, delete clusters is a transaction operation.
         final PluginResponse releaseResponse = dalPluginService.releaseClusters(releaseClusters, operator);
-        log.info(String.format("Release Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
-                releaseResponse.getStatus(), releaseResponse.getMessage()));
+        if (releaseResponse.isSuccess()) {
+            log.info(
+                    String.format("Release Dal Cluster: %s success. Result Code: %s; Result Msg: %s",
+                            clusterNames.toString(), releaseResponse.getStatus(), releaseResponse.getMessage())
+            );
+        } else {
+            throw new DalException(
+                    String.format("Release Dal cluster: %s fail. Result Code: %s; Result Msg: %s",
+                            clusterNames.toString(), releaseResponse.getStatus(), releaseResponse.getMessage())
+            );
+        }
 
 //        final PluginResponse deleteResponse = dalPluginService.deleteClusters(deleteClusters, operator);
 //        log.info(String.format("Delete Dal Cluster: %s. Result Code: %s; Result Msg: %s", clusterNames.toString(),
@@ -482,7 +493,8 @@ public class ClusterService {
                 );
             }
 
-            if (!zones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList()).contains(usageZoneId)) {
+            if (StringUtils.isNotBlank(usageZoneId)
+                    && !zones.stream().map(ZoneDTO::getZoneId).collect(Collectors.toList()).contains(usageZoneId)) {
                 throw new IllegalStateException(
                         String.format("普通类型的集群, 发布时指定生效的zone必须存在于当前集群所有zones之中, clusterName = %s", clusterName)
                 );
@@ -794,6 +806,8 @@ public class ClusterService {
         // Map<clusterName, ClusterDTO>
         final Map<String, ClusterDTO> effectiveClusterDTOMap = Maps.newLinkedHashMapWithExpectedSize(clusterSwitchesVos.size());
         clusterSwitchesVos.forEach(clusterSwitchesVo -> {
+            // argument valid
+            clusterSwitchesVo.valid(regexMatcher);
             // correct
             clusterSwitchesVo.correct();
 
@@ -1043,9 +1057,6 @@ public class ClusterService {
         );
 
         clusterSwitchesVos.forEach(cluster -> {
-            // argument valid
-            cluster.valid(regexMatcher);
-
             final String clusterName = cluster.getClusterName();
             final ClusterDTO effective = effectiveClusterDTOMap.get(clusterName);
 

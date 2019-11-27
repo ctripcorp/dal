@@ -18,13 +18,6 @@ public class PluginResponse {
 
     private Object data;
 
-    public static PluginResponse successPluginResponse() {
-        return new PluginResponse(PluginStatusCode.OK, null, null);
-    }
-
-    public static PluginResponse failPluginResponse(int status, String message) {
-        return new PluginResponse(status, message, null);
-    }
 
     public boolean isSuccess() {
         return 0 == status;

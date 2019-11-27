@@ -116,8 +116,8 @@ PATH_TO_JAR=$SERVICE_NAME".jar"
 SERVER_URL="http://localhost:$SERVER_PORT"
 STARTUP_LOG=$LOG_DIR"/startup.log"
 
-if [[ -z "$JAVA_HOME" && -d /usr/java/latest/ ]]; then
-    export JAVA_HOME=/usr/java/latest/
+if [[ -z "$JAVA_HOME" && -d /usr/java/jdk1.8.0_121/ ]]; then
+    export JAVA_HOME=/usr/java/jdk1.8.0_121/
 fi
 
 cd `dirname $0`/..

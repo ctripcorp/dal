@@ -2,7 +2,7 @@ package com.ctrip.framework.db.cluster.service.plugin;
 
 import com.ctrip.framework.db.cluster.domain.*;
 import com.ctrip.framework.db.cluster.domain.plugin.dal.delete.DeleteCluster;
-import com.ctrip.framework.db.cluster.domain.plugin.dal.release.ReleaseCluster;
+import com.ctrip.framework.db.cluster.domain.plugin.dal.releases.ReleaseCluster;
 import com.ctrip.framework.db.cluster.exception.DBClusterServiceException;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.util.Constants;

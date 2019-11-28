@@ -938,6 +938,7 @@ public class ClusterService {
                 .map(ClusterDTO::getClusterName).collect(Collectors.toList());
         release(releaseClusters, operator, Constants.RELEASE_TYPE_SWITCH_RELEASE);
 
+        // TODO: 2019/11/28 remove from transaction
         // batch switch titan keys
         if (!CollectionUtils.isEmpty(domainIpPortPair)) {
             final List<TitanKeyMhaUpdateData> titanKeyMhaUpdateDatas = Lists.newArrayList();

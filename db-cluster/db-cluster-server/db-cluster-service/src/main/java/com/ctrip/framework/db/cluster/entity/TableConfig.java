@@ -1,6 +1,5 @@
 package com.ctrip.framework.db.cluster.entity;
 
-import com.ctrip.platform.dal.dao.DalPojo;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 
 /**
- * Created by @author zhuYongMing on 2019/11/5.
+ * Created by @author zhuYongMing on 2019/11/26.
  */
 @Data
 @Builder
@@ -21,8 +20,8 @@ import java.sql.Types;
 @AllArgsConstructor
 @Entity
 @Database(name = "dalclusterdemodb_w")
-@Table(name = "cluster_extension_config")
-public class ClusterExtensionConfig implements DalPojo {
+@Table(name = "table_config")
+public class TableConfig {
 
     /**
      * 主键
@@ -34,26 +33,25 @@ public class ClusterExtensionConfig implements DalPojo {
     private Integer id;
 
     /**
-     * cluster_id
+     * 集群id
      */
     @Column(name = "cluster_id")
     @Type(value = Types.INTEGER)
     private Integer clusterId;
 
+    /**
+     * 表名
+     */
+    @Column(name = "table_name")
+    @Type(value = Types.VARCHAR)
+    private String tableName;
 
     /**
-     * 扩展配置内容
+     * 单元化字段名
      */
-    @Column(name = "content")
-    @Type(value = Types.VARBINARY)
-    private String content;
-
-    /**
-     * 扩展配置类型
-     */
-    @Column(name = "type")
-    @Type(value = Types.TINYINT)
-    private Integer type;
+    @Column(name = "unit_shard_column")
+    @Type(value = Types.VARCHAR)
+    private String unitShardColumn;
 
     /**
      * 是否删除

@@ -14,11 +14,15 @@ import org.apache.commons.lang.StringUtils;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterExtensionConfigVo {
+public class ClusterConfigVo {
 
     private String shardStrategies;
 
     private String idGenerators;
+
+    private Integer unitStrategyId;
+
+    private String unitStrategyName;
 
 
     public void valid() {
@@ -32,8 +36,20 @@ public class ClusterExtensionConfigVo {
             Preconditions.checkArgument(!"".equals(idGenerators), "if idGenerators exists, idGenerators can't be empty.");
         }
 
-        if (StringUtils.isBlank(shardStrategies) && StringUtils.isBlank(idGenerators)) {
-            throw new IllegalStateException("At least one of shardStrategies or idGenerators exists.");
+        // unitStrategyId
+        if (null != unitStrategyId) {
+            Preconditions.checkArgument(0 != unitStrategyId, "if unitStrategyName exists, unitStrategyName can't be zero.");
+        }
+
+        // unitStrategyName
+        if (null != unitStrategyName) {
+            Preconditions.checkArgument(!"".equals(unitStrategyName), "if unitStrategyName exists, unitStrategyName can't be empty");
+        }
+
+
+        if (StringUtils.isBlank(shardStrategies) && StringUtils.isBlank(idGenerators)
+                && null == unitStrategyId && StringUtils.isBlank(unitStrategyName)) {
+            throw new IllegalStateException("At least one of shardStrategies or idGenerators or unitStrategyId or unitStrategyName exists.");
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.ctrip.framework.db.cluster.domain.plugin.dal;
+package com.ctrip.framework.db.cluster.domain.plugin.dal.releases;
 
 import lombok.Builder;
 import lombok.Data;

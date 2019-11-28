@@ -3,27 +3,33 @@ package com.ctrip.framework.db.cluster.controller;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.domain.dto.UserDTO;
+import com.ctrip.framework.db.cluster.domain.dto.ZoneDTO;
 import com.ctrip.framework.db.cluster.entity.Cluster;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ClusterType;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
+import com.ctrip.framework.db.cluster.util.Constants;
+import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
-import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.IpUtils;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.ResponseModel;
+import com.ctrip.framework.db.cluster.vo.dal.create.ClusterConfigVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.ctrip.framework.db.cluster.vo.dal.switches.ClusterSwitchesVo;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -103,17 +109,17 @@ public class ClusterController {
                 return response;
             }
 
-            clusterDTO.getZones().forEach(
-                    zone -> zone.getShards().forEach(
-                            shard -> {
-                                final List<UserDTO> users = shard.getUsers();
-                                if (!CollectionUtils.isEmpty(users)) {
-                                    users.forEach(
-                                            user -> user.setUsername(cipherService.decrypt(user.getUsername()))
-                                    );
-                                }
-                            }
-                    )
+            // The same user between multiple zones, so get first zone
+            final Optional<ZoneDTO> firstZone = clusterDTO.getZones().stream().findFirst();
+            firstZone.ifPresent(zoneDTO -> zoneDTO.getShards().forEach(
+                    shard -> {
+                        final List<UserDTO> users = shard.getUsers();
+                        if (!CollectionUtils.isEmpty(users)) {
+                            users.forEach(
+                                    user -> user.setUsername(cipherService.decrypt(user.getUsername()))
+                            );
+                        }
+                    })
             );
             ResponseModel response = ResponseModel.successResponse(clusterDTO.toVo());
             response.setMessage("Query cluster success");
@@ -150,6 +156,7 @@ public class ClusterController {
             final List<ClusterVo> clusterVos = clusters.stream().map(
                     cluster -> ClusterVo.builder()
                             .clusterName(cluster.getClusterName())
+                            .type(ClusterType.getType(cluster.getType()).getName())
                             .dbCategory(cluster.getDbCategory())
                             .enabled(Enabled.getEnabled(cluster.getEnabled()).convertToBoolean())
                             .build()
@@ -167,22 +174,27 @@ public class ClusterController {
 
     @PostMapping(value = "/clusters/{clusterName}/releases")
     public ResponseModel releaseCluster(@PathVariable String clusterName,
+                                        @RequestParam(name = "releaseZoneId", required = false) String releaseZoneId,
                                         @RequestParam(name = "operator") String operator,
                                         HttpServletRequest request) {
 
         try {
             // format parameter
             clusterName = Utils.format(clusterName);
+            releaseZoneId = Utils.format(releaseZoneId);
 
             // access check
             if (!siteAccessChecker.isAllowed(request)) {
                 return ResponseModel.forbiddenResponse();
             }
 
-            clusterService.release(Lists.newArrayList(clusterName), operator, Constants.RELEASE_TYPE_NORMAL_RELEASE);
+            // release
+            clusterService.assignZoneRelease(
+                    releaseZoneId, clusterName, operator, Constants.RELEASE_TYPE_NORMAL_RELEASE)
+            ;
+
             ResponseModel response = ResponseModel.successResponse();
             response.setMessage("Release cluster success");
-
             return response;
         } catch (Exception e) {
             log.error(String.format("Release cluster failed, clusterName = %s .", clusterName), e);
@@ -215,128 +227,93 @@ public class ClusterController {
         }
     }
 
-    // deprecated
-//    @RequestMapping(value = "/add", method = RequestMethod.POST)
-//    public ResponseModel releaseClusters(@RequestBody ClusterVo cluster,
-//                                    @RequestParam(name = "operator", required = false) String operator,
-//                                    HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            // check cluster
-//            dalClusterValidityChecker.checkCluster(cluster, operator);
-//
-//            // createClusterSets cluster to db
-//            dalClusterManager.releaseClusters(cluster);
-//
-//            // sync titanKeys to plugin
-//            titanSyncService.addTitanKeysAsync(cluster, Constants.ENV);
-//
-//            return ResponseModel.successResponse();
-//
-//        } catch (Exception e) {
-//            log.error("Add dal cluster info failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
-//
-//    @RequestMapping(value = "/release", method = RequestMethod.GET)
-//    public ResponseModel releaseAll(@RequestParam(name = "clustername", required = false) String clusterName,
-//                                    @RequestParam(name = "operator", required = false) String operator,
-//                                    HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername参数为空");
-//            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            dalClusterReleaseService.addClusters(clusterName, Constants.ENV, operator);
-//            return ResponseModel.successResponse();
-//
-//        } catch (Exception e) {
-//            log.error("Release dal cluster failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
+    @PutMapping(value = "/clusters/{clusterName}/types/drc")
+    public ResponseModel transformToDrc(@PathVariable String clusterName,
+                                        @RequestParam(name = "operator") String operator,
+                                        HttpServletRequest request) {
 
-//    @RequestMapping(value = "/switch", method = RequestMethod.POST)
-//    public ResponseModel switchCluster(@RequestBody DatabaseGroupVo databases,
-//                                       @RequestParam(name = "operator", required = false) String operator,
-//                                       HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            // check databases
-//            dalClusterValidityChecker.checkDatabases(databases);
-//
-//            String env = Constants.ENV;
-//            // update cluster(db, qconfig)
-//            List<ShardVo> shards = databases.getDatabases();
-//            updateAndReleaseCluster(shards, env, operator);
-//
-//            // update titanKeys to qconfig
-//            titanSyncService.updateTitanKeysAsync(shards, env, operator);
-//
-//            return ResponseModel.successResponse();
-//
-//        } catch (Exception e) {
-//            log.error("Switch dal cluster failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
 
-//    @RequestMapping(value = "/info", method = RequestMethod.GET)
-//    public ResponseModel get(@RequestParam(name = "clustername", required = false) String clusterName,
-//                             HttpServletRequest request) {
-//        try {
-//            Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername参数为空");
-//            if (!siteAccessChecker.isAllowed(request)) {
-//                return ResponseModel.forbiddenResponse();
-//            }
-//
-//            clusterName = Utils.format(clusterName);
-//            ClusterVo cluster = dalClusterManager.getCluster(clusterName);
-//            SecurityUtil.encryptPassword(cluster);
-//
-//            return ResponseModel.successResponse(cluster);
-//
-//        } catch (Exception e) {
-//            log.error("Get dal cluster failed.", e);
-//            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-//        }
-//    }
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
 
-//    @RequestMapping(value = "/delete", method = RequestMethod.GET)
-//    public ResponseModel delete(@RequestParam(name = "name") String name) {
-//        return null;
-//    }
+            clusterService.transformToDrc(clusterName, operator);
 
-//    private void updateAndReleaseCluster(List<ShardVo> shards, String env, String operator) throws SQLException {
-//        // update cluster shards in db
-//        DalClient client = DalClientFactory.getClient(Constants.DATABASE_SET_NAME);
-//        List<DalCommand> dalCommands = Lists.newArrayList();
-//        dalCommands.add(new DalCommand() {
-//            public boolean execute(DalClient client) throws SQLException {
-//                dalClusterManager.updateShards(shards);
-//                return true;
-//            }
-//        });
-//
-//        // update clusters to plugin
-//        dalCommands.add(new DalCommand() {
-//            public boolean execute(DalClient client) throws SQLException {
-//                dalClusterReleaseService.updateClusters(shards, env, operator);
-//                return true;
-//            }
-//        });
-//        DalHints hints = new DalHints();
-//        client.execute(dalCommands, hints);
-//    }
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("Transform to drc cluster success");
+            return response;
+        } catch (Exception e) {
+            log.error("Transform to drc type cluster", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
+
+    @PutMapping(value = "/clusters/{clusterName}/types/normal")
+    public ResponseModel transformToNormal(@PathVariable String clusterName,
+                                           @RequestParam(name = "releaseZoneId") String releaseZoneId,
+                                           @RequestParam(name = "operator") String operator,
+                                           HttpServletRequest request) {
+
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
+            releaseZoneId = Utils.format(releaseZoneId);
+
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
+
+            clusterService.transformToNormal(clusterName, releaseZoneId, operator);
+
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("Transform to normal cluster success");
+            return response;
+        } catch (Exception e) {
+            log.error("Transform to normal cluster failed", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/clusters/{clusterName}/configs")
+    public ResponseModel createClusterConfig(@PathVariable String clusterName,
+                                             @RequestParam(name = "operator") String operator,
+                                             @RequestBody ClusterConfigVo configVo) {
+
+        try {
+            // format parameter
+            clusterName = Utils.format(clusterName);
+            // valid
+            configVo.valid();
+            // cluster exists
+            final Cluster cluster = clusterService.findCluster(clusterName, Deleted.un_deleted, Enabled.enabled);
+            Preconditions.checkArgument(null != cluster, "cluster does not exists.");
+
+            final String shardStrategies = configVo.getShardStrategies();
+            final String idGenerators = configVo.getIdGenerators();
+            final Integer unitStrategyId = configVo.getUnitStrategyId();
+            final String unitStrategyName = configVo.getUnitStrategyName();
+
+            // if exists, update it.
+            final Cluster updateCluster = Cluster.builder()
+                    .id(cluster.getId())
+                    .shardStrategies(StringUtils.isNotBlank(shardStrategies) ? shardStrategies : null)
+                    .idGenerators(StringUtils.isNotBlank(idGenerators) ? idGenerators : null)
+                    .unitStrategyId(unitStrategyId != null && unitStrategyId != 0 ? unitStrategyId : null)
+                    .unitStrategyName(StringUtils.isNotBlank(unitStrategyName) ? unitStrategyName : null)
+                    .build();
+            clusterService.updateCluster(updateCluster);
+
+            ResponseModel response = ResponseModel.successResponse();
+            response.setMessage("create cluster configs success.");
+            return response;
+        } catch (Exception e) {
+            log.error("create cluster configs error.", e);
+            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
+        }
+    }
 }

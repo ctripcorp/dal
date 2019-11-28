@@ -3,7 +3,7 @@ package com.ctrip.framework.db.cluster.controller;
 import com.ctrip.framework.db.cluster.crypto.CipherService;
 import com.ctrip.framework.db.cluster.domain.MongoClusterGetResponse;
 import com.ctrip.framework.db.cluster.domain.PluginResponse;
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
+import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.config.ConfigService;
 import com.ctrip.framework.db.cluster.service.plugin.MongoPluginService;
 import com.ctrip.framework.db.cluster.util.Constants;

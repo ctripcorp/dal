@@ -52,6 +52,7 @@ public class Constants {
     // release types
     public static final String RELEASE_TYPE_NORMAL_RELEASE = "normal_release";
     public static final String RELEASE_TYPE_SWITCH_RELEASE = "switch_release";
+    public static final String RELEASE_TYPE_TRANSFORM_RELEASE = "transform_release";
     public static final String RELEASE_TYPE_HEALTH_SCHEDULE_RELEASE = "health_schedule_release";
 
     // timeout

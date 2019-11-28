@@ -41,6 +41,49 @@ public class Cluster implements DalPojo {
     private String clusterName;
 
     /**
+     * 集群类型, 0:普通集群; 1:DRC集群
+     */
+    @Column(name = "type")
+    @Type(value = Types.TINYINT)
+    private Integer type;
+
+    /**
+     * 集群类型为普通类型时,
+     * zoneId对应的zone是该集群所有应用都在使用的zone
+     */
+    @Column(name = "zone_id")
+    @Type(value = Types.VARCHAR)
+    private String zoneId;
+
+    /**
+     * 单元化策略id
+     */
+    @Column(name = "unit_strategy_id")
+    @Type(value = Types.INTEGER)
+    private Integer unitStrategyId;
+
+    /**
+     * 单元化策略名称
+     */
+    @Column(name = "unit_strategy_name")
+    @Type(value = Types.VARCHAR)
+    private String unitStrategyName;
+
+    /**
+     * 分片策略
+     */
+    @Column(name = "shard_strategies")
+    @Type(value = Types.VARBINARY)
+    private String shardStrategies;
+
+    /**
+     * id生成策略
+     */
+    @Column(name = "id_generators")
+    @Type(value = Types.VARBINARY)
+    private String idGenerators;
+
+    /**
      * 数据库类型
      */
     @Column(name = "db_category")
@@ -88,6 +131,5 @@ public class Cluster implements DalPojo {
     @Column(name = "datachange_lasttime", insertable = false, updatable = false)
     @Type(value = Types.TIMESTAMP)
     private Timestamp updateTime;
-
 }
 

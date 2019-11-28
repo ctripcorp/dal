@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.schedule;
 
 import com.ctrip.framework.db.cluster.entity.*;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.framework.db.cluster.service.remote.qconfig.QConfigService;
 import com.ctrip.framework.db.cluster.service.remote.qconfig.domain.QConfigFileDetailResponse;
 import com.ctrip.framework.db.cluster.service.repository.*;
@@ -13,6 +13,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.unidal.tuple.Triple;
 
 import java.sql.SQLException;
@@ -67,8 +68,14 @@ public class TitanKeysUsageConsistencySchedule {
                 final List<Integer> clusterIds = clusterService.findClusters(
                         null, Deleted.un_deleted, Enabled.enabled
                 ).stream().map(Cluster::getId).collect(Collectors.toList());
+                if (CollectionUtils.isEmpty(clusterIds)) {
+                    return;
+                }
 
                 final List<Shard> shards = shardService.findShards(clusterIds, Deleted.un_deleted);
+                if (CollectionUtils.isEmpty(shards)) {
+                    return;
+                }
 
                 final List<ShardInstance> masterShardInstances = shardInstanceService.findUnDeletedByShardIdsAndRole(
                         shards.stream().map(Shard::getId).collect(Collectors.toList()),
@@ -100,9 +107,15 @@ public class TitanKeysUsageConsistencySchedule {
                         }
                     }
                 });
+                if (CollectionUtils.isEmpty(domainIpPortTriples)) {
+                    return;
+                }
 
                 final List<String> domains = domainIpPortTriples.stream().map(Triple::getFirst).collect(Collectors.toList());
                 final List<TitanKey> titanKeys = titanKeyService.findByDomains(domains, Enabled.enabled);
+                if (CollectionUtils.isEmpty(titanKeys)) {
+                    return;
+                }
 
                 titanKeys.forEach(titanKey -> {
                     final String titanKeyName = titanKey.getName();

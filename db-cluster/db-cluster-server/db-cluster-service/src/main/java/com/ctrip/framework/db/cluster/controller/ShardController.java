@@ -3,27 +3,20 @@ package com.ctrip.framework.db.cluster.controller;
 import com.ctrip.framework.db.cluster.domain.dto.ClusterDTO;
 import com.ctrip.framework.db.cluster.domain.dto.ShardDTO;
 import com.ctrip.framework.db.cluster.domain.dto.ZoneDTO;
-import com.ctrip.framework.db.cluster.entity.Cluster;
 import com.ctrip.framework.db.cluster.entity.Shard;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.ResponseStatus;
-import com.ctrip.framework.db.cluster.service.DalClusterManager;
-import com.ctrip.framework.db.cluster.service.TitanSyncService;
-import com.ctrip.framework.db.cluster.service.checker.DalClusterValidityChecker;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
 import com.ctrip.framework.db.cluster.service.checker.SiteAccessChecker;
+import com.ctrip.framework.db.cluster.vo.ResponseStatus;
 import com.ctrip.framework.db.cluster.service.repository.ClusterService;
 import com.ctrip.framework.db.cluster.service.repository.ShardService;
-import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.util.RegexMatcher;
 import com.ctrip.framework.db.cluster.util.Utils;
 import com.ctrip.framework.db.cluster.vo.ResponseModel;
-import com.ctrip.framework.db.cluster.vo.dal.create.ClusterVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.ShardVo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,24 +35,27 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ShardController {
 
+    private final SiteAccessChecker siteAccessChecker;
+
     private final ClusterService clusterService;
 
     private final ShardService shardService;
 
     private final RegexMatcher regexMatcher;
 
-    // deprecated
-    private final SiteAccessChecker siteAccessChecker;
-    private final DalClusterManager dalClusterManager;
-    private final TitanSyncService titanSyncService;
-    private final DalClusterValidityChecker dalClusterValidityChecker;
-
 
     @PostMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
     public ResponseModel addShards(@PathVariable String clusterName, @PathVariable String zoneId,
-                                   @RequestParam(name = "operator") String operator, @RequestBody final ShardVo[] shardVos) {
+                                   @RequestParam(name = "operator") String operator,
+                                   @RequestBody final ShardVo[] shardVos,
+                                   final HttpServletRequest request) {
 
         try {
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
+
             // format parameter
             clusterName = Utils.format(clusterName);
             zoneId = Utils.format(zoneId);
@@ -69,7 +65,7 @@ public class ShardController {
             addedShardsValid(addedShards);
 
             // cluster exists
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             clusterExistsValid(clusterDTO);
 
             // zone exists
@@ -96,16 +92,23 @@ public class ShardController {
 
     @DeleteMapping(value = "/clusters/{clusterName}/zones/{zoneId}/shards")
     public ResponseModel deleteShards(@PathVariable String clusterName, @PathVariable String zoneId,
-                                      @RequestParam(name = "operator") String operator, @RequestBody Integer[] shardIndexes) {
+                                      @RequestParam(name = "operator") String operator,
+                                      @RequestBody Integer[] shardIndexes,
+                                      final HttpServletRequest request) {
 
         try {
+            // access check
+            if (!siteAccessChecker.isAllowed(request)) {
+                return ResponseModel.forbiddenResponse();
+            }
+
             // format parameter
             clusterName = Utils.format(clusterName);
             zoneId = Utils.format(zoneId);
             final List<Integer> deletedShardIndexes = Lists.newArrayList(shardIndexes);
 
             // cluster exists
-            final ClusterDTO clusterDTO = clusterService.findUnDeletedClusterDTO(clusterName);
+            final ClusterDTO clusterDTO = clusterService.findEffectiveClusterDTO(clusterName);
             clusterExistsValid(clusterDTO);
 
             // zone exists
@@ -148,6 +151,9 @@ public class ShardController {
         );
         addedShards.forEach(shard -> shard.valid(regexMatcher));
 
+        // shards correct
+        addedShards.forEach(ShardVo::correct);
+
         // shardIndex repeated valid
         final List<Integer> distinctSortedAddedShardIndexes = addedShards.stream()
                 .map(ShardVo::getShardIndex).distinct().sorted().collect(Collectors.toList());
@@ -163,9 +169,6 @@ public class ShardController {
                 distinctAddedDbNames.size() == addedShards.size(),
                 "Newly added dbName are not allowed to be repeated."
         );
-
-        // shards correct
-        addedShards.forEach(ShardVo::correct);
     }
 
     private void clusterExistsValid(final ClusterDTO clusterDTO) {
@@ -251,59 +254,5 @@ public class ShardController {
             shardDTO.setZoneId(zoneId);
             return shardDTO;
         }).collect(Collectors.toList());
-    }
-
-
-    // deprecated
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseModel switchCluster(@RequestBody List<ShardVo> shards,
-                                       @RequestParam(name = "clustername", required = false) String clusterName,
-                                       @RequestParam(name = "operator", required = false) String operator,
-                                       HttpServletRequest request) {
-        try {
-            Preconditions.checkArgument(StringUtils.isNotBlank(clusterName), "clustername参数为空");
-            Preconditions.checkArgument(StringUtils.isNotBlank(operator), "operator参数为空");
-            if (!siteAccessChecker.isAllowed(request)) {
-                return ResponseModel.forbiddenResponse();
-            }
-
-            // check shards
-            dalClusterValidityChecker.checkShards(shards, operator);
-
-            // createClusterSets shards
-            dalClusterManager.addShard(clusterName, shards);
-
-            // sync titan keys
-            Cluster clusterInDB = clusterService.findCluster(
-                    clusterName, Deleted.un_deleted, null
-            );
-            ClusterVo cluster = ClusterVo.builder()
-                    .clusterName(clusterName)
-                    .dbCategory(clusterInDB.getDbCategory())
-//                    .shards(shards)
-                    .build();
-            titanSyncService.addTitanKeysAsync(cluster, Constants.ENV);
-
-            return ResponseModel.successResponse();
-
-        } catch (Exception e) {
-            log.error("Add cluster shard failed.", e);
-            return ResponseModel.failResponse(ResponseStatus.ERROR, e.getMessage());
-        }
-    }
-
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public ResponseModel update() {
-        return null;
-    }
-
-    @RequestMapping(value = "/query", method = RequestMethod.GET)
-    public ResponseModel query(@RequestParam(name = "name") long name) {
-        return null;
-    }
-
-    @RequestMapping(value = "/delete", method = RequestMethod.GET)
-    public ResponseModel delete(@RequestParam(name = "name") long name) {
-        return null;
     }
 }

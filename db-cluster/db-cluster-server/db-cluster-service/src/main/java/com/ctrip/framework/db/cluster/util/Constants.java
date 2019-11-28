@@ -43,7 +43,7 @@ public class Constants {
     public static final String ENV_PRO = "pro";
     public static final String ENV_FAT = "fat";
     public static final String ENV_UAT = "uat";
-    public static final String ENV = Foundation.server().getEnvFamily().getName();
+    public static final String ENV = Foundation.server().getEnv().getName();
 
     // db category
     public static final String MYSQL_DB = "mysql";

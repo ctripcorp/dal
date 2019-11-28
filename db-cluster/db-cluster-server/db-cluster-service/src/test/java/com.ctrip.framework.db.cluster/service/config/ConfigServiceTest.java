@@ -1,5 +1,6 @@
 package com.ctrip.framework.db.cluster.service.config;
 
+import com.ctrip.framework.db.cluster.util.Constants;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;

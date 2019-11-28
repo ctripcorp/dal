@@ -152,11 +152,6 @@ ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `unit_strategy_name` varchar(64)
 ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `shard_strategies` text NULL COMMENT '分片策略' AFTER `unit_strategy_name`;
 ALTER TABLE `fxdalclusterdb`.`cluster_info` ADD `id_generators` text NULL COMMENT 'id生成策略' AFTER `shard_strategies`;
 
--- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `unit_strategy_id`;
--- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `unit_strategy_name`;
--- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `shard_strategies`;
--- ALTER TABLE `fxdalclusterdb`.`cluster_info` DROP COLUMN `id_generators`;
-
 DROP TABLE IF EXISTS `table_config`;
 CREATE TABLE `table_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',

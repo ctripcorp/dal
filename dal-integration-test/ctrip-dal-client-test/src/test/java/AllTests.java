@@ -4,6 +4,7 @@ import noshardtest.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import qunar.tc.qmq.dal.DatabaseSetAdaptTest;
 import shardtest.newVersionCodeTest.*;
 import shardtest.oldVersionCodeTest.*;
 import shardtest.qmq.QmqDalIntegrationTest;
@@ -54,6 +55,7 @@ import testUtil.NetStatChecker;
             QmqApiTest.class,
             TitanDataSourceTest.class,
             QmqDalIntegrationTest.class,
+            DatabaseSetAdaptTest.class,
 
             DalTransactionalWithShardOnSqlServerNotSpringTest.class,
             DalTransactionalWithShardOnSqlServerSpringTest.class,

@@ -8,6 +8,7 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
+import com.ctrip.framework.dal.cluster.client.sharding.strategy.UserHintStrategy;
 import com.ctrip.framework.dal.cluster.client.util.ServiceLoaderUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import org.w3c.dom.Document;
@@ -139,12 +140,18 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     private void parseShardStrategies(ClusterConfigImpl clusterConfig, Node strategiesNode) {
         for (Node modStrategyNode : getChildNodes(strategiesNode, MOD_STRATEGY))
             parseModStrategy(clusterConfig, modStrategyNode);
+        for (Node modStrategyNode : getChildNodes(strategiesNode, USER_HINT_STRATEGY))
+            parseUserHintStrategy(clusterConfig, modStrategyNode);
         for (Node customStrategyNode : getChildNodes(strategiesNode, CUSTOM_STRATEGY))
             parseCustomStrategy(clusterConfig, customStrategyNode);
     }
 
     private void parseModStrategy(ClusterConfigImpl clusterConfig, Node strategyNode) {
         parseShardStrategy(clusterConfig, strategyNode, new ModShardStrategy());
+    }
+
+    private void parseUserHintStrategy(ClusterConfigImpl clusterConfig, Node strategyNode) {
+        parseShardStrategy(clusterConfig, strategyNode, new UserHintStrategy());
     }
 
     private void parseCustomStrategy(ClusterConfigImpl clusterConfig, Node strategyNode) {

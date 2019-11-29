@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * @author c7ch23en
  */
-public class ClusterDatabaseSet implements DatabaseSet {
+public class ClusterDatabaseSet extends DatabaseSet {
 
     private String databaseSetName;
     private Cluster cluster;

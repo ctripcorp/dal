@@ -139,7 +139,7 @@ public class InsertTaskAdapter<T> extends TaskAdapter<T> {
 				if (identityInsertDisabled || null == pojo.get(identityFieldName)) {
 					Number id = idGenerator.nextId();
 					checkIdentityTypes(identityFieldType, id);
-					pojo.put(identityFieldName, idGenerator.nextId());
+					pojo.put(identityFieldName, id);
 				}
 			}
 		}

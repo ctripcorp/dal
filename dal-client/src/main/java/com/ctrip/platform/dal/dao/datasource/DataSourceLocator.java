@@ -77,6 +77,7 @@ public class DataSourceLocator {
 
     public void removeDataSource(DataSourceIdentity id) {
         DataSource ds = cache.remove(id);
+        provider.unregister(id);
         if (ds instanceof RefreshableDataSource) {
             ((RefreshableDataSource) ds).close();
         }
@@ -96,8 +97,7 @@ public class DataSourceLocator {
         return ds;
     }
 
-    public void setup(Cluster cluster) {
-    }
+    public void setup(Cluster cluster) {}
 
     public static Map<String, Integer> getActiveConnectionNumber() {
         Map<String, Integer> map = new HashMap<>();

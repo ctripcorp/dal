@@ -15,14 +15,14 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
     private static final String DB_SHARD_COLUMN = "dbShardColumn";
     private static final String TABLE_SHARD_COLUMN = "tableShardColumn";
 
-    public ColumnShardStrategy() {}
+    protected ColumnShardStrategy() {}
 
-    public abstract Integer calcDbShard(String tableName, Object shardValue);
+    protected abstract Integer calcDbShard(String tableName, Object shardValue);
 
-    public abstract String calcTableShard(String tableName, Object shardValue);
+    protected abstract String calcTableShard(String tableName, Object shardValue);
 
     @Override
-    public Integer getDbShard(String tableName, DbShardContext context) {
+    protected Integer calcDbShard(String tableName, DbShardContext context) {
         Integer shard = context.getShardId();
         if (shard != null)
             return shard;
@@ -50,7 +50,7 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
     }
 
     @Override
-    public String getTableShard(String tableName, TableShardContext context) {
+    protected String calcTableShard(String tableName, TableShardContext context) {
         String shard = context.getShardId();
         if (shard != null)
             return shard;
@@ -77,7 +77,7 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
         return shard;
     }
 
-    private Object getDbShardValue(String tableName, ShardData shardData) {
+    protected Object getDbShardValue(String tableName, ShardData shardData) {
         if (shardData == null)
             return null;
         String dbShardColumn = getTableProperty(tableName, DB_SHARD_COLUMN);
@@ -86,7 +86,7 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
         return shardData.getValue(dbShardColumn);
     }
 
-    private Object getTableShardValue(String tableName, ShardData shardData) {
+    protected Object getTableShardValue(String tableName, ShardData shardData) {
         if (shardData == null)
             return null;
         String tableShardColumn = getTableProperty(tableName, TABLE_SHARD_COLUMN);

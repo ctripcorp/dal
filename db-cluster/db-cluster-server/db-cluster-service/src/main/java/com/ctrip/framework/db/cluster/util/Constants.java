@@ -43,7 +43,8 @@ public class Constants {
     public static final String ENV_PRO = "pro";
     public static final String ENV_FAT = "fat";
     public static final String ENV_UAT = "uat";
-    public static final String ENV = Foundation.server().getEnv().getName();
+    public static final String ENV_FWS = "fws";
+    public static final String ENV = getEnv();
 
     // db category
     public static final String MYSQL_DB = "mysql";
@@ -65,4 +66,8 @@ public class Constants {
     // other
     public static final String POINT_SEPARATOR = ".";
 
+    private static String getEnv() {
+        final String actualEnv = Foundation.server().getEnv().getName();
+        return ENV_FWS.equalsIgnoreCase(actualEnv) ? ENV_FAT : actualEnv;
+    }
 }

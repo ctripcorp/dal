@@ -14,36 +14,81 @@ import com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 
-public interface DatabaseSet {
+public abstract class DatabaseSet implements IDatabaseSet {
 
-    String getName();
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    String getProvider();
+    @Override
+    public String getProvider() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    DatabaseCategory getDatabaseCategory();
+    @Override
+    public DatabaseCategory getDatabaseCategory() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    boolean isShardingSupported();
+    @Override
+    public boolean isShardingSupported() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    boolean isTableShardingSupported(String tableName);
+    @Override
+    public boolean isTableShardingSupported(String tableName) {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    Map<String, DataBase> getDatabases();
+    @Override
+    public Map<String, DataBase> getDatabases() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    void validate(String shard) throws SQLException;
+    @Override
+    public void validate(String shard) throws SQLException {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    Set<String> getAllShards();
+    @Override
+    public Set<String> getAllShards() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    Set<String> getAllTableShards(String tableName) throws SQLException;
+    @Override
+    public Set<String> getAllTableShards(String tableName) throws SQLException {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    DalShardingStrategy getStrategy() throws SQLException;
+    @Override
+    public DalShardingStrategy getStrategy() throws SQLException {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    List<DataBase> getMasterDbs();
+    @Override
+    public List<DataBase> getMasterDbs() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    List<DataBase> getSlaveDbs();
+    @Override
+    public List<DataBase> getSlaveDbs() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    List<DataBase> getMasterDbs(String shard);
+    @Override
+    public List<DataBase> getMasterDbs(String shard) {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    List<DataBase> getSlaveDbs(String shard);
+    @Override
+    public List<DataBase> getSlaveDbs(String shard) {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
-    IIdGeneratorConfig getIdGenConfig();
+    @Override
+    public IIdGeneratorConfig getIdGenConfig() {
+        throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
 
 }

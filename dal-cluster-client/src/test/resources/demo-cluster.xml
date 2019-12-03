@@ -20,37 +20,40 @@
         </DatabaseShards>
         <ShardStrategies>
             <ModStrategy default="true">
-                <Property name="shardByDb" value="true"/>
-                <Property name="shardByTable" value="true"/>
-                <Property name="dbShardKey" value="id"/>
+                <Property name="tableSharding" value="true"/>
+                <Property name="dbShardColumn" value="id"/>
                 <Property name="dbShardMod" value="3"/>
-                <Property name="tableShardKey" value="age"/>
+                <!--<Property name="dbShardOffset" value="1"/>-->
+                <Property name="tableShardColumn" value="age"/>
                 <Property name="tableShardMod" value="7"/>
-                <Property name="tableNamePattern" value=""/>
+                <Property name="tableShardSeparator" value="="/>
                 <Tables>
-                    <Property name="shardByDb" value="true"/>
-                    <Property name="shardByTable" value="true"/>
-                    <Property name="dbShardKey" value="id"/>
-                    <Property name="dbShardMod" value="2"/>
-                    <Property name="tableShardKey" value="age"/>
+                    <Property name="tableSharding" value="true"/>
+                    <Property name="dbShardColumn" value="id"/>
+                    <Property name="dbShardMod" value="4"/>
+                    <Property name="tableShardColumn" value="age"/>
                     <Property name="tableShardMod" value="3"/>
-                    <Table name="table11"/>
+                    <Table name="table11">
+                        <Property name="dbShardOffset" value="1"/>
+                        <Property name="tableShardOffset" value="1"/>
+                    </Table>
                     <Table name="table12"/>
                     <Table name="table13">
-                        <Property name="shardByDb" value="true"/>
-                        <Property name="shardByTable" value="true"/>
-                        <Property name="dbShardKey" value="age"/>
+                        <Property name="tableSharding" value="true"/>
+                        <Property name="dbShardColumn" value="age"/>
                         <Property name="dbShardMod" value="2"/>
-                        <Property name="tableShardKey" value="age"/>
+                        <Property name="tableShardColumn" value="age"/>
                         <Property name="tableShardMod" value="4"/>
                     </Table>
                     <Table name="table14">
-                        <Property name="shardByDb" value="true"/>
-                        <Property name="shardByTable" value="true"/>
-                        <Property name="dbShardKey" value="id"/>
+                        <Property name="tableSharding" value="true"/>
+                        <Property name="dbShardColumn" value="id"/>
                         <Property name="dbShardMod" value="2"/>
-                        <Property name="tableShardKey" value="age"/>
-                        <Property name="tableShardMod" value="1"/>
+                        <Property name="tableShardColumn" value="age"/>
+                        <Property name="tableShardMod" value="4"/>
+                    </Table>
+                    <Table name="table15">
+                        <Property name="tableSharding" value="false"/>
                     </Table>
                 </Tables>
             </ModStrategy>

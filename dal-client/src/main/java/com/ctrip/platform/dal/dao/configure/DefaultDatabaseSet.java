@@ -14,7 +14,7 @@ import com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 
-public class DefaultDatabaseSet implements DatabaseSet {
+public class DefaultDatabaseSet extends DatabaseSet {
     private static final String CLASS = "class";
     private static final String ENTRY_SEPARATOR = ";";
     private static final String KEY_VALUE_SEPARATOR = "=";

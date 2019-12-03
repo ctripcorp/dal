@@ -13,6 +13,7 @@ public interface ClusterConfigXMLConstants {
     String DATABASE = "Database";
     String SHARD_STRATEGIES = "ShardStrategies";
     String MOD_STRATEGY = "ModStrategy";
+    String USER_HINT_STRATEGY = "UserHintStrategy";
     String CUSTOM_STRATEGY = "CustomStrategy";
     String PROPERTY = "Property";
     String TABLES = "Tables";

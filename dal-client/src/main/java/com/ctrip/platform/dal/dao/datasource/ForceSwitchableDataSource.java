@@ -35,15 +35,15 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     private static final String NULL_DATASOURCE = "nullDataSource";
     private static final DataSourceConfigureConvert dataSourceConfigureConvert = ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
 
-    public ForceSwitchableDataSource(IDataSourceConfigureProvider provider) throws SQLException {
+    public ForceSwitchableDataSource(IDataSourceConfigureProvider provider) {
         this(getIDataSourceConfigure(provider) == null ? NULL_DATASOURCE : getIDataSourceConfigure(provider).getConnectionUrl(), provider);
     }
 
-    public ForceSwitchableDataSource(String name, IDataSourceConfigureProvider provider) throws SQLException {
+    public ForceSwitchableDataSource(String name, IDataSourceConfigureProvider provider) {
         this(new DataSourceName(name), provider);
     }
 
-    public ForceSwitchableDataSource(DataSourceIdentity id, IDataSourceConfigureProvider provider) throws SQLException {
+    public ForceSwitchableDataSource(DataSourceIdentity id, IDataSourceConfigureProvider provider) {
         super(id, DataSourceConfigure.valueOf(getIDataSourceConfigure(provider) == null ? new DataSourceConfigure() : getIDataSourceConfigure(provider)));
         if (getIDataSourceConfigure(provider) == null) {
             isNullDataSource = true;

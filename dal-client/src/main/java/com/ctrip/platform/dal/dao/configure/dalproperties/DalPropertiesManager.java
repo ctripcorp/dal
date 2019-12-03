@@ -11,33 +11,40 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DalPropertiesManager {
     private DalPropertiesProvider dalPropertiesProvider = DalElementFactory.DEFAULT.getDalPropertiesProvider();
-    private AtomicBoolean isPropertiesListenerAdded = new AtomicBoolean(false);
+    private final AtomicBoolean isInitialized = new AtomicBoolean(false);
 
-    private DalPropertiesLocator dalPropertiesLocator = new DefaultDalPropertiesLocator();
-    private AbstractDalPropertiesLocator sqlServerDalPropertiesLocator = new SqlServerDalPropertiesLocator();
-    private AbstractDalPropertiesLocator mySqlDalPropertiesLocator = new MySqlDalPropertiesLocator();
+    private volatile DalPropertiesLocator dalPropertiesLocator = new DefaultDalPropertiesLocator();
+    private volatile AbstractDalPropertiesLocator sqlServerDalPropertiesLocator = new SqlServerDalPropertiesLocator();
+    private volatile AbstractDalPropertiesLocator mySqlDalPropertiesLocator = new MySqlDalPropertiesLocator();
 
     private volatile static DalPropertiesManager manager = null;
 
-    public synchronized static DalPropertiesManager getInstance() {
+    public static DalPropertiesManager getInstance() {
         if (manager == null) {
-            manager = new DalPropertiesManager();
+            synchronized (DalPropertiesManager.class) {
+                if (manager == null)
+                    manager = new DalPropertiesManager();
+            }
         }
         return manager;
     }
 
-    public synchronized void setup() {
-        // set dal.properties
-        Map<String, String> properties = dalPropertiesProvider.getProperties();
+    public void setup() {
+        setupOnlyOnce();
+    }
 
-        dalPropertiesLocator.setProperties(properties);
-        sqlServerDalPropertiesLocator.setProperties(properties);
-        mySqlDalPropertiesLocator.setProperties(properties);
-
-        boolean isListenerAdded = isPropertiesListenerAdded.get();
-        if (!isListenerAdded) {
-            addPropertiesChangedListener();
-            isPropertiesListenerAdded.compareAndSet(false, true);
+    private void setupOnlyOnce() {
+        if (!isInitialized.get()) {
+            synchronized (isInitialized) {
+                if (!isInitialized.get()) {
+                    Map<String, String> properties = dalPropertiesProvider.getProperties();
+                    dalPropertiesLocator.setProperties(properties);
+                    sqlServerDalPropertiesLocator.setProperties(properties);
+                    mySqlDalPropertiesLocator.setProperties(properties);
+                    addPropertiesChangedListener();
+                    isInitialized.set(true);
+                }
+            }
         }
     }
 
@@ -57,22 +64,27 @@ public class DalPropertiesManager {
     }
 
     public DalPropertiesLocator getDalPropertiesLocator() {
+        setupOnlyOnce();
         return dalPropertiesLocator;
     }
 
     public AbstractDalPropertiesLocator getSqlServerDalPropertiesLocator() {
+        setupOnlyOnce();
         return sqlServerDalPropertiesLocator;
     }
 
     public AbstractDalPropertiesLocator getMySqlDalPropertiesLocator() {
+        setupOnlyOnce();
         return mySqlDalPropertiesLocator;
     }
 
-    public synchronized void tearDown(){
-        isPropertiesListenerAdded.compareAndSet(true,false);
-        Map<String,String> dalProperties=new HashMap<>();
-        dalProperties.put(DefaultDalPropertiesLocator.TABLE_PARSE_SWITCH_KEYNAME,"true");
-        dalProperties.put(DefaultDalPropertiesLocator.IMPLICIT_ALL_SHARDS_SWITCH,"false");
-        dalPropertiesLocator.setProperties(dalProperties);
+    public void tearDown(){
+        synchronized (isInitialized) {
+            isInitialized.set(false);
+            Map<String, String> dalProperties = new HashMap<>();
+            dalProperties.put(DefaultDalPropertiesLocator.TABLE_PARSE_SWITCH_KEYNAME, "true");
+            dalProperties.put(DefaultDalPropertiesLocator.IMPLICIT_ALL_SHARDS_SWITCH, "false");
+            dalPropertiesLocator.setProperties(dalProperties);
+        }
     }
 }

@@ -9,6 +9,8 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -20,15 +22,15 @@ public class DataSourceLocator {
     private static final Map<DataSourceIdentity, DataSource> cache = new ConcurrentHashMap<>();
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
-    private DataSourceConfigureProvider provider;
+    private IntegratedConfigProvider provider;
 
     private boolean isForceInitialize = false;
 
-    public DataSourceLocator(DataSourceConfigureProvider provider) {
+    public DataSourceLocator(IntegratedConfigProvider provider) {
         this.provider = provider;
     }
 
-    public DataSourceLocator(DataSourceConfigureProvider provider, boolean isForceInitialize) {
+    public DataSourceLocator(IntegratedConfigProvider provider, boolean isForceInitialize) {
         this.provider = provider;
         this.isForceInitialize = isForceInitialize;
     }
@@ -75,8 +77,32 @@ public class DataSourceLocator {
         return ds;
     }
 
+    public DataSource getDataSource(ClusterInfo clusterInfo) {
+        DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
+        DataSource ds = cache.get(id);
+        if (ds == null) {
+            synchronized (cache) {
+                ds = cache.get(id);
+                if (ds == null) {
+                    try {
+                        String clusterName = clusterInfo.getClusterName();
+                        ClusterConfig clusterConfig = provider.getClusterConfig(clusterName);
+                        ds = createClusterDynamicDataSource(id, clusterInfo, new DynamicCluster(clusterConfig));
+                        cache.put(id, ds);
+                    } catch (Throwable t) {
+                        String msg = String.format("error when creating datasource: %s", id.getId());
+                        LOGGER.error(msg, t);
+                        throw new RuntimeException(msg, t);
+                    }
+                }
+            }
+        }
+        return ds;
+    }
+
     public void removeDataSource(DataSourceIdentity id) {
         DataSource ds = cache.remove(id);
+        provider.unregister(id);
         if (ds instanceof RefreshableDataSource) {
             ((RefreshableDataSource) ds).close();
         }
@@ -96,8 +122,14 @@ public class DataSourceLocator {
         return ds;
     }
 
-    public void setup(Cluster cluster) {
+    private DataSource createClusterDynamicDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
+        ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider);
+        provider.register(id, ds);
+        executor.execute(ds);
+        return ds;
     }
+
+    public void setup(Cluster cluster) {}
 
     public static Map<String, Integer> getActiveConnectionNumber() {
         Map<String, Integer> map = new HashMap<>();

@@ -10,6 +10,9 @@ import java.util.Map;
  * Created by lilj on 2018/7/22.
  */
 public interface DalPropertiesLocator {
+
+    String PROPERTY_NAME_CLUSTER_INFO_QUERY_URL = "ClusterInfoQueryUrl";
+
     void setProperties(Map<String, String> properties);
 
     TableParseSwitch getTableParseSwitch();
@@ -17,5 +20,9 @@ public interface DalPropertiesLocator {
     Map<String, ErrorCodeInfo> getErrorCodes();
 
     ImplicitAllShardsSwitch getImplicitAllShardsSwitch();
+
+    String getClusterInfoQueryUrl();
+
+    String getProperty(String name);
 
 }

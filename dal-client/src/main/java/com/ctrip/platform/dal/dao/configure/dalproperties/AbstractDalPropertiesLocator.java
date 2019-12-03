@@ -134,4 +134,14 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
         return info;
     }
 
+    @Override
+    public String getClusterInfoQueryUrl() {
+        throw new UnsupportedOperationException("getClusterInfoQueryUrl not supported.");
+    }
+
+    @Override
+    public String getProperty(String name) {
+        throw new UnsupportedOperationException("getProperty not supported.");
+    }
+
 }

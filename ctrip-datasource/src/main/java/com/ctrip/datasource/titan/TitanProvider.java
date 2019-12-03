@@ -4,14 +4,22 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.datasource.configure.CtripLocalClusterInfoProvider;
+import com.ctrip.datasource.net.HttpExecutor;
+import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.datasource.configure.ClusterInfoProvider;
+import com.ctrip.datasource.configure.CtripClusterInfoProvider;
 import com.ctrip.datasource.configure.CtripLocalClusterConfigProvider;
 import com.ctrip.datasource.configure.qconfig.CtripClusterConfigProvider;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 
@@ -22,6 +30,7 @@ public class TitanProvider implements IntegratedConfigProvider {
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
     private ClusterConfigProvider clusterConfigProvider = new CtripClusterConfigProvider();
+    private ClusterInfoProvider clusterInfoProvider = new CtripClusterInfoProvider(DalPropertiesManager.getInstance(), HttpExecutor.getInstance());
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
@@ -29,6 +38,7 @@ public class TitanProvider implements IntegratedConfigProvider {
         dataSourceConfigureManager.initialize(settings);
         if (sourceType == SourceType.Local) {
             clusterConfigProvider = new CtripLocalClusterConfigProvider();
+            clusterInfoProvider = new CtripLocalClusterInfoProvider();
         }
     }
 
@@ -113,6 +123,10 @@ public class TitanProvider implements IntegratedConfigProvider {
     // for unit test only
     public void clear() {
         dataSourceConfigureManager.clear();
+    }
+
+    public ClusterInfo tryGetClusterInfo(String titanKey) {
+        return clusterInfoProvider.getClusterInfo(titanKey);
     }
 
 }

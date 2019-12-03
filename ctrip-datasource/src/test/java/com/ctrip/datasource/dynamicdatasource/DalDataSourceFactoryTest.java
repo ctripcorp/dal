@@ -1,6 +1,8 @@
 package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.platform.dal.dao.datasource.ClusterDynamicDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -66,6 +68,26 @@ public class DalDataSourceFactoryTest {
         } catch (Throwable e) {
             Assert.assertTrue(false);
         }
+    }
+
+    @Test
+    public void testTitanKeyClusterAdapt() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+
+        DataSource dataSource = factory.createDataSource("fnctpauthofflineshard03db_w");
+        Assert.assertTrue(dataSource instanceof ClusterDynamicDataSource);
+        Connection connection = dataSource.getConnection();
+        Assert.assertNotNull(connection);
+        Assert.assertTrue("fnctpauthofflineshard03db".equalsIgnoreCase(connection.getCatalog()));
+        connection.close();
+
+        DataSource dataSource2 = factory.createDataSource("fxdalclusterdb_w");
+        Assert.assertNotNull(dataSource2);
+        Assert.assertFalse(dataSource2 instanceof ClusterDynamicDataSource);
+        Connection connection2 = dataSource2.getConnection();
+        Assert.assertNotNull(connection2);
+        Assert.assertTrue("fxdalclusterdb".equalsIgnoreCase(connection2.getCatalog()));
+        connection2.close();
     }
 
 }

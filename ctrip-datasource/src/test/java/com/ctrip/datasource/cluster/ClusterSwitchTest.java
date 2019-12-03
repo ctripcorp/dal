@@ -6,12 +6,12 @@ import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
+import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.LocalClusterConfigProvider;
-import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.datasource.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,6 +23,7 @@ public class ClusterSwitchTest {
 
     private static final String CLUSTER_NAME1 = "cluster_config_1";
     private static final String CLUSTER_NAME2 = "cluster_config_2";
+    private static final String CLUSTER_NAME3 = "cluster_config_3";
 
     private LocalClusterConfigProvider clusterConfigProvider = new LocalClusterConfigProvider();
 
@@ -65,6 +66,28 @@ public class ClusterSwitchTest {
             Assert.assertTrue(dsSet.add(ds));
             Assert.assertEquals(db.isMaster() ? 2 : 1, ((RefreshableDataSource) ds).getSingleDataSource().getReferenceCount());
         }
+    }
+
+    @Test
+    public void testClusterDynamicDataSourceSwitch() {
+        int shardIndex = 0;
+        ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME1, shardIndex, DatabaseRole.MASTER);
+        MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME1));
+        DynamicCluster cluster = new DynamicCluster(config);
+        TitanProvider provider = new TitanProvider();
+        provider.setup(new HashSet<>());
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider);
+
+        Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
+                cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+        System.out.println("connStr before: " + cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+
+        config.doSwitch(getClusterConfig(CLUSTER_NAME3));
+        cluster.doSwitch(config);
+
+        Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
+                cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+        System.out.println("connStr after: " + cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
     }
 
     private ClusterConfig getClusterConfig(String clusterName) {

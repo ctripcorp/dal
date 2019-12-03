@@ -9,7 +9,10 @@ import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class DalDataSourceFactory {
@@ -54,32 +57,29 @@ public class DalDataSourceFactory {
      * @throws Exception
      */
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid) throws Exception {
-        Set<String> names = new HashSet<>();
-        names.add(allInOneKey);
-
-        TitanProvider provider = new TitanProvider();
-        provider.setSourceTypeByEnv();
-        provider.setup(names);
-
-        DataSourceLocator loc = new DataSourceLocator(provider);
-        String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
-        return loc.getDataSource(keyName);
+        return createDataSource(allInOneKey, svcUrl, appid, false);
     }
 
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceInitialize) throws Exception {
-        Set<String> names = new HashSet<>();
-        names.add(allInOneKey);
+        TitanProvider provider = new TitanProvider();
         Map<String, String> settings = new HashMap<>();
         settings.put(IGNORE_EXTERNAL_EXCEPTION, String.valueOf(isForceInitialize));
-
-        TitanProvider provider = new TitanProvider();
         provider.initialize(settings);
         provider.setSourceTypeByEnv();
-        provider.setup(names);
 
-        DataSourceLocator loc = new DataSourceLocator(provider, isForceInitialize);
-        String keyName = ConnectionStringKeyHelper.getKeyName(allInOneKey);
-        return loc.getDataSource(keyName);
+        Set<String> names = new HashSet<>();
+        ClusterInfo clusterInfo = provider.tryGetClusterInfo(allInOneKey);
+
+        if (clusterInfo == null)
+            names.add(allInOneKey);
+
+        provider.setup(names);
+        DataSourceLocator locator = new DataSourceLocator(provider, isForceInitialize);
+
+        if (clusterInfo != null)
+            return locator.getDataSource(clusterInfo);
+        else
+            return locator.getDataSource(allInOneKey);
     }
 
     /**

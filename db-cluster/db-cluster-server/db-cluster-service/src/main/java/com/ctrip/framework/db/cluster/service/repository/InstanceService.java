@@ -4,7 +4,7 @@ import com.ctrip.framework.db.cluster.dao.InstanceDao;
 import com.ctrip.framework.db.cluster.domain.dto.ShardInstanceDTO;
 import com.ctrip.framework.db.cluster.entity.Instance;
 import com.ctrip.framework.db.cluster.entity.ShardInstance;
-import com.ctrip.framework.db.cluster.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
 import com.ctrip.framework.db.cluster.util.Constants;
 import com.ctrip.framework.db.cluster.vo.dal.create.DatabaseVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.InstanceVo;

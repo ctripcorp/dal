@@ -1,6 +1,6 @@
-package com.ctrip.framework.db.cluster.enums;
+package com.ctrip.framework.db.cluster.entity.enums;
 
-public enum ShardInstanceHealthStatus {
+public enum ShardInstanceMemberStatus {
 
     un_enabled(0) {
         @Override
@@ -16,7 +16,8 @@ public enum ShardInstanceHealthStatus {
         }
     };
 
-    ShardInstanceHealthStatus(int code) {
+
+    ShardInstanceMemberStatus(int code) {
         this.code = code;
     }
 
@@ -28,12 +29,12 @@ public enum ShardInstanceHealthStatus {
 
     public abstract boolean convertToBoolean();
 
-    public static ShardInstanceHealthStatus getShardInstanceHealthStatus(final int code) {
-        for (ShardInstanceHealthStatus status : values()) {
+    public static ShardInstanceMemberStatus getShardInstanceMemberStatus(final int code) {
+        for (ShardInstanceMemberStatus status : values()) {
             if (status.getCode() == code) {
                 return status;
             }
         }
-        throw new IllegalArgumentException(String.format("shardInstanceHealthStatus code can't match, code parameter is %d.", code));
+        throw new IllegalArgumentException(String.format("shardInstanceMemberStatus code can't match, code parameter is %d.", code));
     }
 }

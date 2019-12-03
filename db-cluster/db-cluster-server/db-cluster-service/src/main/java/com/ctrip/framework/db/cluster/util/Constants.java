@@ -43,7 +43,8 @@ public class Constants {
     public static final String ENV_PRO = "pro";
     public static final String ENV_FAT = "fat";
     public static final String ENV_UAT = "uat";
-    public static final String ENV = Foundation.server().getEnvFamily().getName();
+    public static final String ENV_FWS = "fws";
+    public static final String ENV = getEnv();
 
     // db category
     public static final String MYSQL_DB = "mysql";
@@ -52,6 +53,7 @@ public class Constants {
     // release types
     public static final String RELEASE_TYPE_NORMAL_RELEASE = "normal_release";
     public static final String RELEASE_TYPE_SWITCH_RELEASE = "switch_release";
+    public static final String RELEASE_TYPE_TRANSFORM_RELEASE = "transform_release";
     public static final String RELEASE_TYPE_HEALTH_SCHEDULE_RELEASE = "health_schedule_release";
 
     // timeout
@@ -64,4 +66,8 @@ public class Constants {
     // other
     public static final String POINT_SEPARATOR = ".";
 
+    private static String getEnv() {
+        final String actualEnv = Foundation.server().getEnv().getName();
+        return ENV_FWS.equalsIgnoreCase(actualEnv) ? ENV_FAT : actualEnv;
+    }
 }

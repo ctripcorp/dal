@@ -29,15 +29,21 @@ public class ClusterVo {
 
     private String clusterName;
 
+    private String type; // view
+
+    private String zoneId; // view
+
+    private Integer unitStrategyId; // view
+
+    private String unitStrategyName; // view
+
     private String dbCategory;
 
-    private Boolean enabled;
+    private Boolean enabled; // view
 
     private List<ZoneVo> zones;
 
-    public List<ShardVo> deprGetShards() {
-        return null;
-    }
+    private List<TableConfigVo> tableConfigs; // view
 
 
     public void valid(final RegexMatcher regexMatcher) {
@@ -55,11 +61,6 @@ public class ClusterVo {
             Preconditions.checkArgument(
                     zones.stream().map(zoneVo -> Utils.format(zoneVo.getZoneId())).distinct().count() == zones.size(),
                     "zoneId不允许相同, zoneId比较是否相同不区分大小写."
-            );
-
-            // TODO: 2019/10/30 临时:zone size == 1
-            Preconditions.checkArgument(
-                    zones.size() == 1, "目前一个集群中只能存在1个zone."
             );
 
             // zones

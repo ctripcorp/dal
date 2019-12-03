@@ -1,8 +1,8 @@
 package com.ctrip.framework.db.cluster.domain.dto;
 
-import com.ctrip.framework.db.cluster.enums.Enabled;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceHealthStatus;
-import com.ctrip.framework.db.cluster.enums.ShardInstanceMemberStatus;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceHealthStatus;
+import com.ctrip.framework.db.cluster.entity.enums.ShardInstanceMemberStatus;
 import com.ctrip.framework.db.cluster.vo.dal.create.DatabaseVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.InstanceVo;
 import com.ctrip.framework.db.cluster.vo.dal.create.ShardVo;

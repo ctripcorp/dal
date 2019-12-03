@@ -4,8 +4,8 @@ import com.ctrip.framework.db.cluster.dao.ClusterSetDao;
 import com.ctrip.framework.db.cluster.domain.dto.ShardDTO;
 import com.ctrip.framework.db.cluster.domain.dto.ZoneDTO;
 import com.ctrip.framework.db.cluster.entity.ClusterSet;
-import com.ctrip.framework.db.cluster.enums.Deleted;
-import com.ctrip.framework.db.cluster.enums.Enabled;
+import com.ctrip.framework.db.cluster.entity.enums.Deleted;
+import com.ctrip.framework.db.cluster.entity.enums.Enabled;
 import com.ctrip.platform.dal.dao.KeyHolder;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -30,6 +30,10 @@ public class ClusterSetService {
 
     private final ShardService shardService;
 
+
+    public List<ClusterSet> findCusterSets(final ClusterSet queryClusterSet) throws SQLException {
+        return clusterSetDao.queryBy(queryClusterSet);
+    }
 
     public void createClusterSets(final List<ZoneDTO> zoneDTOs) throws SQLException {
         // create zones
@@ -60,6 +64,9 @@ public class ClusterSetService {
         }
     }
 
+    public void updateClusterSets(final List<ClusterSet> updatedClusterSets) throws SQLException {
+        clusterSetDao.update(updatedClusterSets);
+    }
 
     public List<ZoneDTO> findUnDeletedByClusterId(final Integer clusterId) throws SQLException {
         // find unDeleted Zones by clusterId

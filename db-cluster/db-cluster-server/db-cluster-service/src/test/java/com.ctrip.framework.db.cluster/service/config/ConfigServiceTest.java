@@ -1,14 +1,12 @@
 package com.ctrip.framework.db.cluster.service.config;
 
-import com.google.common.collect.Lists;
+import com.ctrip.framework.db.cluster.util.Constants;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Created by @author zhuYongMing on 2019/11/10.
@@ -30,5 +28,10 @@ public class ConfigServiceTest {
         final Map<String, Integer> clusterThresholdMap = configService.convertClusterFreshnessThresholdSecond(": ,,:, cluster1: 5,cluster2: 10 ,cluster3");
         Assert.assertEquals(5, (int) clusterThresholdMap.get("cluster1"));
         Assert.assertEquals(10, (int) clusterThresholdMap.get("cluster2"));
+    }
+
+    @Test
+    public void t() {
+        System.out.println(Constants.ENV);
     }
 }

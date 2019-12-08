@@ -70,16 +70,16 @@ public class DalDataSourceFactory {
         Set<String> names = new HashSet<>();
         ClusterInfo clusterInfo = provider.tryGetClusterInfo(allInOneKey);
 
-        if (clusterInfo == null)
+        if (clusterInfo == null || !clusterInfo.isValid())
             names.add(allInOneKey);
 
         provider.setup(names);
         DataSourceLocator locator = new DataSourceLocator(provider, isForceInitialize);
 
-        if (clusterInfo != null)
-            return locator.getDataSource(clusterInfo);
-        else
+        if (clusterInfo == null || !clusterInfo.isValid())
             return locator.getDataSource(allInOneKey);
+        else
+            return locator.getDataSource(clusterInfo);
     }
 
     /**

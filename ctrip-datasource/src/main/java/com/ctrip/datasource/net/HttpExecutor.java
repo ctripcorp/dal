@@ -34,18 +34,20 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 
 public class HttpExecutor {
+
     private static final Logger logger = LoggerFactory.getLogger(HttpExecutor.class);
-    public static final int DEFAULT_TIMEOUT_MS = 10000;   //10s
+    public static final int DEFAULT_TIMEOUT_MS = 10000;
+
     private CloseableHttpClient httpClient = null;
 
     private static class HttpExecutorSingletonHolder {
         private static final HttpExecutor instance = new HttpExecutor();
     }
-    //constructor - private
+
     private HttpExecutor(){
         init();
     }
-    //Expose method
+
     public static HttpExecutor getInstance(){
         return HttpExecutorSingletonHolder.instance;
     }
@@ -132,7 +134,6 @@ public class HttpExecutor {
         return getContent(response);
     }
 
-    // get content of response
     private String getContent(CloseableHttpResponse response) throws IOException {
         String content = "";
         try {
@@ -147,9 +148,9 @@ public class HttpExecutor {
                 }
             }
             content = EntityUtils.toString(entity, StandardCharsets.UTF_8);
-            EntityUtils.consume(entity);    // 消耗响应实体，并关闭相关资源占用
+            EntityUtils.consume(entity);
         } finally {
-            if(response != null) {
+            if (response != null) {
                 try {
                     response.close();
                 } catch (Exception e) {
@@ -159,4 +160,5 @@ public class HttpExecutor {
         }
         return content;
     }
+
 }

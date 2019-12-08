@@ -26,6 +26,7 @@
         <mybatis.version>3.0.1</mybatis.version>
         <netty-version>3.10.5.Final</netty-version>
         <fastjson.version>1.2.60</fastjson.version>
+        <ucs-client.version>1.0.0-SNAPSHOT</ucs-client.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -84,6 +85,11 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.fx</groupId>
+                <artifactId>ucs-client</artifactId>
+                <version>${ucs-client.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -110,6 +116,10 @@
         <dependency>
             <groupId>qunar.common</groupId>
             <artifactId>common-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework.fx</groupId>
+            <artifactId>ucs-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

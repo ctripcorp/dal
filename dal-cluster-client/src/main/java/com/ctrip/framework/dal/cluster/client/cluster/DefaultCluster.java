@@ -32,6 +32,11 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     }
 
     @Override
+    public ClusterType getClusterType() {
+        return ClusterType.NORMAL;
+    }
+
+    @Override
     public DatabaseCategory getDatabaseCategory() {
         return clusterConfig.getDatabaseCategory();
     }

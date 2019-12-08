@@ -11,6 +11,8 @@ public class ClusterInfo {
     private Integer shardIndex;
     private DatabaseRole role;
 
+    public ClusterInfo() {}
+
     public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role) {
         this.clusterName = clusterName;
         this.shardIndex = shardIndex;
@@ -35,6 +37,10 @@ public class ClusterInfo {
 
     public DataSourceIdentity toDataSourceIdentity() {
         return new SimpleClusterDataSourceIdentity(toString());
+    }
+
+    public boolean isValid() {
+        return clusterName != null && shardIndex != null && role == DatabaseRole.MASTER;
     }
 
     @Override

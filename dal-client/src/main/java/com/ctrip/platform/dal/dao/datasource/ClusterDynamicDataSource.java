@@ -9,16 +9,18 @@ import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.TypeHost;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.lang.management.ThreadInfo;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
-public class ClusterDynamicDataSource implements DataSource, ClosableDataSource, DataSourceConfigureChangeListener {
+public class ClusterDynamicDataSource implements DataSource, ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
 
     private ClusterInfo clusterInfo;
     private Cluster cluster;
@@ -30,6 +32,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         this.clusterInfo = clusterInfo;
         this.provider = provider;
         registerListener();
+        this.dataSourceRef.set(createInnerDataSource(clusterInfo, cluster, provider));
     }
 
     @Override
@@ -45,6 +48,16 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
     @Override
     public Connection getConnection(String paramString1, String paramString2) throws SQLException {
         return getInnerDataSource().getConnection(paramString1, paramString2);
+    }
+
+    @Override
+    public SingleDataSource getSingleDataSource() {
+        return getInnerDataSource().getSingleDataSource();
+    }
+
+    @Override
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {
+        getInnerDataSource().forceRefreshDataSource(name, configure);
     }
 
     @Override

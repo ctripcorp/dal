@@ -16,11 +16,11 @@ public class DefaultDatasourceBackgroundExecutor implements DatasourceBackground
     private static AtomicBoolean containsMySQL = new AtomicBoolean(false);
 
     @Override
-    public void execute(RefreshableDataSource dataSource) {
-        if (dataSource == null)
+    public void execute(SingleDataSourceWrapper dataSourceWrapper) {
+        if (dataSourceWrapper == null)
             return;
 
-        SingleDataSource singleDataSource = dataSource.getSingleDataSource();
+        SingleDataSource singleDataSource = dataSourceWrapper.getSingleDataSource();
         if (singleDataSource == null)
             return;
 

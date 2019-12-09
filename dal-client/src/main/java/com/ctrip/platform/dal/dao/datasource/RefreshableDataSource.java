@@ -20,7 +20,7 @@ import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
-public class RefreshableDataSource implements DataSource, ClosableDataSource, DataSourceConfigureChangeListener {
+public class RefreshableDataSource implements DataSource, ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
@@ -87,7 +87,8 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Da
         refreshDataSource(name,configure,null);
     }
 
-    public void forceRefreshDataSource(String name, DataSourceConfigure configure) throws SQLException {
+    @Override
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {
         forceRefreshDataSource(name,configure,null);
     }
 
@@ -150,6 +151,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Da
         return DataSourceCreator.getInstance().forceCreateSingleDataSource(name, configure, listener);
     }
 
+    @Override
     public SingleDataSource getSingleDataSource() {
         return dataSourceReference.get();
     }

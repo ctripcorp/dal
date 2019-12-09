@@ -87,10 +87,10 @@ public class DataSourceLocator {
                     try {
                         String clusterName = clusterInfo.getClusterName();
                         ClusterConfig clusterConfig = provider.getClusterConfig(clusterName);
-                        ds = createClusterDynamicDataSource(id, clusterInfo, new DynamicCluster(clusterConfig));
+                        ds = createDataSource(id, clusterInfo, new DynamicCluster(clusterConfig));
                         cache.put(id, ds);
                     } catch (Throwable t) {
-                        String msg = String.format("error when creating datasource: %s", id.getId());
+                        String msg = String.format("error when creating cluster datasource: %s", id.getId());
                         LOGGER.error(msg, t);
                         throw new RuntimeException(msg, t);
                     }
@@ -103,8 +103,8 @@ public class DataSourceLocator {
     public void removeDataSource(DataSourceIdentity id) {
         DataSource ds = cache.remove(id);
         provider.unregister(id);
-        if (ds instanceof RefreshableDataSource) {
-            ((RefreshableDataSource) ds).close();
+        if (ds instanceof ClosableDataSource) {
+            ((ClosableDataSource) ds).close();
         }
     }
 
@@ -113,16 +113,14 @@ public class DataSourceLocator {
         if (config == null && !isForceInitialize) {
             throw new SQLException(String.format("datasource configure not found for %s", id.getId()));
         }
-
         SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(id, provider);
         ForceSwitchableDataSource ds = new ForceSwitchableDataSource(id, dataSourceConfigureProvider);
         provider.register(id, ds);
         executor.execute(ds);
-
         return ds;
     }
 
-    private DataSource createClusterDynamicDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
+    private DataSource createDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
         ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider);
         provider.register(id, ds);
         executor.execute(ds);

@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
 
 public class DefaultDatabaseDomainChecker implements DatabaseDomainChecker {
     @Override
-    public void start(RefreshableDataSource dataSource) {}
+    public void start(SingleDataSourceWrapper dataSourceWrapper) {}
 }

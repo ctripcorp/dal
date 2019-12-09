@@ -9,13 +9,14 @@ import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 
+import java.sql.Wrapper;
 import java.util.List;
 import java.util.Set;
 
 /**
  * @author c7ch23en
  */
-public interface Cluster extends Listenable<ClusterSwitchedEvent> {
+public interface Cluster extends Listenable<ClusterSwitchedEvent>, Wrapper {
 
     String getClusterName();
 

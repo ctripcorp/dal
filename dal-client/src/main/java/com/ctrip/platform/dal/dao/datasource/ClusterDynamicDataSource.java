@@ -1,10 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -14,7 +18,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
-public class ClusterDynamicDataSource implements DataSource, DataSourceConfigureChangeListener {
+public class ClusterDynamicDataSource implements DataSource, ClosableDataSource, DataSourceConfigureChangeListener {
 
     private ClusterInfo clusterInfo;
     private Cluster cluster;
@@ -78,8 +82,31 @@ public class ClusterDynamicDataSource implements DataSource, DataSourceConfigure
         return getInnerDataSource().isWrapperFor(iface);
     }
 
-    private RefreshableDataSource createInnerDataSource() {
+    @Override
+    public void close() {
+        RefreshableDataSource ds = getInnerDataSource();
+        if (ds != null) {
+            ds.close();
+        }
+    }
 
+    private RefreshableDataSource createInnerDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider) {
+        DataSourceIdentity id = getDataSourceIdentity(clusterInfo, cluster);
+        DataSourceConfigure config = provider.getDataSourceConfigure(id);
+        try {
+            if (cluster.isWrapperFor(DrcCluster.class)) {
+                DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
+                LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
+                LocalizationValidator validator = ServiceLoaderHelper.getInstance(LocalizationValidator.class);
+                if (validator == null)
+                    throw new DalRuntimeException("load LocalizationValidator exception");
+                validator.initialize(localizationConfig);
+                return new LocalizedDataSource(validator, id, config);
+            }
+        } catch (SQLException e) {
+            // log
+        }
+        return new RefreshableDataSource(id, config);
     }
 
     private void registerListener() {
@@ -87,8 +114,9 @@ public class ClusterDynamicDataSource implements DataSource, DataSourceConfigure
             @Override
             public void onChanged(ClusterSwitchedEvent event) {
                 try {
-                    refresh();
+                    doSwitch();
                 } catch (Throwable t) {
+                    // log
                 }
             }
         });
@@ -98,13 +126,11 @@ public class ClusterDynamicDataSource implements DataSource, DataSourceConfigure
         return dataSourceRef.get();
     }
 
-    private void refresh() throws SQLException {
-        DataSourceIdentity id = getDataSourceIdentity(clusterInfo, cluster);
-        String name = id.getId();
-        DataSourceConfigure oldConfigure = getInnerDataSource().getSingleDataSource().getDataSourceConfigure();
-        DataSourceConfigure newConfigure = provider.getDataSourceConfigure(id);
-        DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(name, newConfigure, oldConfigure);
-        configChanged(event);
+    private void doSwitch() throws SQLException {
+        RefreshableDataSource ds = createInnerDataSource(clusterInfo, cluster, provider);
+        RefreshableDataSource oldDs = dataSourceRef.getAndSet(ds);
+        if (oldDs != null)
+            oldDs.close();
     }
 
     private DataSourceIdentity getDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {

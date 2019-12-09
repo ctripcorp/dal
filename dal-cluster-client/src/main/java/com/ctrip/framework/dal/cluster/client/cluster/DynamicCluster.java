@@ -11,6 +11,7 @@ import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +33,11 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
     @Override
     public String getClusterName() {
         return getInnerCluster().getClusterName();
+    }
+
+    @Override
+    public ClusterType getClusterType() {
+        return getInnerCluster().getClusterType();
     }
 
     @Override
@@ -117,6 +123,16 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
         if (cluster == null)
             throw new ClusterRuntimeException("inner cluster not exists");
         return cluster;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return getInnerCluster().unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return getInnerCluster().isWrapperFor(iface);
     }
 
 }

@@ -8,7 +8,6 @@ import com.ctrip.framework.dal.cluster.client.cluster.DefaultDrcCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ShardStrategyProxy;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
-import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGenerator;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
 
@@ -61,7 +60,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     private Cluster innerGenerate() {
         DefaultCluster cluster = (clusterType == ClusterType.NORMAL ?
-                new DefaultCluster(this) : new DefaultDrcCluster(this));
+                new DefaultCluster(this) : new DefaultDrcCluster(this, generateLocalizationConfig()));
         for (DatabaseShardConfig databaseShardConfig : databaseShardConfigs)
             cluster.addDatabaseShard(databaseShardConfig.generate());
         ShardStrategyProxy shardStrategy = new ShardStrategyProxy(defaultShardStrategy);
@@ -70,6 +69,12 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         cluster.setShardStrategy(shardStrategy);
         cluster.setIdGeneratorConfig(idGeneratorConfig);
         return cluster;
+    }
+
+    private LocalizationConfig generateLocalizationConfig() {
+        if (unitStrategyId == null)
+            throw new ClusterConfigException("unitStrategyId is necessary for drc cluster");
+        return new LocalizationConfigImpl(unitStrategyId);
     }
 
     @Override
@@ -113,10 +118,6 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
         this.idGeneratorConfig = idGeneratorConfig;
-    }
-
-    public Integer getUnitStrategyId() {
-        return unitStrategyId;
     }
 
     public void setUnitStrategyId(Integer unitStrategyId) {

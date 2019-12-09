@@ -5,11 +5,14 @@ import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
+import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
+import jdk.nashorn.internal.ir.IfNode;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -106,6 +109,20 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
 
     public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
         this.idGeneratorConfig = idGeneratorConfig;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException e) {
+            throw new ClusterRuntimeException(String.format("Unable to unwrap %s to %s", this.toString(), iface.toString()));
+        }
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this);
     }
 
 }

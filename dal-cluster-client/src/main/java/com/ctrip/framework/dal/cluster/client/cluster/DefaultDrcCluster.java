@@ -1,18 +1,15 @@
 package com.ctrip.framework.dal.cluster.client.cluster;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 
 public class DefaultDrcCluster extends DefaultCluster implements DrcCluster {
 
-    private int unitStrategyId;
+    private LocalizationConfig localizationConfig;
 
-    public DefaultDrcCluster(ClusterConfigImpl clusterConfig) {
+    public DefaultDrcCluster(ClusterConfigImpl clusterConfig, LocalizationConfig localizationConfig) {
         super(clusterConfig);
-        Integer unitStrategyId = clusterConfig.getUnitStrategyId();
-        if (unitStrategyId == null)
-            throw new ClusterConfigException("unitStrategyId is necessary for drc cluster");
-        this.unitStrategyId = unitStrategyId;
+        this.localizationConfig = localizationConfig;
     }
 
     @Override
@@ -21,8 +18,8 @@ public class DefaultDrcCluster extends DefaultCluster implements DrcCluster {
     }
 
     @Override
-    public int getUnitStrategyId() {
-        return unitStrategyId;
+    public LocalizationConfig getLocalizationConfig() {
+        return localizationConfig;
     }
 
 }

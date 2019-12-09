@@ -20,7 +20,7 @@ import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
-public class RefreshableDataSource implements DataSource, DataSourceConfigureChangeListener {
+public class RefreshableDataSource implements DataSource, ClosableDataSource, DataSourceConfigureChangeListener {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
@@ -121,6 +121,7 @@ public class RefreshableDataSource implements DataSource, DataSourceConfigureCha
         }, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public void close() {
         LOGGER.info(String.format("close RefreshableDataSource '%s'", id.getId()));
         SingleDataSource ds = dataSourceReference.get();

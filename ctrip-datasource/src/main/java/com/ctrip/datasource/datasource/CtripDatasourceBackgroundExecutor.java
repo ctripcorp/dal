@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.DefaultDatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DatabaseDomainChecker;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -15,26 +16,26 @@ public class CtripDatasourceBackgroundExecutor extends DefaultDatasourceBackgrou
     DatabaseDomainChecker checker = new CtripDatabaseDomainChecker();
 
     @Override
-    public void execute(RefreshableDataSource dataSource) {
-        if (dataSource == null)
+    public void execute(SingleDataSourceWrapper dataSourceWrapper) {
+        if (dataSourceWrapper == null)
             return;
 
-        SingleDataSource singleDataSource = dataSource.getSingleDataSource();
+        SingleDataSource singleDataSource = dataSourceWrapper.getSingleDataSource();
         if (singleDataSource == null)
             return;
 
         DataSourceConfigure configure = singleDataSource.getDataSourceConfigure();
 
         // start database domain checker
-        startDatabaseDomainChecker(dataSource);
+        startDatabaseDomainChecker(dataSourceWrapper);
 
         // start connection phantom reference cleaner
         super.startPhantomReferenceCleaner(configure);
     }
 
-    private void startDatabaseDomainChecker(RefreshableDataSource dataSource) {
+    private void startDatabaseDomainChecker(SingleDataSourceWrapper dataSourceWrapper) {
         try {
-            checker.start(dataSource);
+            checker.start(dataSourceWrapper);
         } catch (Throwable e) {
             LOGGER.error("An error occurred while starting CtripDatabaseDomainChecker.", e);
         }

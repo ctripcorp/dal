@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DatabaseDomainChecker;
@@ -31,7 +32,7 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
     private static AtomicReference<ScheduledExecutorService> executorRef = new AtomicReference<>();
     private static AtomicBoolean started = new AtomicBoolean(false);
 
-    private ConcurrentMap<String, RefreshableDataSource> dataSourceMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, SingleDataSourceWrapper> dataSourceMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> ipMap = new ConcurrentHashMap<>();
     private DNSUtil dnsUtil = new DNSUtil();
 
@@ -49,11 +50,11 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
     }
 
     @Override
-    public void start(RefreshableDataSource dataSource) {
-        if (dataSource == null)
+    public void start(SingleDataSourceWrapper dataSourceWrapper) {
+        if (dataSourceWrapper == null)
             return;
 
-        SingleDataSource singleDataSource = dataSource.getSingleDataSource();
+        SingleDataSource singleDataSource = dataSourceWrapper.getSingleDataSource();
         if (singleDataSource == null)
             return;
 
@@ -64,7 +65,7 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
             if (!isSqlServer)
                 return;
 
-            putToMap(name, dataSource);
+            putToMap(name, dataSourceWrapper);
             start();
         } catch (Throwable e) {
             LOGGER.error("An error occurred while starting database domain checking task.", e);
@@ -79,8 +80,8 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
         }
     }
 
-    private void putToMap(String name, RefreshableDataSource dataSource) {
-        dataSourceMap.putIfAbsent(name, dataSource);
+    private void putToMap(String name, SingleDataSourceWrapper dataSourceWrapper) {
+        dataSourceMap.putIfAbsent(name, dataSourceWrapper);
     }
 
     private void start() throws Exception {
@@ -108,15 +109,15 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
     private class DatabaseDomainCheckerThread implements Runnable {
         @Override
         public void run() {
-            Map<String, RefreshableDataSource> map = new HashMap<>(dataSourceMap); // avoid origin map being modified
+            Map<String, SingleDataSourceWrapper> map = new HashMap<>(dataSourceMap); // avoid origin map being modified
             if (map.isEmpty())
                 return;
 
-            for (Map.Entry<String, RefreshableDataSource> entry : map.entrySet()) {
+            for (Map.Entry<String, SingleDataSourceWrapper> entry : map.entrySet()) {
                 try {
                     String key = entry.getKey();
-                    RefreshableDataSource refreshableDataSource = entry.getValue();
-                    SingleDataSource singleDataSource = refreshableDataSource.getSingleDataSource();
+                    SingleDataSourceWrapper dataSourceWrapper = entry.getValue();
+                    SingleDataSource singleDataSource = dataSourceWrapper.getSingleDataSource();
                     DataSourceConfigure configure = singleDataSource.getDataSourceConfigure();
                     String domain = configure.getConnectionString().getDomainConnectionStringConfigure().getHostName();
                     String currentIP = dnsUtil.resolveDNS(domain);
@@ -132,7 +133,7 @@ public class CtripDatabaseDomainChecker implements DatabaseDomainChecker {
                         writeLog(key, domain, ip, currentIP);
 
                         // refresh datasource
-                        refreshableDataSource.forceRefreshDataSource(key, configure);
+                        dataSourceWrapper.forceRefreshDataSource(key, configure);
                     }
                 } catch (Throwable e) {
                     LOGGER.error("An error occured while executing database domain checking task.", e);

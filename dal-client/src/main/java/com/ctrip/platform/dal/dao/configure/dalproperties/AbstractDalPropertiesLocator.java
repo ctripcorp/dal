@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure.dalproperties;
 
+import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
@@ -8,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocator {
+public abstract class AbstractDalPropertiesLocator extends UnsupportedListenable<Void> implements DalPropertiesLocator {
     private static final String SEPARATOR_SEMICOLON = ";";
     private static final String SEPARATOR_COMMA = ",";
     private static final int DEFAULT_CLEAR_INTERVAL_IN_SECONDS = -1;
@@ -24,6 +25,11 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
         }
 
         setErrorCodes(errorCodes);
+    }
+
+    @Override
+    public void refresh(Map<String, String> properties) {
+        setProperties(properties);
     }
 
     protected abstract String getErrorCodesKey();
@@ -137,6 +143,11 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     @Override
     public String getClusterInfoQueryUrl() {
         throw new UnsupportedOperationException("getClusterInfoQueryUrl not supported.");
+    }
+
+    @Override
+    public boolean localizedForDrc() {
+        throw new UnsupportedOperationException("localizationEnabledForDrc not supported.");
     }
 
     @Override

@@ -191,6 +191,11 @@ public enum ErrorCode {
 
     InvalidDatabaseKeyName(ErrorClassify.Connection, 5306, "The given database key name is not qualified: %s"),
 
+    /**
+     * Non-local Request Blocked
+     */
+    NonLocalRequestBlocked(ErrorClassify.Statement, 5400, "Non-local request blocked: %s"),
+
     Unknown(ErrorClassify.Unknown, 9999, "Unknown Exception, caused by: %s");
 
     private final ErrorClassify classify;

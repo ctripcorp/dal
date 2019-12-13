@@ -20,9 +20,11 @@ public interface ClusterConfigXMLConstants {
     String TABLE = "Table";
     String ID_GENERATORS = "IdGenerators";
     String ID_GENERATOR = "IdGenerator";
+    String UNIT_STRATEGY_ID = "UnitStrategyId";
 
     // XML attributes
     String NAME = "name";
+    String TYPE = "type";
     String DB_CATEGORY = "dbCategory";
     String VERSION = "version";
     String INDEX = "index";

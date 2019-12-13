@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.base.PropertyAccessor;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
@@ -67,9 +68,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new ClusterConfigException("cluster name undefined");
+        ClusterType clusterType = ClusterType.NORMAL;
+        String clusterTypeText = getAttribute(clusterNode, TYPE);
+        if (!StringUtils.isEmpty(clusterTypeText))
+            clusterType = ClusterType.parse(clusterTypeText);
         DatabaseCategory dbCategory = DatabaseCategory.parse(getAttribute(clusterNode, DB_CATEGORY));
         int version = Integer.parseInt(getAttribute(clusterNode, VERSION));
-        ClusterConfigImpl clusterConfig = new ClusterConfigImpl(name, dbCategory, version);
+        ClusterConfigImpl clusterConfig = new ClusterConfigImpl(name, clusterType, dbCategory, version);
 
         Node databaseShardsNode = getChildNode(clusterNode, DATABASE_SHARDS);
         if (databaseShardsNode != null) {
@@ -79,14 +84,15 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
 
         Node shardStrategiesNode = getChildNode(clusterNode, SHARD_STRATEGIES);
-        if (shardStrategiesNode != null) {
+        if (shardStrategiesNode != null)
             parseShardStrategies(clusterConfig, shardStrategiesNode);
-        }
 
         Node idGeneratorsNode = getChildNode(clusterNode, ID_GENERATORS);
-        if (idGeneratorsNode != null) {
+        if (idGeneratorsNode != null)
             parseIdGenerators(clusterConfig, idGeneratorsNode);
-        }
+
+        if (clusterType == ClusterType.DRC)
+            parseDrcConfig(clusterConfig, clusterNode);
 
         return clusterConfig;
     }
@@ -212,6 +218,20 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             Node idGeneratorNode = idGeneratorNodes.get(0);
             ClusterIdGeneratorConfig idGeneratorConfig = getIdGeneratorConfigXMLParser().parse(clusterConfig.getClusterName(), idGeneratorNode);
             clusterConfig.setIdGeneratorConfig(idGeneratorConfig);
+        }
+    }
+
+    private void parseDrcConfig(ClusterConfigImpl clusterConfig, Node clusterNode) {
+        Node unitStrategyIdNode = getChildNode(clusterNode, UNIT_STRATEGY_ID);
+        if (unitStrategyIdNode != null) {
+            String unitStrategyIdText = unitStrategyIdNode.getTextContent();
+            if (!StringUtils.isEmpty(unitStrategyIdText)) {
+                try {
+                    clusterConfig.setUnitStrategyId(Integer.parseInt(unitStrategyIdText));
+                } catch (NumberFormatException e) {
+                    throw new ClusterRuntimeException("unitStrategyId should be a number", e);
+                }
+            }
         }
     }
 

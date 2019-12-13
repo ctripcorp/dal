@@ -12,6 +12,7 @@ import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -121,7 +122,8 @@ public class DataSourceLocator {
     }
 
     private DataSource createDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
-        ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider);
+        ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
+                DalPropertiesManager.getInstance().getDalPropertiesLocator());
         provider.register(id, ds);
         executor.execute(ds);
         return ds;

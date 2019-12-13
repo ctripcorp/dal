@@ -7,13 +7,15 @@ import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.TypeHost;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
-import java.lang.management.ThreadInfo;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -22,16 +24,21 @@ import java.util.logging.Logger;
 
 public class ClusterDynamicDataSource implements DataSource, ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
 
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    private static final String NAME_SWITCH_CLUSTER_DATASOURCE = "DataSource::switchClusterDataSource:%s";
+
     private ClusterInfo clusterInfo;
     private Cluster cluster;
     private DataSourceConfigureProvider provider;
+    private DalPropertiesLocator locator;
     private AtomicReference<RefreshableDataSource> dataSourceRef = new AtomicReference<>();
 
-    public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider) {
+    public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider, DalPropertiesLocator locator) {
         this.cluster = cluster;
         this.clusterInfo = clusterInfo;
         this.provider = provider;
-        registerListener();
+        this.locator = locator;
+        registerListeners();
         this.dataSourceRef.set(createInnerDataSource(clusterInfo, cluster, provider));
     }
 
@@ -107,7 +114,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         DataSourceIdentity id = getDataSourceIdentity(clusterInfo, cluster);
         DataSourceConfigure config = provider.getDataSourceConfigure(id);
         try {
-            if (cluster.isWrapperFor(DrcCluster.class)) {
+            if (locator.localizedForDrc() && cluster.isWrapperFor(DrcCluster.class)) {
                 DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                 LocalizationValidator validator = ServiceLoaderHelper.getInstance(LocalizationValidator.class);
@@ -122,12 +129,22 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         return new RefreshableDataSource(id, config);
     }
 
-    private void registerListener() {
+    private void registerListeners() {
         cluster.addListener(new Listener<ClusterSwitchedEvent>() {
             @Override
             public void onChanged(ClusterSwitchedEvent event) {
                 try {
                     doSwitch();
+                } catch (Throwable t) {
+                    // log
+                }
+            }
+        });
+        locator.addListener(new Listener<Void>() {
+            @Override
+            public void onChanged(Void current) {
+                try {
+                    checkAndSwitchForDrc();
                 } catch (Throwable t) {
                     // log
                 }
@@ -144,6 +161,11 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         RefreshableDataSource oldDs = dataSourceRef.getAndSet(ds);
         if (oldDs != null)
             oldDs.close();
+    }
+
+    private void checkAndSwitchForDrc() throws SQLException {
+        if (locator.localizedForDrc() != (dataSourceRef.get() instanceof LocalizedDataSource))
+            doSwitch();
     }
 
     private DataSourceIdentity getDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {

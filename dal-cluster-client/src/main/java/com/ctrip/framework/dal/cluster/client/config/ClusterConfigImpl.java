@@ -124,4 +124,8 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         this.unitStrategyId = unitStrategyId;
     }
 
+    public void setClusterType(ClusterType clusterType) {
+        this.clusterType = clusterType;
+    }
+
 }

@@ -12,13 +12,17 @@ public class LocalizedCallableStatement extends LocalizedPreparedStatement imple
 
     private CallableStatement callableStatement;
 
-    public LocalizedCallableStatement(CallableStatement callableStatement) {
-        super(callableStatement);
-        this.callableStatement = callableStatement;
+    public LocalizedCallableStatement(CallableStatement callableStatement, String sql) {
+        super(callableStatement, sql);
+        init(callableStatement);
     }
 
-    public LocalizedCallableStatement(LocalizationValidator validator, CallableStatement callableStatement) {
-        super(validator, callableStatement);
+    public LocalizedCallableStatement(LocalizationValidator validator, CallableStatement callableStatement, String sql) {
+        super(validator, callableStatement, sql);
+        init(callableStatement);
+    }
+
+    private void init(CallableStatement callableStatement) {
         this.callableStatement = callableStatement;
     }
 

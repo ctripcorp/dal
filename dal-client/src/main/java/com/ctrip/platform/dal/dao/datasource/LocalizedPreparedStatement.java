@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.helper.SqlUtils;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -10,15 +12,21 @@ import java.util.Calendar;
 public class LocalizedPreparedStatement extends LocalizedStatement implements PreparedStatement {
 
     private PreparedStatement preparedStatement;
+    private char firstAlphaCharUc = 0;
 
-    public LocalizedPreparedStatement(PreparedStatement preparedStatement) {
+    public LocalizedPreparedStatement(PreparedStatement preparedStatement, String sql) {
         super(preparedStatement);
-        this.preparedStatement = preparedStatement;
+        init(preparedStatement, sql);
     }
 
-    public LocalizedPreparedStatement(LocalizationValidator validator, PreparedStatement preparedStatement) {
+    public LocalizedPreparedStatement(LocalizationValidator validator, PreparedStatement preparedStatement, String sql) {
         super(validator, preparedStatement);
+        init(preparedStatement, sql);
+    }
+
+    private void init(PreparedStatement preparedStatement, String sql) {
         this.preparedStatement = preparedStatement;
+        this.firstAlphaCharUc = SqlUtils.firstAlphaCharUc(sql);
     }
 
     @Override
@@ -135,6 +143,8 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public boolean execute() throws SQLException {
+        if (needValidate())
+            validateLocalization();
         return preparedStatement.execute();
     }
 
@@ -312,6 +322,11 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
     public long executeLargeUpdate() throws SQLException {
         validateLocalization();
         return preparedStatement.executeLargeUpdate();
+    }
+
+    @Override
+    protected boolean needValidate() {
+        return super.needValidate() && !SqlUtils.isReadOperation(firstAlphaCharUc);
     }
 
 }

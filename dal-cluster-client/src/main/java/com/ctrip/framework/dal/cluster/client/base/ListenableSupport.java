@@ -1,5 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.base;
 
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -17,6 +19,16 @@ public abstract class ListenableSupport<T> implements Listenable<T> {
 
     protected synchronized Set<Listener<T>> getListeners() {
         return new LinkedHashSet<>(listeners);
+    }
+
+    protected void executeListeners(T object) {
+        for (Listener<T> listener : getListeners()) {
+            try {
+                listener.onChanged(object);
+            } catch (Throwable t) {
+                // ignore
+            }
+        }
     }
 
 }

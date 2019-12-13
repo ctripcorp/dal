@@ -15,7 +15,7 @@ import java.sql.Statement;
 
 public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final int DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS = 5;
+    private static final int DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS = 1;
     private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
     private String IS_VALID_FORMAT = "isValid: %s";
@@ -87,7 +87,7 @@ public class DataSourceValidator implements ValidatorProxy {
         }
 
         if (query == null) {
-            isValid = connectionIsValid(connection);
+            isValid = connectionIsValid(connection, parameter);
         } else {
             isValid = executeInitSQL(connection, parameter);
         }
@@ -95,14 +95,14 @@ public class DataSourceValidator implements ValidatorProxy {
         return isValid;
     }
 
-    private boolean connectionIsValid(Connection connection) throws SQLException {
+    private boolean connectionIsValid(Connection connection, QueryParameter parameter) throws SQLException {
         boolean isValid;
 
         if (connection instanceof MySQLConnection) {
             MySQLConnection mySqlConnection = (MySQLConnection) connection;
-            isValid = MySqlConnectionHelper.isValid(mySqlConnection, DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+            isValid = MySqlConnectionHelper.isValid(mySqlConnection, parameter.getValidationQueryTimeout());
         } else {
-            isValid = connection.isValid(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+            isValid = connection.isValid(parameter.getValidationQueryTimeout());
         }
 
         return isValid;

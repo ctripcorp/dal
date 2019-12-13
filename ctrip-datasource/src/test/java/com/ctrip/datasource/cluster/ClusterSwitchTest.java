@@ -3,19 +3,27 @@ package com.ctrip.datasource.cluster;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
-import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.LocalClusterConfigProvider;
+import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
+import com.ctrip.platform.dal.common.enums.TableParseSwitch;
+import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,6 +32,8 @@ public class ClusterSwitchTest {
     private static final String CLUSTER_NAME1 = "cluster_config_1";
     private static final String CLUSTER_NAME2 = "cluster_config_2";
     private static final String CLUSTER_NAME3 = "cluster_config_3";
+    private static final String CLUSTER_NAME4 = "cluster_config_normal";
+    private static final String CLUSTER_NAME5 = "cluster_config_drc";
 
     private LocalClusterConfigProvider clusterConfigProvider = new LocalClusterConfigProvider();
 
@@ -36,7 +46,7 @@ public class ClusterSwitchTest {
         properties.put(DefaultDalConnectionLocator.DATASOURCE_CONFIG_PROVIDER, TitanProvider.class.getName());
         locator.initialize(properties);
         locator.setup(new HashSet<>());
-        new ClusterDatabaseSet(CLUSTER_NAME1, cluster, locator);
+//        new ClusterDatabaseSet(CLUSTER_NAME1, cluster, locator);
 
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
@@ -76,7 +86,7 @@ public class ClusterSwitchTest {
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
-        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider);
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, DalPropertiesManager.getInstance().getDalPropertiesLocator());
 
         Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
                 cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
@@ -90,8 +100,97 @@ public class ClusterSwitchTest {
         System.out.println("connStr after: " + cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
     }
 
+    @Test
+    public void testClusterDynamicDataSourceDrcSwitch() throws SQLException {
+        int shardIndex = 0;
+        ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME4, shardIndex, DatabaseRole.MASTER);
+        MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME4));
+        DynamicCluster cluster = new DynamicCluster(config);
+        TitanProvider provider = new TitanProvider();
+        provider.setup(new HashSet<>());
+        DalPropertiesLocator locator = new DefaultDalPropertiesLocator();
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, locator);
+
+        Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
+                cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+        System.out.println("connStr before: " + cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        locator.refresh(buildDrcProps1());
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        locator.refresh(buildDrcProps2());
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        locator.refresh(buildDrcProps3());
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        locator.refresh(buildDrcProps4());
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        config.doSwitch(getClusterConfig(CLUSTER_NAME5));
+        cluster.doSwitch(config);
+
+        Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
+                cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+        System.out.println("connStr after: " + cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
+
+        LocalizationUtils.testStatementBlocked(dataSource);
+        LocalizationUtils.testPreparedStatementBlocked(dataSource);
+
+        locator.refresh(buildDrcProps1());
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        locator.refresh(buildDrcProps2());
+        LocalizationUtils.testStatementBlocked(dataSource);
+        LocalizationUtils.testPreparedStatementBlocked(dataSource);
+
+        locator.refresh(buildDrcProps3());
+        LocalizationUtils.testStatementPassed(dataSource);
+        LocalizationUtils.testPreparedStatementPassed(dataSource);
+
+        locator.refresh(buildDrcProps4());
+        LocalizationUtils.testStatementBlocked(dataSource);
+        LocalizationUtils.testPreparedStatementBlocked(dataSource);
+    }
+
     private ClusterConfig getClusterConfig(String clusterName) {
         return clusterConfigProvider.getClusterConfig(clusterName);
+    }
+
+    private Map<String, String> buildDrcProps1() {
+        Map<String, String> props = new HashMap<>();
+        props.put("DrcStage", "test");
+        props.put("DrcStage.test.Localized", "false");
+        return props;
+    }
+
+    private Map<String, String> buildDrcProps2() {
+        Map<String, String> props = new HashMap<>();
+        props.put("DrcStage", "test");
+        props.put("DrcStage.test.Localized", "true");
+        return props;
+    }
+
+    private Map<String, String> buildDrcProps3() {
+        Map<String, String> props = new HashMap<>();
+        props.put("DrcStage", "final");
+        props.put("DrcStage.test.Localized", "true");
+        return props;
+    }
+
+    private Map<String, String> buildDrcProps4() {
+        Map<String, String> props = new HashMap<>();
+        props.put("DrcStage", "final");
+        props.put("DrcStage.final.Localized", "true");
+        return props;
     }
 
     private static class MockClusterConfig implements ClusterConfig {

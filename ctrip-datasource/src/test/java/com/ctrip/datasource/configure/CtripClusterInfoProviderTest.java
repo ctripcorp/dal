@@ -11,7 +11,7 @@ public class CtripClusterInfoProviderTest {
     private CtripClusterInfoProvider provider;
 
     public CtripClusterInfoProviderTest() {
-        provider = new CtripClusterInfoProvider(DalPropertiesManager.getInstance(), HttpExecutor.getInstance());
+        provider = new CtripClusterInfoProvider(DalPropertiesManager.getInstance().getDalPropertiesLocator(), HttpExecutor.getInstance());
     }
 
     @Test

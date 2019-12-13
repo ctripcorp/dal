@@ -30,7 +30,7 @@ public class TitanProvider implements IntegratedConfigProvider {
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
     private ClusterConfigProvider clusterConfigProvider = new CtripClusterConfigProvider();
-    private ClusterInfoProvider clusterInfoProvider = new CtripClusterInfoProvider(DalPropertiesManager.getInstance(), HttpExecutor.getInstance());
+    private ClusterInfoProvider clusterInfoProvider = new CtripClusterInfoProvider(DalPropertiesManager.getInstance().getDalPropertiesLocator(), HttpExecutor.getInstance());
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {

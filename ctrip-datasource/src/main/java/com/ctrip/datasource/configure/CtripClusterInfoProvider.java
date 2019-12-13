@@ -4,6 +4,7 @@ import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.datasource.util.GsonUtils;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
@@ -14,12 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CtripClusterInfoProvider implements ClusterInfoProvider {
 
-    private DalPropertiesManager manager;
+    private DalPropertiesLocator locator;
     private HttpExecutor executor;
     private final Map<String, ClusterInfo> clusterInfoCache = new ConcurrentHashMap<>();
 
-    public CtripClusterInfoProvider(DalPropertiesManager manager, HttpExecutor executor) {
-        this.manager = manager;
+    public CtripClusterInfoProvider(DalPropertiesLocator locator, HttpExecutor executor) {
+        this.locator = locator;
         this.executor = executor;
     }
 
@@ -41,7 +42,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
     private ClusterInfo getLatestClusterInfo(String titanKey) {
         ClusterInfo clusterInfo = null;
         try {
-            String url = String.format(manager.getDalPropertiesLocator().getClusterInfoQueryUrl(), titanKey, "dal-client");
+            String url = String.format(locator.getClusterInfoQueryUrl(), titanKey, "dal-client");
             String res = executor.executeGet(url, new HashMap<>(), 5000);
             ClusterInfoResponseEntity response = GsonUtils.json2T(res, ClusterInfoResponseEntity.class);
             if (response != null && response.getStatus() == 200) {

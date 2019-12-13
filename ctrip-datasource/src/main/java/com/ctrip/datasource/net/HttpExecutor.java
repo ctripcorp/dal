@@ -52,7 +52,6 @@ public class HttpExecutor {
         return HttpExecutorSingletonHolder.instance;
     }
 
-
     private void init() {
         SSLConnectionSocketFactory sslsf = null;
         try {
@@ -99,7 +98,6 @@ public class HttpExecutor {
         // init httpClient
         httpClient = HttpClients.custom().setConnectionManager(connectionManager).build();
     }
-
 
     public String executePost(String url, Map<String, String> headers, String message, int timeout) throws IOException {
         Preconditions.checkNotNull(httpClient, "Create HttpClient Exception");

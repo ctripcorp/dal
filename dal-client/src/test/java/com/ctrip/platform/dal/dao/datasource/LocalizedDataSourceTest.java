@@ -361,7 +361,7 @@ public class LocalizedDataSourceTest {
 
     private DataSource getBlockingDataSource() {
         DataSourceConfigure config = getDataSourceConfig();
-        return new LocalizedDataSource(new BlockingLocalizationValidator(), config.getName(), config);
+        return new LocalizedDataSource(new ConstantLocalizationValidator(false), config.getName(), config);
     }
 
     private DataSourceConfigure getDataSourceConfig() {

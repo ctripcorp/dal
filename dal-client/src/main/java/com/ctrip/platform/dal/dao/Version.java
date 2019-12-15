@@ -15,7 +15,7 @@ public class Version {
     }
 
     private static String initVersion(){
-        String path = "/version.prop";
+        String path = "/dal-client.version.prop";
         InputStream stream = Version.class.getResourceAsStream(path);
         if (stream == null) {
             return "UNKNOWN";

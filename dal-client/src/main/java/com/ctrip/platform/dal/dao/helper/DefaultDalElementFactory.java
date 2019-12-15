@@ -4,11 +4,14 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.datasource.DefaultDatasourceBackgroundExecutor;
+import com.ctrip.platform.dal.dao.datasource.DefaultLocalizationValidatorFactory;
+import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 import com.ctrip.platform.dal.dao.log.DefaultLoggerImpl;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,6 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by lilj on 2018/7/29.
  */
 public class DefaultDalElementFactory implements DalElementFactory {
+
     private static Logger log = LoggerFactory.getLogger(DefaultDalElementFactory.class);
 
     private volatile ILogger iLogger;
@@ -26,6 +30,8 @@ public class DefaultDalElementFactory implements DalElementFactory {
 
     private volatile DatasourceBackgroundExecutor datasourceBackgroundExecutor;
     private Lock datasourceBackgroundExecutorLock = new ReentrantLock();
+
+    private final AtomicReference<LocalizationValidatorFactory> localizationValidatorFactoryRef = new AtomicReference<>();
 
     @Override
     public ILogger getILogger() {
@@ -62,6 +68,7 @@ public class DefaultDalElementFactory implements DalElementFactory {
         return dalPropertiesProvider;
     }
 
+    @Override
     public DatasourceBackgroundExecutor getDatasourceBackgroundExecutor() {
         if (datasourceBackgroundExecutor == null) {
             datasourceBackgroundExecutorLock.lock();
@@ -77,6 +84,21 @@ public class DefaultDalElementFactory implements DalElementFactory {
         }
 
         return datasourceBackgroundExecutor;
+    }
+
+    @Override
+    public LocalizationValidatorFactory getLocalizationValidatorFactory() {
+        LocalizationValidatorFactory factory = localizationValidatorFactoryRef.get();
+        if (factory == null) {
+            synchronized (localizationValidatorFactoryRef) {
+                factory = localizationValidatorFactoryRef.get();
+                if (factory == null) {
+                    factory = new DefaultLocalizationValidatorFactory();
+                    localizationValidatorFactoryRef.set(factory);
+                }
+            }
+        }
+        return factory;
     }
 
     @Override

@@ -24,6 +24,7 @@ public class DataSourceLocator {
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
     private IntegratedConfigProvider provider;
+    private LocalizationValidatorFactory factory = DalElementFactory.DEFAULT.getLocalizationValidatorFactory();
 
     private boolean isForceInitialize = false;
 
@@ -123,7 +124,7 @@ public class DataSourceLocator {
 
     private DataSource createDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
         ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
-                DalPropertiesManager.getInstance().getDalPropertiesLocator());
+                DalPropertiesManager.getInstance().getDalPropertiesLocator(), factory);
         provider.register(id, ds);
         executor.execute(ds);
         return ds;

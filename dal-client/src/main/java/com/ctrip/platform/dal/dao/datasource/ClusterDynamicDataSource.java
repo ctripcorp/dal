@@ -31,13 +31,18 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
     private Cluster cluster;
     private DataSourceConfigureProvider provider;
     private DalPropertiesLocator locator;
+    private LocalizationValidatorFactory factory;
+
     private AtomicReference<RefreshableDataSource> dataSourceRef = new AtomicReference<>();
 
-    public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider, DalPropertiesLocator locator) {
+    public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider,
+                                    DalPropertiesLocator locator, LocalizationValidatorFactory factory) {
         this.cluster = cluster;
         this.clusterInfo = clusterInfo;
         this.provider = provider;
         this.locator = locator;
+        this.factory = factory;
+
         registerListeners();
         this.dataSourceRef.set(createInnerDataSource(clusterInfo, cluster, provider));
     }
@@ -117,10 +122,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
             if (locator.localizedForDrc() && cluster.isWrapperFor(DrcCluster.class)) {
                 DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
-                LocalizationValidator validator = ServiceLoaderHelper.getInstance(LocalizationValidator.class);
-                if (validator == null)
-                    throw new DalRuntimeException("load LocalizationValidator exception");
-                validator.initialize(localizationConfig);
+                LocalizationValidator validator = factory.createValidator(localizationConfig);
                 return new LocalizedDataSource(validator, id, config);
             }
         } catch (SQLException e) {

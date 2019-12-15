@@ -146,7 +146,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     }
 
     protected String initVersion() {
-        String path = "/CtripDatasourceVersion.prop";
+        String path = "/ctrip-datasource.version.prop";
         InputStream stream = Version.class.getResourceAsStream(path);
         if (stream == null) {
             return "UNKNOWN";

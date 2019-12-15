@@ -48,7 +48,7 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
     }
 
     private String initVersion(){
-        String path = "/CtripClientVersion.prop";
+        String path = "/ctrip-dal-client.version.prop";
         InputStream stream = Version.class.getResourceAsStream(path);
         if (stream == null) {
             return "UNKNOWN";

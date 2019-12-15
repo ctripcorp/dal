@@ -2,14 +2,18 @@ package com.ctrip.datasource.util;
 
 import com.ctrip.datasource.configure.qconfig.DalPropertiesProviderImpl;
 import com.ctrip.datasource.datasource.CtripDatasourceBackgroundExecutor;
+import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.log.CtripLoggerImpl;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
+import com.ctrip.platform.dal.dao.datasource.DefaultLocalizationValidatorFactory;
+import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by lilj on 2018/7/31.
  */
 public class CtripDalElementFactory implements DalElementFactory {
+
     private static Logger log = LoggerFactory.getLogger(CtripDalElementFactory.class);
 
     private volatile ILogger iLogger;
@@ -27,6 +32,8 @@ public class CtripDalElementFactory implements DalElementFactory {
 
     private volatile DatasourceBackgroundExecutor datasourceBackgroundExecutor;
     private Lock datasourceBackgroundExecutorLock = new ReentrantLock();
+
+    private final AtomicReference<LocalizationValidatorFactory> localizationValidatorFactoryRef = new AtomicReference<>();
 
     @Override
     public ILogger getILogger() {
@@ -61,6 +68,7 @@ public class CtripDalElementFactory implements DalElementFactory {
         return dalPropertiesProvider;
     }
 
+    @Override
     public DatasourceBackgroundExecutor getDatasourceBackgroundExecutor() {
         if (datasourceBackgroundExecutor == null) {
             datasourceBackgroundExecutorLock.lock();
@@ -75,6 +83,21 @@ public class CtripDalElementFactory implements DalElementFactory {
         }
 
         return datasourceBackgroundExecutor;
+    }
+
+    @Override
+    public LocalizationValidatorFactory getLocalizationValidatorFactory() {
+        LocalizationValidatorFactory factory = localizationValidatorFactoryRef.get();
+        if (factory == null) {
+            synchronized (localizationValidatorFactoryRef) {
+                factory = localizationValidatorFactoryRef.get();
+                if (factory == null) {
+                    factory = new CtripLocalizationValidatorFactory();
+                    localizationValidatorFactoryRef.set(factory);
+                }
+            }
+        }
+        return factory;
     }
 
     @Override

@@ -86,7 +86,8 @@ public class ClusterSwitchTest {
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
-        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, DalPropertiesManager.getInstance().getDalPropertiesLocator());
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
+                DalPropertiesManager.getInstance().getDalPropertiesLocator(), new DefaultLocalizationValidatorFactory());
 
         Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
                 cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
@@ -109,7 +110,8 @@ public class ClusterSwitchTest {
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
         DalPropertiesLocator locator = new DefaultDalPropertiesLocator();
-        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, locator);
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
+                locator, new BlockingLocalizationValidatorFactory());
 
         Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
                 cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());

@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.application.web;
 
 import com.ctrip.platform.dal.application.entity.DALServiceTable;
+import com.ctrip.platform.dal.application.service.DALDataSourceService;
 import com.ctrip.platform.dal.application.service.DALService;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -23,7 +24,8 @@ public class DALServiceController {
 
     @Autowired
     private DALService dalService;
-
+    @Autowired
+    private DALDataSourceService dalDataSourceService;
 
     @RequestMapping("/queryMySql")
     public List<DALServiceTable> getMySql() throws Exception {
@@ -98,6 +100,37 @@ public class DALServiceController {
     @RequestMapping("/queryTopWithNoOrderby")
     public List<String> queryTopWithNoOrderby() throws Exception {
         return dalService.queryTopWithNoOrderby();
+    }
+
+    @RequestMapping("/countWithDataSource")
+    public ResponseVo countWithDataSource(@RequestParam(name = "ds") String ds) throws Exception {
+        ResponseVo res = new ResponseVo();
+        try {
+            String result = dalDataSourceService.count(ds);
+            res.setCode(0);
+            res.setMessage("Success");
+            res.setData(result);
+        } catch (Exception e) {
+            res.setCode(-1);
+            res.setMessage(String.format("Fail: \n%s", e));
+        }
+        return res;
+    }
+
+    @RequestMapping("/insertWithDataSource")
+    public ResponseVo insertWithDataSource(@RequestParam(name = "ds") String ds,
+                                           @RequestParam(name = "val") String val) throws Exception {
+        ResponseVo res = new ResponseVo();
+        try {
+            String result = dalDataSourceService.insert(ds, val);
+            res.setCode(0);
+            res.setMessage("Success");
+            res.setData(result);
+        } catch (Exception e) {
+            res.setCode(-1);
+            res.setMessage(String.format("Fail: \n%s", e));
+        }
+        return res;
     }
 
     @RequestMapping("/mockPoolWaitAlert")

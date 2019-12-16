@@ -59,7 +59,14 @@ public class DataSourceValidator implements ValidatorProxy {
     }
 
     private QueryParameter getQueryParameter(int validateAction) {
-        QueryParameter parameter = null;
+        QueryParameter parameter = new QueryParameter();
+
+        int validationQueryTimeout = poolProperties.getValidationQueryTimeout();
+        if (validationQueryTimeout <= 0) {
+            validationQueryTimeout = DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS;
+        }
+        parameter.setValidationQueryTimeout(validationQueryTimeout);
+
         if (validateAction != PooledConnection.VALIDATE_INIT)
             return parameter;
 
@@ -68,14 +75,8 @@ public class DataSourceValidator implements ValidatorProxy {
             return parameter;
 
         String query = poolProperties.getInitSQL();
-        int validationQueryTimeout = poolProperties.getValidationQueryTimeout();
-        if (validationQueryTimeout <= 0) {
-            validationQueryTimeout = DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS;
-        }
-
-        parameter = new QueryParameter();
         parameter.setQuery(query);
-        parameter.setValidationQueryTimeout(validationQueryTimeout);
+
         return parameter;
     }
 

@@ -7,6 +7,8 @@ import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,9 +50,11 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
             if (response != null && response.getStatus() == 200) {
                 clusterInfo = response.getClusterInfo();
             }
+            Cat.logEvent("DAL.cluster", "getClusterInfo:" + titanKey, Event.SUCCESS, clusterInfo != null ? clusterInfo.toString() : "");
             return clusterInfo != null ? clusterInfo : new NullClusterInfo();
         } catch (IOException e) {
             e.printStackTrace();
+            Cat.logEvent("DAL.cluster", "getClusterInfo:" + titanKey, "Fail", e.getMessage());
             throw new DalRuntimeException(String.format("failed to get cluster info for titan key '%s'", titanKey), e);
         }
     }

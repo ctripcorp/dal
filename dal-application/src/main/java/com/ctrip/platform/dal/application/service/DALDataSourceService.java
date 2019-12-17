@@ -24,6 +24,7 @@ public class DALDataSourceService {
             try (PreparedStatement statement = conn.prepareStatement(COUNT_SQL)) {
                 statement.execute();
                 try (ResultSet rs = statement.getResultSet()) {
+                    rs.next();
                     return String.format("DS: %s; Result: %d", getDataSource(dsKey), rs.getInt(1));
                 }
             }

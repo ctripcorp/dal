@@ -4,6 +4,8 @@ import com.ctrip.datasource.configure.qconfig.DalPropertiesProviderImpl;
 import com.ctrip.datasource.datasource.CtripDatasourceBackgroundExecutor;
 import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.log.CtripLoggerImpl;
+import com.ctrip.framework.ucs.client.api.UcsClient;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.datasource.DefaultLocalizationValidatorFactory;
@@ -92,7 +94,7 @@ public class CtripDalElementFactory implements DalElementFactory {
             synchronized (localizationValidatorFactoryRef) {
                 factory = localizationValidatorFactoryRef.get();
                 if (factory == null) {
-                    factory = new CtripLocalizationValidatorFactory();
+                    factory = new CtripLocalizationValidatorFactory(UcsClient.getInstance(), DalPropertiesManager.getInstance().getDalPropertiesLocator());
                     localizationValidatorFactoryRef.set(factory);
                 }
             }

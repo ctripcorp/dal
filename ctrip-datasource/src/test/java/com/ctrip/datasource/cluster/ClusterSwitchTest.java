@@ -1,5 +1,6 @@
 package com.ctrip.datasource.cluster;
 
+import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
@@ -11,6 +12,11 @@ import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.ucs.client.api.RuleContextBuilder;
+import com.ctrip.framework.ucs.client.api.StrategyValidatedResult;
+import com.ctrip.framework.ucs.client.api.Ucs;
+import com.ctrip.framework.ucs.common.constants.KeyType;
+import com.ctrip.framework.ucs.common.domain.Rule;
 import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.*;
@@ -86,8 +92,7 @@ public class ClusterSwitchTest {
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
-        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
-                DalPropertiesManager.getInstance().getDalPropertiesLocator(), new DefaultLocalizationValidatorFactory());
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, new DefaultLocalizationValidatorFactory());
 
         Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
                 cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
@@ -110,8 +115,12 @@ public class ClusterSwitchTest {
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
         DalPropertiesLocator locator = new DefaultDalPropertiesLocator();
-        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
-                locator, new BlockingLocalizationValidatorFactory());
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, new CtripLocalizationValidatorFactory(new Ucs() {
+            @Override
+            public StrategyValidatedResult validateStrategyContext(int expectStrategyId) {
+                return StrategyValidatedResult.ShardBlock;
+            }
+        }, locator));
 
         Assert.assertEquals(dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl(),
                 cluster.getMasterOnShard(shardIndex).getConnectionString().getPrimaryConnectionUrl());
@@ -120,19 +129,19 @@ public class ClusterSwitchTest {
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
-        locator.refresh(buildDrcProps1());
+        locator.setProperties(buildDrcProps1());
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
-        locator.refresh(buildDrcProps2());
+        locator.setProperties(buildDrcProps2());
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
-        locator.refresh(buildDrcProps3());
+        locator.setProperties(buildDrcProps3());
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
-        locator.refresh(buildDrcProps4());
+        locator.setProperties(buildDrcProps4());
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
@@ -146,19 +155,19 @@ public class ClusterSwitchTest {
         LocalizationUtils.testStatementBlocked(dataSource);
         LocalizationUtils.testPreparedStatementBlocked(dataSource);
 
-        locator.refresh(buildDrcProps1());
+        locator.setProperties(buildDrcProps1());
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
-        locator.refresh(buildDrcProps2());
+        locator.setProperties(buildDrcProps2());
         LocalizationUtils.testStatementBlocked(dataSource);
         LocalizationUtils.testPreparedStatementBlocked(dataSource);
 
-        locator.refresh(buildDrcProps3());
+        locator.setProperties(buildDrcProps3());
         LocalizationUtils.testStatementPassed(dataSource);
         LocalizationUtils.testPreparedStatementPassed(dataSource);
 
-        locator.refresh(buildDrcProps4());
+        locator.setProperties(buildDrcProps4());
         LocalizationUtils.testStatementBlocked(dataSource);
         LocalizationUtils.testPreparedStatementBlocked(dataSource);
     }

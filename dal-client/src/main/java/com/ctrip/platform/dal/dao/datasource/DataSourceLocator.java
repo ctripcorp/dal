@@ -123,8 +123,7 @@ public class DataSourceLocator {
     }
 
     private DataSource createDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
-        ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider,
-                DalPropertiesManager.getInstance().getDalPropertiesLocator(), factory);
+        ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider, factory);
         provider.register(id, ds);
         executor.execute(ds);
         return ds;

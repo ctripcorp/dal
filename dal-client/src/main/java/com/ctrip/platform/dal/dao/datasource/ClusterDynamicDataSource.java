@@ -30,17 +30,15 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
     private ClusterInfo clusterInfo;
     private Cluster cluster;
     private DataSourceConfigureProvider provider;
-    private DalPropertiesLocator locator;
     private LocalizationValidatorFactory factory;
 
     private AtomicReference<RefreshableDataSource> dataSourceRef = new AtomicReference<>();
 
     public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider,
-                                    DalPropertiesLocator locator, LocalizationValidatorFactory factory) {
+                                    LocalizationValidatorFactory factory) {
         this.cluster = cluster;
         this.clusterInfo = clusterInfo;
         this.provider = provider;
-        this.locator = locator;
         this.factory = factory;
 
         registerListeners();
@@ -119,10 +117,10 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         DataSourceIdentity id = getDataSourceIdentity(clusterInfo, cluster);
         DataSourceConfigure config = provider.getDataSourceConfigure(id);
         try {
-            if (locator.localizedForDrc() && cluster.isWrapperFor(DrcCluster.class)) {
+            if (cluster.isWrapperFor(DrcCluster.class)) {
                 DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
-                LocalizationValidator validator = factory.createValidator(localizationConfig);
+                LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
                 return new LocalizedDataSource(validator, id, config);
             }
         } catch (SQLException e) {
@@ -142,16 +140,6 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                 }
             }
         });
-        locator.addListener(new Listener<Void>() {
-            @Override
-            public void onChanged(Void current) {
-                try {
-                    checkAndSwitchForDrc();
-                } catch (Throwable t) {
-                    // log
-                }
-            }
-        });
     }
 
     private RefreshableDataSource getInnerDataSource() {
@@ -163,11 +151,6 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         RefreshableDataSource oldDs = dataSourceRef.getAndSet(ds);
         if (oldDs != null)
             oldDs.close();
-    }
-
-    private void checkAndSwitchForDrc() throws SQLException {
-        if (locator.localizedForDrc() != (dataSourceRef.get() instanceof LocalizedDataSource))
-            doSwitch();
     }
 
     private DataSourceIdentity getDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {

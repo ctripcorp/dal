@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class AbstractDalPropertiesLocator extends UnsupportedListenable<Void> implements DalPropertiesLocator {
+public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocator {
     private static final String SEPARATOR_SEMICOLON = ";";
     private static final String SEPARATOR_COMMA = ",";
     private static final int DEFAULT_CLEAR_INTERVAL_IN_SECONDS = -1;
@@ -25,11 +25,6 @@ public abstract class AbstractDalPropertiesLocator extends UnsupportedListenable
         }
 
         setErrorCodes(errorCodes);
-    }
-
-    @Override
-    public void refresh(Map<String, String> properties) {
-        setProperties(properties);
     }
 
     protected abstract String getErrorCodesKey();
@@ -147,7 +142,12 @@ public abstract class AbstractDalPropertiesLocator extends UnsupportedListenable
 
     @Override
     public boolean localizedForDrc() {
-        throw new UnsupportedOperationException("localizationEnabledForDrc not supported.");
+        throw new UnsupportedOperationException("localizedForDrc not supported.");
+    }
+
+    @Override
+    public boolean localizedForDrc(String situation) {
+        throw new UnsupportedOperationException("localizedForDrc not supported.");
     }
 
     @Override

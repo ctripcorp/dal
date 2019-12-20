@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Created by lilj on 2018/7/22.
  */
-public class DefaultDalPropertiesLocator extends ListenableSupport<Void> implements DalPropertiesLocator {
+public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     public static final String TABLE_PARSE_SWITCH_KEYNAME = "TableParseSwitch";
     private static final String DAL_PROPERTIES_SET_TABLE_PARSE_SWITCH = "DalProperties::setTableParseSwitch";
@@ -28,7 +28,6 @@ public class DefaultDalPropertiesLocator extends ListenableSupport<Void> impleme
     private static final String PROPERTY_NAME_DRC_STAGE = "DrcStage";
     private static final String PROPERTY_NAME_FORMAT_DRC_ROUTE_CTRL = "DrcStage.%s.Localized";
 
-    private static final String DEFAULT_CLUSTER_INFO_QUERY_URL = "http://service.dbcluster.fat2240.qa.nt.ctripcorp.com/api/dal/v1/titanKeys/%s?operator=%s";
     private static final String DEFAULT_DRC_STAGE = "test";
     private static final String DEFAULT_DRC_LOCALIZED = "false";
 
@@ -44,12 +43,6 @@ public class DefaultDalPropertiesLocator extends ListenableSupport<Void> impleme
         setAllProperties(properties);
         setTableParseSwitch(properties);
         setImplicitAllShardsSwitch(properties);
-    }
-
-    @Override
-    public void refresh(Map<String, String> properties) {
-        setProperties(properties);
-        executeListeners(null);
     }
 
     private void setTableParseSwitch(Map<String, String> properties) {
@@ -92,7 +85,12 @@ public class DefaultDalPropertiesLocator extends ListenableSupport<Void> impleme
     }
 
     private void setAllProperties(Map<String, String> properties) {
-        Map<String, String> currProperties = new HashMap<>(properties);
+        Map<String, String> currProperties = new HashMap<>();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            if (key != null)
+                currProperties.put(key.toLowerCase(), entry.getValue());
+        }
         Map<String, String> prevProperties = allProperties.getAndSet(currProperties);
         String message = String.format("current: %s; previous: %s", currProperties.toString(), prevProperties.toString());
         LOGGER.logEvent(DalLogTypes.DAL, SET_ALL_PROPERTIES, message);
@@ -100,28 +98,34 @@ public class DefaultDalPropertiesLocator extends ListenableSupport<Void> impleme
 
     @Override
     public String getClusterInfoQueryUrl() {
-        String url = getProperty(PROPERTY_NAME_CLUSTER_INFO_QUERY_URL);
-        if (url != null && !url.isEmpty())
-            return url;
-        else
-            return DEFAULT_CLUSTER_INFO_QUERY_URL;
+        return getProperty(PROPERTY_NAME_CLUSTER_INFO_QUERY_URL);
     }
 
     @Override
     public boolean localizedForDrc() {
+        return localizedForDrc(null);
+    }
+
+    @Override
+    public boolean localizedForDrc(String situation) {
         String drcStage = getProperty(PROPERTY_NAME_DRC_STAGE, DEFAULT_DRC_STAGE);
-        String localized = getProperty(String.format(PROPERTY_NAME_FORMAT_DRC_ROUTE_CTRL, drcStage), DEFAULT_DRC_LOCALIZED);
+        String propKey = String.format(PROPERTY_NAME_FORMAT_DRC_ROUTE_CTRL, drcStage);
+        String localized = getProperty(propKey, DEFAULT_DRC_LOCALIZED);
+        if (!StringUtils.isEmpty(situation)) {
+            propKey = String.format(PROPERTY_NAME_FORMAT_DRC_ROUTE_CTRL, String.format("%s.%s", drcStage, situation));
+            localized = getProperty(propKey, localized);
+        }
         return Boolean.parseBoolean(localized);
     }
 
     @Override
     public String getProperty(String name) {
-        return allProperties.get().get(name);
+        return allProperties.get().get(name.toLowerCase());
     }
 
     private String getProperty(String name, String defaultValue) {
-        String value = allProperties.get().get(name);
-        return StringUtils.isTrimmedEmpty(value) ? defaultValue : value.trim();
+        String value = allProperties.get().get(name.toLowerCase());
+        return StringUtils.isEmpty(value) ? defaultValue : value.trim();
     }
 
 }

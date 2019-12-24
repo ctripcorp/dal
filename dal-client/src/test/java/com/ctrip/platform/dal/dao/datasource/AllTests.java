@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
 		DatabasePoolConfigParserTest.class,
 		RefreshableDataSourceTest.class,
-		ForceSwitchableDataSourceTest.class
+		ForceSwitchableDataSourceTest.class,
+		LocalizedDataSourceTest.class
 })
 public class AllTests {
 

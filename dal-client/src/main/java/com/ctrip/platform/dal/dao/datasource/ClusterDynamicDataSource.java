@@ -25,7 +25,10 @@ import java.util.logging.Logger;
 public class ClusterDynamicDataSource implements DataSource, ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String NAME_SWITCH_CLUSTER_DATASOURCE = "DataSource::switchClusterDataSource:%s";
+    private static final String CAT_LOG_TYPE = "DAL.dataSource";
+    private static final String CAT_LOG_NAME_DRC = "createDrcDataSource:%s";
+    private static final String CAT_LOG_NAME_DRC_FAIL = "createDrcDataSource:%s:EXCEPTION";
+    private static final String CAT_LOG_NAME_NORMAL = "createNormalDataSource:%s";
 
     private ClusterInfo clusterInfo;
     private Cluster cluster;
@@ -121,11 +124,13 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                 DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                 LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
+                LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC, clusterInfo.toString()), localizationConfig.toString());
                 return new LocalizedDataSource(validator, id, config);
             }
         } catch (SQLException e) {
-            // log
+            LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC_FAIL, clusterInfo.toString()), e.getMessage());
         }
+        LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_NORMAL, clusterInfo.toString()), "");
         return new RefreshableDataSource(id, config);
     }
 

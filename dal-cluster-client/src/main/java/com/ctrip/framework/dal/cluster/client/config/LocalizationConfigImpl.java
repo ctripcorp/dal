@@ -16,4 +16,9 @@ public class LocalizationConfigImpl implements LocalizationConfig {
         return unitStrategyId;
     }
 
+    @Override
+    public String toString() {
+        return "unitStrategyId=" + unitStrategyId;
+    }
+
 }

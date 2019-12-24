@@ -9,6 +9,8 @@ import com.ctrip.framework.dal.cluster.client.base.Listenable;
  */
 public interface ClusterConfig extends ComponentGenerator<Cluster>, Listenable<ClusterConfig> {
 
+    String getClusterName();
+
     boolean checkSwitchable(ClusterConfig newConfig);
 
 }

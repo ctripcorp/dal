@@ -5,20 +5,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
+import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 public class DataSourceLocator {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    private static final String LOG_NAME_CREATE_DATASOURCE = "createDataSource:%s";
+    private static final String LOG_NAME_CREATE_CLUSTER_DATASOURCE = "createClusterDataSource:%s";
 
     private static final Map<DataSourceIdentity, DataSource> cache = new ConcurrentHashMap<>();
 
@@ -117,6 +118,7 @@ public class DataSourceLocator {
         }
         SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(id, provider);
         ForceSwitchableDataSource ds = new ForceSwitchableDataSource(id, dataSourceConfigureProvider);
+        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(LOG_NAME_CREATE_DATASOURCE, id.getId()), "");
         provider.register(id, ds);
         executor.execute(ds);
         return ds;
@@ -124,6 +126,7 @@ public class DataSourceLocator {
 
     private DataSource createDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
         ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider, factory);
+        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(LOG_NAME_CREATE_CLUSTER_DATASOURCE, id.getId()), "");
         provider.register(id, ds);
         executor.execute(ds);
         return ds;

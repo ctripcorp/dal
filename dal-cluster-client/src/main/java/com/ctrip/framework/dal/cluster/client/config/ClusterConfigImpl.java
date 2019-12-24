@@ -86,6 +86,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         return false;
     }
 
+    @Override
     public String getClusterName() {
         return clusterName;
     }
@@ -126,6 +127,16 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     public void setClusterType(ClusterType clusterType) {
         this.clusterType = clusterType;
+    }
+
+    @Override
+    public String toString() {
+        return "clusterName=" + clusterName +
+                ", version=" + version +
+                ", clusterType=" + clusterType.getValue() +
+                ", databaseCategory=" + databaseCategory.getValue() +
+                ", databaseShardCount=" + databaseShardConfigs.size() +
+                (unitStrategyId == null ? "" : ", unitStrategyId=" + unitStrategyId);
     }
 
 }

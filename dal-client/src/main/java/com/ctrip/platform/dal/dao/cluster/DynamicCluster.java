@@ -1,8 +1,11 @@
-package com.ctrip.framework.dal.cluster.client.cluster;
+package com.ctrip.platform.dal.dao.cluster;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -10,6 +13,9 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -20,6 +26,12 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author c7ch23en
  */
 public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> implements Cluster {
+
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    private static final String CAT_LOG_TYPE = "DAL.cluster";
+    private static final String CAT_LOG_NAME_FORMAT = "switchCluster:%s";
+    private static final String CAT_EVENT_NAME_NORMAL_TO_DRC = "%s:NormalToDrc";
+    private static final String CAT_EVENT_NAME_DRC_TO_NORMAL = "%s:DrcToNormal";
 
     private ClusterConfig clusterConfig;
     private AtomicReference<Cluster> innerCluster = new AtomicReference<>();
@@ -99,23 +111,40 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
         clusterConfig.addListener(new Listener<ClusterConfig>() {
             @Override
             public void onChanged(ClusterConfig current) {
-                doSwitch(current);
+                try {
+                    doSwitch(current);
+                } catch (Exception e) {
+                    throw new DalRuntimeException("ClusterConfig Changed Listener Error", e);
+                }
             }
         });
     }
 
-    public void doSwitch(ClusterConfig current) {
-        Cluster curr = clusterConfig.generate();
-        Cluster prev = innerCluster.getAndSet(curr);
-        // TODO: TO BE REFACTORED
-        ClusterSwitchedEvent event = new ClusterSwitchedEvent(curr, prev);
-        for (Listener<ClusterSwitchedEvent> listener : getListeners()) {
+    public void doSwitch(ClusterConfig current) throws Exception {
+        String logName = String.format(CAT_LOG_NAME_FORMAT, getClusterName());
+        LOGGER.logTransaction(CAT_LOG_TYPE, logName, "", () -> {
+            Cluster curr = clusterConfig.generate();
+            Cluster prev = innerCluster.getAndSet(curr);
             try {
-                listener.onChanged(event);
+                boolean prevIsDrc = prev.isWrapperFor(DrcCluster.class);
+                boolean currIsDrc = curr.isWrapperFor(DrcCluster.class);
+                if (!prevIsDrc && currIsDrc)
+                    LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_EVENT_NAME_NORMAL_TO_DRC, getClusterName()), "");
+                else
+                    LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_EVENT_NAME_DRC_TO_NORMAL, getClusterName()), "");
             } catch (Throwable t) {
                 // ignore
             }
-        }
+            // TODO: TO BE REFACTORED
+            ClusterSwitchedEvent event = new ClusterSwitchedEvent(curr, prev);
+            for (Listener<ClusterSwitchedEvent> listener : getListeners()) {
+                try {
+                    listener.onChanged(event);
+                } catch (Throwable t) {
+                    LOGGER.logEvent(CAT_LOG_TYPE, logName, "ListenerError: " + listener.toString());
+                }
+            }
+        });
     }
 
     private Cluster getInnerCluster() {

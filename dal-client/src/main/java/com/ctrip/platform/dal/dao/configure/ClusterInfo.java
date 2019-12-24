@@ -66,7 +66,7 @@ public class ClusterInfo {
             if (obj instanceof SimpleClusterDataSourceIdentity) {
                 String id = getId();
                 String objId = ((SimpleClusterDataSourceIdentity) obj).getId();
-                return (id == null && objId == null) || (id != null && id.equals(objId));
+                return (id == null && objId == null) || (id != null && id.equalsIgnoreCase(objId));
             }
             return false;
         }

@@ -7,4 +7,9 @@ public class NullClusterInfo extends ClusterInfo {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "Non-exist cluster";
+    }
+
 }

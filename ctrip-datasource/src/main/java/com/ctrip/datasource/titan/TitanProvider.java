@@ -11,15 +11,12 @@ import com.ctrip.datasource.configure.ClusterInfoProvider;
 import com.ctrip.datasource.configure.CtripClusterInfoProvider;
 import com.ctrip.datasource.configure.CtripLocalClusterConfigProvider;
 import com.ctrip.datasource.configure.qconfig.CtripClusterConfigProvider;
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 

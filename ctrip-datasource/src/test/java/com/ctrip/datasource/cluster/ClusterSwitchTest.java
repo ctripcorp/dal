@@ -4,31 +4,20 @@ import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.DynamicCluster;
+import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.ucs.client.api.RuleContextBuilder;
 import com.ctrip.framework.ucs.client.api.StrategyValidatedResult;
 import com.ctrip.framework.ucs.client.api.Ucs;
-import com.ctrip.framework.ucs.common.constants.KeyType;
-import com.ctrip.framework.ucs.common.domain.Rule;
-import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
-import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
-import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,7 +41,7 @@ public class ClusterSwitchTest {
         properties.put(DefaultDalConnectionLocator.DATASOURCE_CONFIG_PROVIDER, TitanProvider.class.getName());
         locator.initialize(properties);
         locator.setup(new HashSet<>());
-//        new ClusterDatabaseSet(CLUSTER_NAME1, cluster, locator);
+        new ClusterDatabaseSet(CLUSTER_NAME1, cluster, locator);
 
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
@@ -85,7 +74,7 @@ public class ClusterSwitchTest {
     }
 
     @Test
-    public void testClusterDynamicDataSourceSwitch() {
+    public void testClusterDynamicDataSourceSwitch() throws Exception {
         int shardIndex = 0;
         ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME1, shardIndex, DatabaseRole.MASTER);
         MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME1));
@@ -107,7 +96,7 @@ public class ClusterSwitchTest {
     }
 
     @Test
-    public void testClusterDynamicDataSourceDrcSwitch() throws SQLException {
+    public void testClusterDynamicDataSourceDrcSwitch() throws Exception {
         int shardIndex = 0;
         ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME4, shardIndex, DatabaseRole.MASTER);
         MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME4));
@@ -210,6 +199,11 @@ public class ClusterSwitchTest {
 
         public MockClusterConfig(ClusterConfig config) {
             configRef.set(config);
+        }
+
+        @Override
+        public String getClusterName() {
+            return configRef.get().getClusterName();
         }
 
         public void doSwitch(ClusterConfig config) {

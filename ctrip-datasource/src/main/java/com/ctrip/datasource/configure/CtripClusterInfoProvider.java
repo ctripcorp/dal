@@ -2,6 +2,7 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.datasource.util.GsonUtils;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
@@ -9,6 +10,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,9 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CtripClusterInfoProvider implements ClusterInfoProvider {
 
+    private static final int DEFAULT_HTTP_TIMEOUT_MS = 1800;
+    private static final String CAT_LOG_TYPE = "DAL.cluster";
+    private static final String CAT_LOG_NAME_FORMAT = "getClusterMeta:%s";
+
     private DalPropertiesLocator locator;
     private HttpExecutor executor;
-    private final Map<String, ClusterInfo> clusterInfoCache = new ConcurrentHashMap<>();
+    private static final Map<String, ClusterInfo> clusterInfoCache = new ConcurrentHashMap<>();
 
     public CtripClusterInfoProvider(DalPropertiesLocator locator, HttpExecutor executor) {
         this.locator = locator;
@@ -28,13 +34,14 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
 
     @Override
     public ClusterInfo getClusterInfo(String titanKey) {
-        ClusterInfo clusterInfo = clusterInfoCache.get(titanKey);
+        String key = titanKey.toLowerCase();
+        ClusterInfo clusterInfo = clusterInfoCache.get(key);
         if (clusterInfo == null) {
             synchronized (clusterInfoCache) {
-                clusterInfo = clusterInfoCache.get(titanKey);
+                clusterInfo = clusterInfoCache.get(key);
                 if (clusterInfo == null) {
                     clusterInfo = getLatestClusterInfo(titanKey);
-                    clusterInfoCache.put(titanKey, clusterInfo);
+                    clusterInfoCache.put(key, clusterInfo);
                 }
             }
         }
@@ -42,21 +49,32 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
     }
 
     private ClusterInfo getLatestClusterInfo(String titanKey) {
-        ClusterInfo clusterInfo = null;
-        try {
-            String url = String.format(locator.getClusterInfoQueryUrl(), titanKey, "dal-client");
-            String res = executor.executeGet(url, new HashMap<>(), 5000);
-            ClusterInfoResponseEntity response = GsonUtils.json2T(res, ClusterInfoResponseEntity.class);
-            if (response != null && response.getStatus() == 200) {
-                clusterInfo = response.getClusterInfo();
-            }
-            Cat.logEvent("DAL.cluster", "getClusterInfo:" + titanKey, Event.SUCCESS, clusterInfo != null ? clusterInfo.toString() : "");
-            return clusterInfo != null ? clusterInfo : new NullClusterInfo();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Cat.logEvent("DAL.cluster", "getClusterInfo:" + titanKey, "Fail", e.getMessage());
-            throw new DalRuntimeException(String.format("failed to get cluster info for titan key '%s'", titanKey), e);
+        String clusterInfoQueryUrl = locator.getClusterInfoQueryUrl();
+        if (StringUtils.isEmpty(clusterInfoQueryUrl)) {
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey + ":SKIP"));
+            return new NullClusterInfo();
         }
+
+        ClusterInfo clusterInfo = null;
+        Transaction transaction = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey));
+        try {
+            String url = String.format(clusterInfoQueryUrl, titanKey);
+            String res = executor.executeGet(url, new HashMap<>(), DEFAULT_HTTP_TIMEOUT_MS);
+            ClusterInfoResponseEntity response = GsonUtils.json2T(res, ClusterInfoResponseEntity.class);
+            if (response != null && response.getStatus() == 200)
+                clusterInfo = response.getClusterInfo();
+            if (clusterInfo == null)
+                clusterInfo = new NullClusterInfo();
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey), Event.SUCCESS, clusterInfo.toString());
+            transaction.setStatus(Transaction.SUCCESS);
+        } catch (Throwable t) {
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey + ":EXCEPTION"), Event.SUCCESS, t.getMessage());
+            transaction.setStatus(t);
+        } finally {
+            transaction.complete();
+        }
+
+        return clusterInfo != null ? clusterInfo : new NullClusterInfo();
     }
 
 }

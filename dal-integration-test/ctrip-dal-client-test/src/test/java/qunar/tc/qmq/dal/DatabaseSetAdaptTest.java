@@ -68,6 +68,11 @@ public class DatabaseSetAdaptTest {
 
         @Override
         public void startSendTrace() {}
+
+        @Override
+        public int getTableShardingId() {
+            return 0;
+        }
     }
 
 }

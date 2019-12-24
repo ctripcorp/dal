@@ -45,7 +45,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
             try {
                 boolean localized = locator.localizedForDrc(result.name());
                 if (localized) {
-                    Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false));
+                    Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false), DAL_VALIDATE_REJECT, "");
                     return false;
                 } else {
                     Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildValidateLogName(DAL_VALIDATE_WARN));

@@ -27,6 +27,7 @@ import com.ctrip.datasource.spring.XmlConfigMybatisTest;
 import com.ctrip.datasource.titan.TitanServiceReaderTest;
 import com.ctrip.datasource.util.DalEncrypterTest;
 import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
+import com.ctrip.datasource.configure.CtripClusterInfoProviderTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -53,7 +54,8 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		PoolPropertiesProviderImplTest.class,
 		DataSourceConfigureEncryptTest.class,
 		ClusterSwitchTest.class,
-		DataSourceLocatorTest.class
+		DataSourceLocatorTest.class,
+		CtripClusterInfoProviderTest.class
 	})
 
 public class AllTests {

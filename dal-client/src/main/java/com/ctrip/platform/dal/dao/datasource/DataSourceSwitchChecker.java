@@ -62,7 +62,8 @@ public class DataSourceSwitchChecker {
                 //ignore
             }
         }
-        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_SWITCH_DATASOURCE, configure.getName()), serverName, startTime);
+        String logName = configure.getName() != null ? configure.getName() : configure.getConnectionUrl();
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_SWITCH_DATASOURCE, logName), serverName, startTime);
         return serverName;
     }
 }

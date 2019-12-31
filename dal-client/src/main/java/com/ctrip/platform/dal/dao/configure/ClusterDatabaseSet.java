@@ -155,8 +155,8 @@ public class ClusterDatabaseSet extends DatabaseSet {
         cluster.addListener(new Listener<ClusterSwitchedEvent>() {
             @Override
             public void onChanged(ClusterSwitchedEvent event) {
-                locator.uninstallCluster(event.getPrevious());
                 locator.setupCluster(event.getCurrent());
+                locator.uninstallCluster(event.getPrevious());
             }
         });
     }

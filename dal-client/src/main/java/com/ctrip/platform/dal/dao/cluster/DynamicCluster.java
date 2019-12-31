@@ -130,7 +130,7 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
                 boolean currIsDrc = curr.isWrapperFor(DrcCluster.class);
                 if (!prevIsDrc && currIsDrc)
                     LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_EVENT_NAME_NORMAL_TO_DRC, getClusterName()), "");
-                else
+                else if (prevIsDrc && !currIsDrc)
                     LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_EVENT_NAME_DRC_TO_NORMAL, getClusterName()), "");
             } catch (Throwable t) {
                 // ignore

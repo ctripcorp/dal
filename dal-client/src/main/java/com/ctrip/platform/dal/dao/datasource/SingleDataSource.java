@@ -18,8 +18,8 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
 
     private static final String DATASOURCE_CREATE_DATASOURCE = "DataSource::createDataSource:%s";
     private static final String DATASOURCE_CREATE_POOL = "DataSource::createPool:%s";
-    private static final String DATASOURCE_REGISTER_DATASOURCE = "DataSource::registerDataSource:%s";
-    private static final String DATASOURCE_UNREGISTER_DATASOURCE = "DataSource::unregisterDataSource:%s";
+    private static final String DATASOURCE_REGISTER_DATASOURCE = "registerDataSource:%s";
+    private static final String DATASOURCE_UNREGISTER_DATASOURCE = "unregisterDataSource:%s";
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 

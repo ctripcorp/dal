@@ -1,5 +1,6 @@
 package com.ctrip.datasource.mybatis.interceptor;
 
+import com.ctrip.platform.dal.dao.datasource.LocalizedDatabaseMetaData;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 
@@ -33,6 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
@@ -134,7 +136,13 @@ public class StatementHandlerInterceptor implements Interceptor {
       Cat.logEvent(CatConstants.TYPE_SQL_METHOD, buildSqlType(sql), Message.SUCCESS, parameters);
 
       if (connection != null) {
-        Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, connection.getMetaData().getURL());
+        DatabaseMetaData metaData = connection.getMetaData();
+        String logName;
+        if (metaData instanceof LocalizedDatabaseMetaData)
+          logName = ((LocalizedDatabaseMetaData) metaData).getLocalizedURL();
+        else
+          logName = metaData.getURL();
+        Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, logName);
       }
 
     } catch (Throwable ex) {

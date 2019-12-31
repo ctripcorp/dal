@@ -233,6 +233,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
                 }
             }
         }
+        Node zoneIdNode = getChildNode(clusterNode, ZONE_ID);
+        if (zoneIdNode != null) {
+            String zoneIdText = zoneIdNode.getTextContent();
+            if (!StringUtils.isEmpty(zoneIdText)) {
+                clusterConfig.setZoneId(zoneIdText);
+            }
+        }
     }
 
     private List<Node> getChildNodes(Node parent, String name) {

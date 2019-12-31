@@ -21,6 +21,7 @@ public interface ClusterConfigXMLConstants {
     String ID_GENERATORS = "IdGenerators";
     String ID_GENERATOR = "IdGenerator";
     String UNIT_STRATEGY_ID = "UnitStrategyId";
+    String ZONE_ID = "ZoneId";
 
     // XML attributes
     String NAME = "name";

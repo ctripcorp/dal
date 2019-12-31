@@ -8,10 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Properties;
 
 public class LocalizedDataSourceTest {
@@ -51,7 +48,9 @@ public class LocalizedDataSourceTest {
 
     private void testStatementBlocked(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
-        String url = connection.getMetaData().getURL();
+        DatabaseMetaData metaData = connection.getMetaData();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
+        String url = ((LocalizedDatabaseMetaData) metaData).getLocalizedURL();
         Assert.assertTrue(url.endsWith(TEST_ZONE.toUpperCase()));
 
         Statement statement = connection.createStatement();
@@ -168,7 +167,9 @@ public class LocalizedDataSourceTest {
 
     private void testPreparedStatementBlocked(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
-        String url = connection.getMetaData().getURL();
+        DatabaseMetaData metaData = connection.getMetaData();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
+        String url = ((LocalizedDatabaseMetaData) metaData).getLocalizedURL();
         Assert.assertTrue(url.endsWith(TEST_ZONE.toUpperCase()));
 
         // executeQuery
@@ -255,7 +256,9 @@ public class LocalizedDataSourceTest {
 
     private void testStatementPassed(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
-        String url = connection.getMetaData().getURL();
+        DatabaseMetaData metaData = connection.getMetaData();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
+        String url = metaData.getURL();
         Assert.assertTrue(url.endsWith("UTF-8"));
 
         Statement statement = connection.createStatement();
@@ -307,7 +310,9 @@ public class LocalizedDataSourceTest {
 
     private void testPreparedStatementPassed(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
-        String url = connection.getMetaData().getURL();
+        DatabaseMetaData metaData = connection.getMetaData();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
+        String url = metaData.getURL();
         Assert.assertTrue(url.endsWith("UTF-8"));
 
         // executeQuery
@@ -381,7 +386,7 @@ public class LocalizedDataSourceTest {
         Properties p = new Properties();
         p.setProperty("userName", "root");
         p.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8");
         p.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         return new DataSourceConfigure("llj_test", p);
     }

@@ -7,4 +7,6 @@ public interface LocalizationConfig {
 
     int getUnitStrategyId();
 
+    String getZoneId();
+
 }

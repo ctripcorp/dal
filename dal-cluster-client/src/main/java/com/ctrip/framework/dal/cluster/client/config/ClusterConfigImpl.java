@@ -29,6 +29,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private List<ShardStrategy> shardStrategies = new LinkedList<>();
     private ClusterIdGeneratorConfig idGeneratorConfig;
     private Integer unitStrategyId;
+    private String zoneId;
 
     private final AtomicReference<Cluster> generatedClusterRef = new AtomicReference<>();
 
@@ -74,7 +75,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private LocalizationConfig generateLocalizationConfig() {
         if (unitStrategyId == null)
             throw new ClusterConfigException("unitStrategyId is necessary for drc cluster");
-        return new LocalizationConfigImpl(unitStrategyId);
+        return new LocalizationConfigImpl(unitStrategyId, zoneId);
     }
 
     @Override
@@ -125,8 +126,8 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         this.unitStrategyId = unitStrategyId;
     }
 
-    public void setClusterType(ClusterType clusterType) {
-        this.clusterType = clusterType;
+    public void setZoneId(String zoneId) {
+        this.zoneId = zoneId;
     }
 
     @Override
@@ -136,7 +137,8 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
                 ", clusterType=" + clusterType.getValue() +
                 ", databaseCategory=" + databaseCategory.getValue() +
                 ", databaseShardCount=" + databaseShardConfigs.size() +
-                (unitStrategyId == null ? "" : ", unitStrategyId=" + unitStrategyId);
+                (unitStrategyId == null ? "" : ", unitStrategyId=" + unitStrategyId) +
+                (zoneId == null ? "" : ", zoneId=" + zoneId);
     }
 
 }

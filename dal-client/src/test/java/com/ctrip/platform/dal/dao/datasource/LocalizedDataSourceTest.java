@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfigImpl;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -32,12 +33,7 @@ public class LocalizedDataSourceTest {
     private static final String UPDATE_PARAM = "updateName";
     private static final String DELETE_PARAM = "deleteName";
 
-    @Test
-    public void testNormalDataSource() throws SQLException {
-        DataSource dataSource = getNormalDataSource();
-        testStatementPassed(dataSource);
-        testPreparedStatementPassed(dataSource);
-    }
+    private static final String TEST_ZONE = "testZone";
 
     @Test
     public void testBlockingDataSource() throws SQLException {
@@ -46,8 +42,18 @@ public class LocalizedDataSourceTest {
         testPreparedStatementBlocked(dataSource);
     }
 
+    @Test
+    public void testNormalDataSource() throws SQLException {
+        DataSource dataSource = getNormalDataSource();
+        testStatementPassed(dataSource);
+        testPreparedStatementPassed(dataSource);
+    }
+
     private void testStatementBlocked(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
+        String url = connection.getMetaData().getURL();
+        Assert.assertTrue(url.endsWith(TEST_ZONE.toUpperCase()));
+
         Statement statement = connection.createStatement();
 
         // executeQuery
@@ -162,6 +168,8 @@ public class LocalizedDataSourceTest {
 
     private void testPreparedStatementBlocked(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
+        String url = connection.getMetaData().getURL();
+        Assert.assertTrue(url.endsWith(TEST_ZONE.toUpperCase()));
 
         // executeQuery
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_SQL_TEMPLATE);
@@ -247,6 +255,9 @@ public class LocalizedDataSourceTest {
 
     private void testStatementPassed(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
+        String url = connection.getMetaData().getURL();
+        Assert.assertTrue(url.endsWith("UTF-8"));
+
         Statement statement = connection.createStatement();
 
         // executeQuery
@@ -296,6 +307,8 @@ public class LocalizedDataSourceTest {
 
     private void testPreparedStatementPassed(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
+        String url = connection.getMetaData().getURL();
+        Assert.assertTrue(url.endsWith("UTF-8"));
 
         // executeQuery
         PreparedStatement preparedStatement = connection.prepareStatement(SELECT_SQL_TEMPLATE);
@@ -361,7 +374,7 @@ public class LocalizedDataSourceTest {
 
     private DataSource getBlockingDataSource() {
         DataSourceConfigure config = getDataSourceConfig();
-        return new LocalizedDataSource(new ConstantLocalizationValidator(false), config.getName(), config);
+        return new LocalizedDataSource(new ConstantLocalizationValidator(false), new LocalizationConfigImpl(1, TEST_ZONE), config.getName(), config);
     }
 
     private DataSourceConfigure getDataSourceConfig() {

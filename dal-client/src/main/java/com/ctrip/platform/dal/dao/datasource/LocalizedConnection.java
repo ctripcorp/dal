@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
@@ -8,14 +10,16 @@ import java.util.concurrent.Executor;
 public class LocalizedConnection implements Connection {
 
     private LocalizationValidator validator;
+    private LocalizationConfig config;
     private Connection connection;
 
     public LocalizedConnection(Connection connection) {
-        this(LocalizationValidator.DEFAULT, connection);
+        this(LocalizationValidator.DEFAULT, null, connection);
     }
 
-    public LocalizedConnection(LocalizationValidator validator, Connection connection) {
+    public LocalizedConnection(LocalizationValidator validator, LocalizationConfig config, Connection connection) {
         this.validator = validator;
+        this.config = config;
         this.connection = connection;
     }
 
@@ -74,7 +78,8 @@ public class LocalizedConnection implements Connection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return connection.getMetaData();
+        DatabaseMetaData metaData = connection.getMetaData();
+        return metaData != null ? new LocalizedDatabaseMetaDataImpl(config, metaData) : null;
     }
 
     @Override

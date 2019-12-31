@@ -125,7 +125,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                 LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
                 LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC, clusterInfo.toString()), localizationConfig.toString());
-                return new LocalizedDataSource(validator, id, config);
+                return new LocalizedDataSource(validator, localizationConfig, id, config);
             }
         } catch (SQLException e) {
             LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC_FAIL, clusterInfo.toString()), e.getMessage());

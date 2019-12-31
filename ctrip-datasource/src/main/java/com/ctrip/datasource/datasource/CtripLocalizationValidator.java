@@ -36,7 +36,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
         StrategyValidatedResult result = null;
         try {
             result = ucs.validateStrategyContext(config.getUnitStrategyId());
-            Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result));
+            Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result), Event.SUCCESS, buildUcsValidateLogMessage(result));
         } catch (Throwable t) {
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION"), Event.SUCCESS, t.getMessage());
         }
@@ -62,7 +62,11 @@ public class CtripLocalizationValidator implements LocalizationValidator {
     }
 
     private String buildUcsValidateLogName(StrategyValidatedResult result) {
-        return buildValidateLogName(result != null ? result.name() + ":" + result.shouldProcessDBOperation() : "NoResult");
+        return buildValidateLogName(result != null ? result.name() : "NoResult");
+    }
+
+    private String buildUcsValidateLogMessage(StrategyValidatedResult result) {
+        return result != null ? "shouldProcessDBOperation: " + result.shouldProcessDBOperation() : "";
     }
 
     private String buildDalValidateLogName(boolean result) {

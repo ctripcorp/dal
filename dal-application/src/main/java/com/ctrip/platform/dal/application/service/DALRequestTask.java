@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.application.service;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.application.Application;
 import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
@@ -40,7 +41,9 @@ public class DALRequestTask {
     @PostConstruct
     private void init() throws Exception {
         try {
-            qps = Integer.parseInt(dalApplicationConfig.getQPS());
+            String qpsCfg = dalApplicationConfig.getQPS();
+            if (qpsCfg != null)
+                qps = Integer.parseInt(qpsCfg);
             delay = (1000 / qps) * 4;
         } catch (Exception e) {
             Cat.logError("get qps from QConfig error", e);

@@ -87,6 +87,6 @@ public class DalApplicationConfig {
 
 
     public String getQPS() {
-        return applicationConfig.get("QPS");
+        return applicationConfig != null ? applicationConfig.get("QPS") : null;
     }
 }

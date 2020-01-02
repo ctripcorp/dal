@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
@@ -27,7 +28,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.dataSource";
     private static final String CAT_LOG_NAME_DRC = "createDrcDataSource:%s";
-    private static final String CAT_LOG_NAME_DRC_FAIL = "createDrcDataSource:%s:EXCEPTION";
+    private static final String CAT_LOG_NAME_DRC_FAIL = "createDrcDataSource:EXCEPTION:%s";
     private static final String CAT_LOG_NAME_NORMAL = "createNormalDataSource:%s";
 
     private ClusterInfo clusterInfo;
@@ -125,7 +126,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                 LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
                 LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC, clusterInfo.toString()), localizationConfig.toString());
-                return new LocalizedDataSource(validator, localizationConfig, id, config);
+                return new LocalizedDataSource(validator, id, config);
             }
         } catch (SQLException e) {
             LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC_FAIL, clusterInfo.toString()), e.getMessage());
@@ -141,7 +142,9 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                 try {
                     doSwitch();
                 } catch (Throwable t) {
-                    // log
+                    String msg = "Cluster switch listener error";
+                    LOGGER.error(msg, t);
+                    throw new DalRuntimeException(msg, t);
                 }
             }
         });

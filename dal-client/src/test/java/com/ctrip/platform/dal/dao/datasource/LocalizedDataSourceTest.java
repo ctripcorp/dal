@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfigImpl;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -379,7 +380,12 @@ public class LocalizedDataSourceTest {
 
     private DataSource getBlockingDataSource() {
         DataSourceConfigure config = getDataSourceConfig();
-        return new LocalizedDataSource(new ConstantLocalizationValidator(false), new LocalizationConfigImpl(1, TEST_ZONE), config.getName(), config);
+        return new LocalizedDataSource(new ConstantLocalizationValidator(false) {
+            @Override
+            public LocalizationConfig getLocalizationConfig() {
+                return new LocalizationConfigImpl(1, TEST_ZONE);
+            }
+        }, config.getName(), config);
     }
 
     private DataSourceConfigure getDataSourceConfig() {

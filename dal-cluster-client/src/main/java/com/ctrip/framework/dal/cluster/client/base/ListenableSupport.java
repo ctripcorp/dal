@@ -21,14 +21,4 @@ public abstract class ListenableSupport<T> implements Listenable<T> {
         return new LinkedHashSet<>(listeners);
     }
 
-    protected void executeListeners(T object) {
-        for (Listener<T> listener : getListeners()) {
-            try {
-                listener.onChanged(object);
-            } catch (Throwable t) {
-                // ignore
-            }
-        }
-    }
-
 }

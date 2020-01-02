@@ -113,8 +113,10 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
             public void onChanged(ClusterConfig current) {
                 try {
                     doSwitch(current);
-                } catch (Exception e) {
-                    throw new DalRuntimeException("ClusterConfig Changed Listener Error", e);
+                } catch (Throwable t) {
+                    String msg = "ClusterConfig changed listener error";
+                    LOGGER.error(msg, t);
+                    throw new DalRuntimeException(msg, t);
                 }
             }
         });

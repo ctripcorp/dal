@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.configure.dalproperties;
 
-import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;

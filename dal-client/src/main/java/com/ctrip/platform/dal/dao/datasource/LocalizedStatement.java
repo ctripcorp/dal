@@ -21,7 +21,7 @@ public class LocalizedStatement implements Statement {
     }
 
     protected void validateLocalization() throws DalException {
-        if (validator != null && !validator.validate())
+        if (validator != null && !validator.validateRequest())
             throw new DalException(ErrorCode.NonLocalRequestBlocked, "Non-local insert/update/delete is not allowed for drc cluster");
     }
 

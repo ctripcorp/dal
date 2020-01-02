@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+
 public class ConstantLocalizationValidator implements LocalizationValidator {
 
     private boolean constantResult;
@@ -13,8 +15,18 @@ public class ConstantLocalizationValidator implements LocalizationValidator {
     }
 
     @Override
-    public boolean validate() {
+    public boolean validateRequest() {
         return constantResult;
+    }
+
+    @Override
+    public boolean validateZone() {
+        return true;
+    }
+
+    @Override
+    public LocalizationConfig getLocalizationConfig() {
+        return null;
     }
 
 }

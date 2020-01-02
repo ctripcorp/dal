@@ -78,6 +78,18 @@ public class DataSourceValidatorTest {
         testMySqlConnectionValidateFailure(PooledConnection.VALIDATE_INIT);
     }
 
+    @Test
+    public void testValidateQueryTimeout() throws SQLException {
+        Connection connMySql = createNewMySqlConnection();
+        PingConnection pingConnection = new PingConnection(connMySql);
+        DataSourceValidator validator = new DataSourceValidator();
+        PoolProperties properties = new PoolProperties();
+        properties.setValidationQueryTimeout(2);
+        validator.setPoolProperties(properties);
+        validator.validate(pingConnection, PooledConnection.VALIDATE_INIT);
+        Assert.assertEquals(2000, PingConnection.timeout);
+    }
+
     private void testSqlServerConnectionValidateSuccess(int validateAction) throws SQLException {
         Connection connection = createNewSqlServerConnection();
         testConnectionValidateSuccess(validateAction, connection, CORRECT_SQL_SERVER_INIT_SQL);

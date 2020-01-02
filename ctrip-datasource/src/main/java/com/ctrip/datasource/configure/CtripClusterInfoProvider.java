@@ -3,6 +3,7 @@ package com.ctrip.datasource.configure;
 import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.datasource.util.GsonUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
@@ -21,7 +22,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
 
     private static final int DEFAULT_HTTP_TIMEOUT_MS = 1800;
     private static final String CAT_LOG_TYPE = "DAL.cluster";
-    private static final String CAT_LOG_NAME_FORMAT = "getClusterMeta:%s";
+    private static final String CAT_LOG_NAME_FORMAT = "getClusterInfo:%s";
 
     private DalPropertiesLocator locator;
     private HttpExecutor executor;
@@ -51,7 +52,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
     private ClusterInfo getLatestClusterInfo(String titanKey) {
         String clusterInfoQueryUrl = locator.getClusterInfoQueryUrl();
         if (StringUtils.isEmpty(clusterInfoQueryUrl)) {
-            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey + ":SKIP"));
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey));
             return new NullClusterInfo();
         }
 
@@ -59,6 +60,9 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
         Transaction transaction = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey));
         try {
             String url = String.format(clusterInfoQueryUrl, titanKey);
+            String appId = Foundation.app().getAppId();
+            if (!StringUtils.isEmpty(appId))
+                url = url + "&app=" + appId;
             String res = executor.executeGet(url, new HashMap<>(), DEFAULT_HTTP_TIMEOUT_MS);
             ClusterInfoResponseEntity response = GsonUtils.json2T(res, ClusterInfoResponseEntity.class);
             if (response != null && response.getStatus() == 200)
@@ -68,7 +72,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
             Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey), Event.SUCCESS, clusterInfo.toString());
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable t) {
-            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey + ":EXCEPTION"), Event.SUCCESS, t.getMessage());
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "EXCEPTION:" + titanKey), Event.SUCCESS, t.getMessage());
             transaction.setStatus(t);
         } finally {
             transaction.complete();

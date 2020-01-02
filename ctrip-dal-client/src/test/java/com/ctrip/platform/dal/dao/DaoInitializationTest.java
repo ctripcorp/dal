@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by taochen on 2019/8/28.
@@ -114,5 +115,17 @@ public class DaoInitializationTest {
         DalIgnite ignite = new DalIgnite();
         boolean status = ignite.warmUP(new IgniteManager.SimpleLogger());
         assertFalse(status);
+    }
+
+    // need remove all databaseSet in Dal.config
+    @Test
+    public void testDalIgnitePoolPropertiesIsNullWhenDataSetIsNull() throws Exception {
+        String path = DaoInitializationTest.class.getClassLoader().getResource("Dal.config.ignite").getPath();
+        DalClientFactory.shutdownFactory();
+        DalClientFactory.initClientFactory(path);
+        DalIgnite ignite = new DalIgnite();
+        boolean status = ignite.warmUP(new IgniteManager.SimpleLogger());
+        assertTrue(status);
+        DalClientFactory.shutdownFactory();
     }
 }

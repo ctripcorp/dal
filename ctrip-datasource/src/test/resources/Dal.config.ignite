@@ -1,0 +1,31 @@
+<dal name="dal.prize.test">
+  <databaseSets>
+
+  </databaseSets>
+  <LogListener enabled="true">
+      <logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>
+      <settings>
+        <encrypt>false</encrypt>
+        <secretKey>dalctripcn</secretKey>
+        <simplified>true</simplified>
+        <sampling>true</sampling>
+        <samplingLow>2</samplingLow>
+        <samplingHigh>1</samplingHigh>
+        <sampleMaxNum>5000</sampleMaxNum>
+        <sampleClearInterval>30</sampleClearInterval>
+        <asyncLogging>false</asyncLogging>
+      </settings>
+  </LogListener>
+  <ConnectionLocator>
+      <settings>
+         <useLocalConfig>true</useLocalConfig>
+         <dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
+      </settings>
+  </ConnectionLocator>
+  <TaskFactory>
+      <factory>com.ctrip.platform.dal.dao.CtripTaskFactory</factory>
+  </TaskFactory>
+  <DatabaseSelector>
+      <selector>com.ctrip.platform.dal.dao.configure.FreshnessDatabaseSelector</selector>
+  </DatabaseSelector>
+</dal>

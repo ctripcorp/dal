@@ -523,7 +523,7 @@ public class RefreshableDataSourceTest {
 
     @Test
     public void testDataSourceSwitch() throws Exception {
-        DataSourceCreator.getInstance().returnAllDataSources();
+        DataSourceCreator.getInstance().closeAllDataSources();
 
         Properties p1 = new Properties();
         p1.setProperty("userName", "root");

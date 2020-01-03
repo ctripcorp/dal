@@ -1,4 +1,4 @@
-package com.ctrip.framework.dal.cluster.client;
+package com.ctrip.framework.dal.cluster.client.cluster;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigProvider;

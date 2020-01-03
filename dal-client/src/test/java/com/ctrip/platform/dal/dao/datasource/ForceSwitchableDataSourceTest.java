@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.configure.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -16,6 +17,10 @@ public class ForceSwitchableDataSourceTest {
     private final static String DOMAINHOST = "dst56614";
     private final static String INVALIDHOST = "1.1.1.1";
 
+    @Before
+    public void beforeTest() {
+        DataSourceCreator.getInstance().closeAllDataSources();
+    }
 
     @Test
     public void testRestore() throws Exception {

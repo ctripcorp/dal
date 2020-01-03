@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.cluster.client;
 
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultClusterTest;
+import com.ctrip.framework.dal.cluster.client.cluster.DefaultLocalConfigProviderTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

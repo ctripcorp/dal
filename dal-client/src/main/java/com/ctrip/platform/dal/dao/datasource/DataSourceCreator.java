@@ -143,9 +143,13 @@ public class DataSourceCreator {
         return ds;
     }
 
-    protected void returnAllDataSources() {
-        for (SingleDataSource ds : targetDataSourceCache.values())
-            returnDataSource(ds);
+    public void closeAllDataSources() {
+        for (SingleDataSource ds : targetDataSourceCache.values()) {
+            DataSourceConfigure config = ds.getDataSourceConfigure();
+            targetDataSourceCache.remove(config, ds);
+            ds.cancelTask();
+            DataSourceTerminator.getInstance().close(ds);
+        }
     }
 
 }

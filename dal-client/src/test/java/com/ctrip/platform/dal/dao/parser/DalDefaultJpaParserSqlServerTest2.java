@@ -62,10 +62,10 @@ public class DalDefaultJpaParserSqlServerTest2 {
 	@AfterClass
 	public static void tearDownAfterClass(){
 		DalHints hints = new DalHints();
-		String[] sqls = new String[] { 
-				String.format(DROP_TABLE_SQL, parser.getTableName(), parser.getTableName())};
+		StatementParameters parameters = new StatementParameters();
+		String sql = String.format(DROP_TABLE_SQL, parser.getTableName(), parser.getTableName());
 		try {
-			client.batchUpdate(sqls, hints);
+			client.update(sql, parameters, hints);
 		} catch (SQLException e) {
 			Assert.fail();
 			e.printStackTrace();

@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import javax.sql.DataSource;
@@ -26,7 +25,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
 
     private AtomicReference<SingleDataSource> dataSourceReference = new AtomicReference<>();
 
-    private AtomicReference<String> DBServerReference = new AtomicReference<>();
+    private AtomicReference<String> dBServerReference = new AtomicReference<>();
 
     private CopyOnWriteArraySet<DataSourceSwitchListener> dataSourceSwitchListeners = new CopyOnWriteArraySet<>();
 
@@ -241,13 +240,13 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
             } catch (Throwable e) {
                 LOGGER.warn(e);
             }
-            if (DBServerReference.compareAndSet(null, currentServer)) {
+            if (dBServerReference.compareAndSet(null, currentServer)) {
                 return connection;
             }
             int currentSwitchVersion;
             synchronized (this) {
                 if (currentServer != null) {
-                    String oldServer = DBServerReference.getAndSet(currentServer);
+                    String oldServer = dBServerReference.getAndSet(currentServer);
                     if (!oldServer.equalsIgnoreCase(currentServer)) {
                         final int tempSwitchVersion = ++switchVersion;
                         LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(SWITCH_VERSION, tempSwitchVersion), oldServer + " switch to " + currentServer);

@@ -26,7 +26,7 @@ public class LocalizationConfigImpl implements LocalizationConfig {
     @Override
     public String toString() {
         return "unitStrategyId=" + unitStrategyId +
-                ", zoneId=" + zoneId;
+                (zoneId == null ? "" : ", zoneId=" + zoneId);
     }
 
 }

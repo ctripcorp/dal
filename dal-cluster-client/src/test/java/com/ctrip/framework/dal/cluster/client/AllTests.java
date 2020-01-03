@@ -9,7 +9,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        DefaultClusterTest.class
+        DefaultClusterTest.class,
+        DefaultLocalConfigProviderTest.class
 })
 public class AllTests {
 }

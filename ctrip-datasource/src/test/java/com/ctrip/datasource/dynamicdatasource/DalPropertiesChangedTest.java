@@ -6,10 +6,7 @@ import com.ctrip.datasource.dynamicdatasource.provider.LocalDalPropertiesProvide
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 
 /**
@@ -32,6 +29,11 @@ public class DalPropertiesChangedTest {
         dalPropertiesManager.tearDown();
         dalPropertiesManager.setDalPropertiesProvider(DalElementFactory.DEFAULT.getDalPropertiesProvider());
         dalPropertiesManager.setup();
+    }
+
+    @Before
+    public void beforeTest() {
+        dalPropertiesManager.tearDown();
     }
 
     @Test

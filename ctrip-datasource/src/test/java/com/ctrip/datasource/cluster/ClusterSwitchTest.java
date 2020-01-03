@@ -15,6 +15,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.*;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
@@ -31,6 +32,11 @@ public class ClusterSwitchTest {
     private static final String CLUSTER_NAME5 = "cluster_config_drc";
 
     private LocalClusterConfigProvider clusterConfigProvider = new LocalClusterConfigProvider();
+
+    @Before
+    public void beforeTest() {
+        DataSourceCreator.getInstance().closeAllDataSources();
+    }
 
     @Test
     public void testClusterSwitch() throws Exception {

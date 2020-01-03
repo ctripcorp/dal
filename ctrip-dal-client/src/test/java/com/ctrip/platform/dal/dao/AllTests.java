@@ -14,6 +14,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	CallSpByIndexValidatorTest.class,
 	
 	CtripTaskFactoryTest.class,
+
+	DaoInitializationTest.class,
     
     //TVP must be tested at last to avoid spoil old sp3 batch
     TVPTest.class,

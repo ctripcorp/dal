@@ -3,17 +3,20 @@ package com.ctrip.datasource.datasource;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.datasource.*;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
 import java.util.HashSet;
 
 public class DataSourceLocatorTest {
+
+    @Before
+    public void beforeTest() {
+        DataSourceCreator.getInstance().closeAllDataSources();
+    }
 
     @Test
     public void testClusterSetupAndUninstall() {

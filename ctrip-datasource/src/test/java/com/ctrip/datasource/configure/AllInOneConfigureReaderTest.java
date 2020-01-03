@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class AllInOneConfigureReaderTest {
     private static final String LINUX_DB_CONFIG_FILE = "/opt/ctrip/AppData/";
-    private static final String WIN_DB_CONFIG_FILE = "/D:/WebSites/CtripAppData/";
+    private static final String WIN_DB_CONFIG_FILE = "D:\\WebSites\\CtripAppData\\";
     @Test
     public void testGetDataSourceConfiguresSuccess() {
         AllInOneConfigureReader reader = new AllInOneConfigureReader();

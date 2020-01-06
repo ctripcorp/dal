@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DynamicClusterConfig extends ListenableSupport<ClusterConfig> implements ClusterConfig {
 
     private static final String CAT_LOG_TYPE = "DAL.cluster";
-    private static final String CAT_LOG_NAME_LOAD_FORMAT = "loadClusterConfig:%s";
-    private static final String CAT_LOG_NAME_SWITCH_FORMAT = "switchClusterConfig:%s";
+    private static final String CAT_LOG_NAME_LOAD_FORMAT = "LoadClusterConfig:%s";
+    private static final String CAT_LOG_NAME_SWITCH_FORMAT = "SwitchClusterConfig:%s";
 
     private String clusterName;
     private TypedConfig<ClusterConfig> rawConfig;

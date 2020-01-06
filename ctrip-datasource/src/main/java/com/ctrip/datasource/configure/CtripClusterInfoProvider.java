@@ -22,7 +22,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
 
     private static final int DEFAULT_HTTP_TIMEOUT_MS = 1800;
     private static final String CAT_LOG_TYPE = "DAL.cluster";
-    private static final String CAT_LOG_NAME_FORMAT = "getClusterInfo:%s";
+    private static final String CAT_LOG_NAME_FORMAT = "GetClusterInfo:%s";
 
     private DalPropertiesLocator locator;
     private HttpExecutor executor;

@@ -1,11 +1,14 @@
 package com.ctrip.platform.dal.dao;
 
+import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.framework.vi.IgniteManager;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigIPDomainStatusProvider;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigPoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.vi.DalIgnite;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -19,6 +22,17 @@ import static org.junit.Assert.assertTrue;
  */
 public class DaoInitializationTest {
     private static final String DB_NAME = "dao_test";
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        DataSourceConfigureManager.getInstance().initialize(new HashMap<>());
+    }
+
+    @Before
+    public void beforeTest() {
+        DataSourceConfigureManager.getInstance().clear();
+        DalClientFactory.shutdownFactory();
+    }
 
     @Test
     public void testCreateDaoAfterFailedGetPoolProperties() throws Exception {
@@ -120,6 +134,7 @@ public class DaoInitializationTest {
     // need remove all databaseSet in Dal.config
     @Test
     public void testDalIgnitePoolPropertiesIsNullWhenDataSetIsNull() throws Exception {
+        DataSourceConfigureManager.getInstance().setPoolPropertiesProvider(new PoolPropertiesProviderImpl());
         String path = DaoInitializationTest.class.getClassLoader().getResource("Dal.config.ignite").getPath();
         DalClientFactory.shutdownFactory();
         DalClientFactory.initClientFactory(path);

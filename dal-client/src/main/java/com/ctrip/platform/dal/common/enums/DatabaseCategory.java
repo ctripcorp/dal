@@ -158,6 +158,16 @@ public enum DatabaseCategory {
     public static final String MYSQL_PROVIDER = "mySqlProvider";
     public static final String ORACLE_PROVIDER = "oracleProvider";
 
+    public static final String NORMAL_MYSQL_JDBC_URL_PREFIX = "jdbc:mysql";
+    public static final String LOADBALANCE_MYSQL_JDBC_URL_PREFIX = "jdbc:mysql:loadbalance";
+    public static final String REPLICATION_MYSQL_JDBC_URL_PREFIX = "jdbc:mysql:replication";
+    public static final String X_MYSQL_JDBC_URL_PREFIX = "mysqlx";
+
+    public static final String SQLSERVER_JDBC_URL_PREFIX_OLD = "jdbc:sqlserver";
+    public static final String SQLSERVER_JDBC_URL_PREFIX_NEW = "jdbc:microsoft:sqlserver";
+
+    public static final String ORACLE_JDBC_URL_PREFIX = "jdbc:oracle";
+
     public static final int SQL_SERVER_TYPE_TVP = -1000;
 
     public static DatabaseCategory matchWith(String provider) {
@@ -187,11 +197,26 @@ public enum DatabaseCategory {
         throw new RuntimeException("category unrecognized");
     }
 
-    public static boolean isMySql(String connectionUrl) {
-        return StringUtils.isNotBlank(connectionUrl) && (connectionUrl.startsWith(MySqlUrlTemplate.NORMAL_JDBC_URL_PREFIX.getUrlPrefix()) ||
-                connectionUrl.startsWith(MySqlUrlTemplate.LOADBALANCE_JDBC_URL_PREFIX.getUrlPrefix()) ||
-                connectionUrl.startsWith(MySqlUrlTemplate.REPLICATION_JDBC_URL_PREFIX.getUrlPrefix()) ||
-                connectionUrl.startsWith(MySqlUrlTemplate.X_JDBC_URL_PREFIX.getUrlPrefix()));
+    public static DatabaseCategory matchWithConnectionUrl(String connectionUrl) {
+        if (StringUtils.isEmpty(connectionUrl)) {
+            throw new RuntimeException("connection url not be null");
+        }
+        if (connectionUrl.startsWith(NORMAL_MYSQL_JDBC_URL_PREFIX) ||
+                connectionUrl.startsWith(LOADBALANCE_MYSQL_JDBC_URL_PREFIX) ||
+                connectionUrl.startsWith(REPLICATION_MYSQL_JDBC_URL_PREFIX) ||
+                connectionUrl.startsWith(X_MYSQL_JDBC_URL_PREFIX)) {
+            return DatabaseCategory.MySql;
+        }
+        else if (connectionUrl.startsWith(SQLSERVER_JDBC_URL_PREFIX_OLD) ||
+        connectionUrl.startsWith(SQLSERVER_JDBC_URL_PREFIX_NEW)) {
+            return DatabaseCategory.SqlServer;
+        }
+        else if (connectionUrl.startsWith(ORACLE_JDBC_URL_PREFIX)) {
+            return DatabaseCategory.Oracle;
+        }
+        else {
+            throw new RuntimeException("connection url unrecognized");
+        }
     }
 
     public Set<Integer> getDefaultRetriableErrorCodes() {

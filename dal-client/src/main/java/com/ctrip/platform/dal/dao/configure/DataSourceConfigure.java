@@ -1,10 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import com.ctrip.platform.dal.common.enums.MySqlUrlTemplate;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 
@@ -293,11 +291,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public DatabaseCategory getDatabaseCategory() {
-        if (DatabaseCategory.isMySql(getConnectionUrl())) {
-            return DatabaseCategory.MySql;
-        }
-
-        return DatabaseCategory.SqlServer;
+        return DatabaseCategory.matchWithConnectionUrl(getConnectionUrl());
     }
 
     // Rule: username concat password,and then take 8 characters of md5 code from beginning

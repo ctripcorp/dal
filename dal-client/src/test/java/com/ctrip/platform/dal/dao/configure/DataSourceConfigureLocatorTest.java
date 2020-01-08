@@ -140,6 +140,9 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
                 "address=(type=master)(protocol=tcp)(host=1.2.3.4)(port=12345)/testDB";
         String normalUrl = "jdbc:mysql://host1:33060/sakila";
         String sqlserverUrl = "jdbc:sqlserver://localhost:1433; DatabaseName=test";
+        String oracleUrl = "jdbc:oracle:thin:@//host:port/service_name";
+        String nonstandardUrl = "jdbc:unKnow://";
+        String nullUrl = "";
         Properties properties = new Properties();
         properties.setProperty("connectionUrl", replicationUrl);
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure("test", properties);
@@ -148,6 +151,22 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
         Assert.assertEquals(DatabaseCategory.MySql, dataSourceConfigure.getDatabaseCategory());
         properties.setProperty("connectionUrl", sqlserverUrl);
         Assert.assertEquals(DatabaseCategory.SqlServer, dataSourceConfigure.getDatabaseCategory());
+        properties.setProperty("connectionUrl", oracleUrl);
+        Assert.assertEquals(DatabaseCategory.Oracle, dataSourceConfigure.getDatabaseCategory());
+        properties.setProperty("connectionUrl", nonstandardUrl);
+        try {
+            dataSourceConfigure.getDatabaseCategory();
+            Assert.fail();
+        } catch (RuntimeException e) {
+
+        }
+        properties.setProperty("connectionUrl", nullUrl);
+        try {
+            dataSourceConfigure.getDatabaseCategory();
+            Assert.fail();
+        } catch (RuntimeException e) {
+
+        }
     }
 
     private Properties getProperties() {

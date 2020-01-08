@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import org.junit.Assert;
 import org.junit.Test;
@@ -130,6 +131,23 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
         Assert.assertEquals(p.getProperty(MINEVICTABLEIDLETIMEMILLIS), p2.getProperty(MINEVICTABLEIDLETIMEMILLIS));
         Assert.assertEquals(p.getProperty(CONNECTIONPROPERTIES), p2.getProperty(CONNECTIONPROPERTIES));
         Assert.assertEquals(p.getProperty(JDBC_INTERCEPTORS), p2.getProperty(JDBC_INTERCEPTORS));
+    }
+
+    @Test
+    public void testConfirmMySqlOrSqlServerByConnectionUrl() {
+        String replicationUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944)," +
+                "address=(type=master)(protocol=tcp)(host=10.25.91.203)(port=55944),address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944)," +
+                "address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944)/fxqconfigtestdb";
+        String normalUrl = "jdbc:mysql://host1:33060/sakila";
+        String sqlserverUrl = "jdbc:sqlserver://localhost:1433; DatabaseName=test";
+        Properties properties = new Properties();
+        properties.setProperty("connectionUrl", replicationUrl);
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure("test", properties);
+        Assert.assertEquals(DatabaseCategory.MySql, dataSourceConfigure.getDatabaseCategory());
+        properties.setProperty("connectionUrl", normalUrl);
+        Assert.assertEquals(DatabaseCategory.MySql, dataSourceConfigure.getDatabaseCategory());
+        properties.setProperty("connectionUrl", sqlserverUrl);
+        Assert.assertEquals(DatabaseCategory.SqlServer, dataSourceConfigure.getDatabaseCategory());
     }
 
     private Properties getProperties() {

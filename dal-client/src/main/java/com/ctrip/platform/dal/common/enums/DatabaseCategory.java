@@ -16,6 +16,7 @@ import com.ctrip.platform.dal.exceptions.DalParameterException;
 import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.mysql.jdbc.exceptions.MySQLTimeoutException;
+import org.apache.commons.lang.StringUtils;
 
 public enum DatabaseCategory {
     MySql("%s=IFNULL(?,%s) ", "CURRENT_TIMESTAMP", new int[] {1043, 1159, 1161},
@@ -184,6 +185,13 @@ public enum DatabaseCategory {
         else if (category == com.ctrip.framework.dal.cluster.client.database.DatabaseCategory.SQLSERVER)
             return DatabaseCategory.SqlServer;
         throw new RuntimeException("category unrecognized");
+    }
+
+    public static boolean isMySql(String connectionUrl) {
+        return StringUtils.isNotBlank(connectionUrl) && (connectionUrl.startsWith(MySqlUrlTemplate.NORMAL_JDBC_URL_PREFIX.getUrlPrefix()) ||
+                connectionUrl.startsWith(MySqlUrlTemplate.LOADBALANCE_JDBC_URL_PREFIX.getUrlPrefix()) ||
+                connectionUrl.startsWith(MySqlUrlTemplate.REPLICATION_JDBC_URL_PREFIX.getUrlPrefix()) ||
+                connectionUrl.startsWith(MySqlUrlTemplate.X_JDBC_URL_PREFIX.getUrlPrefix()));
     }
 
     public Set<Integer> getDefaultRetriableErrorCodes() {

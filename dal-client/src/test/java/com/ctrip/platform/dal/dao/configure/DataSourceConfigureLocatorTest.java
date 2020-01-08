@@ -135,9 +135,9 @@ public class DataSourceConfigureLocatorTest implements DataSourceConfigureConsta
 
     @Test
     public void testConfirmMySqlOrSqlServerByConnectionUrl() {
-        String replicationUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944)," +
-                "address=(type=master)(protocol=tcp)(host=10.25.91.203)(port=55944),address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944)," +
-                "address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944)/fxqconfigtestdb";
+        String replicationUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=1.4.5.6)(port=12345)," +
+                "address=(type=master)(protocol=tcp)(host=1.1.1.2)(port=12345),address=(type=master)(protocol=tcp)(host=1.1.2.3)(port=12345)," +
+                "address=(type=master)(protocol=tcp)(host=1.2.3.4)(port=12345)/testDB";
         String normalUrl = "jdbc:mysql://host1:33060/sakila";
         String sqlserverUrl = "jdbc:sqlserver://localhost:1433; DatabaseName=test";
         Properties properties = new Properties();

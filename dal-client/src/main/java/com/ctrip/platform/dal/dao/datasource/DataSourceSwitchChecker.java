@@ -33,9 +33,12 @@ public class DataSourceSwitchChecker {
             executeSql = MYSQL_SQL;
             columnIndex = 2;
         }
-        else {
+        else if (databaseCategory.equals(DatabaseCategory.SqlServer)) {
             executeSql = SQLSERVER_SQL;
             columnIndex = 1;
+        }
+        else {
+            return null;
         }
         Statement stmt = null;
         ResultSet rs = null;

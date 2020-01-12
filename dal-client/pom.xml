@@ -15,7 +15,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <dal-cluster-client.version>${project.version}</dal-cluster-client.version>
+        <dal-cluster-client.version>2.0.8</dal-cluster-client.version>
         <javax-persistence-version>1.0.2</javax-persistence-version>
         <commons-codec-version>1.8</commons-codec-version>
         <sqljdbc-version>6.4.0.jre7.ctrip</sqljdbc-version>

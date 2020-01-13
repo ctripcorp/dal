@@ -2,6 +2,7 @@ package noshardtest;
 
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
+import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
@@ -56,4 +57,31 @@ public class QmqApiTest {
       }
     }, new DalHints().inShard(someShardId));
   }
+
+  @Test
+  public void testDalMessage() throws Exception {
+    String logicDb = "SimpleShardByDBOnMysql";
+    String shard = "0";
+    final DalClient dalClient = DalClientFactory.getClient(logicDb);
+    final DalHints globalHints = new DalHints();
+
+    dalClient.execute(new DalCommand() {
+      @Override
+      public boolean execute(DalClient client) throws SQLException {
+        if (DalTransactionManager.getCurrentShardId() != null)
+          globalHints.inShard(DalTransactionManager.getCurrentShardId());
+        DbMeta dbMeta = DalTransactionManager.getCurrentDbMeta();
+        if (dbMeta != null && dbMeta.getDataBaseKeyName() != null)
+          globalHints.inDatabase(dbMeta.getDataBaseKeyName());
+        return true;
+      }
+    }, new DalHints().inShard(shard));
+
+    String sql = "update person set name = ? where age = ?";
+    StatementParameters parameters = new StatementParameters();
+    parameters.set(1, "newName");
+    parameters.set(2, 18);
+    dalClient.update(sql, parameters, globalHints);
+  }
+
 }

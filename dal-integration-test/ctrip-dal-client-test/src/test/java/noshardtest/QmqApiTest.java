@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -44,7 +45,11 @@ public class QmqApiTest {
       public boolean execute(DalClient client) throws SQLException {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(someLogicDBName, DalTransactionManager.getLogicDbName());
-        assertTrue("DalService2DB_W".equalsIgnoreCase(DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()));
+//        assertEquals("DalService2DB_W", DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName());
+
+        // qmq-dal may call DalHints.inDatabase method using DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()
+        assertTrue(DalStatusManager.containsDataSourceStatus(DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()));
+
         assertEquals(someShardId, DalTransactionManager.getCurrentShardId());
 
         return true;

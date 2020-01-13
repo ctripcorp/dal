@@ -45,7 +45,7 @@ public class QmqApiTest {
       public boolean execute(DalClient client) throws SQLException {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(someLogicDBName, DalTransactionManager.getLogicDbName());
-//        assertEquals("DalService2DB_W", DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName());
+        assertEquals("DalService2DB_W", DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName());
 
         // qmq-dal may call DalHints.inDatabase method using DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()
         assertTrue(DalStatusManager.containsDataSourceStatus(DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()));

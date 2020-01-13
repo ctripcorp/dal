@@ -94,7 +94,6 @@ public class DalStatusManager {
 
 	private static void registerDataSources(Set<String> datasourceNames) throws Exception {
 		for(String name: datasourceNames) {
-			name = toLowerCase(name);
 			DataSourceStatus status = new DataSourceStatus(name);
 			registerMBean(status, new ObjectName(DATASOURCE_CONFIG_DOMAIN_PREFIX, TYPE, name));
 			dataSources.put(name, status);
@@ -147,7 +146,6 @@ public class DalStatusManager {
 	}
 	
 	public static DataSourceStatus getDataSourceStatus(String dbName) {
-		dbName = toLowerCase(dbName);
 		DataSourceStatus status = dataSources.get(dbName);
 		if (status == null) {
 			synchronized (dataSources) {
@@ -169,11 +167,7 @@ public class DalStatusManager {
 	}
 	
 	public static boolean containsDataSourceStatus(String dbName) {
-		dbName = toLowerCase(dbName);
 		return dataSources.containsKey(dbName);
 	}
 
-	private static String toLowerCase(String name) {
-		return name != null ? name.toLowerCase() : null;
-	}
 }

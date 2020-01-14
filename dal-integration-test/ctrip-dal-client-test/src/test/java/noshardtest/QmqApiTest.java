@@ -47,10 +47,6 @@ public class QmqApiTest {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(someLogicDBName, DalTransactionManager.getLogicDbName());
         assertEquals("DalService2DB_W", DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName());
-
-        // qmq-dal may call DalHints.inDatabase method using DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()
-        assertTrue(DalStatusManager.containsDataSourceStatus(DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()));
-
         assertEquals(someShardId, DalTransactionManager.getCurrentShardId());
 
         return true;
@@ -60,8 +56,11 @@ public class QmqApiTest {
 
   @Test
   public void testDalMessage() throws Exception {
-    String logicDb = "SimpleShardByDBOnMysql";
-    String shard = "0";
+    testDalMessage("SimpleShardByDBOnMysql", "0");
+    testDalMessage("dal_sharding_cluster", "1");
+  }
+
+  private void testDalMessage(String logicDb, String shard) throws Exception {
     final DalClient dalClient = DalClientFactory.getClient(logicDb);
     final DalHints globalHints = new DalHints();
 

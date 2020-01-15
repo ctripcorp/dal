@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
+import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionHelper;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -38,6 +39,9 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
     private DataSourceIdentity id;
 
+    private volatile long firstErrorTime = 0;
+    private volatile long lastReportErrorTime = 0;
+
     private static int switchVersion = 0;
 
     private static final int INIT_DELAY = 0;
@@ -52,6 +56,8 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private static final String SWITCH_VERSION = "SwitchVersion:%s";
     private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
     private static final String THREAD_NAME = "DataSourceRefresher";
+    public static final int PERMIT_ERROR_DURATION_TIME = 60; //second
+    public static final int REPORT_ERROR_FREQUENCY = 30; //second
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
         this.id = new DataSourceName(name);
@@ -119,6 +125,28 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 }
             }
         }, INIT_DELAY, TimeUnit.MILLISECONDS);
+    }
+
+    public void handleException(SQLException e) throws SQLException {
+        if (e != null) {
+            long nowTime = System.currentTimeMillis();
+            if (firstErrorTime == 0) {
+                firstErrorTime = nowTime;
+            }
+            else {
+                long duration = nowTime - firstErrorTime;
+                if (duration > PERMIT_ERROR_DURATION_TIME * 1000) {
+                    if (lastReportErrorTime == 0 || nowTime - lastReportErrorTime > REPORT_ERROR_FREQUENCY * 1000) {
+                        LOGGER.reportError(getSingleDataSource().getName());
+                    }
+                }
+            }
+            throw new SQLException(e);
+        }
+        else {
+            firstErrorTime = 0;
+            lastReportErrorTime = 0;
+        }
     }
 
     @Override
@@ -241,7 +269,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 LOGGER.warn(e);
             }
             if (dBServerReference.compareAndSet(null, currentServer)) {
-                return connection;
+                return new DalConnection(connection, this);
             }
             int currentSwitchVersion;
             synchronized (this) {
@@ -287,7 +315,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 }
             }
         }
-        return connection;
+        return new DalConnection(connection, this);
     }
 
     @Override

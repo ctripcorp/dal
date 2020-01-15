@@ -86,4 +86,12 @@ public abstract class AbstractLogger implements ILogger {
         }
     }
 
+    @Override
+    public void reportError(String keyName) {
+        try {
+            LOGGER.info(keyName + "switch fail!");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
 }

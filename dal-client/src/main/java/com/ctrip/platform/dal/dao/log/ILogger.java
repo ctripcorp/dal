@@ -22,4 +22,6 @@ public interface ILogger {
 
     void error(final String msg, final Throwable e);
 
+    void reportError(final String keyName);
+
 }

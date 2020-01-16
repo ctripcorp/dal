@@ -355,6 +355,7 @@ public class ForceSwitchableDataSourceTest {
         Thread.sleep(3000);
         SwitchableDataSourceStatus status2 = dataSource.getStatus();
         Assert.assertFalse(status2.isForceSwitched());
-        Assert.assertNotEquals("127.0.0.1", status2.getHostName());
+        String url = dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl();
+        Assert.assertEquals("jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin", url);
     }
 }

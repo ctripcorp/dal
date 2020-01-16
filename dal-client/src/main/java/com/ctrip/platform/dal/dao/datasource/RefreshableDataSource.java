@@ -37,7 +37,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
 
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
     private DataSourceIdentity id;
-    private long totalSwitchListenerTimeout = 0;
+    private long switchListenerTimeout = 0;
 
     private static int switchVersion = 0;
 
@@ -48,10 +48,11 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private static final int CORE_POOL_SIZE = 5;
     private static final int MAX_POOL_SIZE = 10;
     private static final long KEEP_ALIVE_TIME = 1L;
-    private static final long TOTAL_SWITCH_LISTENER_TIME_OUT = 10; //ms
-    private static final long MAX_TOTAL_SWITCH_LISTENER_TIME_OUT = 500; //ms
+    private static final long DEFAULT_SWITCH_LISTENER_TIME_OUT = 10; //ms
+    private static final long MAX_SWITCH_LISTENER_TIME_OUT = 500; //ms
     private static final long FIXED_DELAY = 60;//second
     private static final String SWITCH_VERSION = "SwitchVersion:%s";
+    private static final String LISTENER_TIME_OUT = "SwitchListenerTimeout:%s";
     private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
     private static final String THREAD_NAME = "DataSourceRefresher";
 
@@ -166,19 +167,19 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         scheduledCheckDataSourceSwitch();
     }
 
-    public void setTotalDataSourceSwitchListenerTimeout(long totalSwitchListenerTimeout) {
-        this.totalSwitchListenerTimeout = totalSwitchListenerTimeout;
+    public void setDataSourceSwitchListenerTimeout(long switchListenerTimeout) {
+        this.switchListenerTimeout = switchListenerTimeout;
     }
 
-    private long getTotalSwitchListenerTimeout() {
-        if (totalSwitchListenerTimeout == 0) {
-            return TOTAL_SWITCH_LISTENER_TIME_OUT;
+    public long getSwitchListenerTimeout() {
+        if (switchListenerTimeout <= 0) {
+            return DEFAULT_SWITCH_LISTENER_TIME_OUT;
         }
-        else if (totalSwitchListenerTimeout > 500) {
-            return MAX_TOTAL_SWITCH_LISTENER_TIME_OUT;
+        else if (switchListenerTimeout > 500) {
+            return MAX_SWITCH_LISTENER_TIME_OUT;
         }
         else {
-            return totalSwitchListenerTimeout;
+            return switchListenerTimeout;
         }
     }
 
@@ -223,7 +224,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         return service;
     }
 
-    private void executeDataSourceListener() {
+    private void executeDataSourceListener(int switchVersion) {
         final String keyName = getSingleDataSource().getName();
         final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
         for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
@@ -242,7 +243,10 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
             }
         }
         try {
-            latch.await(getTotalSwitchListenerTimeout(), TimeUnit.MILLISECONDS);
+            boolean isExecuteEnd = latch.await(getSwitchListenerTimeout(), TimeUnit.MILLISECONDS);
+            if (!isExecuteEnd) {
+                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(LISTENER_TIME_OUT, switchVersion), "timeout:" + getSwitchListenerTimeout());
+            }
         } catch (InterruptedException e) {
             LOGGER.error(String.format("timeout,execute datasource switch listener is interrupted for %s", keyName), e);
         }
@@ -273,7 +277,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                             @Override
                             public void run() {
                                 try {
-                                    executeDataSourceListener();
+                                    executeDataSourceListener(tempSwitchVersion);
                                 } catch (Throwable e) {
                                     //ignore
                                 }
@@ -299,7 +303,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 }
                 if (blockThreads.isNeedBlock()) {
                     long startTime = System.currentTimeMillis();
-                    LockSupport.parkNanos(getTotalSwitchListenerTimeout() * 1000000);
+                    LockSupport.parkNanos(getSwitchListenerTimeout() * 1000000);
                     LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(BLOCK_CONNECTION, ConnectionHelper.obtainUrl(connection)),
                             String.format(SWITCH_VERSION, currentSwitchVersion), startTime);
                 }

@@ -334,7 +334,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
             properties.setProperty(CONNECTION_URL, connectionUrl);
             HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
             if (StringUtils.isEmpty(hostAndPort.getHost())) {
-                properties.setProperty(HOST_NAME, "UnKnow");
+                properties.setProperty(HOST_NAME, "UnKnown");
             }
             else {
                 properties.setProperty(HOST_NAME, hostAndPort.getHost());

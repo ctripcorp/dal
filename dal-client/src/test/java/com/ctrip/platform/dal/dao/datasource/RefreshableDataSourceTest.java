@@ -425,18 +425,18 @@ public class RefreshableDataSourceTest {
     @Test
     public void testSetExecuteSwitchListenerTimeout() throws Exception {
         Properties newProperties = new Properties();
-        newProperties.setProperty(USER_NAME, "f_xie");
+        newProperties.setProperty(USER_NAME, "root");
         newProperties.setProperty(PASSWORD, "123456");
-        newProperties.setProperty(CONNECTION_URL, "jdbc:mysql://127.0.0.1:3306/kevin?useUnicode=true&characterEncoding=UTF-8;");
+        newProperties.setProperty(CONNECTION_URL, "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8;");
         newProperties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
         DataSourceConfigure dataSourceConfigure2 = new DataSourceConfigure("normal", newProperties);
 
-        Properties oldProperties = new Properties();
-        oldProperties.setProperty(USER_NAME, "f_xie");
-        oldProperties.setProperty(PASSWORD, "123456");
-        oldProperties.setProperty(CONNECTION_URL, "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin");
-        oldProperties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
-        DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("normal", oldProperties);
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("test2", p2);
 
         final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", dataSourceConfigure1);
         final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
@@ -459,22 +459,25 @@ public class RefreshableDataSourceTest {
         final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent1 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure1, dataSourceConfigure2);
 
         listenerOne.setSleep(20);
-        listenerTwo.setSleep(0);
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(10);
-                    refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
-                } catch (Exception e) {
-                    //ignore
-                }
-            }
-        }).start();
+        listenerTwo.setSleep(20);
+        listenerOne.resetEnd();
+        listenerTwo.resetEnd();
+        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
+        Thread.sleep(3000);
         refreshableDataSource.getConnection();
         Assert.assertFalse(listenerOne.getEnd());
-        Assert.assertFalse(listenerOne.getEnd());
+        Assert.assertFalse(listenerTwo.getEnd());
+
+        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent2 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
+
+        Thread.sleep(5);
+        listenerOne.setSleep(20);
+        listenerTwo.setSleep(150);
+        listenerOne.resetEnd();
+        listenerTwo.resetEnd();
+        refreshableDataSource.setDataSourceSwitchListenerTimeout(100);
+        Assert.assertEquals(100, refreshableDataSource.getSwitchListenerTimeout());
+
     }
 
     @Test

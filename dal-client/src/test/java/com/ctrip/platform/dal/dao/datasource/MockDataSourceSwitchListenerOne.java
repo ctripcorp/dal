@@ -31,4 +31,8 @@ public class MockDataSourceSwitchListenerOne implements DataSourceSwitchListener
     public boolean getEnd() {
         return isEnd;
     }
+
+    public void resetEnd() {
+        isEnd = false;
+    }
 }

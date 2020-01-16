@@ -4,9 +4,11 @@ import com.ctrip.platform.dal.dao.configure.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.*;
@@ -314,5 +316,45 @@ public class ForceSwitchableDataSourceTest {
         Thread.sleep(3000);
         SwitchableDataSourceStatus status6 = dataSource.getStatus();
         assertFalse(status6.isForceSwitched());
+    }
+
+    @Test
+    public void testMGRJDBCUrlParser() {
+        String mgr_url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin";
+        String url = ConnectionStringParser.replaceHostAndPort(mgr_url, "127.0.0.1", "12345");
+        Assert.assertEquals("jdbc:mysql://127.0.0.1:12345/kevin", url);
+    }
+
+    @Test
+    public void MGRSwitchToNormal() throws Exception {
+        IDataSourceConfigureProvider provider = new MockMgrDataSourceConfigureProvider();
+        ForceSwitchableDataSource dataSource = new ForceSwitchableDataSource(provider);
+
+        //Thread.sleep(3000);
+
+//        SwitchableDataSourceStatus status = dataSource.getStatus();
+//        Assert.assertFalse(status.isForceSwitched());
+//        Assert.assertNull(status.getHostName());
+//        Assert.assertNull(status.getPort());
+
+        Properties newProperties = new Properties();
+        newProperties.setProperty(USER_NAME, "f_xie");
+        newProperties.setProperty(PASSWORD, "123456");
+        newProperties.setProperty(CONNECTION_URL, "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8;");
+        newProperties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure("normal", newProperties);
+        dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure), "127.0.0.1", 3306);
+
+        Thread.sleep(3000);
+        SwitchableDataSourceStatus status1 = dataSource.getStatus();
+        Assert.assertTrue(status1.isForceSwitched());
+        Assert.assertEquals("127.0.0.1", status1.getHostName());
+        Assert.assertEquals(3306, status1.getPort().intValue());
+
+        dataSource.restore();
+        Thread.sleep(3000);
+        SwitchableDataSourceStatus status2 = dataSource.getStatus();
+        Assert.assertFalse(status2.isForceSwitched());
+        Assert.assertNotEquals("127.0.0.1", status2.getHostName());
     }
 }

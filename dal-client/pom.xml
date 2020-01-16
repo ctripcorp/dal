@@ -277,7 +277,7 @@
                         <id>attach-sources</id>
                         <phase>install</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>

@@ -2,8 +2,10 @@ package noshardtest;
 
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
+import com.ctrip.platform.dal.dao.client.DbMeta;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -44,11 +46,41 @@ public class QmqApiTest {
       public boolean execute(DalClient client) throws SQLException {
         assertTrue(DalTransactionManager.isInTransaction());
         assertEquals(someLogicDBName, DalTransactionManager.getLogicDbName());
-        assertTrue("DalService2DB_W".equalsIgnoreCase(DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName()));
+        assertEquals("DalService2DB_W", DalTransactionManager.getCurrentDbMeta().getDataBaseKeyName());
         assertEquals(someShardId, DalTransactionManager.getCurrentShardId());
 
         return true;
       }
     }, new DalHints().inShard(someShardId));
   }
+
+  @Test
+  public void testDalMessage() throws Exception {
+    testDalMessage("SimpleShardByDBOnMysql", "0");
+    testDalMessage("dal_sharding_cluster", "1");
+  }
+
+  private void testDalMessage(String logicDb, String shard) throws Exception {
+    final DalClient dalClient = DalClientFactory.getClient(logicDb);
+    final DalHints globalHints = new DalHints();
+
+    dalClient.execute(new DalCommand() {
+      @Override
+      public boolean execute(DalClient client) throws SQLException {
+        if (DalTransactionManager.getCurrentShardId() != null)
+          globalHints.inShard(DalTransactionManager.getCurrentShardId());
+        DbMeta dbMeta = DalTransactionManager.getCurrentDbMeta();
+        if (dbMeta != null && dbMeta.getDataBaseKeyName() != null)
+          globalHints.inDatabase(dbMeta.getDataBaseKeyName());
+        return true;
+      }
+    }, new DalHints().inShard(shard));
+
+    String sql = "update person set name = ? where age = ?";
+    StatementParameters parameters = new StatementParameters();
+    parameters.set(1, "newName");
+    parameters.set(2, 18);
+    dalClient.update(sql, parameters, globalHints);
+  }
+
 }

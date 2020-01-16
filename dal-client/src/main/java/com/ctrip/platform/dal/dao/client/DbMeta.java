@@ -35,15 +35,23 @@ public class DbMeta {
         hostRegxPattern = Pattern.compile(regEx);
     }
 
-    private DbMeta(Connection conn, DataSourceIdentity id, DatabaseCategory dbCategory) throws SQLException {
-        dataBaseKeyName = id.getId();
-        this.dbCategory = dbCategory;
+    private DbMeta(Connection conn, String dataBaseKeyName, DatabaseCategory dbCategory) throws SQLException {
+        this.dataBaseKeyName = dataBaseKeyName;
+        init(conn, new DataSourceName(dataBaseKeyName), dbCategory);
+    }
 
+    private DbMeta(Connection conn, DataSourceIdentity id, DatabaseCategory dbCategory) throws SQLException {
+        this.dataBaseKeyName = id.getId();
+        init(conn, id, dbCategory);
+    }
+
+    private void init(Connection conn, DataSourceIdentity id, DatabaseCategory dbCategory) {
+        this.dbCategory = dbCategory;
         try {
             DatabaseMetaData meta = conn.getMetaData();
             databaseName = conn.getCatalog();
             url = meta.getURL();
-            simplifiedUrl=LoggerHelper.getSimplifiedDBUrl(url);
+            simplifiedUrl = LoggerHelper.getSimplifiedDBUrl(url);
             host = parseHostFromDBURL(url);
             DataSourceConfigure configure = configureLocator.getDataSourceConfigure(id);
             if (configure != null) {
@@ -64,7 +72,7 @@ public class DbMeta {
 
     public static DbMeta createIfAbsent(String realDbName, DatabaseCategory dbCategory, Connection conn)
             throws SQLException {
-        return new DbMeta(conn, new DataSourceName(realDbName), dbCategory);
+        return new DbMeta(conn, realDbName, dbCategory);
     }
 
     public static DbMeta createIfAbsent(DataSourceIdentity id, DatabaseCategory dbCategory, Connection conn)

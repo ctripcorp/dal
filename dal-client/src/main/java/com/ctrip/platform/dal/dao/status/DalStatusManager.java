@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,4 +169,5 @@ public class DalStatusManager {
 	public static boolean containsDataSourceStatus(String dbName) {
 		return dataSources.containsKey(dbName);
 	}
+
 }

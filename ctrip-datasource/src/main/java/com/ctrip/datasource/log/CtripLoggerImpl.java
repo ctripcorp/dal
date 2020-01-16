@@ -3,8 +3,12 @@ package com.ctrip.datasource.log;
 import com.ctrip.datasource.util.CatUtil;
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
+import com.ctrip.framework.clogging.agent.metrics.IMetric;
+import com.ctrip.framework.clogging.agent.metrics.MetricManager;
+import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.log.AbstractLogger;
 import com.ctrip.platform.dal.dao.log.Callback;
+import com.ctrip.platform.dal.dao.log.SQLErrorInfo;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -12,6 +16,7 @@ import com.dianping.cat.message.Transaction;
 public class CtripLoggerImpl extends AbstractLogger {
     public static final String TITLE = "Dal Fx";
     private static final ILog logger = LogManager.getLogger(CtripLoggerImpl.class);
+    private static IMetric metric = MetricManager.getMetricer();
 
     @Override
     public void logEvent(String type, String name, String message) {
@@ -147,4 +152,10 @@ public class CtripLoggerImpl extends AbstractLogger {
         }
     }
 
+    @Override
+    public void reportError(String keyName) {
+        String version = Version.getVersion();
+        SQLErrorInfo errorInfo = new SQLErrorInfo(version, keyName);
+        metric.log(SQLErrorInfo.ERROR, 1, errorInfo.toTag());
+    }
 }

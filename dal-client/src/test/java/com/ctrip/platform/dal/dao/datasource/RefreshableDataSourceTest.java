@@ -17,6 +17,9 @@ import java.util.Properties;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.*;
+import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.DRIVER_CLASS_NAME;
+
 public class RefreshableDataSourceTest {
     private ExecutorService executor = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory("RefreshableDataSourceTest"));
@@ -417,6 +420,67 @@ public class RefreshableDataSourceTest {
             });
         }
         latch.await();
+    }
+
+    @Test
+    public void testSetExecuteSwitchListenerTimeout() throws Exception {
+//        Properties newProperties = new Properties();
+//        newProperties.setProperty(USER_NAME, "root");
+//        newProperties.setProperty(PASSWORD, "123456");
+//        newProperties.setProperty(CONNECTION_URL, "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8;");
+//        newProperties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+//        DataSourceConfigure dataSourceConfigure2 = new DataSourceConfigure("normal", newProperties);
+
+        Properties p2 = new Properties();
+        p2.setProperty("userName", "root");
+        p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("test2", p2);
+
+        final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", dataSourceConfigure1);
+//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
+//        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
+//        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
+//        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
+//        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
+//
+//        listenerOne.setSleep(4);
+//        listenerTwo.setSleep(5);
+
+//        refreshableDataSource.getConnection();
+//        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
+//        Thread.sleep(3000);
+
+//        refreshableDataSource.getConnection();
+//        Assert.assertTrue(listenerOne.getEnd());
+//        Assert.assertTrue(listenerTwo.getEnd());
+
+
+//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent1 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure1, dataSourceConfigure2);
+//
+//        listenerOne.setSleep(20);
+//        listenerTwo.setSleep(20);
+//        listenerOne.resetEnd();
+//        listenerTwo.resetEnd();
+//        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
+//        Thread.sleep(3000);
+//        refreshableDataSource.getConnection();
+//        Assert.assertFalse(listenerOne.getEnd());
+//        Assert.assertFalse(listenerTwo.getEnd());
+
+//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent2 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
+
+//        Thread.sleep(5);
+//        listenerOne.setSleep(20);
+//        listenerTwo.setSleep(150);
+//        listenerOne.resetEnd();
+//        listenerTwo.resetEnd();
+        Assert.assertEquals(10, refreshableDataSource.getSwitchListenerTimeout());
+        refreshableDataSource.setDataSourceSwitchListenerTimeout(100);
+        Assert.assertEquals(100, refreshableDataSource.getSwitchListenerTimeout());
+        refreshableDataSource.setDataSourceSwitchListenerTimeout(600);
+        Assert.assertEquals(500, refreshableDataSource.getSwitchListenerTimeout());
     }
 
     @Test

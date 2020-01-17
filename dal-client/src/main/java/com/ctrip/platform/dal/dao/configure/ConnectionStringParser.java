@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.apache.commons.lang.StringUtils;
 
@@ -30,6 +31,7 @@ public class ConnectionStringParser {
     private static final String PORT_SPLIT = ",";
     private static final String MYSQL_URL_PREFIX="jdbc:mysql://";
     private static final String SQLSERVER_URL_PREFIX="jdbc:sqlserver://";
+    private static final String REPLICATION_MYSQL_URL_PREFIX = "jdbc:mysql:replication://";
     public static final String DBURL_SQLSERVER = SQLSERVER_URL_PREFIX+"%s:%s;DatabaseName=%s";
     public static final String DBURL_MYSQL = MYSQL_URL_PREFIX+"%s:%s/%s?useUnicode=true&characterEncoding=%s";
     public static final String DEFAULT_ENCODING = "UTF-8";
@@ -41,6 +43,7 @@ public class ConnectionStringParser {
     private static final Pattern ipPortPatternInSQLServerURL = Pattern.compile("(jdbc:sqlserver://)([\\S:]+):([^;]+)");
 
     private static final Pattern urlReplacePatternInMySQLURL = Pattern.compile("jdbc:mysql://([^/]+)");
+    private static final Pattern urlReplacePatternInMySQLMgrURL = Pattern.compile("jdbc:mysql:replication://([^/]+)");
     private static final Pattern urlReplacePatternInSQLServerURL = Pattern.compile("jdbc:sqlserver://([^;]+)");
 
     /**
@@ -133,7 +136,14 @@ public class ConnectionStringParser {
                 url = matcher.replaceFirst(String.format("jdbc:mysql://%s:%s", newHost, newPort));
         }
 
-        if (url.toLowerCase().startsWith(SQLSERVER_URL_PREFIX)) {
+        else if (url.toLowerCase().startsWith(REPLICATION_MYSQL_URL_PREFIX)) {
+            matcher = urlReplacePatternInMySQLMgrURL.matcher(url);
+            if (matcher.find()) {
+                url = matcher.replaceFirst(String.format("jdbc:mysql://%s:%s", newHost, newPort));
+            }
+        }
+
+        else if (url.toLowerCase().startsWith(SQLSERVER_URL_PREFIX)) {
             matcher = urlReplacePatternInSQLServerURL.matcher(url);
             if (matcher.find())
                 url = matcher.replaceFirst(String.format("jdbc:sqlserver://%s:%s", newHost, newPort));

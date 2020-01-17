@@ -424,12 +424,12 @@ public class RefreshableDataSourceTest {
 
     @Test
     public void testSetExecuteSwitchListenerTimeout() throws Exception {
-        Properties newProperties = new Properties();
-        newProperties.setProperty(USER_NAME, "root");
-        newProperties.setProperty(PASSWORD, "123456");
-        newProperties.setProperty(CONNECTION_URL, "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8;");
-        newProperties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
-        DataSourceConfigure dataSourceConfigure2 = new DataSourceConfigure("normal", newProperties);
+//        Properties newProperties = new Properties();
+//        newProperties.setProperty(USER_NAME, "root");
+//        newProperties.setProperty(PASSWORD, "123456");
+//        newProperties.setProperty(CONNECTION_URL, "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8;");
+//        newProperties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+//        DataSourceConfigure dataSourceConfigure2 = new DataSourceConfigure("normal", newProperties);
 
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
@@ -439,45 +439,48 @@ public class RefreshableDataSourceTest {
         DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("test2", p2);
 
         final RefreshableDataSource refreshableDataSource = new RefreshableDataSource("test", dataSourceConfigure1);
-        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
-        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
-        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
-        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
-        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
+//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
+//        final MockDataSourceSwitchListenerOne listenerOne = new MockDataSourceSwitchListenerOne();
+//        final MockDataSourceSwitchListenerTwo listenerTwo = new MockDataSourceSwitchListenerTwo();
+//        refreshableDataSource.addDataSourceSwitchListener(listenerOne);
+//        refreshableDataSource.addDataSourceSwitchListener(listenerTwo);
+//
+//        listenerOne.setSleep(4);
+//        listenerTwo.setSleep(5);
 
-        listenerOne.setSleep(4);
-        listenerTwo.setSleep(5);
+//        refreshableDataSource.getConnection();
+//        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
+//        Thread.sleep(3000);
 
-        refreshableDataSource.getConnection();
-        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent);
-        Thread.sleep(3000);
-        refreshableDataSource.getConnection();
-        Assert.assertTrue(listenerOne.getEnd());
-        Assert.assertTrue(listenerTwo.getEnd());
+//        refreshableDataSource.getConnection();
+//        Assert.assertTrue(listenerOne.getEnd());
+//        Assert.assertTrue(listenerTwo.getEnd());
 
 
-        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent1 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure1, dataSourceConfigure2);
+//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent1 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure1, dataSourceConfigure2);
+//
+//        listenerOne.setSleep(20);
+//        listenerTwo.setSleep(20);
+//        listenerOne.resetEnd();
+//        listenerTwo.resetEnd();
+//        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
+//        Thread.sleep(3000);
+//        refreshableDataSource.getConnection();
+//        Assert.assertFalse(listenerOne.getEnd());
+//        Assert.assertFalse(listenerTwo.getEnd());
 
-        listenerOne.setSleep(20);
-        listenerTwo.setSleep(20);
-        listenerOne.resetEnd();
-        listenerTwo.resetEnd();
-        refreshableDataSource.configChanged(dataSourceConfigureChangeEvent1);
-        Thread.sleep(3000);
-        refreshableDataSource.getConnection();
-        Assert.assertFalse(listenerOne.getEnd());
-        Assert.assertFalse(listenerTwo.getEnd());
+//        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent2 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
 
-        final DataSourceConfigureChangeEvent dataSourceConfigureChangeEvent2 = new DataSourceConfigureChangeEvent("test", dataSourceConfigure2, dataSourceConfigure1);
-
-        Thread.sleep(5);
-        listenerOne.setSleep(20);
-        listenerTwo.setSleep(150);
-        listenerOne.resetEnd();
-        listenerTwo.resetEnd();
+//        Thread.sleep(5);
+//        listenerOne.setSleep(20);
+//        listenerTwo.setSleep(150);
+//        listenerOne.resetEnd();
+//        listenerTwo.resetEnd();
+        Assert.assertEquals(10, refreshableDataSource.getSwitchListenerTimeout());
         refreshableDataSource.setDataSourceSwitchListenerTimeout(100);
         Assert.assertEquals(100, refreshableDataSource.getSwitchListenerTimeout());
-
+        refreshableDataSource.setDataSourceSwitchListenerTimeout(600);
+        Assert.assertEquals(500, refreshableDataSource.getSwitchListenerTimeout());
     }
 
     @Test

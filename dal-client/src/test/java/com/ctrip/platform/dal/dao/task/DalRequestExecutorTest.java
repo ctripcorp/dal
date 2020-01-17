@@ -39,13 +39,13 @@ public class DalRequestExecutorTest {
 		}
 
 		@Override
-		public Callable<Integer> createTask() throws SQLException {
+		public TaskCallable<Integer> createTask() throws SQLException {
 			return createInternalTask(values[0]);
 		}
 
 		@Override
-		public Map<String, Callable<Integer>> createTasks() throws SQLException {
-			Map<String, Callable<Integer>> tasks = new HashMap<>();
+		public Map<String, TaskCallable<Integer>> createTasks() throws SQLException {
+			Map<String, TaskCallable<Integer>> tasks = new HashMap<>();
 			
 			for(int i = 0; i < values.length; i++) {
 				final int k = values[i];
@@ -55,12 +55,18 @@ public class DalRequestExecutorTest {
 			return tasks;
 		}
 		
-		public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
-		    return new Callable<Integer>() {
-		        public Integer call() throws Exception {
-		            return k;
-		        }
-		    };
+		public TaskCallable<Integer> createInternalTask(final Integer k) throws SQLException {
+            return new TaskCallable<Integer>() {
+                private DalTaskContext dalTaskContext = new DefaultTaskContext();
+                @Override
+                public DalTaskContext getDalTaskContext() {
+                    return this.dalTaskContext;
+                }
+
+                public Integer call() throws Exception {
+                    return k;
+                }
+            };
 		}
 
 		@Override
@@ -100,8 +106,14 @@ public class DalRequestExecutorTest {
         
         private boolean sleep;
         
-        public Callable<Integer> createInternalTask(final Integer k) throws SQLException {
-            return new Callable<Integer>() {
+        public TaskCallable<Integer> createInternalTask(final Integer k) throws SQLException {
+            return new TaskCallable<Integer>() {
+                private DalTaskContext dalTaskContext = new DefaultTaskContext();
+                @Override
+                public DalTaskContext getDalTaskContext() {
+                    return this.dalTaskContext;
+                }
+
                 public Integer call() throws Exception {
                     all.put(Thread.currentThread().getName(), 1);
                     if(sleep)

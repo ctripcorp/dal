@@ -107,7 +107,7 @@ public class DalSqlTaskRequestTest {
 
 //		implicit in all table shards
 		testRequest.validateAndPrepare();
-		Map<String, Callable<Integer>> tasks = testRequest.createTasks();
+		Map<String, TaskCallable<Integer>> tasks = testRequest.createTasks();
 		for (Callable callable : tasks.values())
 			assertEquals(4, ((DalSqlTaskRequest.SqlTaskCallable) callable).tableShards().size());
 
@@ -194,7 +194,7 @@ public class DalSqlTaskRequestTest {
 			hints.inAllShards();
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			test.validateAndPrepare();
-			Map<String, Callable<Integer>> tasks = test.createTasks();
+			Map<String, TaskCallable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
 				i += task.call().intValue();
@@ -220,7 +220,7 @@ public class DalSqlTaskRequestTest {
 			hints.inShards(shards);
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder(), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			test.validateAndPrepare();
-			Map<String, Callable<Integer>> tasks = test.createTasks();
+			Map<String, TaskCallable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
 				i += task.call().intValue();
@@ -254,7 +254,7 @@ public class DalSqlTaskRequestTest {
 			
 			test = new DalSqlTaskRequest<>("dao_test_sqlsvr_dbShard", new TestSqlBuilder("select * from tablea where id = ? and id in (?) and id = ?", p), hints, new TestSqlTask(1), new ResultMerger.IntSummary());
 			test.validateAndPrepare();
-			Map<String, Callable<Integer>> tasks = test.createTasks();
+			Map<String, TaskCallable<Integer>> tasks = test.createTasks();
 			int i = 0;
 			for(Callable<Integer> task: tasks.values()){
 				i += task.call().intValue();

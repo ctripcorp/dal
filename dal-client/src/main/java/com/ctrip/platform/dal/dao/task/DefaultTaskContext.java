@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
+import com.ctrip.platform.dal.dao.client.LogEntry;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +13,9 @@ import java.util.*;
 public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     protected Set<String> tables = new HashSet<>();
     protected ShardingCategory category;
+
+    protected long statementExecuteTime = 0;
+    protected LogEntry logEntry;
 
     protected int pojosCount = 0;
     // cc 20181010
@@ -38,6 +42,16 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
     @Override
     public void setShardingCategory(ShardingCategory category) {
         this.category = category;
+    }
+
+    @Override
+    public void sumExecuteStatementTime(long executeStatementTime) {
+        this.statementExecuteTime += executeStatementTime;
+    }
+
+    @Override
+    public void setLogEntry(LogEntry entry) {
+        this.logEntry = entry;
     }
 
     public List<Map<String, Object>> getIdentityFields() {
@@ -75,5 +89,15 @@ public class DefaultTaskContext implements DalTaskContext, DalContextConfigure {
         taskContext.identityFields = getIdentityFields();
         taskContext.pojosCount = this.pojosCount;
         return taskContext;
+    }
+
+    @Override
+    public long getStatementExecuteTime() {
+        return this.statementExecuteTime;
+    }
+
+    @Override
+    public LogEntry getLogEntry() {
+        return this.logEntry;
     }
 }

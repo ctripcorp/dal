@@ -142,7 +142,7 @@ public class DalBulkTaskContextTest {
     public void testCreateTasks() {
         DalBulkTaskRequest<Set<String>, TestPojo> test = null;
         List<TestPojo> pojos = null;
-        Map<String, Callable<Set<String>>> tasks = null;
+        Map<String, TaskCallable<Set<String>>> tasks = null;
         try {
             // Shuffled in two shards and two table shards in each shards
             pojos = new ArrayList<TestPojo>();

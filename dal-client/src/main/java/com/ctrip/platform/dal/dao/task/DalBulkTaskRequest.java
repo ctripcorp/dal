@@ -94,7 +94,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	}
 
 	@Override
-	public Callable<K> createTask() throws SQLException {
+	public TaskCallable<K> createTask() throws SQLException {
 		hints = hints.clone();
 		handleKeyHolder(false);
 
@@ -116,8 +116,8 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	}
 
 	@Override
-	public Map<String, Callable<K>> createTasks() throws SQLException {
-		Map<String, Callable<K>> tasks = new HashMap<>();
+	public Map<String, TaskCallable<K>> createTasks() throws SQLException {
+		Map<String, TaskCallable<K>> tasks = new HashMap<>();
 		
 		// I know this is not so elegant.
 		handleKeyHolder(true);
@@ -151,7 +151,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
         setGeneratedKeyBack(task, hints, rawPojos);
 	}
 
-	private static class BulkTaskCallable<K, T> implements Callable<K> {
+	private static class BulkTaskCallable<K, T> implements TaskCallable<K> {
 		private String logicDbName;
 		private String rawTableName;
 		private DalHints hints;
@@ -187,7 +187,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		    DalHints localHints = prepareLocalHints(task, hints);
 
             try {
-                partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>) taskContext.fork());
+                partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>) taskContext);
             } catch (Throwable e) {
                 error = e;
             }
@@ -222,7 +222,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 
 				Throwable error = null;
                 try {
-                    K partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>)taskContext.fork());
+                    K partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>)taskContext);
                     merger.addPartial(curTableShardId, partial);
                 } catch (Throwable e) {
                     error = e;
@@ -232,6 +232,11 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
                 hints.handleError("Error when execute table shard operation", error);
 			}
 			return merger.merge();
+		}
+
+		@Override
+		public DalTaskContext getDalTaskContext() {
+			return this.taskContext;
 		}
 	}
 }

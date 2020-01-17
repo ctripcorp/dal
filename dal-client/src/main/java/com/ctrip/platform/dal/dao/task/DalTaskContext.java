@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
+import com.ctrip.platform.dal.dao.client.LogEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -15,4 +16,6 @@ public interface DalTaskContext {
     List<Map<String, Object>> getIdentityFields();
     int getPojosCount();
     DalTaskContext fork();
+    long getStatementExecuteTime();
+    LogEntry getLogEntry();
 }

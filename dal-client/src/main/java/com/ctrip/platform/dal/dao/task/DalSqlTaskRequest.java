@@ -94,7 +94,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     }
 
     @Override
-    public Callable<T> createTask() throws SQLException {
+    public TaskCallable<T> createTask() throws SQLException {
         DalHints tmpHints = hints.clone();
         if (shards != null && shards.size() == 1) {
             tmpHints.inShard(shards.iterator().next());
@@ -104,8 +104,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     }
 
     @Override
-    public Map<String, Callable<T>> createTasks() throws SQLException {
-        Map<String, Callable<T>> tasks = new HashMap<>();
+    public Map<String, TaskCallable<T>> createTasks() throws SQLException {
+        Map<String, TaskCallable<T>> tasks = new HashMap<>();
 
         if (parametersByShard == null) {
             // Create by given shards
@@ -125,7 +125,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         return tasks;
     }
 
-    private Callable<T> create(StatementParameters parameters, DalHints hints, DalTaskContext taskContext)
+    private TaskCallable<T> create(StatementParameters parameters, DalHints hints, DalTaskContext taskContext)
             throws SQLException {
         return new SqlTaskCallable<>(logicDbName, parameters, hints, task, taskContext, builder, merger, logger);
     }
@@ -186,7 +186,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         }
     }
 
-    protected static class SqlTaskCallable<T> implements Callable<T> {
+    protected static class SqlTaskCallable<T> implements TaskCallable<T> {
         private ILogger iLogger = DalElementFactory.DEFAULT.getILogger();
         private static final String SQL_CROSSSHARD = "SQL.crossShard";
         private static final String IMPLICIT_IN_ALL_TABLE_SHARDS = "implicitInAllTableShards";
@@ -399,7 +399,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                     ((DalContextConfigure) taskContext).addTables(tableName);
 
             String compiledSql = compileSql(builder.build(), originalParameters);
-            return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext.fork());
+            return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext);
         }
 
         private T executeWithSqlBuilder(String tableShardId, String tableName, DalClient client,
@@ -422,7 +422,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                             AbstractFreeSqlBuilder freeSqlBuilder = (AbstractFreeSqlBuilder) builder;
                             String compiledSql = compileSql(freeSqlBuilder.build(), originalParameters);
                             return task.execute(client, compiledSql, compiledParameters, hints.clone(),
-                                    taskContext.fork());
+                                    taskContext);
                         }
                     }
                 }
@@ -472,7 +472,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 ((DalContextConfigure) taskContext).addTables(tempTableName);
 
             String compiledSql = compileSql(sql, originalParameters);
-            return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext.fork());
+            return task.execute(client, compiledSql, compiledParameters, hints.clone(), taskContext);
         }
 
         private String compileSql(String sql, StatementParameters parameters) throws SQLException {
@@ -541,6 +541,10 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             return this.tableShards;
         }
 
+        @Override
+        public DalTaskContext getDalTaskContext() {
+            return this.dalTaskContext;
+        }
     }
 
 }

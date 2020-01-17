@@ -193,7 +193,7 @@ public class DalBulkTaskRequestTest {
 	public void testCreateTasks() {
 		DalBulkTaskRequest<Integer, TestPojo> test = null;
 		List<TestPojo> pojos = null;
-		Map<String, Callable<Integer>> tasks = null;
+		Map<String, TaskCallable<Integer>> tasks = null;
 		try {
 			// Shuffled in two shards
 			pojos = new ArrayList<TestPojo>();

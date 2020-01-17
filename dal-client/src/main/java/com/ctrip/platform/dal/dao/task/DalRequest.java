@@ -39,13 +39,13 @@ public interface DalRequest<T> {
 	 * @return
 	 * @throws SQLException
 	 */
-    Callable<T> createTask() throws SQLException;
+	TaskCallable<T> createTask() throws SQLException;
 	
 	/**
 	 * To split by DB shard
 	 * @return map of shard id to callable
 	 */
-    Map<String, Callable<T>> createTasks() throws SQLException;
+	Map<String, TaskCallable<T>> createTasks() throws SQLException;
 	
 	/**
 	 * @return result merge in cross shard case

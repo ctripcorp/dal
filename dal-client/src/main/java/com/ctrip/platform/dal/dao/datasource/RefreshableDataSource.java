@@ -138,6 +138,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 if (duration > PERMIT_ERROR_DURATION_TIME * 1000) {
                     if (lastReportErrorTime == 0 || nowTime - lastReportErrorTime > REPORT_ERROR_FREQUENCY * 1000) {
                         LOGGER.reportError(getSingleDataSource().getName());
+                        lastReportErrorTime = nowTime;
                     }
                 }
             }

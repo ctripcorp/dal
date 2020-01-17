@@ -37,7 +37,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
 
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
     private DataSourceIdentity id;
-    private long switchListenerTimeout = 10; //ms
+    private long switchListenerTimeout = DEFAULT_SWITCH_LISTENER_TIME_OUT; //ms
 
     private int switchVersion = 0;
 

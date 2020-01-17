@@ -320,13 +320,26 @@ public class ForceSwitchableDataSourceTest {
 
     @Test
     public void testMGRJDBCUrlParser() {
-        String mgr_url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin";
+        String mgr_url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin?useUnicode=true&characterEncoding=UTF-8";
         String url = ConnectionStringParser.replaceHostAndPort(mgr_url, "127.0.0.1", "12345");
-        Assert.assertEquals("jdbc:mysql://127.0.0.1:12345/kevin", url);
+        Assert.assertEquals("jdbc:mysql://127.0.0.1:12345/kevin?useUnicode=true&characterEncoding=UTF-8", url);
     }
 
     @Test
     public void MGRSwitchToNormal() throws Exception {
+        IDataSourceConfigureProvider nullProvider = new ModifyDataSourceConfigureProvider();
+        ForceSwitchableDataSource nullDataSource = new ForceSwitchableDataSource(nullProvider);
+        Properties properties = new Properties();
+        properties.setProperty(USER_NAME, "f_xie");
+        properties.setProperty(PASSWORD, "123456");
+        properties.setProperty(CONNECTION_URL, "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin");
+        properties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+        DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("mgr", properties);
+        nullDataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), "127.0.0.1", 3306);
+        Thread.sleep(3000);
+        String mgrUrl = nullDataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl();
+        Assert.assertEquals("jdbc:mysql://127.0.0.1:3306/kevin", mgrUrl);
+
         IDataSourceConfigureProvider provider = new MockMgrDataSourceConfigureProvider();
         ForceSwitchableDataSource dataSource = new ForceSwitchableDataSource(provider);
 

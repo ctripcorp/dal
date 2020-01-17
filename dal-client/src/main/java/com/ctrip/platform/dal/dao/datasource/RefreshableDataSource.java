@@ -318,6 +318,14 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         return new DalConnection(connection, this);
     }
 
+    public long getFirstErrorTime() {
+        return firstErrorTime;
+    }
+
+    public long getLastReportErrorTime() {
+        return lastReportErrorTime;
+    }
+
     @Override
     public Connection getConnection(String paramString1, String paramString2) throws SQLException {
         return getDataSource().getConnection(paramString1, paramString2);

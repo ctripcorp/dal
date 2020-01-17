@@ -18,7 +18,7 @@ public abstract class BaseShardStrategy extends ShardStrategyElement implements 
     private static final String TABLE_SHARD_OFFSET = "tableShardOffset";
 
     private static final boolean DEFAULT_TABLE_SHARDING = false;
-    private static final String DEFAULT_TABLE_SHARD_SEPARATOR = "_";
+    private static final String DEFAULT_TABLE_SHARD_SEPARATOR = "";
     private static final int DEFAULT_DB_SHARD_OFFSET = 0;
     private static final int DEFAULT_TABLE_SHARD_OFFSET = 0;
 

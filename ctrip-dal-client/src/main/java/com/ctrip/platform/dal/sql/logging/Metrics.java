@@ -1,11 +1,12 @@
 package com.ctrip.platform.dal.sql.logging;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
+import com.ctrip.platform.dal.dao.client.LogContext;
+import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
@@ -73,7 +74,7 @@ public class Metrics {
 
 	private static void reportAll(CtripLogEntry entry, long duration,String status){
 		String database = entry.getDataBaseKeyName();
-		String tableString = getTableString(entry);
+		String tableString = getTableString(entry.getTables());
 		String optType = entry.getEvent().name();
 		String version = entry.getClientVersion();
 		String shardCategory = entry.getShardingCategory() == null ? NUll_SHARDCATEGORY : entry.getShardingCategory().toString();
@@ -91,12 +92,40 @@ public class Metrics {
 		metric.log(OptInfo.KEY, 1, info.toTag());
 	}
 
-	private static String getTableString(CtripLogEntry entry) {
-		String tableString = LoggerHelper.setToOrderedString(entry.getTables());
+	public static void reportDALCost(LogContext logContext, final Throwable e) {
+		LogEntry entry = logContext.getEntries().get(0);
+		long duration = logContext.getDaoExecuteTime() - logContext.getStatementExecuteTime();
+		String database = getDataBaseString(logContext.getEntries());
+		String tableString = getTableString(logContext.getEntries());
+		String optType = entry.getEvent().name();
+		String version = entry.getClientVersion();
+		String status = e == null ? SUCCESS : FAIL;
+		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(),  status, database, tableString, optType);
+		metric.log(SQLInfo.DAL_COST, duration * ticksPerMillisecond, info.toTag());
+	}
+
+	private static String getTableString(Set<String> tables) {
+		String tableString = LoggerHelper.setToOrderedString(tables);
 		if (tableString.equalsIgnoreCase(LoggerHelper.EMPTY_SET))
 			return EMPTY_TABLES;
 		if (tableString.equalsIgnoreCase(LoggerHelper.NULL_SET))
 			return NULL_TABLES;
 		return tableString;
+	}
+
+	private static String getTableString(List<LogEntry> entries) {
+		Set<String> tableSet = new HashSet<>();
+		for (LogEntry entry : entries) {
+			tableSet.addAll(entry.getTables());
+		}
+		return getTableString(tableSet);
+	}
+
+	private static String getDataBaseString(List<LogEntry> entries) {
+		Set<String> dataBaseSet = new HashSet<>();
+		for (LogEntry entry : entries) {
+			dataBaseSet.add(entry.getDataBaseKeyName());
+		}
+		return LoggerHelper.setToOrderedString(dataBaseSet);
 	}
 }

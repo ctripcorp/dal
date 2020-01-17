@@ -180,6 +180,7 @@ public class CtripDalLogger extends LoggerAdapter implements DalLogger {
     @Override
     public void end(LogContext logContext, final Throwable e) {
         DalCatLogger.end(logContext, e);
+        Metrics.reportDALCost(logContext, e);
     }
 
     @Override

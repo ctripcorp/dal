@@ -37,9 +37,9 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
 
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
     private DataSourceIdentity id;
-    private long switchListenerTimeout = 0;
+    private long switchListenerTimeout = 500; //ms
 
-    private static int switchVersion = 0;
+    private int switchVersion = 0;
 
     private static final int INIT_DELAY = 0;
     private static final int POOL_SIZE = 1;
@@ -168,19 +168,19 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     }
 
     public void setDataSourceSwitchListenerTimeout(long switchListenerTimeout) {
-        this.switchListenerTimeout = switchListenerTimeout;
+        if (switchListenerTimeout <= 0) {
+            this.switchListenerTimeout = DEFAULT_SWITCH_LISTENER_TIME_OUT;
+        }
+        else if (switchListenerTimeout > 500) {
+            this.switchListenerTimeout = MAX_SWITCH_LISTENER_TIME_OUT;
+        }
+        else {
+            this.switchListenerTimeout = switchListenerTimeout;
+        }
     }
 
     public long getSwitchListenerTimeout() {
-        if (switchListenerTimeout <= 0) {
-            return DEFAULT_SWITCH_LISTENER_TIME_OUT;
-        }
-        else if (switchListenerTimeout > 500) {
-            return MAX_SWITCH_LISTENER_TIME_OUT;
-        }
-        else {
-            return switchListenerTimeout;
-        }
+        return this.switchListenerTimeout;
     }
 
     public DataSource getDataSource() {

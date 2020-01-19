@@ -147,7 +147,7 @@ public class DalRequestExecutor {
 		T result = taskWrapper.call();
 
 		logContext.setStatementExecuteTime(task.getDalTaskContext().getStatementExecuteTime());
-		logContext.setEntries(Arrays.asList(task.getDalTaskContext().getLogEntry()));
+		logContext.setEntries(toList(task.getDalTaskContext().getLogEntry()));
 		return result;
 	}
 	
@@ -250,4 +250,12 @@ public class DalRequestExecutor {
 	    
 	    return executer.getPoolSize();
 	}
+
+	private List<LogEntry> toList(LogEntry logEntry) {
+	    List<LogEntry> logEntries = new ArrayList<>();
+	    if (logEntry != null) {
+	        logEntries.add(logEntry);
+        }
+        return logEntries;
+    }
 }

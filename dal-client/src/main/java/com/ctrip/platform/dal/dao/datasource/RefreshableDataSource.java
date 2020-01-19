@@ -142,7 +142,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                     }
                 }
             }
-            throw new SQLException(e);
+            throw e;
         }
         else {
             firstErrorTime = 0;

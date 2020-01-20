@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -17,6 +16,10 @@ public class DalCallableStatement extends DalPreparedStatement implements Callab
     public DalCallableStatement(CallableStatement callableStatement, RefreshableDataSource dataSource) {
         super(callableStatement, dataSource);
         this.callableStatement = callableStatement;
+    }
+
+    public CallableStatement getCallableStatement() {
+        return callableStatement;
     }
 
     @Override

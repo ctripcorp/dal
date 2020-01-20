@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 
 import java.sql.*;
 import java.util.Map;
@@ -15,6 +14,10 @@ public class DalConnection implements Connection {
     public DalConnection(Connection connection, RefreshableDataSource dataSource) {
         this.connection = connection;
         this.dataSource = dataSource;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 
     @Override

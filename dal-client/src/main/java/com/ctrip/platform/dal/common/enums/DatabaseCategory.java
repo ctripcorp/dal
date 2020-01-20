@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.dao.StatementParameter;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.AbstractDalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.datasource.jdbc.DalCallableStatement;
 import com.ctrip.platform.dal.dao.markdown.ErrorContext;
 import com.ctrip.platform.dal.exceptions.DalParameterException;
 import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
@@ -91,6 +92,9 @@ public enum DatabaseCategory {
 
         public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {
             if (parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP) {
+                if (statement instanceof DalCallableStatement) {
+                    statement = ((DalCallableStatement) statement).getCallableStatement();
+                }
                 SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement) statement;
                 sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(),
                         (SQLServerDataTable) parameter.getValue());

@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -18,6 +17,10 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
         super(preparedStatement, dataSource);
         this.preparedStatement = preparedStatement;
         this.dataSource = dataSource;
+    }
+
+    public PreparedStatement getPreparedStatement() {
+        return preparedStatement;
     }
 
     @Override

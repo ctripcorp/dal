@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 
 import java.sql.*;
 
@@ -14,6 +13,9 @@ public class DalStatement implements Statement {
         this.dataSource = dataSource;
     }
 
+    public Statement getStatement() {
+        return statement;
+    }
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {

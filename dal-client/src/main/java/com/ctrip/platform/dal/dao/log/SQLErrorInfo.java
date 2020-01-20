@@ -9,13 +9,13 @@ public class SQLErrorInfo {
     public static final String CLIENT = "Client";
     private String version;
 
-    private static final String TITANKEY = "TitanKey";
-    private String titanKey;
+    private static final String DB = "DB";
+    private String database;
 
 
     public SQLErrorInfo(String version, String titanKey) {
         this.version = version;
-        this.titanKey = titanKey;
+        this.database = titanKey;
     }
 
     public String getVersion() {
@@ -26,18 +26,18 @@ public class SQLErrorInfo {
         this.version = version;
     }
 
-    public String getTitanKey() {
-        return titanKey;
+    public String getDatabase() {
+        return database;
     }
 
-    public void setTitanKey(String titanKey) {
-        this.titanKey = titanKey;
+    public void setDatabase(String database) {
+        this.database = database;
     }
 
     public Map<String, String> toTag() {
         Map<String, String> tag = new HashMap<String, String>();
         tag.put(CLIENT, version);
-        tag.put(TITANKEY, titanKey);
+        tag.put(DB, database);
         return tag;
     }
 }

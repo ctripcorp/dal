@@ -94,7 +94,7 @@ public class Metrics {
 
 	public static void reportDALCost(LogContext logContext, final Throwable e) {
 		List<LogEntry> logEntries = logContext.getEntries();
-		if (logEntries.size() > 0) {
+		if (logEntries != null && logEntries.size() > 0) {
 			LogEntry entry = logEntries.get(0);
 			long duration = logContext.getDaoExecuteTime() - logContext.getStatementExecuteTime();
 			String database = getDataBaseString(logEntries);

@@ -36,16 +36,16 @@ public class DalStatementTest {
         Statement statement = connection.createStatement();
         statement.executeQuery("select 1");
 
-        Assert.assertEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertEquals(dataSource.getLastReportContinuousErrorTime(), 0);
 
         try {
             statement.executeQuery("select *from noTable");
         } catch (SQLException e) {
 
         }
-        Assert.assertNotEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertNotEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertEquals(dataSource.getLastReportContinuousErrorTime(), 0);
 
         Thread.sleep(1000*60);
         try {
@@ -54,8 +54,8 @@ public class DalStatementTest {
 
         }
 
-        Assert.assertNotEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertNotEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertNotEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertNotEquals(dataSource.getLastReportContinuousErrorTime(), 0);
 
         try {
             statement.executeQuery("select 1");
@@ -63,8 +63,8 @@ public class DalStatementTest {
 
         }
 
-        Assert.assertEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertEquals(dataSource.getLastReportContinuousErrorTime(), 0);
     }
 
     @Test
@@ -81,8 +81,8 @@ public class DalStatementTest {
 
         }
 
-        Assert.assertNotEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertNotEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertEquals(dataSource.getLastReportContinuousErrorTime(), 0);
 
         Thread.sleep(1000*60);
         try {
@@ -91,8 +91,8 @@ public class DalStatementTest {
 
         }
 
-        Assert.assertNotEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertNotEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertNotEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertNotEquals(dataSource.getLastReportContinuousErrorTime(), 0);
 
         try {
             statement.execute("select 1");
@@ -100,7 +100,7 @@ public class DalStatementTest {
 
         }
 
-        Assert.assertEquals(dataSource.getFirstErrorTime(), 0);
-        Assert.assertEquals(dataSource.getLastReportErrorTime(), 0);
+        Assert.assertEquals(dataSource.getFirstAppearContinuousErrorTime(), 0);
+        Assert.assertEquals(dataSource.getLastReportContinuousErrorTime(), 0);
     }
 }

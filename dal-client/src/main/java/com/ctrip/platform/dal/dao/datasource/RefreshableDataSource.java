@@ -39,8 +39,8 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
     private DataSourceIdentity id;
 
-    private volatile long firstErrorTime = 0;
-    private volatile long lastReportErrorTime = 0;
+    private volatile long firstAppearContinuousErrorTime = 0;
+    private volatile long lastReportContinuousErrorTime = 0;
 
     private static int switchVersion = 0;
 
@@ -56,8 +56,8 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private static final String SWITCH_VERSION = "SwitchVersion:%s";
     private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
     private static final String THREAD_NAME = "DataSourceRefresher";
-    public static final int PERMIT_ERROR_DURATION_TIME = 60; //second
-    public static final int REPORT_ERROR_FREQUENCY = 30; //second
+    public static final int CONTINUOUS_ERROR_DURATION_THRESHOLD = 60; //second
+    public static final int CONTINUOUS_ERROR_REPORT_PERIOD = 30; //second
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
         this.id = new DataSourceName(name);
@@ -127,27 +127,33 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         }, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
-    public void handleException(SQLException e) throws SQLException {
+    public void handleException(SQLException e){
         if (e != null) {
             long nowTime = System.currentTimeMillis();
-            if (firstErrorTime == 0) {
-                firstErrorTime = nowTime;
+            if (firstAppearContinuousErrorTime == 0) {
+                firstAppearContinuousErrorTime = nowTime;
             }
             else {
-                long duration = nowTime - firstErrorTime;
-                if (duration > PERMIT_ERROR_DURATION_TIME * 1000) {
-                    if (lastReportErrorTime == 0 || nowTime - lastReportErrorTime > REPORT_ERROR_FREQUENCY * 1000) {
-                        LOGGER.reportError(getSingleDataSource().getName());
-                        lastReportErrorTime = nowTime;
+                long duration = nowTime - firstAppearContinuousErrorTime;
+                if (duration > CONTINUOUS_ERROR_DURATION_THRESHOLD * 1000) {
+                    if (isNeedToReport(nowTime)) {
+                        LOGGER.reportError(id.getId());
                     }
                 }
             }
-            throw e;
         }
         else {
-            firstErrorTime = 0;
-            lastReportErrorTime = 0;
+            firstAppearContinuousErrorTime = 0;
+            lastReportContinuousErrorTime = 0;
         }
+    }
+
+    private synchronized boolean isNeedToReport(long nowTime) {
+        if (lastReportContinuousErrorTime == 0 || nowTime - lastReportContinuousErrorTime > CONTINUOUS_ERROR_REPORT_PERIOD * 1000) {
+            lastReportContinuousErrorTime = nowTime;
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -319,12 +325,12 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         return new DalConnection(connection, this);
     }
 
-    public long getFirstErrorTime() {
-        return firstErrorTime;
+    public long getFirstAppearContinuousErrorTime() {
+        return firstAppearContinuousErrorTime;
     }
 
-    public long getLastReportErrorTime() {
-        return lastReportErrorTime;
+    public long getLastReportContinuousErrorTime() {
+        return lastReportContinuousErrorTime;
     }
 
     @Override

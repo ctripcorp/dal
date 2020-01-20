@@ -7,6 +7,8 @@ public class MockDataSourceSwitchListenerOne implements DataSourceSwitchListener
     private volatile int step = 1;
 
     private int sleep = 100;
+
+    private boolean isEnd = false;
     @Override
     public void execute() {
         try {
@@ -15,6 +17,7 @@ public class MockDataSourceSwitchListenerOne implements DataSourceSwitchListener
             return;
         }
         step = 10;
+        isEnd = true;
     }
 
     public int getStep() {
@@ -23,5 +26,13 @@ public class MockDataSourceSwitchListenerOne implements DataSourceSwitchListener
 
     public void setSleep(int sleep) {
         this.sleep = sleep;
+    }
+
+    public boolean getEnd() {
+        return isEnd;
+    }
+
+    public void resetEnd() {
+        isEnd = false;
     }
 }

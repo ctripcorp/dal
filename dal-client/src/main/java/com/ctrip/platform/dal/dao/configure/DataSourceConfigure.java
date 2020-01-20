@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.configure;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 
@@ -332,7 +333,12 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 throw new DalRuntimeException("connetion url cannot be null");
             properties.setProperty(CONNECTION_URL, connectionUrl);
             HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
-            properties.setProperty(HOST_NAME, hostAndPort.getHost());
+            if (StringUtils.isEmpty(hostAndPort.getHost())) {
+                properties.setProperty(HOST_NAME, "UnKnown");
+            }
+            else {
+                properties.setProperty(HOST_NAME, hostAndPort.getHost());
+            }
 
             if (configure.getDriverClass() != null)
                 properties.setProperty(DRIVER_CLASS_NAME, configure.getDriverClass());

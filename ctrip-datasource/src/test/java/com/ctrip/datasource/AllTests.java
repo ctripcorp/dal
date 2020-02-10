@@ -6,6 +6,7 @@ import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImplTest;
 import com.ctrip.datasource.datasource.BackgroundExecutor.DatasourceBackgroundExecutorTest;
 import com.ctrip.datasource.datasource.ConnectionListener.CtripConnectionListenerTest;
 import com.ctrip.datasource.datasource.DataSourceLocatorTest;
+import com.ctrip.datasource.datasource.DataSourceMonitorTest;
 import com.ctrip.datasource.datasource.DataSourceValidatorTest;
 import com.ctrip.datasource.datasource.MockQConfigProvider.ExceptionQConfigPoolPropertiesProviderTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
@@ -55,7 +56,8 @@ import com.ctrip.datasource.configure.CtripClusterInfoProviderTest;
 		DataSourceConfigureEncryptTest.class,
 		ClusterSwitchTest.class,
 		DataSourceLocatorTest.class,
-		CtripClusterInfoProviderTest.class
+		CtripClusterInfoProviderTest.class,
+		DataSourceMonitorTest.class
 	})
 
 public class AllTests {

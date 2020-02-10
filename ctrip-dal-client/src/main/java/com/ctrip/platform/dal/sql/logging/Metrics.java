@@ -93,15 +93,18 @@ public class Metrics {
 	}
 
 	public static void reportDALCost(LogContext logContext, final Throwable e) {
-		LogEntry entry = logContext.getEntries().get(0);
-		long duration = logContext.getDaoExecuteTime() - logContext.getStatementExecuteTime();
-		String database = getDataBaseString(logContext.getEntries());
-		String tableString = getTableString(logContext.getEntries());
-		String optType = entry.getEvent().name();
-		String version = entry.getClientVersion();
-		String status = e == null ? SUCCESS : FAIL;
-		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(),  status, database, tableString, optType);
-		metric.log(SQLInfo.DAL_COST, duration * ticksPerMillisecond, info.toTag());
+		List<LogEntry> logEntries = logContext.getEntries();
+		if (logEntries != null && logEntries.size() > 0) {
+			LogEntry entry = logEntries.get(0);
+			long duration = logContext.getDaoExecuteTime() - logContext.getStatementExecuteTime();
+			String database = getDataBaseString(logEntries);
+			String tableString = getTableString(logEntries);
+			String optType = entry.getEvent().name();
+			String version = entry.getClientVersion();
+			String status = e == null ? SUCCESS : FAIL;
+			SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(), status, database, tableString, optType);
+			metric.log(SQLInfo.DAL_COST, duration * ticksPerMillisecond, info.toTag());
+		}
 	}
 
 	private static String getTableString(Set<String> tables) {

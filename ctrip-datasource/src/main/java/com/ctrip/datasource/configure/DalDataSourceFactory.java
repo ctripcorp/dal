@@ -60,6 +60,10 @@ public class DalDataSourceFactory {
         return createDataSource(allInOneKey, svcUrl, appid, false);
     }
 
+    public DataSource createDataSource(AbstractMGRConfigProvider provider) throws Exception {
+
+    }
+
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceInitialize) throws Exception {
         TitanProvider provider = new TitanProvider();
         Map<String, String> settings = new HashMap<>();

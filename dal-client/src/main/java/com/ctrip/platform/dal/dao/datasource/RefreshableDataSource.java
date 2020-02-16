@@ -32,9 +32,9 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
 
     private volatile ScheduledExecutorService service = null;
 
-    private static volatile ThreadPoolExecutor listenersExecutor;
+    private static volatile ThreadPoolExecutor listenersExecutor = null;
 
-    private static volatile ThreadPoolExecutor listenerExecutor;
+    private static volatile ThreadPoolExecutor listenerExecutor = null;
 
     private volatile ScheduledExecutorService timer = null;
 
@@ -69,15 +69,6 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         SingleDataSource ds = createSingleDataSource(name, config);
         LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", name, ds.getName(), ds.getReferenceCount()));
         dataSourceReference.set(ds);
-        listenersExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new CustomThreadFactory("DataSourceSwitchListenersExecutor"));
-        listenersExecutor.allowCoreThreadTimeOut(true);
-
-        listenerExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new CustomThreadFactory("DataSourceSwitchListenerExecutor"));
-        listenerExecutor.allowCoreThreadTimeOut(true);
     }
 
     public RefreshableDataSource(DataSourceIdentity id, DataSourceConfigure config) {
@@ -85,15 +76,6 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         SingleDataSource ds = createSingleDataSource(id.getId(), config);
         LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", id.getId(), ds.getName(), ds.getReferenceCount()));
         dataSourceReference.set(ds);
-        listenersExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new CustomThreadFactory("DataSourceSwitchListenersExecutor"));
-        listenersExecutor.allowCoreThreadTimeOut(true);
-
-        listenerExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                new CustomThreadFactory("DataSourceSwitchListenerExecutor"));
-        listenerExecutor.allowCoreThreadTimeOut(true);
     }
 
     @Override
@@ -271,12 +253,40 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         return service;
     }
 
+    private ThreadPoolExecutor getListenersExecutor() {
+        if (listenersExecutor == null) {
+            synchronized (this) {
+                if (listenersExecutor == null) {
+                    listenersExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<Runnable>(),
+                            new CustomThreadFactory("DataSourceSwitchListenersExecutor"));
+                    listenersExecutor.allowCoreThreadTimeOut(true);
+                }
+            }
+        }
+        return listenersExecutor;
+    }
+
+    private ThreadPoolExecutor getListenerExecutor() {
+        if (listenerExecutor == null) {
+            synchronized (this) {
+                if (listenerExecutor == null) {
+                    listenerExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<Runnable>(),
+                            new CustomThreadFactory("DataSourceSwitchListenerExecutor"));
+                    listenerExecutor.allowCoreThreadTimeOut(true);
+                }
+            }
+        }
+        return listenerExecutor;
+    }
+
     private void executeDataSourceListener(int switchVersion) {
         final String keyName = getSingleDataSource().getName();
         final CountDownLatch latch = new CountDownLatch(dataSourceSwitchListeners.size());
         for (final DataSourceSwitchListener dataSourceSwitchListener : dataSourceSwitchListeners) {
             if (dataSourceSwitchListener != null) {
-                listenerExecutor.submit(new Runnable() {
+                getListenerExecutor().submit(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -320,7 +330,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                         final int tempSwitchVersion = ++switchVersion;
                         LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(SWITCH_VERSION, tempSwitchVersion), oldServer + " switch to " + currentServer);
                         waiters.put(tempSwitchVersion, new DataSourceSwitchBlockThreads());
-                        listenersExecutor.submit(new Runnable() {
+                        getListenersExecutor().submit(new Runnable() {
                             @Override
                             public void run() {
                                 try {

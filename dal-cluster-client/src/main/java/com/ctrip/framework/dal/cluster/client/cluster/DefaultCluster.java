@@ -45,13 +45,18 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     }
 
     @Override
-    public int getDbShardCount() {
-        return databaseShards.size();
+    public boolean dbShardingEnabled() {
+        return databaseShards.size() > 1;
     }
 
     @Override
     public Integer getDbShard(String tableName, DbShardContext context) {
         return shardStrategyProxy.getDbShard(tableName, context);
+    }
+
+    @Override
+    public Set<Integer> getAllDbShards() {
+        return databaseShards.keySet();
     }
 
     @Override

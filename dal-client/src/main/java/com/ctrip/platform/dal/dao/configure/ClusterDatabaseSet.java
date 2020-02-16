@@ -80,8 +80,8 @@ public class ClusterDatabaseSet extends DatabaseSet {
     @Override
     public Set<String> getAllShards() {
         Set<String> allShards = new HashSet<>();
-        for (int i = 0; i < cluster.getDbShardCount(); i++)
-            allShards.add(String.valueOf(i));
+        for (Integer shard : cluster.getAllDbShards())
+            allShards.add(String.valueOf(shard));
         return allShards;
     }
 
@@ -143,7 +143,7 @@ public class ClusterDatabaseSet extends DatabaseSet {
     private int getShardIndex(String shard) {
         try {
             Integer shardIndex = StringUtils.toInt(shard);
-            if (shardIndex == null || shardIndex < 0 || shardIndex >= cluster.getDbShardCount())
+            if (shardIndex == null || !cluster.getAllDbShards().contains(shardIndex))
                 throw new DalRuntimeException("shard is null or out of range");
             return shardIndex;
         } catch (Throwable t) {

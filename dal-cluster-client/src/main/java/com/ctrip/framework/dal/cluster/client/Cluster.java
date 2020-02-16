@@ -24,9 +24,11 @@ public interface Cluster extends Listenable<ClusterSwitchedEvent>, Wrapper {
 
     DatabaseCategory getDatabaseCategory();
 
-    int getDbShardCount();
+    boolean dbShardingEnabled();
 
     Integer getDbShard(String tableName, DbShardContext context);
+
+    Set<Integer> getAllDbShards();
 
     boolean tableShardingEnabled(String tableName);
 

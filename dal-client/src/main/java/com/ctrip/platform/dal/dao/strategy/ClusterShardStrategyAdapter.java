@@ -31,7 +31,7 @@ public class ClusterShardStrategyAdapter implements DalShardingStrategy {
 
     @Override
     public boolean isShardingByDb() {
-        return cluster.getDbShardCount() > 1;
+        return cluster.dbShardingEnabled();
     }
 
     @Override

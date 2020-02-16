@@ -58,13 +58,18 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
     }
 
     @Override
-    public int getDbShardCount() {
-        return getInnerCluster().getDbShardCount();
+    public boolean dbShardingEnabled() {
+        return getInnerCluster().dbShardingEnabled();
     }
 
     @Override
     public Integer getDbShard(String tableName, DbShardContext context) {
         return getInnerCluster().getDbShard(tableName, context);
+    }
+
+    @Override
+    public Set<Integer> getAllDbShards() {
+        return getInnerCluster().getAllDbShards();
     }
 
     @Override

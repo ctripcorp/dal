@@ -92,10 +92,11 @@ public enum DatabaseCategory {
 
         public void setObject(CallableStatement statement, StatementParameter parameter) throws SQLException {
             if (parameter.getValue() != null && parameter.getSqlType() == SQL_SERVER_TYPE_TVP) {
+                CallableStatement callableStatement = statement;
                 if (statement instanceof DalCallableStatement) {
-                    statement = ((DalCallableStatement) statement).getCallableStatement();
+                    callableStatement = ((DalCallableStatement) statement).getCallableStatement();
                 }
-                SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement) statement;
+                SQLServerCallableStatement sqlsvrStatement = (SQLServerCallableStatement) callableStatement;
                 sqlsvrStatement.setStructured(parameter.getIndex(), parameter.getName(),
                         (SQLServerDataTable) parameter.getValue());
             } else {

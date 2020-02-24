@@ -22,10 +22,6 @@ public class CtripVariableDataSourceConfigureProvider extends AbstractVariableDa
     private static final String DB_TOKEN_FILE = "db_token.properties";
     private Map<String, String> tokenCache = new ConcurrentHashMap<>();
 
-    private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
-    private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
-
-
     @Override
     public Map<String, DalConnectionStringConfigure> getConnectionStrings(Set<String> dbNames) throws UnsupportedEncodingException {
         String env = EnvUtil.getEnv();
@@ -39,14 +35,14 @@ public class CtripVariableDataSourceConfigureProvider extends AbstractVariableDa
 
     @Override
     public void setup(Set<String> dbNames) {
-        dalPropertiesManager.setup();
-        dataSourceConfigureManager.setup(dbNames);
         initialize();
+        DalPropertiesManager.getInstance().setup();
+        DataSourceConfigureManager.getInstance().setup(dbNames);
     }
 
     private void initialize() {
         MapConfig config = MapConfig.get(DB_TOKEN_FILE, Feature.create().setHttpsEnable(true).build());
-        config.asMap();
+        changeToken(config.asMap());
         config.addListener(new Configuration.ConfigListener<Map<String, String>>() {
             @Override
             public void onLoad(Map<String, String> conf) {

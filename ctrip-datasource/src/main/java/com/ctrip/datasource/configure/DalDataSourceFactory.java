@@ -9,11 +9,9 @@ import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.platform.dal.dao.configure.AbstractVariableDataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-import com.ctrip.platform.dal.dao.datasource.DataSourceName;
-import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 public class DalDataSourceFactory {
     private static final String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
@@ -60,8 +58,15 @@ public class DalDataSourceFactory {
         return createDataSource(allInOneKey, svcUrl, appid, false);
     }
 
-    public DataSource createDataSource(AbstractMGRConfigProvider provider) throws Exception {
+    public DataSource createVariableTypeDataSource(String dbName) throws Exception {
+        return createVariableTypeDataSource(dbName, new CtripVariableDataSourceConfigureProvider());
+    }
 
+    public DataSource createVariableTypeDataSource(String dbName, AbstractVariableDataSourceConfigureProvider provider) throws Exception {
+        Set<String> names = new HashSet<>();
+        provider.setup(names);
+        DataSourceLocator locator = new DataSourceLocator(provider);
+        return locator.getDataSource(dbName);
     }
 
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceInitialize) throws Exception {

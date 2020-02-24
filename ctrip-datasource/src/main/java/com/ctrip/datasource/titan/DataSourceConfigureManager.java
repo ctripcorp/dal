@@ -1,6 +1,7 @@
 package com.ctrip.datasource.titan;
 
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
+import com.ctrip.datasource.configure.CtripVariableDataSourceConfigureProvider;
 import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
 import com.ctrip.datasource.configure.qconfig.IPDomainStatusProviderImpl;
 import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
@@ -81,6 +82,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
      */
     private AllInOneConfigureReader allInOneProvider = new AllInOneConfigureReader();
 
+    private AbstractVariableDataSourceConfigureProvider variableConnectionStringProvider = new CtripVariableDataSourceConfigureProvider();
     private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
     private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
@@ -109,30 +111,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         isInitialized = true;
     }
 
-    public synchronized void setup(Set<String> dbNames, SourceType sourceType) {
-        for (String dbName : dbNames)
-            keyNameMap.remove(dbName);
-
-        Set<String> names;
-        try {
-            names = getFilteredNames(dbNames, sourceType);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            // set ip domain status
-            IPDomainStatus status = ipDomainStatusProvider.getStatus();
-            dataSourceConfigureLocator.setIPDomainStatus(status);
-        } catch (Throwable e) {
-            if (getIgnoreExternalException()) {
-                Cat.logError("fail to get IPDomainStatus from qconfig. ", e);
-            }
-            else {
-                throw e;
-            }
-        }
-
+    private void setupPoolProperties() {
         try {
             // set pool properties
             DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
@@ -157,6 +136,33 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             addIPDomainStatusChangedListener();
             isIPDomainStatusListenerAdded.compareAndSet(false, true);
         }
+    }
+
+    public synchronized void setup(Set<String> dbNames, SourceType sourceType) {
+        for (String dbName : dbNames)
+            keyNameMap.remove(dbName);
+
+        Set<String> names;
+        try {
+            names = getFilteredNames(dbNames, sourceType);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            // set ip domain status
+            IPDomainStatus status = ipDomainStatusProvider.getStatus();
+            dataSourceConfigureLocator.setIPDomainStatus(status);
+        } catch (Throwable e) {
+            if (getIgnoreExternalException()) {
+                Cat.logError("fail to get IPDomainStatus from qconfig. ", e);
+            }
+            else {
+                throw e;
+            }
+        }
+
+        setupPoolProperties();
 
         if (names.isEmpty())
             return;
@@ -167,6 +173,13 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         if (sourceType == SourceType.Remote)
             addConnectionStringChangedListeners(names);
+    }
+
+    public synchronized void setup(Set<String> dbNames) {
+        setupPoolProperties();
+
+        Map<String, DalConnectionStringConfigure> connectionStringConfigs = getConnectionStringConfigures(dbNames);
+        dataSourceConfigureLocator.setVariableConnectionStringConfigs(connectionStringConfigs);
     }
 
     private Set<String> getFilteredNames(Set<String> names, SourceType sourceType) throws Exception {
@@ -225,6 +238,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         }
 
         return connectionStrings;
+    }
+
+    private Map<String, DalConnectionStringConfigure> getConnectionStringConfigures(Set<String> dbNames) {
+        Map<String, DalConnectionStringConfigure> connectionStringConfigs = null;
+        // get config from api
+        try {
+            connectionStringConfigs = variableConnectionStringProvider.getConnectionStrings(dbNames);
+        } catch (Exception e) {
+            error("Fail to setup VariableDataSourceConfigure provider", e);
+            throw new RuntimeException(e);
+        }
+
+        return  connectionStringConfigs;
     }
 
     public DataSourceConfigure mergeDataSourceConfig(DalConnectionString connectionString) {
@@ -643,6 +669,10 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     public void setIPDomainStatusProvider(IPDomainStatusProvider provider) {
         this.ipDomainStatusProvider = provider;
+    }
+
+    public void setVariableConnectionStringProvider(AbstractVariableDataSourceConfigureProvider provider) {
+        this.variableConnectionStringProvider = provider;
     }
 
     // for unit test only

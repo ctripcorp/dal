@@ -19,7 +19,7 @@ public class CtripVariableDataSourceConfigureProviderTest {
         dbNames.add(DB_NAME);
         provider.setup(dbNames);
         DataSourceConfigure dataSourceConfigure = provider.getDataSourceConfigure(DB_NAME);
-        System.out.println();
+        Assert.assertNotNull(dataSourceConfigure);
     }
 
     @Test

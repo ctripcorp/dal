@@ -64,6 +64,7 @@ public class DalDataSourceFactory {
 
     public DataSource createVariableTypeDataSource(String dbName, AbstractVariableDataSourceConfigureProvider provider) throws Exception {
         Set<String> names = new HashSet<>();
+        names.add(dbName);
         provider.setup(names);
         DataSourceLocator locator = new DataSourceLocator(provider);
         return locator.getDataSource(dbName);

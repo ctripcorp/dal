@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CtripVariableDataSourceConfigureProvider extends AbstractVariableDataSourceConfigureProvider {
 
     private static final String DB_TOKEN_FILE = "db_token.properties";
-    private Map<String, String> tokenCache = new ConcurrentHashMap<>();
+    private static Map<String, String> tokenCache = new ConcurrentHashMap<>();
 
     @Override
     public Map<String, DalConnectionStringConfigure> getConnectionStrings(Set<String> dbNames) throws UnsupportedEncodingException {

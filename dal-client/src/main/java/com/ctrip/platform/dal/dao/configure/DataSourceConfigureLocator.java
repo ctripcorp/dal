@@ -35,10 +35,13 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     DalConnectionString setConnectionString(String name, DalConnectionString connectionString);
 
+    void setVariableConnectionStringConfigs(Map<String, DalConnectionStringConfigure> map);
+
     Properties setPoolProperties(DalPoolPropertiesConfigure configure);
 
     PropertiesWrapper getPoolProperties();
 
     DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString);
 
+    DataSourceConfigure mergeDataSourceConfigure(DalConnectionStringConfigure configure);
 }

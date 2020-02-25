@@ -27,6 +27,8 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     Map<String, DalConnectionString> getFailedConnectionStrings();
 
+    Map<String, DalConnectionStringConfigure> getFailedVariableConnectionStrings();
+
     void setIPDomainStatus(IPDomainStatus status);
 
     IPDomainStatus getIPDomainStatus();

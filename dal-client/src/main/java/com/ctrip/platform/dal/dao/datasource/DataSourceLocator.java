@@ -135,7 +135,7 @@ public class DataSourceLocator {
             ClusterInfo clusterInfo = new ClusterInfo(database.getClusterName(), database.getShardIndex(),
                     database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE);
             try {
-                if (cluster.isWrapperFor(DrcCluster.class)) {
+                if (cluster != null && cluster.isWrapperFor(DrcCluster.class)) {
                     DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                     LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                     LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);

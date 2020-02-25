@@ -14,8 +14,12 @@ import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
  */
 public class CtripLocalizationValidatorFactory implements LocalizationValidatorFactory {
 
-    private Ucs ucs;
+    private volatile Ucs ucs;
     private DalPropertiesLocator locator;
+
+    public CtripLocalizationValidatorFactory(DalPropertiesLocator locator) {
+        this(null, locator);
+    }
 
     public CtripLocalizationValidatorFactory(Ucs ucs, DalPropertiesLocator locator) {
         this.ucs = ucs;
@@ -24,7 +28,18 @@ public class CtripLocalizationValidatorFactory implements LocalizationValidatorF
 
     @Override
     public LocalizationValidator createValidator(ClusterInfo clusterInfo, LocalizationConfig localizationConfig) {
-        return new CtripLocalizationValidator(ucs, locator, clusterInfo, localizationConfig);
+        return new CtripLocalizationValidator(getOrCreateUcs(), locator, clusterInfo, localizationConfig);
+    }
+
+    private Ucs getOrCreateUcs() {
+        if (ucs == null) {
+            synchronized (this) {
+                if (ucs == null) {
+                    ucs = UcsClient.getInstance();
+                }
+            }
+        }
+        return ucs;
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.platform.dal.dao.configure.AbstractVariableDataSourceConfigureProvider;
@@ -65,6 +66,7 @@ public class DalDataSourceFactory {
     public DataSource createVariableTypeDataSource(String dbName, AbstractVariableDataSourceConfigureProvider provider) throws Exception {
         Set<String> names = new HashSet<>();
         names.add(dbName);
+        DataSourceConfigureManager.getInstance().setVariableConnectionStringProvider(provider);
         provider.setup(names);
         DataSourceLocator locator = new DataSourceLocator(provider);
         return locator.getDataSource(dbName);

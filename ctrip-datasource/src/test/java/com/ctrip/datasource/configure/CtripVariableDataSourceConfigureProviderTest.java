@@ -11,6 +11,7 @@ import java.util.Set;
 public class CtripVariableDataSourceConfigureProviderTest {
 
     private static final String DB_NAME = "qconfig";
+    private static final String DB_NAME_MGR = "kevin";
 
     @Test
     public void testGetDataSourceConfigure() {
@@ -23,9 +24,16 @@ public class CtripVariableDataSourceConfigureProviderTest {
     }
 
     @Test
-    public void testCreateVariableDataSource() throws Exception {
+    public void testCreateDataSource() throws Exception {
         DalDataSourceFactory factory = new DalDataSourceFactory();
         DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME);
+        Assert.assertNotNull(dataSource);
+    }
+
+    @Test
+    public void testCreateMGRDataSource() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_MGR, new MockCtripVariableDataSourceConfigureProvider());
         Assert.assertNotNull(dataSource);
     }
 }

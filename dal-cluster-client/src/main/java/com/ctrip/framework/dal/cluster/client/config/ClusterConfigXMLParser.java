@@ -272,8 +272,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             Node attributeNode = attributes.getNamedItem(name);
             if (attributeNode != null) {
                 String attribute = attributeNode.getNodeValue();
-                if (!StringUtils.isEmpty(attribute))
-                    return attribute.trim();
+                return attribute != null ? attribute.trim() : null;
             }
         }
         return defaultValue;

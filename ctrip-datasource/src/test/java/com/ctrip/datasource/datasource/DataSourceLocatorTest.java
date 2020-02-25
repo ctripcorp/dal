@@ -2,6 +2,9 @@ package com.ctrip.datasource.datasource;
 
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.DefaultDrcCluster;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.datasource.*;
@@ -26,9 +29,24 @@ public class DataSourceLocatorTest {
         DataSourceLocator locator = new DataSourceLocator(provider);
         MockConnectionString connStr1 = new MockConnectionString("10.32.20.139", 3306, "llj_test", "root", "!QAZ@WSX1qaz2wsx");
         MockDatabase db1 = new MockDatabase(connStr1);
-        MockDatabase db2 = new MockDatabase(connStr1);
+
+        MockDatabase db2 = mockDrcClusterDatabase(connStr1, true, new LocalizationConfig() {
+            @Override
+            public int getUnitStrategyId() {
+                return 1;
+            }
+
+            @Override
+            public String getZoneId() {
+                return "mockZone";
+            }
+        });
+
         DataSource ds1 = locator.getDataSource(new ClusterDataSourceIdentity(db1));
         DataSource ds2 = locator.getDataSource(new ClusterDataSourceIdentity(db2));
+        Assert.assertTrue(ds1 instanceof RefreshableDataSource);
+        Assert.assertFalse(ds1 instanceof LocalizedDataSource);
+        Assert.assertTrue(ds2 instanceof LocalizedDataSource);
         Assert.assertNotSame(ds1, ds2);
         SingleDataSource sds1 = ((RefreshableDataSource) ds1).getSingleDataSource();
         SingleDataSource sds2 = ((RefreshableDataSource) ds2).getSingleDataSource();
@@ -43,9 +61,21 @@ public class DataSourceLocatorTest {
         Assert.assertEquals(2, sds1.getReferenceCount());
     }
 
+    private MockDatabase mockDrcClusterDatabase(ConnectionString connectionString, boolean isMaster,
+                                                LocalizationConfig localizationConfig) {
+        MockDatabase database = new MockDatabase(connectionString);
+        if (!isMaster)
+            database.setSlave();
+        DrcCluster cluster = new DefaultDrcCluster(null, localizationConfig);
+        database.setCluster(cluster);
+        return database;
+    }
+
     private static class MockDatabase implements Database {
 
         private ConnectionString connectionString;
+        private boolean isMaster = true;
+        private Cluster cluster;
 
         public MockDatabase(ConnectionString connectionString) {
             this.connectionString = connectionString;
@@ -63,7 +93,7 @@ public class DataSourceLocatorTest {
 
         @Override
         public boolean isMaster() {
-            return true;
+            return isMaster;
         }
 
         @Override
@@ -78,7 +108,15 @@ public class DataSourceLocatorTest {
 
         @Override
         public Cluster getCluster() {
-            return null;
+            return cluster;
+        }
+
+        protected void setSlave() {
+            isMaster = false;
+        }
+
+        protected void setCluster(Cluster cluster) {
+            this.cluster = cluster;
         }
 
     }

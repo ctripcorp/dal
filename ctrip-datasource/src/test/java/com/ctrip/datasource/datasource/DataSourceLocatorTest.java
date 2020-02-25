@@ -1,6 +1,7 @@
 package com.ctrip.datasource.datasource;
 
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.datasource.*;
@@ -72,6 +73,11 @@ public class DataSourceLocatorTest {
 
         @Override
         public String[] getAliasKeys() {
+            return null;
+        }
+
+        @Override
+        public Cluster getCluster() {
             return null;
         }
 

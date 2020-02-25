@@ -10,7 +10,7 @@
         </databaseSet>
     </databaseSets>
     <LogListener>
-        <logger>com.ctrip.platform.dal.dao.CtripDalLogger</logger>
+        <logger>com.ctrip.platform.dal.sql.logging.CtripDalLogger</logger>
     </LogListener>
     <ConnectionLocator>
         <settings>

@@ -6,7 +6,9 @@ import com.ctrip.datasource.util.VariableConnectionStringUtils;
 import com.ctrip.datasource.util.entity.VariableConnectionStringInfo;
 import com.ctrip.platform.dal.dao.configure.AbstractVariableDataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
+import com.ctrip.platform.dal.dao.configure.InvalidVariableConnectionString;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.exceptions.DalException;
 import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
@@ -26,8 +28,14 @@ public class CtripVariableDataSourceConfigureProvider extends AbstractVariableDa
     public Map<String, DalConnectionStringConfigure> getConnectionStrings(Set<String> dbNames) throws UnsupportedEncodingException {
         String env = EnvUtil.getEnv();
         Map<String, DalConnectionStringConfigure> dalConnectionStringConfigures = new HashMap<>();
+        VariableConnectionStringInfo info = null;
         for (String dbName : dbNames) {
-            VariableConnectionStringInfo info = VariableConnectionStringUtils.getConnectionStringFromDBAPI(dbName, env);
+            try {
+                info = VariableConnectionStringUtils.getConnectionStringFromDBAPI(dbName, env);
+            } catch (Exception e) {
+                dalConnectionStringConfigures.put(dbName, new InvalidVariableConnectionString(dbName, new DalException(e.getMessage(), e)));
+                continue;
+            }
             dalConnectionStringConfigures.put(dbName, VariableConnectionStringParser.parser(dbName, info, tokenCache.get(dbName)));
         }
         return dalConnectionStringConfigures;

@@ -158,6 +158,18 @@ public class DalIgnite extends AbstractCtripIgnitePlugin {
                 errorMsg.append(String.format("[TitanKey: %s, ErrorMessage: %s] ", entry.getKey(), ((DalInvalidConnectionString) entry.getValue()).getConnectionStringException().getMessage()));
             }
         }
+
+        Map<String, DalConnectionStringConfigure> failedVariableConnectionStringMap = locator.getFailedVariableConnectionStrings();
+        if (failedVariableConnectionStringMap == null || failedVariableConnectionStringMap.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, DalConnectionStringConfigure> entry : failedVariableConnectionStringMap.entrySet()) {
+            if (entry.getValue() instanceof DalInvalidConnectionString) {
+                errorMsg.append(String.format("[dbName: %s, ErrorMessage: %s] ", entry.getKey(), ((InvalidVariableConnectionString) entry.getValue()).getConnectionStringException().getMessage()));
+            }
+        }
+
         throw new DalRuntimeException(errorMsg.toString());
     }
 

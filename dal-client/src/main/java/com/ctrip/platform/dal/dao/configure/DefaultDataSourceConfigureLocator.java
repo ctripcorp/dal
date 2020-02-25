@@ -81,6 +81,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         else {
             configure = mergeDataSourceConfigure(connectionString);
         }
+
         if (configure != null) {
             dataSourceConfiguresCache.put(id, configure);
         }

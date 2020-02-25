@@ -29,13 +29,7 @@ public abstract class AbstractVariableDataSourceConfigureProvider implements Int
 
     @Override
     public DataSourceConfigure getDataSourceConfigure(DataSourceIdentity id) {
-        DalPoolPropertiesConfigure dataSourceConfigure =
-                DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(id);
-        if (dataSourceConfigure == null)
-            return new DataSourceConfigure(id.getId());
-
-        return new DataSourceConfigure(id.getId(), dataSourceConfigure.getProperties());
-
+        return DataSourceConfigureLocatorManager.getInstance().getDataSourceConfigure(id);
     }
 
     @Override

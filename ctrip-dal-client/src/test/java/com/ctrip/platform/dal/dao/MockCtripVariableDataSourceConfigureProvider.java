@@ -1,5 +1,6 @@
-package com.ctrip.datasource.configure;
+package com.ctrip.platform.dal.dao;
 
+import com.ctrip.datasource.configure.CtripVariableDataSourceConfigureProvider;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 

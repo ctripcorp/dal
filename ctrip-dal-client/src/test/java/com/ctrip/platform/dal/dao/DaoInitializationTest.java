@@ -5,12 +5,14 @@ import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.framework.vi.IgniteManager;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigIPDomainStatusProvider;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigPoolPropertiesProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.vi.DalIgnite;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -142,5 +144,21 @@ public class DaoInitializationTest {
         boolean status = ignite.warmUP(new IgniteManager.SimpleLogger());
         assertTrue(status);
         DalClientFactory.shutdownFactory();
+    }
+
+    //support mgr in dal.config
+    @Test
+    public void testMGRInDALConfig() throws Exception {
+        String dbName1 = "qconfig";
+        String dbName2 = "kevin";
+        DataSourceConfigureManager.getInstance().setVariableConnectionStringProvider(new MockCtripVariableDataSourceConfigureProvider());
+        String path = DaoInitializationTest.class.getClassLoader().getResource("Dal.config.mgr").getPath();
+        DalClientFactory.shutdownFactory();
+        DalClientFactory.initClientFactory(path);
+        DataSourceLocator locator = new DataSourceLocator();
+        DataSource ds1 = locator.getDataSource(dbName1);
+        Assert.assertNotNull(ds1);
+        DataSource ds2 = locator.getDataSource(dbName2);
+        Assert.assertNotNull(ds2);
     }
 }

@@ -59,6 +59,10 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         return cluster;
     }
 
+    public Cluster getOrCreateCluster() {
+        return generate();
+    }
+
     private Cluster innerGenerate() {
         DefaultCluster cluster = (clusterType == ClusterType.NORMAL ?
                 new DefaultCluster(this) : new DefaultDrcCluster(this, generateLocalizationConfig()));

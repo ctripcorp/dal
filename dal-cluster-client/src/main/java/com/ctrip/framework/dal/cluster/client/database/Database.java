@@ -1,5 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.database;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
+
 /**
  * @author c7ch23en
  */
@@ -14,5 +16,7 @@ public interface Database {
     ConnectionString getConnectionString();
 
     String[] getAliasKeys();
+
+    Cluster getCluster();
 
 }

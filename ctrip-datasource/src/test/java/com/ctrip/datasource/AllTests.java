@@ -36,7 +36,7 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		AllInOneConfigureReaderTest.class,
 		ConnectionStringParserParserTest.class,
 		CtripDalDataSourceTest.class,
-		CtripVariableDataSourceConfigureProvider.class,
+		CtripVariableDataSourceConfigureProviderTest.class,
 		VariableConnectionStringParserTest.class,
 		MetricTest.class,
   		DalEncrypterTest.class,

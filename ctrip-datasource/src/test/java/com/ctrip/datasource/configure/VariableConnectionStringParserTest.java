@@ -14,7 +14,7 @@ public class VariableConnectionStringParserTest {
     private static final String TOKEN = "2olkdweut7sUbsrim-La";
 
     @Test
-    public void testConnectionStringParser() throws UnsupportedEncodingException {
+    public void testConnectionStringParser() throws Exception {
         String mgrUrl = "jdbc:mysql:replication://address=(type=slave)(protocol=tcp)(host=10.9.72.67)(port=55944),address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944),address=(type=slave)(protocol=tcp)(host=10.60.53.211)(port=55944)/qconfig?useUnicode=true&characterEncoding=UTF-8";
         String url = "jdbc:mysql://qconfig.mysql.db.fat.qa.nt.ctripcorp.com:55111/qconfig?useUnicode=true&characterEncoding=UTF-8";
         VariableConnectionStringInfo info = VariableConnectionStringUtils.getConnectionStringFromDBAPI(DBNAME, "PRO");

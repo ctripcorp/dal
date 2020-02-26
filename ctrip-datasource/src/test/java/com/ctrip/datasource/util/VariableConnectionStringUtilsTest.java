@@ -7,7 +7,7 @@ import org.junit.Test;
 public class VariableConnectionStringUtilsTest {
 
     @Test
-    public void testGetConnectionStringFromAPI() {
+    public void testGetConnectionStringFromAPI() throws Exception {
         String dbName = "qconfig";
         VariableConnectionStringInfo info = VariableConnectionStringUtils.getConnectionStringFromDBAPI(dbName, "FAT");
         Assert.assertNotNull(info);

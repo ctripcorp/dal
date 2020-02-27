@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
@@ -121,7 +122,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
         DataSourceIdentity id = getDataSourceIdentity(clusterInfo, cluster);
         DataSourceConfigure config = provider.getDataSourceConfigure(id);
         try {
-            if (cluster.isWrapperFor(DrcCluster.class)) {
+            if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
                 DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                 LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                 LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);

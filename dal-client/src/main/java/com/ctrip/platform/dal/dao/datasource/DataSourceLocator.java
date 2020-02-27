@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
@@ -135,7 +136,7 @@ public class DataSourceLocator {
             ClusterInfo clusterInfo = new ClusterInfo(database.getClusterName(), database.getShardIndex(),
                     database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE);
             try {
-                if (cluster != null && cluster.isWrapperFor(DrcCluster.class)) {
+                if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
                     DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
                     LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
                     LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);

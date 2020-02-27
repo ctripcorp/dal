@@ -17,16 +17,11 @@ import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 public class MockElementFactory extends CtripDalElementFactory {
 
     private static DalPropertiesLocator locator;
-    private MockLocalizationValidatorFactory factory;
-
-    public MockElementFactory() {
-        locator = new DefaultDalPropertiesLocator();
-        factory = new MockLocalizationValidatorFactory(locator);
-    }
+    private LocalizationValidatorFactory factory;
 
     @Override
     public LocalizationValidatorFactory getLocalizationValidatorFactory() {
-        return factory;
+        return getFactory();
     }
 
     @Override
@@ -35,7 +30,21 @@ public class MockElementFactory extends CtripDalElementFactory {
     }
 
     protected DalPropertiesLocator getLocator() {
+        if (locator == null)
+            synchronized (this) {
+                if (locator == null)
+                    locator = new DefaultDalPropertiesLocator();
+            }
         return locator;
+    }
+
+    private LocalizationValidatorFactory getFactory() {
+        if (factory == null)
+            synchronized (this) {
+                if (factory == null)
+                    factory = new MockLocalizationValidatorFactory(getLocator());
+            }
+        return factory;
     }
 
     static class MockLocalizationValidatorFactory extends CtripLocalizationValidatorFactory {

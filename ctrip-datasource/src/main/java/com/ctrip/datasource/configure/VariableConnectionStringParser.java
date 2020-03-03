@@ -14,11 +14,9 @@ import java.util.regex.Pattern;
 public class VariableConnectionStringParser {
     private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     private static final String MGR_URL_TEMPLATE = "jdbc:mysql:replication://%s/%s?useUnicode=true&characterEncoding=%s";
-    private static final String MGR_HOST_PORT_TEMPLATE = "address=(type=%s)(protocol=tcp)(host=%s)(port=%s)";
+    private static final String MGR_HOST_PORT_TEMPLATE = "address=(type=master)(protocol=tcp)(host=%s)(port=%s)";
     private static final String COM_SPLIT = ",";
     private static final String ONLINE = "online";
-    private static final String MYSQL_SLAVE = "slave";
-    private static final String MYSQL_MASTER = "master";
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     private static final Pattern dbnamePattern =
@@ -51,7 +49,7 @@ public class VariableConnectionStringParser {
         String ipAndPortString = "";
         for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoList) {
             if (checkClusterNodeInfo(clusterNodeInfo)) {
-                ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, getMysqlRole(clusterNodeInfo.getRole()), clusterNodeInfo.getIp_business(),
+                ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, clusterNodeInfo.getIp_business(),
                         clusterNodeInfo.getDns_port()) + COM_SPLIT;
             }
         }
@@ -82,9 +80,5 @@ public class VariableConnectionStringParser {
         StringBuilder sb = new StringBuilder(decodePassword);
         sb.reverse();
         return sb.substring(0, sb.toString().indexOf(token));
-    }
-
-    private static String getMysqlRole(String roleString) {
-        return roleString.contains(MYSQL_MASTER) ? MYSQL_MASTER : MYSQL_SLAVE;
     }
 }

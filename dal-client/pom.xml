@@ -23,7 +23,7 @@
         <spring-version>4.3.8.RELEASE</spring-version>
         <cglib-nodep-version>2.1_3</cglib-nodep-version>
         <file_encoding>UTF-8</file_encoding>
-        <jackson-version>2.9.9</jackson-version>
+        <jackson-version>2.10.3</jackson-version>
         <jsqlparser-version>1.2</jsqlparser-version>
     </properties>
     <dependencies>

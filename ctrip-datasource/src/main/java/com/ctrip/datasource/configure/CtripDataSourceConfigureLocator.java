@@ -12,7 +12,8 @@ public class CtripDataSourceConfigureLocator extends DefaultDataSourceConfigureL
             "An error occured while getting datasource.properties from QConfig.";
 
     @Override
-    protected DataSourceConfigure _mergeDataSourceConfigure(DalConnectionStringConfigure connectionStringConfigure, DalConnectionString connectionString) {
+    public DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString) {
+        DalConnectionStringConfigure connectionStringConfigure = getConnectionStringConfigure(connectionString);
         if (connectionStringConfigure == null)
             return null;
 

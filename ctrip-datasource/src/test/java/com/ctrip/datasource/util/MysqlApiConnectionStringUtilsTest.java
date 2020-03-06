@@ -1,15 +1,15 @@
 package com.ctrip.datasource.util;
 
-import com.ctrip.datasource.util.entity.VariableConnectionStringInfo;
+import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class VariableConnectionStringUtilsTest {
+public class MysqlApiConnectionStringUtilsTest {
 
     @Test
     public void testGetConnectionStringFromAPI() throws Exception {
         String dbName = "qconfig";
-        VariableConnectionStringInfo info = VariableConnectionStringUtils.getConnectionStringFromDBAPI(dbName, "FAT");
+        MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromDBAPI(dbName, "FAT");
         Assert.assertNotNull(info);
     }
 }

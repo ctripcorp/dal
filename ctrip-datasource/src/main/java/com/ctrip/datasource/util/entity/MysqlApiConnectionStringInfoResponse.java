@@ -1,9 +1,9 @@
 package com.ctrip.datasource.util.entity;
 
-public class VariableConnectionStringInfoResponse {
+public class MysqlApiConnectionStringInfoResponse {
     private String message;
 
-    private VariableConnectionStringInfo data;
+    private MysqlApiConnectionStringInfo data;
 
     public String getMessage() {
         return message;
@@ -13,11 +13,11 @@ public class VariableConnectionStringInfoResponse {
         this.message = message;
     }
 
-    public VariableConnectionStringInfo getData() {
+    public MysqlApiConnectionStringInfo getData() {
         return data;
     }
 
-    public void setData(VariableConnectionStringInfo data) {
+    public void setData(MysqlApiConnectionStringInfo data) {
         this.data = data;
     }
 }

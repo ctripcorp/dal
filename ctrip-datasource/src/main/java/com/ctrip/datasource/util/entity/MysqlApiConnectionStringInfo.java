@@ -2,7 +2,7 @@ package com.ctrip.datasource.util.entity;
 
 import java.util.List;
 
-public class VariableConnectionStringInfo {
+public class MysqlApiConnectionStringInfo {
     private String connectionstring;
 
     private List<ClusterNodeInfo> clusternodeinfolist;

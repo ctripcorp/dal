@@ -1,7 +1,6 @@
 package com.ctrip.datasource.titan;
 
 import com.ctrip.datasource.configure.AllInOneConfigureReader;
-import com.ctrip.datasource.configure.CtripVariableDataSourceConfigureProvider;
 import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
 import com.ctrip.datasource.configure.qconfig.IPDomainStatusProviderImpl;
 import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
@@ -30,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DataSourceConfigureManager extends DataSourceConfigureHelper {
@@ -82,7 +82,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
      */
     private AllInOneConfigureReader allInOneProvider = new AllInOneConfigureReader();
 
-    private AbstractVariableDataSourceConfigureProvider variableConnectionStringProvider = new CtripVariableDataSourceConfigureProvider();
     private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
     private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
@@ -94,6 +93,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
     private volatile boolean isInitialized = false;
+    private volatile boolean isPoolPropertiesInitialized = false;
     private Map<DataSourceIdentity, DataSourceConfigureChangeListener> dataSourceConfigureChangeListeners =
             new ConcurrentHashMap<>();
     private Map<String, SourceType> keyNameMap = new ConcurrentHashMap<>();
@@ -112,29 +112,18 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     }
 
     private void setupPoolProperties() {
-        try {
-            // set pool properties
-            DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
-            dataSourceConfigureLocator.setPoolProperties(poolProperties);
-        } catch (Throwable e) {
-            if (getIgnoreExternalException()) {
-                Cat.logError("fail to get pool properties from qconfig. ", e);
+        if (!isPoolPropertiesInitialized) {
+            try {
+                // set pool properties
+                DalPoolPropertiesConfigure poolProperties = poolPropertiesProvider.getPoolProperties();
+                dataSourceConfigureLocator.setPoolProperties(poolProperties);
+            } catch (Throwable e) {
+                if (getIgnoreExternalException()) {
+                    Cat.logError("fail to get pool properties from qconfig. ", e);
+                } else {
+                    throw e;
+                }
             }
-            else {
-                throw e;
-            }
-        }
-
-        boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get();
-        if (!isPoolListenerAdded) {
-            addPoolPropertiesChangedListener();
-            isPoolPropertiesListenerAdded.compareAndSet(false, true);
-        }
-
-        boolean isStatusListenerAdded = isIPDomainStatusListenerAdded.get();
-        if (!isStatusListenerAdded) {
-            addIPDomainStatusChangedListener();
-            isIPDomainStatusListenerAdded.compareAndSet(false, true);
         }
     }
 
@@ -164,6 +153,18 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         setupPoolProperties();
 
+        boolean isPoolListenerAdded = isPoolPropertiesListenerAdded.get();
+        if (!isPoolListenerAdded) {
+            addPoolPropertiesChangedListener();
+            isPoolPropertiesListenerAdded.compareAndSet(false, true);
+        }
+
+        boolean isStatusListenerAdded = isIPDomainStatusListenerAdded.get();
+        if (!isStatusListenerAdded) {
+            addIPDomainStatusChangedListener();
+            isIPDomainStatusListenerAdded.compareAndSet(false, true);
+        }
+
         if (names.isEmpty())
             return;
 
@@ -173,13 +174,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         if (sourceType == SourceType.Remote)
             addConnectionStringChangedListeners(names);
-    }
-
-    public synchronized void setup(Set<String> dbNames) {
-        setupPoolProperties();
-
-        Map<String, DalConnectionStringConfigure> connectionStringConfigs = getConnectionStringConfigures(dbNames);
-        dataSourceConfigureLocator.setVariableConnectionStringConfigs(connectionStringConfigs);
     }
 
     private Set<String> getFilteredNames(Set<String> names, SourceType sourceType) throws Exception {
@@ -240,21 +234,13 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return connectionStrings;
     }
 
-    private Map<String, DalConnectionStringConfigure> getConnectionStringConfigures(Set<String> dbNames) {
-        Map<String, DalConnectionStringConfigure> connectionStringConfigs = null;
-        // get config from api
-        try {
-            connectionStringConfigs = variableConnectionStringProvider.getConnectionStrings(dbNames);
-        } catch (Exception e) {
-            error("Fail to setup VariableDataSourceConfigure provider", e);
-            throw new RuntimeException(e);
-        }
-
-        return  connectionStringConfigs;
-    }
-
     public DataSourceConfigure mergeDataSourceConfig(DalConnectionString connectionString) {
         return dataSourceConfigureLocator.mergeDataSourceConfigure(connectionString);
+    }
+
+    public synchronized DataSourceConfigureLocator getDataSourceConfigureLocator() {
+        setupPoolProperties();
+        return dataSourceConfigureLocator;
     }
 
     private void addConnectionStringChangedListeners(Set<String> names) {
@@ -669,10 +655,6 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     public void setIPDomainStatusProvider(IPDomainStatusProvider provider) {
         this.ipDomainStatusProvider = provider;
-    }
-
-    public void setVariableConnectionStringProvider(AbstractVariableDataSourceConfigureProvider provider) {
-        this.variableConnectionStringProvider = provider;
     }
 
     // for unit test only

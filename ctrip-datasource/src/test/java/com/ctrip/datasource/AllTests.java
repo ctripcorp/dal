@@ -14,7 +14,7 @@ import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
 import com.ctrip.datasource.dynamicdatasource.DataSourceConfigureEncryptTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import com.ctrip.datasource.readonly.SqlServerReadonlyTest;
-import com.ctrip.datasource.util.VariableConnectionStringUtilsTest;
+import com.ctrip.datasource.util.MysqlApiConnectionStringUtilsTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -37,10 +37,10 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		ConnectionStringParserParserTest.class,
 		CtripDalDataSourceTest.class,
 		CtripVariableDataSourceConfigureProviderTest.class,
-		VariableConnectionStringParserTest.class,
+		MysqlApiConnectionStringParserTest.class,
 		MetricTest.class,
   		DalEncrypterTest.class,
-		VariableConnectionStringUtilsTest.class,
+		MysqlApiConnectionStringUtilsTest.class,
 		JavaConfigMybatisTest.class,
   		XmlConfigMybatisTest.class,
   		ExecutorInterceptorTest.class,

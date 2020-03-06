@@ -1,17 +1,22 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
-import com.ctrip.datasource.util.entity.VariableConnectionStringInfo;
+import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
 import com.ctrip.platform.dal.dao.configure.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import qunar.tc.qconfig.client.Configuration;
+import qunar.tc.qconfig.client.Feature;
+import qunar.tc.qconfig.client.MapConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class VariableConnectionStringParser {
+public class MysqlApiConnectionStringParser {
     private static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     private static final String MGR_URL_TEMPLATE = "jdbc:mysql:replication://%s/%s?useUnicode=true&characterEncoding=%s";
     private static final String MGR_HOST_PORT_TEMPLATE = "address=(type=master)(protocol=tcp)(host=%s)(port=%s)";
@@ -23,7 +28,16 @@ public class VariableConnectionStringParser {
             Pattern.compile("(database|initial\\scatalog)=([^;]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern dbcharsetPattern = Pattern.compile("(charset)=([^;]+)", Pattern.CASE_INSENSITIVE);
 
-    public static DalConnectionStringConfigure parser(String dbName, VariableConnectionStringInfo info, String token) throws UnsupportedEncodingException {
+    private static MysqlApiConnectionStringParser parser = null;
+
+    public synchronized static MysqlApiConnectionStringParser getInstance() {
+        if (parser == null) {
+            parser = new MysqlApiConnectionStringParser();
+        }
+        return parser;
+    }
+
+    public DalConnectionStringConfigure parser(String dbName, MysqlApiConnectionStringInfo info, String token) throws UnsupportedEncodingException {
         if (info == null) {
             return null;
         }
@@ -59,11 +73,11 @@ public class VariableConnectionStringParser {
         return configure;
     }
 
-    private static boolean checkClusterNodeInfo(ClusterNodeInfo c) {
+    private boolean checkClusterNodeInfo(ClusterNodeInfo c) {
         return ONLINE.equalsIgnoreCase(c.getStatus()) && StringUtils.isNotBlank(c.getIp_business()) && c.getDns_port() != 0;
     }
 
-    private static DataSourceConfigure parserConnectionString(String dbName, String connectionString, String token) throws UnsupportedEncodingException {
+    private DataSourceConfigure parserConnectionString(String dbName, String connectionString, String token) throws UnsupportedEncodingException {
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         ConnectionStringParser parser = ConnectionStringParser.getInstance();
         DalConnectionStringConfigure stringConfigure = parser.parse(dbName, connectionString);
@@ -75,7 +89,7 @@ public class VariableConnectionStringParser {
         return dataSourceConfigure;
     }
 
-    private static String decrypt(String password, String token) throws UnsupportedEncodingException {
+    private String decrypt(String password, String token) throws UnsupportedEncodingException {
         String decodePassword = new String(Base64.decodeBase64(password), "utf-8");
         StringBuilder sb = new StringBuilder(decodePassword);
         sb.reverse();

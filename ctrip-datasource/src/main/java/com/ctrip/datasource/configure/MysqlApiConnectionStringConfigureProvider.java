@@ -47,6 +47,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
                     dbToken = poolProperties.getDBToken();
                     callMysqlApiPeriod = poolProperties.getCallMysqlApiPeriod();
                     dbModel = poolProperties.getDBModel();
+                    isInitialized.set(true);
                 }
             }
         }
@@ -59,8 +60,8 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         DalConnectionStringConfigure dalConnectionStringConfigure = null;
 
         try {
-            MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(dbName, env, dbModel);
-            dalConnectionStringConfigure = MysqlApiConnectionStringParser.getInstance().parser(dbName, info, dbToken);
+            MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(mysqlApiUrl, dbName, env);
+            dalConnectionStringConfigure = MysqlApiConnectionStringParser.getInstance().parser(dbName, info, dbToken, dbModel);
         } catch (Exception e) {
             dalConnectionStringConfigure = new InvalidVariableConnectionString(dbName, new DalException(e.getMessage(), e));
         }

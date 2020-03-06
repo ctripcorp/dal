@@ -2,6 +2,7 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
+import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -37,39 +38,44 @@ public class MysqlApiConnectionStringParser {
         return parser;
     }
 
-    public DalConnectionStringConfigure parser(String dbName, MysqlApiConnectionStringInfo info, String token) throws UnsupportedEncodingException {
+    public DalConnectionStringConfigure parser(String dbName, MysqlApiConnectionStringInfo info, String token,
+                                               DBModel dbModel) throws UnsupportedEncodingException {
         if (info == null) {
             return null;
         }
         String connectionString = info.getConnectionstring();
         DataSourceConfigure configure = parserConnectionString(dbName, connectionString, token);
-        List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
-        if (clusterNodeInfoList == null || clusterNodeInfoList.size() <= 1) {
-            return configure;
-        }
-        String database = null;
-        Matcher matcher = dbnamePattern.matcher(connectionString);
-        if (matcher.find()) {
-            database = matcher.group(2);
-        }
-        String charset = null;
-        matcher = dbcharsetPattern.matcher(connectionString);
-        if (matcher.find()) {
-            charset = matcher.group(2);
-        } else {
-            charset = DEFAULT_ENCODING;
+
+        if (DBModel.MGR.equals(dbModel)) {
+            List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
+            if (clusterNodeInfoList == null || clusterNodeInfoList.size() <= 1) {
+                return configure;
+            }
+            String database = null;
+            Matcher matcher = dbnamePattern.matcher(connectionString);
+            if (matcher.find()) {
+                database = matcher.group(2);
+            }
+            String charset = null;
+            matcher = dbcharsetPattern.matcher(connectionString);
+            if (matcher.find()) {
+                charset = matcher.group(2);
+            } else {
+                charset = DEFAULT_ENCODING;
+            }
+
+            String ipAndPortString = "";
+            for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoList) {
+                if (checkClusterNodeInfo(clusterNodeInfo)) {
+                    ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, clusterNodeInfo.getIp_business(),
+                            clusterNodeInfo.getDns_port()) + COM_SPLIT;
+                }
+            }
+            ipAndPortString = ipAndPortString.substring(0, ipAndPortString.length() - 1);
+            String mgrUrl = String.format(MGR_URL_TEMPLATE, ipAndPortString, database, charset);
+            configure.setConnectionUrl(mgrUrl);
         }
 
-        String ipAndPortString = "";
-        for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoList) {
-            if (checkClusterNodeInfo(clusterNodeInfo)) {
-                ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, clusterNodeInfo.getIp_business(),
-                        clusterNodeInfo.getDns_port()) + COM_SPLIT;
-            }
-        }
-        ipAndPortString = ipAndPortString.substring(0, ipAndPortString.length() - 1);
-        String mgrUrl = String.format(MGR_URL_TEMPLATE, ipAndPortString, database, charset);
-        configure.setConnectionUrl(mgrUrl);
         return configure;
     }
 

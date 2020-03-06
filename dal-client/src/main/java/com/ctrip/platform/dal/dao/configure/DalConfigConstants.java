@@ -15,6 +15,7 @@ public interface DalConfigConstants {
     String SHARDING_STRATEGY = "shardingStrategy";
     String DATABASE_TYPE = "databaseType";
     String SHARDING = "sharding";
+    String CONNECTION_STRING_PROVIDER = "connectionStringProvider";
     String CONNECTION_STRING = "connectionString";
     String MASTER = "Master";
     String LOG_LISTENER = "LogListener";

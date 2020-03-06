@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
@@ -23,7 +24,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
-    private Map<String, DalConnectionStringConfigure> variableConnectionStrings = new ConcurrentHashMap<>();
     private Map<String, DalConnectionString> connectionStrings = new ConcurrentHashMap<>();
     protected AtomicReference<PropertiesWrapper> propertiesWrapperReference = new AtomicReference<>();
     private AtomicReference<IPDomainStatus> ipDomainStatusReference = new AtomicReference<>(IPDomainStatus.IP);
@@ -69,19 +69,10 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
             return configure;
 
         DalConnectionString connectionString = getConnectionString(id);
-        if (connectionString == null) {
-            DalConnectionStringConfigure dalConnectionStringConfigure = variableConnectionStrings.get(id.getId());
-            if (dalConnectionStringConfigure == null || dalConnectionStringConfigure instanceof InvalidVariableConnectionString) {
-                return null;
-            }
-            configure = mergeDataSourceConfigure(dalConnectionStringConfigure);
-        }
-        else if (connectionString instanceof DalInvalidConnectionString)
+        if (connectionString instanceof DalInvalidConnectionString)
             return null;
-        else {
-            configure = mergeDataSourceConfigure(connectionString);
-        }
 
+        configure = mergeDataSourceConfigure(connectionString);
         if (configure != null) {
             dataSourceConfiguresCache.put(id, configure);
         }
@@ -96,6 +87,9 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     private DalConnectionString getConnectionString(DataSourceIdentity id) {
         if (id instanceof ClusterDataSourceIdentity)
             return ((ClusterDataSourceIdentity) id).getDalConnectionString();
+        else if (id instanceof ApiDataSourceIdentity) {
+            return ((ApiDataSourceIdentity) id).getConnectionString();
+        }
         else
             return connectionStrings.get(id.getId());
     }
@@ -144,18 +138,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         return (oldConnectionString instanceof DalInvalidConnectionString) ? null : oldConnectionString;
     }
 
-    @Override
-    public void setVariableConnectionStringConfigs(Map<String, DalConnectionStringConfigure> map) {
-        if (map == null || map.isEmpty())
-            return;
-
-        for (Map.Entry<String, DalConnectionStringConfigure> entry : map.entrySet()) {
-            String keyName = ConnectionStringKeyHelper.getKeyName(entry.getKey());
-            variableConnectionStrings.put(keyName, entry.getValue());
-            dataSourceConfiguresCache.remove(new DataSourceName(keyName));
-        }
-    }
-
     public Map<String, DalConnectionString> getAllConnectionStrings() {
         Map<String, DalConnectionString> copyConnectionStrings = new ConcurrentHashMap<>(connectionStrings);
         return copyConnectionStrings;
@@ -177,17 +159,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
                 failedConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()), entry.getValue());
         }
         return failedConnectionStrings;
-    }
-
-    @Override
-    public Map<String, DalConnectionStringConfigure> getFailedVariableConnectionStrings() {
-        Map<String, DalConnectionStringConfigure> failedVariableConnectionStrings = new ConcurrentHashMap<>();
-        for (Map.Entry<String, DalConnectionStringConfigure> entry : variableConnectionStrings.entrySet()) {
-            if (entry.getValue() instanceof  InvalidVariableConnectionString) {
-                failedVariableConnectionStrings.put(ConnectionStringKeyHelper.getKeyName(entry.getKey()), entry.getValue());
-            }
-        }
-        return failedVariableConnectionStrings;
     }
 
     @Override
@@ -239,15 +210,6 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     @Override
     public DataSourceConfigure mergeDataSourceConfigure(DalConnectionString connectionString) {
         DalConnectionStringConfigure connectionStringConfigure = getConnectionStringConfigure(connectionString);
-        return _mergeDataSourceConfigure(connectionStringConfigure, connectionString);
-    }
-
-    @Override
-    public DataSourceConfigure mergeDataSourceConfigure(DalConnectionStringConfigure configure) {
-        return _mergeDataSourceConfigure(configure, null);
-    }
-
-    protected DataSourceConfigure _mergeDataSourceConfigure(DalConnectionStringConfigure connectionStringConfigure, DalConnectionString connectionString) {
         if (connectionStringConfigure == null)
             return null;
 

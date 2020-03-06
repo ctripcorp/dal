@@ -6,12 +6,7 @@ import java.util.*;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
-import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
-import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
-import com.ctrip.platform.dal.dao.configure.DataBase;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.configure.DefaultDataSourceConfigureProvider;
-import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 import javax.sql.DataSource;
@@ -43,7 +38,9 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
                 locator.setup(((ClusterDatabaseSet) dbSet).getCluster());
             } else  {
                 for (DataBase db : dbSet.getDatabases().values()) {
-                    keyNames.add(db.getConnectionString());
+                    if (!(db instanceof ProviderDataBase)) {
+                        keyNames.add(db.getConnectionString());
+                    }
                 }
             }
         }
@@ -60,6 +57,13 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
     @Override
     public Connection getConnection(Database database) throws Exception {
         DataSourceIdentity id = new ClusterDataSourceIdentity(database);
+        DataSource dataSource = locator.getDataSource(id);
+        return dataSource.getConnection();
+    }
+
+    @Override
+    public Connection getConnection(ConnectionStringConfigureProvider provider) throws Exception {
+        DataSourceIdentity id = new ApiDataSourceIdentity(provider);
         DataSource dataSource = locator.getDataSource(id);
         return dataSource.getConnection();
     }

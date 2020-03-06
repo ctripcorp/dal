@@ -8,7 +8,9 @@ import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -120,7 +122,13 @@ public class DalConnectionManager {
 				Database db = ((ClusterDataBase) selectedDataBase).getDatabase();
 				conn = locator.getConnection(db);
 				meta = DbMeta.createIfAbsent(new ClusterDataSourceIdentity(db), dbSet.getDatabaseCategory(), conn);
-			} else {
+			}
+			else if (selectedDataBase instanceof ProviderDataBase) {
+				ConnectionStringConfigureProvider provider = ((ProviderDataBase) selectedDataBase).getConnectionStringProvider();
+				conn = locator.getConnection(provider);
+				meta = DbMeta.createIfAbsent(new ApiDataSourceIdentity(provider), dbSet.getDatabaseCategory(), conn);
+			}
+			else {
 				String allInOneKey = selectedDataBase.getConnectionString();
 				conn = locator.getConnection(allInOneKey);
 				meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);

@@ -26,6 +26,11 @@ public interface DataSourceConfigureConstants {
     String CONNECTIONPROPERTIES = "connectionProperties";
     String INIT_SQL = "initSql";
 
+    //used by mgr datasource
+    String DB_TOKEN = "dbToken";
+    String CALL_MYSQL_API_PERIOD = "callMysqlApiPeriod";
+    String DB_MODEL = "dbModel";
+
     // This is for typo error
     String INIT_SQL2 = "initSQL";
 
@@ -67,6 +72,9 @@ public interface DataSourceConfigureConstants {
     // com.ctrip.datasource.interceptor.CtripConnectionState
     // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
 
+    //used by mgr datasource
+    int DEFAULT_CALL_MYSQL_API_PERIOD = 3; //second
+    String DEFAULT_DB_MODEL = "standalone";
 
 
     // **********Constants**********

@@ -95,6 +95,8 @@ public class DalConfigure {
         try {
             if (db instanceof ClusterDataBase)
                 conn = locator.getConnection(((ClusterDataBase) db).getDatabase());
+            else if (db instanceof ProviderDataBase)
+                conn = locator.getConnection(((ProviderDataBase) db).getConnectionStringProvider());
             else
                 conn = locator.getConnection(db.getConnectionString());
         } catch (Throwable e) {

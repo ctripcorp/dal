@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -236,6 +237,21 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
 
     public String getOption() {
         return getProperty(OPTION, DEFAULT_CONNECTIONPROPERTIES);
+    }
+
+    @Override
+    public String getDBToken() {
+        return getProperty(DB_TOKEN);
+    }
+
+    @Override
+    public Integer getCallMysqlApiPeriod() {
+        return getIntProperty(CALL_MYSQL_API_PERIOD, DEFAULT_CALL_MYSQL_API_PERIOD);
+    }
+
+    @Override
+    public DBModel getDBModel() {
+        return DBModel.toDBModel(getProperty(DB_MODEL, DEFAULT_DB_MODEL));
     }
 
 

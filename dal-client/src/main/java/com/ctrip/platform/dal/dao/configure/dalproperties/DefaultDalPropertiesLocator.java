@@ -27,6 +27,12 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     private static final String PROPERTY_NAME_DRC_STAGE = "DrcStage";
     private static final String PROPERTY_NAME_FORMAT_DRC_ROUTE_CTRL = "DrcStage.%s.Localized";
 
+    private static final String CONNECTION_STRING_MYSQL_API_URL = "ConnectionStringMysqlApiUrl";
+    private static final String CONNECTION_STRING_MYSQL_API_URL_SHAJQ = "ConnectionStringMysqlApiUrl_shajq";
+    private static final String CONNECTION_STRING_MYSQL_API_URL_SHAOY = "ConnectionStringMysqlApiUrl_shaoy";
+    private static final String CONNECTION_STRING_MYSQL_API_URL_SHARB = "ConnectionStringMysqlApiUrl_sharb";
+    private static final String CONNECTION_STRING_MYSQL_API_URL_SHAFQ = "ConnectionStringMysqlApiUrl_shafq";
+
     private static final String DEFAULT_DRC_STAGE = "test";
     private static final String DEFAULT_DRC_LOCALIZED = "false";
 
@@ -120,6 +126,11 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     @Override
     public String getProperty(String name) {
         return allProperties.get().get(name.toLowerCase());
+    }
+
+    @Override
+    public String getConnectionStringMysqlApiUrl() {
+        return getProperty(CONNECTION_STRING_MYSQL_API_URL);
     }
 
     private String getProperty(String name, String defaultValue) {

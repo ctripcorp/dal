@@ -27,4 +27,6 @@ public interface DalPropertiesLocator {
 
     String getProperty(String name);
 
+    String getConnectionStringMysqlApiUrl();
+
 }

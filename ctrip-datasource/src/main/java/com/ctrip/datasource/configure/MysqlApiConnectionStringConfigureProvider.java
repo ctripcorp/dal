@@ -16,6 +16,8 @@ import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.exceptions.DalException;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class MysqlApiConnectionStringConfigureProvider implements ConnectionStringConfigureProvider {
 
     private String dbName;
@@ -27,23 +29,32 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     private int callMysqlApiPeriod;
     private DBModel dbModel;
 
+    private final AtomicBoolean isInitialized = new AtomicBoolean(false);
+
     public MysqlApiConnectionStringConfigureProvider(String dbName) {
         this.dbName = dbName;
         dalPropertiesLocator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
         dataSourceConfigureLocator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
     }
 
-    public void initMysqlApiConfigure() {
-        mysqlApiUrl = dalPropertiesLocator.getConnectionStringMysqlApiUrl();
+    private void initMysqlApiConfigure() {
+        if (!isInitialized.get()) {
+            synchronized (isInitialized) {
+                if (!isInitialized.get()) {
+                    mysqlApiUrl = dalPropertiesLocator.getConnectionStringMysqlApiUrl();
 
-        DalPoolPropertiesConfigure poolProperties = dataSourceConfigureLocator.getDataSourceConfigure(new ApiDataSourceIdentity(this));
-        dbToken = poolProperties.getDBToken();
-        callMysqlApiPeriod = poolProperties.getCallMysqlApiPeriod();
-        dbModel = poolProperties.getDBModel();
+                    DalPoolPropertiesConfigure poolProperties = dataSourceConfigureLocator.getDataSourceConfigure(new ApiDataSourceIdentity(this));
+                    dbToken = poolProperties.getDBToken();
+                    callMysqlApiPeriod = poolProperties.getCallMysqlApiPeriod();
+                    dbModel = poolProperties.getDBModel();
+                }
+            }
+        }
     }
 
     @Override
     public DalConnectionStringConfigure getConnectionString() throws Exception {
+        initMysqlApiConfigure();
         String env = EnvUtil.getEnv();
         DalConnectionStringConfigure dalConnectionStringConfigure = null;
 

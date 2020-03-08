@@ -1,5 +1,6 @@
 package com.ctrip.datasource.util;
 
+import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.datasource.util.entity.HttpMethod;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfoResponse;
@@ -11,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MysqlApiConnectionStringUtils {
+
+    private static final int DEFAULT_HTTP_TIMEOUT_MS = 1800;
 
     private static final String DB_MYSQL_API_PRO = "http://mysqlapi.db.ctripcorp.com:8080/database/getdbconninfo";
 
@@ -30,12 +33,14 @@ public class MysqlApiConnectionStringUtils {
         MysqlApiConnectionStringInfo info = null;
         String url = !StringUtils.isEmpty(mysqlApiUrl) ? mysqlApiUrl : "FAT".equalsIgnoreCase(env) ? DB_MYSQL_API_FAT : "UAT".equalsIgnoreCase(env) ?
                 DB_MYSQL_API_UAT : DB_MYSQL_API_PRO;
-        Map<String, Object> parameters = new HashMap<>();
+        Map<String, String> parameters = new HashMap<>();
         parameters.put("env", env);
         parameters.put("dbname", dbName);
         MysqlApiConnectionStringInfoResponse response = null;
+        HttpExecutor executor = HttpExecutor.getInstance();
         try {
-            response = HttpUtils.getJSONEntity(MysqlApiConnectionStringInfoResponse.class, url, parameters, HttpMethod.HttpPost);
+            String responseStr = executor.executePost(url, parameters, "", DEFAULT_HTTP_TIMEOUT_MS);
+            response = GsonUtils.json2T(responseStr, MysqlApiConnectionStringInfoResponse.class);
         } catch (Exception e) {
             Cat.logError("get mgr info from db api fail, [dbName:" + dbName + "]", e);
             throw e;

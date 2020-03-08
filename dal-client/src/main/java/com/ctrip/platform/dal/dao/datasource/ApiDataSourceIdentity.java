@@ -1,9 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.platform.dal.dao.configure.DalConnectionString;
-import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
-import com.ctrip.platform.dal.dao.configure.InvalidConnectionString;
-import com.ctrip.platform.dal.dao.configure.InvalidVariableConnectionString;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -45,6 +43,23 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
 
     public DalConnectionString getConnectionString() {
         return connectionString;
+    }
+
+    public void addListener(DataSourceConfigureChangeListener changeListener) {
+        provider.addListener(new Listener<DalConnectionStringConfigure>() {
+
+
+            @Override
+            public void onChanged(DalConnectionStringConfigure current) {
+                if (current != null) {
+                    String oldConnectionUrl = connectionStringConfigure.getConnectionUrl();
+                    String newConnectionUrl = current.getConnectionUrl();
+                    if (!oldConnectionUrl.equalsIgnoreCase(newConnectionUrl)) {
+                        connectionStringConfigure = current;
+                    }
+                }
+            }
+        });
     }
 
     @Override

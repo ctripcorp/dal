@@ -90,6 +90,17 @@ public class DalDataSourceFactory {
      * @return DataSource
      * @throws Exception
      */
+    public DataSource createVariableTypeDataSource(ConnectionStringConfigureProvider connectionStringConfigureProvider) throws Exception {
+        return createVariableTypeDataSource(connectionStringConfigureProvider, false);
+    }
+
+    /**
+     * support create mgr or standalone datasource
+     *
+     * @param connectionStringConfigureProvider
+     * @return DataSource
+     * @throws Exception
+     */
     public DataSource createVariableTypeDataSource(ConnectionStringConfigureProvider connectionStringConfigureProvider, boolean isForceInitialize) throws Exception {
         TitanProvider provider = initTitanProvider(isForceInitialize);
 

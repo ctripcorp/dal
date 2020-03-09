@@ -9,7 +9,7 @@ public class MysqlApiConnectionStringUtilsTest {
     @Test
     public void testGetConnectionStringFromAPI() throws Exception {
         String dbName = "qconfig";
-        MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromDBAPI(dbName, "FAT");
+        MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(null, dbName, "FAT");
         Assert.assertNotNull(info);
     }
 }

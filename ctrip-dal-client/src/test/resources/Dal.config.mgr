@@ -1,12 +1,15 @@
 <dal name="testByQA">
     <databaseSets>
-        <!-- mgr 模式-->
-        <databaseSet name="kevin" provider="mySqlProvider">
-            <add name="kevin" databaseType="Master" sharding="" connectionString="kevin"/>
+        <databaseSet name="testConnectionString" provider="mySqlProvider">
+            <!-- mgr 模式-->
+            <add name="kevin" databaseType="Master" sharding="" connectionStringProvider="com.ctrip.platform.dal.dao.MockConnectionStringConfigureProvider" connectionString="kevin"/>
+            <!-- titankey -->
+            <add name="dao_test" databaseType="Master" sharding="" connectionString="fxdaltestdb_w"/>
         </databaseSet>
-        <!-- 单点 -->
+
         <databaseSet name="qconfig" provider="mySqlProvider">
-                    <add name="qconfig" databaseType="Master" sharding="" connectionString="qconfig"/>
+            <!-- 单点 -->
+            <add name="qconfig" databaseType="Master" sharding="" connectionStringProvider="com.ctrip.datasource.configure.MysqlApiConnectionStringConfigureProvider" connectionString="qconfig"/>
         </databaseSet>
     </databaseSets>
     <LogListener>
@@ -14,7 +17,7 @@
     </LogListener>
     <ConnectionLocator>
         <settings>
-            <dataSourceConfigureProvider>com.ctrip.platform.dal.dao.MockCtripVariableDataSourceConfigureProvider</dataSourceConfigureProvider>
+            <dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
         </settings>
     </ConnectionLocator>
     <TaskFactory>

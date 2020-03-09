@@ -1,10 +1,13 @@
 package com.ctrip.platform.dal.dao;
 
+import com.ctrip.datasource.configure.MysqlApiConnectionStringConfigureProvider;
 import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
+import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.vi.IgniteManager;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigIPDomainStatusProvider;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigPoolPropertiesProvider;
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.vi.DalIgnite;
 import org.junit.Assert;
@@ -157,16 +160,19 @@ public class DaoInitializationTest {
 
         String dbName1 = "qconfig";
         String dbName2 = "kevin";
-        DataSourceConfigureManager.getInstance().setVariableConnectionStringProvider(new MockCtripVariableDataSourceConfigureProvider());
+        String dbName3 = "fxdaltestdb_w";
         String path = DaoInitializationTest.class.getClassLoader().getResource("Dal.config.mgr").getPath();
         DalClientFactory.shutdownFactory();
         DalClientFactory.initClientFactory(path);
-        DataSourceLocator locator = new DataSourceLocator();
-        DataSource ds1 = locator.getDataSource(dbName1);
+        DataSourceLocator locator = new DataSourceLocator(new TitanProvider());
+        DataSource ds1 = locator.getDataSource(new ApiDataSourceIdentity(new MysqlApiConnectionStringConfigureProvider(dbName1)));
         Assert.assertNotNull(ds1);
 
-        DataSource ds2 = locator.getDataSource(dbName2);
+        DataSource ds2 = locator.getDataSource(new ApiDataSourceIdentity(new MockConnectionStringConfigureProvider()));
         Assert.assertNotNull(ds2);
+
+        DataSource ds3 = locator.getDataSource(dbName3);
+        Assert.assertNotNull(ds3);
 
         DatabaseMetaData metaData1 = ds1.getConnection().getMetaData();
         String url1 = metaData1.getURL();
@@ -175,6 +181,10 @@ public class DaoInitializationTest {
         DatabaseMetaData metaData2 = ds2.getConnection().getMetaData();
         String url2 = metaData2.getURL();
         Assert.assertTrue(mgrUrl1.equalsIgnoreCase(url2) || mgrUrl2.equalsIgnoreCase(url2) || mgrUrl3.equalsIgnoreCase(url2));
+
+        DatabaseMetaData metaData3 = ds3.getConnection().getMetaData();
+        String url3 = metaData3.getURL();
+        Assert.assertTrue(normalUrl.equalsIgnoreCase(url3));
 
         DalClientFactory.shutdownFactory();
     }

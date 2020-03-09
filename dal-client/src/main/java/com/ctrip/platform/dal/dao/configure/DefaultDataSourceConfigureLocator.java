@@ -24,6 +24,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
 
     protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
+    private Map<DataSourceIdentity, DalConnectionString> apiConnectionStrings = new ConcurrentHashMap<>();
     private Map<String, DalConnectionString> connectionStrings = new ConcurrentHashMap<>();
     protected AtomicReference<PropertiesWrapper> propertiesWrapperReference = new AtomicReference<>();
     private AtomicReference<IPDomainStatus> ipDomainStatusReference = new AtomicReference<>(IPDomainStatus.IP);
@@ -88,7 +89,13 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         if (id instanceof ClusterDataSourceIdentity)
             return ((ClusterDataSourceIdentity) id).getDalConnectionString();
         else if (id instanceof ApiDataSourceIdentity) {
-            return ((ApiDataSourceIdentity) id).getConnectionString();
+            DalConnectionString dalConnectionString = apiConnectionStrings.get(id);
+
+            if (dalConnectionString == null) {
+                dalConnectionString = ((ApiDataSourceIdentity) id).getConnectionString();
+                apiConnectionStrings.put(id, dalConnectionString);
+            }
+            return dalConnectionString;
         }
         else
             return connectionStrings.get(id.getId());
@@ -135,6 +142,13 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         DalConnectionString oldConnectionString = connectionStrings.put(keyName, connectionString);
         dataSourceConfiguresCache.remove(new DataSourceName(keyName));
+        return (oldConnectionString instanceof DalInvalidConnectionString) ? null : oldConnectionString;
+    }
+
+    @Override
+    public DalConnectionString setApiConnectionString(DataSourceIdentity id, DalConnectionString connectionString) {
+        DalConnectionString oldConnectionString = apiConnectionStrings.put(id, connectionString);
+        dataSourceConfiguresCache.remove(id);
         return (oldConnectionString instanceof DalInvalidConnectionString) ? null : oldConnectionString;
     }
 

@@ -17,10 +17,9 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
 
     public ApiDataSourceIdentity(ConnectionStringConfigureProvider provider) {
         this.provider = provider;
-        init();
     }
 
-    private void init() {
+    private void initConnectionString() {
         try {
             connectionStringConfigure = provider.getConnectionString();
         } catch (Exception e) {
@@ -42,24 +41,8 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
     }
 
     public DalConnectionString getConnectionString() {
+        initConnectionString();
         return connectionString;
-    }
-
-    public void addListener(DataSourceConfigureChangeListener changeListener) {
-        provider.addListener(new Listener<DalConnectionStringConfigure>() {
-
-
-            @Override
-            public void onChanged(DalConnectionStringConfigure current) {
-                if (current != null) {
-                    String oldConnectionUrl = connectionStringConfigure.getConnectionUrl();
-                    String newConnectionUrl = current.getConnectionUrl();
-                    if (!oldConnectionUrl.equalsIgnoreCase(newConnectionUrl)) {
-                        connectionStringConfigure = current;
-                    }
-                }
-            }
-        });
     }
 
     @Override

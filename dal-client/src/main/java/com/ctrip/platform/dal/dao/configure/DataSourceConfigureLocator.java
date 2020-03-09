@@ -35,6 +35,8 @@ public interface DataSourceConfigureLocator extends Ordered {
 
     DalConnectionString setConnectionString(String name, DalConnectionString connectionString);
 
+    DalConnectionString setApiConnectionString(DataSourceIdentity id, DalConnectionString connectionString);
+
     Properties setPoolProperties(DalPoolPropertiesConfigure configure);
 
     PropertiesWrapper getPoolProperties();

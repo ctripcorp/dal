@@ -309,9 +309,12 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private DataBase readDataBase(Node dataBaseNode, boolean isSharded) throws Exception {
-        checkAttribte(dataBaseNode, NAME, DATABASE_TYPE, SHARDING, CONNECTION_STRING);
+        checkAttribte(dataBaseNode, NAME, DATABASE_TYPE, SHARDING, CONNECTION_STRING, CONNECTION_STRING_PROVIDER);
         String sharding = isSharded ? getAttribute(dataBaseNode, SHARDING) : "";
-        String connectionStringProvider = getAttribute(dataBaseNode, CONNECTION_STRING_PROVIDER);
+        String connectionStringProvider = null;
+        if (hasAttribute(dataBaseNode, CONNECTION_STRING_PROVIDER)) {
+            connectionStringProvider = getAttribute(dataBaseNode, CONNECTION_STRING_PROVIDER);
+        }
 
         DataBase dataBase = new DefaultDataBase(getAttribute(dataBaseNode, NAME), getAttribute(dataBaseNode, DATABASE_TYPE).equals(MASTER),
                 sharding, getAttribute(dataBaseNode, CONNECTION_STRING));

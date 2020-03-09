@@ -21,7 +21,6 @@ import com.dianping.cat.Cat;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MysqlApiConnectionStringConfigureProvider implements ConnectionStringConfigureProvider {
 

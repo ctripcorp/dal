@@ -1,11 +1,13 @@
 package com.ctrip.datasource.titan;
 
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.ctrip.datasource.configure.CtripLocalClusterInfoProvider;
 import com.ctrip.datasource.net.HttpExecutor;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.datasource.configure.ClusterInfoProvider;
 import com.ctrip.datasource.configure.CtripClusterInfoProvider;
@@ -17,8 +19,11 @@ import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.datasource.common.enums.SourceType;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
+import com.dianping.cat.Cat;
 
 public class TitanProvider implements IntegratedConfigProvider {
 
@@ -78,6 +83,7 @@ public class TitanProvider implements IntegratedConfigProvider {
     @Override
     public void register(DataSourceIdentity id, DataSourceConfigureChangeListener listener) {
         dataSourceConfigureManager.register(id, listener);
+        registerMysqlApi(id, listener);
     }
 
     @Override
@@ -93,6 +99,40 @@ public class TitanProvider implements IntegratedConfigProvider {
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
         return clusterConfigProvider.getClusterConfig(clusterName);
+    }
+
+    private void registerMysqlApi(final DataSourceIdentity id, DataSourceConfigureChangeListener listener) {
+        if (id instanceof ApiDataSourceIdentity) {
+            ConnectionStringConfigureProvider provider = ((ApiDataSourceIdentity) id).getProvider();
+            provider.addListener(new Listener<DalConnectionStringConfigure>() {
+                @Override
+                public void onChanged(DalConnectionStringConfigure newConnectionStringConfigure) {
+                    if (newConnectionStringConfigure != null) {
+                        String newConnectionUrl = newConnectionStringConfigure.getConnectionUrl();
+
+                        DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocatorManager.getInstance();
+                        DataSourceConfigure oldDataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure(id);
+                        String oldConnectionUrl = oldDataSourceConfigure.getConnectionUrl();
+
+                        if (!newConnectionUrl.equalsIgnoreCase(oldConnectionUrl)) {
+                            dataSourceConfigureLocator.setApiConnectionString(id,
+                                    new ApiDataSourceIdentity.MysqlApiConnectionStringImpl(newConnectionStringConfigure));
+                            DataSourceConfigure newDataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure(id);
+
+                            DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(id.getId(),
+                                    newDataSourceConfigure, oldDataSourceConfigure);
+                            synchronized (TitanProvider.class) {
+                                try {
+                                    listener.configChanged(event);
+                                } catch (SQLException e) {
+                                    Cat.logError(String.format("mgr datasource[name:%s] switch failed", id.getId()), e);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void setSourceType(Map<String, String> settings) {

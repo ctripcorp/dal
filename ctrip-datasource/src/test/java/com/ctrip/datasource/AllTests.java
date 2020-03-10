@@ -12,6 +12,7 @@ import com.ctrip.datasource.datasource.DataSourceValidatorTest;
 import com.ctrip.datasource.datasource.MockQConfigProvider.ExceptionQConfigPoolPropertiesProviderTest;
 import com.ctrip.datasource.dynamicdatasource.DalDataSourceFactoryTest;
 import com.ctrip.datasource.dynamicdatasource.DataSourceConfigureEncryptTest;
+import com.ctrip.datasource.dynamicdatasource.MGRDataSourceSwitchTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import com.ctrip.datasource.readonly.SqlServerReadonlyTest;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtilsTest;
@@ -47,6 +48,7 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
   		StatementHandlerInterceptorTest.class,
   		StatementPrepareHandlerInterceptorTest.class,
 		DalDataSourceFactoryTest.class,
+		MGRDataSourceSwitchTest.class,
 		QConfigConnectionStringProviderTest.class,
 		CtripConnectionListenerTest.class,
 		DataSourceValidatorTest.class,

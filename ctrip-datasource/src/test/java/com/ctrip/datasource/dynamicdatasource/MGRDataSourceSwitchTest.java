@@ -45,7 +45,7 @@ public class MGRDataSourceSwitchTest {
         String mgrUrl2 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
         String mgrUrl3 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
 
-        MockConnectionStringConfigureProvider provider = new MockConnectionStringConfigureProvider();
+        DynamicConnectionStringConfigureProvider provider = new DynamicConnectionStringConfigureProvider("unused");
         DalDataSourceFactory factory = new DalDataSourceFactory();
         DataSource ds1 = factory.createVariableTypeDataSource(provider);
         RefreshableDataSource refreshableDataSource = (RefreshableDataSource) ds1;

@@ -65,6 +65,15 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         Map<String, Properties> datasourcePropertiesMap = propertiesWrapper.getDatasourceProperties();
         Properties dataSourceProperties = datasourcePropertiesMap.get(dbName);
 
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
+        if (dataSourceProperties == null) {
+            if (StringUtils.isEmpty(appProperties.getProperty(DB_TOKEN))) {
+                throw new DalRuntimeException(String.format("the db token of %s is null", dbName));
+            }
+
+            dataSourceConfigure.setProperties(appProperties);
+            return dataSourceConfigure;
+        }
         Properties mysqlApiConfigure = new Properties();
 
         String dbToken = dataSourceProperties.getProperty(DB_TOKEN) != null ? dataSourceProperties.getProperty(DB_TOKEN) : appProperties.getProperty(DB_TOKEN);
@@ -86,9 +95,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         }
         mysqlApiConfigure.setProperty(DB_MODEL, dbModel);
 
-        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         dataSourceConfigure.setProperties(mysqlApiConfigure);
-
         return dataSourceConfigure;
     }
 
@@ -107,7 +114,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         return dalConnectionStringConfigure;
     }
 
-    private DalConnectionStringConfigure getConnectionStringFromMysqlApi() throws Exception {
+    protected DalConnectionStringConfigure getConnectionStringFromMysqlApi() throws Exception {
         String env = EnvUtil.getEnv();
         MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(mysqlApiUrl, dbName, env);
 

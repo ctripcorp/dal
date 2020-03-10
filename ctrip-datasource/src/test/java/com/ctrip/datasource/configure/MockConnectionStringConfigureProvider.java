@@ -43,11 +43,11 @@ public class MockConnectionStringConfigureProvider implements ConnectionStringCo
     }
 
     public void switchDataSource() {
-        String url = "jdbc:mysql://10.32.20.139:3306/llj_test";
+        String url = "jdbc:mysql://localhost:3306/test";
         String userName = "root";
-        String password = "!QAZ@WSX1qaz2wsx";
+        String password = "123456";
         String driver = "com.mysql.jdbc.Driver";
-        String dbName = "llj_test";
+        String dbName = "test";
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         dataSourceConfigure.setConnectionUrl(url);
         dataSourceConfigure.setName(dbName);

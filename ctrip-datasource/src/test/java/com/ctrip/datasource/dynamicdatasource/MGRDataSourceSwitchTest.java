@@ -16,7 +16,7 @@ public class MGRDataSourceSwitchTest {
         String mgrUrl1 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306):3306:3306/";
         String mgrUrl2 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
         String mgrUrl3 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
-        String normalUrl1 = "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8";
+        String normalUrl1 = "jdbc:mysql://localhost:3306/test";
 
         MockConnectionStringConfigureProvider provider = new MockConnectionStringConfigureProvider();
         DalDataSourceFactory factory = new DalDataSourceFactory();
@@ -53,7 +53,8 @@ public class MGRDataSourceSwitchTest {
         provider.setUrl(mgrJdbcUrl1);
         Thread.sleep(6000);
 
-        Assert.assertEquals(mgrJdbcUrl1, ((org.apache.tomcat.jdbc.pool.DataSource) refreshableDataSource.getSingleDataSource().getDataSource()).getUrl());
+        String testUrl1 = ((org.apache.tomcat.jdbc.pool.DataSource) refreshableDataSource.getSingleDataSource().getDataSource()).getUrl();
+        Assert.assertEquals(mgrJdbcUrl1, testUrl1);
         DatabaseMetaData metaData1 = ds1.getConnection().getMetaData();
         for (int i = 0; i < 3; ++i) {
             String url1 = metaData1.getURL();

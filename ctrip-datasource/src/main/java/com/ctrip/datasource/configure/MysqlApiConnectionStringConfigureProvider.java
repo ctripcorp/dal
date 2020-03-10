@@ -58,9 +58,6 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         dbToken = mysqlApiConfigureProperties.getDBToken();
         callMysqlApiPeriod = mysqlApiConfigureProperties.getCallMysqlApiPeriod();
         dbModel = mysqlApiConfigureProperties.getDBModel();
-
-        executor = Executors.newScheduledThreadPool(THREAD_SIZE, new CustomThreadFactory(THREAD_NAME));
-        executor.scheduleWithFixedDelay(new MysqlApiConnectionStringChecker(), INITIAL_DELAY, callMysqlApiPeriod, TimeUnit.MILLISECONDS);
     }
 
     private DalPoolPropertiesConfigure getMysqlApiConfigureProperties(PropertiesWrapper propertiesWrapper) {
@@ -120,6 +117,9 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     @Override
     public void addListener(Listener<DalConnectionStringConfigure> listener) {
         this.listener = listener;
+
+        executor = Executors.newScheduledThreadPool(THREAD_SIZE, new CustomThreadFactory(THREAD_NAME));
+        executor.scheduleWithFixedDelay(new MysqlApiConnectionStringChecker(), INITIAL_DELAY, callMysqlApiPeriod, TimeUnit.MILLISECONDS);
     }
 
     private class MysqlApiConnectionStringChecker implements Runnable {

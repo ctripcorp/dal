@@ -1,15 +1,17 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-import java.util.Set;
 
 public class MockConnectionStringConfigureProvider implements ConnectionStringConfigureProvider {
+
+    private Listener<DalConnectionStringConfigure> listener;
+    private String url;
+
     @Override
     public DalConnectionStringConfigure getConnectionString() throws Exception {
         String url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin";
@@ -18,7 +20,12 @@ public class MockConnectionStringConfigureProvider implements ConnectionStringCo
         String driver = "com.mysql.jdbc.Driver";
         String dbName = "kevin";
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
-        dataSourceConfigure.setConnectionUrl(url);
+        if (StringUtils.isEmpty(this.url)) {
+            dataSourceConfigure.setConnectionUrl(url);
+        }
+        else {
+            dataSourceConfigure.setConnectionUrl(this.url);
+        }
         dataSourceConfigure.setName(dbName);
         dataSourceConfigure.setUserName(userName);
         dataSourceConfigure.setPassword(password);
@@ -28,6 +35,25 @@ public class MockConnectionStringConfigureProvider implements ConnectionStringCo
 
     @Override
     public void addListener(Listener<DalConnectionStringConfigure> listener) {
+        this.listener = listener;
+    }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void switchDataSource() {
+        String url = "jdbc:mysql://10.32.20.139:3306/llj_test";
+        String userName = "root";
+        String password = "!QAZ@WSX1qaz2wsx";
+        String driver = "com.mysql.jdbc.Driver";
+        String dbName = "llj_test";
+        DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
+        dataSourceConfigure.setConnectionUrl(url);
+        dataSourceConfigure.setName(dbName);
+        dataSourceConfigure.setUserName(userName);
+        dataSourceConfigure.setPassword(password);
+        dataSourceConfigure.setDriverClass(driver);
+        listener.onChanged(dataSourceConfigure);
     }
 }

@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class ApiDataSourceIdentity implements DataSourceIdentity {
 
@@ -24,6 +24,7 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
             connectionStringConfigure = provider.getConnectionString();
         } catch (Exception e) {
             LOGGER.error("get connectionString from mysql api failed!", e);
+            throw new DalRuntimeException(e);
         }
 
         id = String.format(ID_FORMAT, connectionStringConfigure.getName());

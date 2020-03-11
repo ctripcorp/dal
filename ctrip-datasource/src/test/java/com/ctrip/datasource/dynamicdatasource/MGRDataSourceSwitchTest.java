@@ -58,7 +58,7 @@ public class MGRDataSourceSwitchTest {
         DatabaseMetaData metaData1 = ds1.getConnection().getMetaData();
         for (int i = 0; i < 3; ++i) {
             String url1 = metaData1.getURL();
-            Assert.assertTrue(mgrUrl1.equalsIgnoreCase(url1) || mgrUrl2.equalsIgnoreCase(url1));
+            Assert.assertTrue(mgrUrl1.equalsIgnoreCase(url1) || mgrUrl3.equalsIgnoreCase(url1));
         }
 
         provider.setUrl(mgrJdbcUrl2);
@@ -68,7 +68,7 @@ public class MGRDataSourceSwitchTest {
         DatabaseMetaData metaData2 = ds1.getConnection().getMetaData();
         for (int i = 0; i < 3; ++i) {
             String url2 = metaData2.getURL();
-            Assert.assertTrue(mgrUrl1.equalsIgnoreCase(url2) || mgrUrl3.equalsIgnoreCase(url2));
+            Assert.assertTrue(mgrUrl1.equalsIgnoreCase(url2) || mgrUrl2.equalsIgnoreCase(url2));
         }
     }
 }

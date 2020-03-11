@@ -11,7 +11,7 @@ import java.util.Map;
 public class LocalConnectionStringProvider extends AbstractConnectionStringProvider
         implements DataSourceConfigureConstants {
     private String connectionString2 =
-            "Server=10.32.20.139;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_1;version=2";
+            "Server=10.32.20.143;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_1;version=2";
 
     private String connectionString2Failover =
             "Server=DST56614;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_1;version=2";

@@ -3,10 +3,12 @@ package com.ctrip.datasource.configure;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.util.EnvUtil;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtils;
+import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DBModel;
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
@@ -17,6 +19,8 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -29,6 +33,11 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     private static final String THREAD_NAME = "DAL-MysqlApiConnectionStringChecker";
     private static final int INITIAL_DELAY = 0;
     private static final int FIXED_DELAY = 3 * 1000; //ms
+    private static final String SEPARATED = ",";
+    private static final String LOAD_BALANCED_JDBC_URL_PARAMETER = "&%s&%s";
+    private static final String URL_PARAMETER = "%s=%s";
+    private static final String IP_PORT = "%s:%s";
+    private static final String[] IDC_ACCESS_ORDER = new String[] {"shaoy", "sharb", "shafq", "shajq"};
 
     private String dbName;
     private DalPropertiesLocator dalPropertiesLocator;
@@ -118,7 +127,52 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         String env = EnvUtil.getEnv();
         MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(mysqlApiUrl, dbName, env);
 
-        return MysqlApiConnectionStringParser.getInstance().parser(dbName, info, dbToken, dbModel);
+        DataSourceConfigure connectionStringConfigure = MysqlApiConnectionStringParser.getInstance().parser(dbName, info, dbToken, dbModel);
+
+        addMGRLocalToLocalParam(connectionStringConfigure, info.getClusternodeinfolist());
+        return connectionStringConfigure;
+    }
+
+    private void addMGRLocalToLocalParam(DataSourceConfigure connectionStringConfigure, List<ClusterNodeInfo> clusterNodeInfos) {
+        String connectionUrl = connectionStringConfigure.getConnectionUrl();
+        if (connectionUrl.startsWith(DatabaseCategory.REPLICATION_MYSQL_JDBC_URL_PREFIX)) {
+            String urlParam1 = String.format(URL_PARAMETER, LOAD_BALANCE_STRATEGY, DEFAULT_LOAD_BALANCE_STRATEGY);
+            String urlParam2 = String.format(URL_PARAMETER, SERVER_AFFINITY_ORDER, getServerAffinityOrder(clusterNodeInfos));
+            String urlPostfix = String.format(LOAD_BALANCED_JDBC_URL_PARAMETER, urlParam1, urlParam2);
+
+            String loadBalanceUrl = connectionStringConfigure.getConnectionUrl() + urlPostfix;
+            connectionStringConfigure.setConnectionUrl(loadBalanceUrl);
+        }
+    }
+
+    private String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
+        String currentIdc = EnvUtil.getIdc();
+
+        String serverAffinityOrder = "";
+
+        Map<String, String> idcAndIpPort = new HashMap<>();
+        for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfos) {
+            String ipPort = String.format(IP_PORT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port());
+            idcAndIpPort.put(clusterNodeInfo.getMachine_located_short().toLowerCase(), ipPort);
+        }
+
+        String ipPortInCurrentIdc = idcAndIpPort.get(currentIdc);
+        if (!StringUtils.isEmpty(ipPortInCurrentIdc)) {
+            serverAffinityOrder += ipPortInCurrentIdc + SEPARATED;
+        }
+
+        for (String idc : IDC_ACCESS_ORDER) {
+            if (idc.equalsIgnoreCase(currentIdc)) {
+                continue;
+            }
+            String ipPort = idcAndIpPort.get(idc);
+            if (StringUtils.isEmpty(ipPort)) {
+                continue;
+            }
+            serverAffinityOrder += ipPort + SEPARATED;
+        }
+
+        return serverAffinityOrder.substring(0, serverAffinityOrder.length() - 1);
     }
 
     @Override

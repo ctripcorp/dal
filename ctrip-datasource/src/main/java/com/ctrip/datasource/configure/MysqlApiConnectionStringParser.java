@@ -38,7 +38,7 @@ public class MysqlApiConnectionStringParser {
         return parser;
     }
 
-    public DalConnectionStringConfigure parser(String dbName, MysqlApiConnectionStringInfo info, String token,
+    public DataSourceConfigure parser(String dbName, MysqlApiConnectionStringInfo info, String token,
                                                DBModel dbModel) throws UnsupportedEncodingException {
         if (info == null) {
             return null;

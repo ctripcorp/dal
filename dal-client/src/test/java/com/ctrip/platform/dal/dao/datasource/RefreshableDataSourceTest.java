@@ -197,7 +197,7 @@ public class RefreshableDataSourceTest {
         Properties p3 = new Properties();
         p3.setProperty("userName", "root");
         p3.setProperty("password", "111111");
-        p3.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/test");
+        p3.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/test");
         p3.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         p3.setProperty("connectionProperties", "connectTimeout=3000");
         final DataSourceConfigure configure3 = new DataSourceConfigure("test", p3);
@@ -217,7 +217,7 @@ public class RefreshableDataSourceTest {
         Thread.sleep(4000);
         Assert.assertNotNull(refreshableDataSource.getSingleDataSource());
         Assert.assertNotNull(refreshableDataSource.getSingleDataSource().getDataSource());
-        Assert.assertEquals("jdbc:mysql://10.32.20.139:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getProperty("connectionUrl"));
+        Assert.assertEquals("jdbc:mysql://10.32.20.143:3306/test", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getProperty("connectionUrl"));
     }
 
     @Test
@@ -300,7 +300,7 @@ public class RefreshableDataSourceTest {
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
         p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         DataSourceConfigure configure2 = new DataSourceConfigure("test2", p2);
 
@@ -325,7 +325,7 @@ public class RefreshableDataSourceTest {
                     //System.out.println(listenerOne.getStep() + ", " + listenerTwo.getStep());
                     if (listenerOne.getStep() == 10 && listenerTwo.getStep() == 20) {
                         switched.set(true);
-                        Assert.assertEquals("jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl());
+                        Assert.assertEquals("jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", refreshableDataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl());
                     }
                     latch.countDown();
                 }
@@ -376,7 +376,7 @@ public class RefreshableDataSourceTest {
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
         p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         DataSourceConfigure configure2 = new DataSourceConfigure("test2", p2);
 
@@ -434,7 +434,7 @@ public class RefreshableDataSourceTest {
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
         p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("test2", p2);
 
@@ -488,7 +488,7 @@ public class RefreshableDataSourceTest {
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
         p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         DataSourceConfigure configure2 = new DataSourceConfigure("test2", p2);
 
@@ -516,7 +516,7 @@ public class RefreshableDataSourceTest {
         Properties p2 = new Properties();
         p2.setProperty("userName", "root");
         p2.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p2.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p2.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         DataSourceConfigure configure2 = new DataSourceConfigure("test2", p2);
 
@@ -540,7 +540,7 @@ public class RefreshableDataSourceTest {
                         Connection connection = refreshableDataSource.getConnection();
                         long endTime = System.currentTimeMillis();
                         System.out.println(startTime + ":" + (endTime - startTime));
-                        if ("jdbc:mysql://10.32.20.139:3306/llj_test".equalsIgnoreCase(ConnectionHelper.obtainUrl(connection))) {
+                        if ("jdbc:mysql://10.32.20.143:3306/llj_test".equalsIgnoreCase(ConnectionHelper.obtainUrl(connection))) {
                             Assert.assertEquals(listenerOne.getStep(), 10);
                             Assert.assertEquals(listenerTwo.getStep(), 20);
                         }
@@ -565,7 +565,7 @@ public class RefreshableDataSourceTest {
         Properties p1 = new Properties();
         p1.setProperty("userName", "root");
         p1.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p1.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p1.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         DataSourceConfigure config1 = new DataSourceConfigure("config1", p1);
         DataSourceConfigure config2 = new DataSourceConfigure("config2", p1);
@@ -592,7 +592,7 @@ public class RefreshableDataSourceTest {
         Properties p1 = new Properties();
         p1.setProperty("userName", "root");
         p1.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p1.setProperty("connectionUrl", "jdbc:mysql://10.32.20.139:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        p1.setProperty("connectionUrl", "jdbc:mysql://10.32.20.143:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
         p1.setProperty("driverClassName", "com.mysql.jdbc.Driver");
 
         Properties p2 = new Properties();

@@ -30,6 +30,8 @@ public interface DataSourceConfigureConstants {
     String DB_TOKEN = "dbToken";
     String CALL_MYSQL_API_PERIOD = "callMysqlApiPeriod";
     String DB_MODEL = "dbModel";
+    String LOAD_BALANCE_STRATEGY = "loadBalanceStrategy";
+    String SERVER_AFFINITY_ORDER = "serverAffinityOrder";
 
     // This is for typo error
     String INIT_SQL2 = "initSQL";
@@ -75,7 +77,7 @@ public interface DataSourceConfigureConstants {
     //used by mgr datasource
     int DEFAULT_CALL_MYSQL_API_PERIOD = 3; //second
     String DEFAULT_DB_MODEL = "standalone";
-
+    String DEFAULT_LOAD_BALANCE_STRATEGY = "serverAffinity";
 
     // **********Constants**********
     String USE_LOCAL_CONFIG = "useLocalConfig";

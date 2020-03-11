@@ -23,8 +23,10 @@ public class MysqlApiConnectionStringConfigureProviderTest {
                 "address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944)," +
                 "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944)/qconfig" +
                 "?useUnicode=true&characterEncoding=UTF-8" +
-                "&loadBalanceStrategy=serverAffinity&serverAffinityOrder=10.25.82.137:55944,10.60.53.211:55944,10.9.72.67:55944";
-
+                "&loadBalanceStrategy=serverAffinity&serverAffinityOrder="+
+                "address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944):55944," +
+                "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944):55944," +
+                "address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944):55944";
         ConnectionStringConfigureProvider provider = new MysqlApiConnectionStringConfigureProvider(DB_NAME);
         EnvUtil.setEnv("pro");
         DalConnectionStringConfigure configure = provider.getConnectionString();

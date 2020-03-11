@@ -37,6 +37,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     private static final String LOAD_BALANCED_JDBC_URL_PARAMETER = "&%s&%s";
     private static final String URL_PARAMETER = "%s=%s";
     private static final String IP_PORT = "%s:%s";
+    private static final String SERVER_AFFINITY_ORDER_FORMAT = "address=(type=master)(protocol=tcp)(host=%s)(port=%s):%s";
     private static final String[] IDC_ACCESS_ORDER = new String[] {"shaoy", "sharb", "shafq", "shajq"};
 
     private String dbName;
@@ -152,7 +153,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
         Map<String, String> idcAndIpPort = new HashMap<>();
         for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfos) {
-            String ipPort = String.format(IP_PORT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port());
+            String ipPort = String.format(SERVER_AFFINITY_ORDER_FORMAT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port(), clusterNodeInfo.getDns_port());
             idcAndIpPort.put(clusterNodeInfo.getMachine_located_short().toLowerCase(), ipPort);
         }
 

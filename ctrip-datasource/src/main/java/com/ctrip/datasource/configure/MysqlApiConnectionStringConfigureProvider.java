@@ -15,6 +15,8 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
@@ -29,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MysqlApiConnectionStringConfigureProvider implements ConnectionStringConfigureProvider, DataSourceConfigureConstants {
 
+    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final int THREAD_SIZE = 1;
     private static final String THREAD_NAME = "DAL-MysqlApiConnectionStringChecker";
     private static final int INITIAL_DELAY = 0;
@@ -39,6 +42,8 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     private static final String IP_PORT = "%s:%s";
     private static final String SERVER_AFFINITY_ORDER_FORMAT = "address=(type=master)(protocol=tcp)(host=%s)(port=%s):3306";
     private static final String[] IDC_ACCESS_ORDER = new String[] {"shaoy", "sharb", "shafq", "shajq"};
+    private static final String CONNECTION_STRING_CHECKER_EVENT_NAME = "connectionStringChecker";
+    private static final String CONNECTION_STRING_TYPE = "dal.connectionString";
 
     private String dbName;
     private DalPropertiesLocator dalPropertiesLocator;
@@ -111,8 +116,6 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
     @Override
     public DalConnectionStringConfigure getConnectionString() throws Exception {
-        initMysqlApiConfigure();
-
         DalConnectionStringConfigure dalConnectionStringConfigure = null;
 
         try {
@@ -125,6 +128,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     }
 
     protected DalConnectionStringConfigure getConnectionStringFromMysqlApi() throws Exception {
+        initMysqlApiConfigure();
         String env = EnvUtil.getEnv();
         MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(mysqlApiUrl, dbName, env);
 
@@ -182,6 +186,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
         executor = Executors.newScheduledThreadPool(THREAD_SIZE, new CustomThreadFactory(THREAD_NAME));
         executor.scheduleWithFixedDelay(new MysqlApiConnectionStringChecker(), INITIAL_DELAY, callMysqlApiPeriod, TimeUnit.MILLISECONDS);
+        LOGGER.logEvent(CONNECTION_STRING_TYPE, CONNECTION_STRING_CHECKER_EVENT_NAME, String.valueOf(callMysqlApiPeriod));
     }
 
     private class MysqlApiConnectionStringChecker implements Runnable {

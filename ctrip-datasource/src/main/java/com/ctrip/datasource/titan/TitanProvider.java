@@ -23,11 +23,21 @@ import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 
 public class TitanProvider implements IntegratedConfigProvider {
 
+    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
+    private static final String CONNECTION_STRING_TYPE = "dal.connectionString";
+    private static final String MYSQL_API_CONNECTION_STRING = "mysqlApiConnectionString";
+    private static final String CONNECTION_STRING_CHANGE = "connectionStringChange";
+    private static final String CONNECTION_STRING_OLD = "Old ConnectionString:%s";
+    private static final String CONNECTION_STRING_NEW = "New ConnectionString:%s";
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
@@ -113,8 +123,13 @@ public class TitanProvider implements IntegratedConfigProvider {
                         DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureLocatorManager.getInstance();
                         DataSourceConfigure oldDataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure(id);
                         String oldConnectionUrl = oldDataSourceConfigure.getConnectionUrl();
+                        LOGGER.logEvent(CONNECTION_STRING_TYPE, MYSQL_API_CONNECTION_STRING, newConnectionUrl);
 
                         if (!newConnectionUrl.equalsIgnoreCase(oldConnectionUrl)) {
+                            Transaction t = Cat.newTransaction(CONNECTION_STRING_TYPE, CONNECTION_STRING_CHANGE);
+                            LOGGER.logEvent(CONNECTION_STRING_TYPE, MYSQL_API_CONNECTION_STRING, String.format(CONNECTION_STRING_OLD, oldConnectionUrl));
+                            LOGGER.logEvent(CONNECTION_STRING_TYPE, MYSQL_API_CONNECTION_STRING, String.format(CONNECTION_STRING_NEW, newConnectionUrl));
+
                             dataSourceConfigureLocator.setApiConnectionString(id,
                                     new ApiDataSourceIdentity.MysqlApiConnectionStringImpl(newConnectionStringConfigure));
                             DataSourceConfigure newDataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure(id);
@@ -124,8 +139,12 @@ public class TitanProvider implements IntegratedConfigProvider {
                             synchronized (TitanProvider.class) {
                                 try {
                                     listener.configChanged(event);
+                                    t.setStatus(Message.SUCCESS);
                                 } catch (SQLException e) {
                                     Cat.logError(String.format("mgr datasource[name:%s] switch failed", id.getId()), e);
+                                    t.setStatus(e);
+                                } finally {
+                                    t.complete();
                                 }
                             }
                         }

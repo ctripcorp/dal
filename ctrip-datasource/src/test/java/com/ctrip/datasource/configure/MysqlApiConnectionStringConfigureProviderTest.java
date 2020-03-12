@@ -2,9 +2,11 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.util.EnvUtil;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
+import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import org.junit.Assert;
@@ -52,14 +54,14 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         Assert.assertNotNull(dataSource);
     }
 
-//    @Test
-//    public void testCreateMGRDataSource() throws Exception {
-//        DalDataSourceFactory factory = new DalDataSourceFactory();
-//        EnvUtil.setEnv("pro");
-//        DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_2);
-//        Assert.assertNotNull(dataSource);
-//        EnvUtil.setEnv(null);
-//    }
+    @Test
+    public void testCreateMGRDataSource() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        EnvUtil.setEnv("pro");
+        DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_3);
+        Assert.assertNotNull(dataSource);
+        EnvUtil.setEnv(null);
+    }
 
     @Test
     public void testCreateMGRDataSourceCustomProvider() throws Exception {
@@ -73,5 +75,30 @@ public class MysqlApiConnectionStringConfigureProviderTest {
             String url = metaData.getURL();
             Assert.assertTrue(mgrUrl.equalsIgnoreCase(url));
         }
+    }
+
+    @Test
+    public void testDBModelChange() throws Exception {
+        String fixMgrUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944),address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944),address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944)/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8" +
+                "&loadBalanceStrategy=serverAffinity&serverAffinityOrder=address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944):3306,address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944):3306,address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944):3306";
+        String fixNormalUrl = "jdbc:mysql://fxdalclusterbenchmark.mysql.db.ctripcorp.com:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
+        EnvUtil.setEnv("pro");
+        ConnectionStringConfigureProvider provider = new MysqlApiConnectionStringConfigureProvider(DB_NAME_2);
+        /*provider.addListener(new Listener<DalConnectionStringConfigure>() {
+            @Override
+            public void onChanged(DalConnectionStringConfigure current) {
+                String mgrUrl = current.getConnectionUrl();
+            }
+        });*/
+        DalConnectionStringConfigure configure = provider.getConnectionString();
+        String normalUrl = configure.getConnectionUrl();
+        Assert.assertEquals(normalUrl, fixNormalUrl);
+        DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
+        PropertiesWrapper propertiesWrapper = dataSourceConfigureLocator.getPoolProperties();
+        propertiesWrapper.getDatasourceProperties().get(DB_NAME_2).setProperty("dbModel", "mgr");
+
+        String mgrUrl = provider.getConnectionString().getConnectionUrl();
+        Assert.assertEquals(mgrUrl, fixMgrUrl);
+        EnvUtil.setEnv(null);
     }
 }

@@ -14,8 +14,8 @@ public class MGRDataSourceSwitchTest {
     @Test
     public void testExecuteListenerSwitchDataSource() throws Exception {
         String mgrUrl1 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306):3306:3306/";
-        String mgrUrl2 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
-        String mgrUrl3 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
+        String mgrUrl2 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
+        String mgrUrl3 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
         String normalUrl1 = "jdbc:mysql://localhost:3306/test";
 
         MockConnectionStringConfigureProvider provider = new MockConnectionStringConfigureProvider();

@@ -52,14 +52,14 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         Assert.assertNotNull(dataSource);
     }
 
-    /*@Test
-    public void testCreateMGRDataSource() throws Exception {
-        DalDataSourceFactory factory = new DalDataSourceFactory();
-        EnvUtil.setEnv("pro");
-        DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_3);
-        Assert.assertNotNull(dataSource);
-        EnvUtil.setEnv(null);
-    }*/
+//    @Test
+//    public void testCreateMGRDataSource() throws Exception {
+//        DalDataSourceFactory factory = new DalDataSourceFactory();
+//        EnvUtil.setEnv("pro");
+//        DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_2);
+//        Assert.assertNotNull(dataSource);
+//        EnvUtil.setEnv(null);
+//    }
 
     @Test
     public void testCreateMGRDataSourceCustomProvider() throws Exception {

@@ -108,7 +108,7 @@ public class DalDataSourceFactory {
         provider.setup(names);
 
         DataSourceIdentity id = new ApiDataSourceIdentity(connectionStringConfigureProvider);
-        DataSourceLocator locator = new DataSourceLocator(provider);
+        DataSourceLocator locator = new DataSourceLocator(provider, isForceInitialize);
         return locator.getDataSource(id);
     }
 

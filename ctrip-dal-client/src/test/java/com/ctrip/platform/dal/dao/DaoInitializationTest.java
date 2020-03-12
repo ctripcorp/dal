@@ -154,8 +154,8 @@ public class DaoInitializationTest {
     @Test
     public void testMGRInDALConfig() throws Exception {
         String mgrUrl1 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306):3306:3306/";
-        String mgrUrl2 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
-        String mgrUrl3 = "jdbc:mysql://address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
+        String mgrUrl2 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
+        String mgrUrl3 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
         String standaloneUrl = "jdbc:mysql://qconfig.mysql.db.fat.qa.nt.ctripcorp.com:55111/qconfig?useUnicode=true&characterEncoding=UTF-8";
         String normalUrl = "jdbc:mysql://fxdaltest.mysql.db.fat.qa.nt.ctripcorp.com:55111/fxdaltestdb?useUnicode=true&characterEncoding=UTF-8";
 

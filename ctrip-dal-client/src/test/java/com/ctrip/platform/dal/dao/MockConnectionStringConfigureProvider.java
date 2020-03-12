@@ -13,7 +13,7 @@ public class MockConnectionStringConfigureProvider implements ConnectionStringCo
 
     @Override
     public DalConnectionStringConfigure getConnectionString() throws Exception {
-        String url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin";
+        String url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=(type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=(type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin";
         String userName = "f_xie";
         String password = "123456";
         String driver = "com.mysql.jdbc.Driver";

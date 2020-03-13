@@ -151,7 +151,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     }
 
     private String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
-        String currentIdc = EnvUtil.getIdc();
+        String currentIdc = EnvUtil.getIdc().toLowerCase();
 
         String serverAffinityOrder = "";
 

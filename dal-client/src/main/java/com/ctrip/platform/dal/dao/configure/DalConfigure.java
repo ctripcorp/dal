@@ -10,6 +10,9 @@ import java.util.concurrent.*;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
 import com.ctrip.platform.dal.exceptions.DalConfigException;
@@ -93,10 +96,14 @@ public class DalConfigure {
     public void warmUpConnection(DataBase db){
         Connection conn = null;
         try {
-            if (db instanceof ClusterDataBase)
-                conn = locator.getConnection(((ClusterDataBase) db).getDatabase());
-            else if (db instanceof ProviderDataBase)
-                conn = locator.getConnection(((ProviderDataBase) db).getConnectionStringProvider());
+            if (db instanceof ClusterDataBase) {
+                DataSourceIdentity id = new ClusterDataSourceIdentity(((ClusterDataBase) db).getDatabase())
+                conn = locator.getConnection(id);
+            }
+            else if (db instanceof ProviderDataBase) {
+                DataSourceIdentity id = new ApiDataSourceIdentity(((ProviderDataBase) db).getConnectionStringProvider());
+                conn = locator.getConnection(id);
+            }
             else
                 conn = locator.getConnection(db.getConnectionString());
         } catch (Throwable e) {

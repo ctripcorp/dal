@@ -97,7 +97,7 @@ public class DalConfigure {
         Connection conn = null;
         try {
             if (db instanceof ClusterDataBase) {
-                DataSourceIdentity id = new ClusterDataSourceIdentity(((ClusterDataBase) db).getDatabase())
+                DataSourceIdentity id = new ClusterDataSourceIdentity(((ClusterDataBase) db).getDatabase());
                 conn = locator.getConnection(id);
             }
             else if (db instanceof ProviderDataBase) {

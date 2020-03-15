@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -120,13 +121,15 @@ public class DalConnectionManager {
 			DbMeta meta;
 			if (selectedDataBase instanceof ClusterDataBase) {
 				Database db = ((ClusterDataBase) selectedDataBase).getDatabase();
-				conn = locator.getConnection(db);
-				meta = DbMeta.createIfAbsent(new ClusterDataSourceIdentity(db), dbSet.getDatabaseCategory(), conn);
+				DataSourceIdentity id = new ClusterDataSourceIdentity(db);
+				conn = locator.getConnection(id);
+				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
 			}
 			else if (selectedDataBase instanceof ProviderDataBase) {
 				ConnectionStringConfigureProvider provider = ((ProviderDataBase) selectedDataBase).getConnectionStringProvider();
-				conn = locator.getConnection(provider);
-				meta = DbMeta.createIfAbsent(new ApiDataSourceIdentity(provider), dbSet.getDatabaseCategory(), conn);
+				DataSourceIdentity id = new ApiDataSourceIdentity(provider);
+				conn = locator.getConnection(id);
+				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
 			}
 			else {
 				String allInOneKey = selectedDataBase.getConnectionString();

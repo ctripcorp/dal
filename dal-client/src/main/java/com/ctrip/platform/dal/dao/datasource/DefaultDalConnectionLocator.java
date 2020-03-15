@@ -55,15 +55,7 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
     }
 
     @Override
-    public Connection getConnection(Database database) throws Exception {
-        DataSourceIdentity id = new ClusterDataSourceIdentity(database);
-        DataSource dataSource = locator.getDataSource(id);
-        return dataSource.getConnection();
-    }
-
-    @Override
-    public Connection getConnection(ConnectionStringConfigureProvider provider) throws Exception {
-        DataSourceIdentity id = new ApiDataSourceIdentity(provider);
+    public Connection getConnection(DataSourceIdentity id) throws Exception {
         DataSource dataSource = locator.getDataSource(id);
         return dataSource.getConnection();
     }

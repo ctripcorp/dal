@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.ctrip.platform.dal.dao.configure.DalComponent;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 
 public interface DalConnectionLocator extends DalComponent {
 	
@@ -16,9 +17,7 @@ public interface DalConnectionLocator extends DalComponent {
 	
 	Connection getConnection(String name) throws Exception;
 
-	Connection getConnection(Database database) throws Exception;
-
-	Connection getConnection(ConnectionStringConfigureProvider provider) throws Exception;
+	Connection getConnection(DataSourceIdentity id) throws Exception;
 
 	ClusterConfigProvider getClusterConfigProvider();
 

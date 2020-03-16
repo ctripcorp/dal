@@ -7,6 +7,8 @@ public class MysqlApiConnectionStringInfo {
 
     private List<ClusterNodeInfo> clusternodeinfolist;
 
+    private String clustertype;
+
     public String getConnectionstring() {
         return connectionstring;
     }
@@ -21,5 +23,13 @@ public class MysqlApiConnectionStringInfo {
 
     public void setClusternodeinfolist(List<ClusterNodeInfo> clusternodeinfolist) {
         this.clusternodeinfolist = clusternodeinfolist;
+    }
+
+    public String getClustertype() {
+        return clustertype;
+    }
+
+    public void setClustertype(String clustertype) {
+        this.clustertype = clustertype;
     }
 }

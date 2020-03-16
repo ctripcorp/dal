@@ -48,7 +48,7 @@ public class MysqlApiConnectionStringParser {
 
         if (DBModel.MGR.equals(dbModel)) {
             List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
-            if (clusterNodeInfoList == null || clusterNodeInfoList.size() <= 1) {
+            if (!info.getClustertype().equalsIgnoreCase(DBModel.MGR.getName()) || clusterNodeInfoList == null || clusterNodeInfoList.size() <= 1) {
                 return configure;
             }
             String database = null;

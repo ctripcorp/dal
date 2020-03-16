@@ -2,6 +2,7 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.util.EnvUtil;
+import com.ctrip.datasource.util.GsonUtils;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtils;
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
@@ -12,10 +13,10 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
-import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -44,6 +45,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     private static final String[] IDC_ACCESS_ORDER = new String[] {"shaoy", "sharb", "shafq", "shajq"};
     private static final String CONNECTION_STRING_CHECKER_EVENT_NAME = "connectionStringChecker";
     private static final String CONNECTION_STRING_TYPE = "dal.connectionString";
+    private static final String NULL_CONNECTION_STRING = "nullConnectionString";
 
     private String dbName;
     private DalPropertiesLocator dalPropertiesLocator;
@@ -120,6 +122,9 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
         try {
             dalConnectionStringConfigure = getConnectionStringFromMysqlApi();
+            if (dalConnectionStringConfigure == null) {
+                dalConnectionStringConfigure = new InvalidVariableConnectionString(dbName, new DalException("result or node info returned by mysql api is empty"));
+            }
         } catch (Exception e) {
             dalConnectionStringConfigure = new InvalidVariableConnectionString(dbName, new DalException(e.getMessage(), e));
         }
@@ -135,18 +140,23 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         DataSourceConfigure connectionStringConfigure = MysqlApiConnectionStringParser.getInstance().parser(dbName, info, dbToken, dbModel);
 
         addMGRLocalToLocalParam(connectionStringConfigure, info.getClusternodeinfolist());
+        if (connectionStringConfigure == null) {
+            LOGGER.logEvent(DalLogTypes.DAL_CONNECTION_STRING, NULL_CONNECTION_STRING, GsonUtils.t2Json(info));
+        }
         return connectionStringConfigure;
     }
 
     private void addMGRLocalToLocalParam(DataSourceConfigure connectionStringConfigure, List<ClusterNodeInfo> clusterNodeInfos) {
-        String connectionUrl = connectionStringConfigure.getConnectionUrl();
-        if (connectionUrl.startsWith(DatabaseCategory.REPLICATION_MYSQL_JDBC_URL_PREFIX)) {
-            String urlParam1 = String.format(URL_PARAMETER, LOAD_BALANCE_STRATEGY, DEFAULT_LOAD_BALANCE_STRATEGY);
-            String urlParam2 = String.format(URL_PARAMETER, SERVER_AFFINITY_ORDER, getServerAffinityOrder(clusterNodeInfos));
-            String urlPostfix = String.format(LOAD_BALANCED_JDBC_URL_PARAMETER, urlParam1, urlParam2);
+        if (connectionStringConfigure != null) {
+            String connectionUrl = connectionStringConfigure.getConnectionUrl();
+            if (connectionUrl.startsWith(DatabaseCategory.REPLICATION_MYSQL_JDBC_URL_PREFIX)) {
+                String urlParam1 = String.format(URL_PARAMETER, LOAD_BALANCE_STRATEGY, DEFAULT_LOAD_BALANCE_STRATEGY);
+                String urlParam2 = String.format(URL_PARAMETER, SERVER_AFFINITY_ORDER, getServerAffinityOrder(clusterNodeInfos));
+                String urlPostfix = String.format(LOAD_BALANCED_JDBC_URL_PARAMETER, urlParam1, urlParam2);
 
-            String loadBalanceUrl = connectionStringConfigure.getConnectionUrl() + urlPostfix;
-            connectionStringConfigure.setConnectionUrl(loadBalanceUrl);
+                String loadBalanceUrl = connectionStringConfigure.getConnectionUrl() + urlPostfix;
+                connectionStringConfigure.setConnectionUrl(loadBalanceUrl);
+            }
         }
     }
 

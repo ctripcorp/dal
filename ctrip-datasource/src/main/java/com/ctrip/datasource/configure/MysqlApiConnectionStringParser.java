@@ -24,6 +24,9 @@ public class MysqlApiConnectionStringParser {
     private static final String COM_SPLIT = ",";
     private static final String ONLINE = "online";
     private static final String DEFAULT_ENCODING = "UTF-8";
+    private static final String MYSQL_API_CLUSTER_TYPE_MGR = "mgr";
+    private static final String MYSQL_API_CLUSTER_TYPE_MHA = "mha";
+    private static final String MYSQL_MASTER = "master";
 
     private static final Pattern dbnamePattern =
             Pattern.compile("(database|initial\\scatalog)=([^;]+)", Pattern.CASE_INSENSITIVE);
@@ -40,17 +43,13 @@ public class MysqlApiConnectionStringParser {
 
     public DataSourceConfigure parser(String dbName, MysqlApiConnectionStringInfo info, String token,
                                                DBModel dbModel) throws UnsupportedEncodingException {
-        if (info == null) {
+        if (info == null || info.getClusternodeinfolist().size() == 0) {
             return null;
         }
         String connectionString = info.getConnectionstring();
         DataSourceConfigure configure = parserConnectionString(dbName, connectionString, token);
 
         if (DBModel.MGR.equals(dbModel)) {
-            List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
-            if (!info.getClustertype().equalsIgnoreCase(DBModel.MGR.getName()) || clusterNodeInfoList == null || clusterNodeInfoList.size() <= 1) {
-                return configure;
-            }
             String database = null;
             Matcher matcher = dbnamePattern.matcher(connectionString);
             if (matcher.find()) {
@@ -65,18 +64,41 @@ public class MysqlApiConnectionStringParser {
             }
 
             String ipAndPortString = "";
+            String masterIp = null;
+            String port = null;
+            int masterCount = 0;
+            List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
+
             for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoList) {
                 if (checkClusterNodeInfo(clusterNodeInfo)) {
                     ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, clusterNodeInfo.getIp_business(),
                             clusterNodeInfo.getDns_port()) + COM_SPLIT;
+                    if (MYSQL_MASTER.equalsIgnoreCase(clusterNodeInfo.getRole())) {
+                        masterIp = clusterNodeInfo.getIp_business();
+                        port = String.valueOf(clusterNodeInfo.getDns_port());
+                        ++ masterCount;
+                    }
                 }
             }
-            ipAndPortString = ipAndPortString.substring(0, ipAndPortString.length() - 1);
-            String mgrUrl = String.format(MGR_URL_TEMPLATE, ipAndPortString, database, charset);
-            configure.setConnectionUrl(mgrUrl);
-        }
 
-        return configure;
+            if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MHA) && masterCount == 1 && StringUtils.isNotBlank(masterIp)
+                    && StringUtils.isNotBlank(port)) {
+                String ipDirectConnectUrl = ConnectionStringParser.replaceHostAndPort(configure.getConnectionUrl(), masterIp, port);
+                configure.setConnectionUrl(ipDirectConnectUrl);
+                return configure;
+            }
+
+            else if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MGR)) {
+                ipAndPortString = ipAndPortString.substring(0, ipAndPortString.length() - 1);
+                String mgrUrl = String.format(MGR_URL_TEMPLATE, ipAndPortString, database, charset);
+                configure.setConnectionUrl(mgrUrl);
+                return configure;
+            }
+        }
+        else if (DBModel.STANDALONE.equals(dbModel)) {
+            return configure;
+        }
+        return null;
     }
 
     private boolean checkClusterNodeInfo(ClusterNodeInfo c) {
@@ -85,8 +107,7 @@ public class MysqlApiConnectionStringParser {
 
     private DataSourceConfigure parserConnectionString(String dbName, String connectionString, String token) throws UnsupportedEncodingException {
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
-        ConnectionStringParser parser = ConnectionStringParser.getInstance();
-        DalConnectionStringConfigure stringConfigure = parser.parse(dbName, connectionString);
+        DalConnectionStringConfigure stringConfigure = ConnectionStringParser.getInstance().parse(dbName, connectionString);
         dataSourceConfigure.setName(dbName);
         dataSourceConfigure.setUserName(stringConfigure.getUserName());
         dataSourceConfigure.setPassword(decrypt(stringConfigure.getPassword(), token));

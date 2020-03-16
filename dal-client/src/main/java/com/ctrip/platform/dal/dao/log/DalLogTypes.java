@@ -10,4 +10,7 @@ public class DalLogTypes {
 
     //    configure
     public static final String DAL_CONFIGURE = "DAL.configure";
+
+    // connectionString
+    public static final String DAL_CONNECTION_STRING = "DAL.connectionString";
 }

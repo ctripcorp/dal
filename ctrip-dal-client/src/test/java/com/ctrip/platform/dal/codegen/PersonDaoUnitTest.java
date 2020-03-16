@@ -418,6 +418,46 @@ public class PersonDaoUnitTest {
     }
 
 	@Test
+	public void testInsert4PkInsertBack2() throws Exception {
+		DalHints hints = new DalHints();
+		KeyHolder keyHolder = new KeyHolder();
+		List<Person> daoPojos = createPojos(1, 1);
+		int i = 0;
+		for(Person p: daoPojos) {
+			p.setName("test" + i++);
+			p.setPeopleID(null);
+		}
+
+		int[] affected = dao.insert(hints.setIdentityBack(), keyHolder, daoPojos);
+		assertArrayEquals(new int[]{1,1,1,1,},  affected);
+		assertEquals(4, keyHolder.size());
+		for(Person p: daoPojos) {
+			Person p2 = dao.queryByPk(p, hints);
+			assertEquals(p.getName(), p2.getName());
+		}
+	}
+
+	@Test
+	public void testInsert4PkInsertBack3() throws Exception {
+		DalHints hints = new DalHints();
+		KeyHolder keyHolder = new KeyHolder();
+		List<Person> daoPojos = createPojos(1, 1);
+		int i = 0;
+		for(Person p: daoPojos) {
+			p.setName("test" + i++);
+			p.setPeopleID(null);
+		}
+
+		int[] affected = dao.insert(hints.setIdentityBack().enableIdentityInsert(), keyHolder, daoPojos);
+		assertArrayEquals(new int[]{1,1,1,1,},  affected);
+		assertEquals(4, keyHolder.size());
+		for(Person p: daoPojos) {
+			Person p2 = dao.queryByPk(p, hints);
+			assertEquals(p.getName(), p2.getName());
+		}
+	}
+
+	@Test
 	public void testInsert5() throws Exception {
 		DalHints hints = new DalHints();
 		List<Person> daoPojos = dao.queryAll(new DalHints().inShard(1).inTableShard(1));

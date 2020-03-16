@@ -34,7 +34,7 @@ public class DataSourceConnectionStringFailCaseTest {
             Assert.assertFalse(before);
 
             DataSourceConfigure conf1 = locator.getDataSourceConfigure(name);
-            Assert.assertEquals("jdbc:mysql://10.32.20.139:3306/dal_shard_0?useUnicode=true&characterEncoding=UTF-8",
+            Assert.assertEquals("jdbc:mysql://10.32.20.143:3306/dal_shard_0?useUnicode=true&characterEncoding=UTF-8",
                     conf1.getConnectionUrl());
 
             // emulate configChanged
@@ -47,7 +47,7 @@ public class DataSourceConnectionStringFailCaseTest {
             Assert.assertTrue(after);
 
             DataSourceConfigure conf2 = locator.getDataSourceConfigure(name);
-            Assert.assertEquals("jdbc:mysql://10.32.20.139:3306/dal_shard_1?useUnicode=true&characterEncoding=UTF-8",
+            Assert.assertEquals("jdbc:mysql://10.32.20.143:3306/dal_shard_1?useUnicode=true&characterEncoding=UTF-8",
                     conf2.getConnectionUrl());
         } catch (Throwable e) {
             System.out.println(e.getMessage());

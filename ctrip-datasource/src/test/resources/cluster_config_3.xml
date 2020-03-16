@@ -2,8 +2,8 @@
     <Cluster name="cluster_config_3" dbCategory="mysql" version="1">
         <DatabaseShards>
             <DatabaseShard index="0" masterDomain="dst56614" masterPort="3306" slaveDomain="dst56614" slavePort="3306">
-                <Database role="master" ip="10.32.20.139" port="3306" dbName="cluster_rw_slave2" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
-                <Database role="slave" ip="10.32.20.139" port="3306" dbName="cluster_rw_slave2" uid="root" pwd="!QAZ@WSX1qaz2wsx" tags="slave,slave2"/>
+                <Database role="master" ip="10.32.20.143" port="3306" dbName="cluster_rw_slave2" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+                <Database role="slave" ip="10.32.20.143" port="3306" dbName="cluster_rw_slave2" uid="root" pwd="!QAZ@WSX1qaz2wsx" tags="slave,slave2"/>
             </DatabaseShard>
         </DatabaseShards>
     </Cluster>

@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class AbstractConnectionStringProvider implements ConnectionStringProvider {
     private String connectionString1 =
-            "Server=10.32.20.139;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
+            "Server=10.32.20.143;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";
 
     private String connectionString1Failover =
             "Server=DST56614;port=3306;UID=root;password=!QAZ@WSX1qaz2wsx;database=dal_shard_0;version=1";

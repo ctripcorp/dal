@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -132,6 +133,12 @@ public class LoggerHelperTest {
             set6.add("NotFound");
             String str6 = LoggerHelper.setToOrderedString(set6);
             assertTrue("NotFound".equals(str6));
+
+            Set<String> containNullObjectSet = new HashSet<>();
+            containNullObjectSet.add(StringUtils.EMPTY);
+            containNullObjectSet.add(null);
+            String actualResult = LoggerHelper.setToOrderedString(containNullObjectSet);
+            assertEquals(StringUtils.EMPTY, actualResult);
         } catch (Throwable e) {
             e.printStackTrace();
             fail();

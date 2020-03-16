@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.helper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -267,8 +268,11 @@ public class LoggerHelper {
 			return EMPTY_SET;
 
 		Set<String> treeSet = new TreeSet<>();
-		treeSet.addAll(origin);
+		for (String item : origin) {
+			if (item != null)
+				treeSet.add(item);
+		}
 
-		return StringUtils.join(treeSet.toArray(), ",");
+		return StringUtils.join(treeSet, ",");
 	}
 }

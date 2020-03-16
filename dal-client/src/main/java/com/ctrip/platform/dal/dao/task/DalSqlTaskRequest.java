@@ -81,6 +81,9 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             if (tables != null && tables.size() == 1) {
                 RequestContext ctx = new DalRequestContext().setLogicTableName(tables.get(0).getTableName());
                 hints.setRequestContext(ctx);
+            } else if (hints.getSpecifiedTableName() != null) {
+                RequestContext ctx = new DalRequestContext().setLogicTableName(hints.getSpecifiedTableName());
+                hints.setRequestContext(ctx);
             }
         } else if (hints.getSpecifiedTableName() != null) {
             RequestContext ctx = new DalRequestContext().setLogicTableName(hints.getSpecifiedTableName());

@@ -65,33 +65,52 @@ public class MysqlApiConnectionStringParser {
 
             String ipAndPortString = "";
             String masterIp = null;
-            String port = null;
+            String masterPort = null;
+            String nodeIp = null;
+            String nodePort = null;
             int masterCount = 0;
-            List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
+            int validNodeCount = 0;
 
+            List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
             for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoList) {
                 if (checkClusterNodeInfo(clusterNodeInfo)) {
+                    // mgr
                     ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, clusterNodeInfo.getIp_business(),
                             clusterNodeInfo.getDns_port()) + COM_SPLIT;
+                    // master ip
                     if (MYSQL_MASTER.equalsIgnoreCase(clusterNodeInfo.getRole())) {
                         masterIp = clusterNodeInfo.getIp_business();
-                        port = String.valueOf(clusterNodeInfo.getDns_port());
+                        masterPort = String.valueOf(clusterNodeInfo.getDns_port());
                         ++ masterCount;
                     }
+                    // one node ip
+                    nodeIp = clusterNodeInfo.getIp_business();
+                    nodePort = String.valueOf(clusterNodeInfo.getDns_port());
+
+                    ++ validNodeCount;
                 }
             }
 
+            // mha must have only one master node
             if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MHA) && masterCount == 1 && StringUtils.isNotBlank(masterIp)
-                    && StringUtils.isNotBlank(port)) {
-                String ipDirectConnectUrl = ConnectionStringParser.replaceHostAndPort(configure.getConnectionUrl(), masterIp, port);
+                    && StringUtils.isNotBlank(masterPort)) {
+                String ipDirectConnectUrl = ConnectionStringParser.replaceHostAndPort(configure.getConnectionUrl(), masterIp, masterPort);
                 configure.setConnectionUrl(ipDirectConnectUrl);
                 return configure;
             }
 
-            else if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MGR)) {
+            // mgr must have more than one node
+            else if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MGR) && validNodeCount > 1) {
                 ipAndPortString = ipAndPortString.substring(0, ipAndPortString.length() - 1);
                 String mgrUrl = String.format(MGR_URL_TEMPLATE, ipAndPortString, database, charset);
                 configure.setConnectionUrl(mgrUrl);
+                return configure;
+            }
+
+            // mgr but there's only one node
+            else if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MGR) && validNodeCount == 1) {
+                String ipDirectConnectUrl = ConnectionStringParser.replaceHostAndPort(configure.getConnectionUrl(), nodeIp, nodePort);
+                configure.setConnectionUrl(ipDirectConnectUrl);
                 return configure;
             }
         }

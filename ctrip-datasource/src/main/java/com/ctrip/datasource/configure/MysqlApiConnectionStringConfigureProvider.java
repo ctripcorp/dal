@@ -46,6 +46,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     private static final String CONNECTION_STRING_CHECKER_EVENT_NAME = "connectionStringChecker";
     private static final String CONNECTION_STRING_TYPE = "dal.connectionString";
     private static final String NULL_CONNECTION_STRING = "nullConnectionString";
+    private static final String ONLINE = "online";
 
     private String dbName;
     private DalPropertiesLocator dalPropertiesLocator;
@@ -167,8 +168,10 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
         Map<String, String> idcAndIpPort = new HashMap<>();
         for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfos) {
-            String ipPort = String.format(SERVER_AFFINITY_ORDER_FORMAT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port());
-            idcAndIpPort.put(clusterNodeInfo.getMachine_located_short().toLowerCase(), ipPort);
+            if (ONLINE.equalsIgnoreCase(clusterNodeInfo.getStatus())) {
+                String ipPort = String.format(SERVER_AFFINITY_ORDER_FORMAT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port());
+                idcAndIpPort.put(clusterNodeInfo.getMachine_located_short().toLowerCase(), ipPort);
+            }
         }
 
         String ipPortInCurrentIdc = idcAndIpPort.get(currentIdc);

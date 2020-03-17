@@ -36,9 +36,11 @@ public class TitanProvider implements IntegratedConfigProvider {
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
     //private static final String CONNECTION_STRING_TYPE = "dal.connectionString";
     private static final String MYSQL_API_CONNECTION_STRING = "mysqlApiConnectionString";
+    private static final String NULL_MYSQL_API_CONNECTION_STRING = "nullConnectionString";
     private static final String CONNECTION_STRING_CHANGE = "connectionStringChange";
     private static final String CONNECTION_STRING_OLD = "Old ConnectionString:%s";
     private static final String CONNECTION_STRING_NEW = "New ConnectionString:%s";
+    private static final String NULL_STRING = "null";
     private DataSourceConfigureManager dataSourceConfigureManager = DataSourceConfigureManager.getInstance();
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
@@ -149,6 +151,9 @@ public class TitanProvider implements IntegratedConfigProvider {
                                 }
                             }
                         }
+                    }
+                    else {
+                        LOGGER.logEvent(DalLogTypes.DAL_CONNECTION_STRING, NULL_MYSQL_API_CONNECTION_STRING, NULL_STRING);
                     }
                 }
             });

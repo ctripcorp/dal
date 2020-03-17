@@ -93,6 +93,7 @@ public class MysqlApiConnectionStringParserTest {
         String mgr_mgr_url_three = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944),address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944),address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944)/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
         String mgr_mgr_url_two ="jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944),address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944)/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
         String master_jdbc_url = "jdbc:mysql://10.60.45.198:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
+        String slave_jdbc_url_1 = "jdbc:mysql://10.25.91.204:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
 
         String url = "jdbc:mysql://fxdalclusterbenchmark.mysql.db.ctripcorp.com:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
         MysqlApiConnectionStringInfoResponse response = GsonUtils.json2T(responseStr, MysqlApiConnectionStringInfoResponse.class);
@@ -120,8 +121,23 @@ public class MysqlApiConnectionStringParserTest {
             if (clusterNodeInfo.getRole().equalsIgnoreCase("master"))
             clusterNodeInfo.setStatus("offline");
         }
+        info.setClustertype("mgr");
+        DalConnectionStringConfigure configure6 = MysqlApiConnectionStringParser.getInstance().parser(DBNAME_1, info, TOKEN_1, DBModel.MGR);
+        Assert.assertEquals(slave_jdbc_url_1, configure6.getConnectionUrl());
+
+        info.setClustertype("mha");
         DalConnectionStringConfigure configure3 = MysqlApiConnectionStringParser.getInstance().parser(DBNAME_1, info, TOKEN_1, DBModel.MGR);
         Assert.assertNull(configure3);
+
+        info.setClustertype("mgr");
+        for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfos) {
+            if ("online".equalsIgnoreCase(clusterNodeInfo.getStatus())) {
+                clusterNodeInfo.setStatus("offline");
+                break;
+            }
+        }
+        DalConnectionStringConfigure configure7 = MysqlApiConnectionStringParser.getInstance().parser(DBNAME_1, info, TOKEN_1, DBModel.MGR);
+        Assert.assertNull(configure7);
 
         DalConnectionStringConfigure configure5 = MysqlApiConnectionStringParser.getInstance().parser(DBNAME_1, info, TOKEN_1, DBModel.STANDALONE);
         Assert.assertEquals(url, configure5.getConnectionUrl());

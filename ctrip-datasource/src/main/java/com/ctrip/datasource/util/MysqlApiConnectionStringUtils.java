@@ -46,6 +46,7 @@ public class MysqlApiConnectionStringUtils {
         try {
             String responseStr = executor.executePost(url, null, json.toString(), DEFAULT_HTTP_TIMEOUT_MS);
             response = GsonUtils.json2T(responseStr, MysqlApiConnectionStringInfoResponse.class);
+            t.addData(responseStr);
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {
             Cat.logError("get mgr info from db api fail, [dbName:" + dbName + "]", e);

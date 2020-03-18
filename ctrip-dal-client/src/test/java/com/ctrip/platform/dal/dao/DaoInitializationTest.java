@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.configure.FailedQConfigIPDomainStatusProvider;
 import com.ctrip.platform.dal.dao.configure.FailedQConfigPoolPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+import com.ctrip.platform.dal.dao.helper.FixedValueRowMapper;
 import com.ctrip.platform.dal.dao.vi.DalIgnite;
 import org.junit.Assert;
 import org.junit.Before;
@@ -156,7 +157,7 @@ public class DaoInitializationTest {
         String mgrUrl1 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306):3306:3306/";
         String mgrUrl2 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.187)(port=3306):3306:3306/";
         String mgrUrl3 = "jdbc:mysql://address=(type=master)(protocol=tcp)(host=10.2.7.184)(port=3306):3306:3306/";
-        String standaloneUrl = "jdbc:mysql://qconfig.mysql.db.fat.qa.nt.ctripcorp.com:55111/qconfig?useUnicode=true&characterEncoding=UTF-8";
+        String standaloneUrl = "jdbc:mysql://10.2.22.101:55111/qconfig?useUnicode=true&characterEncoding=UTF-8";
         String normalUrl = "jdbc:mysql://fxdaltest.mysql.db.fat.qa.nt.ctripcorp.com:55111/fxdaltestdb?useUnicode=true&characterEncoding=UTF-8";
 
         String dbName1 = "qconfig";
@@ -165,6 +166,14 @@ public class DaoInitializationTest {
         String path = DaoInitializationTest.class.getClassLoader().getResource("Dal.config.mgr").getPath();
         DalClientFactory.shutdownFactory();
         DalClientFactory.initClientFactory(path);
+
+        try {
+            DalQueryDao queryDao = new DalQueryDao(dbName1);
+            queryDao.query("select 1", new StatementParameters(), new DalHints(), new FixedValueRowMapper());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+
         DataSourceLocator locator = new DataSourceLocator(new TitanProvider());
         DataSource ds1 = locator.getDataSource(new ApiDataSourceIdentity(new MysqlApiConnectionStringConfigureProvider(dbName1)));
         Assert.assertNotNull(ds1);

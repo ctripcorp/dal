@@ -1,14 +1,14 @@
 <dal name="testByQA">
     <databaseSets>
         <databaseSet name="testConnectionString" provider="mySqlProvider">
-            <!-- mgr 模式-->
+            <!-- mgr custom provider-->
             <add name="kevin" databaseType="Master" sharding="" connectionStringProvider="com.ctrip.platform.dal.dao.MockConnectionStringConfigureProvider" connectionString="kevin"/>
             <!-- titankey -->
             <add name="dao_test" databaseType="Master" sharding="" connectionString="fxdaltestdb_w"/>
         </databaseSet>
 
         <databaseSet name="qconfig" provider="mySqlProvider">
-            <!-- 单点 -->
+            <!-- mgr -->
             <add name="qconfig" databaseType="Master" sharding="" connectionStringProvider="com.ctrip.datasource.configure.MysqlApiConnectionStringConfigureProvider" connectionString="qconfig"/>
         </databaseSet>
     </databaseSets>

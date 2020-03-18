@@ -30,6 +30,7 @@ public class ClusterSwitchTest {
     private static final String CLUSTER_NAME3 = "cluster_config_3";
     private static final String CLUSTER_NAME4 = "cluster_config_normal";
     private static final String CLUSTER_NAME5 = "cluster_config_drc";
+    private static final String CLUSTER_NAME6 = "cluster_config_drc_2";
 
     private LocalClusterConfigProvider clusterConfigProvider = new LocalClusterConfigProvider();
 
@@ -76,6 +77,24 @@ public class ClusterSwitchTest {
             DataSource ds = dsLocator.getDataSource(new ClusterDataSourceIdentity(db));
             Assert.assertTrue(dsSet.add(ds));
             Assert.assertEquals(db.isMaster() ? 2 : 1, ((RefreshableDataSource) ds).getSingleDataSource().getReferenceCount());
+        }
+
+        // switch from normal to drc
+        config.doSwitch(getClusterConfig(CLUSTER_NAME6));
+        cluster.doSwitch(config);
+        currDatabases = cluster.getDatabases();
+        for (Database db : currDatabases) {
+            DataSource ds = dsLocator.getDataSource(new ClusterDataSourceIdentity(db));
+            Assert.assertTrue(ds instanceof LocalizedDataSource);
+        }
+
+        // switch from drc to normal
+        config.doSwitch(getClusterConfig(CLUSTER_NAME1));
+        cluster.doSwitch(config);
+        currDatabases = cluster.getDatabases();
+        for (Database db : currDatabases) {
+            DataSource ds = dsLocator.getDataSource(new ClusterDataSourceIdentity(db));
+            Assert.assertFalse(ds instanceof LocalizedDataSource);
         }
     }
 

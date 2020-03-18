@@ -103,7 +103,9 @@ public class DALRequestTask {
                 try {
                     DALServiceTable pojo = new DALServiceTable();
                     pojo.setName("insertName");
-                    dao.insert(new DalHints().setIdentityBack(), pojo);
+//                    dao.insert(new DalHints().setIdentityBack(), pojo);
+//                    dao.insert(new DalHints(), pojo);
+                    pojo.setID(1);
                     pojo = dao.queryByPk(pojo.getID(), null);
                     if (pojo != null) {
                         pojo.setName("updateName");

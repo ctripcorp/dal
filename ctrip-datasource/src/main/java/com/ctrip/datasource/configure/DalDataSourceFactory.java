@@ -9,11 +9,9 @@ import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
-import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.*;
 
 public class DalDataSourceFactory {
     private static final String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
@@ -118,13 +116,13 @@ public class DalDataSourceFactory {
         Set<String> names = new HashSet<>();
         ClusterInfo clusterInfo = provider.tryGetClusterInfo(allInOneKey);
 
-        if (clusterInfo == null || !clusterInfo.isValid())
+        if (clusterInfo == null || clusterInfo.getRole() != DatabaseRole.MASTER)
             names.add(allInOneKey);
 
         provider.setup(names);
         DataSourceLocator locator = new DataSourceLocator(provider, isForceInitialize);
 
-        if (clusterInfo == null || !clusterInfo.isValid())
+        if (clusterInfo == null || clusterInfo.getRole() != DatabaseRole.MASTER)
             return locator.getDataSource(allInOneKey);
         else
             return locator.getDataSource(clusterInfo);

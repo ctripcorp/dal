@@ -94,7 +94,7 @@ public class CtripDalElementFactory implements DalElementFactory {
             synchronized (localizationValidatorFactoryRef) {
                 factory = localizationValidatorFactoryRef.get();
                 if (factory == null) {
-                    factory = new CtripLocalizationValidatorFactory(UcsClient.getInstance(), DalPropertiesManager.getInstance().getDalPropertiesLocator());
+                    factory = new CtripLocalizationValidatorFactory(DalPropertiesManager.getInstance().getDalPropertiesLocator());
                     localizationValidatorFactoryRef.set(factory);
                 }
             }

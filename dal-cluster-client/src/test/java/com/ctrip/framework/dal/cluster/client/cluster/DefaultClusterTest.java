@@ -31,7 +31,7 @@ public class DefaultClusterTest {
     public static void init() {
         ClusterConfigProvider provider = new DefaultLocalConfigProvider("demo-cluster");
         ClusterConfig config = provider.getClusterConfig();
-        cluster =  config.generate();
+        cluster = config.generate();
     }
 
     @Test
@@ -174,7 +174,7 @@ public class DefaultClusterTest {
         Assert.assertTrue(table1Enabled);
 
         final String undefinedTable1Separator = cluster.getTableShardSeparator("table1");
-        Assert.assertEquals("=", undefinedTable1Separator);
+        Assert.assertEquals("", undefinedTable1Separator);
     }
 
 
@@ -312,7 +312,20 @@ public class DefaultClusterTest {
 
     @Test
     public void getTableShardSeparatorTest() {
+        final String table14Separator = cluster.getTableShardSeparator("table14");
+        Assert.assertEquals("_", table14Separator);
         final String table15Separator = cluster.getTableShardSeparator("table15");
-        Assert.assertEquals("=", table15Separator);
+        Assert.assertEquals("", table15Separator);
     }
+
+    @Test
+    public void dbShardingTest() {
+        Assert.assertTrue(cluster.dbShardingEnabled());
+        Assert.assertEquals(4, cluster.getAllDbShards().size());
+        Assert.assertTrue(cluster.getAllDbShards().contains(1));
+        Assert.assertTrue(cluster.getAllDbShards().contains(2));
+        Assert.assertTrue(cluster.getAllDbShards().contains(3));
+        Assert.assertTrue(cluster.getAllDbShards().contains(4));
+    }
+
 }

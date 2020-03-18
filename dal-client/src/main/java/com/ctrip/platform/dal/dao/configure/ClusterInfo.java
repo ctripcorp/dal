@@ -39,10 +39,6 @@ public class ClusterInfo {
         return new SimpleClusterDataSourceIdentity(toString());
     }
 
-    public boolean isValid() {
-        return clusterName != null && shardIndex != null && role == DatabaseRole.MASTER;
-    }
-
     @Override
     public String toString() {
         return String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null);

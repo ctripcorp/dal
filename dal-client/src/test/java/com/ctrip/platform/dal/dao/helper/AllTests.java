@@ -12,6 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		PartialQueryQueryDaoTest.class,
 		DalColumnMapRowMapperTest.class,
 		DalCustomRowMapperTest.class,
+		DalRowMapperExtractorTest.class,
 		SQLCompilerTest.class,
 		ServiceLoaderHelperTest.class,
 		DalBase64Test.class,

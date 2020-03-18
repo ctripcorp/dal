@@ -8,17 +8,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 public class DataSourceLocator {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String LOG_NAME_CREATE_DATASOURCE = "createDataSource:%s";
+    private static final String LOG_TYPE_CREATE_DATASOURCE = "DAL.dataSource";
+    private static final String LOG_NAME_CREATE_DRC_DATASOURCE = "createDrcDataSource:%s";
+    private static final String LOG_NAME_CREATE_DRC_DATASOURCE_FAIL = "createDrcDataSource:EXCEPTION:%s";
+    private static final String LOG_NAME_CREATE_NORMAL_DATASOURCE = "createNormalDataSource:%s";
     private static final String LOG_NAME_CREATE_CLUSTER_DATASOURCE = "createClusterDataSource:%s";
 
     private static final Map<DataSourceIdentity, DataSource> cache = new ConcurrentHashMap<>();
@@ -116,17 +123,40 @@ public class DataSourceLocator {
         if (config == null && !isForceInitialize) {
             throw new SQLException(String.format("datasource configure not found for %s", id.getId()));
         }
-        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(id, provider);
-        ForceSwitchableDataSource ds = new ForceSwitchableDataSource(id, dataSourceConfigureProvider);
-        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(LOG_NAME_CREATE_DATASOURCE, id.getId()), "");
+        RefreshableDataSource ds = createRefreshableDataSource(id);
         provider.register(id, ds);
         executor.execute(ds);
         return ds;
     }
 
+    private RefreshableDataSource createRefreshableDataSource(DataSourceIdentity id) throws SQLException {
+        if (id instanceof ClusterDataSourceIdentity) {
+            Database database = ((ClusterDataSourceIdentity) id).getDatabase();
+            Cluster cluster = database.getCluster();
+            ClusterInfo clusterInfo = new ClusterInfo(database.getClusterName(), database.getShardIndex(),
+                    database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE);
+            try {
+                if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
+                    DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
+                    LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
+                    LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
+                    LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE,
+                            clusterInfo.toString()), localizationConfig.toString());
+                    return new LocalizedDataSource(validator, id, provider.getDataSourceConfigure(id));
+                }
+            } catch (SQLException e) {
+                LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE_FAIL,
+                        clusterInfo.toString()), e.getMessage());
+            }
+        }
+        LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_NORMAL_DATASOURCE, id.getId()), "");
+        SingleDataSourceConfigureProvider dataSourceConfigureProvider = new SingleDataSourceConfigureProvider(id, provider);
+        return new ForceSwitchableDataSource(id, dataSourceConfigureProvider);
+    }
+
     private DataSource createDataSource(DataSourceIdentity id, ClusterInfo clusterInfo, Cluster cluster) throws SQLException {
         ClusterDynamicDataSource ds = new ClusterDynamicDataSource(clusterInfo, cluster, provider, factory);
-        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(LOG_NAME_CREATE_CLUSTER_DATASOURCE, id.getId()), "");
+        LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_CLUSTER_DATASOURCE, id.getId()), "");
         provider.register(id, ds);
         executor.execute(ds);
         return ds;

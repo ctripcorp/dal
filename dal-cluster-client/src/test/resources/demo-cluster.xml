@@ -1,19 +1,19 @@
 <DAL>
     <Cluster name="demo-cluster" dbCategory="mysql" version="1">
         <DatabaseShards>
-            <DatabaseShard index="0" masterDomain="demodbshard00.mysql.db.ctripcorp.com" slaveDomain="demodbshard00read.mysql.db.ctripcorp.com">
+            <DatabaseShard index="1" masterDomain="demodbshard00.mysql.db.ctripcorp.com" slaveDomain="demodbshard00read.mysql.db.ctripcorp.com">
                 <Database ip="10.25.44.1" port="55944" dbName="demoDbShard00" uid="user_w" pwd="xyzw" readWeight="0"/>
                 <Database role="slave" ip="10.25.44.2" port="55944" dbName="demoDbShard00" uid="user_r" pwd="xyzr" readWeight="1" tags="a,b"/>
                 <Database role="slave" ip="10.25.44.3" port="55944" dbName="demoDbShard00" uid="user_r" pwd="xyzr" readWeight="1" tags="b,c"/>
             </DatabaseShard>
-            <DatabaseShard index="1" masterDomain="demodbshard01.mysql.db.ctripcorp.com" slaveDomain="demodbshard01read.mysql.db.ctripcorp.com">
+            <DatabaseShard index="2" masterDomain="demodbshard01.mysql.db.ctripcorp.com" slaveDomain="demodbshard01read.mysql.db.ctripcorp.com">
                 <Database ip="10.25.44.11" port="55944" dbName="demoDbShard01" uid="user_w" pwd="xyzw" readWeight="1"/>
                 <Database role="slave" ip="10.25.44.12" port="55944" dbName="demoDbShard01" uid="user_r" pwd="xyzr" readWeight="1"/>
             </DatabaseShard>
-            <DatabaseShard index="2" masterDomain="demodbshard02.mysql.db.ctripcorp.com" slaveDomain="demodbshard02read.mysql.db.ctripcorp.com">
+            <DatabaseShard index="3" masterDomain="demodbshard02.mysql.db.ctripcorp.com" slaveDomain="demodbshard02read.mysql.db.ctripcorp.com">
                 <Database ip="10.25.44.21" port="55944" dbName="demoDbShard02" uid="user_w" pwd="xyzw" readWeight="1"/>
             </DatabaseShard>
-            <DatabaseShard index="3" masterDomain="demodbshard03.mysql.db.ctripcorp.com" slaveDomain="demodbshard03read.mysql.db.ctripcorp.com">
+            <DatabaseShard index="4" masterDomain="demodbshard03.mysql.db.ctripcorp.com" slaveDomain="demodbshard03read.mysql.db.ctripcorp.com">
                 <Database ip="10.25.44.31" port="55944" dbName="demoDbShard03" uid="user_w" pwd="xyzw" readWeight="0"/>
                 <Database role="slave" ip="10.25.44.31" port="55944" dbName="demoDbShard03" uid="user_r" pwd="xyzw" readWeight="1"/>
             </DatabaseShard>
@@ -26,13 +26,13 @@
                 <!--<Property name="dbShardOffset" value="1"/>-->
                 <Property name="tableShardColumn" value="age"/>
                 <Property name="tableShardMod" value="7"/>
-                <Property name="tableShardSeparator" value="="/>
                 <Tables>
                     <Property name="tableSharding" value="true"/>
                     <Property name="dbShardColumn" value="id"/>
                     <Property name="dbShardMod" value="4"/>
                     <Property name="tableShardColumn" value="age"/>
                     <Property name="tableShardMod" value="3"/>
+                    <Property name="tableShardSeparator" value="_"/>
                     <Table name="table11">
                         <Property name="dbShardOffset" value="1"/>
                         <Property name="tableShardOffset" value="1"/>
@@ -54,6 +54,7 @@
                     </Table>
                     <Table name="table15">
                         <Property name="tableSharding" value="false"/>
+                        <Property name="tableShardSeparator" value=""/>
                     </Table>
                 </Tables>
             </ModStrategy>

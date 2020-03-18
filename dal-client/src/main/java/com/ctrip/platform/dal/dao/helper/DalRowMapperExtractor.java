@@ -10,6 +10,8 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 
 public class DalRowMapperExtractor <T> implements DalResultSetExtractor<List<T>>, HintsAwareExtractor<List<T>> {
+	private static final int COUNT_LIMIT = 5000000;
+
 	private DalRowMapper<T> mapper;
 	private int start;
 	private int count;
@@ -34,7 +36,7 @@ public class DalRowMapperExtractor <T> implements DalResultSetExtractor<List<T>>
 
 	@Override
 	public List<T> extract(ResultSet rs) throws SQLException {
-		List<T> result = count == 0 ? new ArrayList<T>() : new ArrayList<T>(count);
+		List<T> result = count == 0 ? new ArrayList<T>() : new ArrayList<T>(Math.min(count, COUNT_LIMIT));
 		if(start != 0)
 			rs.absolute(start);
 		int i = 0;

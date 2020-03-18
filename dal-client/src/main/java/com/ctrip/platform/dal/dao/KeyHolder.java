@@ -313,7 +313,7 @@ public class KeyHolder {
         if (keyHolder == null || rawPojos == null || rawPojos.isEmpty())
             return;
 
-        if (!(hints.is(DalHintEnum.setIdentityBack) && hints.isIdentityInsertDisabled()))
+        if (!hints.is(DalHintEnum.setIdentityBack))
             return;
 
         EntityManager em = EntityManager.getEntityManager(rawPojos.get(0).getClass());
@@ -329,7 +329,14 @@ public class KeyHolder {
 
         for (int i = 0; i < rawPojos.size(); i++)
             if (!keyHolder.isEmptyKey(i)) {
-                setPrimaryKey(pkFlield, rawPojos.get(i), keyHolder.getKey(i));
+                Object rawPojo = rawPojos.get(i);
+                try {
+                    if (!hints.isIdentityInsertDisabled() && pkFlield.get(rawPojo) != null)
+                        continue;
+                } catch (Throwable t) {
+                    // ignore
+                }
+                setPrimaryKey(pkFlield, rawPojo, keyHolder.getKey(i));
             }
     }
 

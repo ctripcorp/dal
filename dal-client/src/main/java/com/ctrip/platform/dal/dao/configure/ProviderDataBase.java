@@ -30,6 +30,7 @@ public class ProviderDataBase extends DefaultDataBase {
                 this.connectionStringProvider = (ConnectionStringConfigureProvider) con.newInstance();
             } catch (Exception ex) {
                 LOGGER.error("custom connection string provider is illegal.Must have a public constructor with no arguments or a string.", e);
+                throw ex;
             }
         }
     }

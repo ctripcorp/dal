@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 public class ApiDataSourceIdentity implements DataSourceIdentity {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String ID_FORMAT = "%s_mysql_api"; //dbName
+    private static final String ID_FORMAT = "%s_api"; //dbName
 
     private ConnectionStringConfigureProvider provider;
     private String id;
@@ -23,7 +23,7 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
         try {
             connectionStringConfigure = provider.getConnectionString();
         } catch (Exception e) {
-            LOGGER.error("get connectionString from mysql api failed!", e);
+            LOGGER.error("get connectionString from api failed!", e);
             throw new DalRuntimeException(e);
         }
 
@@ -33,7 +33,7 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
             connectionString = new InvalidConnectionString(id, ((InvalidVariableConnectionString) connectionStringConfigure).getConnectionStringException());
         }
         else {
-            connectionString = new MysqlApiConnectionStringImpl(connectionStringConfigure);
+            connectionString = new ApiConnectionStringImpl(connectionStringConfigure);
         }
     }
 
@@ -65,11 +65,11 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
         return provider != null ? provider.hashCode() : 0;
     }
 
-    public static class MysqlApiConnectionStringImpl implements DalConnectionString {
+    public static class ApiConnectionStringImpl implements DalConnectionString {
 
         private DalConnectionStringConfigure connectionStringConfigure;
 
-        public MysqlApiConnectionStringImpl(DalConnectionStringConfigure connectionStringConfigure) {
+        public ApiConnectionStringImpl(DalConnectionStringConfigure connectionStringConfigure) {
             this.connectionStringConfigure = connectionStringConfigure;
         }
 

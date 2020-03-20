@@ -124,6 +124,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
                     throw e;
                 }
             }
+            isPoolPropertiesInitialized = true;
         }
     }
 

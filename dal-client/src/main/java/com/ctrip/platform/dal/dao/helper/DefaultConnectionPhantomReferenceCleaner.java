@@ -16,7 +16,7 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
     private static AtomicReference<ScheduledExecutorService> defaultConnectionPhantomReferenceCleanerRef = new AtomicReference<>();
     private static final Integer DEFAULT_INTERVAL = 900;
     private static String driverClassName = "com.mysql.jdbc.NonRegisteringDriver";
-    private static String ConnectionCleanupClassName = "com.mysql.jdbc.AbandonedConnectionCleanupThread"
+    private static String ConnectionCleanupClassName = "com.mysql.jdbc.AbandonedConnectionCleanupThread";
     private static String fieldName_5138 = "connectionPhantomRefs";
     private static String fieldName_5148 = "connectionFinalizerPhantomRefs";
     private static Class<?> nonRegisteringDriver;

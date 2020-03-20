@@ -134,7 +134,7 @@ public class TitanProvider implements IntegratedConfigProvider {
                             LOGGER.logEvent(DalLogTypes.DAL_CONNECTION_STRING, MYSQL_API_CONNECTION_STRING, String.format(CONNECTION_STRING_NEW, newConnectionUrl));
 
                             dataSourceConfigureLocator.setApiConnectionString(id,
-                                    new ApiDataSourceIdentity.MysqlApiConnectionStringImpl(newConnectionStringConfigure));
+                                    new ApiDataSourceIdentity.ApiConnectionStringImpl(newConnectionStringConfigure));
                             DataSourceConfigure newDataSourceConfigure = dataSourceConfigureLocator.getDataSourceConfigure(id);
 
                             DataSourceConfigureChangeEvent event = new DataSourceConfigureChangeEvent(id.getId(),

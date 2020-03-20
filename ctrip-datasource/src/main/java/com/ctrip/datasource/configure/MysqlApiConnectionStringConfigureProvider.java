@@ -67,7 +67,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         dataSourceConfigureLocator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
     }
 
-    private void initMysqlApiConfigure() {
+    protected void initMysqlApiConfigure() {
         mysqlApiUrl = dalPropertiesLocator.getConnectionStringMysqlApiUrl();
 
         PropertiesWrapper propertiesWrapper = dataSourceConfigureLocator.getPoolProperties();
@@ -162,7 +162,10 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     }
 
     private String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
-        String currentIdc = EnvUtil.getIdc().toLowerCase();
+        String currentIdc = EnvUtil.getIdc();
+        if (!StringUtils.isEmpty(currentIdc)) {
+            currentIdc = currentIdc.toLowerCase();
+        }
 
         String serverAffinityOrder = "";
 

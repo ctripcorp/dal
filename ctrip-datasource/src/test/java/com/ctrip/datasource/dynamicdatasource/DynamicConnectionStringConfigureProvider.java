@@ -15,6 +15,7 @@ public class DynamicConnectionStringConfigureProvider extends MysqlApiConnection
 
     @Override
     protected DalConnectionStringConfigure getConnectionStringFromMysqlApi() throws Exception {
+        initMysqlApiConfigure();
         String url = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin";
         String userName = "f_xie";
         String password = "123456";

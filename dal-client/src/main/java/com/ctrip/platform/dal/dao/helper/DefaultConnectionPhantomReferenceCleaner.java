@@ -15,9 +15,12 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConnectionPhantomReferenceCleaner.class);
     private static AtomicReference<ScheduledExecutorService> defaultConnectionPhantomReferenceCleanerRef = new AtomicReference<>();
     private static final Integer DEFAULT_INTERVAL = 900;
-    private static String driverClassName = "com.mysql.jdbc.AbandonedConnectionCleanupThread";
-    private static String fieldName = "connectionFinalizerPhantomRefs";
+    private static String driverClassName = "com.mysql.jdbc.NonRegisteringDriver";
+    private static String ConnectionCleanupClassName = "com.mysql.jdbc.AbandonedConnectionCleanupThread"
+    private static String fieldName_5138 = "connectionPhantomRefs";
+    private static String fieldName_5148 = "connectionFinalizerPhantomRefs";
     private static Class<?> nonRegisteringDriver;
+    private static Class<?> ConnectionCleanupClass;
     private static Field connectionPhantomReference;
     private static AtomicBoolean started = new AtomicBoolean(false);
 
@@ -34,8 +37,17 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
         if (started.getAndSet(true))
             return;
         try {
-            nonRegisteringDriver = Class.forName(driverClassName);
-            connectionPhantomReference = nonRegisteringDriver.getDeclaredField(fieldName);
+            try {
+                ConnectionCleanupClass = Class.forName(ConnectionCleanupClassName);
+                connectionPhantomReference = ConnectionCleanupClass.getDeclaredField(fieldName_5148);
+            } catch (NoSuchFieldException e1) {
+                try {
+                    nonRegisteringDriver = Class.forName(driverClassName);
+                    connectionPhantomReference = nonRegisteringDriver.getDeclaredField(fieldName_5138);
+                } catch (NoSuchFieldException e2) {
+                    throw new Exception("Need use 5.1.48 mysql Jdbc driver!", e2);
+                }
+            }
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
             modifiersField.setInt(connectionPhantomReference, connectionPhantomReference.getModifiers() & ~Modifier.FINAL);

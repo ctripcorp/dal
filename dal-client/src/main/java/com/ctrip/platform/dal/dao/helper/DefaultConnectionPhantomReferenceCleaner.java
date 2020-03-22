@@ -19,8 +19,7 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
     private static String ConnectionCleanupClassName = "com.mysql.jdbc.AbandonedConnectionCleanupThread";
     private static String fieldName_5138 = "connectionPhantomRefs";
     private static String fieldName_5148 = "connectionFinalizerPhantomRefs";
-    private static Class<?> nonRegisteringDriver;
-    private static Class<?> ConnectionCleanupClass;
+    private static Class<?> connectionPhantomReferenceClass;
     private static Field connectionPhantomReference;
     private static AtomicBoolean started = new AtomicBoolean(false);
 
@@ -38,12 +37,12 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
             return;
         try {
             try {
-                ConnectionCleanupClass = Class.forName(ConnectionCleanupClassName);
-                connectionPhantomReference = ConnectionCleanupClass.getDeclaredField(fieldName_5148);
+                connectionPhantomReferenceClass = Class.forName(ConnectionCleanupClassName);
+                connectionPhantomReference = connectionPhantomReferenceClass.getDeclaredField(fieldName_5148);
             } catch (NoSuchFieldException e1) {
                 try {
-                    nonRegisteringDriver = Class.forName(driverClassName);
-                    connectionPhantomReference = nonRegisteringDriver.getDeclaredField(fieldName_5138);
+                    connectionPhantomReferenceClass = Class.forName(driverClassName);
+                    connectionPhantomReference = connectionPhantomReferenceClass.getDeclaredField(fieldName_5138);
                 } catch (NoSuchFieldException e2) {
                     throw new Exception("Need use 5.1.48 mysql Jdbc driver!", e2);
                 }
@@ -67,7 +66,7 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
         @Override
         public void run() {
             try {
-                ((ConcurrentHashMap) connectionPhantomReference.get(nonRegisteringDriver)).clear();
+                ((ConcurrentHashMap) connectionPhantomReference.get(connectionPhantomReferenceClass)).clear();
                 LOGGER.info(String.format("ConnectionPhantomReference cleaned."));
             } catch (Exception ex) {
                 LOGGER.warn(String.format("Cleaning ConnectionPhantomReference Error"), ex.getMessage());

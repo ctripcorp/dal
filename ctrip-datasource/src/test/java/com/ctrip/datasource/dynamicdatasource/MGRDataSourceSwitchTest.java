@@ -2,6 +2,11 @@ package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.datasource.configure.MockConnectionStringConfigureProvider;
+import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +52,16 @@ public class MGRDataSourceSwitchTest {
 
         DynamicConnectionStringConfigureProvider provider = new DynamicConnectionStringConfigureProvider("unused");
         DalDataSourceFactory factory = new DalDataSourceFactory();
-        DataSource ds1 = factory.createVariableTypeDataSource(provider);
+        DataSource ds1 = null;
+        try {
+            ds1 = factory.createVariableTypeDataSource(provider);
+        } catch (Exception e) {
+            provider.setConnectionStringSwitch(true);
+            DataSourceIdentity id = new ApiDataSourceIdentity(provider);
+            DalClientFactory.getDalConfigure().getLocator().getConnection(id);
+            DataSourceLocator locator = new DataSourceLocator(new TitanProvider());
+            ds1 = locator.getDataSource(id);
+        }
         RefreshableDataSource refreshableDataSource = (RefreshableDataSource) ds1;
 
         provider.setUrl(mgrJdbcUrl1);

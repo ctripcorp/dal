@@ -28,14 +28,16 @@ public class MysqlApiConnectionStringUtils {
 
     private static final String DB_MYSQL_API_FAT = "http://mysqlapi.db.fat.qa.nt.ctripcorp.com:8080/database/getdbconninfo";
 
+    private static final String DB_MYSQL_API_LPT = "http://mysqlapi.db.lpt.qa.nt.ctripcorp.com:8080/database/getdbconninfo";
+
     private static final String MYSQL_API = "mysqlApi";
 
     public static MysqlApiConnectionStringInfo getConnectionStringFromMysqlApi(String mysqlApiUrl, String dbName, String env) throws Exception {
         Transaction t = Cat.newTransaction(DalLogTypes.DAL_CONNECTION_STRING, MYSQL_API);
 
         MysqlApiConnectionStringInfo info = null;
-        String url = !StringUtils.isEmpty(mysqlApiUrl) ? mysqlApiUrl : "FAT".equalsIgnoreCase(env) ? DB_MYSQL_API_FAT : "UAT".equalsIgnoreCase(env) ?
-                DB_MYSQL_API_UAT : DB_MYSQL_API_PRO;
+        String url = !StringUtils.isEmpty(mysqlApiUrl) ? mysqlApiUrl : "FAT".equalsIgnoreCase(env) || "FWS".equalsIgnoreCase(env) ? DB_MYSQL_API_FAT :
+                "LPT".equalsIgnoreCase(env) ? DB_MYSQL_API_LPT : "UAT".equalsIgnoreCase(env) ? DB_MYSQL_API_UAT : DB_MYSQL_API_PRO;
 
         JSONObject json = new JSONObject();
         json.put("env", env);

@@ -19,12 +19,6 @@ public interface DalRequest<T> {
     boolean isAsynExecution();
 
 	/**
-	 * Validate request
-	 * @throws SQLException
-	 */
-//    void validate() throws SQLException;
-
-	/**
 	 * Do validation and preparation
 	 */
 	void validateAndPrepare() throws SQLException;

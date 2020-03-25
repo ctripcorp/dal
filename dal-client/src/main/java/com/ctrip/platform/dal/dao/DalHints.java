@@ -398,6 +398,19 @@ public class DalHints {
     }
 
     public void handleError(String msg, Throwable e) throws SQLException {
+        handleError(msg, e, null, null);
+    }
+
+    public <T extends CallbackContext> void handleError(String msg, Throwable e, DalCallback<T> callback,
+                                                        T callbackContext) throws SQLException {
+        if (callback != null) {
+            try {
+                callback.process(callbackContext);
+            } catch (Throwable t) {
+                // ignore
+            }
+        }
+
         if (e == null)
             return;
 

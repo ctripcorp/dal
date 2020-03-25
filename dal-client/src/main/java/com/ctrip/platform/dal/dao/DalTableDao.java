@@ -27,6 +27,7 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  * @author jhhe
  */
 public final class DalTableDao<T> extends TaskAdapter<T> {
+
     public static final String GENERATED_KEY = "GENERATED_KEY";
 
     private SingleTask<T> singleInsertTask;
@@ -149,7 +150,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      */
     @Deprecated
     public List<T> queryLike(T sample, DalHints hints) throws SQLException {
-        return queryList(sample, hints, false);
+        return queryLike(sample, hints, null);
+    }
+
+    @Deprecated
+    public List<T> queryLike(T sample, DalHints hints, ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return queryList(sample, hints, false, callback);
     }
 
     /**
@@ -162,10 +168,14 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public List<T> queryBy(T sample, DalHints hints) throws SQLException {
-        return queryList(sample, hints, true);
+        return queryBy(sample, hints, null);
     }
 
-    private List<T> queryList(T sample, DalHints hints, boolean checkAllNullFields) throws SQLException {
+    public List<T> queryBy(T sample, DalHints hints, ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return queryList(sample, hints, true, callback);
+    }
+
+    private List<T> queryList(T sample, DalHints hints, boolean checkAllNullFields, ShardExecutionCallback<List<T>> callback) throws SQLException {
         if (sample == null) {
             throw new DalException(ErrorCode.ValidatePojo);
         }
@@ -182,7 +192,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         addParameters(parameters, queryCriteria);
         String whereClause = buildWhereClause(queryCriteria);
 
-        return query(whereClause, parameters, hints.setFields(fields));
+        return query(whereClause, parameters, hints.setFields(fields), callback);
     }
 
     /**
@@ -199,6 +209,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return query(new SelectSqlBuilder().where(whereClause).with(parameters), hints);
     }
 
+    public List<T> query(String whereClause, StatementParameters parameters, DalHints hints, ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return query(new SelectSqlBuilder().where(whereClause).with(parameters), hints, callback);
+    }
+
     /**
      * Query by given selectBuilder
      * 
@@ -209,6 +223,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      */
     public List<T> query(SelectSqlBuilder selectBuilder, DalHints hints) throws SQLException {
         return commonQuery(selectBuilder.mapWith(parser).nullable(), hints);
+    }
+
+    public List<T> query(SelectSqlBuilder selectBuilder, DalHints hints, ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return commonQuery(selectBuilder.mapWith(parser).nullable(), hints, callback);
     }
 
     /**
@@ -224,6 +242,9 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return commonQuery((SelectSqlBuilder) selectBuilder.mapWith(clazz).nullable(), hints);
     }
 
+    public <K> List<K> query(SelectSqlBuilder selectBuilder, DalHints hints, Class<K> clazz, ShardExecutionCallback<List<K>> callback) throws SQLException {
+        return commonQuery((SelectSqlBuilder) selectBuilder.mapWith(clazz).nullable(), hints, callback);
+    }
 
     /**
      * Query by given selectBuilder
@@ -238,6 +259,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     @Deprecated
     public List<T> query(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
         return query((SelectSqlBuilder) selectBuilder, hints);
+    }
+
+    @Deprecated
+    public List<T> query(TableSelectBuilder selectBuilder, DalHints hints, ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return query((SelectSqlBuilder) selectBuilder, hints, callback);
     }
 
     /**
@@ -256,6 +282,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return query((SelectSqlBuilder) selectBuilder, hints, clazz);
     }
 
+    @Deprecated
+    public <K> List<K> query(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz, ShardExecutionCallback<List<K>> callback) throws SQLException {
+        return query((SelectSqlBuilder) selectBuilder, hints, clazz, callback);
+    }
+
     /**
      * Query the first row of the given where clause and parameters. The where clause can contain value placeholder "?".
      * The parameter should match the index of the placeholder.
@@ -270,6 +301,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return queryObject(new SelectSqlBuilder().where(whereClause).with(parameters).requireFirst().nullable(), hints);
     }
 
+    public T queryFirst(String whereClause, StatementParameters parameters, DalHints hints, ShardExecutionCallback<T> callback) throws SQLException {
+        return queryObject(new SelectSqlBuilder().where(whereClause).with(parameters).requireFirst().nullable(), hints, callback);
+    }
+
     /**
      * Query the first row of the given SelectSqlBuilder.
      *
@@ -282,6 +317,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return queryObject(selectBuilder.requireFirst().nullable(), hints);
     }
 
+    public T queryFirst(SelectSqlBuilder selectBuilder, DalHints hints, ShardExecutionCallback<T> callback) throws SQLException {
+        return queryObject(selectBuilder.requireFirst().nullable(), hints, callback);
+    }
+
     /**
      * Query pojo for the given query builder. The requireSingle or requireFirst MUST be set on builder.
      * 
@@ -292,6 +331,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      */
     public T queryObject(SelectSqlBuilder selectBuilder, DalHints hints) throws SQLException {
         return commonQuery(selectBuilder.mapWith(parser), hints);
+    }
+
+    public T queryObject(SelectSqlBuilder selectBuilder, DalHints hints, ShardExecutionCallback<T> callback) throws SQLException {
+        return commonQuery(selectBuilder.mapWith(parser), hints, callback);
     }
 
     /**
@@ -308,6 +351,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return commonQuery((SelectSqlBuilder) selectBuilder.mapWith(clazz), hints);
     }
 
+    public <K> K queryObject(SelectSqlBuilder selectBuilder, DalHints hints, Class<K> clazz, ShardExecutionCallback<K> callback) throws SQLException {
+        return commonQuery((SelectSqlBuilder) selectBuilder.mapWith(clazz), hints, callback);
+    }
+
     /**
      * Query pojo for the given query builder. The requireSingle or requireFirst MUST be set on builder.
      *
@@ -321,6 +368,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     @Deprecated
     public T queryObject(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
         return queryObject((SelectSqlBuilder) selectBuilder, hints);
+    }
+
+    @Deprecated
+    public T queryObject(TableSelectBuilder selectBuilder, DalHints hints, ShardExecutionCallback<T> callback) throws SQLException {
+        return queryObject((SelectSqlBuilder) selectBuilder, hints, callback);
     }
 
     /**
@@ -340,9 +392,19 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return queryObject((SelectSqlBuilder) selectBuilder, hints, clazz);
     }
 
+    @Deprecated
+    public <K> K queryObject(TableSelectBuilder selectBuilder, DalHints hints, Class<K> clazz, ShardExecutionCallback<K> callback) throws SQLException {
+        return queryObject((SelectSqlBuilder) selectBuilder, hints, clazz, callback);
+    }
 
     public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
         return count(new SelectSqlBuilder().where(whereClause).with(parameters).selectCount(), hints);
+    }
+
+
+    public Number count(String whereClause, StatementParameters parameters, DalHints hints,
+                        ShardExecutionCallback<Number> callback) throws SQLException {
+        return count(new SelectSqlBuilder().where(whereClause).with(parameters).selectCount(), hints, callback);
     }
 
     // Assume selectCount() is already invoked
@@ -350,6 +412,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return commonQuery(selectBuilder, hints);
     }
 
+    // Assume selectCount() is already invoked
+    public Number count(SelectSqlBuilder selectBuilder, DalHints hints,
+                        ShardExecutionCallback<Number> callback) throws SQLException {
+        return commonQuery(selectBuilder, hints, callback);
+    }
 
     /**
      * @param selectBuilder
@@ -362,6 +429,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     @Deprecated
     public Number count(TableSelectBuilder selectBuilder, DalHints hints) throws SQLException {
         return count((SelectSqlBuilder) selectBuilder, hints);
+    }
+
+    @Deprecated
+    public Number count(TableSelectBuilder selectBuilder, DalHints hints,
+                        ShardExecutionCallback<Number> callback) throws SQLException {
+        return count((SelectSqlBuilder) selectBuilder, hints, callback);
     }
 
     /**
@@ -378,6 +451,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     public List<T> queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count)
             throws SQLException {
         return query(new SelectSqlBuilder().where(whereClause).with(parameters).top(count), hints);
+    }
+
+    public List<T> queryTop(String whereClause, StatementParameters parameters, DalHints hints, int count,
+                            ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return query(new SelectSqlBuilder().where(whereClause).with(parameters).top(count), hints, callback);
     }
 
     /**
@@ -397,13 +475,20 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return query(new SelectSqlBuilder().where(whereClause).with(parameters).range(start, count), hints);
     }
 
-    private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints) throws SQLException {
-        DalSqlTaskRequest<K> request = new DalSqlTaskRequest<K>(logicDbName, populate(builder), hints,
-                DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser,
-                        (DalResultSetExtractor<K>) builder.getResultExtractor(hints)),
-                (ResultMerger<K>) builder.getResultMerger(hints));
+    public List<T> queryFrom(String whereClause, StatementParameters parameters, DalHints hints, int start, int count,
+                             ShardExecutionCallback<List<T>> callback) throws SQLException {
+        return query(new SelectSqlBuilder().where(whereClause).with(parameters).range(start, count), hints, callback);
+    }
 
-        return executor.execute(hints, request, builder.isNullable());
+    private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints) throws SQLException {
+        return commonQuery(builder, hints, null);
+    }
+
+    private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints, ShardExecutionCallback<K> callback) throws SQLException {
+        DalSqlTaskRequest<K> request = new DalSqlTaskRequest<>(logicDbName, populate(builder), hints,
+                DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser,
+                        builder.getResultExtractor(hints)), builder.getResultMerger(hints), callback);
+        return executor.execute(hints, request, builder.isNullable(), callback);
     }
 
     /**
@@ -447,7 +532,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @return how many rows been affected
      */
     public int[] insert(DalHints hints, List<T> daoPojos) throws SQLException {
-        return insert(hints, hints.getKeyHolder(), daoPojos);
+        return insert(hints, daoPojos, null);
+    }
+
+    public int[] insert(DalHints hints, List<T> daoPojos, PojoExecutionCallback callback) throws SQLException {
+        return insert(hints, hints.getKeyHolder(), daoPojos, callback);
     }
 
     /**
@@ -464,8 +553,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
+        return insert(hints, keyHolder, daoPojos, null);
+    }
+
+    public int[] insert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos, PojoExecutionCallback callback) throws SQLException {
         return executor.execute(setSize(hints, keyHolder, daoPojos),
-                new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleInsertTask));
+                new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleInsertTask, callback));
     }
 
     /**
@@ -480,7 +573,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int combinedInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-        return combinedInsert(hints, hints.getKeyHolder(), daoPojos);
+        return combinedInsert(hints, daoPojos, null);
+    }
+
+    public int combinedInsert(DalHints hints, List<T> daoPojos, ShardExecutionCallback<Integer> callback) throws SQLException {
+        return combinedInsert(hints, hints.getKeyHolder(), daoPojos, callback);
     }
 
     /**
@@ -496,8 +593,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
+        return combinedInsert(hints, keyHolder, daoPojos, null);
+    }
+
+    public int combinedInsert(DalHints hints, KeyHolder keyHolder, List<T> daoPojos, ShardExecutionCallback<Integer> callback) throws SQLException {
         return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojos),
-                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask)));
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedInsertTask, callback), callback));
     }
 
     /**
@@ -510,8 +611,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] batchInsert(DalHints hints, List<T> daoPojos) throws SQLException {
-        return executor.execute(hints,
-                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchInsertTask));
+        return batchInsert(hints, daoPojos, null);
+    }
+
+    public int[] batchInsert(DalHints hints, List<T> daoPojos, ShardExecutionCallback<int[]> callback) throws SQLException {
+        return executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchInsertTask, callback), callback);
     }
 
     /**
@@ -523,8 +627,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int insert(InsertSqlBuilder insertBuilder, DalHints hints) throws SQLException {
+        return insert(insertBuilder, hints, null);
+    }
+
+    public int insert(InsertSqlBuilder insertBuilder, DalHints hints, ShardExecutionCallback<Integer> callback) throws SQLException {
         return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, populate(insertBuilder),
-                hints, updateSqlTask, new ResultMerger.IntSummary())));
+                hints, updateSqlTask, new ResultMerger.IntSummary(), callback), callback));
     }
 
     /**
@@ -536,8 +644,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int delete(DalHints hints, T daoPojo) throws SQLException {
-        return getSafeResult(getSafeResult(
-                executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleDeleteTask))));
+        return getSafeResult(getSafeResult(executor.execute(hints,
+                new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleDeleteTask))));
     }
 
     /**
@@ -549,7 +657,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] delete(DalHints hints, List<T> daoPojos) throws SQLException {
-        return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleDeleteTask));
+        return delete(hints, daoPojos, null);
+    }
+
+    public int[] delete(DalHints hints, List<T> daoPojos, PojoExecutionCallback callback) throws SQLException {
+        return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleDeleteTask, callback));
     }
 
     /**
@@ -562,8 +674,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] batchDelete(DalHints hints, List<T> daoPojos) throws SQLException {
+        return batchDelete(hints, daoPojos, null);
+    }
+
+    public int[] batchDelete(DalHints hints, List<T> daoPojos, ShardExecutionCallback<int[]> callback) throws SQLException {
         return executor.execute(hints,
-                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchDeleteTask));
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchDeleteTask, callback), callback);
     }
 
     /**
@@ -577,8 +693,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int update(DalHints hints, T daoPojo) throws SQLException {
-        return getSafeResult(
-                executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleUpdateTask)));
+        return getSafeResult(executor.execute(hints,
+                new DalSingleTaskRequest<>(logicDbName, hints, daoPojo, singleUpdateTask)));
     }
 
     /**
@@ -592,12 +708,20 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] update(DalHints hints, List<T> daoPojos) throws SQLException {
-        return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleUpdateTask));
+        return update(hints, daoPojos, null);
+    }
+
+    public int[] update(DalHints hints, List<T> daoPojos, PojoExecutionCallback callback) throws SQLException {
+        return executor.execute(hints, new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleUpdateTask, callback));
     }
 
     public int[] batchUpdate(DalHints hints, List<T> daoPojos) throws SQLException {
+        return batchUpdate(hints, daoPojos, null);
+    }
+
+    public int[] batchUpdate(DalHints hints, List<T> daoPojos, ShardExecutionCallback<int[]> callback) throws SQLException {
         return executor.execute(hints,
-                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchUpdateTask));
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchUpdateTask, callback), callback);
     }
 
     /**
@@ -613,6 +737,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return delete(new DeleteSqlBuilder().where(whereClause).with(parameters), hints);
     }
 
+    public int delete(String whereClause, StatementParameters parameters, DalHints hints, ShardExecutionCallback<Integer> callback) throws SQLException {
+        return delete(new DeleteSqlBuilder().where(whereClause).with(parameters), hints, callback);
+    }
+
     /**
      * Delete for the given delete sql builder.
      * 
@@ -622,8 +750,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int delete(DeleteSqlBuilder deleteBuilder, DalHints hints) throws SQLException {
+        return delete(deleteBuilder, hints, null);
+    }
+
+    public int delete(DeleteSqlBuilder deleteBuilder, DalHints hints, ShardExecutionCallback<Integer> callback) throws SQLException {
         return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, populate(deleteBuilder),
-                hints, deleteSqlTask, new ResultMerger.IntSummary())));
+                hints, deleteSqlTask, new ResultMerger.IntSummary(), callback), callback));
     }
 
     /**
@@ -638,10 +770,13 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int update(String sql, StatementParameters parameters, DalHints hints) throws SQLException {
-        return getSafeResult(executor.execute(hints,
-                new DalSqlTaskRequest<>(logicDbName,
-                        new FreeUpdateSqlBuilder(dbCategory).setTemplate(sql).with(parameters), hints, updateSqlTask,
-                        new ResultMerger.IntSummary())));
+        return update(sql, parameters, hints, null);
+    }
+
+    public int update(String sql, StatementParameters parameters, DalHints hints, ShardExecutionCallback<Integer> callback) throws SQLException {
+        return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName,
+                new FreeUpdateSqlBuilder(dbCategory).setTemplate(sql).with(parameters), hints, updateSqlTask,
+                new ResultMerger.IntSummary(), callback), callback));
     }
 
     /**
@@ -653,8 +788,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int update(UpdateSqlBuilder updateBuilder, DalHints hints) throws SQLException {
+        return update(updateBuilder, hints, null);
+    }
+
+    public int update(UpdateSqlBuilder updateBuilder, DalHints hints, ShardExecutionCallback<Integer> callback) throws SQLException {
         return getSafeResult(executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, populate(updateBuilder),
-                hints, updateSqlTask, new ResultMerger.IntSummary())));
+                hints, updateSqlTask, new ResultMerger.IntSummary(), callback), callback));
     }
 
     /**
@@ -699,7 +838,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @return how many rows been affected
      */
     public int[] replace(DalHints hints, List<T> daoPojos) throws SQLException {
-        return replace(hints, hints.getKeyHolder(), daoPojos);
+        return replace(hints, daoPojos, null);
+    }
+
+    public int[] replace(DalHints hints, List<T> daoPojos, PojoExecutionCallback callback) throws SQLException {
+        return replace(hints, hints.getKeyHolder(), daoPojos, callback);
     }
 
     /**
@@ -716,10 +859,13 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] replace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
-        return executor.execute(setSize(hints, keyHolder, daoPojos),
-                new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleReplaceTask));
+        return replace(hints, keyHolder, daoPojos, null);
     }
 
+    public int[] replace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos, PojoExecutionCallback callback) throws SQLException {
+        return executor.execute(setSize(hints, keyHolder, daoPojos),
+                new DalSingleTaskRequest<>(logicDbName, hints, daoPojos, singleReplaceTask, callback));
+    }
 
     /**
      * If your table has a auto_increment primary key and a unique key, it's suggested to bypass with insert into ... on
@@ -732,7 +878,11 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int combinedReplace(DalHints hints, List<T> daoPojos) throws SQLException {
-        return combinedReplace(hints, hints.getKeyHolder(), daoPojos);
+        return combinedReplace(hints, daoPojos, null);
+    }
+
+    public int combinedReplace(DalHints hints, List<T> daoPojos, ShardExecutionCallback<Integer> callback) throws SQLException {
+        return combinedReplace(hints, hints.getKeyHolder(), daoPojos, callback);
     }
 
     /**
@@ -747,8 +897,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int combinedReplace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos) throws SQLException {
+        return combinedReplace(hints, keyHolder, daoPojos, null);
+    }
+
+    public int combinedReplace(DalHints hints, KeyHolder keyHolder, List<T> daoPojos, ShardExecutionCallback<Integer> callback) throws SQLException {
         return getSafeResult(executor.execute(setSize(hints, keyHolder, daoPojos),
-                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedReplaceTask)));
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedReplaceTask, callback), callback));
     }
 
     /**
@@ -762,8 +916,12 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public int[] batchReplace(DalHints hints, List<T> daoPojos) throws SQLException {
+        return batchReplace(hints, daoPojos, null);
+    }
+
+    public int[] batchReplace(DalHints hints, List<T> daoPojos, ShardExecutionCallback<int[]> callback) throws SQLException {
         return executor.execute(hints,
-                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchReplaceTask));
+                new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, batchReplaceTask, callback), callback);
     }
 
     private SqlBuilder populate(TableSqlBuilder builder) throws SQLException {
@@ -806,4 +964,5 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
             keyHolder = keyHolder == null ? new KeyHolder() : keyHolder;
         return keyHolder;
     }
+
 }

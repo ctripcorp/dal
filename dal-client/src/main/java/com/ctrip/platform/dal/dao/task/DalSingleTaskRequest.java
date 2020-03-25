@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.ResultMerger;
+import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.helper.DalRequestContext;
 import com.ctrip.platform.dal.dao.helper.RequestContext;
@@ -29,24 +28,33 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
     private List<Map<String, ?>> daoPojos;
     private SingleTask<T> task;
     private DalTaskContext dalTaskContext;
+    private PojoExecutionCallback callback;
 
-    private DalSingleTaskRequest(String logicDbName, DalHints hints, SingleTask<T> task) {
+    private DalSingleTaskRequest(String logicDbName, DalHints hints, SingleTask<T> task, PojoExecutionCallback callback) {
         this.logicDbName = logicDbName;
         this.task = task;
         this.hints = hints != null ? hints.clone() : new DalHints();
         this.caller = LogContext.getRequestCaller();
+        this.callback = callback;
         prepareRequestContext();
     }
 
     public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task) {
-        this(logicDbName, hints, task);
+        this(logicDbName, hints, rawPojo, task, null);
+    }
 
+    public DalSingleTaskRequest(String logicDbName, DalHints hints, T rawPojo, SingleTask<T> task, PojoExecutionCallback callback) {
+        this(logicDbName, hints, task, callback);
         this.rawPojo = rawPojo;
         isList = false;
     }
 
     public DalSingleTaskRequest(String logicDbName, DalHints hints, List<T> rawPojos, SingleTask<T> task) {
-        this(logicDbName, hints, task);
+        this(logicDbName, hints, rawPojos, task, null);
+    }
+
+    public DalSingleTaskRequest(String logicDbName, DalHints hints, List<T> rawPojos, SingleTask<T> task, PojoExecutionCallback callback) {
+        this(logicDbName, hints, task, callback);
         this.rawPojos = rawPojos;
         isList = true;
     }
@@ -106,7 +114,7 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
 
     @Override
     public TaskCallable<int[]> createTask() {
-        return new SingleTaskCallable<>(hints, daoPojos, rawPojos, task, dalTaskContext);
+        return new SingleTaskCallable<>(hints, daoPojos, rawPojos, task, dalTaskContext, callback);
     }
 
     @Override
@@ -131,13 +139,16 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
         private List<T> rawPojos;
         private SingleTask<T> task;
         private DalTaskContext taskContext;
+        private PojoExecutionCallback callback;
 
-        public SingleTaskCallable(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos, SingleTask<T> task, DalTaskContext taskContext) {
+        public SingleTaskCallable(DalHints hints, List<Map<String, ?>> daoPojos, List<T> rawPojos, SingleTask<T> task,
+                                  DalTaskContext taskContext, PojoExecutionCallback callback) {
             this.hints = hints;
             this.daoPojos = daoPojos;
             this.rawPojos = rawPojos;
             this.task = task;
             this.taskContext = taskContext;
+            this.callback = callback;
         }
 
         @Override
@@ -147,14 +158,17 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
                 Throwable error = null;
                 DalHints localHints = prepareLocalHints(task, hints);
 
+                PojoExecutionResult executionResult;
                 try {
                     counts[i] = task.execute(localHints, daoPojos.get(i), rawPojos.get(i), taskContext);
+                    executionResult = new PojoExecutionResultImpl(i, counts[i]);
                 } catch (Throwable e) {
                     error = e;
+                    executionResult = new PojoExecutionResultImpl(i, e);
                 }
 
                 mergePartial(task, hints.getKeyHolder(), localHints.getKeyHolder(), error);
-                hints.handleError("Error when execute single pojo operation", error);
+                hints.handleError("Error when execute single pojo operation", error, callback, executionResult);
             }
 
             return counts;

@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
-
 import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
 import com.ctrip.platform.dal.dao.helper.DalRowCallbackExtractor;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
@@ -24,6 +23,7 @@ import com.ctrip.platform.dal.dao.task.*;
  *
  */
 public final class DalQueryDao extends BaseTaskAdapter {
+
 	private static final boolean NULLABLE = true;
 	private DalRequestExecutor executor;
 
@@ -55,6 +55,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return query(new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(mapper), parameters, hints);
 	}
 
+	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+							 ShardExecutionCallback<List<T>> callback) throws SQLException {
+		return query(new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(mapper), parameters, hints, callback);
+	}
+
 	/**
 	 * Execute query by the given sql with parameters. The result will be the list of instance of the given clazz.
 	 * Please don't use this when clazz is Short because ResultSet will return Integer instead of Short.
@@ -70,6 +75,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
 		return query(new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(getMapper(clazz)), parameters, hints);
+	}
+
+	public <T> List<T> query(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+							 ShardExecutionCallback<List<T>> callback) throws SQLException {
+		return query(new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(getMapper(clazz)), parameters, hints, callback);
 	}
 
 	/**
@@ -94,13 +104,15 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	 * @return List of entities that represent the query result.
 	 * @throws SQLException when things going wrong during the execution
 	 */
-	public List<?> query(MultipleSqlBuilder mqr, DalHints hints)
-			throws SQLException {
-		DalSqlTaskRequest<List<?>> request = new DalSqlTaskRequest<>(
-				logicDbName, mqr, hints,
-				DalClientFactory.getTaskFactory().createMultipleQueryTask(logicDbName, mqr.getExtractors()), mqr.getMergers());
+	public List<?> query(MultipleSqlBuilder mqr, DalHints hints) throws SQLException {
+		return query(mqr, hints, null);
+	}
 
-		return executor.execute(hints, request, NULLABLE);
+	public List<?> query(MultipleSqlBuilder mqr, DalHints hints, ShardExecutionCallback<List<?>> callback) throws SQLException {
+		DalSqlTaskRequest<List<?>> request = new DalSqlTaskRequest<>(logicDbName, mqr, hints,
+				DalClientFactory.getTaskFactory().createMultipleQueryTask(logicDbName, mqr.getExtractors()),
+				mqr.getMergers(), callback);
+		return executor.execute(hints, request, NULLABLE, callback);
 	}
 	
 	/**
@@ -115,13 +127,17 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	 * @throws SQLException
 	 */
 	public <T> T query(FreeSelectSqlBuilder<T> builder, StatementParameters parameters, DalHints hints) throws SQLException {
+		return query(builder, parameters, hints, null);
+	}
+
+	public <T> T query(FreeSelectSqlBuilder<T> builder, StatementParameters parameters, DalHints hints,
+					   ShardExecutionCallback<T> callback) throws SQLException {
 		ResultMerger<T> merger = builder.getResultMerger(hints);
 		DalResultSetExtractor<T> extractor = builder.getResultExtractor(hints);
-		
-		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
-				logicDbName, builder.setLogicDbName(logicDbName).with(parameters), hints, DalClientFactory.getTaskFactory().createFreeSqlQueryTask(logicDbName, extractor), merger);
-		
-		return executor.execute(hints, request, builder.isNullable());
+		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(logicDbName,
+				builder.setLogicDbName(logicDbName).with(parameters), hints,
+				DalClientFactory.getTaskFactory().createFreeSqlQueryTask(logicDbName, extractor), merger, callback);
+		return executor.execute(hints, request, builder.isNullable(), callback);
 	}
 	
     /**
@@ -136,13 +152,17 @@ public final class DalQueryDao extends BaseTaskAdapter {
      * @throws SQLException
      */
 	public <T> T query(FreeSelectSqlBuilder<T> builder, DalHints hints) throws SQLException {
+		return query(builder, hints, null);
+	}
+
+	public <T> T query(FreeSelectSqlBuilder<T> builder, DalHints hints, ShardExecutionCallback<T> callback)
+			throws SQLException {
 		ResultMerger<T> merger = builder.getResultMerger(hints);
 		DalResultSetExtractor<T> extractor = builder.getResultExtractor(hints);
-
-		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(
-				logicDbName, builder.setLogicDbName(logicDbName).setHints(hints), hints, DalClientFactory.getTaskFactory().createFreeSqlQueryTask(logicDbName, extractor), merger);
-
-		return executor.execute(hints, request, builder.isNullable());
+		DalSqlTaskRequest<T> request = new DalSqlTaskRequest<>(logicDbName,
+				builder.setLogicDbName(logicDbName).setHints(hints), hints,
+				DalClientFactory.getTaskFactory().createFreeSqlQueryTask(logicDbName, extractor), merger, callback);
+		return executor.execute(hints, request, builder.isNullable(), callback);
 	}
 
 	/**
@@ -162,6 +182,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return queryForObject(sql, parameters, hints, mapper, !NULLABLE);
 	}
 
+	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+								ShardExecutionCallback<T> callback) throws SQLException {
+		return queryForObject(sql, parameters, hints, mapper, !NULLABLE, callback);
+	}
+
 	/**
 	 * Query for the only object in the result. It is expected that there is only one result should be found.
 	 * If there is no result, it will return null. If there is more than 1 result found, it will throws exception to indicate the exceptional case.
@@ -177,6 +202,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		return queryForObject(sql, parameters, hints, mapper, NULLABLE);
+	}
+
+	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+										ShardExecutionCallback<T> callback) throws SQLException {
+		return queryForObject(sql, parameters, hints, mapper, NULLABLE, callback);
 	}
 
 	/**
@@ -196,6 +226,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return queryForObject(sql, parameters, hints, getMapper(clazz), !NULLABLE);
 	}
 
+	public <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+								ShardExecutionCallback<T> callback) throws SQLException {
+		return queryForObject(sql, parameters, hints, getMapper(clazz), !NULLABLE, callback);
+	}
+
 	/**
 	 * Query for the only object in the result. It is expected that there is only one result should be found.
 	 * If there is no result, it will return null. If there is more than 1 result found, it will throws exception to indicate the exceptional case.
@@ -211,6 +246,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
 		return queryForObject(sql, parameters, hints, getMapper(clazz), NULLABLE);
+	}
+
+	public <T> T queryForObjectNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+										ShardExecutionCallback<T> callback) throws SQLException {
+		return queryForObject(sql, parameters, hints, getMapper(clazz), NULLABLE, callback);
 	}
 	
 	/**
@@ -230,6 +270,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return queryFirst(sql, parameters, hints, mapper, !NULLABLE);
 	}
 
+	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+							ShardExecutionCallback<T> callback) throws SQLException {
+		return queryFirst(sql, parameters, hints, mapper, !NULLABLE, callback);
+	}
+
 	/**
 	 * Query for the first object in the result. It is expected that there is at least one result should be found.
 	 * If there is no result found, it will return null.
@@ -245,6 +290,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper) 
 			throws SQLException {
 		return queryFirst(sql, parameters, hints, mapper, NULLABLE);
+	}
+
+	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+									ShardExecutionCallback<T> callback) throws SQLException {
+		return queryFirst(sql, parameters, hints, mapper, NULLABLE, callback);
 	}
 	
 	/**
@@ -264,6 +314,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return queryFirst(sql, parameters, hints, getMapper(clazz), !NULLABLE);
 	}
 
+	public <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+							ShardExecutionCallback<T> callback) throws SQLException {
+		return queryFirst(sql, parameters, hints, getMapper(clazz), !NULLABLE, callback);
+	}
+
 	/**
 	 * Query for the first object in the result. It is expected that there is at least one result should be found.
 	 * If there is no result found, it will return null.
@@ -279,6 +334,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz) 
 			throws SQLException {
 		return queryFirst(sql, parameters, hints, getMapper(clazz), NULLABLE);
+	}
+
+	public <T> T queryFirstNullable(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+									ShardExecutionCallback<T> callback) throws SQLException {
+		return queryFirst(sql, parameters, hints, getMapper(clazz), NULLABLE, callback);
 	}
 
 	/**
@@ -299,6 +359,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return queryRange(sql, parameters, hints, mapper, 0, count);
 	}
 
+	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int count,
+								ShardExecutionCallback<List<T>> callback) throws SQLException {
+		return queryRange(sql, parameters, hints, mapper, 0, count, callback);
+	}
+
 	/**
 	 * Query the first count of object in the result. If the query return more result than 
 	 * count. It will return top count of result. If there is not enough result, it will 
@@ -317,6 +382,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return queryRange(sql, parameters, hints,  getMapper(clazz), 0, count);
 	}
 
+	public <T> List<T> queryTop(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int count,
+								ShardExecutionCallback<List<T>> callback) throws SQLException {
+		return queryRange(sql, parameters, hints,  getMapper(clazz), 0, count, callback);
+	}
+
 	/**
 	 * Execute query and return partial result against the given start and count.
 	 *   
@@ -329,9 +399,16 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	 * @return list of entity that represent the query result.
 	 * @throws SQLException when things going wrong during the execution
 	 */
-	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count) throws SQLException {
+	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+								 int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return queryRange(sql, parameters, hints, mapper, start, count);
+	}
+
+	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper,
+								 int start, int count, ShardExecutionCallback<List<T>> callback) throws SQLException {
+		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
+		return queryRange(sql, parameters, hints, mapper, start, count, callback);
 	}
 
 	/**
@@ -349,9 +426,16 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	 * @return list of instance of clazz that represent the query result.
 	 * @throws SQLException when things going wrong during the execution
 	 */
-	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz, int start, int count) throws SQLException {
+	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+								 int start, int count) throws SQLException {
 		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
 		return queryRange(sql, parameters, hints, getMapper(clazz), start, count);
+	}
+
+	public <T> List<T> queryFrom(String sql, StatementParameters parameters, DalHints hints, Class<T> clazz,
+								 int start, int count, ShardExecutionCallback<List<T>> callback) throws SQLException {
+		hints.set(DalHintEnum.resultSetType, ResultSet.TYPE_SCROLL_INSENSITIVE);
+		return queryRange(sql, parameters, hints, getMapper(clazz), start, count, callback);
 	}
 	
 	/**
@@ -368,6 +452,11 @@ public final class DalQueryDao extends BaseTaskAdapter {
 	public int update(FreeUpdateSqlBuilder builder, StatementParameters parameters, DalHints hints) throws SQLException {
 		return update((FreeUpdateSqlBuilder)builder.with(parameters), hints);
 	}
+
+	public int update(FreeUpdateSqlBuilder builder, StatementParameters parameters, DalHints hints,
+					  ShardExecutionCallback<Integer> callback) throws SQLException {
+		return update((FreeUpdateSqlBuilder)builder.with(parameters), hints, callback);
+	}
 	
     /**
      * Update with FreeUpdateSqlBuilder. The builder contains sql template. If there is IN (?) clause, the number of "?" should be 1.
@@ -380,18 +469,31 @@ public final class DalQueryDao extends BaseTaskAdapter {
      * @throws SQLException
      */
     public int update(FreeUpdateSqlBuilder builder, DalHints hints) throws SQLException {
-        return getSafeResult((Integer)executor.execute(hints, new DalSqlTaskRequest<>(logicDbName, builder.setLogicDbName(logicDbName).setHints(hints), hints, DalClientFactory.getTaskFactory().createFreeUpdateTask(logicDbName), new ResultMerger.IntSummary())));
+        return update(builder, hints, null);
     }
+
+	public int update(FreeUpdateSqlBuilder builder, DalHints hints,
+					  ShardExecutionCallback<Integer> callback) throws SQLException {
+		return getSafeResult((Integer)executor.execute(hints, new DalSqlTaskRequest<>(logicDbName,
+				builder.setLogicDbName(logicDbName).setHints(hints), hints,
+				DalClientFactory.getTaskFactory().createFreeUpdateTask(logicDbName),
+				new ResultMerger.IntSummary(), callback), callback));
+	}
     
 	private int getSafeResult(Integer value) {
 		if(value == null)
 			return 0;
 		return value;
 	}
-	
-	private <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 
+
+	private <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable)
 			throws SQLException {
 		return query(new FreeSelectSqlBuilder<T>().setTemplate(sql).mapWith(mapper).requireSingle().setNullable(nullable), parameters, hints);
+	}
+
+	private <T> T queryForObject(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable,
+								 ShardExecutionCallback<T> callback) throws SQLException {
+		return query(new FreeSelectSqlBuilder<T>().setTemplate(sql).mapWith(mapper).requireSingle().setNullable(nullable), parameters, hints, callback);
 	}
 
 	private <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable) 
@@ -399,10 +501,19 @@ public final class DalQueryDao extends BaseTaskAdapter {
 		return query(new FreeSelectSqlBuilder<T>().setTemplate(sql).mapWith(mapper).requireFirst().setNullable(nullable), parameters, hints);
 	}
 
+	private <T> T queryFirst(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, boolean nullable,
+							 ShardExecutionCallback<T> callback) throws SQLException {
+		return query(new FreeSelectSqlBuilder<T>().setTemplate(sql).mapWith(mapper).requireFirst().setNullable(nullable), parameters, hints, callback);
+	}
+
 	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count)
 			throws SQLException {
-		FreeSelectSqlBuilder<List<T>> builder = new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(mapper);
+		return queryRange(sql, parameters, hints, mapper, start, count, null);
+	}
 
+	private <T> List<T> queryRange(String sql, StatementParameters parameters, DalHints hints, DalRowMapper<T> mapper, int start, int count,
+								   ShardExecutionCallback<List<T>> callback) throws SQLException {
+		FreeSelectSqlBuilder<List<T>> builder = new FreeSelectSqlBuilder<List<T>>().setTemplate(sql).mapWith(mapper);
 		if (hints.isAllShards() || hints.isInShards()) {
 			builder.range(0, (count + start));
 			builder.mergerWith(new DalRangedResultMerger<>((Comparator<T>) hints.getSorter(), start, count));
@@ -411,7 +522,7 @@ public final class DalQueryDao extends BaseTaskAdapter {
 			builder.range(start, count);
 			builder.extractorWith(new DalRowMapperExtractor<T>(mapper));
 		}
+		return query(builder, parameters, hints, callback);
+	}
 
-		return query(builder, parameters, hints);
-	}	
 }

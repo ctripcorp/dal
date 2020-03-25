@@ -7,9 +7,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.PojoExecutionResult;
+import com.ctrip.platform.dal.dao.ShardExecutionCallback;
+import com.ctrip.platform.dal.dao.ShardExecutionResult;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.helper.DalRequestContext;
 import com.ctrip.platform.dal.dao.helper.RequestContext;
@@ -26,15 +28,22 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	private BulkTask<K, T> task;
 	private DalBulkTaskContext<T> taskContext;
 	private BulkTaskResultMerger<K> dbShardMerger;
-	Map<String, Map<Integer, Map<String, ?>>> shuffled;
+	private Map<String, Map<Integer, Map<String, ?>>> shuffled;
+	private ShardExecutionCallback<K> callback;
 	
 	public DalBulkTaskRequest(String logicDbName, String rawTableName, DalHints hints, List<T> rawPojos, BulkTask<K, T> task) {
+		this(logicDbName, rawTableName, hints, rawPojos, task, null);
+	}
+
+	public DalBulkTaskRequest(String logicDbName, String rawTableName, DalHints hints,
+							  List<T> rawPojos, BulkTask<K, T> task, ShardExecutionCallback<K> callback) {
 		this.logicDbName = logicDbName;
 		this.rawTableName = rawTableName;
 		this.hints = hints != null ? hints.clone() : new DalHints();
 		this.rawPojos = rawPojos;
 		this.task = task;
 		this.caller = LogContext.getRequestCaller();
+		this.callback = callback;
 		prepareRequestContext();
 	}
 
@@ -101,10 +110,12 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		// If only one shard is shuffled
 		if(shuffled != null) {
 			if(shuffled.size() == 0)
-				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<Integer, Map<String, ?>>(), task, (DalBulkTaskContext<T>) taskContext.fork());
+				return new BulkTaskCallable<>(logicDbName, rawTableName, hints, new HashMap<>(), task,
+						(DalBulkTaskContext<T>) taskContext.fork(), null, callback);
 
 			String shard = shuffled.keySet().iterator().next();
-			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard), task, (DalBulkTaskContext<T>) taskContext.fork());
+			return new BulkTaskCallable<>(logicDbName, rawTableName, hints.inShard(shard), shuffled.get(shard),
+					task, (DalBulkTaskContext<T>) taskContext.fork(), shard, callback);
 		}
 	
 		// Convert to index map
@@ -112,7 +123,8 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		for(int i = 0; i < daoPojos.size(); i++)
 			daoPojosMap.put(i, daoPojos.get(i));
 
-		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, task, (DalBulkTaskContext<T>) taskContext.fork());
+		return new BulkTaskCallable<>(logicDbName, rawTableName, hints, daoPojosMap, task,
+				(DalBulkTaskContext<T>) taskContext.fork(), null, callback);
 	}
 
 	@Override
@@ -127,8 +139,8 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 			
 			dbShardMerger.recordPartial(shard, pojosInShard.keySet().toArray(new Integer[pojosInShard.size()]));
 			
-			tasks.put(shard, new BulkTaskCallable<>(
-					logicDbName, rawTableName, hints.clone().inShard(shard), shuffled.get(shard), task, (DalBulkTaskContext<T>) taskContext.fork()));
+			tasks.put(shard, new BulkTaskCallable<>(logicDbName, rawTableName, hints.clone().inShard(shard),
+					shuffled.get(shard), task, (DalBulkTaskContext<T>) taskContext.fork(), shard, callback));
 		}
 
 		return tasks; 
@@ -155,28 +167,34 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		private String logicDbName;
 		private String rawTableName;
 		private DalHints hints;
-		private Map<Integer, Map<String, ?>> shaffled;
+		private Map<Integer, Map<String, ?>> shuffled;
 		private BulkTask<K, T> task;
 		private DalBulkTaskContext<T> taskContext;
+		private String shuffledDbShard;
+		private ShardExecutionCallback<K> callback;
 
-		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints, Map<Integer, Map<String, ?>> shaffled, BulkTask<K, T> task, DalBulkTaskContext<T> taskContext){
+		public BulkTaskCallable(String logicDbName, String rawTableName, DalHints hints,
+								Map<Integer, Map<String, ?>> shuffled, BulkTask<K, T> task, DalBulkTaskContext<T> taskContext,
+								String shuffledDbShard, ShardExecutionCallback<K> callback) {
 			this.logicDbName = logicDbName;
 			this.rawTableName = rawTableName;
 			this.hints = hints;
-			this.shaffled = shaffled;
+			this.shuffled = shuffled;
 			this.task = task;
 			this.taskContext = taskContext;
+			this.shuffledDbShard = shuffledDbShard;
+			this.callback = callback;
 		}
 
 		@Override
 		public K call() throws Exception {
-			if(shaffled.isEmpty())
+			if(shuffled.isEmpty())
 			    return task.getEmptyValue();
 			
 			if(isTableShardingEnabled(logicDbName, rawTableName)) {
 				return executeByTableShards();
 			}else{
-				return execute(hints, shaffled, taskContext);
+				return execute(hints, shuffled, taskContext);
 			}
 		}
 
@@ -204,7 +222,7 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		private K executeByTableShards() throws SQLException {
 			BulkTaskResultMerger<K> merger = task.createMerger();
 			
-			Map<String, Map<Integer, Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, rawTableName, hints.getTableShardId(), shaffled);
+			Map<String, Map<Integer, Map<String, ?>>> pojosInTable = shuffleByTable(logicDbName, rawTableName, hints.getTableShardId(), shuffled);
 			
 			if(pojosInTable.size() > 1 && hints.getKeyHolder() != null) {
 				hints.getKeyHolder().requireMerge();
@@ -221,15 +239,19 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 				merger.recordPartial(curTableShardId, indexList);
 
 				Throwable error = null;
+				ShardExecutionResult<K> executionResult;
                 try {
-                    K partial = task.execute(localHints, pojosInShard, (DalBulkTaskContext<T>)taskContext);
+                    K partial = task.execute(localHints, pojosInShard, taskContext);
                     merger.addPartial(curTableShardId, partial);
+					// TODO: shuffledDbShard may be inaccurate
+                    executionResult = new ShardExecutionResultImpl<>(shuffledDbShard, curTableShardId, partial);
                 } catch (Throwable e) {
                     error = e;
+					executionResult = new ShardExecutionResultImpl<>(shuffledDbShard, curTableShardId, e);
                 }
 
                 mergePartial(task, hints.getKeyHolder(), indexList, localHints.getKeyHolder(), error);
-                hints.handleError("Error when execute table shard operation", error);
+                hints.handleError("Error when execute table shard operation", error, callback, executionResult);
 			}
 			return merger.merge();
 		}

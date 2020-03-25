@@ -12,11 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.DalResultCallback;
-import com.ctrip.platform.dal.dao.ResultMerger;
+import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.client.LogEntry;
@@ -87,26 +83,34 @@ public class DalRequestExecutor {
 	}
 
 	public <T> T execute(final DalHints hints, final DalRequest<T> request) throws SQLException {
-		return execute(hints, request, false);
+		return execute(hints, request, null);
+	}
+
+	public <T> T execute(final DalHints hints, final DalRequest<T> request, final ShardExecutionCallback<T> callback) throws SQLException {
+		return execute(hints, request, false, callback);
 	}
 	
 	public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable) throws SQLException {
+		return execute(hints, request, nullable, null);
+	}
+
+	public <T> T execute(final DalHints hints, final DalRequest<T> request, final boolean nullable, final ShardExecutionCallback<T> callback) throws SQLException {
 		if (hints.isAsyncExecution()) {
 			Future<T> future = serviceRef.get().submit(new Callable<T>() {
 				public T call() throws Exception {
-					return internalExecute(hints, request, nullable);
+					return internalExecute(hints, request, nullable, callback);
 				}
 			});
-			
+
 			if(hints.isAsyncExecution())
-				hints.set(DalHintEnum.futureResult, future); 
+				hints.set(DalHintEnum.futureResult, future);
 			return null;
 		}
-		
-		return internalExecute(hints, request, nullable);
+
+		return internalExecute(hints, request, nullable, callback);
 	}
 
-	private <T> T internalExecute(DalHints hints, DalRequest<T> request, boolean nullable) throws SQLException {
+	private <T> T internalExecute(DalHints hints, DalRequest<T> request, boolean nullable, final ShardExecutionCallback<T> callback) throws SQLException {
 		T result = null;
 		Throwable error = null;
 		
@@ -114,11 +118,10 @@ public class DalRequestExecutor {
 		long startTime = System.currentTimeMillis();
 
 		try {
-//			request.validate();
 			request.validateAndPrepare();
 			
 			if(request.isCrossShard())
-				result = crossShardExecute(logContext, hints, request);
+				result = crossShardExecute(logContext, hints, request, callback);
 			else
 				result = nonCrossShardExecute(logContext, hints, request);
 
@@ -151,7 +154,7 @@ public class DalRequestExecutor {
 		return result;
 	}
 	
-	private <T> T crossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
+	private <T> T crossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request, ShardExecutionCallback<T> callback) throws Exception {
         Map<String, TaskCallable<T>> tasks = request.createTasks();
         logContext.setShards(tasks.keySet());
 
@@ -167,8 +170,8 @@ public class DalRequestExecutor {
 
 		try {
             result = isSequentialExecution?
-            		seqncialExecute(hints, tasks, merger, logContext):
-            		parallelExecute(hints, tasks, merger, logContext);
+            		sequentialExecute(hints, tasks, merger, logContext, callback):
+            		parallelExecute(hints, tasks, merger, logContext, callback);
 
         } catch (Throwable e) {
             error = e;
@@ -194,7 +197,8 @@ public class DalRequestExecutor {
 			qc.onError(error);
 	}
 
-	private <T> T parallelExecute(DalHints hints, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
+	private <T> T parallelExecute(DalHints hints, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger,
+								  LogContext logContext, ShardExecutionCallback<T> callback) throws SQLException {
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 
 		List<LogEntry> logEntries = new ArrayList<>();
@@ -203,11 +207,19 @@ public class DalRequestExecutor {
 			resultFutures.put(shard, serviceRef.get().submit(new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext)));
 
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
+			String dbShard = entry.getKey();
+			Throwable error = null;
+			ShardExecutionResult<T> executionResult;
 			try {
-				merger.addPartial(entry.getKey(), entry.getValue().get());
+				T partial = entry.getValue().get();
+				merger.addPartial(dbShard, partial);
+				// TODO: tableShard may be inaccurate
+				executionResult = new ShardExecutionResultImpl<>(dbShard, null, partial);
 			} catch (Throwable e) {
-				hints.handleError("There is error during parallel execution: ", e);
+				error = e;
+				executionResult = new ShardExecutionResultImpl<>(dbShard, null, e);
 			}
+			hints.handleError("There is error during parallel execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(entry.getKey());
 			maxStatementExecuteTime = Math.max(maxStatementExecuteTime, task.getDalTaskContext().getStatementExecuteTime());
 			addLogEntry(logEntries, task.getDalTaskContext().getLogEntry());
@@ -218,15 +230,23 @@ public class DalRequestExecutor {
 		return merger.merge();
 	}
 
-	private <T> T seqncialExecute(DalHints hints, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger, LogContext logContext) throws SQLException {
+	private <T> T sequentialExecute(DalHints hints, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger,
+									LogContext logContext, ShardExecutionCallback<T> callback) throws SQLException {
 		long totalStatementExecuteTime = 0;
 		List<LogEntry> logEntries = new ArrayList<>();
 		for(final String shard: tasks.keySet()) {
+			Throwable error = null;
+			ShardExecutionResult<T> executionResult;
 			try {
-				merger.addPartial(shard, new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call());
+				T partial = new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call();
+				merger.addPartial(shard, partial);
+				// TODO: tableShard may be inaccurate
+				executionResult = new ShardExecutionResultImpl<>(shard, null, partial);
 			} catch (Throwable e) {
-				hints.handleError("There is error during sequential execution: ", e);
+				error = e;
+				executionResult = new ShardExecutionResultImpl<>(shard, null, e);
 			}
+			hints.handleError("There is error during sequential execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(shard);
 			totalStatementExecuteTime += task.getDalTaskContext().getStatementExecuteTime();
 			addLogEntry(logEntries, task.getDalTaskContext().getLogEntry());

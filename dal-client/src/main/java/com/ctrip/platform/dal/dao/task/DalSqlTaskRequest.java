@@ -39,10 +39,16 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     private Set<String> shards;
     private Map<String, List<?>> parametersByShard;
     private DalTaskContext taskContext;
+    private ShardExecutionCallback<T> callback;
     private static DalPropertiesLocator dalPropertiesLocator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
 
     public DalSqlTaskRequest(String logicDbName, SqlBuilder builder, DalHints hints, SqlTask<T> task,
-            ResultMerger<T> merger) throws SQLException {
+                             ResultMerger<T> merger) throws SQLException {
+        this(logicDbName, builder, hints, task, merger, null);
+    }
+
+    public DalSqlTaskRequest(String logicDbName, SqlBuilder builder, DalHints hints, SqlTask<T> task,
+                             ResultMerger<T> merger, ShardExecutionCallback<T> callback) throws SQLException {
         this.logger = DalClientFactory.getDalLogger();
         this.logicDbName = logicDbName;
         this.builder = builder;
@@ -53,6 +59,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         this.caller = LogContext.getRequestCaller();
         prepareRequestContext();
         this.shards = getShards();
+        this.callback = callback;
     }
 
     @Override
@@ -103,7 +110,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             tmpHints.inShard(shards.iterator().next());
         }
 
-        return create(parameters, tmpHints, taskContext.fork());
+        return create(parameters, tmpHints, taskContext.fork(), tmpHints.getShardId());
     }
 
     @Override
@@ -113,7 +120,7 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         if (parametersByShard == null) {
             // Create by given shards
             for (String shard : shards) {
-                tasks.put(shard, create(parameters.duplicate(), hints.clone().inShard(shard), taskContext.fork()));
+                tasks.put(shard, create(parameters.duplicate(), hints.clone().inShard(shard), taskContext.fork(), shard));
             }
         } else {
             // Create by sharded values
@@ -121,16 +128,17 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
                 StatementParameters tempParameters =
                         parameters.duplicateWith(hints.getShardBy(), (List) shard.getValue());
                 tasks.put(shard.getKey(),
-                        create(tempParameters, hints.clone().inShard(shard.getKey()), taskContext.fork()));
+                        create(tempParameters, hints.clone().inShard(shard.getKey()), taskContext.fork(), shard.getKey()));
             }
         }
 
         return tasks;
     }
 
-    private TaskCallable<T> create(StatementParameters parameters, DalHints hints, DalTaskContext taskContext)
-            throws SQLException {
-        return new SqlTaskCallable<>(logicDbName, parameters, hints, task, taskContext, builder, merger, logger);
+    private TaskCallable<T> create(StatementParameters parameters, DalHints hints,
+                                   DalTaskContext taskContext, String dbShard) throws SQLException {
+        return new SqlTaskCallable<>(logicDbName, parameters, hints, task, taskContext, builder, merger,
+                logger, dbShard, callback);
     }
 
     @Override
@@ -199,6 +207,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         private DalHints hints;
         private SqlTask<T> task;
         private DalTaskContext dalTaskContext;
+        private String dbShard;
+        private ShardExecutionCallback<T> callback;
 
         private boolean isTableShardingEnabled;
         private String logicDbName;
@@ -210,7 +220,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         private DalLogger logger;
 
         public SqlTaskCallable(String logicDbName, StatementParameters parameters, DalHints hints, SqlTask<T> task,
-                DalTaskContext dalTaskContext, SqlBuilder builder, ResultMerger<T> merger, DalLogger logger)
+                               DalTaskContext dalTaskContext, SqlBuilder builder, ResultMerger<T> merger,
+                               DalLogger logger, String dbShard, ShardExecutionCallback<T> callback)
                 throws SQLException {
             this.logicDbName = logicDbName;
             this.client = DalClientFactory.getClient(logicDbName);
@@ -218,6 +229,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             this.task = task;
             this.parameters = parameters;
             this.dalTaskContext = dalTaskContext;
+            this.dbShard = dbShard;
+            this.callback = callback;
 
             // for table sharding
             this.builder = builder;
@@ -227,10 +240,8 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             this.rawTableName = tableName;
             this.isTableShardingEnabled = DalShardingHelper.isTableShardingEnabled(logicDbName, tableName);
             this.tableShards = getTableShards();
-            this.merger = createResultMerger(isTableShardingEnabled, merger, builder, hints); // we should create new
-                                                                                              // ResultMerger here if
-                                                                                              // table sharding is
-                                                                                              // enabled
+            // we should create new ResultMerger here if table sharding is enabled
+            this.merger = createResultMerger(isTableShardingEnabled, merger, builder, hints);
         }
 
         private String getTableName() {
@@ -347,15 +358,18 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
 
             for (String tableShard : tableShards) {
                 Throwable error = null;
+                ShardExecutionResult<T> executionResult;
                 try {
-                    T partial =
-                            execute(tableShard, client, parameters, hints, taskContext, builder, merger, tableShards);
+                    T partial = execute(tableShard, client, parameters, hints, taskContext, builder, merger, tableShards);
                     merger.addPartial(tableShard, partial);
+                    // TODO: dbShard may be inaccurate
+                    executionResult = new ShardExecutionResultImpl<>(dbShard, tableShard, partial);
                 } catch (Throwable e) {
                     error = e;
+                    executionResult = new ShardExecutionResultImpl<>(dbShard, tableShard, e);
                 }
 
-                hints.handleError("Error when execute table shard operation", error);
+                hints.handleError("Error when execute table shard operation", error, callback, executionResult);
             }
 
             return merger.merge();
@@ -367,16 +381,20 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
 
             for (Map.Entry<String, ?> tableShard : parametersByTableShard.entrySet()) {
                 Throwable error = null;
+                ShardExecutionResult<T> executionResult;
                 try {
                     T partial = execute(tableShard.getKey(), client,
                             parameters.duplicateWith(hints.getTableShardBy(), (List) tableShard.getValue()), hints,
                             taskContext, builder, merger, tableShards);
                     merger.addPartial(tableShard.getKey(), partial);
+                    // TODO: dbShard may be inaccurate
+                    executionResult = new ShardExecutionResultImpl<>(dbShard, tableShard.getKey(), partial);
                 } catch (Throwable e) {
                     error = e;
+                    executionResult = new ShardExecutionResultImpl<>(dbShard, tableShard.getKey(), e);
                 }
 
-                hints.handleError("Error when execute table shard operation", error);
+                hints.handleError("Error when execute table shard operation", error, callback, executionResult);
             }
 
             return merger.merge();

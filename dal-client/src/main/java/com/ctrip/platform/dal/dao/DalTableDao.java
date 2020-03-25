@@ -150,7 +150,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      */
     @Deprecated
     public List<T> queryLike(T sample, DalHints hints) throws SQLException {
-        return queryLike(sample, hints, null);
+        return queryList(sample, hints, false);
     }
 
     @Deprecated
@@ -168,14 +168,19 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
      * @throws SQLException
      */
     public List<T> queryBy(T sample, DalHints hints) throws SQLException {
-        return queryBy(sample, hints, null);
+        return queryList(sample, hints, true);
     }
 
     public List<T> queryBy(T sample, DalHints hints, ShardExecutionCallback<List<T>> callback) throws SQLException {
         return queryList(sample, hints, true, callback);
     }
 
-    private List<T> queryList(T sample, DalHints hints, boolean checkAllNullFields, ShardExecutionCallback<List<T>> callback) throws SQLException {
+    private List<T> queryList(T sample, DalHints hints, boolean checkAllNullFields) throws SQLException {
+        return queryList(sample, hints, checkAllNullFields, null);
+    }
+
+    private List<T> queryList(T sample, DalHints hints, boolean checkAllNullFields,
+                              ShardExecutionCallback<List<T>> callback) throws SQLException {
         if (sample == null) {
             throw new DalException(ErrorCode.ValidatePojo);
         }
@@ -400,7 +405,6 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     public Number count(String whereClause, StatementParameters parameters, DalHints hints) throws SQLException {
         return count(new SelectSqlBuilder().where(whereClause).with(parameters).selectCount(), hints);
     }
-
 
     public Number count(String whereClause, StatementParameters parameters, DalHints hints,
                         ShardExecutionCallback<Number> callback) throws SQLException {

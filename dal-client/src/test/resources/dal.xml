@@ -132,6 +132,10 @@
       <add  name="dao_test_mysql_dbShard_7" databaseType="Slave" sharding="1" connectionString="dal_shard_0"/>
       <add  name="dao_test_mysql_dbShard_9" databaseType="Slave" sharding="1" connectionString="dal_shard_1"/>
     </databaseSet>
+    <databaseSet name="dao_test_mysql_exception_shard" provider="mysqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;column=dbIndex;mod=2;tableColumn=tableIndex;tableMod=4;separator=_;shardedTables=shard_tbl">
+      <add  name="dao_test_mysql_exception_shard_0" databaseType="Master" sharding="0" connectionString="MySqlShard_0"/>
+      <add  name="dao_test_mysql_exception_shard_1" databaseType="Master" sharding="1" connectionString="MySqlShard_1"/>
+    </databaseSet>
     <cluster name="clusterName1"/>
     <cluster name="clusterName2" alias="DbSetName"/>
   </databaseSets>

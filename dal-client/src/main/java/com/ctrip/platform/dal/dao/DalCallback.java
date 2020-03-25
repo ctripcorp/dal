@@ -5,6 +5,6 @@ package com.ctrip.platform.dal.dao;
  */
 public interface DalCallback<T extends CallbackContext> {
 
-    void process(T context);
+    void handle(T context);
 
 }

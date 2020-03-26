@@ -9,10 +9,12 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.io.UnsupportedEncodingException;
 import java.sql.DatabaseMetaData;
 
 public class MysqlApiConnectionStringConfigureProviderTest {
@@ -100,5 +102,15 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         String mgrUrl = provider.getConnectionString().getConnectionUrl();
         Assert.assertEquals(mgrUrl, fixMgrUrl);
         EnvUtil.setEnv(null);
+    }
+
+    @Test
+    public void testDecrypt() throws UnsupportedEncodingException {
+        String password = "YTIwZ2t5eHVDcXl6bnZ5dmhHe2F4d2tiI2F5YXAwUWtwaDZ0bXdxVg==";
+        String token = "a{GhvyvnzyqCuxykg02a";
+        String decodePassword = new String(Base64.decodeBase64(password), "utf-8");
+        StringBuilder sb = new StringBuilder(decodePassword);
+        sb.reverse();
+        System.out.println(sb.substring(0, sb.toString().indexOf(token)));
     }
 }

@@ -75,7 +75,7 @@ public interface DataSourceConfigureConstants {
     // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
 
     //used by mgr datasource
-    int DEFAULT_CALL_MYSQL_API_PERIOD = 3; //second
+    int DEFAULT_CALL_MYSQL_API_PERIOD = 3 * 1000; //ms
     String DEFAULT_DB_MODEL = "standalone";
     String DEFAULT_LOAD_BALANCE_STRATEGY = "serverAffinity";
 

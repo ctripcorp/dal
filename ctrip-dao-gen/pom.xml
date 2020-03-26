@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
-    <version>1.16.13</version>
+    <version>1.16.16</version>
     <packaging>war</packaging>
     <properties>
         <environment>local</environment>
@@ -18,8 +18,8 @@
         <framework-bom.version>3.17.0</framework-bom.version>
         <ctrip-dal-client-version>2.0.0</ctrip-dal-client-version>
         <ctrip-datasource-version>2.0.0</ctrip-datasource-version>
-        <dao-gen-core-version>1.16.13</dao-gen-core-version>
-        <dal-dao-gen-version>1.16.13</dal-dao-gen-version>
+        <dao-gen-core-version>1.16.16</dao-gen-core-version>
+        <dal-dao-gen-version>1.16.16</dal-dao-gen-version>
         <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
         <mysql-connector-version>5.1.41</mysql-connector-version>
         <javax-mail-version>1.4.7</javax-mail-version>

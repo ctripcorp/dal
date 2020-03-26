@@ -36,9 +36,11 @@ public class ShardExecutionCallbackTestTable {
     @Type(value = Types.VARCHAR)
     private String charCol;
 
+/*
     @Column(name = "lastUpdateTime")
     @Type(value = Types.TIMESTAMP)
     private Timestamp lastUpdateTime;
+*/
 
     public Integer getId() {
         return id;
@@ -80,6 +82,7 @@ public class ShardExecutionCallbackTestTable {
         this.charCol = charCol;
     }
 
+/*
     public Timestamp getLastUpdateTime() {
         return lastUpdateTime;
     }
@@ -87,5 +90,6 @@ public class ShardExecutionCallbackTestTable {
     public void setLastUpdateTime(Timestamp lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
+*/
 
 }

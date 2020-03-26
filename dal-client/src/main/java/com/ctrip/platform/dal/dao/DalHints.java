@@ -405,7 +405,7 @@ public class DalHints {
                                                         T callbackContext) throws SQLException {
         if (callback != null) {
             try {
-                callback.process(callbackContext);
+                callback.handle(callbackContext);
             } catch (Throwable t) {
                 // ignore
             }

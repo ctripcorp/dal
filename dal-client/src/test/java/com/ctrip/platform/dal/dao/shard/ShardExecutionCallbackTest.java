@@ -26,8 +26,7 @@ public class ShardExecutionCallbackTest {
             "dbIndex int NOT NULL, " +
             "tableIndex int NOT NULL, " +
             "intCol int, " +
-            "charCol varchar(64)" +
-            "lastUpdateTime timestamp default CURRENT_TIMESTAMP)";
+            "charCol varchar(64))";
 
     private static DalClient dalClient;
     private DalTableDao<ShardExecutionCallbackTestTable> tableDao;

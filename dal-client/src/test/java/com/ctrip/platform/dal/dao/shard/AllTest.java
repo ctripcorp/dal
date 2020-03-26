@@ -20,5 +20,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	DalQueryDaoMySqlTest.class,
 	DalQueryDaoSqlSvrTest.class,
+
+	ExecutionCallbackTest.class
 })
 public class AllTest {}

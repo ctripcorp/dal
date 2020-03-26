@@ -91,7 +91,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         else if (id instanceof ApiDataSourceIdentity) {
             DalConnectionString dalConnectionString = apiConnectionStrings.get(id);
 
-            if (dalConnectionString == null) {
+            if (dalConnectionString == null || dalConnectionString instanceof InvalidConnectionString) {
                 dalConnectionString = ((ApiDataSourceIdentity) id).getConnectionString();
                 apiConnectionStrings.put(id, dalConnectionString);
             }

@@ -56,7 +56,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
     private String mysqlApiUrl;
     private String dbToken;
-    private int callMysqlApiPeriod;
+    private int callMysqlApiPeriod = FIXED_DELAY;
     private DBModel dbModel;
 
     private ScheduledExecutorService executor;
@@ -86,7 +86,9 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
         if (dataSourceProperties == null) {
             if (StringUtils.isEmpty(appProperties.getProperty(DB_TOKEN))) {
-                throw new DalRuntimeException(String.format("the db token of %s is null", dbName));
+                DalRuntimeException e = new DalRuntimeException(String.format("the db token of %s is null", dbName));
+                Cat.logError(e);
+                throw e;
             }
 
             dataSourceConfigure.setProperties(appProperties);
@@ -96,7 +98,9 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
         String dbToken = dataSourceProperties.getProperty(DB_TOKEN) != null ? dataSourceProperties.getProperty(DB_TOKEN) : appProperties.getProperty(DB_TOKEN);
         if (StringUtils.isEmpty(dbToken)) {
-            throw new DalRuntimeException(String.format("the db token of %s is null", dbName));
+            DalRuntimeException e = new DalRuntimeException(String.format("the db token of %s is null", dbName));
+            Cat.logError(e);
+            throw e;
         }
         mysqlApiConfigure.setProperty(DB_TOKEN, dbToken);
 
@@ -130,7 +134,16 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
             dalConnectionStringConfigure = new InvalidVariableConnectionString(dbName, new DalException(e.getMessage(), e));
         }
 
+        initScheduleJob();
         return dalConnectionStringConfigure;
+    }
+
+    private void initScheduleJob() {
+        if (executor == null) {
+            executor = Executors.newScheduledThreadPool(THREAD_SIZE, new CustomThreadFactory(THREAD_NAME));
+            executor.scheduleWithFixedDelay(new MysqlApiConnectionStringChecker(), INITIAL_DELAY, callMysqlApiPeriod, TimeUnit.MILLISECONDS);
+            LOGGER.logEvent(CONNECTION_STRING_TYPE, CONNECTION_STRING_CHECKER_EVENT_NAME, String.valueOf(callMysqlApiPeriod));
+        }
     }
 
     protected DalConnectionStringConfigure getConnectionStringFromMysqlApi() throws Exception {
@@ -199,10 +212,6 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     @Override
     public void addListener(Listener<DalConnectionStringConfigure> listener) {
         this.listener = listener;
-
-        executor = Executors.newScheduledThreadPool(THREAD_SIZE, new CustomThreadFactory(THREAD_NAME));
-        executor.scheduleWithFixedDelay(new MysqlApiConnectionStringChecker(), INITIAL_DELAY, callMysqlApiPeriod, TimeUnit.MILLISECONDS);
-        LOGGER.logEvent(CONNECTION_STRING_TYPE, CONNECTION_STRING_CHECKER_EVENT_NAME, String.valueOf(callMysqlApiPeriod));
     }
 
     private class MysqlApiConnectionStringChecker implements Runnable {
@@ -216,7 +225,10 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
             } catch (Exception e) {
                 Cat.logError("timed get connection string from mysql api failed!", e);
             }
-            listener.onChanged(dalConnectionStringConfigure);
+
+            if (listener != null) {
+                listener.onChanged(dalConnectionStringConfigure);
+            }
         }
     }
 }

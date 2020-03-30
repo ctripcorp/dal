@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
+import com.ctrip.platform.dal.dao.helper.DalScalarExtractor;
 import com.ctrip.platform.dal.dao.sqlbuilder.*;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author c7ch23en
@@ -431,6 +433,90 @@ public class ClusterDaoTest {
                 "  ]\n" +
                 "}\n";
         return String.format(format, CLUSTER_NAME, version, type.getValue());
+    }
+
+    @Test
+    public void testTransaction() throws Exception {
+        final DalClient client = DalClientFactory.getClient(CLUSTER_NAME);
+
+        Number age = (Number) client.query("select age from person where id = 1", new StatementParameters(), newPersonHints(), new DalScalarExtractor());
+        if (age == null) {
+            LOGGER.info("No data with id = 1");
+            client.update("insert into person (id, name, age) values (1, 'testName', 10)", new StatementParameters(), newPersonHints().enableIdentityInsert());
+            age = (Number) client.query("select age from person where id = 1", new StatementParameters(), newPersonHints(), new DalScalarExtractor());
+        }
+        if (age == null) {
+            Assert.fail("[START] NO DATA");
+        }
+        LOGGER.info(String.format("Age = %d with id = 1", age.intValue()));
+
+//        Thread.sleep(20000);
+
+        CountDownLatch latch = new CountDownLatch(2);
+
+        new Thread(() -> {
+            try {
+                client.execute((client2) -> {
+                    LOGGER.info("[Transaction 1] Start");
+                    client.update("update person set age = age + 1 where id = 1", new StatementParameters(), newPersonHints());
+                    LOGGER.info("[Transaction 1] Update");
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        LOGGER.warn("[Transaction 1] Sleep exception");
+                    }
+                    client.update("update person set age = age + 1 where id = 1", new StatementParameters(), newPersonHints());
+                    LOGGER.info("[Transaction 1] Update again");
+                    LOGGER.info("[Transaction 1] Complete");
+                    return false;
+                }, newPersonHints());
+            } catch (Exception e) {
+                LOGGER.warn("[Transaction 1] Exception", e);
+            } finally {
+                latch.countDown();
+            }
+        }).start();
+
+        Thread.sleep(1000);
+
+        new Thread(() -> {
+            try {
+                client.execute((client2) -> {
+                    LOGGER.info("[Transaction 2] Start");
+                    client.update("update person set age = age + 1 where id = 1", new StatementParameters(), newPersonHints());
+                    LOGGER.info("[Transaction 2] Update");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        LOGGER.warn("[Transaction 2] Sleep exception");
+                    }
+                    client.update("update person set age = age + 1 where id = 1", new StatementParameters(), newPersonHints());
+                    LOGGER.info("[Transaction 2] Update again");
+                    LOGGER.info("[Transaction 2] Complete");
+                    return false;
+                }, newPersonHints());
+            } catch (Exception e) {
+                LOGGER.warn("[Transaction 2] Exception", e);
+            } finally {
+                latch.countDown();
+            }
+        }).start();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            LOGGER.warn("[CountDownLatch] Exception", e);
+        }
+
+        age = (Number) client.query("select age from person where id = 1", new StatementParameters(), newPersonHints(), new DalScalarExtractor());
+        if (age == null) {
+            Assert.fail("[END] NO DATA");
+        }
+        LOGGER.info(String.format("Age = %d with id = 1", age.intValue()));
+    }
+
+    private DalHints newPersonHints() {
+        return new DalHints().specifyTableName("person").inShard(0);
     }
 
 }

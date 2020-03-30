@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import com.ctrip.platform.dal.dao.configure.DalExtendedPoolProperties;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -18,7 +19,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
     }
 
     public PoolProperties convert(DataSourceConfigure config) {
-        PoolProperties properties = new PoolProperties();
+        DalExtendedPoolProperties properties = new DalExtendedPoolProperties();
 
         /**
          * It is assumed that user name/password/url/driver class name are provided in pool config If not, it should be
@@ -68,6 +69,8 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
         // This are current hard coded as default value
         properties.setJmxEnabled(DEFAULT_JMXENABLED);
         properties.setJdbcInterceptors(config.getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS));
+
+        properties.setServerWaitTimeout(config.getIntProperty(SERVER_WAIT_TIMEOUT, DEFAULT_SERVER_WAIT_TIMEOUT));
 
         return properties;
     }

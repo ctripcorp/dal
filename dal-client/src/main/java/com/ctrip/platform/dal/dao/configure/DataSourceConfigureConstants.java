@@ -26,6 +26,9 @@ public interface DataSourceConfigureConstants {
     String CONNECTIONPROPERTIES = "connectionProperties";
     String INIT_SQL = "initSql";
 
+    // **********Dal extended properties key**********
+    String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";
+
     //used by mgr datasource
     String DB_TOKEN = "dbToken";
     String CALL_MYSQL_API_PERIOD = "callMysqlApiPeriod";
@@ -73,6 +76,9 @@ public interface DataSourceConfigureConstants {
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;";
     // com.ctrip.datasource.interceptor.CtripConnectionState
     // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
+
+    // **********Dal extended properties default value**********
+    int DEFAULT_SERVER_WAIT_TIMEOUT = 120;
 
     //used by mgr datasource
     int DEFAULT_CALL_MYSQL_API_PERIOD = 3 * 1000; //ms

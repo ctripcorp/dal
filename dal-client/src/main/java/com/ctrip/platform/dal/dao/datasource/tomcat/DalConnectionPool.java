@@ -1,20 +1,21 @@
 package com.ctrip.platform.dal.dao.datasource.tomcat;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.sun.javafx.image.BytePixelSetter;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DalConnectionPool extends ConnectionPool {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
-    private static final String CONNECTION_WAIT = "ConnectionWait";
     private static ConnectionListener connectionListener = ServiceLoaderHelper.getInstance(ConnectionListener.class);
 
     private static ThreadLocal<Long> poolWaitTime = new ThreadLocal<>();
@@ -64,6 +65,8 @@ public class DalConnectionPool extends ConnectionPool {
             logger.error("[createConnection]" + this, e);
         }
 
+        preHandleConnection(pooledConnection);
+
         return pooledConnection;
     }
 
@@ -96,6 +99,46 @@ public class DalConnectionPool extends ConnectionPool {
 
     private Connection getConnection(PooledConnection con) {
         return con == null ? null : con.getConnection();
+    }
+
+    private void preHandleConnection(PooledConnection conn) {
+        Connection connection = getConnection(conn);
+        if (connection != null) {
+            trySetWaitTimeout(connection);
+        }
+    }
+
+    private void trySetWaitTimeout(Connection conn) {
+        PoolConfiguration config = getPoolProperties();
+        if (config instanceof DalExtendedPoolConfiguration &&
+                DatabaseCategory.MySql == DatabaseCategory.matchWithConnectionUrl(config.getUrl())) {
+            int serverWaitTimeout = ((DalExtendedPoolConfiguration) config).getServerWaitTimeout();
+            if (serverWaitTimeout > 0) {
+                try {
+                    boolean autoCommit = conn.getAutoCommit();
+                    try {
+                        conn.setAutoCommit(true);
+                        try (Statement statement = conn.createStatement()) {
+                            statement.setQueryTimeout(1);
+                            statement.execute(String.format("set session wait_timeout = %d", serverWaitTimeout));
+                            try (ResultSet rs = statement.executeQuery("show session variables like 'wait_timeout'")) {
+                                if (rs != null && rs.next() && serverWaitTimeout == rs.getInt(2))
+                                    logger.info(String.format("Set wait_timeout to %ds succeeded: %s",
+                                            serverWaitTimeout, getName()));
+                                else
+                                    logger.warn("Check wait_timeout failed: " + getName());
+                            }
+                        }
+                    } catch (SQLException e) {
+                        logger.warn("Set wait_timeout exception: " + getName(), e);
+                    } finally {
+                        conn.setAutoCommit(autoCommit);
+                    }
+                } catch (Throwable t) {
+                    logger.warn("Set wait_timeout exception: " + getName(), t);
+                }
+            }
+        }
     }
 
 }

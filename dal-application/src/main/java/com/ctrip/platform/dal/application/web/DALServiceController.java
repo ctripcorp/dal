@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.application.service.DALDataSourceService;
 import com.ctrip.platform.dal.application.service.DALService;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.mysql.jdbc.NonRegisteringDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,8 +15,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @RestController
@@ -160,4 +164,51 @@ public class DALServiceController {
         }
     }
 
+    @RequestMapping(value = "/mgr_oy")
+    public void mgrConnectionTestOY(HttpServletResponse response) throws Exception {
+        Properties connProps = new Properties();
+        String hostName = "address=(type=master)(protocol=tcp)(host=10.25.82.86)(port=55944):3306";
+        String portNumber = "3306";
+        connProps.setProperty("user", "m_fxdalcluster");
+        connProps.setProperty("password", "6]wWaglbqiSjlxm6qilx");
+        connProps.setProperty(NonRegisteringDriver.HOST_PROPERTY_KEY, hostName);
+        connProps.setProperty(NonRegisteringDriver.PORT_PROPERTY_KEY, portNumber);
+        connProps.setProperty(NonRegisteringDriver.HOST_PROPERTY_KEY + ".1", hostName);
+        connProps.setProperty(NonRegisteringDriver.PORT_PROPERTY_KEY + ".1", portNumber);
+        connProps.setProperty(NonRegisteringDriver.NUM_HOSTS_PROPERTY_KEY, "1");
+        connProps.setProperty("roundRobinLoadBalance", "false");
+        String url = "jdbc:mysql://" + hostName + ":" + portNumber + "/";
+
+        try {
+            NonRegisteringDriver driver = new NonRegisteringDriver();
+            Connection con = driver.connect(url, connProps);
+            response.getWriter().write("success");
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @RequestMapping(value = "/mgr_rb")
+    public void mgrConnectionTestRB(HttpServletResponse response) throws IOException {
+        Properties connProps = new Properties();
+        String hostName = "address=(type=master)(protocol=tcp)(host=10.60.46.16)(port=55944):3306";
+        String portNumber = "3306";
+        connProps.setProperty("user", "m_fxdalcluster");
+        connProps.setProperty("password", "6]wWaglbqiSjlxm6qilx");
+        connProps.setProperty(NonRegisteringDriver.HOST_PROPERTY_KEY, hostName);
+        connProps.setProperty(NonRegisteringDriver.PORT_PROPERTY_KEY, portNumber);
+        connProps.setProperty(NonRegisteringDriver.HOST_PROPERTY_KEY + ".1", hostName);
+        connProps.setProperty(NonRegisteringDriver.PORT_PROPERTY_KEY + ".1", portNumber);
+        connProps.setProperty(NonRegisteringDriver.NUM_HOSTS_PROPERTY_KEY, "1");
+        connProps.setProperty("roundRobinLoadBalance", "false");
+        String url = "jdbc:mysql://" + hostName + ":" + portNumber + "/";
+
+        try {
+            NonRegisteringDriver driver = new NonRegisteringDriver();
+            Connection con = driver.connect(url, connProps);
+            response.getWriter().write("success");
+        } catch (Exception e) {
+            response.getWriter().write(e.getMessage());
+        }
+    }
 }

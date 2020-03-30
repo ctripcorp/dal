@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ctrip.framework</groupId>
         <artifactId>framework-parent</artifactId>
-        <version>1.10.0</version>
+        <version>1.12.0</version>
     </parent>
 
     <groupId>com.ctrip.platform</groupId>
@@ -51,6 +51,11 @@
                 <version>1.4.3.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.48</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

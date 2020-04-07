@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>ctrip-datasource</artifactId>
-    <version>2.0.17</version>
+    <version>2.0.18-SNAPSHOT</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -135,10 +135,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
         </dependency>
         <!-- Optional mybatis dependency -->
         <dependency>

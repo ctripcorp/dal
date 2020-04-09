@@ -1,12 +1,12 @@
 package com.ctrip.datasource.configure;
 
-import com.ctrip.datasource.util.GsonUtils;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtils;
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfoResponse;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
+import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -96,7 +96,7 @@ public class MysqlApiConnectionStringParserTest {
         String slave_jdbc_url_1 = "jdbc:mysql://10.25.91.204:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
 
         String url = "jdbc:mysql://fxdalclusterbenchmark.mysql.db.ctripcorp.com:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
-        MysqlApiConnectionStringInfoResponse response = GsonUtils.json2T(responseStr, MysqlApiConnectionStringInfoResponse.class);
+        MysqlApiConnectionStringInfoResponse response = JsonUtils.fromJson(responseStr, MysqlApiConnectionStringInfoResponse.class);
         MysqlApiConnectionStringInfo info = response.getData();
 
         DalConnectionStringConfigure configure1 = MysqlApiConnectionStringParser.getInstance().parser(DBNAME_1, info, TOKEN_1, DBModel.MGR);

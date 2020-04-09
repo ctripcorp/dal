@@ -1,6 +1,6 @@
 package util;
 
-import com.alibaba.fastjson.JSONObject;
+import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.http.HttpEntity;
@@ -96,14 +96,14 @@ public class ConnectionStringSwitch {
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             HttpEntity resEntity = response.getEntity();
             //解析json格式的返回结果
-            JSONObject json = JSONObject.parseObject(EntityUtils.toString(resEntity).toString());
+            JsonObject json = JsonUtils.parseObject(EntityUtils.toString(resEntity));
             log.info(String.format("接口返回结果：%s", json.toString()));
             System.out.println(String.format("接口返回结果：%s", json.toString()));
             try {
-                assertEquals(0, json.getIntValue("status"));
+                assertEquals(0, json.get("status").getAsInt());
                 log.info("切换成功");
             } catch (Throwable error) {
-                log.error("调用切换接口失败，原因：" + json.getString("message"), error);
+                log.error("调用切换接口失败，原因：" + json.get("message").getAsString(), error);
                 fail();
             }
         }

@@ -2,7 +2,6 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.util.EnvUtil;
-import com.ctrip.datasource.util.GsonUtils;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtils;
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
@@ -16,6 +15,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -155,7 +155,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
         addMGRLocalToLocalParam(connectionStringConfigure, info.getClusternodeinfolist());
         if (connectionStringConfigure == null) {
-            LOGGER.logEvent(DalLogTypes.DAL_CONNECTION_STRING, NULL_CONNECTION_STRING, GsonUtils.t2Json(info));
+            LOGGER.logEvent(DalLogTypes.DAL_CONNECTION_STRING, NULL_CONNECTION_STRING, JsonUtils.toJson(info));
         }
         return connectionStringConfigure;
     }

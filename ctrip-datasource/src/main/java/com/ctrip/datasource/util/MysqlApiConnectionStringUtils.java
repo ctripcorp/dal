@@ -4,6 +4,7 @@ import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfoResponse;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -47,7 +48,7 @@ public class MysqlApiConnectionStringUtils {
         HttpExecutor executor = HttpExecutor.getInstance();
         try {
             String responseStr = executor.executePost(url, null, json.toString(), DEFAULT_HTTP_TIMEOUT_MS);
-            response = GsonUtils.json2T(responseStr, MysqlApiConnectionStringInfoResponse.class);
+            response = JsonUtils.fromJson(responseStr, MysqlApiConnectionStringInfoResponse.class);
             t.addData(responseStr);
             t.setStatus(Message.SUCCESS);
         } catch (Exception e) {

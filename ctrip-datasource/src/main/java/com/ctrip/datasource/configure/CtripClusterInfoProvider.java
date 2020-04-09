@@ -1,19 +1,16 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.net.HttpExecutor;
-import com.ctrip.datasource.util.GsonUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
-import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
-import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,7 +61,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
             if (!StringUtils.isEmpty(appId))
                 url = url + "&app=" + appId;
             String res = executor.executeGet(url, new HashMap<>(), DEFAULT_HTTP_TIMEOUT_MS);
-            ClusterInfoResponseEntity response = GsonUtils.json2T(res, ClusterInfoResponseEntity.class);
+            ClusterInfoResponseEntity response = JsonUtils.fromJson(res, ClusterInfoResponseEntity.class);
             if (response != null && response.getStatus() == 200)
                 clusterInfo = response.getClusterInfo();
             if (clusterInfo == null)

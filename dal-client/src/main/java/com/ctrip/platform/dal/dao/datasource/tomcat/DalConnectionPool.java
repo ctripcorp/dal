@@ -6,6 +6,8 @@ import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.log.Callback;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.sun.javafx.image.BytePixelSetter;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
@@ -38,7 +40,7 @@ public class DalConnectionPool extends ConnectionPool {
                 connectionListener.onWaitConnection(getName(), getConnection(con), poolWaitTime.get().longValue());
             }
         } catch (Exception e) {
-            logger.error("[borrow]" + this, e);
+            logger.error("[borrowConnection]" + this, e);
         }
 
         return super.borrowConnection(now, con, username, password);
@@ -75,7 +77,7 @@ public class DalConnectionPool extends ConnectionPool {
         try {
             connectionListener.onReleaseConnection(getName(), getConnection(con));
         } catch (Exception e) {
-            logger.error("[release]" + this, e);
+            logger.error("[releaseConnection]" + this, e);
         }
 
         super.release(con);
@@ -86,7 +88,7 @@ public class DalConnectionPool extends ConnectionPool {
         try {
             connectionListener.onAbandonConnection(getName(), getConnection(con));
         } catch (Exception e) {
-            logger.error("[abandon]" + this, e);
+            logger.error("[abandonConnection]" + this, e);
         }
 
         super.abandon(con);
@@ -104,40 +106,48 @@ public class DalConnectionPool extends ConnectionPool {
     private void preHandleConnection(PooledConnection conn) {
         Connection connection = getConnection(conn);
         if (connection != null) {
-            trySetWaitTimeout(connection);
+            trySetServerWaitTimeout(connection);
         }
     }
 
-    private void trySetWaitTimeout(Connection conn) {
+    private void trySetServerWaitTimeout(Connection conn) {
         PoolConfiguration config = getPoolProperties();
         if (config instanceof DalExtendedPoolConfiguration &&
                 DatabaseCategory.MySql == DatabaseCategory.matchWithConnectionUrl(config.getUrl())) {
             int serverWaitTimeout = ((DalExtendedPoolConfiguration) config).getServerWaitTimeout();
             if (serverWaitTimeout > 0) {
+                String connUrl = LoggerHelper.getSimplifiedDBUrl(config.getUrl());
+                String logName = String.format("Connection::setServerWaitTimeout:%s", connUrl);
                 try {
-                    boolean autoCommit = conn.getAutoCommit();
-                    try {
-                        conn.setAutoCommit(true);
-                        try (Statement statement = conn.createStatement()) {
-                            statement.setQueryTimeout(1);
-                            statement.execute(String.format("set session wait_timeout = %d", serverWaitTimeout));
-                            try (ResultSet rs = statement.executeQuery("show session variables like 'wait_timeout'")) {
-                                if (rs != null && rs.next() && serverWaitTimeout == rs.getInt(2))
-                                    logger.info(String.format("Set wait_timeout to %ds succeeded: %s",
-                                            serverWaitTimeout, getName()));
-                                else
-                                    logger.warn("Check wait_timeout failed: " + getName());
-                            }
-                        }
-                    } catch (SQLException e) {
-                        logger.warn("Set wait_timeout exception: " + getName(), e);
-                    } finally {
-                        conn.setAutoCommit(autoCommit);
-                    }
+                    logger.logTransaction(DalLogTypes.DAL_DATASOURCE, logName,
+                            String.format("serverWaitTimeout: %ds, connectionUrl: %s", serverWaitTimeout, connUrl),
+                            () -> setServerWaitTimeout(conn, serverWaitTimeout));
                 } catch (Throwable t) {
-                    logger.warn("Set wait_timeout exception: " + getName(), t);
+                    logger.error("set serverWaitTimeout exception: " + connUrl, t);
                 }
             }
+        }
+    }
+
+    private void setServerWaitTimeout(Connection conn, int serverWaitTimeout) throws SQLException {
+        boolean autoCommit = conn.getAutoCommit();
+        try {
+            conn.setAutoCommit(true);
+            try (Statement statement = conn.createStatement()) {
+                statement.setQueryTimeout(1);
+                statement.execute(String.format("set session wait_timeout = %d", serverWaitTimeout));
+                try (ResultSet rs = statement.executeQuery("show session variables like 'wait_timeout'")) {
+                    if (rs != null && rs.next() && serverWaitTimeout == rs.getInt(2))
+                        logger.info(String.format("set serverWaitTimeout to %ds succeeded: %s",
+                                serverWaitTimeout, getName()));
+                    else
+                        logger.warn("check serverWaitTimeout failed: " + getName());
+                } catch (Throwable t) {
+                    logger.warn("check serverWaitTimeout exception: " + getName(), t);
+                }
+            }
+        } finally {
+            conn.setAutoCommit(autoCommit);
         }
     }
 

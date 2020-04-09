@@ -1,14 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Properties;
 
 import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.*;

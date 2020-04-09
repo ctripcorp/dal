@@ -8,12 +8,12 @@ public class UserHintStrategy extends BaseShardStrategy implements ShardStrategy
     public UserHintStrategy() {}
 
     @Override
-    protected Integer calcDbShard(String tableName, DbShardContext context) {
+    public Integer getDbShard(String tableName, DbShardContext context) {
         return context.getShardId();
     }
 
     @Override
-    protected String calcTableShard(String tableName, TableShardContext context) {
+    public String getTableShard(String tableName, TableShardContext context) {
         return context.getShardId();
     }
 

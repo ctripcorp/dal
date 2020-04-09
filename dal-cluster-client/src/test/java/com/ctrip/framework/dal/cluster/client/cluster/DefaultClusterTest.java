@@ -328,4 +328,27 @@ public class DefaultClusterTest {
         Assert.assertTrue(cluster.getAllDbShards().contains(4));
     }
 
+    @Test
+    public void testShardingOffset() {
+        DbShardContext dbShardCtx = new DbShardContext("demo-cluster");
+        Assert.assertNull(cluster.getDbShard("table31", dbShardCtx));
+        dbShardCtx.setShardId(1);
+        Assert.assertEquals(1, (int) cluster.getDbShard("table31", dbShardCtx));
+        TableShardContext tbShardCtx = new TableShardContext("demo-cluster");
+        Assert.assertNull(cluster.getTableShard("table31", tbShardCtx));
+        tbShardCtx.setShardId("2");
+        Assert.assertEquals("2", cluster.getTableShard("table31", tbShardCtx));
+
+        dbShardCtx = new DbShardContext("demo-cluster");
+        dbShardCtx.setShardValue(5);
+        Assert.assertEquals(2, (int) cluster.getDbShard("table11", dbShardCtx));
+        dbShardCtx.setShardId(1);
+        Assert.assertEquals(1, (int) cluster.getDbShard("table11", dbShardCtx));
+        tbShardCtx = new TableShardContext("demo-cluster");
+        tbShardCtx.setShardValue(5);
+        Assert.assertEquals("3", cluster.getTableShard("table11", tbShardCtx));
+        tbShardCtx.setShardId("2");
+        Assert.assertEquals("2", cluster.getTableShard("table11", tbShardCtx));
+    }
+
 }

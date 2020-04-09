@@ -3,10 +3,7 @@ package com.ctrip.platform.dal.dao.helper;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 

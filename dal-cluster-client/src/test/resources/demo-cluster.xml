@@ -71,6 +71,13 @@
                     </Table>
                 </Tables>
             </CustomStrategy>
+            <UserHintStrategy>
+                <Property name="dbShardOffset" value="1"/>
+                <Property name="tableShardOffset" value="1"/>
+                <Tables>
+                    <Table name="table31"/>
+                </Tables>
+            </UserHintStrategy>
         </ShardStrategies>
         <IdGenerators>
             <IdGenerator/>

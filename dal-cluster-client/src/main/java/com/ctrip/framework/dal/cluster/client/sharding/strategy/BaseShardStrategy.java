@@ -24,22 +24,6 @@ public abstract class BaseShardStrategy extends ShardStrategyElement implements 
 
     protected BaseShardStrategy() {}
 
-    protected abstract Integer calcDbShard(String tableName, DbShardContext context);
-
-    protected abstract String calcTableShard(String tableName, TableShardContext context);
-
-    @Override
-    public Integer getDbShard(String tableName, DbShardContext context) {
-        Integer shard = calcDbShard(tableName, context);
-        return shard != null ? (shard + getDbShardOffset(tableName)) : null;
-    }
-
-    @Override
-    public String getTableShard(String tableName, TableShardContext context) {
-        String shard = calcTableShard(tableName, context);
-        return shard != null ? offsetTableShard(tableName, shard) : null;
-    }
-
     @Override
     public Set<String> getAllTableShards(String tableName) {
         Set<String> allShards = calcAllTableShards(tableName);
@@ -71,7 +55,13 @@ public abstract class BaseShardStrategy extends ShardStrategyElement implements 
         throw new UnsupportedOperationException(String.format("Could not calculate all table shards for table '%s'", tableName));
     }
 
-    private String offsetTableShard(String tableName, String shard) {
+    protected Integer offsetDbShard(String tableName, Integer shard) {
+        return shard != null ? (shard + getDbShardOffset(tableName)) : null;
+    }
+
+    protected String offsetTableShard(String tableName, String shard) {
+        if (shard == null)
+            return null;
         int offset = getTableShardOffset(tableName);
         if (offset == 0)
             return shard;

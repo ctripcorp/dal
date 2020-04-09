@@ -2,14 +2,11 @@ package com.ctrip.platform.dal.dao.helper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.LogEntry;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 
 public class LoggerHelper {
@@ -19,18 +16,6 @@ public class LoggerHelper {
 	private static final String SQLSERVER_URL_PREFIX = "jdbc:sqlserver://";
 	public static final String NULL_SET = "NullSet";
 	public static final String EMPTY_SET = "EmptySet";
-
-	private static class ObjectMapperHolder{
-		private static ObjectMapper objectMapperInstance=new ObjectMapper();
-		static {
-			objectMapperInstance.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
-			objectMapperInstance.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-		}
-	}
-
-	public static ObjectMapper getObjectMapperInstance(){
-		return ObjectMapperHolder.objectMapperInstance;
-	}
 
 	public static int getHashCode(String str) {
 		str = getCompactSql(str);
@@ -225,7 +210,7 @@ public class LoggerHelper {
 
 	public static String toJson(Object object) {
 		try {
-			return getObjectMapperInstance().writeValueAsString(object);
+			return JsonUtils.toJson(object);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

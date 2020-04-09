@@ -74,7 +74,7 @@ public class ClusterDatabaseSet extends DatabaseSet {
 
     @Override
     public void validate(String shard) throws SQLException {
-        getShardIndex(shard);
+        getDbShardIndex(shard);
     }
 
     @Override
@@ -97,7 +97,8 @@ public class ClusterDatabaseSet extends DatabaseSet {
 
     @Override
     public List<DataBase> getMasterDbs() {
-        Database clusterDatabase = cluster.getMasterOnShard(0);
+        int shard = getTheOnlyDbShardIndex();
+        Database clusterDatabase = cluster.getMasterOnShard(shard);
         List<DataBase> dataBases = new LinkedList<>();
         dataBases.add(new ClusterDataBase(clusterDatabase));
         return dataBases;
@@ -105,7 +106,8 @@ public class ClusterDatabaseSet extends DatabaseSet {
 
     @Override
     public List<DataBase> getSlaveDbs() {
-        List<Database> clusterDatabases = cluster.getSlavesOnShard(0);
+        int shard = getTheOnlyDbShardIndex();
+        List<Database> clusterDatabases = cluster.getSlavesOnShard(shard);
         List<DataBase> dataBases = new LinkedList<>();
         for (Database clusterDatabase : clusterDatabases) {
             dataBases.add(new ClusterDataBase(clusterDatabase));
@@ -115,7 +117,7 @@ public class ClusterDatabaseSet extends DatabaseSet {
 
     @Override
     public List<DataBase> getMasterDbs(String shard) {
-        Database clusterDatabase = cluster.getMasterOnShard(getShardIndex(shard));
+        Database clusterDatabase = cluster.getMasterOnShard(getDbShardIndex(shard));
         List<DataBase> dataBases = new LinkedList<>();
         dataBases.add(new ClusterDataBase(clusterDatabase));
         return dataBases;
@@ -123,7 +125,7 @@ public class ClusterDatabaseSet extends DatabaseSet {
 
     @Override
     public List<DataBase> getSlaveDbs(String shard) {
-        List<Database> clusterDatabases = cluster.getSlavesOnShard(getShardIndex(shard));
+        List<Database> clusterDatabases = cluster.getSlavesOnShard(getDbShardIndex(shard));
         List<DataBase> dataBases = new LinkedList<>();
         for (Database clusterDatabase : clusterDatabases) {
             dataBases.add(new ClusterDataBase(clusterDatabase));
@@ -140,7 +142,7 @@ public class ClusterDatabaseSet extends DatabaseSet {
         return cluster;
     }
 
-    private int getShardIndex(String shard) {
+    private int getDbShardIndex(String shard) {
         try {
             Integer shardIndex = StringUtils.toInt(shard);
             if (shardIndex == null || !cluster.getAllDbShards().contains(shardIndex))
@@ -149,6 +151,15 @@ public class ClusterDatabaseSet extends DatabaseSet {
         } catch (Throwable t) {
             throw new DalRuntimeException(String.format("illegal shard: %s", shard));
         }
+    }
+
+    private int getTheOnlyDbShardIndex() {
+        Set<Integer> shards = cluster.getAllDbShards();
+        if (shards.size() == 0)
+            throw new DalRuntimeException("no shards found for this cluster");
+        if (shards.size() > 1)
+            throw new DalRuntimeException("multiple shards detected for non sharding cluster");
+        return shards.iterator().next();
     }
 
     private void registerListener() {

@@ -4,11 +4,9 @@ import java.sql.Connection;
 import java.util.Collection;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.ctrip.platform.dal.dao.configure.DalComponent;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 
 public interface DalConnectionLocator extends DalComponent {
@@ -19,7 +17,7 @@ public interface DalConnectionLocator extends DalComponent {
 
 	Connection getConnection(DataSourceIdentity id) throws Exception;
 
-	ClusterConfigProvider getClusterConfigProvider();
+	IntegratedConfigProvider getIntegratedConfigProvider();
 
 	void setupCluster(Cluster cluster);
 

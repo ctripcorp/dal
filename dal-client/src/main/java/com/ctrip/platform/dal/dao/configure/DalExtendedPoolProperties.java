@@ -41,7 +41,7 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
                 LOGGER.info(String.format("minIdle=%d, serverWaitTimeout set to 0", getMinIdle()));
                 return 0;
             }
-            if (getTimeBetweenEvictionRunsMillis() <= 0 || getMinEvictableIdleTimeMillis() <= 0) {
+            /*if (getTimeBetweenEvictionRunsMillis() <= 0 || getMinEvictableIdleTimeMillis() <= 0) {
                 LOGGER.info("idle cleaner disabled, serverWaitTimeout set to 0");
                 return 0;
             }
@@ -50,7 +50,7 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
             if (maxIdleSeconds > adjustedServerWaitTimeout) {
                 LOGGER.info(String.format("serverWaitTimeout set to possible maxIdleSeconds: %d", maxIdleSeconds));
                 adjustedServerWaitTimeout = maxIdleSeconds;
-            }
+            }*/
         }
         return adjustedServerWaitTimeout;
     }

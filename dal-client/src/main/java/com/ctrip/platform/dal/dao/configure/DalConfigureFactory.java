@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.Entity;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -110,6 +107,9 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         locator.setup(databaseSets.values());
 
+        DatabaseSetAdapter adapter = new ClusterDatabaseSetAdapter(locator);
+        tryAdaptToClusters(databaseSets, adapter);
+
         DatabaseSelector selector =
                 readComponent(root, DATABASE_SELECTOR, new DefaultDatabaseSelector(), SELECTOR);
 
@@ -183,7 +183,7 @@ public class DalConfigureFactory implements DalConfigConstants {
     private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalConnectionLocator locator) throws Exception {
         Map<String, DatabaseSet> databaseSets = new HashMap<>();
 
-        ClusterConfigProvider provider = locator.getClusterConfigProvider();
+        ClusterConfigProvider provider = locator.getIntegratedConfigProvider();
         List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
         for (int i = 0; i < clusterList.size(); i++) {
             Node node = clusterList.get(i);
@@ -239,6 +239,11 @@ public class DalConfigureFactory implements DalConfigConstants {
         else
             return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
                     shardingStrategy, databases, idGenConfig);
+    }
+
+    private void tryAdaptToClusters(Map<String, DatabaseSet> databaseSets, DatabaseSetAdapter adapter) {
+        for (Map.Entry<String, DatabaseSet> entry : new HashMap<>(databaseSets).entrySet())
+            databaseSets.put(entry.getKey(), adapter.adapt(entry.getValue()));
     }
 
     private IIdGeneratorConfig getIdGenConfig(Node databaseSetNode) throws Exception {

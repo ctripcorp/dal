@@ -134,7 +134,8 @@ public class DataSourceLocator {
             Database database = ((ClusterDataSourceIdentity) id).getDatabase();
             Cluster cluster = database.getCluster();
             ClusterInfo clusterInfo = new ClusterInfo(database.getClusterName(), database.getShardIndex(),
-                    database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE);
+                    database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE,
+                    cluster != null && cluster.dbShardingEnabled());
             try {
                 if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
                     DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);

@@ -32,6 +32,7 @@ public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
     private Map<String, String> map = new HashMap<>();
 
     private ClusterConfigProvider clusterConfigProvider = new LocalClusterConfigProvider();
+    private ClusterInfoProvider clusterInfoProvider = new LocalClusterInfoProvider();
 
     @Override
     public void initialize(Map<String, String> settings) throws Exception {
@@ -115,6 +116,11 @@ public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
         return clusterConfigProvider.getClusterConfig(clusterName);
+    }
+
+    @Override
+    public ClusterInfo getClusterInfo(String databaseKey) {
+        return clusterInfoProvider.getClusterInfo(databaseKey);
     }
 
     @Override

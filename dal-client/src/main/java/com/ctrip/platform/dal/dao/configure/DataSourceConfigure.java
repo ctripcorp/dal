@@ -307,6 +307,20 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return Boolean.parseBoolean(value);
     }
 
+    public Integer getServerWaitTimeout() {
+        if (properties != null) {
+            String value = properties.getProperty(SERVER_WAIT_TIMEOUT);
+            if (value != null) {
+                try {
+                    return Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
+            }
+        }
+        return null;
+    }
+
     public DatabaseCategory getDatabaseCategory() {
         return DatabaseCategory.matchWithConnectionUrl(getConnectionUrl());
     }
@@ -412,31 +426,32 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     public boolean equals(Object obj) {
         if (obj instanceof DataSourceConfigure) {
             DataSourceConfigure ref = (DataSourceConfigure) obj;
-            return (equals(ref.getConnectionUrl(), ref.getConnectionUrl()) &&
-                    equals(ref.getUserName(), ref.getUserName()) &&
-                    equals(ref.getPassword(), ref.getPassword()) &&
-                    equals(ref.getDriverClass(), ref.getDriverClass()) &&
-                    equals(ref.getTestOnBorrow(), ref.getTestOnBorrow()) &&
-                    equals(ref.getTestOnReturn(), ref.getTestOnReturn()) &&
-                    equals(ref.getTestWhileIdle(), ref.getTestWhileIdle()) &&
-                    equals(ref.getValidationInterval(), ref.getValidationInterval()) &&
-                    equals(ref.getValidationQuery(), ref.getValidationQuery()) &&
-                    equals(ref.getValidationQueryTimeout(), ref.getValidationQueryTimeout()) &&
-                    equals(ref.getValidatorClassName(), ref.getValidatorClassName()) &&
-                    equals(ref.getMaxActive(), ref.getMaxActive()) &&
-                    equals(ref.getMaxAge(), ref.getMaxAge()) &&
-                    equals(ref.getMaxWait(), ref.getMaxWait()) &&
-                    equals(ref.getMinIdle(), ref.getMinIdle()) &&
-                    equals(ref.getTimeBetweenEvictionRunsMillis(), ref.getTimeBetweenEvictionRunsMillis()) &&
-                    equals(ref.getMinEvictableIdleTimeMillis(), ref.getMinEvictableIdleTimeMillis()) &&
-                    equals(ref.getInitialSize(), ref.getInitialSize()) &&
-                    equals(ref.getInitSQL(), ref.getInitSQL()) &&
-                    equals(ref.getLogAbandoned(), ref.getLogAbandoned()) &&
-                    equals(ref.getRemoveAbandoned(), ref.getRemoveAbandoned()) &&
-                    equals(ref.getRemoveAbandonedTimeout(), ref.getRemoveAbandonedTimeout()) &&
-                    equals(ref.getJdbcInterceptors(), ref.getJdbcInterceptors()) &&
-                    equals(ref.getConnectionProperties(), ref.getConnectionProperties()) &&
-                    equals(ref.getJmxEnabled(), ref.getJmxEnabled()));
+            return (equals(getConnectionUrl(), ref.getConnectionUrl()) &&
+                    equals(getUserName(), ref.getUserName()) &&
+                    equals(getPassword(), ref.getPassword()) &&
+                    equals(getDriverClass(), ref.getDriverClass()) &&
+                    equals(getTestOnBorrow(), ref.getTestOnBorrow()) &&
+                    equals(getTestOnReturn(), ref.getTestOnReturn()) &&
+                    equals(getTestWhileIdle(), ref.getTestWhileIdle()) &&
+                    equals(getValidationInterval(), ref.getValidationInterval()) &&
+                    equals(getValidationQuery(), ref.getValidationQuery()) &&
+                    equals(getValidationQueryTimeout(), ref.getValidationQueryTimeout()) &&
+                    equals(getValidatorClassName(), ref.getValidatorClassName()) &&
+                    equals(getMaxActive(), ref.getMaxActive()) &&
+                    equals(getMaxAge(), ref.getMaxAge()) &&
+                    equals(getMaxWait(), ref.getMaxWait()) &&
+                    equals(getMinIdle(), ref.getMinIdle()) &&
+                    equals(getTimeBetweenEvictionRunsMillis(), ref.getTimeBetweenEvictionRunsMillis()) &&
+                    equals(getMinEvictableIdleTimeMillis(), ref.getMinEvictableIdleTimeMillis()) &&
+                    equals(getInitialSize(), ref.getInitialSize()) &&
+                    equals(getInitSQL(), ref.getInitSQL()) &&
+                    equals(getLogAbandoned(), ref.getLogAbandoned()) &&
+                    equals(getRemoveAbandoned(), ref.getRemoveAbandoned()) &&
+                    equals(getRemoveAbandonedTimeout(), ref.getRemoveAbandonedTimeout()) &&
+                    equals(getJdbcInterceptors(), ref.getJdbcInterceptors()) &&
+                    equals(getConnectionProperties(), ref.getConnectionProperties()) &&
+                    equals(getJmxEnabled(), ref.getJmxEnabled()) &&
+                    equals(getServerWaitTimeout(), ref.getServerWaitTimeout()));
         }
         return false;
     }
@@ -473,6 +488,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 append(getJdbcInterceptors()).
                 append(getConnectionProperties()).
                 append(getJmxEnabled()).
+                append(getServerWaitTimeout()).
                 generate();
     }
 

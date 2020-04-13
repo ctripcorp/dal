@@ -10,13 +10,15 @@ public class ClusterInfo {
     private String clusterName;
     private Integer shardIndex;
     private DatabaseRole role;
+    private boolean dbSharding;
 
     public ClusterInfo() {}
 
-    public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role) {
+    public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, boolean dbSharding) {
         this.clusterName = clusterName;
         this.shardIndex = shardIndex;
         this.role = role;
+        this.dbSharding = dbSharding;
     }
 
     public String getClusterName() {
@@ -29,6 +31,10 @@ public class ClusterInfo {
 
     public DatabaseRole getRole() {
         return role;
+    }
+
+    public boolean dbSharding() {
+        return dbSharding;
     }
 
     public void setClusterName(String clusterName) {

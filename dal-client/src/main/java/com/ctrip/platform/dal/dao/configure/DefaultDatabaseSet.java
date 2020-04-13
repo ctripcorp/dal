@@ -85,7 +85,7 @@ public class DefaultDatabaseSet extends DatabaseSet {
     }
 
     private void initShards() throws Exception {
-        if (strategy == null || strategy.isShardingByDb() == false) {
+        if (strategy == null || !strategy.isShardingByDb()) {
             // Init with no shard support
             for (DataBase db : databases.values()) {
                 if (db.isMaster())
@@ -179,6 +179,10 @@ public class DefaultDatabaseSet extends DatabaseSet {
     public DalShardingStrategy getStrategy() throws SQLException {
         if (strategy == null)
             throw new SQLException("No sharding strategy defined");
+        return strategy;
+    }
+
+    protected DalShardingStrategy getShardingStrategy() {
         return strategy;
     }
 

@@ -39,7 +39,7 @@ public class ClusterDatabaseSetTest {
             }
 
             @Override
-            public com.ctrip.platform.dal.dao.configure.ClusterConfigProvider getClusterConfigProvider() {
+            public IntegratedConfigProvider getIntegratedConfigProvider() {
                 return null;
             }
 

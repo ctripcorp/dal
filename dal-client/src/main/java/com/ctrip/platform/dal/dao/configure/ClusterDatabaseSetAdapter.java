@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.util.List;
@@ -78,11 +79,18 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
                         String clusterName = clusterInfo.getClusterName();
                         ClusterConfig clusterConfig = clusterConfigProvider.getClusterConfig(clusterName);
                         Cluster cluster = new DynamicCluster(clusterConfig);
+                        LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSucceeded",
+                                String.format("databaseSet: %s, clusterName: %s",
+                                        defaultDatabaseSet.getName(), clusterName));
                         return new ClusterDatabaseSet(defaultDatabaseSet.getName(), cluster, connectionLocator);
                     }
                 }
             }
+            LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSkipped", String.format("databaseSet: %s",
+                    defaultDatabaseSet.getName()));
         } catch (Throwable t) {
+            LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptFailed", String.format("databaseSet: %s",
+                    defaultDatabaseSet.getName()));
             LOGGER.warn("Adapt DefaultDatabaseSet to ClusterDatabaseSet exception", t);
         }
         return null;

@@ -61,7 +61,7 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
     }
 
     @Override
-    public ClusterConfigProvider getClusterConfigProvider() {
+    public IntegratedConfigProvider getIntegratedConfigProvider() {
         return provider;
     }
 

@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import apple.laf.JRSUIConstants;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;

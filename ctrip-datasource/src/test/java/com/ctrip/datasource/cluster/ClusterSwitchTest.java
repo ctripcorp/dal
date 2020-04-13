@@ -101,7 +101,7 @@ public class ClusterSwitchTest {
     @Test
     public void testClusterDynamicDataSourceSwitch() throws Exception {
         int shardIndex = 0;
-        ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME1, shardIndex, DatabaseRole.MASTER);
+        ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME1, shardIndex, DatabaseRole.MASTER, false);
         MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME1));
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();
@@ -123,7 +123,7 @@ public class ClusterSwitchTest {
     @Test
     public void testClusterDynamicDataSourceDrcSwitch() throws Exception {
         int shardIndex = 0;
-        ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME4, shardIndex, DatabaseRole.MASTER);
+        ClusterInfo clusterInfo = new ClusterInfo(CLUSTER_NAME4, shardIndex, DatabaseRole.MASTER, false);
         MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME4));
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();

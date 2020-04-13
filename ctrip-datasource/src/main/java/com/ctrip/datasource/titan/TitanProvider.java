@@ -5,11 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.ctrip.datasource.configure.CtripLocalClusterInfoProvider;
+import com.ctrip.platform.dal.dao.configure.LocalClusterInfoProvider;
 import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.datasource.configure.ClusterInfoProvider;
+import com.ctrip.platform.dal.dao.configure.ClusterInfoProvider;
 import com.ctrip.datasource.configure.CtripClusterInfoProvider;
 import com.ctrip.datasource.configure.CtripLocalClusterConfigProvider;
 import com.ctrip.datasource.configure.qconfig.CtripClusterConfigProvider;
@@ -53,7 +53,7 @@ public class TitanProvider implements IntegratedConfigProvider {
         dataSourceConfigureManager.initialize(settings);
         if (sourceType == SourceType.Local) {
             clusterConfigProvider = new CtripLocalClusterConfigProvider();
-            clusterInfoProvider = new CtripLocalClusterInfoProvider();
+            clusterInfoProvider = new LocalClusterInfoProvider();
         }
     }
 
@@ -188,6 +188,11 @@ public class TitanProvider implements IntegratedConfigProvider {
     }
 
     public ClusterInfo tryGetClusterInfo(String titanKey) {
+        return getClusterInfo(titanKey);
+    }
+
+    @Override
+    public ClusterInfo getClusterInfo(String titanKey) {
         return clusterInfoProvider.getClusterInfo(titanKey);
     }
 

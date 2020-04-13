@@ -4,6 +4,7 @@ import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.platform.dal.dao.configure.ClusterInfoProvider;
 import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.helper.JsonUtils;
@@ -49,13 +50,21 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
     private ClusterInfo getLatestClusterInfo(String titanKey) {
         String clusterInfoQueryUrl = locator.getClusterInfoQueryUrl();
         if (StringUtils.isEmpty(clusterInfoQueryUrl)) {
-            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey));
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey),
+                    Event.SUCCESS, "empty url");
             return new NullClusterInfo();
         }
 
         ClusterInfo clusterInfo = null;
         Transaction transaction = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey));
         try {
+            String subEnv = Foundation.server().getSubEnv();
+            if (subEnv != null && subEnv.toLowerCase().contains("aws")) {
+                Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey),
+                        Event.SUCCESS, subEnv);
+                return new NullClusterInfo();
+            }
+
             String url = String.format(clusterInfoQueryUrl, titanKey);
             String appId = Foundation.app().getAppId();
             if (!StringUtils.isEmpty(appId))

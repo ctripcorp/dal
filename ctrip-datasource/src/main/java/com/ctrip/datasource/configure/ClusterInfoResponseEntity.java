@@ -42,6 +42,7 @@ public class ClusterInfoResponseEntity {
         private String clusterName;
         private Integer shardIndex;
         private String role;
+        private Boolean dbSharding;
 
         public String getClusterName() {
             return clusterName;
@@ -67,9 +68,17 @@ public class ClusterInfoResponseEntity {
             this.role = role;
         }
 
+        public Boolean getDbSharding() {
+            return dbSharding;
+        }
+
+        public void setDbSharding(Boolean dbSharding) {
+            this.dbSharding = dbSharding;
+        }
+
         public ClusterInfo toClusterInfo() {
             if (clusterName != null && shardIndex != null && role != null)
-                return new ClusterInfo(clusterName, shardIndex, DatabaseRole.parse(role));
+                return new ClusterInfo(clusterName, shardIndex, DatabaseRole.parse(role), dbSharding);
             else
                 return null;
         }

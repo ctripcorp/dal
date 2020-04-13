@@ -4,6 +4,7 @@ import com.ctrip.datasource.configure.DynamicClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
+import com.ctrip.platform.dal.dao.configure.AbstractClusterConfigProvider;
 import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
@@ -17,22 +18,21 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author c7ch23en
  */
-public class CtripClusterConfigProvider implements ClusterConfigProvider {
+public class CtripClusterConfigProvider extends AbstractClusterConfigProvider implements ClusterConfigProvider {
 
     private static final String CONFIG_GROUP = "100020718";
     private static final String CAT_LOG_TYPE = "DAL.cluster";
     private static final String CAT_LOG_NAME_FORMAT = "GetClusterConfig:%s";
     private static final String CAT_LOG_NAME_FORMAT2 = "ParseClusterConfig:%s";
 
-    private final ClusterConfigParser configParser;
     private static final Map<String, ClusterConfig> configCache = new ConcurrentHashMap<>();
 
     public CtripClusterConfigProvider() {
-        this(new ClusterConfigXMLParser());
+        super();
     }
 
     public CtripClusterConfigProvider(ClusterConfigParser configParser) {
-        this.configParser = configParser;
+        super(configParser);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CtripClusterConfigProvider implements ClusterConfigProvider {
                 public ClusterConfig parse(String content) throws IOException {
                     Transaction transaction2 = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT2, clusterName));
                     try {
-                        ClusterConfig config2 = configParser.parse(content);
+                        ClusterConfig config2 = getParser().parse(content);
                         transaction2.addData(config2.toString());
                         transaction2.setStatus(Transaction.SUCCESS);
                         return config2;

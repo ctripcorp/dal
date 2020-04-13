@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import apple.laf.JRSUIConstants;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -15,8 +16,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 public class CtripDalConfig implements DalConfigLoader {
+
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     public static final String DAL_CONFIG = "dal.config";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
@@ -77,8 +80,6 @@ public class CtripDalConfig implements DalConfigLoader {
                 }
         }
     }
-
-
 
     private DalConfigure getConfigure() throws Exception {
         DalConfigure configure = null;

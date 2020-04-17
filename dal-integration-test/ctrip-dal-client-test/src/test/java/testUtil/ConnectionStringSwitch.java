@@ -1,6 +1,6 @@
 package testUtil;
 
-import com.ctrip.platform.dal.dao.helper.JsonUtils;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.http.HttpEntity;
@@ -13,6 +13,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.JsonUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -23,6 +24,8 @@ import static org.junit.Assert.fail;
 public class ConnectionStringSwitch {
 
     private static Logger log = LoggerFactory.getLogger(ConnectionStringSwitch.class);
+
+    private Gson gson = new Gson();
 
     public HttpResponse switchPostByDBAInterface(boolean isPro) throws Exception {
         JsonObject jsonObject = new JsonObject();

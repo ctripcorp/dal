@@ -83,7 +83,8 @@ public class IdGenPrefetchTest {
             fail();
         } catch (Exception e) {
             logger.error(e.getMessage());
-            assertEquals("sequenceName 'nonexistdb.person' invalid", e.getMessage());
+            assertTrue(e.getMessage().contains("sequence") || e.getMessage().contains("Sequence"));
+            assertTrue(e.getMessage().contains("invalid") || e.getMessage().contains("Invalid"));
         }
     }
 

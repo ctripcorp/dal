@@ -56,6 +56,14 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;">DB
+                                Catalog:</label> <select id="dbcatalog" class="span8"></select>
+                        </div>
+                    </div>
+
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">DB
@@ -84,12 +92,7 @@
                     </div>
                 </div>
                 <div id="add_new_db_step2" class="row-fluid">
-                    <div class="row-fluid">
-                        <div class="control-group">
-                            <label class="control-label popup_label" style="width: 130px;">DB
-                                Catalog:</label> <select id="dbcatalog" class="span8"></select>
-                        </div>
-                    </div>
+
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">All-In-One

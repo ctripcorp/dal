@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -18,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +32,8 @@ import java.util.*;
 public class DatabaseResource {
     private static ClassLoader classLoader;
     private static ObjectMapper mapper = new ObjectMapper();
+    private final String CONF_PROPERTIES = "conf.properties";
+    private final String USER_INFO_CLASS_NAME = "userinfo_class";
 
     static {
         classLoader = Thread.currentThread().getContextClassLoader();
@@ -128,6 +133,40 @@ public class DatabaseResource {
             ResourceUtils.close(rs);
             ResourceUtils.close(conn);
         }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("getAllMysqlDB")
+    public List<DBLevelInfo> getAllMysqlDB() {
+        try {
+            String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
+            if (StringUtils.isNotBlank(className)) {
+                Class<?> clazz = Class.forName(className);
+                DBInfoApi dbInfoApi = (DBInfoApi) clazz.newInstance();
+                return dbInfoApi.getDBLevelInfo();
+            }
+        } catch (Exception e) {
+            LoggerManager.getInstance().error(e);
+        }
+        return new ArrayList<>();
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("getTitanKeyByDBName")
+    public List<String> getTitanKeyByDBName(@FormParam("dbName") String dbName) {
+        try {
+            String className = CustomizedResource.getInstance().getAllInOneKeyApiClassName();
+            if (StringUtils.isNotBlank(className)) {
+                Class<?> clazz = Class.forName(className);
+                AllInOneKeyApi allInOneKeyApi = (AllInOneKeyApi) clazz.newInstance();
+                return allInOneKeyApi.getAllInOneKeys(dbName);
+            }
+        } catch (Exception e) {
+            LoggerManager.getInstance().error(e);
+        }
+        return new ArrayList<>();
     }
 
     @POST

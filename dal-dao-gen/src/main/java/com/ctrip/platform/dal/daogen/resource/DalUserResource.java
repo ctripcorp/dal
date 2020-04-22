@@ -414,9 +414,9 @@ public class DalUserResource {
 
     @POST
     @Path("getDefaultDBInfo")
-    public DalGroupDB getDefaultDBInfo(@FormParam("dbType") String dbType) throws Exception {
+    public DalGroupDB getDefaultDBInfo(@FormParam("dbType") String dbType, @FormParam("dbName") String dbName) throws Exception {
         try {
-            return CustomizedResource.getInstance().getDefaultDBInfo(dbType);
+            return CustomizedResource.getInstance().getDefaultDBInfo(dbType, dbName);
         } catch (Throwable e) {
             LoggerManager.getInstance().error(e);
             throw e;

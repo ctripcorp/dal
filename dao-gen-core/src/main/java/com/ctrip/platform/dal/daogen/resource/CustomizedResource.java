@@ -20,6 +20,8 @@ public class CustomizedResource {
     private ClassLoader classLoader = null;
     private final String CONF_PROPERTIES = "conf.properties";
     private final String USER_INFO_CLASS_NAME = "userinfo_class";
+    private final String DB_LEVEL_INFO_API_CLASS_NAME = "db_level_info_api";
+    private final String ALL_IN_ONE_KEY_API_CLASS_NAME = "all_in_one_key_api";
     private UserInfo userInfo = null;
     private Boolean isDefaultUser = null;
 
@@ -116,6 +118,14 @@ public class CustomizedResource {
         return getClassNameFromConf(CONFIG_CLASS_NAME);
     }
 
+    public String getDBLevelInfoApiClassName() throws IOException {
+        return getClassNameFromConf(DB_LEVEL_INFO_API_CLASS_NAME);
+    }
+
+    public String getAllInOneKeyApiClassName() throws IOException {
+        return getClassNameFromConf(ALL_IN_ONE_KEY_API_CLASS_NAME);
+    }
+
     private String getClassNameFromConf(String className) throws IOException {
         if (className == null || className.isEmpty())
             return null;
@@ -134,8 +144,8 @@ public class CustomizedResource {
         userInfo.logOut(request, response);
     }
 
-    public DalGroupDB getDefaultDBInfo(String dbType) {
-        return userInfo.getDefaultDBInfo(dbType);
+    public DalGroupDB getDefaultDBInfo(String dbType, String dbName) {
+        return userInfo.getDefaultDBInfo(dbType, dbName);
     }
 
 }

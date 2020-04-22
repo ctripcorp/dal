@@ -137,14 +137,14 @@ public class DatabaseResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("getAllMysqlDB")
-    public List<DBLevelInfo> getAllMysqlDB() {
+    @Path("getAllDB")
+    public List<DBLevelInfo> getAllDB(@FormParam("dbType") String dbType) {
         try {
             String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
             if (StringUtils.isNotBlank(className)) {
                 Class<?> clazz = Class.forName(className);
                 DBInfoApi dbInfoApi = (DBInfoApi) clazz.newInstance();
-                return dbInfoApi.getDBLevelInfo();
+                return dbInfoApi.getDBLevelInfo(dbType);
             }
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);

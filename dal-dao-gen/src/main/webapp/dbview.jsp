@@ -96,8 +96,7 @@
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">All-In-One
-                                Name:</label> <input id="allinonename" class="span5 input-sm"
-                                                     type="text"><a id="validateKeyname"
+                                Name:</label> <select id="allinonename" class="span8"></select><a id="validateKeyname"
                                                                     class="ctip"
                                                                     data-toggle="tooltip" data-placement="right"
                                                                     html="1"
@@ -166,6 +165,12 @@
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">DB
+                                Catalog:</label> <select id="dbcatalog_up" class="span8"></select>
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;">DB
                                 Address:</label> <input id="dbaddress_up" class="span8 input-sm"
                                                         type="text">
                         </div>
@@ -194,15 +199,8 @@
                 <div id="update_db_step2" class="row-fluid">
                     <div class="row-fluid">
                         <div class="control-group">
-                            <label class="control-label popup_label" style="width: 130px;">DB
-                                Catalog:</label> <select id="dbcatalog_up" class="span8"></select>
-                        </div>
-                    </div>
-                    <div class="row-fluid">
-                        <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">All-In-One
-                                Name:</label> <input id="allinonename_up" class="span8 input-sm"
-                                                     type="text">
+                                Name:</label> <select id="allinonename_up" class="span8"></select>
                         </div>
                     </div>
                 </div>

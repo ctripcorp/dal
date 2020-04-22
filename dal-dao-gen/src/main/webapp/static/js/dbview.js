@@ -308,17 +308,33 @@
 
     $(function () {
         var setDefaultDbVal = function () {
+            var dbcatalog = $("#dbcatalog");
             $("#error_msg").html(" ");
             var dbType = $.trim($("#dbtype").val());
-
-            $.post("/rest/user/getDefaultDBInfo", {
+            $.post("/rest/db/getAllDB", {
                 dbType: dbType
             }, function (data) {
-                $("#dbaddress").val(data.db_address);
-                $("#dbport").val(data.db_port);
-                $("#dbuser").val(data.db_user);
-                $("#dbpassword").val(data.db_password);
+                var allCatalog = [];
+                $.each(data, function (index, value) {
+                    allCatalog.push({
+                        id: value, title: value
+                    });
+                });
+                dbcatalog[0].selectize.clearOptions();
+                dbcatalog[0].selectize.addOption(allCatalog);
+                dbcatalog[0].selectize.refreshOptions(false);
             });
+            if (dbType === "SQLServer") {
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: dbType,
+                    dbName: ""
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
+            }
         };
 
         var getAllCatalog = function (successInfo) {
@@ -327,7 +343,7 @@
             var dbPort = $("#dbport").val();
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
-            var dbcatalog = $("#dbcatalog");
+
             var error_msg = $("#error_msg");
             error_msg.html("正在连接数据库，请稍等...");
             var result = true;
@@ -345,7 +361,7 @@
                 async: false,
                 success: function (data) {
                     if (data.code == "OK") {
-                        var allCatalog = [];
+                        /*var allCatalog = [];
                         $.each($.parseJSON(data.info), function (index, value) {
                             allCatalog.push({
                                 id: value, title: value
@@ -353,7 +369,7 @@
                         });
                         dbcatalog[0].selectize.clearOptions();
                         dbcatalog[0].selectize.addOption(allCatalog);
-                        dbcatalog[0].selectize.refreshOptions(false);
+                        dbcatalog[0].selectize.refreshOptions(false);*/
                         error_msg.html(successInfo);
                     } else {
                         error_msg.html("连接失败:" + data.info);
@@ -363,6 +379,36 @@
             });
 
             return result;
+        };
+
+        var getAllInOneKeyByDbName = function () {
+            var dbcatalog = $("#dbcatalog").val();
+            var allinonename = $("#allinonename");
+            if (allinonename[0] != undefined && allinonename[0].selectize != undefined) {
+                allinonename[0].selectize.clearOptions();
+            } else {
+                allinonename.selectize({
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: true
+                });
+            }
+            $.get("/rest/db/getTitanKeyByDBName",{
+                dbName: dbcatalog
+            }, function (data) {
+                var allInOneNames = [];
+                $.each(data, function (index, value) {
+                    allInOneNames.push({
+                        id: value, title: value
+                    });
+                });
+                allinonename[0].selectize.clearOptions();
+                allinonename[0].selectize.addOption(groups);
+                allinonename[0].selectize.refreshOptions(false);
+            });
         };
 
         var getUserGroups = function () {
@@ -393,6 +439,22 @@
                     setDefaultDbVal();
                 }
             });
+        });
+
+        $(document.body).on("change", "#dbcatalog", function () {
+            var dbcatalog = $("#dbcatalog").val();
+            var dbType = $.trim($("#dbtype").val());
+            if (dbType === "MySQL") {
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: dbType,
+                    dbName: dbcatalog
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
+            }
         });
 
         $(document.body).on("click", "#add_new_db_next", function () {
@@ -436,6 +498,8 @@
             $("#add_new_db_prev").show();
             $("#add_new_db_save").show();
             getUserGroups();
+
+            getAllInOneKeyByDbName();
         });
 
         $(document.body).on("click", "#add_new_db_prev", function () {

@@ -27,6 +27,7 @@ local.properties
 logs/
 *.pid
 *.log
+*.versionsBackup
 
 # External tool builders
 .externalToolBuilders/

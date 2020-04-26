@@ -138,35 +138,49 @@ public class DatabaseResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getAllDB")
-    public List<DBLevelInfo> getAllDB(@FormParam("dbType") String dbType) {
+    public Status getAllDB(@FormParam("dbType") String dbType) {
         try {
+            Status status = Status.OK();
             String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
             if (StringUtils.isNotBlank(className)) {
                 Class<?> clazz = Class.forName(className);
                 DBInfoApi dbInfoApi = (DBInfoApi) clazz.newInstance();
-                return dbInfoApi.getDBLevelInfo(dbType);
+                List<DBLevelInfo> dbLevelInfos = dbInfoApi.getDBLevelInfo(dbType);
+                List<String> allDBs = new ArrayList<>();
+                for (DBLevelInfo dbLevelInfo : dbLevelInfos) {
+                    allDBs.add(dbLevelInfo.getDb_name());
+                }
+                status.setInfo(mapper.writeValueAsString(allDBs));
             }
+            return status;
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR();
+            status.setInfo(e.getMessage());
+            return status;
         }
-        return new ArrayList<>();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getTitanKeyByDBName")
-    public List<String> getTitanKeyByDBName(@FormParam("dbName") String dbName) {
+    public Status getTitanKeyByDBName(@FormParam("dbName") String dbName) {
+
         try {
+            Status status = Status.OK();
             String className = CustomizedResource.getInstance().getAllInOneKeyApiClassName();
             if (StringUtils.isNotBlank(className)) {
                 Class<?> clazz = Class.forName(className);
                 AllInOneKeyApi allInOneKeyApi = (AllInOneKeyApi) clazz.newInstance();
-                return allInOneKeyApi.getAllInOneKeys(dbName);
+                status.setInfo(mapper.writeValueAsString(allInOneKeyApi.getAllInOneKeys(dbName)));
             }
+            return status;
         } catch (Exception e) {
             LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR();
+            status.setInfo(e.getMessage());
+            return status;
         }
-        return new ArrayList<>();
     }
 
     @POST

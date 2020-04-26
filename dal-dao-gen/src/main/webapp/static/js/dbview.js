@@ -57,6 +57,23 @@
                     });
                 }
                 $("#addDbModal").modal({"backdrop": "static"});
+                var dbcatalog = $("#dbcatalog");
+                var db_providerName = $.trim($("#dbtype").val());
+                if (db_providerName !== null || db_providerName.length > 0) {
+                    $.post("/rest/db/getAllDB", {
+                        dbType: db_providerName
+                    }, function (data) {
+                        var allCatalog_up = [];
+                        $.each($.parseJSON(data.info), function (index, value) {
+                            allCatalog_up.push({
+                                id: value, title: value
+                            });
+                        });
+                        dbcatalog[0].selectize.clearOptions();
+                        dbcatalog[0].selectize.addOption(allCatalog_up);
+                        dbcatalog[0].selectize.refreshOptions(false);
+                    });
+                }
             } else {
                 alert("请先加入一个DAL Team.");
             }
@@ -109,15 +126,15 @@
                     dbType: db['db_providerName']
                 }, function (data) {
                     var allCatalog_up = [];
-                    $.each(data, function (index, value) {
+                    $.each($.parseJSON(data.info), function (index, value) {
                         allCatalog_up.push({
-                            id: value.db_name, title: value.db_name
+                            id: value, title: value
                         });
                     });
                     dbcatalog_up[0].selectize.clearOptions();
                     dbcatalog_up[0].selectize.addOption(allCatalog_up);
                     dbcatalog_up[0].selectize.refreshOptions(false);
-                    $("#dbcatalog_up").val(db['db_catalog']);
+                    $("#dbcatalog_up")[0].selectize.setValue(db['db_catalog'])
                 });
 
             } else {
@@ -332,9 +349,9 @@
                 dbType: dbType
             }, function (data) {
                 var allCatalog = [];
-                $.each(data, function (index, value) {
+                $.each($.parseJSON(data.info), function (index, value) {
                     allCatalog.push({
-                        id: value.db_name, title: value.db_name
+                        id: value, title: value
                     });
                 });
                 dbcatalog[0].selectize.clearOptions();
@@ -417,7 +434,7 @@
                 dbName: dbcatalog
             }, function (data) {
                 var allInOneNames = [];
-                $.each(data, function (index, value) {
+                $.each($.parseJSON(data.info), function (index, value) {
                     allInOneNames.push({
                         id: value, title: value
                     });
@@ -447,7 +464,7 @@
                 dbName: dbcatalog
             }, function (data) {
                 var allInOneNames = [];
-                $.each(data, function (index, value) {
+                $.each($.parseJSON(data.info), function (index, value) {
                     allInOneNames.push({
                         id: value, title: value
                     });

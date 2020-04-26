@@ -84,6 +84,38 @@
         });
     };
 
+    var getAllInOneKeyByDbName_up = function (allInOneName) {
+        var dbcatalog = $("#dbcatalog_up").val();
+        var allinonename = $("#allinonename_up");
+        if (allinonename[0] != undefined && allinonename[0].selectize != undefined) {
+            allinonename[0].selectize.clearOptions();
+        } else {
+            allinonename.selectize({
+                valueField: 'id',
+                labelField: 'title',
+                searchField: 'title',
+                sortField: 'title',
+                options: [],
+                create: true
+            });
+        }
+        $.post("/rest/db/getTitanKeyByDBName",{
+            dbName: dbcatalog
+        }, function (data) {
+            var allInOneNames = [];
+            $.each($.parseJSON(data.info), function (index, value) {
+                allInOneNames.push({
+                    id: value, title: value
+                });
+            });
+            allinonename[0].selectize.clearOptions();
+            allinonename[0].selectize.addOption(allInOneNames);
+            allinonename[0].selectize.refreshOptions(false);
+
+            allinonename[0].selectize.setValue(allInOneName);
+        });
+    };
+
     function editDB() {
         $("#update_error_msg").html('');
         $("#update_db_step1").show();
@@ -107,7 +139,7 @@
                 $("#dbport_up").val(db['db_port']);
                 $("#dbuser_up").val(db['db_user']);
                 $("#dbpassword_up").val(db['db_password']);
-                $("#allinonename_up").val(db['dbname']);
+                /*$("#allinonename_up").val(db['dbname']);*/
                 if ($("#dbcatalog_up")[0] != undefined && $("#dbcatalog_up")[0].selectize != undefined) {
                     $("#dbcatalog_up")[0].selectize.clearOptions();
                 } else {
@@ -134,9 +166,9 @@
                     dbcatalog_up[0].selectize.clearOptions();
                     dbcatalog_up[0].selectize.addOption(allCatalog_up);
                     dbcatalog_up[0].selectize.refreshOptions(false);
-                    $("#dbcatalog_up")[0].selectize.setValue(db['db_catalog'])
+                    $("#dbcatalog_up")[0].selectize.setValue(db['db_catalog']);
+                    getAllInOneKeyByDbName_up(db['dbname']);
                 });
-
             } else {
                 $("#errorMess").html(data.info);
                 $("#errorNoticeDiv").modal({"backdrop": "static"});
@@ -415,35 +447,7 @@
             return result;
         };
 
-        var getAllInOneKeyByDbName_up = function () {
-            var dbcatalog = $("#dbcatalog_up").val();
-            var allinonename = $("#allinonename_up");
-            if (allinonename[0] != undefined && allinonename[0].selectize != undefined) {
-                allinonename[0].selectize.clearOptions();
-            } else {
-                allinonename.selectize({
-                    valueField: 'id',
-                    labelField: 'title',
-                    searchField: 'title',
-                    sortField: 'title',
-                    options: [],
-                    create: true
-                });
-            }
-            $.post("/rest/db/getTitanKeyByDBName",{
-                dbName: dbcatalog
-            }, function (data) {
-                var allInOneNames = [];
-                $.each($.parseJSON(data.info), function (index, value) {
-                    allInOneNames.push({
-                        id: value, title: value
-                    });
-                });
-                allinonename[0].selectize.clearOptions();
-                allinonename[0].selectize.addOption(allInOneNames);
-                allinonename[0].selectize.refreshOptions(false);
-            });
-        };
+
 
         var getAllInOneKeyByDbName = function () {
             var dbcatalog = $("#dbcatalog").val();
@@ -806,7 +810,6 @@
             $("#update_db_prev").show();
             $("#update_db_save").show();
 
-            getAllInOneKeyByDbName_up();
         });
 
         $(document.body).on("click", "#update_db_prev", function () {

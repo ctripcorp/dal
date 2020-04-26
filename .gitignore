@@ -29,6 +29,7 @@ local.properties
 logs/
 *.pid
 *.log
+*.versionsBackup
 
 # External tool builders
 .externalToolBuilders/
@@ -71,7 +72,6 @@ logs/
 *.tlb
 *.tli
 *.tlh
-*.tmp
 *.vspscc
 .builds
 *.dotCover

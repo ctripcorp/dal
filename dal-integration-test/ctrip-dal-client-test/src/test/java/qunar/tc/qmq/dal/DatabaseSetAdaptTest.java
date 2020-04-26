@@ -66,8 +66,8 @@ public class DatabaseSetAdaptTest {
         @Override
         public void setStore(MessageStore messageStore) {}
 
-        @Override
-        public void startSendTrace() {}
+        /*@Override
+        public void startSendTrace() {}*/
 
         @Override
         public int getTableShardingId() {

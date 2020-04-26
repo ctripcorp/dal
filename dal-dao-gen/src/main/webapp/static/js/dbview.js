@@ -334,7 +334,7 @@
                 var allCatalog = [];
                 $.each(data, function (index, value) {
                     allCatalog.push({
-                        id: value.dbName, title: value.dbName
+                        id: value.db_name, title: value.db_name
                     });
                 });
                 dbcatalog[0].selectize.clearOptions();

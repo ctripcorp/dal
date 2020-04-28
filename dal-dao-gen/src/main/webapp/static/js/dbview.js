@@ -409,6 +409,7 @@
             var dbPort = $("#dbport").val();
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
+            var dbCatalog = $("#dbcatalog").val();
 
             var error_msg = $("#error_msg");
             error_msg.html("正在连接数据库，请稍等...");
@@ -422,7 +423,8 @@
                     dbaddress: dbAddress,
                     dbport: dbPort,
                     dbuser: dbUser,
-                    dbpassword: dbPassword
+                    dbpassword: dbPassword,
+                    dbName: dbCatalog
                 },
                 async: false,
                 success: function (data) {
@@ -604,7 +606,7 @@
                 return;
             }
 
-            var result = validateKeyName($("#allinonename"), error_msg);
+            var result = validateKeyName($("#allinonename"), dbCatalog, error_msg);
             if (!result) {
                 return;
             }
@@ -743,7 +745,7 @@
             return result;
         };
 
-        var validateKeyName = function (obj, msg) {
+        var validateKeyName = function (obj, dbCatalog, msg) {
             var result = true;
             var key = obj.val();
             if (key.length == 0)
@@ -753,7 +755,7 @@
                 type: "GET",
                 dataType: "json",
                 url: "/rest/db/validation",
-                data: {"key": key},
+                data: {"key": key, "dbName": dbCatalog},
                 async: false,
                 success: function (data) {
                     if (data.info.length > 0) {
@@ -841,7 +843,7 @@
                 return;
             }
 
-            var result = validateKeyName($("#allinonename_up"), update_error_msg);
+            var result = validateKeyName($("#allinonename_up"), dbCatalog, update_error_msg);
             if (!result) {
                 return;
             }
@@ -889,7 +891,7 @@
         });
 
         $(document.body).on("click", "#validateKeyname", function () {
-            validateKeyName($("#allinonename"), $("#error_msg"));
+            validateKeyName($("#allinonename"), $("#dbcatalog").val(), $("#error_msg"));
         });
 
         isDefaultUser();

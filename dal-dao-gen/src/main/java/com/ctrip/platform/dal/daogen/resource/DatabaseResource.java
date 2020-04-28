@@ -25,6 +25,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Resource
 @Singleton
@@ -32,6 +34,7 @@ import java.util.*;
 public class DatabaseResource {
     private static ClassLoader classLoader;
     private static ObjectMapper mapper = new ObjectMapper();
+    private static final Pattern dbnamePattern = Pattern.compile("(database|initial\\scatalog)=([^;]+)", 2);
     private final String CONF_PROPERTIES = "conf.properties";
     private final String USER_INFO_CLASS_NAME = "userinfo_class";
 
@@ -99,14 +102,14 @@ public class DatabaseResource {
     @Path("connectionTest")
     public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
             @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-            @FormParam("dbpassword") String dbpassword) throws Exception {
+            @FormParam("dbpassword") String dbpassword, @FormParam("dbName") String dbName) throws Exception {
         Connection conn = null;
         ResultSet rs = null;
         try {
             Status status = Status.OK();
             try {
                 conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
-                        DatabaseType.valueOf(dbtype).getValue());
+                        DatabaseType.valueOf(dbtype).getValue(), dbName);
                 // conn.setNetworkTimeout(Executors.newFixedThreadPool(1), 5000);
                 rs = conn.getMetaData().getCatalogs();
                 Set<String> allCatalog = new HashSet<String>();
@@ -580,7 +583,7 @@ public class DatabaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("validation")
-    public Status validationKey(@QueryParam("key") String key) throws Exception {
+    public Status validationKey(@QueryParam("key") String key, @QueryParam("dbName") String dbName) throws Exception {
         try {
             Status status = Status.ERROR();
             Response res = WebUtil.getAllInOneResponse(key, null);
@@ -604,7 +607,18 @@ public class DatabaseResource {
                 if (error != null && !error.isEmpty()) {
                     status.setInfo(error);
                 } else {
-                    status.setInfo("");
+                    String connectionString = RC4.decrypt(data[0].getConnectionString());
+                    String dbnameInTitanKey = null;
+                    Matcher matcher = dbnamePattern.matcher(connectionString);
+                    if (matcher.find()) {
+                        dbnameInTitanKey = matcher.group(2);
+                    }
+                    if (dbName != null && dbName.equalsIgnoreCase(dbnameInTitanKey)) {
+                        status.setInfo("");
+                    }
+                    else {
+                        status.setInfo("dbName is not matching");
+                    }
                 }
             }
 

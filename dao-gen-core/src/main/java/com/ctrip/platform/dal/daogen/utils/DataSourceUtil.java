@@ -32,7 +32,7 @@ public class DataSourceUtil {
     private static volatile Map<String, DataSource> cache2 = new ConcurrentHashMap<>();
 
     public static Connection getConnection(String address, String port, String userName, String password,
-            String driverClass) throws Exception {
+            String driverClass, String dbName) throws Exception {
         validateParam(address, port, userName, password, driverClass);
         String key = address.trim() + port.trim() + userName.trim() + password.trim();
         DataSource ds = cache1.get(key);
@@ -46,7 +46,7 @@ public class DataSourceUtil {
                 Connection conn = ds.getConnection();
                 return conn;
             } else {
-                DataSource newDS = createDataSource(address.trim(), port.trim(), userName.trim(), password.trim(),
+                DataSource newDS = createDataSource(address.trim(), port.trim(), dbName.trim(), userName.trim(), password.trim(),
                         driverClass.trim());
                 cache1.put(key, newDS);
                 Connection conn = newDS.getConnection();

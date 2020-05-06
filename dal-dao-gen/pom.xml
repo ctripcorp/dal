@@ -65,7 +65,6 @@
                 <directory>src/main/resources/log</directory>
             </resource>
         </resources>
-        <finalName>ROOT</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

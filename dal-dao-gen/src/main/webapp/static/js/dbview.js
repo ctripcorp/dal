@@ -116,14 +116,16 @@
             allinonename[0].selectize.addOption(allInOneNames);
             allinonename[0].selectize.refreshOptions(false);
 
-            allinonename[0].selectize.addOption({
-                id : allInOneName,
-                title : allInOneName,
-            });
-            allinonename[0].selectize.setValue(allInOneName);
+            if (allInOneName!=""){
+                allinonename[0].selectize.addOption({
+                    id : allInOneName,
+                    title : allInOneName,
+                });
+                allinonename[0].selectize.setValue(allInOneName);
+            }
         });
     };
-
+    var  record=null;
     function editDB() {
         $("#update_error_msg").html('');
         $("#update_db_step1").show();
@@ -133,7 +135,7 @@
         $("#update_db_prev").hide();
         $("#update_db_save").hide();
         var records = w2ui['grid'].getSelection();
-        var record = w2ui['grid'].get(records[0]);
+        record= w2ui['grid'].get(records[0]);
         if (record == null) {
             alert('请先选择一个 database');
             return;
@@ -708,7 +710,7 @@
                 });
 
             }
-            getAllInOneKeyByDbName_up(dbcatalog);
+            getAllInOneKeyByDbName_up(record['dbname']);
 
         });
 

@@ -35,25 +35,22 @@ public class DataSourceUtil {
     public static Connection getConnection(String address, String port, String userName, String password,
             String driverClass, String dbName) throws Exception {
         validateParam(address, port, userName, password, driverClass);
-        String key = address.trim() + port.trim() + userName.trim() + password.trim();
+        String key = address.trim() +dbName.trim()+ port.trim() + userName.trim() + password.trim();
         DataSource ds = cache1.get(key);
         if (ds != null) {
             Connection conn = ds.getConnection();
-            LoggerManager.getInstance().info("getConnection1");
             return conn;
         }
         synchronized (DataSourceUtil.class) {
             ds = cache1.get(key);
             if (ds != null) {
                 Connection conn = ds.getConnection();
-                LoggerManager.getInstance().info("getConnection2");
                 return conn;
             } else {
                 DataSource newDS = createDataSource(address.trim(), port.trim(), dbName.trim(), userName.trim(), password.trim(),
                         driverClass.trim());
                 cache1.put(key, newDS);
                 Connection conn = newDS.getConnection();
-                LoggerManager.getInstance().info("getConnection3");
                 return conn;
             }
         }
@@ -65,7 +62,6 @@ public class DataSourceUtil {
         String key = address.trim() + port.trim() + userName.trim() + password.trim();
         DataSource ds = cache1.get(key);
         if (ds != null) {
-            LoggerManager.getInstance().info("getConnection1 no dbname.");
             Connection conn = ds.getConnection();
             return conn;
         }
@@ -73,14 +69,12 @@ public class DataSourceUtil {
             ds = cache1.get(key);
             if (ds != null) {
                 Connection conn = ds.getConnection();
-                LoggerManager.getInstance().info("getConnection3 no dbname.");
                 return conn;
             } else {
                 DataSource newDS = createDataSource(address.trim(), port.trim(), userName.trim(), password.trim(),
                         driverClass.trim());
                 cache1.put(key, newDS);
                 Connection conn = newDS.getConnection();
-                LoggerManager.getInstance().info("getConnection3 no dbname.");
                 return conn;
             }
         }
@@ -133,7 +127,6 @@ public class DataSourceUtil {
         } else {
             url = String.format(DBURL_SQLSERVER_CACHE1, address, port);
         }
-        LoggerManager.getInstance().info("getConnection3 no dbname."+url);
         return createDataSource(url, userName, password, driver);
     }
 
@@ -146,7 +139,6 @@ public class DataSourceUtil {
         } else {
             url = String.format(DBURL_SQLSERVER_CACHE2, address, port, catalog);
         }
-        LoggerManager.getInstance().info("getConnection3."+url);
         return createDataSource(url, userName, password, driver);
     }
 

@@ -108,6 +108,8 @@ public class DatabaseResource {
         try {
             Status status = Status.OK();
             try {
+                String info=String.format("connectionTest:%s,user:%s,pwd:%s,dbname:%s,dbtype:%s",dbaddress,dbpassword,dbuser,dbName,dbtype);
+                LoggerManager.getInstance().info(info);
                 conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
                         DatabaseType.valueOf(dbtype).getValue(), dbName);
                 // conn.setNetworkTimeout(Executors.newFixedThreadPool(1), 5000);

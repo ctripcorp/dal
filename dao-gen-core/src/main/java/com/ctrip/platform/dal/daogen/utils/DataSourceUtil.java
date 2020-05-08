@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.utils;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import javax.sql.DataSource;
@@ -38,18 +39,21 @@ public class DataSourceUtil {
         DataSource ds = cache1.get(key);
         if (ds != null) {
             Connection conn = ds.getConnection();
+            LoggerManager.getInstance().info("getConnection1");
             return conn;
         }
         synchronized (DataSourceUtil.class) {
             ds = cache1.get(key);
             if (ds != null) {
                 Connection conn = ds.getConnection();
+                LoggerManager.getInstance().info("getConnection2");
                 return conn;
             } else {
                 DataSource newDS = createDataSource(address.trim(), port.trim(), dbName.trim(), userName.trim(), password.trim(),
                         driverClass.trim());
                 cache1.put(key, newDS);
                 Connection conn = newDS.getConnection();
+                LoggerManager.getInstance().info("getConnection3");
                 return conn;
             }
         }
@@ -61,6 +65,7 @@ public class DataSourceUtil {
         String key = address.trim() + port.trim() + userName.trim() + password.trim();
         DataSource ds = cache1.get(key);
         if (ds != null) {
+            LoggerManager.getInstance().info("getConnection1 no dbname.");
             Connection conn = ds.getConnection();
             return conn;
         }
@@ -68,12 +73,14 @@ public class DataSourceUtil {
             ds = cache1.get(key);
             if (ds != null) {
                 Connection conn = ds.getConnection();
+                LoggerManager.getInstance().info("getConnection3 no dbname.");
                 return conn;
             } else {
                 DataSource newDS = createDataSource(address.trim(), port.trim(), userName.trim(), password.trim(),
                         driverClass.trim());
                 cache1.put(key, newDS);
                 Connection conn = newDS.getConnection();
+                LoggerManager.getInstance().info("getConnection3 no dbname.");
                 return conn;
             }
         }
@@ -126,6 +133,7 @@ public class DataSourceUtil {
         } else {
             url = String.format(DBURL_SQLSERVER_CACHE1, address, port);
         }
+        LoggerManager.getInstance().info("getConnection3 no dbname."+url);
         return createDataSource(url, userName, password, driver);
     }
 
@@ -138,6 +146,7 @@ public class DataSourceUtil {
         } else {
             url = String.format(DBURL_SQLSERVER_CACHE2, address, port, catalog);
         }
+        LoggerManager.getInstance().info("getConnection3."+url);
         return createDataSource(url, userName, password, driver);
     }
 

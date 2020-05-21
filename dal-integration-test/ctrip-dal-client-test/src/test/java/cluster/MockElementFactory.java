@@ -3,8 +3,9 @@ package cluster;
 import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.util.CtripDalElementFactory;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.ucs.client.api.RequestContext;
 import com.ctrip.framework.ucs.client.api.StrategyValidatedResult;
-import com.ctrip.framework.ucs.client.api.Ucs;
+import com.ctrip.framework.ucs.client.api.UcsClient;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesLocator;
@@ -50,10 +51,15 @@ public class MockElementFactory extends CtripDalElementFactory {
     static class MockLocalizationValidatorFactory extends CtripLocalizationValidatorFactory {
 
         public MockLocalizationValidatorFactory(DalPropertiesLocator locator) {
-            super(new Ucs() {
+            super(new UcsClient() {
                 @Override
-                public StrategyValidatedResult validateStrategyContext(int expectStrategyId) {
-                    return StrategyValidatedResult.ShardBlock;
+                public RequestContext getCurrentRequestContext() {
+                    return new RequestContext() {
+                        @Override
+                        public StrategyValidatedResult validate(int expectStrategyId) {
+                            return StrategyValidatedResult.ShardBlock;
+                        }
+                    };
                 }
             }, locator);
         }

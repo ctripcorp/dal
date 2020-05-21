@@ -3,8 +3,9 @@ package com.ctrip.datasource.datasource;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.framework.ucs.client.api.RequestContext;
 import com.ctrip.framework.ucs.client.api.StrategyValidatedResult;
-import com.ctrip.framework.ucs.client.api.Ucs;
+import com.ctrip.framework.ucs.client.api.UcsClient;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidator;
@@ -24,13 +25,13 @@ public class CtripLocalizationValidator implements LocalizationValidator {
     private static final String DAL_VALIDATE_WARN = "WARN";
     private static final String DAL_VALIDATE_REJECT = "REJECT";
 
-    private Ucs ucs;
+    private UcsClient ucsClient;
     private DalPropertiesLocator locator;
     private ClusterInfo clusterInfo;
     private LocalizationConfig config;
 
-    public CtripLocalizationValidator(Ucs ucs, DalPropertiesLocator locator, ClusterInfo clusterInfo, LocalizationConfig config) {
-        this.ucs = ucs;
+    public CtripLocalizationValidator(UcsClient ucsClient, DalPropertiesLocator locator, ClusterInfo clusterInfo, LocalizationConfig config) {
+        this.ucsClient = ucsClient;
         this.locator = locator;
         this.clusterInfo = clusterInfo;
         this.config = config;
@@ -38,9 +39,10 @@ public class CtripLocalizationValidator implements LocalizationValidator {
 
     @Override
     public boolean validateRequest() {
+        RequestContext context = ucsClient.getCurrentRequestContext();
         StrategyValidatedResult result = null;
         try {
-            result = ucs.validateStrategyContext(config.getUnitStrategyId());
+            result = context.validate(config.getUnitStrategyId());
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result), Event.SUCCESS, buildUcsValidateLogMessage(result));
         } catch (Throwable t) {
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION"), Event.SUCCESS, t.getMessage());

@@ -4,12 +4,13 @@ import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.ucs.client.api.RequestContext;
+import com.ctrip.framework.ucs.client.api.UcsClient;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.ucs.client.api.StrategyValidatedResult;
-import com.ctrip.framework.ucs.client.api.Ucs;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesLocator;
@@ -19,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -129,10 +129,15 @@ public class ClusterSwitchTest {
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
         DalPropertiesLocator locator = new DefaultDalPropertiesLocator();
-        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, new CtripLocalizationValidatorFactory(new Ucs() {
+        ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, new CtripLocalizationValidatorFactory(new UcsClient() {
             @Override
-            public StrategyValidatedResult validateStrategyContext(int expectStrategyId) {
-                return StrategyValidatedResult.ShardBlock;
+            public RequestContext getCurrentRequestContext() {
+                return new RequestContext() {
+                    @Override
+                    public StrategyValidatedResult validate(int expectStrategyId) {
+                        return StrategyValidatedResult.ShardBlock;
+                    }
+                };
             }
         }, locator));
 

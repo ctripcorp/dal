@@ -368,10 +368,10 @@
         </plugins>
     </build>
 
-    <repositories>
+    <!--<repositories>
         <repository>
             <id>dal-repo</id>
             <url>https://raw.github.com/ctripcorp/dal/mvn-repo</url>
         </repository>
-    </repositories>
+    </repositories>-->
 </project>

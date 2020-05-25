@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.sql.logging;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.cat.message.Event;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
@@ -16,8 +17,8 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
 public class DalCatLogger {
+    private static final String DAL_CLUSTER = "DAL.cluster";
     private static final String RECORD_COUNT = "DAL.recordCount";
-
     private static final String AFFECTED_ROWS = "DAL.affectedRows";
     private static final String TYPE_SQL_TRANSACTION_EXECUTION = "SQL.transaction";
     private static final String TYPE_SQL_REQUEST_EXECUTION = "SQL.dao";
@@ -82,6 +83,9 @@ public class DalCatLogger {
     public static void catTransactionSuccess(CtripLogEntry entry, int count) {
         try {
             Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+            String clusterName = entry.getClusterName();
+            if (!com.ctrip.framework.dal.cluster.client.util.StringUtils.isEmpty(clusterName))
+                Cat.logEvent(DAL_CLUSTER, clusterName, Event.SUCCESS, "shard=" + entry.getShardId());
             logSqlTable(entry);
             if (entry.getEvent() == DalEventEnum.QUERY)
                 Cat.logEvent(RECORD_COUNT, String.valueOf(entry.getResultCount()));
@@ -112,6 +116,9 @@ public class DalCatLogger {
     public static void catTransactionFailed(CtripLogEntry entry, Throwable e) {
         try {
             Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+            String clusterName = entry.getClusterName();
+            if (!com.ctrip.framework.dal.cluster.client.util.StringUtils.isEmpty(clusterName))
+                Cat.logEvent(DAL_CLUSTER, clusterName, Event.SUCCESS, "shard=" + entry.getShardId());
             logSqlTable(entry);
             Cat.logEvent(RECORD_COUNT, String.valueOf(entry.getResultCount()));
             entry.getCatTransaction().setStatus(e);

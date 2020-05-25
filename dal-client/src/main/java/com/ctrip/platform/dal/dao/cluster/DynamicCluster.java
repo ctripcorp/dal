@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> implements Cluster {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String CAT_LOG_TYPE = "DAL.cluster";
+    private static final String CAT_LOG_TYPE = "DAL.configure";
     private static final String CAT_LOG_NAME_FORMAT = "SwitchCluster:%s";
     private static final String CAT_EVENT_NAME_NORMAL_TO_DRC = "NormalToDrc:%s";
     private static final String CAT_EVENT_NAME_DRC_TO_NORMAL = "DrcToNormal:%s";

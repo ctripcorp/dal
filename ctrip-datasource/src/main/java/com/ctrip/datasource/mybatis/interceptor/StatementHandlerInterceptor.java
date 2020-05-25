@@ -1,6 +1,8 @@
 package com.ctrip.datasource.mybatis.interceptor;
 
-import com.ctrip.platform.dal.dao.datasource.LocalizedDatabaseMetaData;
+import com.ctrip.platform.dal.dao.datasource.jdbc.ClusterDatabaseMetaData;
+import com.ctrip.platform.dal.dao.datasource.jdbc.DalDatabaseMetaData;
+import com.dianping.cat.message.Event;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 
@@ -52,6 +54,7 @@ import javax.crypto.NoSuchPaddingException;
 public class StatementHandlerInterceptor implements Interceptor {
   private static final Logger LOGGER = LoggerFactory.getLogger(StatementHandlerInterceptor.class);
   private static final Joiner.MapJoiner PARAMETER_JOINER = Joiner.on(",").withKeyValueSeparator("=");
+  private static final String DAL_CLUSTER = "DAL.cluster";
   private static final String RECORD_COUNT = "DAL.recordCount";
   private static final String UNKNOWN = "UNKNOWN";
   private boolean needEncryptParamemters;
@@ -138,11 +141,21 @@ public class StatementHandlerInterceptor implements Interceptor {
       if (connection != null) {
         DatabaseMetaData metaData = connection.getMetaData();
         String logName;
-        if (metaData instanceof LocalizedDatabaseMetaData)
-          logName = ((LocalizedDatabaseMetaData) metaData).getLocalizedURL();
+        if (metaData instanceof DalDatabaseMetaData)
+          logName = ((DalDatabaseMetaData) metaData).getExtendedURL();
         else
           logName = metaData.getURL();
         Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, logName);
+
+        try {
+          if (metaData.isWrapperFor(ClusterDatabaseMetaData.class)) {
+            ClusterDatabaseMetaData clusterDatabaseMetaData = metaData.unwrap(ClusterDatabaseMetaData.class);
+            Cat.logEvent(DAL_CLUSTER, clusterDatabaseMetaData.getClusterName(),
+                    Event.SUCCESS, "shard=" + clusterDatabaseMetaData.getShardIndex());
+          }
+        } catch (Throwable t) {
+          LOGGER.warn("log cluster error", t);
+        }
       }
 
     } catch (Throwable ex) {

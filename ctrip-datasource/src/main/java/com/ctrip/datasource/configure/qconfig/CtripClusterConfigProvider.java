@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CtripClusterConfigProvider extends AbstractClusterConfigProvider implements ClusterConfigProvider {
 
     private static final String CONFIG_GROUP = "100020718";
-    private static final String CAT_LOG_TYPE = "DAL.cluster";
+    private static final String CAT_LOG_TYPE = "DAL.configure";
     private static final String CAT_LOG_NAME_FORMAT = "GetClusterConfig:%s";
     private static final String CAT_LOG_NAME_FORMAT2 = "ParseClusterConfig:%s";
 

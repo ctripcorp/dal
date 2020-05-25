@@ -24,6 +24,7 @@ public class LogEntry implements ILogEntry{
 	private boolean transactional;
 	private long duration;
 	private String logicDbName;
+	private String clusterName;
 	private DatabaseCategory dbCategory;
 	private String databaseName;
 	private String dataBaseKeyName;
@@ -169,7 +170,15 @@ public class LogEntry implements ILogEntry{
         this.logicDbName = logicDbName;
     }
 
-    public DatabaseCategory getDbCategory() {
+	public String getClusterName() {
+		return clusterName;
+	}
+
+	public void setClusterName(String clusterName) {
+		this.clusterName = clusterName;
+	}
+
+	public DatabaseCategory getDbCategory() {
         return dbCategory;
     }
 

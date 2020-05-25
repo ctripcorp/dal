@@ -19,7 +19,6 @@ public class DalConnection {
     private String shardId;
     private DbMeta meta;
     private DalLogger logger;
-    private boolean needDiscard;
 
     public DalConnection(Connection conn, boolean master, String shardId, DbMeta meta) throws SQLException {
         this.oldIsolationLevel = conn.getTransactionIsolation();
@@ -66,7 +65,6 @@ public class DalConnection {
     }
 
     public void error(Throwable e) {
-        needDiscard |= isSpecificException(e);
     }
 
     public void close() {
@@ -85,41 +83,11 @@ public class DalConnection {
         }
 
         try {
-            if (needDiscard) {
-                markDiscard(conn);
-            }
-
             conn.close();
         } catch (Throwable e) {
             logger.error("Close connection failed!", e);
         }
         conn = null;
-    }
-
-    private boolean isSpecificException(Throwable e) {
-        // Filter wrapping exception
-        while (e != null && e instanceof DalException) {
-            e = e.getCause();
-        }
-
-        while (e != null && !(e instanceof SQLException)) {
-            e = e.getCause();
-        }
-
-        if (e == null)
-            return false;
-
-        DatabaseCategory dbCategory = meta.getDatabaseCategory();
-        SQLException se = (SQLException) e;
-        if (dbCategory.isSpecificException(se))
-            return true;
-
-        return isSpecificException(se.getNextException());
-    }
-
-    private void markDiscard(Connection conn) throws SQLException {
-        PooledConnection pConn = (PooledConnection) conn.unwrap(PooledConnection.class);
-        pConn.setDiscarded(true);
     }
 
 }

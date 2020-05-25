@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -11,10 +9,11 @@ import java.util.Calendar;
 import java.util.Map;
 
 public class DalCallableStatement extends DalPreparedStatement implements CallableStatement {
+
     private CallableStatement callableStatement;
 
-    public DalCallableStatement(CallableStatement callableStatement, RefreshableDataSource dataSource) {
-        super(callableStatement, dataSource);
+    public DalCallableStatement(CallableStatement callableStatement, DalConnection connection) {
+        super(callableStatement, connection);
         this.callableStatement = callableStatement;
     }
 
@@ -626,4 +625,5 @@ public class DalCallableStatement extends DalPreparedStatement implements Callab
     public void registerOutParameter(String parameterName, SQLType sqlType, String typeName) throws SQLException {
         callableStatement.registerOutParameter(parameterName, sqlType, typeName);
     }
+
 }

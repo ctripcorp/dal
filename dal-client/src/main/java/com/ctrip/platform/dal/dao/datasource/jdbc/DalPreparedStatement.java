@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -10,13 +8,12 @@ import java.sql.*;
 import java.util.Calendar;
 
 public class DalPreparedStatement extends DalStatement implements PreparedStatement {
-    private PreparedStatement preparedStatement;
-    private RefreshableDataSource dataSource;
 
-    public DalPreparedStatement(PreparedStatement preparedStatement, RefreshableDataSource dataSource) {
-        super(preparedStatement, dataSource);
+    private PreparedStatement preparedStatement;
+
+    public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection) {
+        super(preparedStatement, connection);
         this.preparedStatement = preparedStatement;
-        this.dataSource = dataSource;
     }
 
     public PreparedStatement getPreparedStatement() {
@@ -25,28 +22,12 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        SQLException exception = null;
-        try {
-            return preparedStatement.executeQuery();
-        } catch (SQLException e) {
-            exception = e;
-            throw e;
-        } finally {
-            dataSource.handleException(exception);
-        }
+        return innerExecute(() -> preparedStatement.executeQuery());
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        SQLException exception = null;
-        try {
-            return preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            exception = e;
-            throw e;
-        } finally {
-            dataSource.handleException(exception);
-        }
+        return innerExecute(() -> preparedStatement.executeUpdate());
     }
 
     @Override
@@ -151,15 +132,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public boolean execute() throws SQLException {
-        SQLException exception = null;
-        try {
-            return preparedStatement.execute();
-        } catch (SQLException e) {
-            exception = e;
-            throw e;
-        } finally {
-            dataSource.handleException(exception);
-        }
+        return innerExecute(() -> preparedStatement.execute());
     }
 
     @Override
@@ -334,14 +307,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public long executeLargeUpdate() throws SQLException {
-        SQLException exception = null;
-        try {
-            return preparedStatement.executeLargeUpdate();
-        } catch (SQLException e) {
-            exception = e;
-            throw e;
-        } finally {
-            dataSource.handleException(exception);
-        }
+        return innerExecute(() -> preparedStatement.executeLargeUpdate());
     }
+
 }

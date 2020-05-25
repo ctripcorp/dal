@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -14,6 +15,8 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.task.DalContextConfigure;
@@ -156,6 +159,11 @@ public abstract class ConnectionAction<T> {
 
     public void initLogEntry(String logicDbName, DalHints hints) {
         this.entry = logger.createLogEntry();
+        DatabaseSet databaseSet = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
+        if (databaseSet instanceof ClusterDatabaseSet) {
+            Cluster cluster = ((ClusterDatabaseSet) databaseSet).getCluster();
+            entry.setClusterName(cluster.getClusterName().toLowerCase());
+        }
         entry.setLogicDbName(logicDbName);
         entry.setDbCategory(DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory());
         entry.setClientVersion(Version.getVersion());

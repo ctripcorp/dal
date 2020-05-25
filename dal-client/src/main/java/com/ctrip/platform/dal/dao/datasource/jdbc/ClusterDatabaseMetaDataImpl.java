@@ -1,21 +1,38 @@
-package com.ctrip.platform.dal.dao.datasource;
+package com.ctrip.platform.dal.dao.datasource.jdbc;
 
-import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
-import com.ctrip.platform.dal.dao.datasource.jdbc.DalDatabaseMetaData;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
+import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.*;
 
 /**
  * @author c7ch23en
  */
-public class LocalizedDatabaseMetaDataImpl implements DalDatabaseMetaData {
+public class ClusterDatabaseMetaDataImpl implements ClusterDatabaseMetaData {
 
-    private final LocalizationConfig config;
-    private final DatabaseMetaData metaData;
+    protected final DatabaseMetaData metaData;
+    private final Database database;
 
-    public LocalizedDatabaseMetaDataImpl(LocalizationConfig config, DatabaseMetaData metaData) {
-        this.config = config;
+    public ClusterDatabaseMetaDataImpl(DatabaseMetaData metaData, Database database) {
         this.metaData = metaData;
+        this.database = database;
+    }
+
+    @Override
+    public String getClusterName() {
+        return database.getClusterName();
+    }
+
+    @Override
+    public int getShardIndex() {
+        return database.getShardIndex();
+    }
+
+    @Override
+    public boolean isMaster() {
+        return database.isMaster();
     }
 
     @Override
@@ -35,11 +52,7 @@ public class LocalizedDatabaseMetaDataImpl implements DalDatabaseMetaData {
 
     @Override
     public String getExtendedURL() throws SQLException {
-        String url = getURL();
-        if (config != null && config.getZoneId() != null) {
-            url = url + "::" + config.getZoneId().toUpperCase();
-        }
-        return url;
+        return getURL();
     }
 
     @Override
@@ -909,12 +922,16 @@ public class LocalizedDatabaseMetaDataImpl implements DalDatabaseMetaData {
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return metaData.unwrap(iface);
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException e) {
+            throw new DalRuntimeException(String.format("Unable to unwrap %s to %s", this.toString(), iface.toString()));
+        }
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return metaData.isWrapperFor(iface);
+        return iface.isInstance(this);
     }
 
 }

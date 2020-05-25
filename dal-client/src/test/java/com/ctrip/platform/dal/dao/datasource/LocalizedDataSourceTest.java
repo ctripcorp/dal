@@ -50,8 +50,8 @@ public class LocalizedDataSourceTest {
     private void testStatementBlocked(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
-        String url = ((LocalizedDatabaseMetaData) metaData).getLocalizedURL();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaDataImpl);
+        String url = ((LocalizedDatabaseMetaDataImpl) metaData).getExtendedURL();
         Assert.assertTrue(url.endsWith(TEST_ZONE.toUpperCase()));
 
         Statement statement = connection.createStatement();
@@ -169,8 +169,8 @@ public class LocalizedDataSourceTest {
     private void testPreparedStatementBlocked(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
-        String url = ((LocalizedDatabaseMetaData) metaData).getLocalizedURL();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaDataImpl);
+        String url = ((LocalizedDatabaseMetaDataImpl) metaData).getExtendedURL();
         Assert.assertTrue(url.endsWith(TEST_ZONE.toUpperCase()));
 
         // executeQuery
@@ -258,8 +258,8 @@ public class LocalizedDataSourceTest {
     private void testStatementPassed(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
-        String url = metaData.getURL();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaDataImpl);
+        String url = ((LocalizedDatabaseMetaDataImpl) metaData).getExtendedURL();
         Assert.assertTrue(url.endsWith("UTF-8"));
 
         Statement statement = connection.createStatement();
@@ -312,8 +312,8 @@ public class LocalizedDataSourceTest {
     private void testPreparedStatementPassed(DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaData);
-        String url = metaData.getURL();
+        Assert.assertTrue(metaData instanceof LocalizedDatabaseMetaDataImpl);
+        String url = ((LocalizedDatabaseMetaDataImpl) metaData).getExtendedURL();
         Assert.assertTrue(url.endsWith("UTF-8"));
 
         // executeQuery

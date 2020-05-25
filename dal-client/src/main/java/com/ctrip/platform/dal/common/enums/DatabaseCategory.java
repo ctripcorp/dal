@@ -23,6 +23,10 @@ public enum DatabaseCategory {
     MySql("%s=IFNULL(?,%s) ", "CURRENT_TIMESTAMP", new int[] {1043, 1159, 1161},
             new int[] {1021, 1037, 1038, 1039, 1040, 1041, 1154, 1158, 1160, 1189, 1190, 1205, 1218, 1219, 1220}) {
 
+        private static final String READONLY_EXCEPTION_SQL_STATE = "HY000";
+        private static final int READONLY_EXCEPTION_ERROR_CODE = 1290;
+        private static final String READONLY_EXCEPTION_MESSAGE_KEYWORD = "--read-only";
+
         private AbstractDalPropertiesLocator mySqlDalPropertiesLocator =
                 DalPropertiesManager.getInstance().getMySqlDalPropertiesLocator();
 
@@ -54,7 +58,16 @@ public enum DatabaseCategory {
         // SQLError.SQL_STATE_COMMUNICATION_LINK_FAILURE
         public boolean isSpecificException(SQLException exception) {
             Map<String, ErrorCodeInfo> map = mySqlDalPropertiesLocator.getErrorCodes();
-            return matchSpecificError(exception, map);
+            return matchSpecificError(exception, map) || isReadonlyException(exception);
+        }
+
+        private boolean isReadonlyException(SQLException exception) {
+            if (exception != null && READONLY_EXCEPTION_SQL_STATE.equalsIgnoreCase(exception.getSQLState()) &&
+                    READONLY_EXCEPTION_ERROR_CODE == exception.getErrorCode()) {
+                String message = exception.getMessage();
+                return message != null && message.toLowerCase().contains(READONLY_EXCEPTION_MESSAGE_KEYWORD);
+            }
+            return false;
         }
     },
 

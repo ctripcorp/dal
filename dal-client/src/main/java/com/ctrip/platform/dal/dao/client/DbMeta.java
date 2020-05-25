@@ -12,6 +12,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
+import com.ctrip.platform.dal.dao.datasource.jdbc.ClusterDatabaseMetaData;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -60,6 +61,7 @@ public class DbMeta {
         } catch (Throwable e) {
             ilogger.error(e.getMessage(),e);
         }
+
     }
 
     public void populate(LogEntry entry) {

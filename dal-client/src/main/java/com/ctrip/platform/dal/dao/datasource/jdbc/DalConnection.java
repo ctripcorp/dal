@@ -1,14 +1,30 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.LocalizedDatabaseMetaDataImpl;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.LoggerHelper;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalException;
+import org.apache.tomcat.jdbc.pool.PooledConnection;
 
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
 public class DalConnection implements Connection {
+
+    private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+
     private Connection connection;
+    private List<SQLException> discardCauses = new LinkedList<>();
     private RefreshableDataSource dataSource;
 
     public DalConnection(Connection connection, RefreshableDataSource dataSource) {
@@ -20,19 +36,50 @@ public class DalConnection implements Connection {
         return connection;
     }
 
+    public void handleException(SQLException e) {
+        try {
+            if (isSpecificException(e))
+                discardCauses.add(e);
+        } catch (Throwable t) {
+            LOGGER.warn("connection handleException exception", t);
+        }
+        try {
+            dataSource.handleException(e);
+        } catch (Throwable t) {
+            LOGGER.warn("dataSource handleException exception", t);
+        }
+    }
+
+    private boolean isSpecificException(Throwable t) {
+        Throwable t1 = t;
+        while (t1 instanceof DalException) {
+            t1 = t1.getCause();
+        }
+        while (t1 != null && !(t1 instanceof SQLException)) {
+            t1 = t1.getCause();
+        }
+        if (t1 == null)
+            return false;
+        DatabaseCategory dbCategory = dataSource.getSingleDataSource().getDataSourceConfigure().getDatabaseCategory();
+        SQLException se = (SQLException) t1;
+        if (dbCategory.isSpecificException(se))
+            return true;
+        return isSpecificException(se.getNextException());
+    }
+
     @Override
     public Statement createStatement() throws SQLException {
-        return new DalStatement(connection.createStatement(), dataSource);
+        return new DalStatement(connection.createStatement(), this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql), dataSource);
+        return new DalPreparedStatement(connection.prepareStatement(sql), this);
     }
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        return new DalCallableStatement(connection.prepareCall(sql), dataSource);
+        return new DalCallableStatement(connection.prepareCall(sql), this);
     }
 
     @Override
@@ -62,7 +109,26 @@ public class DalConnection implements Connection {
 
     @Override
     public void close() throws SQLException {
+        if (discardCauses.size() > 0) {
+            try {
+                markDiscard();
+            } catch (Throwable t) {
+                LOGGER.warn("mark connection discarded exception", t);
+            } finally {
+                discardCauses.clear();
+            }
+        }
         connection.close();
+    }
+
+    private void markDiscard() throws SQLException {
+        long startTime = System.currentTimeMillis();
+        PooledConnection conn = connection.unwrap(PooledConnection.class);
+        conn.setDiscarded(true);
+        String connUrl = conn.getPoolProperties().getUrl();
+        String logName = String.format("Connection::discardConnection:%s", LoggerHelper.getSimplifiedDBUrl(connUrl));
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, logName, connUrl, startTime);
+        LOGGER.info(String.format("connection marked discarded: %s", connUrl));
     }
 
     @Override
@@ -72,7 +138,13 @@ public class DalConnection implements Connection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return connection.getMetaData();
+        DatabaseMetaData metaData = connection.getMetaData();
+        if (metaData == null)
+            return null;
+        DataSourceIdentity id = dataSource.getId();
+        if (id instanceof ClusterDataSourceIdentity)
+            return new ClusterDatabaseMetaDataImpl(metaData, ((ClusterDataSourceIdentity) id).getDatabase());
+        return metaData;
     }
 
     @Override
@@ -117,17 +189,17 @@ public class DalConnection implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency), dataSource);
+        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency), this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), dataSource);
+        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), this);
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetConcurrency), dataSource);
+        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetConcurrency), this);
     }
 
     @Override
@@ -172,32 +244,32 @@ public class DalConnection implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), dataSource);
+        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), dataSource);
+        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), this);
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetHoldability), dataSource);
+        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetHoldability), this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, autoGeneratedKeys), dataSource);
+        return new DalPreparedStatement(connection.prepareStatement(sql, autoGeneratedKeys), this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, columnIndexes), dataSource);
+        return new DalPreparedStatement(connection.prepareStatement(sql, columnIndexes), this);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, columnNames), dataSource);
+        return new DalPreparedStatement(connection.prepareStatement(sql, columnNames), this);
     }
 
     @Override
@@ -289,4 +361,5 @@ public class DalConnection implements Connection {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return connection.isWrapperFor(iface);
     }
+
 }

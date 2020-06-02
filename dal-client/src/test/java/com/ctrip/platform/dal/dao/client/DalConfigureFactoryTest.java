@@ -1,10 +1,13 @@
 package com.ctrip.platform.dal.dao.client;
 
-import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
-import com.ctrip.platform.dal.dao.configure.DalConfigure;
-import com.ctrip.platform.dal.dao.configure.DalConfigureFactory;
-import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
+import com.ctrip.platform.dal.dao.task.DalRequestExecutorUtils;
+import com.ctrip.platform.dal.dao.task.DalThreadPoolExecutor;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.*;
 
@@ -47,6 +50,21 @@ public class DalConfigureFactoryTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testThreadPoolConfig() throws Exception {
+		DalRequestExecutor.shutdown();
+		DalConfigure configure = DalConfigureFactory.load(Thread.currentThread().getContextClassLoader().
+				getResource("dal-thread-pool-test.xml"));
+		DalRequestExecutor.init(configure);
+		ExecutorService executor = DalRequestExecutorUtils.getExecutor();
+		Assert.assertTrue(executor instanceof DalThreadPoolExecutor);
+		DalThreadPoolExecutorConfig executorConfig = DalRequestExecutorUtils.getExecutorConfig((DalThreadPoolExecutor) executor);
+		Assert.assertEquals(5, executorConfig.getMaxThreadsPerShard("dao_test_mod_mysql"));
+		Assert.assertEquals(0, executorConfig.getMaxThreadsPerShard("clusterName1"));
+		Assert.assertEquals(0, executorConfig.getMaxThreadsPerShard("clusterName2"));
+		Assert.assertEquals(3, executorConfig.getMaxThreadsPerShard("DbSetName"));
 	}
 
 }

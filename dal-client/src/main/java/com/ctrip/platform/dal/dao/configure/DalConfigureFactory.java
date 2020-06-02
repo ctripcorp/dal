@@ -185,16 +185,15 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         ClusterConfigProvider provider = locator.getIntegratedConfigProvider();
         List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
-        for (int i = 0; i < clusterList.size(); i++) {
-            Node node = clusterList.get(i);
+        for (Node node : clusterList) {
             String name = getDatabaseSetName(node);
             Cluster cluster = readCluster(node, provider);
-            databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator));
+            databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator, getSettings(node)));
         }
 
         List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
-        for (int i = 0; i < databaseSetList.size(); i++) {
-            DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i));
+        for (Node node : databaseSetList) {
+            DatabaseSet databaseSet = readDatabaseSet(node);
             databaseSets.put(databaseSet.getName(), databaseSet);
         }
 
@@ -228,17 +227,17 @@ public class DalConfigureFactory implements DalConfigConstants {
         
         List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
         Map<String, DataBase> databases = new HashMap<>();
-        for (int i = 0; i < databaseList.size(); i++) {
-            DataBase database = readDataBase(databaseList.get(i), !shardingStrategy.isEmpty());
+        for (Node node : databaseList) {
+            DataBase database = readDataBase(node, !shardingStrategy.isEmpty());
             databases.put(database.getName(), database);
         }
 
         if (shardingStrategy.isEmpty())
             return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    databases, idGenConfig);
+                    databases, idGenConfig, getSettings(databaseSetNode));
         else
             return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    shardingStrategy, databases, idGenConfig);
+                    shardingStrategy, databases, idGenConfig, getSettings(databaseSetNode));
     }
 
     private void tryAdaptToClusters(Map<String, DatabaseSet> databaseSets, DatabaseSetAdapter adapter) {

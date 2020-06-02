@@ -8,15 +8,21 @@ import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.exceptions.DalException;
 
-public class RequestTaskWrapper<T> implements Callable<T> {
-    private DalLogger logger = DalClientFactory.getDalLogger();
-    private String shard;
-    private Callable<T> task;
-    private LogContext logContext;
+public class RequestTaskWrapper<T> extends DalRequestCallable<T> implements Callable<T> {
+    private final static String UNKNOWN_SHARD = "N/A";
+    private final DalLogger logger = DalClientFactory.getDalLogger();
+    private final String shard;
+    private final LogContext logContext;
 
-    public RequestTaskWrapper(String shard, Callable<T> task, LogContext logContext) {
+    public RequestTaskWrapper(Callable<T> task, LogContext logContext) {
+        super(null, null, task);
+        this.shard = UNKNOWN_SHARD;
+        this.logContext = logContext;
+    }
+
+    public RequestTaskWrapper(String logicDbName, String shard, Callable<T> task, LogContext logContext) {
+        super(logicDbName, shard, task);
         this.shard = shard;
-        this.task = task;
         this.logContext = logContext;
     }
 
@@ -30,7 +36,7 @@ public class RequestTaskWrapper<T> implements Callable<T> {
         try {
             LogEntry.populateCurrentCaller(logContext.getCaller());
 
-            result = task.call();
+            result = getTask().call();
 
             LogEntry.clearCurrentCaller();
         } catch (Throwable e) {

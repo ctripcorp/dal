@@ -99,6 +99,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
     }
 
     @Override
+    public String getLogicDbName() {
+        return logicDbName;
+    }
+
+    @Override
     public boolean isCrossShard() {
         return (shards != null && shards.size() > 1);
     }

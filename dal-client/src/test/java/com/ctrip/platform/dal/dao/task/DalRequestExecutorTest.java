@@ -33,7 +33,12 @@ public class DalRequestExecutorTest {
 				throw e;
 		}
 
-		@Override
+        @Override
+        public String getLogicDbName() {
+            return null;
+        }
+
+        @Override
 		public boolean isCrossShard() throws SQLException {
 			return values.length > 1;
 		}

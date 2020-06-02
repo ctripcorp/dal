@@ -12,10 +12,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfig;
+import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfigBuilder;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -27,20 +32,48 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  */
 public class DalRequestExecutor {
 	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
-	
+
 	public static final String MAX_POOL_SIZE = "maxPoolSize";
 	public static final String KEEP_ALIVE_TIME = "keepAliveTime";
+	public static final String MAX_THREADS_PER_SHARD = "maxThreadsPerShard";
 	
 	// To be consist with default connection max active size
 	public static final int DEFAULT_MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
-
 	public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
+	public static final int DEFAULT_MAX_THREADS_PER_SHARD = 0;
 	
 	private DalLogger logger = DalClientFactory.getDalLogger();
-	
-	private final static String NA = "N/A";
-	        
+
 	public static void init(String maxPoolSizeStr, String keepAliveTimeStr){
+		if(serviceRef.get() != null)
+			return;
+
+		synchronized (DalRequestExecutor.class) {
+			if(serviceRef.get() != null)
+				return;
+
+			int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
+			if(maxPoolSizeStr != null)
+				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
+
+			int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
+			if(keepAliveTimeStr != null)
+				keepAliveTime = Integer.parseInt(keepAliveTimeStr);
+
+			ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+				AtomicInteger atomic = new AtomicInteger();
+				@Override
+				public Thread newThread(Runnable r) {
+					return new Thread(r, "DalRequestExecutor-Worker-" + this.atomic.getAndIncrement());
+				}
+			});
+			executer.allowCoreThreadTimeOut(true);
+
+			serviceRef.set(executer);
+		}
+	}
+	        
+	public static void init(DalConfigure configure) {
 		if(serviceRef.get() != null)
 			return;
 		
@@ -49,25 +82,46 @@ public class DalRequestExecutor {
 				return;
 			
 			int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
-			if(maxPoolSizeStr != null)
+			String maxPoolSizeStr = configure.getFactory().getProperty(MAX_POOL_SIZE);
+			if(!StringUtils.isEmpty(maxPoolSizeStr))
 				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
 			
 			int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
-            if(keepAliveTimeStr != null)
+			String keepAliveTimeStr = configure.getFactory().getProperty(KEEP_ALIVE_TIME);
+			if(!StringUtils.isEmpty(keepAliveTimeStr))
                 keepAliveTime = Integer.parseInt(keepAliveTimeStr);
+
+			int maxThreadsPerShard = DEFAULT_MAX_THREADS_PER_SHARD;
+			String maxThreadsPerShardStr = configure.getFactory().getProperty(MAX_THREADS_PER_SHARD);
+			if(!StringUtils.isEmpty(maxThreadsPerShardStr))
+				maxThreadsPerShard = Integer.parseInt(maxThreadsPerShardStr);
+
+			DalThreadPoolExecutorConfigBuilder builder = new DalThreadPoolExecutorConfigBuilder()
+					.setCorePoolSize(maxPoolSize)
+					.setMaxPoolSize(maxPoolSize)
+					.setKeepAliveSeconds(keepAliveTime)
+					.setMaxThreadsPerShard(maxThreadsPerShard);
+
+			for (String dbSetName : configure.getDatabaseSetNames()) {
+				DatabaseSet dbSet = configure.getDatabaseSet(dbSetName);
+				Integer dbMaxThreadsPerShard = dbSet.getSettingAsInt(MAX_THREADS_PER_SHARD);
+				if (dbMaxThreadsPerShard != null)
+					builder.setMaxThreadsPerShard(dbSetName, dbMaxThreadsPerShard);
+			}
 			
-            ThreadPoolExecutor executer = new ThreadPoolExecutor(maxPoolSize, maxPoolSize, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
-                AtomicInteger atomic = new AtomicInteger();
+            ThreadPoolExecutor executor = new DalThreadPoolExecutor(builder.build(),
+					new LinkedBlockingQueue<>(), new ThreadFactory() {
+                final AtomicInteger atomic = new AtomicInteger();
                 @Override
                 public Thread newThread(Runnable r) {
                     return new Thread(r, "DalRequestExecutor-Worker-" + this.atomic.getAndIncrement());
                 }
             });
-            executer.allowCoreThreadTimeOut(true);
+            executor.allowCoreThreadTimeOut(true);
             
-            serviceRef.set(executer);
+            serviceRef.set(executor);
 		}
-	} 
+	}
 	
 	public static void shutdown() {
 		if (serviceRef.get() == null)
@@ -146,7 +200,7 @@ public class DalRequestExecutor {
 	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
         logContext.setSingleTask(true);
 		TaskCallable<T> task = request.createTask();
-	    Callable<T> taskWrapper = new RequestTaskWrapper<T>(NA, task, logContext);
+	    Callable<T> taskWrapper = new RequestTaskWrapper<T>(task, logContext);
 		T result = taskWrapper.call();
 
 		logContext.setStatementExecuteTime(task.getDalTaskContext().getStatementExecuteTime());
@@ -162,6 +216,7 @@ public class DalRequestExecutor {
         logContext.setSeqencialExecution(isSequentialExecution);
         
         ResultMerger<T> merger = request.getMerger();
+        String logicDbName = request.getLogicDbName();
         
 	    logger.startCrossShardTasks(logContext, isSequentialExecution);
 		
@@ -170,8 +225,8 @@ public class DalRequestExecutor {
 
 		try {
             result = isSequentialExecution?
-            		sequentialExecute(hints, tasks, merger, logContext, callback):
-            		parallelExecute(hints, tasks, merger, logContext, callback);
+            		sequentialExecute(hints, logicDbName, tasks, merger, logContext, callback):
+            		parallelExecute(hints, logicDbName, tasks, merger, logContext, callback);
 
         } catch (Throwable e) {
             error = e;
@@ -197,14 +252,15 @@ public class DalRequestExecutor {
 			qc.onError(error);
 	}
 
-	private <T> T parallelExecute(DalHints hints, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger,
+	private <T> T parallelExecute(DalHints hints, String logicDbName, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger,
 								  LogContext logContext, ShardExecutionCallback<T> callback) throws SQLException {
 		Map<String, Future<T>> resultFutures = new HashMap<>();
 
 		List<LogEntry> logEntries = new ArrayList<>();
 		long maxStatementExecuteTime = 0;
 		for(final String shard: tasks.keySet())
-			resultFutures.put(shard, serviceRef.get().submit(new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext)));
+			resultFutures.put(shard, serviceRef.get().submit(new RequestTaskWrapper<T>(logicDbName,
+					shard, tasks.get(shard), logContext)));
 
 		for(Map.Entry<String, Future<T>> entry: resultFutures.entrySet()) {
 			String dbShard = entry.getKey();
@@ -230,7 +286,7 @@ public class DalRequestExecutor {
 		return merger.merge();
 	}
 
-	private <T> T sequentialExecute(DalHints hints, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger,
+	private <T> T sequentialExecute(DalHints hints, String logicDbName, Map<String, TaskCallable<T>> tasks, ResultMerger<T> merger,
 									LogContext logContext, ShardExecutionCallback<T> callback) throws SQLException {
 		long totalStatementExecuteTime = 0;
 		List<LogEntry> logEntries = new ArrayList<>();
@@ -238,7 +294,7 @@ public class DalRequestExecutor {
 			Throwable error = null;
 			ShardExecutionResult<T> executionResult;
 			try {
-				T partial = new RequestTaskWrapper<T>(shard, tasks.get(shard), logContext).call();
+				T partial = new RequestTaskWrapper<T>(logicDbName, shard, tasks.get(shard), logContext).call();
 				merger.addPartial(shard, partial);
 				// TODO: tableShard may be inaccurate
 				executionResult = new ShardExecutionResultImpl<>(shard, null, partial);
@@ -278,4 +334,9 @@ public class DalRequestExecutor {
         }
         return logEntries;
     }
+
+    protected static ExecutorService getExecutor() {
+		return serviceRef.get();
+	}
+
 }

@@ -1,0 +1,49 @@
+<dal name="dal.thread.pool.test">
+    <databaseSets>
+        <databaseSet name="dao_test_mod_mysql" provider="mySqlProvider" shardingStrategy="class=com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;columns=id;mod=2" >
+            <settings>
+                <maxThreadsPerShard>5</maxThreadsPerShard>
+            </settings>
+            <add  name="dao_test_sqlsvr_M" databaseType="Master" sharding="0" connectionString="dao_test_mysql_0"/>
+            <add  name="dao_test_sqlsvr_S" databaseType="Slave" sharding="0" connectionString="dao_test_mysql_0"/>
+            <add  name="dao_test_mysql_M" databaseType="Master" sharding="1" connectionString="dal_test_new"/>
+            <add  name="dao_test_mysql_S" databaseType="Slave" sharding="1" connectionString="dal_test_new"/>
+        </databaseSet>
+        <cluster name="clusterName1"/>
+        <cluster name="clusterName2" alias="DbSetName">
+            <settings>
+                <maxThreadsPerShard>3</maxThreadsPerShard>
+            </settings>
+        </cluster>
+    </databaseSets>
+    <LogListener enabled="true">
+        <logger>com.ctrip.platform.dal.dao.client.DefaultLogger</logger>
+        <settings>
+            <encrypt>false</encrypt>
+            <secretKey>dalctripcn</secretKey>
+            <simplified>false</simplified>
+            <samplingRate>10</samplingRate>
+            <asyncLogging>false</asyncLogging>
+        </settings>
+    </LogListener>
+    <ConnectionLocator>
+        <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
+        <settings>
+            <!--<path>/opt/settings/dal/database.properties</path>-->
+            <path>D:\dal\database.properties</path>
+            <dataSourceConfigureProvider>com.ctrip.platform.dal.dao.configure.PropertyFileConfigureProvider</dataSourceConfigureProvider>
+        </settings>
+    </ConnectionLocator>
+    <TaskFactory>
+        <settings>
+            <maxPoolSize>100</maxPoolSize>
+        </settings>
+    </TaskFactory>
+    <DatabaseSelector>
+        <selector>com.ctrip.platform.dal.dao.configure.FreshnessSelector</selector>
+        <settings>
+            <freshnessReader>com.ctrip.platform.dal.dao.configure.TestFreshnessReader</freshnessReader>
+            <updateInterval>2</updateInterval>
+        </settings>
+    </DatabaseSelector>
+</dal>

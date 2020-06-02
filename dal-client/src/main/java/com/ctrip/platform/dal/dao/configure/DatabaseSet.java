@@ -1,20 +1,24 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
-import com.ctrip.platform.dal.dao.strategy.ShardColModShardStrategy;
-import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;
 
 public abstract class DatabaseSet implements IDatabaseSet {
+
+    private final Map<String, String> properties;
+
+    public DatabaseSet() {
+        properties = null;
+    }
+
+    public DatabaseSet(Map<String, String> properties) {
+        this.properties = properties;
+    }
 
     @Override
     public String getName() {
@@ -89,6 +93,25 @@ public abstract class DatabaseSet implements IDatabaseSet {
     @Override
     public IIdGeneratorConfig getIdGenConfig() {
         throw new UnsupportedOperationException("This is an abstract DatabaseSet.");
+    }
+
+    public String getSetting(String key) {
+        return properties != null ? properties.get(key) : null;
+    }
+
+    public Integer getSettingAsInt(String key) {
+        String value = getSetting(key);
+        return !StringUtils.isEmpty(value) ? Integer.parseInt(value) : null;
+    }
+
+    public Long getSettingAsLong(String key) {
+        String value = getSetting(key);
+        return !StringUtils.isEmpty(value) ? Long.parseLong(value) : null;
+    }
+
+    public Boolean getSettingAsBool(String key) {
+        String value = getSetting(key);
+        return !StringUtils.isEmpty(value) ? Boolean.parseBoolean(value) : null;
     }
 
 }

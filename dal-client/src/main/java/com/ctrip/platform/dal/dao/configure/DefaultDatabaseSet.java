@@ -1,12 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -51,13 +46,26 @@ public class DefaultDatabaseSet extends DatabaseSet {
         this(name, provider, shardStrategy, databases, null);
     }
 
-    public DefaultDatabaseSet(String name, String provider, Map<String, DataBase> databases, IIdGeneratorConfig idGenConfig)
+    public DefaultDatabaseSet(String name, String provider, Map<String, DataBase> databases,
+                              IIdGeneratorConfig idGenConfig)
             throws Exception {
         this(name, provider, null, databases, idGenConfig);
     }
 
+    public DefaultDatabaseSet(String name, String provider, Map<String, DataBase> databases,
+                              IIdGeneratorConfig idGenConfig, Map<String, String> properties)
+            throws Exception {
+        this(name, provider, null, databases, idGenConfig, properties);
+    }
+
     public DefaultDatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases,
-            IIdGeneratorConfig idGenConfig) throws Exception {
+                              IIdGeneratorConfig idGenConfig) throws Exception {
+        this(name, provider, shardStrategy, databases, idGenConfig, null);
+    }
+
+    public DefaultDatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases,
+                              IIdGeneratorConfig idGenConfig, Map<String, String> properties) throws Exception {
+        super(properties);
         this.name = name;
         this.provider = provider;
         this.dbCategory = DatabaseCategory.matchWith(provider);

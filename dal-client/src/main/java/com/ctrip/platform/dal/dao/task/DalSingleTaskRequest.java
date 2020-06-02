@@ -107,6 +107,11 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
     }
 
     @Override
+    public String getLogicDbName() {
+        return logicDbName;
+    }
+
+    @Override
     public boolean isCrossShard() {
         // The single task request is always executed as if the pojos are not corss shard even they really are.
         return false;

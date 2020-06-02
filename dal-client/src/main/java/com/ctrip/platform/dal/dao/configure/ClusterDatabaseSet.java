@@ -28,6 +28,11 @@ public class ClusterDatabaseSet extends DatabaseSet {
     private ClusterIdGeneratorConfigAdapter idGeneratorConfig;
 
     public ClusterDatabaseSet(String name, Cluster cluster, DalConnectionLocator locator) {
+        this(name, cluster, locator, null);
+    }
+
+    public ClusterDatabaseSet(String name, Cluster cluster, DalConnectionLocator locator, Map<String, String> properties) {
+        super(properties);
         this.databaseSetName = name;
         this.cluster = cluster;
         this.shardStrategy = new ClusterShardStrategyAdapter(cluster);

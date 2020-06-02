@@ -52,7 +52,7 @@ public class DalConfigureFactoryTest {
 		}
 	}
 
-	@Test
+//	@Test
 	public void testThreadPoolConfig() throws Exception {
 		DalRequestExecutor.shutdown();
 		DalConfigure configure = DalConfigureFactory.load(Thread.currentThread().getContextClassLoader().

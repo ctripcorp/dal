@@ -65,7 +65,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     private Cluster innerGenerate() {
         DefaultCluster cluster = (clusterType == ClusterType.NORMAL ?
-                new DefaultCluster(this) : new DefaultDrcCluster(this, generateLocalizationConfig()));
+                new DefaultCluster(this) : new DefaultDrcCluster(this));
         for (DatabaseShardConfig databaseShardConfig : databaseShardConfigs)
             cluster.addDatabaseShard(databaseShardConfig.generate());
         ShardStrategyProxy shardStrategy = new ShardStrategyProxy(defaultShardStrategy);
@@ -73,13 +73,9 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
             shardStrategy.addStrategy(strategy);
         cluster.setShardStrategy(shardStrategy);
         cluster.setIdGeneratorConfig(idGeneratorConfig);
+        cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId));
+        cluster.validate();
         return cluster;
-    }
-
-    private LocalizationConfig generateLocalizationConfig() {
-        if (unitStrategyId == null)
-            throw new ClusterConfigException("unitStrategyId is necessary for drc cluster");
-        return new LocalizationConfigImpl(unitStrategyId, zoneId);
     }
 
     @Override

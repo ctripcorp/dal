@@ -91,8 +91,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         if (idGeneratorsNode != null)
             parseIdGenerators(clusterConfig, idGeneratorsNode);
 
-        if (clusterType == ClusterType.DRC)
-            parseDrcConfig(clusterConfig, clusterNode);
+        parseDrcConfig(clusterConfig, clusterNode);
 
         return clusterConfig;
     }

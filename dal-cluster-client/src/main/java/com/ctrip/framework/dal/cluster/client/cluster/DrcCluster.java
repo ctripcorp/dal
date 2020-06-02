@@ -7,7 +7,4 @@ import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
  * @author c7ch23en
  */
 public interface DrcCluster extends Cluster {
-
-    LocalizationConfig getLocalizationConfig();
-
 }

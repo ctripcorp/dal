@@ -5,7 +5,7 @@ package com.ctrip.framework.dal.cluster.client.config;
  */
 public interface LocalizationConfig {
 
-    int getUnitStrategyId();
+    Integer getUnitStrategyId();
 
     String getZoneId();
 

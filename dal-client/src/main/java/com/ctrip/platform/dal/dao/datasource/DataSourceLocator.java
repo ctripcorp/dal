@@ -141,16 +141,16 @@ public class DataSourceLocator {
                     cluster != null && cluster.dbShardingEnabled());
             try {
                 if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
-                    DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
-                    LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
+                    LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
                     LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
                     LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE,
                             clusterInfo.toString()), localizationConfig.toString());
                     return new LocalizedDataSource(validator, id, provider.getDataSourceConfigure(id));
                 }
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE_FAIL,
                         clusterInfo.toString()), e.getMessage());
+                throw e;
             }
         }
         LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_NORMAL_DATASOURCE, id.getId()), "");

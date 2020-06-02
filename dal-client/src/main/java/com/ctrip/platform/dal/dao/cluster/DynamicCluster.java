@@ -7,6 +7,7 @@ import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
@@ -110,6 +111,11 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
     @Override
     public ClusterIdGeneratorConfig getIdGeneratorConfig() {
         return getInnerCluster().getIdGeneratorConfig();
+    }
+
+    @Override
+    public LocalizationConfig getLocalizationConfig() {
+        return getInnerCluster().getLocalizationConfig();
     }
 
     private void registerListener() {

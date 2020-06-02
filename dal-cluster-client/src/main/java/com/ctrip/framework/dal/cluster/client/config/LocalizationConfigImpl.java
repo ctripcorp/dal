@@ -5,16 +5,16 @@ package com.ctrip.framework.dal.cluster.client.config;
  */
 public class LocalizationConfigImpl implements LocalizationConfig {
 
-    private int unitStrategyId;
+    private Integer unitStrategyId;
     private String zoneId;
 
-    public LocalizationConfigImpl(int unitStrategyId, String zoneId) {
+    public LocalizationConfigImpl(Integer unitStrategyId, String zoneId) {
         this.unitStrategyId = unitStrategyId;
         this.zoneId = zoneId;
     }
 
     @Override
-    public int getUnitStrategyId() {
+    public Integer getUnitStrategyId() {
         return unitStrategyId;
     }
 

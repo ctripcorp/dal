@@ -9,9 +9,13 @@ import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.platform.dal.dao.cluster.ClusterManager;
+import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.datasource.*;
+import com.ctrip.platform.dal.exceptions.DalException;
 
 public class DalDataSourceFactory {
     private static final String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
@@ -110,17 +114,6 @@ public class DalDataSourceFactory {
         return locator.getDataSource(id);
     }
 
-    /**
-     * Get or create the DataSource for the only master of the specified cluster.
-     * Exception will be thrown when the cluster is sharding.
-     * @param clusterName dal cluster name
-     * @return DataSource
-     * @throws Exception
-     */
-    public DataSource getOrCreateNonShardingDataSource(String clusterName) throws Exception {
-        return null;
-    }
-
     public DataSource createDataSource(String allInOneKey, String svcUrl, String appid, boolean isForceInitialize) throws Exception {
         TitanProvider provider = initTitanProvider(isForceInitialize);
 
@@ -144,8 +137,25 @@ public class DalDataSourceFactory {
         Map<String, String> settings = new HashMap<>();
         settings.put(IGNORE_EXTERNAL_EXCEPTION, String.valueOf(isForceInitialize));
         provider.initialize(settings);
-        provider.setSourceTypeByEnv();
         return provider;
+    }
+
+    /**
+     * Get or create the DataSource for the only master of the specified cluster.
+     * Exception will be thrown when the cluster is sharding.
+     * @param clusterName dal cluster name
+     * @return DataSource
+     * @throws Exception
+     */
+    public DataSource getOrCreateNonShardingDataSource(String clusterName) throws Exception {
+        TitanProvider provider = initTitanProvider(false);
+        Cluster cluster = new ClusterManagerImpl(provider).getOrCreateCluster(clusterName);
+        if (cluster.dbShardingEnabled())
+            throw new UnsupportedOperationException("sharding cluster is not supported");
+        provider.setup(new HashSet<>());
+        int shardIndex = cluster.getAllDbShards().iterator().next();
+        ClusterInfo clusterInfo = new ClusterInfo(clusterName, shardIndex, DatabaseRole.MASTER, false);
+        return new DataSourceLocator(provider).getDataSource(clusterInfo);
     }
 
     /**

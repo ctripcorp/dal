@@ -161,17 +161,10 @@ public class TitanProvider implements IntegratedConfigProvider {
     }
 
     private void setSourceType(Map<String, String> settings) {
-        if (settings == null || settings.isEmpty())
+        if (settings != null && Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG))) {
+            sourceType = SourceType.Local;
             return;
-
-        if (settings.containsKey(USE_LOCAL_CONFIG)) {
-            boolean result = Boolean.parseBoolean(settings.get(USE_LOCAL_CONFIG));
-            if (result) {
-                sourceType = SourceType.Local;
-                return;
-            }
         }
-
         setSourceTypeByEnv();
     }
 

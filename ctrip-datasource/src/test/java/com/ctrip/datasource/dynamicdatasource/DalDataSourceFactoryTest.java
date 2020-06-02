@@ -1,8 +1,6 @@
 package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.platform.dal.dao.datasource.ClusterDynamicDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -67,6 +65,44 @@ public class DalDataSourceFactoryTest {
             Assert.assertTrue(true);
         } catch (Throwable e) {
             Assert.assertTrue(false);
+        }
+    }
+
+//    @Test
+    public void testGetOrCreateNonShardingDataSource() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        try {
+            factory.getOrCreateNonShardingDataSource("non-exist-cluster");
+            Assert.fail("non-exist-cluster");
+        } catch (Exception e) {
+            // ok
+        }
+        DataSource ds = factory.getOrCreateNonShardingDataSource("cluster_config_1");
+        Assert.assertNotNull(ds);
+        try {
+            factory.getOrCreateNonShardingDataSource("cluster_config_sharding");
+            Assert.fail("cluster_config_sharding");
+        } catch (UnsupportedOperationException e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testGetOrCreateNonShardingDataSourceFat() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        try {
+            factory.getOrCreateNonShardingDataSource("non-exist-cluster");
+            Assert.fail("non-exist-cluster");
+        } catch (Exception e) {
+            // ok
+        }
+        DataSource ds = factory.getOrCreateNonShardingDataSource("dalservice2db_dalcluster");
+        Assert.assertNotNull(ds);
+        try {
+            factory.getOrCreateNonShardingDataSource("dal_sharding_cluster");
+            Assert.fail("dal_sharding_cluster");
+        } catch (UnsupportedOperationException e) {
+            // ok
         }
     }
 

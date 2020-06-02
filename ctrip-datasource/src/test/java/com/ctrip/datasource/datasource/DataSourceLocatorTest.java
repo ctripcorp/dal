@@ -2,11 +2,14 @@ package com.ctrip.datasource.datasource;
 
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultDrcCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +35,7 @@ public class DataSourceLocatorTest {
 
         MockDatabase db2 = mockDrcClusterDatabase(connStr1, true, new LocalizationConfig() {
             @Override
-            public int getUnitStrategyId() {
+            public Integer getUnitStrategyId() {
                 return 1;
             }
 
@@ -66,7 +69,10 @@ public class DataSourceLocatorTest {
         MockDatabase database = new MockDatabase(connectionString);
         if (!isMaster)
             database.setSlave();
-        DrcCluster cluster = new DefaultDrcCluster(null, localizationConfig);
+        ClusterConfigImpl clusterConfig = new ClusterConfigImpl("drc", ClusterType.DRC, DatabaseCategory.MYSQL, 1);
+        clusterConfig.setUnitStrategyId(localizationConfig.getUnitStrategyId());
+        clusterConfig.setZoneId(localizationConfig.getZoneId());
+        Cluster cluster = clusterConfig.generate();
         database.setCluster(cluster);
         return database;
     }

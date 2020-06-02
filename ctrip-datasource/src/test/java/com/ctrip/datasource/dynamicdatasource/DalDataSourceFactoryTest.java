@@ -68,7 +68,7 @@ public class DalDataSourceFactoryTest {
         }
     }
 
-//    @Test
+    @Test
     public void testGetOrCreateNonShardingDataSource() throws Exception {
         DalDataSourceFactory factory = new DalDataSourceFactory();
         try {
@@ -87,7 +87,7 @@ public class DalDataSourceFactoryTest {
         }
     }
 
-    @Test
+//    @Test
     public void testGetOrCreateNonShardingDataSourceFat() throws Exception {
         DalDataSourceFactory factory = new DalDataSourceFactory();
         try {

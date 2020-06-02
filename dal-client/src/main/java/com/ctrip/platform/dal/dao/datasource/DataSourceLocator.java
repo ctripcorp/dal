@@ -13,6 +13,8 @@ import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.platform.dal.dao.cluster.ClusterManager;
+import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
@@ -32,17 +34,19 @@ public class DataSourceLocator {
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
     private IntegratedConfigProvider provider;
+    private ClusterManager clusterManager;
     private LocalizationValidatorFactory factory = DalElementFactory.DEFAULT.getLocalizationValidatorFactory();
 
     private boolean isForceInitialize = false;
 
     public DataSourceLocator(IntegratedConfigProvider provider) {
-        this.provider = provider;
+        this(provider, false);
     }
 
     public DataSourceLocator(IntegratedConfigProvider provider, boolean isForceInitialize) {
         this.provider = provider;
         this.isForceInitialize = isForceInitialize;
+        this.clusterManager = new ClusterManagerImpl(provider);
     }
 
     // to be refactored
@@ -96,8 +100,7 @@ public class DataSourceLocator {
                 if (ds == null) {
                     try {
                         String clusterName = clusterInfo.getClusterName();
-                        ClusterConfig clusterConfig = provider.getClusterConfig(clusterName);
-                        ds = createDataSource(id, clusterInfo, new DynamicCluster(clusterConfig));
+                        ds = createDataSource(id, clusterInfo, clusterManager.getOrCreateCluster(clusterName));
                         cache.put(id, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating cluster datasource: %s", id.getId());

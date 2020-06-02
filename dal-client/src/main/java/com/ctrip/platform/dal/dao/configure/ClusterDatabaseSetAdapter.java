@@ -5,6 +5,8 @@ import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
+import com.ctrip.platform.dal.dao.cluster.ClusterManager;
+import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -21,13 +23,13 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private ClusterInfoProvider clusterInfoProvider;
-    private ClusterConfigProvider clusterConfigProvider;
+    private ClusterManager clusterManager;
     private DalConnectionLocator connectionLocator;
 
     public ClusterDatabaseSetAdapter(DalConnectionLocator connectionLocator) {
         this.connectionLocator = connectionLocator;
         this.clusterInfoProvider = connectionLocator.getIntegratedConfigProvider();
-        this.clusterConfigProvider = connectionLocator.getIntegratedConfigProvider();
+        this.clusterManager = new ClusterManagerImpl(connectionLocator.getIntegratedConfigProvider());
     }
 
     @Override
@@ -77,8 +79,7 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
                     if (clusterInfo != null && clusterInfo.getRole() == DatabaseRole.MASTER &&
                             !clusterInfo.dbSharding()) {
                         String clusterName = clusterInfo.getClusterName();
-                        ClusterConfig clusterConfig = clusterConfigProvider.getClusterConfig(clusterName);
-                        Cluster cluster = new DynamicCluster(clusterConfig);
+                        Cluster cluster = clusterManager.getOrCreateCluster(clusterName);
                         LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSucceeded",
                                 String.format("databaseSet: %s, clusterName: %s",
                                         defaultDatabaseSet.getName(), clusterName));

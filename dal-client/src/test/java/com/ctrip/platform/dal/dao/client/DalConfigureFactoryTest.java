@@ -65,6 +65,7 @@ public class DalConfigureFactoryTest {
 		Assert.assertEquals(0, executorConfig.getMaxThreadsPerShard("clusterName1"));
 		Assert.assertEquals(0, executorConfig.getMaxThreadsPerShard("clusterName2"));
 		Assert.assertEquals(3, executorConfig.getMaxThreadsPerShard("DbSetName"));
+		DalRequestExecutor.shutdown();
 	}
 
 }

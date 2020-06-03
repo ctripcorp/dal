@@ -199,8 +199,10 @@ public class DalRequestExecutor {
 
 	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
         logContext.setSingleTask(true);
+		String logicDbName = request.getLogicDbName();
 		TaskCallable<T> task = request.createTask();
-	    Callable<T> taskWrapper = new RequestTaskWrapper<T>(task, logContext);
+		String shard = task.getPreparedDbShard();
+	    Callable<T> taskWrapper = new RequestTaskWrapper<T>(logicDbName, shard, task, logContext);
 		T result = taskWrapper.call();
 
 		logContext.setStatementExecuteTime(task.getDalTaskContext().getStatementExecuteTime());

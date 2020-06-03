@@ -183,5 +183,10 @@ public class DalSingleTaskRequest<T> implements DalRequest<int[]> {
         public DalTaskContext getDalTaskContext() {
             return this.taskContext;
         }
+
+        @Override
+        public String getPreparedDbShard() {
+            return hints.getShardId();
+        }
     }
 }

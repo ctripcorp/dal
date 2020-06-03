@@ -265,5 +265,10 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		public DalTaskContext getDalTaskContext() {
 			return this.taskContext;
 		}
+
+		@Override
+		public String getPreparedDbShard() {
+			return shuffledDbShard != null ? shuffledDbShard : hints.getShardId();
+		}
 	}
 }

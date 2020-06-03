@@ -571,6 +571,11 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
         public DalTaskContext getDalTaskContext() {
             return this.dalTaskContext;
         }
+
+        @Override
+        public String getPreparedDbShard() {
+            return dbShard != null ? dbShard : hints.getShardId();
+        }
     }
 
 }

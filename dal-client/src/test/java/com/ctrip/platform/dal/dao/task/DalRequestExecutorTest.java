@@ -68,6 +68,11 @@ public class DalRequestExecutorTest {
                     return this.dalTaskContext;
                 }
 
+                @Override
+                public String getPreparedDbShard() {
+                    return null;
+                }
+
                 public Integer call() throws Exception {
                     return k;
                 }
@@ -117,6 +122,11 @@ public class DalRequestExecutorTest {
                 @Override
                 public DalTaskContext getDalTaskContext() {
                     return this.dalTaskContext;
+                }
+
+                @Override
+                public String getPreparedDbShard() {
+                    return null;
                 }
 
                 public Integer call() throws Exception {

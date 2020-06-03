@@ -22,7 +22,7 @@ public class RequestTaskWrapper<T> extends DalRequestCallable<T> implements Call
 
     public RequestTaskWrapper(String logicDbName, String shard, Callable<T> task, LogContext logContext) {
         super(logicDbName, shard, task);
-        this.shard = shard;
+        this.shard = shard != null ? shard : UNKNOWN_SHARD;
         this.logContext = logContext;
     }
 

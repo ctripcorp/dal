@@ -1,0 +1,36 @@
+<DAL>
+    <Cluster name="TestCluster2" dbCategory="mysql" version="1">
+        <DatabaseShards>
+            <DatabaseShard index="0" masterDomain="10.32.20.143">
+                <Database ip="10.32.20.143" port="3306" dbName="Shard_0" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+            </DatabaseShard>
+            <DatabaseShard index="1" masterDomain="10.32.20.143">
+                <Database ip="10.32.20.143" port="3306" dbName="Shard_0" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+            </DatabaseShard>
+            <DatabaseShard index="2" masterDomain="10.32.20.143">
+                <Database ip="10.32.20.143" port="3306" dbName="Shard_0" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+            </DatabaseShard>
+            <DatabaseShard index="3" masterDomain="10.32.20.143">
+                <Database ip="10.32.20.143" port="3306" dbName="Shard_0" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+            </DatabaseShard>
+        </DatabaseShards>
+        <ShardStrategies>
+            <ModStrategy default="true">
+                <Property name="dbShardColumn" value="CountryID"/>
+                <Property name="dbShardMod" value="2"/>
+                <Tables>
+                    <Property name="tableSharding" value="true"/>
+                    <Property name="tableShardColumn" value="CityID"/>
+                    <Property name="tableShardMod" value="4"/>
+                    <Property name="tableShardSeparator" value="_"/>
+                    <Table name="person">
+                    </Table>
+                </Tables>
+            </ModStrategy>
+        </ShardStrategies>
+        <IdGenerators>
+            <IdGenerator>
+            </IdGenerator>
+        </IdGenerators>
+    </Cluster>
+</DAL>

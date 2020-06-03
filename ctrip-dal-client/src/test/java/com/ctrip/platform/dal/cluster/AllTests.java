@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     PersonDaoUnitTest.class,
-    RWClusterQueryDaoTest.class
+    RWClusterQueryDaoTest.class,
+    ThreadPoolLimitTest.class
 })
 public class AllTests {}

@@ -33,7 +33,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DalBulkTaskRequestTest.class,
 	DalSingleTaskRequestTest.class,
 	DalSqlTaskRequestTest.class,
-		DalBulkTaskContextTest.class
+	DalBulkTaskContextTest.class,
+	DalThreadPoolExecutorTest.class
 })
 public class AllTest {
 

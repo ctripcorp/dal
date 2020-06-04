@@ -22,8 +22,8 @@ public class CtripClusterConfigProvider extends AbstractClusterConfigProvider im
 
     private static final String CONFIG_GROUP = "100020718";
     private static final String CAT_LOG_TYPE = "DAL.configure";
-    private static final String CAT_LOG_NAME_FORMAT = "GetClusterConfig:%s";
-    private static final String CAT_LOG_NAME_FORMAT2 = "ParseClusterConfig:%s";
+    private static final String CAT_LOG_NAME_FORMAT = "Cluster::getClusterConfig:%s";
+    private static final String CAT_LOG_NAME_FORMAT2 = "Cluster::parseClusterConfig:%s";
 
     private static final Map<String, ClusterConfig> configCache = new ConcurrentHashMap<>();
 

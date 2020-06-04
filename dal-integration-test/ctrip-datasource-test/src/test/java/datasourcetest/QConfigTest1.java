@@ -74,13 +74,13 @@ public class QConfigTest1 {
             assertFalse(pc.isLogAbandoned());
             assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
             assertEquals(
-                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=15000",
+                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
                     pc.getConnectionProperties());
             // assertEquals("set names utf8mb4",pc.getInitSQL());
             assertEquals(
                     "com.ctrip.platform.dal.dao.datasource.DataSourceValidator",
                     pc.getValidatorClassName());
-            assertEquals(5, pc.getValidationQueryTimeout());
+            assertEquals(1, pc.getValidationQueryTimeout());
 
             DataSourceConfigure result = null;
             result = provider.getDataSourceConfigure("DalServiceDB");
@@ -150,7 +150,7 @@ public class QConfigTest1 {
             assertFalse(pc.isLogAbandoned());
             assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
             assertEquals(
-                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=15000",
+                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
                     pc.getConnectionProperties());
             // assertEquals("set names utf8mb4",pc.getInitSQL());
             assertEquals(
@@ -232,7 +232,7 @@ public class QConfigTest1 {
             assertFalse(pc.isLogAbandoned());
             assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
             assertEquals(
-                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=15000",
+                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
                     pc.getConnectionProperties());
             // assertEquals("set names utf8mb4",pc.getInitSQL());
             assertEquals(
@@ -313,7 +313,7 @@ public class QConfigTest1 {
             assertFalse(pc.isLogAbandoned());
             assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
             assertEquals(
-                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=15000",
+                    "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
                     pc.getConnectionProperties());
             // assertEquals("set names utf8mb4",pc.getInitSQL());
             assertEquals(

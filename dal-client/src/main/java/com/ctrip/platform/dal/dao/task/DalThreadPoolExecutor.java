@@ -16,8 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DalThreadPoolExecutor extends ThreadPoolExecutor {
 
-    private final ILogger logger = DalElementFactory.DEFAULT.getILogger();
-
     private final DalThreadPoolExecutorConfig executorConfig;
     private final Map<DalRequestIdentity, AtomicInteger> runningTasks = new ConcurrentHashMap<>();
 
@@ -80,11 +78,7 @@ public class DalThreadPoolExecutor extends ThreadPoolExecutor {
             if (incCount > maxThreadsPerShard && maxThreadsPerShard > 0) {
                 shardTaskCount.decrementAndGet();
                 // retry execution, possibly put to the end of the taskQueue
-                logger.logEvent(DalLogTypes.DAL_VALIDATION,
-                        String.format("ShardThreadsLimited::%s-%s", logicDbName, shard),
-                        String.format("maxThreadsPerShard=%d, currentThreads=%d", maxThreadsPerShard, incCount - 1));
-                logger.info(String.format("ShardThreadsLimited::%s-%s; maxThreadsPerShard=%d, currentThreads=%d",
-                        logicDbName, shard, maxThreadsPerShard, incCount));
+                task.logLimited(maxThreadsPerShard);
                 execute(task);
                 return;
             }

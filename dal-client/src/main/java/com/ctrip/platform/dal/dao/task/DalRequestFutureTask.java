@@ -1,5 +1,9 @@
 package com.ctrip.platform.dal.dao.task;
 
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
+
 import java.util.concurrent.FutureTask;
 
 /**
@@ -7,11 +11,15 @@ import java.util.concurrent.FutureTask;
  */
 public class DalRequestFutureTask<V> extends FutureTask<V> {
 
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+
     private final String logicDbName;
     private final String shard;
     private final DalThreadPoolExecutor executor;
 
     private STATUS status;
+
+    private volatile long lastLogLimitedTime = 0;
 
     public DalRequestFutureTask(DalRequestCallable<V> callable, DalThreadPoolExecutor executor) {
         super(callable);
@@ -40,6 +48,22 @@ public class DalRequestFutureTask<V> extends FutureTask<V> {
             super.run();
         } finally {
             status = STATUS.DONE;
+        }
+    }
+
+    protected void logLimited(int limit) {
+        try {
+            long now = System.currentTimeMillis();
+            if (now - lastLogLimitedTime >= 1000) {
+                lastLogLimitedTime = now;
+                LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+                        String.format("ShardThreadsLimited::%s-%s", logicDbName, shard),
+                        "maxThreadsPerShard=" + limit);
+                LOGGER.info(String.format("ShardThreadsLimited::%s-%s, maxThreadsPerShard=%d",
+                        logicDbName, shard, limit));
+            }
+        } catch (Throwable t) {
+            // ignore
         }
     }
 

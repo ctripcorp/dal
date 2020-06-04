@@ -21,6 +21,9 @@ import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfig;
 import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfigBuilder;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
@@ -31,6 +34,9 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
  * @author jhhe
  */
 public class DalRequestExecutor {
+
+	private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+
 	private static AtomicReference<ExecutorService> serviceRef = new AtomicReference<>();
 
 	public static final String MAX_POOL_SIZE = "maxPoolSize";
@@ -93,8 +99,11 @@ public class DalRequestExecutor {
 
 			int maxThreadsPerShard = DEFAULT_MAX_THREADS_PER_SHARD;
 			String maxThreadsPerShardStr = configure.getFactory().getProperty(MAX_THREADS_PER_SHARD);
-			if(!StringUtils.isEmpty(maxThreadsPerShardStr))
+			if(!StringUtils.isEmpty(maxThreadsPerShardStr)) {
 				maxThreadsPerShard = Integer.parseInt(maxThreadsPerShardStr);
+				LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+						"MaxThreadsPerShard::Global:" + maxThreadsPerShard, "");
+			}
 
 			DalThreadPoolExecutorConfigBuilder builder = new DalThreadPoolExecutorConfigBuilder()
 					.setCorePoolSize(maxPoolSize)
@@ -105,8 +114,11 @@ public class DalRequestExecutor {
 			for (String dbSetName : configure.getDatabaseSetNames()) {
 				DatabaseSet dbSet = configure.getDatabaseSet(dbSetName);
 				Integer dbMaxThreadsPerShard = dbSet.getSettingAsInt(MAX_THREADS_PER_SHARD);
-				if (dbMaxThreadsPerShard != null)
+				if (dbMaxThreadsPerShard != null) {
 					builder.setMaxThreadsPerShard(dbSetName, dbMaxThreadsPerShard);
+					LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+							String.format("MaxThreadsPerShard::%s:%d", dbSetName, dbMaxThreadsPerShard), "");
+				}
 			}
 			
             ThreadPoolExecutor executor = new DalThreadPoolExecutor(builder.build(),

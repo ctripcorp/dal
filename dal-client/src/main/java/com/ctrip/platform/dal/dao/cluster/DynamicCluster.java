@@ -30,9 +30,9 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.configure";
-    private static final String CAT_LOG_NAME_FORMAT = "SwitchCluster:%s";
-    private static final String CAT_EVENT_NAME_NORMAL_TO_DRC = "NormalToDrc:%s";
-    private static final String CAT_EVENT_NAME_DRC_TO_NORMAL = "DrcToNormal:%s";
+    private static final String CAT_LOG_NAME_FORMAT = "Cluster::switchCluster:%s";
+    private static final String CAT_EVENT_NAME_NORMAL_TO_DRC = "Cluster::normalToDrc:%s";
+    private static final String CAT_EVENT_NAME_DRC_TO_NORMAL = "Cluster::drcToNormal:%s";
 
     private ClusterConfig clusterConfig;
     private AtomicReference<Cluster> innerCluster = new AtomicReference<>();

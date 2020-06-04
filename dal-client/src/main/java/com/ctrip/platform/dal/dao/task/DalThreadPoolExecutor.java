@@ -2,6 +2,9 @@ package com.ctrip.platform.dal.dao.task;
 
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfig;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.log.DalLogTypes;
+import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.util.Map;
 import java.util.Objects;
@@ -12,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author c7ch23en
  */
 public class DalThreadPoolExecutor extends ThreadPoolExecutor {
+
+    private final ILogger logger = DalElementFactory.DEFAULT.getILogger();
 
     private final DalThreadPoolExecutorConfig executorConfig;
     private final Map<DalRequestIdentity, AtomicInteger> runningTasks = new ConcurrentHashMap<>();
@@ -71,8 +76,18 @@ public class DalThreadPoolExecutor extends ThreadPoolExecutor {
                 }
             }
             int maxThreadsPerShard = executorConfig.getMaxThreadsPerShard(logicDbName);
-            if (maxThreadsPerShard > 0 && shardTaskCount.incrementAndGet() > maxThreadsPerShard)
+            int incCount = shardTaskCount.incrementAndGet();
+            if (incCount > maxThreadsPerShard && maxThreadsPerShard > 0) {
                 shardTaskCount.decrementAndGet();
+                // retry execution, possibly put to the end of the taskQueue
+                logger.logEvent(DalLogTypes.DAL_VALIDATION,
+                        String.format("ShardThreadsLimited::%s-%s", logicDbName, shard),
+                        String.format("maxThreadsPerShard=%d, currentThreads=%d", maxThreadsPerShard, incCount - 1));
+                logger.info(String.format("ShardThreadsLimited::%s-%s; maxThreadsPerShard=%d, currentThreads=%d",
+                        logicDbName, shard, maxThreadsPerShard, incCount));
+                execute(task);
+                return;
+            }
             else {
                 try {
                     // actual execution
@@ -83,8 +98,7 @@ public class DalThreadPoolExecutor extends ThreadPoolExecutor {
                 }
             }
         }
-        // retry execution, possibly put to the end of the taskQueue
-        execute(task);
+        task.internalRun();
     }
 
     static class DalRequestIdentity {

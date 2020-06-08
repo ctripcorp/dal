@@ -30,7 +30,7 @@ public class DataSourceLocatorTest {
         TitanProvider provider = new TitanProvider();
         provider.setup(new HashSet<>());
         DataSourceLocator locator = new DataSourceLocator(provider);
-        MockConnectionString connStr1 = new MockConnectionString("10.32.20.143", 3306, "llj_test", "root", "!QAZ@WSX1qaz2wsx");
+        MockConnectionString connStr1 = new MockConnectionString("10.32.20.128", 3306, "llj_test", "root", "!QAZ@WSX1qaz2wsx");
         MockDatabase db1 = new MockDatabase(connStr1);
 
         MockDatabase db2 = mockDrcClusterDatabase(connStr1, true, new LocalizationConfig() {

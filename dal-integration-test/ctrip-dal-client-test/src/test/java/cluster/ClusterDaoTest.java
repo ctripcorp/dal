@@ -371,11 +371,11 @@ public class ClusterDaoTest {
                 "      \"databaseShards\": [\n" +
                 "        {\n" +
                 "          \"index\": 0,\n" +
-                "          \"masterDomain\": \"10.32.20.143\",\n" +
+                "          \"masterDomain\": \"10.32.20.128\",\n" +
                 "          \"masterPort\": 3306,\n" +
                 "          \"databases\": [\n" +
                 "            {\n" +
-                "              \"ip\": \"10.32.20.143\",\n" +
+                "              \"ip\": \"10.32.20.128\",\n" +
                 "              \"port\": 3306,\n" +
                 "              \"dbName\": \"llj_crossshardbymod_0\",\n" +
                 "              \"uid\": \"root\",\n" +
@@ -385,11 +385,11 @@ public class ClusterDaoTest {
                 "        },\n" +
                 "        {\n" +
                 "          \"index\": 1,\n" +
-                "          \"masterDomain\": \"10.32.20.143\",\n" +
+                "          \"masterDomain\": \"10.32.20.128\",\n" +
                 "          \"masterPort\": 3306,\n" +
                 "          \"databases\": [\n" +
                 "            {\n" +
-                "              \"ip\": \"10.32.20.143\",\n" +
+                "              \"ip\": \"10.32.20.128\",\n" +
                 "              \"port\": 3306,\n" +
                 "              \"dbName\": \"llj_crossshardbymod_1\",\n" +
                 "              \"uid\": \"root\",\n" +
@@ -399,11 +399,11 @@ public class ClusterDaoTest {
                 "        },\n" +
                 "        {\n" +
                 "          \"index\": 2,\n" +
-                "          \"masterDomain\": \"10.32.20.143\",\n" +
+                "          \"masterDomain\": \"10.32.20.128\",\n" +
                 "          \"masterPort\": 3306,\n" +
                 "          \"databases\": [\n" +
                 "            {\n" +
-                "              \"ip\": \"10.32.20.143\",\n" +
+                "              \"ip\": \"10.32.20.128\",\n" +
                 "              \"port\": 3306,\n" +
                 "              \"dbName\": \"llj_crossshardbymod_2\",\n" +
                 "              \"uid\": \"root\",\n" +
@@ -413,11 +413,11 @@ public class ClusterDaoTest {
                 "        },\n" +
                 "        {\n" +
                 "          \"index\": 3,\n" +
-                "          \"masterDomain\": \"10.32.20.143\",\n" +
+                "          \"masterDomain\": \"10.32.20.128\",\n" +
                 "          \"masterPort\": 3306,\n" +
                 "          \"databases\": [\n" +
                 "            {\n" +
-                "              \"ip\": \"10.32.20.143\",\n" +
+                "              \"ip\": \"10.32.20.128\",\n" +
                 "              \"port\": 3306,\n" +
                 "              \"dbName\": \"llj_crossshardbymod_3\",\n" +
                 "              \"uid\": \"root\",\n" +

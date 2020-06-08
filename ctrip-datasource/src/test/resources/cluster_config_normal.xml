@@ -2,7 +2,7 @@
     <Cluster name="cluster_config_1" dbCategory="mysql" version="1">
         <DatabaseShards>
             <DatabaseShard index="0" masterDomain="dst56614" masterPort="3306" slaveDomain="dst56614" slavePort="3306">
-                <Database role="master" ip="10.32.20.143" port="3306" dbName="llj_test" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+                <Database role="master" ip="10.32.20.128" port="3306" dbName="llj_test" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
             </DatabaseShard>
         </DatabaseShards>
     </Cluster>

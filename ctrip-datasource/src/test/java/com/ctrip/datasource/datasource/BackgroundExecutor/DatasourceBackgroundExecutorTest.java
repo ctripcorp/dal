@@ -30,7 +30,7 @@ public class DatasourceBackgroundExecutorTest {
     private static final String CONNECTION_URL = "jdbc:sqlserver://dst56614.cn1.global.ctrip.com:1433;DatabaseName=PerformanceTest";
     private static final String DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    private static final String CONNECTION_URL_2 = "jdbc:sqlserver://10.32.20.143:1433;DatabaseName=daoTest";
+    private static final String CONNECTION_URL_2 = "jdbc:sqlserver://10.32.20.128:1433;DatabaseName=daoTest";
 
     private static final String NETWORK_ADDRESS_CACHE_TTL = "networkaddress.cache.ttl";
     private static final String NETWORK_ADDRESS_CACHE_TTL_VALUE_IN_SECONDS = "1";

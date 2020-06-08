@@ -119,8 +119,8 @@ public class ConnectionStringParser {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         config.setName(keyName);
         config.setConnectionUrl(url);
-        config.setUserName(userName);
-        config.setPassword(password);
+        config.setUserName(userName != null ? userName : "");
+        config.setPassword(password != null ? password : "");
         config.setDriverClass(driverClass);
         config.setVersion(version);
         config.setHostName(dbhost);

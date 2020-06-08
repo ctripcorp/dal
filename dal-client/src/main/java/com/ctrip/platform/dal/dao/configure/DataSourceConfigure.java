@@ -356,8 +356,10 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         else {
             DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
             Properties properties = new Properties();
-            properties.setProperty(USER_NAME, configure.getUserName());
-            properties.setProperty(PASSWORD, configure.getPassword());
+            String username = configure.getUserName();
+            properties.setProperty(USER_NAME, username != null ? username : "");
+            String password = configure.getPassword();
+            properties.setProperty(PASSWORD, password != null ? password : "");
             String connectionUrl = configure.getConnectionUrl();
             if (connectionUrl == null)
                 throw new DalRuntimeException("connetion url cannot be null");

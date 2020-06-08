@@ -1,9 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
-import com.ctrip.platform.dal.exceptions.DalException;
-
 import java.sql.*;
-import java.util.concurrent.Callable;
 
 public class DalStatement implements Statement {
 
@@ -31,7 +28,7 @@ public class DalStatement implements Statement {
 
     @Override
     public void close() throws SQLException {
-        statement.close();
+        innerExecute(() -> statement.close());
     }
 
     @Override
@@ -71,7 +68,7 @@ public class DalStatement implements Statement {
 
     @Override
     public void cancel() throws SQLException {
-        statement.cancel();
+        innerExecute(() -> statement.cancel());
     }
 
     @Override
@@ -106,7 +103,7 @@ public class DalStatement implements Statement {
 
     @Override
     public boolean getMoreResults() throws SQLException {
-        return statement.getMoreResults();
+        return innerExecute(() -> statement.getMoreResults());
     }
 
     @Override
@@ -161,12 +158,12 @@ public class DalStatement implements Statement {
 
     @Override
     public boolean getMoreResults(int current) throws SQLException {
-        return statement.getMoreResults();
+        return innerExecute(() -> statement.getMoreResults(current));
     }
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        return statement.getGeneratedKeys();
+        return innerExecute(() -> statement.getGeneratedKeys());
     }
 
     @Override
@@ -206,7 +203,7 @@ public class DalStatement implements Statement {
 
     @Override
     public boolean isClosed() throws SQLException {
-        return statement.isClosed();
+        return innerExecute(() -> statement.isClosed());
     }
 
     @Override
@@ -279,18 +276,12 @@ public class DalStatement implements Statement {
         return statement.isWrapperFor(iface);
     }
 
-    protected <T> T innerExecute(Callable<T> task) throws SQLException {
-        SQLException exception = null;
-        try {
-            return task.call();
-        } catch (SQLException e) {
-            exception = e;
-            throw e;
-        } catch (Exception ex) {
-            throw new DalException("innerExecute exception", ex);
-        } finally {
-            connection.handleException(exception);
-        }
+    protected void innerExecute(SqlRunnable task) throws SQLException {
+        connection.innerExecute(task);
+    }
+
+    protected <T> T innerExecute(SqlCallable<T> task) throws SQLException {
+        return connection.innerExecute(task);
     }
 
 }

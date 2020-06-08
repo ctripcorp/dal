@@ -3,7 +3,6 @@ package com.ctrip.platform.dal.dao.datasource.jdbc;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.LocalizedDatabaseMetaDataImpl;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -13,18 +12,17 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DalConnection implements Connection {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private Connection connection;
-    private List<SQLException> discardCauses = new LinkedList<>();
+    private final AtomicReference<SQLException> discardCauseRef = new AtomicReference<>();
     private RefreshableDataSource dataSource;
 
     public DalConnection(Connection connection, RefreshableDataSource dataSource) {
@@ -36,21 +34,7 @@ public class DalConnection implements Connection {
         return connection;
     }
 
-    public void handleException(SQLException e) {
-        try {
-            if (isSpecificException(e))
-                discardCauses.add(e);
-        } catch (Throwable t) {
-            LOGGER.warn("connection handleException exception", t);
-        }
-        try {
-            dataSource.handleException(e);
-        } catch (Throwable t) {
-            LOGGER.warn("dataSource handleException exception", t);
-        }
-    }
-
-    private boolean isSpecificException(Throwable t) {
+    private boolean isDiscardException(Throwable t) {
         Throwable t1 = t;
         while (t1 instanceof DalException) {
             t1 = t1.getCause();
@@ -64,7 +48,7 @@ public class DalConnection implements Connection {
         SQLException se = (SQLException) t1;
         if (dbCategory.isSpecificException(se))
             return true;
-        return isSpecificException(se.getNextException());
+        return isDiscardException(se.getNextException());
     }
 
     @Override
@@ -99,41 +83,42 @@ public class DalConnection implements Connection {
 
     @Override
     public void commit() throws SQLException {
-        connection.commit();
+        innerExecute(() -> connection.commit());
     }
 
     @Override
     public void rollback() throws SQLException {
-        connection.rollback();
+        innerExecute(() -> connection.rollback());
     }
 
     @Override
     public void close() throws SQLException {
-        if (discardCauses.size() > 0) {
+        SQLException discardCause = discardCauseRef.get();
+        if (discardCause != null) {
             try {
-                markDiscard();
+                markDiscard(discardCause);
             } catch (Throwable t) {
                 LOGGER.warn("mark connection discarded exception", t);
             } finally {
-                discardCauses.clear();
+                discardCauseRef.set(null);
             }
         }
         connection.close();
     }
 
-    private void markDiscard() throws SQLException {
+    private void markDiscard(SQLException cause) throws SQLException {
         long startTime = System.currentTimeMillis();
         PooledConnection conn = connection.unwrap(PooledConnection.class);
         conn.setDiscarded(true);
         String connUrl = conn.getPoolProperties().getUrl();
         String logName = String.format("Connection::discardConnection:%s", LoggerHelper.getSimplifiedDBUrl(connUrl));
         LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, logName, connUrl, startTime);
-        LOGGER.info(String.format("connection marked discarded: %s", connUrl));
+        LOGGER.warn(String.format("connection marked discarded: %s", connUrl), cause);
     }
 
     @Override
     public boolean isClosed() throws SQLException {
-        return connection.isClosed();
+        return innerExecute(() -> connection.isClosed());
     }
 
     @Override
@@ -234,7 +219,7 @@ public class DalConnection implements Connection {
 
     @Override
     public void rollback(Savepoint savepoint) throws SQLException {
-        connection.rollback();
+        innerExecute(() -> connection.rollback(savepoint));
     }
 
     @Override
@@ -294,7 +279,7 @@ public class DalConnection implements Connection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return connection.isValid(timeout);
+        return innerExecute(() -> connection.isValid(timeout));
     }
 
     @Override
@@ -339,7 +324,7 @@ public class DalConnection implements Connection {
 
     @Override
     public void abort(Executor executor) throws SQLException {
-        connection.abort(executor);
+        innerExecute(() -> connection.abort(executor));
     }
 
     @Override
@@ -360,6 +345,44 @@ public class DalConnection implements Connection {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return connection.isWrapperFor(iface);
+    }
+
+    protected void innerExecute(SqlRunnable task) throws SQLException {
+        SQLException error = null;
+        try {
+            task.run();
+        } catch (SQLException e) {
+            error = e;
+            throw e;
+        } finally {
+            handleException(error);
+        }
+    }
+
+    protected <T> T innerExecute(SqlCallable<T> task) throws SQLException {
+        SQLException error = null;
+        try {
+            return task.call();
+        } catch (SQLException e) {
+            error = e;
+            throw e;
+        } finally {
+            handleException(error);
+        }
+    }
+
+    private void handleException(SQLException e) {
+        try {
+            if (isDiscardException(e))
+                discardCauseRef.set(e);
+        } catch (Throwable t) {
+            LOGGER.warn("DalConnection handleException exception", t);
+        }
+        try {
+            dataSource.handleException(e);
+        } catch (Throwable t) {
+            LOGGER.warn("RefreshableDataSource handleException exception", t);
+        }
     }
 
 }

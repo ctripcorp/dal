@@ -1,21 +1,23 @@
 package com.ctrip.datasource.configure;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.sql.DataSource;
 
 import com.ctrip.datasource.titan.TitanDataSourceLocator;
 import com.ctrip.datasource.titan.TitanProvider;
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
+import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
 import com.ctrip.platform.dal.dao.datasource.*;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class DalDataSourceFactory {
     private static final String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
@@ -141,21 +143,137 @@ public class DalDataSourceFactory {
     }
 
     /**
-     * Get or create the DataSource for the only master of the specified cluster.
-     * Exception will be thrown when the cluster is sharding.
+     * Get or create master DataSource for non-sharding dal cluster
+     *
+     * @param clusterName dal cluster name
+     * @return DataSource
+     * @throws Exception
+     */
+    public DataSource getOrCreateDataSource(String clusterName) throws Exception {
+        return getOrCreateDataSource(clusterName, null, DatabaseRole.MASTER);
+    }
+
+    /**
+     * Get or create master DataSource for dal cluster on specified shard
+     *
+     * @param clusterName dal cluster name
+     * @param shardIndex shard index
+     * @return DataSource
+     * @throws Exception
+     */
+    public DataSource getOrCreateDataSource(String clusterName, Integer shardIndex) throws Exception {
+        return getOrCreateDataSource(clusterName, shardIndex, DatabaseRole.MASTER);
+    }
+
+    /**
+     * Get or create DataSource with specified role for non-sharding dal cluster
+     *
+     * @param clusterName dal cluster name
+     * @param databaseRole database role - master (by default) / slave
+     * @return DataSource
+     * @throws Exception
+     */
+    public DataSource getOrCreateDataSource(String clusterName, String databaseRole) throws Exception {
+        return getOrCreateDataSource(clusterName, null, databaseRole);
+    }
+
+    /**
+     * Get or create DataSource with specified role for dal cluster on specified shard
+     *
+     * @param clusterName dal cluster name
+     * @param shardIndex shard index
+     * @param databaseRole database role - master (by default) / slave
+     * @return DataSource
+     * @throws Exception
+     */
+    public DataSource getOrCreateDataSource(String clusterName, Integer shardIndex, String databaseRole)
+            throws Exception {
+        return getOrCreateDataSource(clusterName, shardIndex,
+                StringUtils.isEmpty(databaseRole) ? DatabaseRole.MASTER : DatabaseRole.parse(databaseRole));
+    }
+
+    private DataSource getOrCreateDataSource(String clusterName, Integer shardIndex, DatabaseRole databaseRole)
+            throws Exception {
+        TitanProvider provider = initTitanProvider(false);
+        Cluster cluster = getCluster(provider, clusterName);
+        ClusterInfo clusterInfo = buildClusterInfo(clusterName, cluster, shardIndex, databaseRole);
+        provider.setup(new HashSet<>());
+        return getOrCreateDataSource(provider, clusterInfo);
+    }
+
+    private Cluster getCluster(ClusterConfigProvider provider, String clusterName) {
+        if (StringUtils.isEmpty(clusterName))
+            throw new DalRuntimeException("clusterName should not be empty");
+        return new ClusterManagerImpl(provider).getOrCreateCluster(clusterName);
+    }
+
+    private ClusterInfo buildClusterInfo(String clusterName, Cluster cluster, Integer shardIndex, DatabaseRole databaseRole) {
+        int finalShard;
+        if (shardIndex == null) {
+            if (cluster.dbShardingEnabled())
+                throw new IllegalArgumentException(String.format(
+                        "shardIndex is necessary for sharding cluster '%s'", clusterName));
+            finalShard = cluster.getAllDbShards().iterator().next();
+        } else {
+            if (!cluster.getAllDbShards().contains(shardIndex))
+                throw new IllegalArgumentException(String.format(
+                        "shard %d is not found for cluster '%s'", shardIndex, clusterName));
+            finalShard = shardIndex;
+        }
+        DatabaseRole dbRole = databaseRole != null ? databaseRole : DatabaseRole.MASTER;
+        if (dbRole == DatabaseRole.MASTER && cluster.getMasterOnShard(finalShard) == null)
+            throw new IllegalStateException(String.format(
+                    "master is not found for cluster '%s', shard %d", clusterName, finalShard));
+        else if (dbRole == DatabaseRole.SLAVE) {
+            List<Database> slaves = cluster.getSlavesOnShard(finalShard);
+            if (slaves == null || slaves.size() == 0)
+                throw new IllegalStateException(String.format(
+                        "slave is not found for cluster '%s', shard %d", clusterName, finalShard));
+            if (slaves.size() > 1)
+                throw new UnsupportedOperationException(String.format(
+                        "multi slaves are found for cluster '%s', shard %d, which is not supported yet",
+                        clusterName, finalShard));
+        }
+        return new ClusterInfo(clusterName, finalShard, dbRole, cluster.dbShardingEnabled());
+    }
+
+    private DataSource getOrCreateDataSource(IntegratedConfigProvider provider, ClusterInfo clusterInfo) {
+        return new DataSourceLocator(provider).getDataSource(clusterInfo);
+    }
+
+    /**
+     * Get or create master DataSource for non-sharding dal cluster
+     *
      * @param clusterName dal cluster name
      * @return DataSource
      * @throws Exception
      */
     public DataSource getOrCreateNonShardingDataSource(String clusterName) throws Exception {
+        return getOrCreateDataSource(clusterName);
+    }
+
+    /**
+     * Get or create master DataSource for non-sharding dal cluster
+     *
+     * @param clusterName dal cluster name
+     * @return DataSource
+     * @throws Exception
+     */
+    public List<DataSource> getOrCreateAllMasterDataSources(String clusterName) throws Exception {
+        return getOrCreateAllDataSourcesByRole(clusterName, DatabaseRole.MASTER);
+    }
+
+    private List<DataSource> getOrCreateAllDataSourcesByRole(String clusterName, DatabaseRole databaseRole)
+            throws Exception {
         TitanProvider provider = initTitanProvider(false);
-        Cluster cluster = new ClusterManagerImpl(provider).getOrCreateCluster(clusterName);
-        if (cluster.dbShardingEnabled())
-            throw new UnsupportedOperationException("sharding cluster is not supported");
+        Cluster cluster = getCluster(provider, clusterName);
         provider.setup(new HashSet<>());
-        int shardIndex = cluster.getAllDbShards().iterator().next();
-        ClusterInfo clusterInfo = new ClusterInfo(clusterName, shardIndex, DatabaseRole.MASTER, false);
-        return new DataSourceLocator(provider).getDataSource(clusterInfo);
+        List<DataSource> dataSources = new LinkedList<>();
+        for (Integer shard : cluster.getAllDbShards()) {
+            ClusterInfo clusterInfo = buildClusterInfo(clusterName, cluster, shard, databaseRole);
+            dataSources.add(getOrCreateDataSource(provider, clusterInfo));
+        }
+        return dataSources;
     }
 
     /**

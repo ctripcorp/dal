@@ -1,5 +1,7 @@
 package com.ctrip.datasource.configure.qconfig;
 
+import com.ctrip.datasource.util.HeraldTokenUtils;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringChanged;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringProvider;
@@ -15,6 +17,8 @@ import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
 import qunar.tc.qconfig.client.exception.ResultUnexpectedException;
+import qunar.tc.qconfig.client.plugin.HeaderPlugin;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -127,6 +131,8 @@ public class ConnectionStringProviderImpl implements ConnectionStringProvider, D
         try {
             String keyName = ConnectionStringKeyHelper.getKeyName(name);
             Feature feature = Feature.create().setHttpsEnable(true).build();
+            // register herald token
+            HeraldTokenUtils.registerHeraldToken(TITAN_APP_ID, keyName);
             config = MapConfig.get(TITAN_APP_ID, keyName, feature);
             if (config == null)
                 throw new RuntimeException(String.format(NULL_MAPCONFIG_EXCEPTION_FORMAT, name));

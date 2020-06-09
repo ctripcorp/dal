@@ -38,6 +38,10 @@
             <artifactId>ucs-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.ctrip.sysdev</groupId>
+            <artifactId>herald-token-lib</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>

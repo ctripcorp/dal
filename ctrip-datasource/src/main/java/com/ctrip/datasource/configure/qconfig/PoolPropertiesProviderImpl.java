@@ -36,7 +36,7 @@ public class PoolPropertiesProviderImpl implements PoolPropertiesProvider, DataS
     private static final String POOLPROPERTIES_GET_MAPCONFIG = "PoolProperties::getMapConfig";
     private static final String POOLPROPERTIES_GET_POOLPROPERTIES = "PoolProperties::getPoolProperties";
     private static final String POOLPROPERTIES_ADD_LISTENER = "PoolProperties::setListener";
-    private static final String POOLPROPERTIES_LISTENER_ON_LOAD = "PoolProperties:listenerOnLoad";
+    private static final String POOLPROPERTIES_LISTENER_ON_LOAD = "PoolProperties::listenerOnLoad";
 
     private AtomicReference<MapConfig> mapConfigReference = new AtomicReference<>();
     private AtomicReference<Boolean> isFirstTimeLoadReference = new AtomicReference<>(true);

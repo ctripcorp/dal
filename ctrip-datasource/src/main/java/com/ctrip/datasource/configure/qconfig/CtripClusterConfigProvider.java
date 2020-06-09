@@ -1,6 +1,7 @@
 package com.ctrip.datasource.configure.qconfig;
 
 import com.ctrip.datasource.configure.DynamicClusterConfig;
+import com.ctrip.datasource.util.HeraldTokenUtils;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
@@ -55,6 +56,8 @@ public class CtripClusterConfigProvider extends AbstractClusterConfigProvider im
         Transaction transaction = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, clusterName));
         try {
             Feature feature = Feature.create().setHttpsEnable(true).build();
+            // register herald token
+            HeraldTokenUtils.registerHeraldToken(CONFIG_GROUP, clusterName);
             TypedConfig<ClusterConfig> config = TypedConfig.get(CONFIG_GROUP, clusterName, feature, new TypedConfig.Parser<ClusterConfig>() {
                 @Override
                 public ClusterConfig parse(String content) throws IOException {

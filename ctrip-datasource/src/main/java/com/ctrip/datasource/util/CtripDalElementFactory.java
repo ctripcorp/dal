@@ -4,11 +4,14 @@ import com.ctrip.datasource.configure.qconfig.DalPropertiesProviderImpl;
 import com.ctrip.datasource.datasource.CtripDatasourceBackgroundExecutor;
 import com.ctrip.datasource.datasource.CtripLocalizationValidatorFactory;
 import com.ctrip.datasource.log.CtripLoggerImpl;
+import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
+import com.ctrip.platform.dal.dao.helper.NullEnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,8 @@ public class CtripDalElementFactory implements DalElementFactory {
     private Lock datasourceBackgroundExecutorLock = new ReentrantLock();
 
     private final AtomicReference<LocalizationValidatorFactory> localizationValidatorFactoryRef = new AtomicReference<>();
+
+    private final ObjectHolder<EnvUtils> envUtilsHolder = new ObjectHolder<>();
 
     @Override
     public ILogger getILogger() {
@@ -98,6 +103,11 @@ public class CtripDalElementFactory implements DalElementFactory {
             }
         }
         return factory;
+    }
+
+    @Override
+    public EnvUtils getEnvUtils() {
+        return envUtilsHolder.getOrCreate(CtripEnvUtils::new);
     }
 
     @Override

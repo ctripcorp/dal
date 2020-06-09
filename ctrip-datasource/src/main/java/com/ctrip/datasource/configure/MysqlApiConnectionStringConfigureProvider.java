@@ -1,7 +1,6 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
-import com.ctrip.datasource.util.EnvUtil;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtils;
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.datasource.util.entity.MysqlApiConnectionStringInfo;
@@ -15,6 +14,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class MysqlApiConnectionStringConfigureProvider implements ConnectionStringConfigureProvider, DataSourceConfigureConstants {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    private static EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
     private static final int THREAD_SIZE = 1;
     private static final String THREAD_NAME = "DAL-MysqlApiConnectionStringChecker";
     private static final int INITIAL_DELAY = 0;
@@ -148,7 +149,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
     protected DalConnectionStringConfigure getConnectionStringFromMysqlApi() throws Exception {
         initMysqlApiConfigure();
-        String env = EnvUtil.getEnv();
+        String env = envUtils.getEnv();
         MysqlApiConnectionStringInfo info = MysqlApiConnectionStringUtils.getConnectionStringFromMysqlApi(mysqlApiUrl, dbName, env);
 
         DataSourceConfigure connectionStringConfigure = MysqlApiConnectionStringParser.getInstance().parser(dbName, info, dbToken, dbModel);
@@ -175,7 +176,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     }
 
     private String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
-        String currentIdc = EnvUtil.getIdc();
+        String currentIdc = envUtils.getIdc();
         if (!StringUtils.isEmpty(currentIdc)) {
             currentIdc = currentIdc.toLowerCase();
         }

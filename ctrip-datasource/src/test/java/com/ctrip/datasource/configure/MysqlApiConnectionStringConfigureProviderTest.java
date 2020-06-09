@@ -1,14 +1,14 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
-import com.ctrip.datasource.util.EnvUtil;
-import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.datasource.util.CtripEnvUtils;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +24,8 @@ public class MysqlApiConnectionStringConfigureProviderTest {
     private static final String DB_NAME_3 = "fxqconfigtestdb";
     private static final String DB_NAME_MGR = "kevin";
 
+    private static CtripEnvUtils envUtils = (CtripEnvUtils) DalElementFactory.DEFAULT.getEnvUtils();
+
     @Test
     public void testConnectionString() throws Exception {
         String mgrUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944)," +
@@ -35,10 +37,10 @@ public class MysqlApiConnectionStringConfigureProviderTest {
                 "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944):3306," +
                 "address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944):3306";
         ConnectionStringConfigureProvider provider = new MysqlApiConnectionStringConfigureProvider(DB_NAME_1);
-        EnvUtil.setEnv("pro");
+        envUtils.setEnv("pro");
         DalConnectionStringConfigure configure = provider.getConnectionString();
         Assert.assertEquals(configure.getConnectionUrl(), mgrUrl);
-        EnvUtil.setEnv(null);
+        envUtils.setEnv(null);
     }
 
     @Test
@@ -59,10 +61,10 @@ public class MysqlApiConnectionStringConfigureProviderTest {
     @Test
     public void testCreateMGRDataSource() throws Exception {
         DalDataSourceFactory factory = new DalDataSourceFactory();
-        EnvUtil.setEnv("pro");
+        envUtils.setEnv("pro");
         DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_3);
         Assert.assertNotNull(dataSource);
-        EnvUtil.setEnv(null);
+        envUtils.setEnv(null);
     }
 
     @Test
@@ -81,27 +83,18 @@ public class MysqlApiConnectionStringConfigureProviderTest {
 
     @Test
     public void testDBModelChange() throws Exception {
-        String fixMgrUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944),address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944),address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944)/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8" +
-                "&loadBalanceStrategy=serverAffinity&serverAffinityOrder=address=(type=master)(protocol=tcp)(host=10.25.91.204)(port=55944):3306,address=(type=master)(protocol=tcp)(host=10.60.45.198)(port=55944):3306,address=(type=master)(protocol=tcp)(host=10.8.37.82)(port=55944):3306";
-        String fixNormalUrl = "jdbc:mysql://fxdalclusterbenchmark.mysql.db.ctripcorp.com:55944/fxdalclusterbenchmarkdb?useUnicode=true&characterEncoding=UTF-8";
-        EnvUtil.setEnv("pro");
+        envUtils.setEnv("pro");
         ConnectionStringConfigureProvider provider = new MysqlApiConnectionStringConfigureProvider(DB_NAME_2);
-        /*provider.addListener(new Listener<DalConnectionStringConfigure>() {
-            @Override
-            public void onChanged(DalConnectionStringConfigure current) {
-                String mgrUrl = current.getConnectionUrl();
-            }
-        });*/
         DalConnectionStringConfigure configure = provider.getConnectionString();
         String normalUrl = configure.getConnectionUrl();
-        Assert.assertEquals(normalUrl, fixNormalUrl);
+        Assert.assertTrue(normalUrl.startsWith("jdbc:mysql://"));
         DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
         PropertiesWrapper propertiesWrapper = dataSourceConfigureLocator.getPoolProperties();
         propertiesWrapper.getDatasourceProperties().get(DB_NAME_2).setProperty("dbModel", "mgr");
 
         String mgrUrl = provider.getConnectionString().getConnectionUrl();
-        Assert.assertEquals(mgrUrl, fixMgrUrl);
-        EnvUtil.setEnv(null);
+        Assert.assertTrue(mgrUrl.startsWith("jdbc:mysql:replication://"));
+        envUtils.setEnv(null);
     }
 
     @Test

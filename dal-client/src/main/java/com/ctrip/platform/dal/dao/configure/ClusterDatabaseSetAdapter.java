@@ -3,12 +3,14 @@ package com.ctrip.platform.dal.dao.configure;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -21,6 +23,7 @@ import java.util.Map;
 public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    private static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
 
     private ClusterInfoProvider clusterInfoProvider;
     private ClusterManager clusterManager;
@@ -46,12 +49,13 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
 
     private boolean adaptable(DefaultDatabaseSet defaultDatabaseSet) {
         /*
+         * 0. no subEnv, not aws
          * 1. mysql
          * 2. no shard strategy
          * 4. no idgen config
          * 5. one master, no slaves
          */
-        boolean adaptable = true;
+        boolean adaptable = checkEnv();
         if (defaultDatabaseSet.getDatabaseCategory() != DatabaseCategory.MySql)
             adaptable = false;
         if (defaultDatabaseSet.getShardingStrategy() != null)
@@ -65,6 +69,12 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
         if (slaves != null && slaves.size() > 0)
             adaptable = false;
         return adaptable;
+    }
+
+    private boolean checkEnv() {
+        String subEnv = envUtils.getSubEnv();
+        String idc = envUtils.getIdc();
+        return StringUtils.isEmpty(subEnv) && (idc == null || !idc.toLowerCase().contains("aws"));
     }
 
     private ClusterDatabaseSet tryAdapt(DefaultDatabaseSet defaultDatabaseSet) {

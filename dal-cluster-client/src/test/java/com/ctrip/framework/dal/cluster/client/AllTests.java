@@ -2,6 +2,7 @@ package com.ctrip.framework.dal.cluster.client;
 
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultClusterTest;
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultLocalConfigProviderTest;
+import com.ctrip.framework.dal.cluster.client.util.ObjectHolderTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -11,7 +12,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         DefaultClusterTest.class,
-        DefaultLocalConfigProviderTest.class
+        DefaultLocalConfigProviderTest.class,
+        ObjectHolderTest.class
 })
 public class AllTests {
 }

@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.sql.logging;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +9,8 @@ public class SQLInfo {
 	public static final String COUNT = "arch.dal.sql.count";
 	public static final String COST = "arch.dal.sql.cost";
 	public static final String DAL_COST = "fx.dal.request.cost";
+
+	public static final String UNDEFINED = "Undefined";
 	
 	public static final String CLIENT = "Client";
 	private String version;
@@ -85,12 +89,12 @@ public class SQLInfo {
 		this.database = database;
 		this.tables = tables;
 		this.operationType = optType;
-		this.cluster = cluster;
-		this.shard = shard;
-		this.clientZone = clientZone;
-		this.dbZone = dbZone;
-		this.ucsValidation = ucsValidation;
-		this.dalValidation = dalValidation;
+		this.cluster = cluster != null ? StringUtils.toTrimmedLowerCase(cluster) : UNDEFINED;
+		this.shard = shard != null ? shard : UNDEFINED;
+		this.clientZone = clientZone != null ? StringUtils.toTrimmedUpperCase(clientZone) : UNDEFINED;
+		this.dbZone = dbZone != null ? StringUtils.toTrimmedUpperCase(dbZone) : UNDEFINED;
+		this.ucsValidation = ucsValidation != null ? ucsValidation : UNDEFINED;
+		this.dalValidation = dalValidation != null ? dalValidation : UNDEFINED;
 	}
 	
 	public String getDao() {

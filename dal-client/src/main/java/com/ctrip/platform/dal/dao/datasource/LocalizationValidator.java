@@ -6,7 +6,7 @@ public interface LocalizationValidator {
 
     LocalizationValidator DEFAULT = new ConstantLocalizationValidator();
 
-    boolean validateRequest();
+    ValidationResult validateRequest();
 
     boolean validateZone();
 

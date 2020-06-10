@@ -1,15 +1,19 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 import java.sql.*;
 
-public class LocalizedStatement implements Statement {
+public class LocalizedStatement implements Statement, LocalizationValidatable {
 
     private LocalizationValidator validator;
     private Statement statement;
+
+    private ValidationStatus lastValidationStatus = ValidationStatus.UNKNOWN;
+    private ValidationResult lastValidationResult = null;
 
     public LocalizedStatement(Statement statement) {
         this(LocalizationValidator.DEFAULT, statement);
@@ -21,8 +25,32 @@ public class LocalizedStatement implements Statement {
     }
 
     protected void validateLocalization() throws DalException {
-        if (validator != null && !validator.validateRequest())
-            throw new DalException(ErrorCode.NonLocalRequestBlocked, "Non-local insert/update/delete is not allowed for drc cluster");
+        if (!validate())
+            throw new DalException(ErrorCode.NonLocalRequestBlocked,
+                    "Non-local insert/update/delete is not allowed for drc cluster");
+    }
+
+    @Override
+    public boolean validate() {
+        if (validator == null) {
+            lastValidationStatus = ValidationStatus.SKIPPED;
+            lastValidationResult = new ValidationResult(true, null, null);
+            return true;
+        }
+        ValidationResult result = validator.validateRequest();
+        lastValidationStatus = result.getValidationResult() ? ValidationStatus.OK : ValidationStatus.FAILED;
+        lastValidationResult = result;
+        return result.getValidationResult();
+    }
+
+    @Override
+    public ValidationStatus getLastValidationStatus() {
+        return lastValidationStatus;
+    }
+
+    @Override
+    public ValidationResult getLastValidationResult() {
+        return lastValidationResult;
     }
 
     @Override
@@ -295,11 +323,17 @@ public class LocalizedStatement implements Statement {
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return statement.unwrap(iface);
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException e) {
+            return statement.unwrap(iface);
+        }
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        if (iface.isInstance(this))
+            return true;
         return statement.isWrapperFor(iface);
     }
 

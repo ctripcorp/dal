@@ -15,8 +15,8 @@ public class ConstantLocalizationValidator implements LocalizationValidator {
     }
 
     @Override
-    public boolean validateRequest() {
-        return constantResult;
+    public ValidationResult validateRequest() {
+        return new ValidationResult(constantResult, null, null);
     }
 
     @Override

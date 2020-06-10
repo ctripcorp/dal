@@ -82,7 +82,11 @@ public class Metrics {
 		report(database, version, entry.isMaster() ? "Master" : "Slave", optType, tableString, shardCategory);
 
 //		arch.dal.sql.count & arch.dal.sql.cost
-		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(), entry.getSqlSize(), status, database, tableString, optType);
+		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(),
+				entry.getSqlSize(), status, database, tableString, optType,
+				entry.getClusterName(), entry.getShardId(), entry.getClientZone(),
+				entry.getDbZone(), entry.getUcsValidation(), entry.getDalValidation());
+		Map map = info.toTag();
 		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
 		metric.log(SQLInfo.COUNT, 1, info.toTag());
 	}

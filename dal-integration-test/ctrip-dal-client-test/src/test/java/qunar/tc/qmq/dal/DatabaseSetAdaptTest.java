@@ -14,6 +14,25 @@ public class DatabaseSetAdaptTest {
     }
 
     static class MockProduceMessage implements ProduceMessage {
+
+        @Override
+        public void reset() {}
+
+        @Override
+        public int incTries() {
+            return 0;
+        }
+
+        @Override
+        public int getTries() {
+            return 0;
+        }
+
+        @Override
+        public int getMaxTries() {
+            return 0;
+        }
+
         @Override
         public String getMessageId() {
             return "test" + System.currentTimeMillis();

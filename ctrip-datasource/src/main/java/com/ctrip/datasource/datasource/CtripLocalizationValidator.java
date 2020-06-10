@@ -9,6 +9,7 @@ import com.ctrip.framework.ucs.client.api.UcsClient;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidator;
+import com.ctrip.platform.dal.dao.datasource.ValidationResult;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -38,11 +39,16 @@ public class CtripLocalizationValidator implements LocalizationValidator {
     }
 
     @Override
-    public boolean validateRequest() {
+    public ValidationResult validateRequest() {
+        boolean bResult;
+        String ucsMsg = null;
+        String dalMsg = null;
         RequestContext context = ucsClient.getCurrentRequestContext();
         StrategyValidatedResult result = null;
         try {
             result = context.validate(config.getUnitStrategyId());
+            if (result != null)
+                ucsMsg = result.name();
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result), Event.SUCCESS, buildUcsValidateLogMessage(result));
         } catch (Throwable t) {
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION"), Event.SUCCESS, t.getMessage());
@@ -53,19 +59,24 @@ public class CtripLocalizationValidator implements LocalizationValidator {
                 boolean localized = locator.localizedForDrc(result.name());
                 if (localized) {
                     Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false), DAL_VALIDATE_REJECT, "");
-                    return false;
+                    bResult = false;
+                    dalMsg = DAL_VALIDATE_REJECT;
                 } else {
                     Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildValidateLogName(DAL_VALIDATE_WARN));
-                    return true;
+                    bResult = true;
+                    dalMsg = DAL_VALIDATE_WARN;
                 }
             } catch (Throwable t) {
                 Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(true), Event.SUCCESS, t.getMessage());
-                return true;
+                bResult = true;
+                dalMsg = DAL_VALIDATE_PASS;
             }
         } else {
             Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(true));
-            return true;
+            bResult = true;
+            dalMsg = DAL_VALIDATE_PASS;
         }
+        return new ValidationResult(bResult, ucsMsg, dalMsg);
     }
 
     @Override

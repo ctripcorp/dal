@@ -32,7 +32,43 @@ public class SQLInfo {
 	private static final String OPTTYPE = "OperationType";
 	private String operationType;
 
+	private static final String CLUSTER = "Cluster";
+	private String cluster;
+
+	private static final String SHARD = "Shard";
+	private String shard;
+
+	private static final String CLIENT_ZONE = "ClientZone";
+	private String clientZone;
+
+	private static final String DB_ZONE = "DBZone";
+	private String dbZone;
+
+	private static final String UCS_VALIDATION = "UcsValidation";
+	private String ucsValidation;
+
+	private static final String DAL_VALIDATION = "DalValidation";
+	private String dalValidation;
+
 	public SQLInfo(String dao, String version, String method, int size, String status, String database, String tables, String optType) {
+		this(dao, version, method, size, status, database, tables, optType,
+				null, null, null, null, null, null);
+	}
+
+	public SQLInfo(String dao, String version, String method, String status, String database, String tables, String optType) {
+		this.dao = dao;
+		this.method = method;
+		this.version = "Java " + version;
+		this.status = status;
+		this.database = database;
+		this.tables = tables;
+		this.operationType = optType;
+	}
+
+	public SQLInfo(String dao, String version, String method, int size,
+				   String status, String database, String tables, String optType,
+				   String cluster, String shard, String clientZone, String dbZone,
+				   String ucsValidation, String dalValidation) {
 		this.dao = dao;
 		this.method = method;
 		this.version = "Java " + version;
@@ -49,16 +85,12 @@ public class SQLInfo {
 		this.database = database;
 		this.tables = tables;
 		this.operationType = optType;
-	}
-
-	public SQLInfo(String dao, String version, String method, String status, String database, String tables, String optType) {
-		this.dao = dao;
-		this.method = method;
-		this.version = "Java " + version;
-		this.status = status;
-		this.database = database;
-		this.tables = tables;
-		this.operationType = optType;
+		this.cluster = cluster;
+		this.shard = shard;
+		this.clientZone = clientZone;
+		this.dbZone = dbZone;
+		this.ucsValidation = ucsValidation;
+		this.dalValidation = dalValidation;
 	}
 	
 	public String getDao() {
@@ -87,17 +119,35 @@ public class SQLInfo {
 	}
 	
 	public Map<String, String> toTag(){
-		Map<String, String> tag = new HashMap<String, String>();
-		tag.put(DAO, this.dao);
-		tag.put(METHOD, this.method);
+		Map<String, String> tags = new HashMap<>();
+		tags.put(DAO, this.dao);
+		tags.put(METHOD, this.method);
 		if (this.size != null) {
-			tag.put(SIZE, this.size.toString());
+			tags.put(SIZE, this.size.toString());
 		}
-		tag.put(STATUS, this.status);
-		tag.put(CLIENT, this.version);
-		tag.put(DB,this.database);
-		tag.put(TABLES, this.tables);
-		tag.put(OPTTYPE,this.operationType);
-		return tag;
+		tags.put(STATUS, this.status);
+		tags.put(CLIENT, this.version);
+		tags.put(DB,this.database);
+		tags.put(TABLES, this.tables);
+		tags.put(OPTTYPE,this.operationType);
+		if (this.cluster != null) {
+			tags.put(CLUSTER, this.cluster);
+		}
+		if (this.shard != null) {
+			tags.put(SHARD, this.shard);
+		}
+		if (this.clientZone != null) {
+			tags.put(CLIENT_ZONE, this.clientZone);
+		}
+		if (this.dbZone != null) {
+			tags.put(DB_ZONE, this.dbZone);
+		}
+		if (this.ucsValidation != null) {
+			tags.put(UCS_VALIDATION, this.ucsValidation);
+		}
+		if (this.dalValidation != null) {
+			tags.put(DAL_VALIDATION, this.dalValidation);
+		}
+		return tags;
 	}
 }

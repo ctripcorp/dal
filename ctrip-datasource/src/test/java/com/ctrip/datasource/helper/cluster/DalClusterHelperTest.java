@@ -8,7 +8,7 @@ import org.junit.Test;
  */
 public class DalClusterHelperTest {
 
-    @Test
+//    @Test
     public void test() {
         Assert.assertFalse(DalClusterHelper.tryGetUcsStrategyId("cluster_config_1").isPresent());
         Assert.assertTrue(DalClusterHelper.tryGetUcsStrategyId("cluster_config_drc").isPresent());
@@ -17,7 +17,7 @@ public class DalClusterHelperTest {
         Assert.assertEquals(3, DalClusterHelper.tryGetUcsStrategyId("cluster_config_sharding").get().intValue());
     }
 
-//    @Test
+    @Test
     public void testFat() {
         Assert.assertFalse(DalClusterHelper.tryGetUcsStrategyId("test_cluster_1").isPresent());
         Assert.assertTrue(DalClusterHelper.tryGetUcsStrategyId("dal_sharding_cluster").isPresent());

@@ -17,7 +17,8 @@
   <properties>
     <java.version>1.8</java.version>
     <framework-bom.version>4.18.0</framework-bom.version>
-    <dal.version>2.1.1</dal.version>
+    <qconfig.version>1.100.19</qconfig.version>
+    <dal.version>2.1.2</dal.version>
     <ucs.version>0.2.0</ucs.version>
   </properties>
 
@@ -45,7 +46,7 @@
       <dependency>
         <groupId>qunar.tc.qconfig</groupId>
         <artifactId>qconfig-client</artifactId>
-        <version>1.0.0-ctrip-SNAPSHOT</version>
+        <version>${qconfig.version}</version>
       </dependency>
       <!--<dependency>
         <groupId>qunar.tc.qconfig</groupId>

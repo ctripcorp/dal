@@ -17,7 +17,6 @@ import qunar.tc.qconfig.client.Configuration;
 import qunar.tc.qconfig.client.Feature;
 import qunar.tc.qconfig.client.MapConfig;
 import qunar.tc.qconfig.client.exception.ResultUnexpectedException;
-import qunar.tc.qconfig.client.plugin.HeaderPlugin;
 
 import java.util.Collections;
 import java.util.HashMap;

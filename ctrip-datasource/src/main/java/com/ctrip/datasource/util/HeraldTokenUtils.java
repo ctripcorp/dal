@@ -32,7 +32,7 @@ public class HeraldTokenUtils {
             if (!StringUtils.isEmpty(heraldToken)) {
                 Map<String, String> headers = new HashMap<>();
                 headers.put(HERALD_TOKEN_HEADER, heraldToken);
-                HeaderPlugin.prepareHeader(groupId, configId, headers);
+                HeaderPlugin.prepareHeaders(groupId, configId, headers);
                 String msg = String.format("groupId=%s, configId=%s", groupId, configId);
                 LOGGER.info("Herald token registered: " + msg);
                 Cat.logEvent(DalLogTypes.DAL_VALIDATION, "HeraldTokenRegistered", Event.SUCCESS, msg);
@@ -66,7 +66,8 @@ public class HeraldTokenUtils {
             }
             return token;
         } catch (HeraldTokenException e) {
-            LOGGER.warn("getTokenStringByAppID error, appId=" + appId, e);
+            Cat.logEvent(DalLogTypes.DAL_VALIDATION, "HeraldTokenNotFound");
+            LOGGER.info("getTokenStringByAppID error, appId=" + appId, e);
             return null;
         }
     }

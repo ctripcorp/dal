@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.helper.SqlUtils;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -10,10 +12,12 @@ import java.util.Calendar;
 public class DalPreparedStatement extends DalStatement implements PreparedStatement {
 
     private PreparedStatement preparedStatement;
+    private char firstAlphaCharUc = 0;
 
-    public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection) {
+    public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection, String sql) {
         super(preparedStatement, connection);
         this.preparedStatement = preparedStatement;
+        this.firstAlphaCharUc = SqlUtils.firstAlphaCharUc(sql);
     }
 
     public PreparedStatement getPreparedStatement() {
@@ -22,12 +26,12 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return innerExecute(() -> preparedStatement.executeQuery());
+        return innerExecute(() -> preparedStatement.executeQuery(), false);
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return innerExecute(() -> preparedStatement.executeUpdate());
+        return innerExecute(() -> preparedStatement.executeUpdate(), true);
     }
 
     @Override
@@ -132,7 +136,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public boolean execute() throws SQLException {
-        return innerExecute(() -> preparedStatement.execute());
+        return innerExecute(() -> preparedStatement.execute(), isUpdateOperation());
     }
 
     @Override
@@ -307,7 +311,11 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public long executeLargeUpdate() throws SQLException {
-        return innerExecute(() -> preparedStatement.executeLargeUpdate());
+        return innerExecute(() -> preparedStatement.executeLargeUpdate(), true);
+    }
+
+    protected boolean isUpdateOperation() {
+        return !isCallableStatement() && !SqlUtils.isReadOperation(firstAlphaCharUc);
     }
 
 }

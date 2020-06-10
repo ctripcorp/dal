@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.log;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,9 +15,9 @@ public class SQLErrorInfo {
     private String database;
 
 
-    public SQLErrorInfo(String version, String titanKey) {
+    public SQLErrorInfo(String version, String dbKey) {
         this.version = version;
-        this.database = titanKey;
+        this.database = dbKey != null ? StringUtils.toTrimmedLowerCase(dbKey) : "Undefined";
     }
 
     public String getVersion() {
@@ -35,7 +37,7 @@ public class SQLErrorInfo {
     }
 
     public Map<String, String> toTag() {
-        Map<String, String> tag = new HashMap<String, String>();
+        Map<String, String> tag = new HashMap<>();
         tag.put(CLIENT, version);
         tag.put(DB, database);
         return tag;

@@ -12,8 +12,8 @@ public class DalCallableStatement extends DalPreparedStatement implements Callab
 
     private CallableStatement callableStatement;
 
-    public DalCallableStatement(CallableStatement callableStatement, DalConnection connection) {
-        super(callableStatement, connection);
+    public DalCallableStatement(CallableStatement callableStatement, DalConnection connection, String sql) {
+        super(callableStatement, connection, sql);
         this.callableStatement = callableStatement;
     }
 

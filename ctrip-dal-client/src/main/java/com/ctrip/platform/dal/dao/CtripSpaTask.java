@@ -41,7 +41,7 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
 	}
 
 	protected String prepareSpCallForSqlServer(String spName, StatementParameters parameters, Map<String, ?> fields) {
-	    String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
+	    String callSql = buildSqlServerCallSql(spName, fields.keySet().toArray(new String[fields.size()]));
         addParametersByIndex(parameters, fields);
         return callSql;
     }
@@ -54,4 +54,29 @@ public abstract class CtripSpaTask<T> extends TaskAdapter<T> implements SingleTa
             addParametersByIndex(parameters, fields);
         return callSql;
     }
+
+	protected String buildSqlServerCallSqlNotNullField(String spName, Map<String, ?> fields) {
+		StringBuilder valuesSb = new StringBuilder();
+		for (Map.Entry<String, ?> field : fields.entrySet()) {
+			String column = field.getKey();
+			if (field.getValue() != null || isPrimaryKey(column)) {
+				valuesSb.append(String.format(SQLSERVER_TMPL_SET_VALUE, column)).append(COLUMN_SEPARATOR);
+			}
+		}
+		if (valuesSb.length() >= 2)
+			valuesSb.delete(valuesSb.length() - 2, valuesSb.length());
+		return String.format(SQLSERVER_TMPL_CALL, spName, valuesSb.toString());
+	}
+
+	protected void addParametersByIndexNotNullField(StatementParameters parameters, Map<String, ?> entries) {
+		int index = parameters.size() + 1;
+		for (Map.Entry<String, ?> entry : entries.entrySet()) {
+			String column = entry.getKey();
+			Object value = entry.getValue();
+			if (value != null || isPrimaryKey(column)) {
+				addParameterByIndex(parameters, index++, column, value);
+			}
+		}
+	}
+
 }

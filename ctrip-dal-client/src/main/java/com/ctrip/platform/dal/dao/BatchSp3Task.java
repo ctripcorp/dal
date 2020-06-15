@@ -26,7 +26,7 @@ public class BatchSp3Task<T> extends AbstractIntArrayBulkTask<T> {
         String tableName = getRawTableName(hints);
         String spName = String.format(spTempName, tableName);
 
-        String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSql(spName, columns);
+        String callSql = buildSqlServerCallSql(spName, columns);
         StatementParameters[] parametersList = new StatementParameters[daoPojos.size()];
         
         int i = 0;

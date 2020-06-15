@@ -152,6 +152,20 @@ public abstract class BaseSingleUpdateTest {
         p3.setCountryID(null);
         String callSql3 = singleTask.prepareSpCall(spName, parameters, parser.getFields(p3));
         Assert.assertEquals(callSql3, noNameCountryIDColumn);
+
+		String noPeopleIDColumn = "exec spA_test_u @PeopleID=?, @CityID=?, @ProvinceID=?";
+		People p4 = new People();
+		p4.setName(null);
+		p4.setCityID(-1);
+		p4.setProvinceID(-1);
+		p4.setCountryID(null);
+		String callSql4 = singleTask.prepareSpCall(spName, parameters, parser.getFields(p4));
+		Assert.assertEquals(callSql4, noPeopleIDColumn);
+
+		String noColumns = "exec spA_test_u @PeopleID=?";
+		People p5 = new People();
+		String callSql5 = singleTask.prepareSpCall(spName, parameters, parser.getFields(p5));
+		Assert.assertEquals(callSql5, noColumns);
     }
 
     @Test
@@ -256,6 +270,26 @@ public abstract class BaseSingleUpdateTest {
 
 		try {
 			test.execute(new DalHints().inShard(0), parser.getFields(p1), p1, new DefaultTaskContext());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+
+	@Test
+	public void testExecuteNullPk() {
+		PeopleParser parser = new PeopleParser();
+		SingleTask<People> test = getTest(parser);
+
+		People p1 = new People();
+		p1.setName("test");
+		p1.setCityID(-1);
+		p1.setProvinceID(-1);
+		p1.setCountryID(-1);
+
+		try {
+			Assert.assertEquals(100,
+					test.execute(new DalHints().inShard(0), parser.getFields(p1), p1, new DefaultTaskContext()));
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -374,4 +408,5 @@ public abstract class BaseSingleUpdateTest {
 		
 		return pojoFields;
 	}
+
 }

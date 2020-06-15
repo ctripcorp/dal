@@ -33,7 +33,7 @@ public class SingleUpdateSpaTask<T> extends CtripSpaTask<T> {
 
 	@Override
     protected String prepareSpCallForSqlServer(String spName, StatementParameters parameters, Map<String, ?> fields) {
-        String callSql = CtripSqlServerSpBuilder.buildSqlServerCallSqlNotNullField(spName, fields);
+        String callSql = buildSqlServerCallSqlNotNullField(spName, fields);
         addParametersByIndexNotNullField(parameters, fields);
         return callSql;
     }

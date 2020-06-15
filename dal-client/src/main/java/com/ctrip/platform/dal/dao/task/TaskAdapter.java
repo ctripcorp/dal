@@ -34,6 +34,8 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 	protected static final String AND = " AND ";
 	protected static final String OR = " OR ";
 	protected static final String TMPL_CALL = "{call %s(%s)}";
+	protected static final String SQLSERVER_TMPL_CALL = "exec %s %s";
+	protected static final String SQLSERVER_TMPL_SET_VALUE = "@%s=?";
 
 	public static String findtmp = "SELECT * FROM %s WHERE %s";
 
@@ -233,20 +235,6 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 		int index = parameters.size() + 1;
 		for (Map.Entry<String, ?> entry : entries.entrySet()) {
 			addParameterByIndex(parameters, index++, entry.getKey(), entry.getValue());
-		}
-	}
-
-	/**
-	 * According to DBA, call SP by parameter name will invoke sp_sproc_columns to get SP metadata,  this is a
-	 * very costly operation. To avoid the cost, it is required to call sp by parameter index instead of name
-	 */
-	public void addParametersByIndexNotNullField(StatementParameters parameters,
-									 Map<String, ?> entries) {
-		int index = parameters.size() + 1;
-		for (Map.Entry<String, ?> entry : entries.entrySet()) {
-			if (entry.getValue() != null) {
-				addParameterByIndex(parameters, index++, entry.getKey(), entry.getValue());
-			}
 		}
 	}
 
@@ -464,6 +452,18 @@ public class TaskAdapter<T> extends BaseTaskAdapter implements DaoTask<T> {
 			this.shardingCategory = ShardingCategory.TableShard;
 		else
 			this.shardingCategory = ShardingCategory.NoShard;
+	}
+
+	protected String buildSqlServerCallSql(String spName, String[] columns) {
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		for (String value : columns) {
+			sb.append(String.format(SQLSERVER_TMPL_SET_VALUE, value));
+			if (++i < columns.length)
+				sb.append(COLUMN_SEPARATOR);
+		}
+
+		return String.format(SQLSERVER_TMPL_CALL, spName, sb.toString());
 	}
 
 }

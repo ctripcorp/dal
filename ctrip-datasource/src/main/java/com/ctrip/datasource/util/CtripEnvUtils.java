@@ -36,19 +36,38 @@ public class CtripEnvUtils implements EnvUtils {
     }
 
     public void setEnv(String env) {
-        this.env.set(new ValueWrapper<>(env));
+        if (env != null)
+            this.env.set(new ValueWrapper<>(env));
+        else
+            this.env.set(null);
     }
 
     public void setSubEnv(String subEnv) {
-        this.subEnv.set(new ValueWrapper<>(subEnv));
+        if (subEnv != null)
+            this.subEnv.set(new ValueWrapper<>(subEnv));
+        else
+            this.subEnv.set(null);
     }
 
     public void setZone(String zone) {
-        this.zone.set(new ValueWrapper<>(zone));
+        if (zone != null)
+            this.zone.set(new ValueWrapper<>(zone));
+        else
+            this.zone.set(null);
     }
 
     public void setIdc(String idc) {
-        this.idc.set(new ValueWrapper<>(idc));
+        if (idc != null)
+            this.idc.set(new ValueWrapper<>(idc));
+        else
+            this.idc.set(null);
+    }
+
+    public void clear() {
+        setEnv(null);
+        setSubEnv(null);
+        setZone(null);
+        setIdc(null);
     }
 
 }

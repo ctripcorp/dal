@@ -2,6 +2,9 @@ package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
+import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,8 +14,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.util.List;
 
 public class DalDataSourceFactoryTest {
+    private static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
+
     private static final String name = "mysqldaltest01db_W";
 
     private static final String NULL_CONFIGURE_NAME = "nullConfigure";
@@ -104,6 +110,20 @@ public class DalDataSourceFactoryTest {
         } catch (UnsupportedOperationException e) {
             // ok
         }
+    }
+
+//    @Test
+    public void testGetOrCreateAllMasterDataSources() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        List<DataSource> dss = factory.getOrCreateAllMasterDataSources("cluster_config_sharding_with_slaves");
+        Assert.assertEquals(2, dss.size());
+    }
+
+    @Test
+    public void testGetOrCreateAllMasterDataSourcesFat() throws Exception {
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        List<DataSource> dss = factory.getOrCreateAllMasterDataSources("dal_sharding_cluster");
+        Assert.assertEquals(4, dss.size());
     }
 
 }

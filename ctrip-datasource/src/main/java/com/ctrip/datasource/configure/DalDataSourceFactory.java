@@ -253,7 +253,7 @@ public class DalDataSourceFactory {
     }
 
     /**
-     * Get or create master DataSource for non-sharding dal cluster
+     * Get or create master DataSources for dal cluster on all shards
      *
      * @param clusterName dal cluster name
      * @return DataSource

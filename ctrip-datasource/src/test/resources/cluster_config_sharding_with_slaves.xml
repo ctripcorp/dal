@@ -1,0 +1,15 @@
+<DAL>
+    <Cluster name="cluster_config_sharding_with_slaves" dbCategory="mysql" version="1">
+        <DatabaseShards>
+            <DatabaseShard index="0" masterDomain="dst56614" masterPort="3306" slaveDomain="dst56614" slavePort="3306">
+                <Database role="master" ip="10.32.20.128" port="3306" dbName="llj_test" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+                <Database role="slave" ip="10.32.20.128" port="3306" dbName="llj_test" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+            </DatabaseShard>
+            <DatabaseShard index="1" masterDomain="dst56614" masterPort="3306" slaveDomain="dst56614" slavePort="3306">
+                <Database ip="10.32.20.128" port="3306" dbName="dao_test" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+                <Database role="slave" ip="10.32.20.128" port="3306" dbName="llj_test" uid="root" pwd="!QAZ@WSX1qaz2wsx"/>
+            </DatabaseShard>
+        </DatabaseShards>
+        <UnitStrategyId>3</UnitStrategyId>
+    </Cluster>
+</DAL>

@@ -89,10 +89,12 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
         return clusterInfo != null ? clusterInfo : new NullClusterInfo();
     }
 
-    private boolean checkEnv() {
+    protected boolean checkEnv() {
+        String env = envUtils.getEnv();
         String subEnv = envUtils.getSubEnv();
         String idc = envUtils.getIdc();
-        return StringUtils.isEmpty(subEnv) && (idc == null || !idc.toLowerCase().contains("aws"));
+        boolean isPro = env != null && env.toLowerCase().contains("pro");
+        return isPro ? (idc == null || !idc.toLowerCase().contains("aws")) : StringUtils.isEmpty(subEnv);
     }
 
 }

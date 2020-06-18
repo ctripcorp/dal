@@ -55,7 +55,7 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
          * 4. no idgen config
          * 5. one master, no slaves
          */
-        boolean adaptable = checkEnv();
+        boolean adaptable = true;
         if (defaultDatabaseSet.getDatabaseCategory() != DatabaseCategory.MySql)
             adaptable = false;
         if (defaultDatabaseSet.getShardingStrategy() != null)
@@ -69,12 +69,6 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
         if (slaves != null && slaves.size() > 0)
             adaptable = false;
         return adaptable;
-    }
-
-    private boolean checkEnv() {
-        String subEnv = envUtils.getSubEnv();
-        String idc = envUtils.getIdc();
-        return StringUtils.isEmpty(subEnv) && (idc == null || !idc.toLowerCase().contains("aws"));
     }
 
     private ClusterDatabaseSet tryAdapt(DefaultDatabaseSet defaultDatabaseSet) {

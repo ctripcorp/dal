@@ -7,6 +7,8 @@ import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.ClusterInfoProvider;
 import com.ctrip.platform.dal.dao.configure.NullClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.helper.JsonUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -25,6 +27,7 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
     private DalPropertiesLocator locator;
     private HttpExecutor executor;
     private static final Map<String, ClusterInfo> clusterInfoCache = new ConcurrentHashMap<>();
+    private static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
 
     public CtripClusterInfoProvider(DalPropertiesLocator locator, HttpExecutor executor) {
         this.locator = locator;
@@ -58,10 +61,9 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
         ClusterInfo clusterInfo = null;
         Transaction transaction = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey));
         try {
-            String subEnv = Foundation.server().getSubEnv();
-            if (subEnv != null && subEnv.toLowerCase().contains("aws")) {
+            if (!checkEnv()) {
                 Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey),
-                        Event.SUCCESS, subEnv);
+                        Event.SUCCESS, String.format("subEnv=%s, idc=%s", envUtils.getSubEnv(), envUtils.getIdc()));
                 return new NullClusterInfo();
             }
 
@@ -85,6 +87,12 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
         }
 
         return clusterInfo != null ? clusterInfo : new NullClusterInfo();
+    }
+
+    private boolean checkEnv() {
+        String subEnv = envUtils.getSubEnv();
+        String idc = envUtils.getIdc();
+        return StringUtils.isEmpty(subEnv) && (idc == null || !idc.toLowerCase().contains("aws"));
     }
 
 }

@@ -11,7 +11,11 @@ public interface DataSourceConfigureConstants {
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";
     String VALIDATIONQUERY = "validationQuery";
+
+    // milliseconds (since 2.1.4)
+    // precisely for mysql; rounded up to seconds for other types of db
     String VALIDATIONQUERYTIMEOUT = "validationQueryTimeout";
+
     String VALIDATIONINTERVAL = "validationInterval";
     String TIMEBETWEENEVICTIONRUNSMILLIS = "timeBetweenEvictionRunsMillis";
     String MAX_AGE = "maxAge";
@@ -56,7 +60,11 @@ public interface DataSourceConfigureConstants {
     boolean DEFAULT_TESTONBORROW = true;
     boolean DEFAULT_TESTONRETURN = false;
     String DEFAULT_VALIDATIONQUERY = "SELECT 1";
-    int DEFAULT_VALIDATIONQUERYTIMEOUT = 5;
+
+    // milliseconds (since 2.1.4)
+    // precisely for mysql; rounded up to seconds for other types of db
+    int DEFAULT_VALIDATIONQUERYTIMEOUT = 250;
+
     long DEFAULT_VALIDATIONINTERVAL = 30000L;
     String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
     int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 5000;

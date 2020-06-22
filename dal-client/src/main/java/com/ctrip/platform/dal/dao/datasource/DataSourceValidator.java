@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
@@ -15,7 +16,6 @@ import java.sql.Statement;
 
 public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final int DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS = 1;
     private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
     private String IS_VALID_FORMAT = "isValid: %s";
@@ -63,12 +63,12 @@ public class DataSourceValidator implements ValidatorProxy {
 
         PoolProperties poolProperties = getPoolProperties();
         if (poolProperties == null) {
-            parameter.setValidationQueryTimeout(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+            parameter.setValidationQueryTimeout(DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT);
             return parameter;
         }
         int validationQueryTimeout = poolProperties.getValidationQueryTimeout();
         if (validationQueryTimeout <= 0) {
-            validationQueryTimeout = DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS;
+            validationQueryTimeout = DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT;
         }
         parameter.setValidationQueryTimeout(validationQueryTimeout);
 
@@ -104,7 +104,7 @@ public class DataSourceValidator implements ValidatorProxy {
             MySQLConnection mySqlConnection = (MySQLConnection) connection;
             isValid = MySqlConnectionHelper.isValid(mySqlConnection, parameter.getValidationQueryTimeout());
         } else {
-            isValid = connection.isValid(parameter.getValidationQueryTimeout());
+            isValid = connection.isValid(parameter.getValidationQueryTimeoutS());
         }
 
         return isValid;
@@ -113,12 +113,12 @@ public class DataSourceValidator implements ValidatorProxy {
     private boolean executeInitSQL(Connection connection, QueryParameter parameter) throws SQLException {
         boolean isValid = false;
         String query = parameter.getQuery();
-        int validationQueryTimeout = parameter.getValidationQueryTimeout();
+        int validationQueryTimeoutS = parameter.getValidationQueryTimeoutS();
 
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
-            stmt.setQueryTimeout(validationQueryTimeout);
+            stmt.setQueryTimeout(validationQueryTimeoutS);
             stmt.execute(query);
             isValid = true;
         } finally {
@@ -134,7 +134,7 @@ public class DataSourceValidator implements ValidatorProxy {
 
     private class QueryParameter {
         private String query = null;
-        private int validationQueryTimeout = -1;
+        private int validationQueryTimeout = DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT;
 
         public String getQuery() {
             return query;
@@ -144,8 +144,14 @@ public class DataSourceValidator implements ValidatorProxy {
             this.query = query;
         }
 
+        // milliseconds
         public int getValidationQueryTimeout() {
             return validationQueryTimeout;
+        }
+
+        // rounded up to seconds
+        public int getValidationQueryTimeoutS() {
+            return validationQueryTimeout / 1000 + 1;
         }
 
         public void setValidationQueryTimeout(int validationQueryTimeout) {

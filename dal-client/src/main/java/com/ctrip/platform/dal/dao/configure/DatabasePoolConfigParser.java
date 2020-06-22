@@ -22,8 +22,7 @@ public class DatabasePoolConfigParser implements DataSourceConfigureConstants {
         poolProperties.setTestOnReturn(configure.getBooleanProperty(TESTONRETURN, DEFAULT_TESTONRETURN));
 
         poolProperties.setValidationQuery(configure.getProperty(VALIDATIONQUERY, DEFAULT_VALIDATIONQUERY));
-        poolProperties.setValidationQueryTimeout(
-                configure.getIntProperty(VALIDATIONQUERYTIMEOUT, DEFAULT_VALIDATIONQUERYTIMEOUT));
+        poolProperties.setValidationQueryTimeout(configure.getValidationQueryTimeout());
         poolProperties.setValidationInterval(configure.getLongProperty(VALIDATIONINTERVAL, DEFAULT_VALIDATIONINTERVAL));
 
         poolProperties.setTimeBetweenEvictionRunsMillis(

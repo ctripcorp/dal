@@ -18,7 +18,7 @@ public class MySqlConnectionHelper {
             return false;
 
         try {
-            connection.pingInternal(false, timeout * 1000);
+            connection.pingInternal(false, timeout);
         } catch (Throwable e) {
             DataSourceValidatorException exception =
                     new DataSourceValidatorException(PING_INTERNAL_EXCEPTION_MESSAGE, e);

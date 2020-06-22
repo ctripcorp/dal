@@ -11,7 +11,7 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
-    private static final int DEFAULT_SERVER_WAIT_TIMEOUT = 120;
+    private static final int DEFAULT_SERVER_WAIT_TIMEOUT = DataSourceConfigureConstants.DEFAULT_SERVER_WAIT_TIMEOUT;
 
     // seconds
     private volatile int serverWaitTimeout = DEFAULT_SERVER_WAIT_TIMEOUT;

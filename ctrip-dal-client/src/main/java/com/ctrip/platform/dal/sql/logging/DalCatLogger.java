@@ -82,7 +82,7 @@ public class DalCatLogger {
 
     public static void catTransactionSuccess(CtripLogEntry entry, int count) {
         try {
-            Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+            Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, getLogUrl(entry));
             String clusterName = entry.getClusterName();
             if (!com.ctrip.framework.dal.cluster.client.util.StringUtils.isEmpty(clusterName))
                 Cat.logEvent(DAL_CLUSTER, clusterName, Event.SUCCESS, "shard=" + entry.getShardId());
@@ -115,7 +115,7 @@ public class DalCatLogger {
 
     public static void catTransactionFailed(CtripLogEntry entry, Throwable e) {
         try {
-            Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, entry.getDbUrl());
+            Cat.logEvent(CatConstants.TYPE_SQL_DATABASE, getLogUrl(entry));
             String clusterName = entry.getClusterName();
             if (!com.ctrip.framework.dal.cluster.client.util.StringUtils.isEmpty(clusterName))
                 Cat.logEvent(DAL_CLUSTER, clusterName, Event.SUCCESS, "shard=" + entry.getShardId());
@@ -127,6 +127,13 @@ public class DalCatLogger {
         } catch (Throwable e1) {
             e1.printStackTrace();
         }
+    }
+
+    private static String getLogUrl(CtripLogEntry entry) {
+        String connUrl = entry.getDbUrl();
+        if (entry.getDbZone() != null)
+            return connUrl + "::" + entry.getDbZone().toUpperCase();
+        return connUrl;
     }
 
     public static <T> LogContext start(DalRequest<T> request) {

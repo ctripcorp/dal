@@ -84,10 +84,10 @@ public class DataSourceValidatorTest {
         PingConnection pingConnection = new PingConnection(connMySql);
         DataSourceValidator validator = new DataSourceValidator();
         PoolProperties properties = new PoolProperties();
-        properties.setValidationQueryTimeout(2);
+        properties.setValidationQueryTimeout(200);
         validator.setPoolProperties(properties);
         validator.validate(pingConnection, PooledConnection.VALIDATE_INIT);
-        Assert.assertEquals(2000, PingConnection.timeout);
+        Assert.assertEquals(200, PingConnection.timeout);
     }
 
     private void testSqlServerConnectionValidateSuccess(int validateAction) throws SQLException {

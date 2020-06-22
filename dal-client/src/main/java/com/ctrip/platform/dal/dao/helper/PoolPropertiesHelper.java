@@ -69,7 +69,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
         properties.setJmxEnabled(DEFAULT_JMXENABLED);
         properties.setJdbcInterceptors(config.getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS));
 
-        properties.setServerWaitTimeout(config.getIntProperty(SERVER_WAIT_TIMEOUT, DEFAULT_SERVER_WAIT_TIMEOUT));
+        properties.setSessionWaitTimeout(config.getSessionWaitTimeout());
 
         return properties;
     }

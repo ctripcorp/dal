@@ -5,6 +5,6 @@ package com.ctrip.platform.dal.dao.configure;
  */
 public interface DalExtendedPoolConfiguration {
 
-    int getServerWaitTimeout();
+    int getSessionWaitTimeout();
 
 }

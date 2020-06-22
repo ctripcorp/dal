@@ -82,4 +82,9 @@ public  abstract class AbstractDataSourceConfigure implements IDataSourceConfigu
     public String getJdbcInterceptors(){
         return null;
     }
+
+    public Integer getSessionWaitTimeout() {
+        return null;
+    }
+
 }

@@ -31,7 +31,8 @@ public interface DataSourceConfigureConstants {
     String INIT_SQL = "initSql";
 
     // **********Dal extended properties key**********
-    String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";
+    String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";  // alias name for sessionWaitTimeout
+    String SESSION_WAIT_TIMEOUT = "sessionWaitTimeout";
 
     //used by mgr datasource
     String DB_TOKEN = "dbToken";
@@ -86,7 +87,7 @@ public interface DataSourceConfigureConstants {
     // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
 
     // **********Dal extended properties default value**********
-    int DEFAULT_SERVER_WAIT_TIMEOUT = 120;
+    int DEFAULT_SESSION_WAIT_TIMEOUT = 120;
 
     //used by mgr datasource
     int DEFAULT_CALL_MYSQL_API_PERIOD = 3 * 1000; //ms

@@ -307,18 +307,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return Boolean.parseBoolean(value);
     }
 
-    public Integer getServerWaitTimeout() {
-        if (properties != null) {
-            String value = properties.getProperty(SERVER_WAIT_TIMEOUT);
-            if (value != null) {
-                try {
-                    return Integer.parseInt(value);
-                } catch (NumberFormatException e) {
-                    // ignore
-                }
-            }
-        }
-        return null;
+    public Integer getSessionWaitTimeout() {
+        return getIntProperty(SESSION_WAIT_TIMEOUT, getIntProperty(SERVER_WAIT_TIMEOUT, DEFAULT_SESSION_WAIT_TIMEOUT));
     }
 
     public DatabaseCategory getDatabaseCategory() {
@@ -414,6 +404,11 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 properties.setProperty(VALIDATORCLASSNAME, configure.getValidatorClassName());
             if (configure.getJdbcInterceptors() != null)
                 properties.setProperty(JDBC_INTERCEPTORS, configure.getJdbcInterceptors());
+            if (configure instanceof AbstractDataSourceConfigure) {
+                AbstractDataSourceConfigure configure1 = (AbstractDataSourceConfigure) configure;
+                if (configure1.getSessionWaitTimeout() != null)
+                    properties.setProperty(SESSION_WAIT_TIMEOUT, String.valueOf(configure1.getSessionWaitTimeout()));
+            }
             dataSourceConfigure.setProperties(properties);
             return dataSourceConfigure;
         }
@@ -453,7 +448,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                     equals(getJdbcInterceptors(), ref.getJdbcInterceptors()) &&
                     equals(getConnectionProperties(), ref.getConnectionProperties()) &&
                     equals(getJmxEnabled(), ref.getJmxEnabled()) &&
-                    equals(getServerWaitTimeout(), ref.getServerWaitTimeout()));
+                    equals(getSessionWaitTimeout(), ref.getSessionWaitTimeout()));
         }
         return false;
     }
@@ -490,7 +485,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 append(getJdbcInterceptors()).
                 append(getConnectionProperties()).
                 append(getJmxEnabled()).
-                append(getServerWaitTimeout()).
+                append(getSessionWaitTimeout()).
                 generate();
     }
 

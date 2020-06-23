@@ -74,7 +74,7 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
     private ClusterDatabaseSet tryAdapt(DefaultDatabaseSet defaultDatabaseSet) {
         try {
             DataBase master = defaultDatabaseSet.getMasterDbs().iterator().next();
-            if (master instanceof DefaultDataBase) {
+            if ((master instanceof DefaultDataBase) && !(master instanceof ProviderDataBase)) {
                 String databaseKey = master.getConnectionString();
                 Map<String, DalConnectionString> failedConnectionStrings = DataSourceConfigureLocatorManager.
                         getInstance().getFailedConnectionStrings();

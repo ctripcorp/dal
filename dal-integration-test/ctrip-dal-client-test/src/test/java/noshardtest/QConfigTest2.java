@@ -86,7 +86,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(10000, pc.getMaxWait());
+				assertEquals(6000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -94,7 +94,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(
@@ -140,7 +140,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(10000, pc.getMaxWait());
+				assertEquals(6000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -148,7 +148,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(
@@ -221,7 +221,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(10000, pc.getMaxWait());
+				assertEquals(6000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -229,7 +229,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(
@@ -278,7 +278,7 @@ public class QConfigTest2 {
 		// case8,配置env=fat环境，QConfig
 		// APP级别配置removeAbandonedTimeout=100,datasource级别和datasource.xml配置YouSearchDB
 		@Test
-		public void testQonfigCase8() {
+		public void testQConfigCase8() {
 			TitanProvider provider = new TitanProvider();
 			Set<String> dbNames = new HashSet<>();
 			dbNames.add("CorpPerformanceManagementDB_W");
@@ -301,7 +301,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(10000, pc.getMaxWait());
+				assertEquals(6000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -309,7 +309,7 @@ public class QConfigTest2 {
 				assertTrue(pc.isLogAbandoned());
 				assertEquals(30000, pc.getMinEvictableIdleTimeMillis());
 				assertEquals(
-						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2",
+						"sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2",
 						pc.getConnectionProperties());
 				// assertEquals("set names utf8mb4",pc.getInitSQL());
 				assertEquals(

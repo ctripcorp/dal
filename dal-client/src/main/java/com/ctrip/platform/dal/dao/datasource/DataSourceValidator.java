@@ -104,7 +104,7 @@ public class DataSourceValidator implements ValidatorProxy {
             MySQLConnection mySqlConnection = (MySQLConnection) connection;
             isValid = MySqlConnectionHelper.isValid(mySqlConnection, parameter.getValidationQueryTimeout());
         } else {
-            isValid = connection.isValid(parameter.getValidationQueryTimeoutS());
+            isValid = connection.isValid(parameter.getValidationQueryTimeout());
         }
 
         return isValid;
@@ -113,12 +113,12 @@ public class DataSourceValidator implements ValidatorProxy {
     private boolean executeInitSQL(Connection connection, QueryParameter parameter) throws SQLException {
         boolean isValid = false;
         String query = parameter.getQuery();
-        int validationQueryTimeoutS = parameter.getValidationQueryTimeoutS();
+        int validationQueryTimeout = parameter.getValidationQueryTimeout();
 
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
-            stmt.setQueryTimeout(validationQueryTimeoutS);
+            stmt.setQueryTimeout(validationQueryTimeout);
             stmt.execute(query);
             isValid = true;
         } finally {
@@ -144,14 +144,8 @@ public class DataSourceValidator implements ValidatorProxy {
             this.query = query;
         }
 
-        // milliseconds
         public int getValidationQueryTimeout() {
             return validationQueryTimeout;
-        }
-
-        // rounded up to seconds
-        public int getValidationQueryTimeoutS() {
-            return validationQueryTimeout / 1000 + 1;
         }
 
         public void setValidationQueryTimeout(int validationQueryTimeout) {

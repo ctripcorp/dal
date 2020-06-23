@@ -11,9 +11,6 @@ public interface DataSourceConfigureConstants {
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";
     String VALIDATIONQUERY = "validationQuery";
-
-    // milliseconds (since 2.1.4)
-    // precisely for mysql; rounded up to seconds for other types of db
     String VALIDATIONQUERYTIMEOUT = "validationQueryTimeout";
 
     String VALIDATIONINTERVAL = "validationInterval";
@@ -40,6 +37,9 @@ public interface DataSourceConfigureConstants {
     String DB_MODEL = "dbModel";
     String LOAD_BALANCE_STRATEGY = "loadBalanceStrategy";
     String SERVER_AFFINITY_ORDER = "serverAffinityOrder";
+    String LOCAL_ACCESS = "localAccess";
+    String IDC_PRIORITY = "idcPriority";
+    String IDC_PRIORITY_SEPARATOR = ",";
 
     // This is for typo error
     String INIT_SQL2 = "initSQL";
@@ -61,10 +61,7 @@ public interface DataSourceConfigureConstants {
     boolean DEFAULT_TESTONBORROW = true;
     boolean DEFAULT_TESTONRETURN = false;
     String DEFAULT_VALIDATIONQUERY = "SELECT 1";
-
-    // milliseconds (since 2.1.4)
-    // precisely for mysql; rounded up to seconds for other types of db
-    int DEFAULT_VALIDATIONQUERYTIMEOUT = 250;
+    int DEFAULT_VALIDATIONQUERYTIMEOUT = 1;
 
     long DEFAULT_VALIDATIONINTERVAL = 30000L;
     String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";

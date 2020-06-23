@@ -10,8 +10,9 @@ import java.util.*;
 
 public class DataSourceConfigure extends AbstractDataSourceConfigure
         implements DataSourceConfigureConstants, DalConnectionStringConfigure, DalPoolPropertiesConfigure {
+
     private String name;
-    private Properties properties = new Properties();
+    private Properties properties = new NullFilteredProperties();
     private String version;
     private DalConnectionString connectionString;
 
@@ -26,7 +27,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
 
     public DataSourceConfigure(String name, Properties properties) {
         this(name);
-        this.properties = properties;
+        this.properties = new NullFilteredProperties(properties);
     }
 
     public DataSourceConfigure(String name, Map<String, String> propertyMap) {
@@ -130,7 +131,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setProperties(Properties properties) {
-        this.properties = properties;
+        this.properties = new NullFilteredProperties(properties);
     }
 
 
@@ -254,6 +255,18 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return DBModel.toDBModel(getProperty(DB_MODEL, DEFAULT_DB_MODEL));
     }
 
+    @Override
+    public String getLocalAccess() {
+        return getProperty(LOCAL_ACCESS);
+    }
+
+    @Override
+    public String[] getIdcPriority() {
+        String value = getProperty(IDC_PRIORITY);
+        if (com.ctrip.framework.dal.cluster.client.util.StringUtils.isTrimmedEmpty(value))
+            return new String[0];
+        return StringUtils.split(value, IDC_PRIORITY_SEPARATOR);
+    }
 
     public String getInitSQL() {
         String initSQL = getProperty(INIT_SQL);
@@ -497,6 +510,20 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         }
         public int generate() {
             return hashCode;
+        }
+    }
+
+    private static class NullFilteredProperties extends Properties {
+        public NullFilteredProperties() {
+        }
+
+        public NullFilteredProperties(Properties defaults) {
+            super(defaults);
+        }
+
+        @Override
+        public synchronized Object setProperty(String key, String value) {
+            return value != null ? super.setProperty(key, value) : getProperty(key);
         }
     }
 

@@ -7,9 +7,7 @@ import com.mysql.jdbc.MySQLConnection;
 public class MySqlConnectionHelper {
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String PING_INTERNAL_EXCEPTION_MESSAGE =
-            "An error occurred while invoking pingInternal method of MySqlConnection.";
-    private static final String VALIDATION_EXCEPTION_HELP_MESSAGE =
-            "Connection validation failed. Refer to http://conf.ctripcorp.com/pages/viewpage.action?pageId=231813020 for more explanation";
+            "An error occurred while invoking pingInternal method of MySqlConnection. Refer to http://conf.ctripcorp.com/pages/viewpage.action?pageId=231813020";
 
     public static boolean isValid(MySQLConnection connection, int timeout) {
         return pingInternal(connection, timeout);
@@ -20,10 +18,9 @@ public class MySqlConnectionHelper {
             return false;
 
         try {
-            connection.pingInternal(false, timeout);
+            connection.pingInternal(false, timeout * 1000);
         } catch (Throwable e) {
-            LOGGER.warn(VALIDATION_EXCEPTION_HELP_MESSAGE,
-                    new DataSourceValidatorException(PING_INTERNAL_EXCEPTION_MESSAGE, e));
+            LOGGER.warn(new DataSourceValidatorException(PING_INTERNAL_EXCEPTION_MESSAGE, e));
             return false;
         }
 

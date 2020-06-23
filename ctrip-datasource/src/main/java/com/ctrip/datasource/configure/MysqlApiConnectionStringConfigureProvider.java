@@ -22,10 +22,7 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,15 +52,17 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
 
     private Listener<DalConnectionStringConfigure> listener;
 
-    private String mysqlApiUrl;
-    private String dbToken;
-    private int callMysqlApiPeriod = FIXED_DELAY;
-    private DBModel dbModel;
+    protected String mysqlApiUrl;
+    protected String dbToken;
+    protected int callMysqlApiPeriod = FIXED_DELAY;
+    protected DBModel dbModel;
+    protected boolean localAccess = false;
+    protected String[] idcPriority = IDC_ACCESS_ORDER;
 
     private ScheduledExecutorService executor;
 
     public MysqlApiConnectionStringConfigureProvider(String dbName) {
-        this.dbName = dbName;
+        this.dbName = dbName != null ? StringUtils.toTrimmedLowerCase(dbName) : null;
         dalPropertiesLocator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
         dataSourceConfigureLocator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
     }
@@ -77,6 +76,10 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         dbToken = mysqlApiConfigureProperties.getDBToken();
         callMysqlApiPeriod = mysqlApiConfigureProperties.getCallMysqlApiPeriod();
         dbModel = mysqlApiConfigureProperties.getDBModel();
+        localAccess = Boolean.parseBoolean(mysqlApiConfigureProperties.getLocalAccess());
+        String[] idcPriorityConfig = mysqlApiConfigureProperties.getIdcPriority();
+        if (idcPriorityConfig != null && idcPriorityConfig.length > 0)
+            idcPriority = idcPriorityConfig;
     }
 
     private DalPoolPropertiesConfigure getMysqlApiConfigureProperties(PropertiesWrapper propertiesWrapper) {
@@ -176,11 +179,6 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     }
 
     private String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
-        String currentIdc = envUtils.getIdc();
-        if (!StringUtils.isEmpty(currentIdc)) {
-            currentIdc = currentIdc.toLowerCase();
-        }
-
         String serverAffinityOrder = "";
 
         Map<String, String> idcAndIpPort = new HashMap<>();
@@ -191,20 +189,23 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
             }
         }
 
-        String ipPortInCurrentIdc = idcAndIpPort.get(currentIdc);
-        if (!StringUtils.isEmpty(ipPortInCurrentIdc)) {
-            serverAffinityOrder += ipPortInCurrentIdc + SEPARATED;
+        if (localAccess) {
+            String currentIdc = envUtils.getIdc();
+            if (!StringUtils.isEmpty(currentIdc)) {
+                currentIdc = currentIdc.toLowerCase();
+                String ipPortInCurrentIdc = idcAndIpPort.get(currentIdc);
+                if (!StringUtils.isEmpty(ipPortInCurrentIdc)) {
+                    serverAffinityOrder += ipPortInCurrentIdc + SEPARATED;
+                }
+                idcAndIpPort.remove(currentIdc);
+            }
         }
 
-        for (String idc : IDC_ACCESS_ORDER) {
-            if (idc.equalsIgnoreCase(currentIdc)) {
-                continue;
+        for (String idc : idcPriority) {
+            String ipPort = idcAndIpPort.get(idc.toLowerCase());
+            if (!StringUtils.isEmpty(ipPort)) {
+                serverAffinityOrder += ipPort + SEPARATED;
             }
-            String ipPort = idcAndIpPort.get(idc);
-            if (StringUtils.isEmpty(ipPort)) {
-                continue;
-            }
-            serverAffinityOrder += ipPort + SEPARATED;
         }
 
         return serverAffinityOrder.substring(0, serverAffinityOrder.length() - 1);
@@ -213,6 +214,19 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
     @Override
     public void addListener(Listener<DalConnectionStringConfigure> listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MysqlApiConnectionStringConfigureProvider that = (MysqlApiConnectionStringConfigureProvider) o;
+        return Objects.equals(dbName, that.dbName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dbName);
     }
 
     private class MysqlApiConnectionStringChecker implements Runnable {

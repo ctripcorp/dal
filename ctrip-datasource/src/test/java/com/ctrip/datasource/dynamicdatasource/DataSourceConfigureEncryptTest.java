@@ -14,6 +14,7 @@ import static org.junit.Assert.*;
  * Created by taochen on 2019/8/22.
  */
 public class DataSourceConfigureEncryptTest {
+
     @Test
     public void testEncryptDataSourceConfigure() {
         DataSourceConfigureConvert stringConvert = ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
@@ -36,6 +37,6 @@ public class DataSourceConfigureEncryptTest {
         assertNotEquals("!QAZ@WSX1qaz2wsx", configureEncrypt.getPassword());
         assertEquals("root", configureDecrypt.getUserName());
         assertEquals("!QAZ@WSX1qaz2wsx", configureDecrypt.getPassword());
-
     }
+
 }

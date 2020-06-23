@@ -34,7 +34,6 @@ public class TitanProvider implements IntegratedConfigProvider {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
-    //private static final String CONNECTION_STRING_TYPE = "dal.connectionString";
     private static final String MYSQL_API_CONNECTION_STRING = "mysqlApiConnectionString";
     private static final String NULL_MYSQL_API_CONNECTION_STRING = "nullConnectionString";
     private static final String CONNECTION_STRING_CHANGE = "connectionStringChange";

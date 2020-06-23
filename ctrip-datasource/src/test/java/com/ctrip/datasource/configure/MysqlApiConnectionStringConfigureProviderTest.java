@@ -44,6 +44,46 @@ public class MysqlApiConnectionStringConfigureProviderTest {
     }
 
     @Test
+    public void testLocalAccessConnectionString() throws Exception {
+        String mgrUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944)," +
+                "address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944)," +
+                "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944)/qconfig" +
+                "?useUnicode=true&characterEncoding=UTF-8" +
+                "&loadBalanceStrategy=serverAffinity&serverAffinityOrder="+
+                "address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944):3306";
+        MockProvider provider = new MockProvider(DB_NAME_1, true,
+                new String[] { "sharb", "shaoy", "shafq", "shajq" });
+        envUtils.setEnv("pro");
+        envUtils.setIdc("shafq");
+        DalConnectionStringConfigure configure = provider.getConnectionString();
+        Assert.assertEquals(configure.getConnectionUrl(), mgrUrl);
+        envUtils.setEnv(null);
+        envUtils.setIdc(null);
+    }
+
+    @Test
+    public void testNonLocalAccessConnectionString() throws Exception {
+        String mgrUrl = "jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944)," +
+                "address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944)," +
+                "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944)/qconfig" +
+                "?useUnicode=true&characterEncoding=UTF-8" +
+                "&loadBalanceStrategy=serverAffinity&serverAffinityOrder="+
+                "address=(type=master)(protocol=tcp)(host=10.60.53.211)(port=55944):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.25.82.137)(port=55944):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.9.72.67)(port=55944):3306";
+        MockProvider provider = new MockProvider(DB_NAME_1, false,
+                new String[] { "sharb", "shaoy", "shafq", "shajq" });
+        envUtils.setEnv("pro");
+        envUtils.setIdc("shafq");
+        DalConnectionStringConfigure configure = provider.getConnectionString();
+        Assert.assertEquals(configure.getConnectionUrl(), mgrUrl);
+        envUtils.setEnv(null);
+        envUtils.setIdc(null);
+    }
+
+    @Test
     public void testCustomGetDataSourceConfigure() {
         ConnectionStringConfigureProvider provider = new MockConnectionStringConfigureProvider();
         DataSourceConfigureLocator locator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
@@ -106,4 +146,24 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         sb.reverse();
         System.out.println(sb.substring(0, sb.toString().indexOf(token)));
     }
+
+    static class MockProvider extends MysqlApiConnectionStringConfigureProvider {
+        boolean localAccess;
+        String[] idcPriority;
+
+        MockProvider(String dbName, boolean localAccess, String[] idcPriority) {
+            super(dbName);
+            this.localAccess = localAccess;
+            this.idcPriority = idcPriority;
+        }
+
+        @Override
+        protected void initMysqlApiConfigure() {
+            super.initMysqlApiConfigure();
+            super.localAccess = this.localAccess;
+            if (this.idcPriority != null)
+                super.idcPriority = this.idcPriority;
+        }
+    }
+
 }

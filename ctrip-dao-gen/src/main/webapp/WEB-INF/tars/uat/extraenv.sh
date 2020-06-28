@@ -1,1 +1,0 @@
-JAVA_OPTS="${JAVA_OPTS} -Xmx1716m -Xms1716m"

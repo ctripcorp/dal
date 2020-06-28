@@ -1,2 +1,0 @@
-#com.ctrip.framework.idgen.client.IdGeneratorFactory
-com.ctrip.platform.dal.sharding.idgen.NullIdGeneratorFactory

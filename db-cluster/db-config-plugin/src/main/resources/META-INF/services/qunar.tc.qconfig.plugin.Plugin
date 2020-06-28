@@ -1,6 +1,0 @@
-com.ctrip.framework.dal.dbconfig.plugin.TitanAdminPlugin
-com.ctrip.framework.dal.dbconfig.plugin.TitanServerPlugin
-com.ctrip.framework.dal.dbconfig.plugin.MongoAdminPlugin
-com.ctrip.framework.dal.dbconfig.plugin.MongoServerPlugin
-com.ctrip.framework.dal.dbconfig.plugin.DalAdminPlugin
-com.ctrip.framework.dal.dbconfig.plugin.DalServerPlugin

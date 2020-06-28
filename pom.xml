@@ -4,16 +4,16 @@
     <parent>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>dal-client-parent</artifactId>
-        <version>2.0.0.1</version>
+        <version>2.1.5-SNAPSHOT</version>
     </parent>
     <artifactId>dal-client-trip-parent</artifactId>
-    <version>2.0.0.1</version>
+    <version>2.1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>ctrip-datasource</module>
         <module>ctrip-dal-client</module>
-        <!--<module>ctrip-dao-gen</module>-->
+        <module>ctrip-dao-gen</module>
     </modules>
 
     <properties>

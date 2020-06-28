@@ -1,0 +1,23 @@
+<Datasources>
+    <Datasource name="dao"
+                userName="un_songs_dal"
+                password="1@unsongsdal"
+                connectionUrl="jdbc:mysql://dalservice2.mysql.db.lpt.qa.nt.ctripcorp.com:55444/dalservice2db"
+                driverClassName="com.mysql.jdbc.Driver"
+                testWhileIdle="false"
+                testOnBorrow="true"
+                testOnReturn="false"
+                validationQuery="SELECT 1"
+                validationInterval="30000"
+                timeBetweenEvictionRunsMillis="5000"
+                maxActive="100"
+                minIdle="0"
+                maxWait="10000"
+                maxAge="0"
+                initialSize="1"
+                removeAbandonedTimeout="60"
+                removeAbandoned="true"
+                logAbandoned="true"
+                minEvictableIdleTimeMillis="30000"
+                connectionProperties="rewriteBatchedStatements=true;allowMultiQueries=true"/>
+</Datasources>

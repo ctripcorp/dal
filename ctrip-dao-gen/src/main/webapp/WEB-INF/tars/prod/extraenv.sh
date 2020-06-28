@@ -1,0 +1,1 @@
+JAVA_OPTS="${JAVA_OPTS} -Xmx6g -Xms6g"

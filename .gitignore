@@ -29,6 +29,8 @@ logs/
 *.log
 *.versionsBackup
 
+ctrip-dao-gen/overlays/
+
 # External tool builders
 .externalToolBuilders/
 

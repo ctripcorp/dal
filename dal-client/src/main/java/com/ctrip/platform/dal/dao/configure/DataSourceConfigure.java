@@ -365,11 +365,11 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
             properties.setProperty(PASSWORD, password != null ? password : "");
             String connectionUrl = configure.getConnectionUrl();
             if (connectionUrl == null)
-                throw new DalRuntimeException("connetion url cannot be null");
+                throw new DalRuntimeException("connection url cannot be null");
             properties.setProperty(CONNECTION_URL, connectionUrl);
             HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
             if (StringUtils.isEmpty(hostAndPort.getHost())) {
-                properties.setProperty(HOST_NAME, "UnKnown");
+                properties.setProperty(HOST_NAME, "unknown");
             }
             else {
                 properties.setProperty(HOST_NAME, hostAndPort.getHost());

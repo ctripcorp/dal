@@ -62,11 +62,13 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
     public static class ClusterConnectionStringImpl implements DalConnectionString {
 
         private String name;
+        private Database database;
         private ConnectionString connectionString;
         private String[] aliasKeys;
 
         public ClusterConnectionStringImpl(String name, Database database) {
             this.name = name;
+            this.database = database;
             this.connectionString = database.getConnectionString();
             this.aliasKeys = database.getAliasKeys();
         }
@@ -112,7 +114,7 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
         @Override
         public DalConnectionString clone() {
-            throw new UnsupportedOperationException("clone not supported");
+            return new ClusterConnectionStringImpl(name, database);
         }
 
     }

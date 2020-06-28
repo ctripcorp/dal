@@ -322,7 +322,7 @@ public class ForceSwitchableDataSourceTest {
     }
 
     @Test
-    public void MGRSwitchToNormal() throws Exception {
+    public void testSwitchMGRToNormal() throws Exception {
         IDataSourceConfigureProvider nullProvider = new ModifyDataSourceConfigureProvider();
         ForceSwitchableDataSource nullDataSource = new ForceSwitchableDataSource(nullProvider);
         Properties properties = new Properties();

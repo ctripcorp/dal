@@ -72,21 +72,19 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             final String name;
             final DataSourceConfigure usedConfigure;
             forceSwitchedStatus = ForceSwitchedStatus.ForceSwitching;
-            if (isNullDataSource) {
-                if (configure instanceof IDataSourceConfigure) {
-                    usedConfigure = dataSourceConfigureConvert.desDecrypt(DataSourceConfigure.valueOf((IDataSourceConfigure) configure));
-                    name = ((IDataSourceConfigure)configure).getConnectionUrl();
-                }
-                else {
-                    throw new DalRuntimeException("Force Switch Error: datasource configure is invalid");
-                }
-            }
-            else {
-                usedConfigure = getSingleDataSource().getDataSourceConfigure().clone();
-                name = getSingleDataSource().getName();
-            }
-            final String logName = String.format(FORCE_SWITCH, name);
             try {
+                if (isNullDataSource) {
+                    if (configure instanceof IDataSourceConfigure) {
+                        usedConfigure = dataSourceConfigureConvert.desDecrypt(DataSourceConfigure.valueOf((IDataSourceConfigure) configure));
+                        name = ((IDataSourceConfigure) configure).getConnectionUrl();
+                    } else {
+                        throw new DalRuntimeException("Force Switch Error: datasource configure is invalid");
+                    }
+                } else {
+                    usedConfigure = getSingleDataSource().getDataSourceConfigure().clone();
+                    name = getSingleDataSource().getName();
+                }
+                final String logName = String.format(FORCE_SWITCH, name);
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "forceSwitch", new Callback() {
                     @Override
                     public void execute() throws Exception {
@@ -96,13 +94,13 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new connection url: %s", usedConfigure.getConnectionUrl()));
                         asyncRefreshDataSource(name, usedConfigure, new ForceSwitchListener() {
                             public void onCreatePoolSuccess() {
-                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s",name), usedConfigure.getConnectionUrl());
+                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess: %s", name), usedConfigure.getConnectionUrl());
                                 poolCreated = true;
                                 forceSwitchedStatus = ForceSwitchedStatus.ForceSwitched;
-                                oldForceSwitchedStatus = forceSwitchedStatus;
+                                oldForceSwitchedStatus = ForceSwitchedStatus.ForceSwitched;
                                 isNullDataSource = false;
                                 final SwitchableDataSourceStatus status = getStatus();
-                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s",name), "notify listeners' onForceSwitchSuccess");
+                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolSuccess::notifyListeners: %s", name), "notify listeners' onForceSwitchSuccess");
                                 for (final SwitchListener listener : listeners)
                                     executor.submit(new Runnable() {
                                         @Override
@@ -117,10 +115,10 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                             }
 
                             public void onCreatePoolFail(final Throwable e) {
-                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail: %s",name),  e.getMessage());
+                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail: %s", name), e.getMessage());
                                 forceSwitchedStatus = oldForceSwitchedStatus;
                                 final SwitchableDataSourceStatus status = getStatus();
-                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail::notifyListeners: %s",name), "notify listeners' onForceSwitchFail");
+                                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format("onCreatePoolFail::notifyListeners: %s", name), "notify listeners' onForceSwitchFail");
                                 for (final SwitchListener listener : listeners)
                                     executor.submit(new Runnable() {
                                         @Override
@@ -136,9 +134,10 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         });
                     }
                 });
-            } catch (Exception e) {
-                LOGGER.error("Force Switch Error", e);
-                throw new DalRuntimeException("Force Switch Error", e);
+            } catch (Throwable t) {
+                forceSwitchedStatus = oldForceSwitchedStatus;
+                LOGGER.error("Force switch error", t);
+                throw new DalRuntimeException("Force switch error", t);
             }
             return oldStatus;
         }
@@ -182,9 +181,9 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         }
                     }
                 });
-            } catch (Exception e) {
-                LOGGER.error("get status error", e);
-                throw new DalRuntimeException("get status error", e);
+            } catch (Throwable t) {
+                LOGGER.error("Get status error", t);
+                throw new DalRuntimeException("Get status error", t);
             }
             boolean isForceSwitched;
             if (ForceSwitchedStatus.ForceSwitched.equals(forceSwitchedStatus)) {
@@ -263,8 +262,9 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                         });
                     }
                 });
-            } catch (Exception e) {
-                throw new DalRuntimeException(e);
+            } catch (Throwable t) {
+                LOGGER.error("Restore error", t);
+                throw new DalRuntimeException("Restore error", t);
             }
             return oldStatus;
         }
@@ -277,7 +277,6 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     private void setIpPortCache(HostAndPort hostAndPort) {
         this.currentHostAndPort = hostAndPort;
     }
-
 
     private void setPoolCreated(boolean poolCreated) {
         this.poolCreated = poolCreated;

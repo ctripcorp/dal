@@ -101,8 +101,9 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
 
         @Override
         public DalConnectionString clone() {
-            throw new UnsupportedOperationException("clone not supported");
+            return new ApiConnectionStringImpl(connectionStringConfigure);
         }
+
     }
 
 }

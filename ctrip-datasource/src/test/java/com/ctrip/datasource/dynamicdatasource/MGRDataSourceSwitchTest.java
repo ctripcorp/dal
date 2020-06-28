@@ -2,12 +2,16 @@ package com.ctrip.datasource.dynamicdatasource;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.datasource.configure.MockConnectionStringConfigureProvider;
+import com.ctrip.datasource.configure.MysqlApiConnectionStringConfigureProvider;
 import com.ctrip.datasource.titan.TitanProvider;
+import com.ctrip.datasource.util.CtripEnvUtils;
 import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.DataSourceLocator;
-import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.configure.FirstAidKit;
+import com.ctrip.platform.dal.dao.configure.IDataSourceConfigure;
+import com.ctrip.platform.dal.dao.datasource.*;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,6 +19,8 @@ import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
 
 public class MGRDataSourceSwitchTest {
+
+    private static CtripEnvUtils envUtils = (CtripEnvUtils) DalElementFactory.DEFAULT.getEnvUtils();
 
     @Test
     public void testExecuteListenerSwitchDataSource() throws Exception {
@@ -85,4 +91,19 @@ public class MGRDataSourceSwitchTest {
             Assert.assertTrue(mgrUrl1.equalsIgnoreCase(url2) || mgrUrl2.equalsIgnoreCase(url2));
         }
     }
+
+    @Test
+    public void testGetFirstAidKit() throws Exception {
+        envUtils.setEnv("pro");
+        DalDataSourceFactory factory = new DalDataSourceFactory();
+        DataSource dataSource = factory.createVariableTypeDataSource(new MockConnectionStringConfigureProvider(), true);
+        Assert.assertTrue(dataSource instanceof ForceSwitchableDataSource);
+        Assert.assertTrue(((ForceSwitchableDataSource) dataSource).getSingleDataSource()
+                .getDataSourceConfigure().getConnectionUrl().startsWith("jdbc:mysql:replication://"));
+        FirstAidKit kit = ((ForceSwitchableDataSource) dataSource).getFirstAidKit();
+        Assert.assertTrue(kit instanceof IDataSourceConfigure);
+        Assert.assertTrue(((IDataSourceConfigure) kit).getConnectionUrl().startsWith("jdbc:mysql:replication://"));
+        envUtils.setEnv(null);
+    }
+
 }

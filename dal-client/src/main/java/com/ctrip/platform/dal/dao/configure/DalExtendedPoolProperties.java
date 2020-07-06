@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -16,6 +17,8 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
 
     // seconds
     private volatile int sessionWaitTimeout = DEFAULT_SESSION_WAIT_TIMEOUT;
+
+    private DataSourceIdentity dataSourceId;
 
     @Override
     public int getSessionWaitTimeout() {
@@ -48,6 +51,15 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
         LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
                 "AppliedSessionWaitTimeout=" + appliedSessionWaitTimeout, "");
         return appliedSessionWaitTimeout;
+    }
+
+    @Override
+    public DataSourceIdentity getDataSourceId() {
+        return dataSourceId;
+    }
+
+    public void setDataSourceId(DataSourceIdentity dataSourceId) {
+        this.dataSourceId = dataSourceId;
     }
 
 }

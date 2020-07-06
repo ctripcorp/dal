@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
@@ -15,8 +16,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     private Properties properties = new NullFilteredProperties();
     private String version;
     private DalConnectionString connectionString;
-
-    private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
+    private DataSourceIdentity dataSourceId;
 
     public DataSourceConfigure() {
     }
@@ -350,6 +350,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         dataSourceConfigure.setProperties(p);
         dataSourceConfigure.setVersion(version);
         dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
+        dataSourceConfigure.setDataSourceId(dataSourceId);
         return dataSourceConfigure;
     }
 
@@ -430,6 +431,14 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     public void replaceURL(String ip, int port) {
         String newConnectionUrl = ConnectionStringParser.replaceHostAndPort(getConnectionUrl(),ip,String.valueOf(port));
         setConnectionUrl(newConnectionUrl);
+    }
+
+    public DataSourceIdentity getDataSourceId() {
+        return dataSourceId;
+    }
+
+    public void setDataSourceId(DataSourceIdentity dataSourceId) {
+        this.dataSourceId = dataSourceId;
     }
 
     @Override

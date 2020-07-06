@@ -71,6 +71,8 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
 
         properties.setSessionWaitTimeout(config.getSessionWaitTimeout());
 
+        properties.setDataSourceId(config.getDataSourceId());
+
         return properties;
     }
 

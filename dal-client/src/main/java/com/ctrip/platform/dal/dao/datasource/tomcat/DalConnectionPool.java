@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.tomcat;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
@@ -35,9 +36,9 @@ public class DalConnectionPool extends ConnectionPool {
     @Override
     protected PooledConnection borrowConnection(long now, PooledConnection con, String username, String password) throws SQLException {
         try {
-            long waitTime = System.currentTimeMillis() - poolWaitTime.get().longValue();
+            long waitTime = System.currentTimeMillis() - poolWaitTime.get();
             if (waitTime > 1) {
-                connectionListener.onWaitConnection(getName(), getConnection(con), poolWaitTime.get().longValue());
+                connectionListener.onWaitConnection(getName(), getConnection(con), poolWaitTime.get());
             }
         } catch (Exception e) {
             logger.error("[borrowConnection]" + this, e);
@@ -53,16 +54,20 @@ public class DalConnectionPool extends ConnectionPool {
         long startTime = System.currentTimeMillis();
         PooledConnection pooledConnection;
 
+        PoolConfiguration poolConfig = getPoolProperties();
+        DataSourceIdentity dataSourceId = poolConfig instanceof DalExtendedPoolConfiguration ?
+                ((DalExtendedPoolConfiguration) poolConfig).getDataSourceId() : null;
+
         try {
             pooledConnection = super.createConnection(now, notUsed, username, password);
         } catch (Throwable e) {
             String connectionUrl = LoggerHelper.getSimplifiedDBUrl(getPoolProperties().getUrl());
-            connectionListener.onCreateConnectionFailed(getName(), connectionUrl, e, startTime);
+            connectionListener.onCreateConnectionFailed(getName(), connectionUrl, dataSourceId, e, startTime);
             throw e;
         }
 
         try {
-            connectionListener.onCreateConnection(getName(), getConnection(pooledConnection), startTime);
+            connectionListener.onCreateConnection(getName(), getConnection(pooledConnection), dataSourceId, startTime);
         } catch (Throwable e) {
             logger.error("[createConnection]" + this, e);
         }

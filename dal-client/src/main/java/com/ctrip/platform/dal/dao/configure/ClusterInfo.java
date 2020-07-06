@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.IClusterDataSourceIdentity;
 
 public class ClusterInfo {
 
@@ -42,7 +43,7 @@ public class ClusterInfo {
     }
 
     public DataSourceIdentity toDataSourceIdentity() {
-        return new SimpleClusterDataSourceIdentity(toString());
+        return new SimpleClusterDataSourceIdentity(this);
     }
 
     @Override
@@ -50,17 +51,34 @@ public class ClusterInfo {
         return String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null);
     }
 
-    static class SimpleClusterDataSourceIdentity implements DataSourceIdentity {
+    static class SimpleClusterDataSourceIdentity implements DataSourceIdentity, IClusterDataSourceIdentity {
 
+        private ClusterInfo clusterInfo;
         private String id;
 
-        public SimpleClusterDataSourceIdentity(String id) {
-            this.id = id;
+        public SimpleClusterDataSourceIdentity(ClusterInfo clusterInfo) {
+            this.clusterInfo = clusterInfo;
+            this.id = clusterInfo.toString();
         }
 
         @Override
         public String getId() {
             return id;
+        }
+
+        @Override
+        public String getClusterName() {
+            return clusterInfo.getClusterName();
+        }
+
+        @Override
+        public Integer getShardIndex() {
+            return clusterInfo.getShardIndex();
+        }
+
+        @Override
+        public DatabaseRole getDatabaseRole() {
+            return clusterInfo.getRole();
         }
 
         @Override

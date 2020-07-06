@@ -33,7 +33,7 @@ public class CtripConnectionListenerTest {
     public void testCreateConnection() throws SQLException {
         long startTime = System.currentTimeMillis();
         Connection connection = getConnection();
-        connectionListener.onCreateConnection(POOL_DESC, connection, startTime);
+        connectionListener.onCreateConnection(POOL_DESC, connection, null, startTime);
     }
 
     @Test

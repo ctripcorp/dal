@@ -10,7 +10,7 @@ import java.sql.SQLException;
  * Created by taochen on 2019/12/16.
  */
 public class PingConnection extends ConnectionImpl {
-    public static int timeout = 0;
+    public int timeout = 0;
 
     private Connection connection = null;
 
@@ -21,7 +21,7 @@ public class PingConnection extends ConnectionImpl {
     @Override
     public void pingInternal(boolean checkForClosedConnection, int timeoutMillis) throws SQLException {
         timeout = timeoutMillis;
-        ((MySQLConnection) connection).pingInternal(false, timeout * 1000);
+        ((MySQLConnection) connection).pingInternal(false, timeoutMillis);
     }
 
     @Override

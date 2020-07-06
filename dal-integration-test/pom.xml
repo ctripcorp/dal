@@ -16,9 +16,9 @@
 
   <properties>
     <java.version>1.8</java.version>
-    <framework-bom.version>4.18.0</framework-bom.version>
+    <framework-bom.version>4.19.0</framework-bom.version>
     <qconfig.version>1.100.19</qconfig.version>
-    <dal.version>2.0.0.1</dal.version>
+    <dal.version>2.0.0.2</dal.version>
     <ucs.version>0.2.0</ucs.version>
   </properties>
 
@@ -43,11 +43,11 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
+      <!--<dependency>
         <groupId>qunar.tc.qconfig</groupId>
         <artifactId>qconfig-client</artifactId>
         <version>${qconfig.version}</version>
-      </dependency>
+      </dependency>-->
       <!--<dependency>
         <groupId>qunar.tc.qconfig</groupId>
         <artifactId>qconfig-common</artifactId>

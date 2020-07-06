@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import com.ctrip.datasource.log.ILogger.MockILoggerImpl;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.DataSourceValidator;
 import com.ctrip.platform.dal.dao.datasource.ValidatorProxy;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -84,10 +85,33 @@ public class DataSourceValidatorTest {
         PingConnection pingConnection = new PingConnection(connMySql);
         DataSourceValidator validator = new DataSourceValidator();
         PoolProperties properties = new PoolProperties();
-        properties.setValidationQueryTimeout(200);
+        properties.setValidationQueryTimeout(500);
         validator.setPoolProperties(properties);
         validator.validate(pingConnection, PooledConnection.VALIDATE_INIT);
-        Assert.assertEquals(200, PingConnection.timeout);
+        Assert.assertEquals(500, pingConnection.timeout);
+    }
+
+    @Test
+    public void testDefaultValidateQueryTimeout() throws SQLException {
+        Connection connMySql = createNewMySqlConnection();
+        PingConnection pingConnection = new PingConnection(connMySql);
+        DataSourceValidator validator = new DataSourceValidator();
+        PoolProperties properties = new PoolProperties();
+        validator.setPoolProperties(properties);
+        validator.validate(pingConnection, PooledConnection.VALIDATE_INIT);
+        Assert.assertEquals(DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT, pingConnection.timeout);
+    }
+
+    @Test
+    public void testMinValidateQueryTimeout() throws SQLException {
+        Connection connMySql = createNewMySqlConnection();
+        PingConnection pingConnection = new PingConnection(connMySql);
+        DataSourceValidator validator = new DataSourceValidator();
+        PoolProperties properties = new PoolProperties();
+        properties.setValidationQueryTimeout(2);
+        validator.setPoolProperties(properties);
+        validator.validate(pingConnection, PooledConnection.VALIDATE_INIT);
+        Assert.assertEquals(DataSourceConfigureConstants.MIN_VALIDATIONQUERYTIMEOUT, pingConnection.timeout);
     }
 
     private void testSqlServerConnectionValidateSuccess(int validateAction) throws SQLException {

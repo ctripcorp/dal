@@ -28,4 +28,4 @@ import org.junit.runners.Suite.SuiteClasses;
 		com.ctrip.platform.dal.dao.markdown.AllTests.class,
 
 })
-public class AllTest {}
+public class AllTests {}

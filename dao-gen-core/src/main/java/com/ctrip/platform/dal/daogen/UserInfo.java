@@ -15,5 +15,5 @@ public interface UserInfo {
 
     void logOut(HttpServletRequest request, HttpServletResponse response);
 
-    DalGroupDB getDefaultDBInfo(String dbType);
+    DalGroupDB getDefaultDBInfo(String dbType, String name);
 }

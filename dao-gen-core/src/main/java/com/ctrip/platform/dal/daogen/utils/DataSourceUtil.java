@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.daogen.utils;
 import com.ctrip.platform.dal.daogen.dao.DalGroupDBDao;
 import com.ctrip.platform.dal.daogen.entity.DalGroupDB;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import javax.sql.DataSource;
@@ -32,7 +33,31 @@ public class DataSourceUtil {
     private static volatile Map<String, DataSource> cache2 = new ConcurrentHashMap<>();
 
     public static Connection getConnection(String address, String port, String userName, String password,
-            String driverClass) throws Exception {
+            String driverClass, String dbName) throws Exception {
+        validateParam(address, port, userName, password, driverClass);
+        String key = address.trim() +dbName.trim()+ port.trim() + userName.trim() + password.trim();
+        DataSource ds = cache1.get(key);
+        if (ds != null) {
+            Connection conn = ds.getConnection();
+            return conn;
+        }
+        synchronized (DataSourceUtil.class) {
+            ds = cache1.get(key);
+            if (ds != null) {
+                Connection conn = ds.getConnection();
+                return conn;
+            } else {
+                DataSource newDS = createDataSource(address.trim(), port.trim(), dbName.trim(), userName.trim(), password.trim(),
+                        driverClass.trim());
+                cache1.put(key, newDS);
+                Connection conn = newDS.getConnection();
+                return conn;
+            }
+        }
+    }
+
+    public static Connection getConnection(String address, String port, String userName, String password,
+                                           String driverClass) throws Exception {
         validateParam(address, port, userName, password, driverClass);
         String key = address.trim() + port.trim() + userName.trim() + password.trim();
         DataSource ds = cache1.get(key);

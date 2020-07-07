@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.platform.dal.daogen.entity.Response;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -55,7 +54,7 @@ public class WebUtil {
                 HttpResponse response = sslClient.execute(httpGet);
                 HttpEntity entity = response.getEntity();
                 String content = EntityUtils.toString(entity);
-                res = JSON.parseObject(content, Response.class);
+                res = JsonUtils.fromJson(content, Response.class);
             }
 
             return res;

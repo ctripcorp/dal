@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -18,10 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Resource
 @Singleton
@@ -29,6 +34,9 @@ import java.util.*;
 public class DatabaseResource {
     private static ClassLoader classLoader;
     private static ObjectMapper mapper = new ObjectMapper();
+    private static final Pattern dbnamePattern = Pattern.compile("(database|initial\\scatalog)=([^;]+)", 2);
+    private final String CONF_PROPERTIES = "conf.properties";
+    private final String USER_INFO_CLASS_NAME = "userinfo_class";
 
     static {
         classLoader = Thread.currentThread().getContextClassLoader();
@@ -94,14 +102,16 @@ public class DatabaseResource {
     @Path("connectionTest")
     public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
             @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-            @FormParam("dbpassword") String dbpassword) throws Exception {
+            @FormParam("dbpassword") String dbpassword, @FormParam("dbName") String dbName) throws Exception {
         Connection conn = null;
         ResultSet rs = null;
         try {
             Status status = Status.OK();
             try {
+                String info=String.format("connectionTest:%s,user:%s,pwd:%s,dbname:%s,dbtype:%s",dbaddress,dbpassword,dbuser,dbName,dbtype);
+                LoggerManager.getInstance().info(info);
                 conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
-                        DatabaseType.valueOf(dbtype).getValue());
+                        DatabaseType.valueOf(dbtype).getValue(), dbName);
                 // conn.setNetworkTimeout(Executors.newFixedThreadPool(1), 5000);
                 rs = conn.getMetaData().getCatalogs();
                 Set<String> allCatalog = new HashSet<String>();
@@ -127,6 +137,54 @@ public class DatabaseResource {
         } finally {
             ResourceUtils.close(rs);
             ResourceUtils.close(conn);
+        }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("getAllDB")
+    public Status getAllDB(@FormParam("dbType") String dbType) {
+        try {
+            Status status = Status.OK();
+            String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
+            if (StringUtils.isNotBlank(className)) {
+                Class<?> clazz = Class.forName(className);
+                DBInfoApi dbInfoApi = (DBInfoApi) clazz.newInstance();
+                List<DBLevelInfo> dbLevelInfos = dbInfoApi.getDBLevelInfo(dbType);
+                List<String> allDBs = new ArrayList<>();
+                for (DBLevelInfo dbLevelInfo : dbLevelInfos) {
+                    allDBs.add(dbLevelInfo.getDb_name());
+                }
+                status.setInfo(mapper.writeValueAsString(allDBs));
+            }
+            return status;
+        } catch (Exception e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR();
+            status.setInfo(e.getMessage());
+            return status;
+        }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("getTitanKeyByDBName")
+    public Status getTitanKeyByDBName(@FormParam("dbName") String dbName) {
+
+        try {
+            Status status = Status.OK();
+            String className = CustomizedResource.getInstance().getAllInOneKeyApiClassName();
+            if (StringUtils.isNotBlank(className)) {
+                Class<?> clazz = Class.forName(className);
+                AllInOneKeyApi allInOneKeyApi = (AllInOneKeyApi) clazz.newInstance();
+                status.setInfo(mapper.writeValueAsString(allInOneKeyApi.getAllInOneKeys(dbName)));
+            }
+            return status;
+        } catch (Exception e) {
+            LoggerManager.getInstance().error(e);
+            Status status = Status.ERROR();
+            status.setInfo(e.getMessage());
+            return status;
         }
     }
 
@@ -527,7 +585,7 @@ public class DatabaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("validation")
-    public Status validationKey(@QueryParam("key") String key) throws Exception {
+    public Status validationKey(@QueryParam("key") String key, @QueryParam("dbName") String dbName) throws Exception {
         try {
             Status status = Status.ERROR();
             Response res = WebUtil.getAllInOneResponse(key, null);
@@ -551,7 +609,18 @@ public class DatabaseResource {
                 if (error != null && !error.isEmpty()) {
                     status.setInfo(error);
                 } else {
-                    status.setInfo("");
+                    String connectionString = RC4.decrypt(data[0].getConnectionString());
+                    String dbnameInTitanKey = null;
+                    Matcher matcher = dbnamePattern.matcher(connectionString);
+                    if (matcher.find()) {
+                        dbnameInTitanKey = matcher.group(2);
+                    }
+                    if (dbName != null && dbName.equalsIgnoreCase(dbnameInTitanKey)) {
+                        status.setInfo("");
+                    }
+                    else {
+                        status.setInfo("dbName is not matching");
+                    }
                 }
             }
 

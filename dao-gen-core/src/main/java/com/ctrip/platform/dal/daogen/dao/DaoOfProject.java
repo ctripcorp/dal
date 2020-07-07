@@ -34,7 +34,7 @@ public class DaoOfProject extends BaseDao {
     public List<Project> getProjectByGroupId(int groupId) throws SQLException {
         FreeSelectSqlBuilder<List<Project>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         builder.setTemplate(
-                "SELECT id, name, namespace,dal_group_id,dal_config_name,update_user_no,update_time FROM project WHERE dal_group_id = ?");
+                "SELECT id, name, namespace,dal_group_id,dal_config_name,update_user_no,update_time FROM project WHERE dal_group_id = ?  order by id desc");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);

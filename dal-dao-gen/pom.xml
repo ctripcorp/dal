@@ -4,18 +4,38 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-dao-gen</artifactId>
-    <version>1.16.17</version>
+    <version>1.16.24</version>
     <packaging>war</packaging>
+    <parent>
+        <groupId>com.ctrip.framework</groupId>
+        <artifactId>framework-parent</artifactId>
+        <version>1.12.0</version>
+    </parent>
     <properties>
         <environment>open</environment>
         <file_encoding>UTF-8</file_encoding>
-        <dao-gen-core-version>1.16.17</dao-gen-core-version>
+        <dao-gen-core-version>1.16.24</dao-gen-core-version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>1.1.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
             <version>${dao-gen-core-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
         </dependency>
     </dependencies>
     <profiles>
@@ -45,7 +65,6 @@
                 <directory>src/main/resources/log</directory>
             </resource>
         </resources>
-        <finalName>ROOT</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

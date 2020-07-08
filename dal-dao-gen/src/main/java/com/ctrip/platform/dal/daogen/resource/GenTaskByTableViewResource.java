@@ -94,11 +94,11 @@ public class GenTaskByTableViewResource extends ApproveResource {
         }
     }
 
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("apiList")
-    public Status getApiList(@QueryParam("db_name") String db_set_name, @QueryParam("table_names") String table_names,
-            @QueryParam("sql_style") String sql_style) {
+    public Status getApiList(@FormParam("db_name") String db_set_name, @FormParam("table_names") String table_names,
+            @FormParam("sql_style") String sql_style) {
         Status status = Status.OK();
 
         try {

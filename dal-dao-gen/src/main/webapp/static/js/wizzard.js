@@ -491,7 +491,7 @@
         nextStep.text("正在加载...");
         nextStep.removeClass("btn-primary");
         var data = undefined;
-        $.get("/rest/task/table/apiList", {
+        $.post("/rest/task/table/apiList", {
             db_name: $("#databases").val(),
             table_names: tableList.join(","),
             sql_style: $("#sql_style").val(),

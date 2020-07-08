@@ -5,7 +5,7 @@
                 testOnReturn="false"
                 validationQuery="SELECT 1"
                 validationInterval="30000"
-                validationQueryTimeout="6"
+                validationTimeoutMillis="500"
                 timeBetweenEvictionRunsMillis="5000"
                 maxActive="100"
                 minIdle="10"

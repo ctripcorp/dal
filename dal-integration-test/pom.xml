@@ -16,9 +16,9 @@
 
   <properties>
     <java.version>1.8</java.version>
-    <framework-bom.version>4.19.0</framework-bom.version>
+    <framework-bom.version>4.22.1</framework-bom.version>
     <qconfig.version>1.100.19</qconfig.version>
-    <dal.version>2.0.0.2</dal.version>
+    <dal.version>2.1.6</dal.version>
     <ucs.version>0.2.0</ucs.version>
   </properties>
 
@@ -63,11 +63,11 @@
         <artifactId>ctrip-datasource</artifactId>
         <version>${dal.version}</version>
       </dependency>
-      <dependency>
+      <!--<dependency>
         <groupId>com.ctrip.framework.fx</groupId>
         <artifactId>ucs-client</artifactId>
         <version>${ucs.version}</version>
-      </dependency>
+      </dependency>-->
       <dependency>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>

@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServiceLoaderUtils {
+public class SPIUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceLoaderUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SPIUtils.class);
 
     private static Map<Class<?>, Object> allServices = new ConcurrentHashMap<>();
 
@@ -41,7 +41,7 @@ public class ServiceLoaderUtils {
     }
 
     private static <T> Iterator<T> getIterator(Class<T> clazz) {
-        ServiceLoader<T> loader = ServiceLoader.load(clazz, ServiceLoaderUtils.class.getClassLoader());
+        ServiceLoader<T> loader = ServiceLoader.load(clazz, SPIUtils.class.getClassLoader());
         return loader.iterator();
     }
 

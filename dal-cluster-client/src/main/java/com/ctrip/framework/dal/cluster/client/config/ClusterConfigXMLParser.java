@@ -10,7 +10,7 @@ import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorC
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.UserHintStrategy;
-import com.ctrip.framework.dal.cluster.client.util.ServiceLoaderUtils;
+import com.ctrip.framework.dal.cluster.client.util.SPIUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -281,7 +281,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         if (idGeneratorConfigXMLParser == null) {
             synchronized (this) {
                 if (idGeneratorConfigXMLParser == null) {
-                    idGeneratorConfigXMLParser = ServiceLoaderUtils.getInstance(IdGeneratorConfigXMLParser.class);
+                    idGeneratorConfigXMLParser = SPIUtils.getInstance(IdGeneratorConfigXMLParser.class);
                     if (idGeneratorConfigXMLParser == null)
                         throw new ClusterRuntimeException("load IdGeneratorConfigXMLParser failed");
                 }

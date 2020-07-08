@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
+import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 
 import java.io.InputStream;
@@ -20,18 +21,8 @@ public class LocalClusterConfigProvider extends AbstractClusterConfigProvider im
 
     @Override
     public ClusterConfig getClusterConfig(String clusterName) {
-        try {
-            String fileName = getFileName(clusterName);
-            URL url = LocalClusterConfigProvider.class.getClassLoader().getResource(fileName);
-            InputStream is = url.openStream();
-            return getParser().parse(is);
-        } catch (Throwable t) {
-            throw new ClusterConfigException(t);
-        }
-    }
-
-    protected String getFileName(String clusterName) {
-        return clusterName + ".xml";
+        DefaultLocalConfigProvider configProvider = new DefaultLocalConfigProvider(clusterName, getParser());
+        return configProvider.getClusterConfig();
     }
 
 }

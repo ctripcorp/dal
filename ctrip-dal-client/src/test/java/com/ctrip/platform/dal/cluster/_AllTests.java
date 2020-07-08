@@ -8,6 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     PersonDaoUnitTest.class,
     RWClusterQueryDaoTest.class,
-    ThreadPoolLimitTest.class
+    ThreadPoolLimitTest.class,
+    ClusterConfigParserTest.class
 })
-public class AllTests {}
+public class _AllTests {}

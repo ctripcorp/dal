@@ -6,28 +6,28 @@
     <parent>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>dal-client-trip-parent</artifactId>
-        <version>2.1.5</version>
+        <version>2.1.6-SNAPSHOT</version>
     </parent>
     <groupId>com.ctrip.framework</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
     <packaging>war</packaging>
+
     <properties>
         <environment>local</environment>
-        <file_encoding>UTF-8</file_encoding>
         <framework-bom.version>4.19.0</framework-bom.version>
-        <dao-gen-core-version>1.16.24</dao-gen-core-version>
-        <dal-dao-gen-version>1.16.24</dal-dao-gen-version>
-        <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
-        <mysql-connector-version>5.1.41</mysql-connector-version>
-        <javax-mail-version>1.4.7</javax-mail-version>
-        <cas-version>3.1.15-30Days-no-jsessionid</cas-version>
-        <credis-version>3.1.11</credis-version>
-        <hickwall-sdk-version>0.1.2</hickwall-sdk-version>
-        <java.version>1.8</java.version>
+        <dao-gen-core.version>1.16.24</dao-gen-core.version>
+        <dal-dao-gen.version>1.16.24</dal-dao-gen.version>
+        <javax-mail.version>1.4.7</javax-mail.version>
+        <cas.version>3.1.15-30Days-no-jsessionid</cas.version>
+        <credis.version>3.1.11</credis.version>
+        <hickwall-sdk.version>0.1.2</hickwall-sdk.version>
+        <jxl.version>2.6.12</jxl.version>
+        <emailservice.version>1.2.1</emailservice.version>
+        <maven-warpath-plugin.version>3.0.0</maven-warpath-plugin.version>
     </properties>
+
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
@@ -35,21 +35,15 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <dependency>
-                <groupId>javax.activation</groupId>
-                <artifactId>activation</artifactId>
-                <version>1.1.1</version>
-            </dependency>
             <dependency>
                 <groupId>com.ctrip.credis</groupId>
                 <artifactId>credis</artifactId>
-                <version>${credis-version}</version>
+                <version>${credis.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jasig.cas.client</groupId>
                 <artifactId>cas-client-core-infosec-credis</artifactId>
-                <version>${cas-version}</version>
+                <version>${cas.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.ctrip.framework.clogging</groupId>
@@ -58,29 +52,19 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-jdbc</artifactId>
-                <version>${tomcat-jdbc-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql-connector-version}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
-                <version>${javax-mail-version}</version>
+                <version>${javax-mail.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.ops</groupId>
                 <artifactId>hickwall-sdk</artifactId>
-                <version>0.1.2</version>
+                <version>${hickwall-sdk.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dao-gen-core</artifactId>
-                <version>${dao-gen-core-version}</version>
+                <version>${dao-gen-core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.ctrip.platform</groupId>
@@ -91,17 +75,38 @@
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dal-dao-gen</artifactId>
-                <version>${dal-dao-gen-version}</version>
+                <version>${dal-dao-gen.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dal-dao-gen</artifactId>
-                <version>${dal-dao-gen-version}</version>
+                <version>${dal-dao-gen.version}</version>
                 <type>warpath</type>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.jexcelapi</groupId>
+                <artifactId>jxl</artifactId>
+                <version>${jxl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.soa.platform.basesystem.emailservice.v1</groupId>
+                <artifactId>emailservice</artifactId>
+                <version>${emailservice.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-aop</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
@@ -144,24 +149,13 @@
         <dependency>
             <groupId>net.sourceforge.jexcelapi</groupId>
             <artifactId>jxl</artifactId>
-            <version>2.6.12</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.soa.platform.basesystem.emailservice.v1</groupId>
             <artifactId>emailservice</artifactId>
-            <version>1.2.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.inject</groupId>
-                    <artifactId>javax.inject</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-aop</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
+
     <profiles>
         <profile>
             <id>local</id>
@@ -212,7 +206,9 @@
             </activation>
         </profile>
     </profiles>
+
     <build>
+        <finalName>ROOT</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources/${environment}</directory>
@@ -231,12 +227,19 @@
                 <directory>src/main/resources/log</directory>
             </resource>
         </resources>
-        <finalName>ROOT</finalName>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.appfuse.plugins</groupId>
+                    <artifactId>maven-warpath-plugin</artifactId>
+                    <version>${maven-warpath-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.appfuse.plugins</groupId>
                 <artifactId>maven-warpath-plugin</artifactId>
-                <version>3.0.0</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -248,20 +251,7 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
                 <configuration>
                     <encoding>${file_encoding}</encoding>
                 </configuration>
@@ -290,14 +280,4 @@
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <url>http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>

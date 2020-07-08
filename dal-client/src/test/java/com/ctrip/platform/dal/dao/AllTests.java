@@ -2,30 +2,31 @@ package com.ctrip.platform.dal.dao;
 
 
 import com.ctrip.platform.dal.dao.helper.EntityManagerTest.EntityManagerTest;
+import com.ctrip.platform.dal.dao.task._AllTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-		com.ctrip.platform.dal.dao.client.AllTest.class,
-		com.ctrip.platform.dal.dao.common.AllTest.class,
-		com.ctrip.platform.dal.dao.datasource.AllTests.class,
+		com.ctrip.platform.dal.dao.client._AllTests.class,
+		com.ctrip.platform.dal.dao.common._AllTests.class,
+		com.ctrip.platform.dal.dao.datasource._AllTests.class,
 		com.ctrip.platform.dal.dao.dialet.mysql.MySqlHelperTest.class,
-		com.ctrip.platform.dal.dao.helper.AllTests.class,
-		com.ctrip.platform.dal.dao.parser.AllTest.class,
-		com.ctrip.platform.dal.dao.shard.AllTest.class,
-		com.ctrip.platform.dal.dao.sqlbuilder.AllTests.class,
-		com.ctrip.platform.dal.dao.task.AllTest.class,
-		com.ctrip.platform.dal.dao.unittests.AllTest.class,
-		com.ctrip.platform.dal.dao.annotation.AllTest.class,
-		com.ctrip.platform.dal.dao.configure.AllTest.class,
-        com.ctrip.platform.dal.dao.sharding.idgen.AllTests.class,
+		com.ctrip.platform.dal.dao.helper._AllTests.class,
+		com.ctrip.platform.dal.dao.parser._AllTests.class,
+		com.ctrip.platform.dal.dao.shard._AllTests.class,
+		com.ctrip.platform.dal.dao.sqlbuilder._AllTests.class,
+		_AllTests.class,
+		com.ctrip.platform.dal.dao.unittests._AllTests.class,
+		com.ctrip.platform.dal.dao.annotation._AllTests.class,
+		com.ctrip.platform.dal.dao.configure._AllTests.class,
+        com.ctrip.platform.dal.dao.sharding.idgen._AllTests.class,
         EntityManagerTest.class,
 		/**
 		 * IMPORTANT NOTE! markdown test must be the last one to avoid interfere other test
 		 */
-		com.ctrip.platform.dal.dao.markdown.AllTests.class,
+		com.ctrip.platform.dal.dao.markdown._AllTests.class,
 
 })
 public class AllTests {}

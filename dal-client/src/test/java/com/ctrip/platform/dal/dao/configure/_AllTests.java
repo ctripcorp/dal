@@ -11,6 +11,6 @@ import org.junit.runners.Suite.SuiteClasses;
         ClusterConfigParserTest.class,
         ClusterConfigValidatorTest.class
 })
-public class AllTest {
+public class _AllTests {
 
 }

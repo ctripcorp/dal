@@ -13,7 +13,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         implements DataSourceConfigureConstants, DalConnectionStringConfigure, DalPoolPropertiesConfigure {
 
     private String name;
-    private Properties properties = new NullFilteredProperties();
+    private Properties properties = new Properties();
     private String version;
     private DalConnectionString connectionString;
     private DataSourceIdentity dataSourceId;
@@ -27,7 +27,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
 
     public DataSourceConfigure(String name, Properties properties) {
         this(name);
-        this.properties = new NullFilteredProperties(properties);
+        this.properties = properties;
     }
 
     public DataSourceConfigure(String name, Map<String, String> propertyMap) {
@@ -64,7 +64,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setUserName(String userName) {
-        setProperty(USER_NAME, userName);
+        setProperty(USER_NAME, userName != null ? userName : "");
     }
 
     @Override
@@ -73,7 +73,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setPassword(String password) {
-        setProperty(PASSWORD, password);
+        setProperty(PASSWORD, password != null ? password : "");
     }
 
     @Override
@@ -131,7 +131,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setProperties(Properties properties) {
-        this.properties = new NullFilteredProperties(properties);
+        this.properties = properties;
     }
 
 
@@ -145,7 +145,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setProperty(String key, String value) {
-        properties.setProperty(key, value);
+        if (key != null && value != null)
+            properties.setProperty(key, value);
     }
 
 
@@ -368,12 +369,16 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
             if (connectionUrl == null)
                 throw new DalRuntimeException("connection url cannot be null");
             properties.setProperty(CONNECTION_URL, connectionUrl);
-            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
-            if (StringUtils.isEmpty(hostAndPort.getHost())) {
-                properties.setProperty(HOST_NAME, "unknown");
-            }
-            else {
-                properties.setProperty(HOST_NAME, hostAndPort.getHost());
+
+            try {
+                HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
+                if (StringUtils.isEmpty(hostAndPort.getHost())) {
+                    properties.setProperty(HOST_NAME, "unknown");
+                } else {
+                    properties.setProperty(HOST_NAME, hostAndPort.getHost());
+                }
+            } catch (Throwable t) {
+                // ignore
             }
 
             if (configure.getDriverClass() != null)
@@ -519,20 +524,6 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         }
         public int generate() {
             return hashCode;
-        }
-    }
-
-    private static class NullFilteredProperties extends Properties {
-        public NullFilteredProperties() {
-        }
-
-        public NullFilteredProperties(Properties defaults) {
-            super(defaults);
-        }
-
-        @Override
-        public synchronized Object setProperty(String key, String value) {
-            return value != null ? super.setProperty(key, value) : getProperty(key);
         }
     }
 

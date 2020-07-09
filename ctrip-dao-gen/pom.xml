@@ -15,8 +15,8 @@
     <properties>
         <environment>local</environment>
         <framework-bom.version>4.19.0</framework-bom.version>
-        <dao-gen-core.version>1.16.24</dao-gen-core.version>
-        <dal-dao-gen.version>1.16.24</dal-dao-gen.version>
+        <dao-gen-core.version>${project.version}</dao-gen-core.version>
+        <dal-dao-gen.version>${project.version}</dal-dao-gen.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <cas.version>3.1.15-30Days-no-jsessionid</cas.version>
         <credis.version>3.1.11</credis.version>

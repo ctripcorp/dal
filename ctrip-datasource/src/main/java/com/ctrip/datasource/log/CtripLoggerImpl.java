@@ -13,6 +13,9 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
+import java.util.Map;
+import java.util.Properties;
+
 public class CtripLoggerImpl extends AbstractLogger {
     public static final String TITLE = "Dal Fx";
     private static final ILog logger = LogManager.getLogger(CtripLoggerImpl.class);
@@ -64,10 +67,20 @@ public class CtripLoggerImpl extends AbstractLogger {
 
     @Override
     public void logTransaction(String type, String name, String message, long startTime) {
-        Transaction t = Cat.newTransaction(type, name);
+        logTransaction(type, name, message, (Map<String, String>) null, startTime);
+    }
 
+    @Override
+    public void logTransaction(String type, String name, String message, Throwable exception, long startTime) {
+        logTransaction(type, name, message, (Map<String, String>) null, exception, startTime);
+    }
+
+    @Override
+    public void logTransaction(String type, String name, String message, Map<String, String> properties, long startTime) {
+        Transaction t = Cat.newTransaction(type, name);
         try {
             t.addData(message);
+            addProperties(t, properties);
             t.setStatus(Message.SUCCESS);
         } catch (Throwable e) {
             t.setStatus(e);
@@ -82,12 +95,12 @@ public class CtripLoggerImpl extends AbstractLogger {
     }
 
     @Override
-    public void logTransaction(String type, String name, String message, Throwable exception, long startTime) {
+    public void logTransaction(String type, String name, String message, Map<String, String> properties, Throwable exception, long startTime) {
         Transaction t = Cat.newTransaction(type, name);
-
         try {
             t.addData(message);
             t.addData(exception.getMessage());
+            addProperties(t, properties);
             t.setStatus(exception);
             Cat.logError(exception);
         } catch (Throwable e) {
@@ -99,6 +112,12 @@ public class CtripLoggerImpl extends AbstractLogger {
                 t.complete();
             }
         }
+    }
+
+    private void addProperties(Transaction transaction, Map<String, String> properties) {
+        if (properties != null)
+            for (Map.Entry<String, String> entry : properties.entrySet())
+                transaction.addProperty(entry.getKey(), entry.getValue());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.net.HttpExecutor;
+import com.ctrip.datasource.util.Version;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
@@ -61,32 +62,46 @@ public class CtripClusterInfoProvider implements ClusterInfoProvider {
         ClusterInfo clusterInfo = null;
         Transaction transaction = Cat.newTransaction(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey));
         try {
-            if (!checkEnv()) {
-                Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey),
-                        Event.SUCCESS, String.format("subEnv=%s, idc=%s", envUtils.getSubEnv(), envUtils.getIdc()));
-                return new NullClusterInfo();
-            }
-
-            String url = String.format(clusterInfoQueryUrl, titanKey);
-            String appId = Foundation.app().getAppId();
-            if (!StringUtils.isEmpty(appId))
-                url = url + "&app=" + appId;
+            String url = String.format(clusterInfoQueryUrl, titanKey) + buildExtQueryString();
             String res = executor.executeGet(url, new HashMap<>(), DEFAULT_HTTP_TIMEOUT_MS);
             ClusterInfoResponseEntity response = JsonUtils.fromJson(res, ClusterInfoResponseEntity.class);
             if (response != null && response.getStatus() == 200)
                 clusterInfo = response.getClusterInfo();
             if (clusterInfo == null)
                 clusterInfo = new NullClusterInfo();
-            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey), Event.SUCCESS, clusterInfo.toString());
+            if (clusterInfo instanceof NullClusterInfo)
+                Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "SKIP:" + titanKey),
+                        Event.SUCCESS, String.format("subEnv=%s, idc=%s", envUtils.getSubEnv(), envUtils.getIdc()));
+            else
+                Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, titanKey),
+                        Event.SUCCESS, clusterInfo.toString());
             transaction.setStatus(Transaction.SUCCESS);
         } catch (Throwable t) {
-            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "EXCEPTION:" + titanKey), Event.SUCCESS, t.getMessage());
+            Cat.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_FORMAT, "EXCEPTION:" + titanKey),
+                    Event.SUCCESS, t.getMessage());
             transaction.setStatus(t);
         } finally {
             transaction.complete();
         }
 
         return clusterInfo != null ? clusterInfo : new NullClusterInfo();
+    }
+
+    protected String buildExtQueryString() {
+        StringBuilder sb = new StringBuilder();
+        String version = Version.getVersion();
+        if (!StringUtils.isEmpty(version) && !Version.UNKNOWN.equalsIgnoreCase(version))
+            sb.append("&clientVersion=").append(version);
+        String appId = Foundation.app().getAppId();
+        if (!StringUtils.isEmpty(appId))
+            sb.append("&appId=").append(appId);
+        String subEnv = envUtils.getSubEnv();
+        if (!StringUtils.isEmpty(subEnv))
+            sb.append("&subEnv=").append(subEnv);
+        String idc = envUtils.getIdc();
+        if (!StringUtils.isEmpty(idc))
+            sb.append("&idc=").append(idc);
+        return sb.toString();
     }
 
     protected boolean checkEnv() {

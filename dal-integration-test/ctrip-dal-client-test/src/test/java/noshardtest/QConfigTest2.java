@@ -162,7 +162,7 @@ public class QConfigTest2 {
 				assertFalse(pc.isTestOnReturn());
 				assertEquals("SELECT 1", pc.getValidationQuery());
 				assertEquals(30000, pc.getValidationInterval());
-				assertEquals(6,pc.getValidationQueryTimeout());
+				assertEquals(500,pc.getValidationQueryTimeout());
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(10, pc.getMinIdle());
@@ -246,7 +246,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(30, pc.getMinIdle());
-				assertEquals(10000, pc.getMaxWait());
+				assertEquals(6000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());

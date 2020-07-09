@@ -1,9 +1,9 @@
 package com.ctrip.datasource.titan;
 
 import com.ctrip.datasource.util.DalEncrypter;
+import com.ctrip.datasource.util.Version;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.foundation.Foundation;
-import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
@@ -81,7 +81,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
         isDebug = Boolean.parseBoolean(settings.get(IS_DEBUG));
         info("isDebug: " + isDebug);
 
-        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, initVersion());
+        ProductVersionManager.getInstance().register(CTRIP_DATASOURCE_VERSION, Version.getVersion());
 
         if (dataSourceConfigureParser.isDataSourceXmlExist()) {
             ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCE, getAppId());
@@ -143,22 +143,6 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
         ent.msg = msg;
         ent.e = e;
         startUpLog.add(ent);
-    }
-
-    protected String initVersion() {
-        String path = "/ctrip-datasource.version.prop";
-        InputStream stream = Version.class.getResourceAsStream(path);
-        if (stream == null) {
-            return "UNKNOWN";
-        }
-        Properties props = new Properties();
-        try {
-            props.load(stream);
-            stream.close();
-            return (String) props.get("version");
-        } catch (IOException e) {
-            return "UNKNOWN";
-        }
     }
 
 }

@@ -15,7 +15,6 @@
     <properties>
         <environment>local</environment>
         <framework-bom.version>4.19.0</framework-bom.version>
-        <dao-gen-core.version>${project.version}</dao-gen-core.version>
         <dal-dao-gen.version>${project.version}</dal-dao-gen.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <cas.version>3.1.15-30Days-no-jsessionid</cas.version>
@@ -34,6 +33,18 @@
                 <version>${framework-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>dal-dao-gen</artifactId>
+                <version>${dal-dao-gen.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>dal-dao-gen</artifactId>
+                <version>${dal-dao-gen.version}</version>
+                <type>warpath</type>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.credis</groupId>
@@ -62,29 +73,6 @@
                 <version>${hickwall-sdk.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.ctrip.platform</groupId>
-                <artifactId>dao-gen-core</artifactId>
-                <version>${dao-gen-core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.ctrip.platform</groupId>
-                        <artifactId>dal-client</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.ctrip.platform</groupId>
-                <artifactId>dal-dao-gen</artifactId>
-                <version>${dal-dao-gen.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>com.ctrip.platform</groupId>
-                <artifactId>dal-dao-gen</artifactId>
-                <version>${dal-dao-gen.version}</version>
-                <type>warpath</type>
-            </dependency>
-            <dependency>
                 <groupId>net.sourceforge.jexcelapi</groupId>
                 <artifactId>jxl</artifactId>
                 <version>${jxl.version}</version>
@@ -111,10 +99,6 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>ctrip-dal-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.platform</groupId>
-            <artifactId>dao-gen-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>

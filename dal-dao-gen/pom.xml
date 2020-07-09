@@ -13,7 +13,18 @@
 
     <properties>
         <environment>open</environment>
+        <dao-gen-core.version>${project.version}</dao-gen-core.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>dao-gen-core</artifactId>
+                <version>${dao-gen-core.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

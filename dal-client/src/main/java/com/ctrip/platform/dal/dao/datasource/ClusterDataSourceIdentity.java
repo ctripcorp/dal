@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
@@ -9,7 +10,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 /**
  * @author c7ch23en
  */
-public class ClusterDataSourceIdentity implements DataSourceIdentity {
+public class ClusterDataSourceIdentity implements DataSourceIdentity, IClusterDataSourceIdentity {
 
     private static final String ID_FORMAT = "%s-%d-%s-%s"; // cluster-shard-role-host
     private static final String MASTER = "master";
@@ -46,6 +47,21 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
     }
 
     @Override
+    public String getClusterName() {
+        return database.getClusterName();
+    }
+
+    @Override
+    public Integer getShardIndex() {
+        return database.getShardIndex();
+    }
+
+    @Override
+    public DatabaseRole getDatabaseRole() {
+        return database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ClusterDataSourceIdentity) {
             Database objDatabase = ((ClusterDataSourceIdentity) obj).getDatabase();
@@ -60,13 +76,14 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
     }
 
     public static class ClusterConnectionStringImpl implements DalConnectionString {
-
         private String name;
+        private Database database;
         private ConnectionString connectionString;
         private String[] aliasKeys;
 
         public ClusterConnectionStringImpl(String name, Database database) {
             this.name = name;
+            this.database = database;
             this.connectionString = database.getConnectionString();
             this.aliasKeys = database.getAliasKeys();
         }
@@ -112,9 +129,8 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity {
 
         @Override
         public DalConnectionString clone() {
-            throw new UnsupportedOperationException("clone not supported");
+            return new ClusterConnectionStringImpl(name, database);
         }
-
     }
 
 }

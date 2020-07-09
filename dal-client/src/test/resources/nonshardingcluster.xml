@@ -1,0 +1,9 @@
+<DAL>
+    <Cluster name="NonShardingCluster" dbCategory="mysql" version="1">
+        <DatabaseShards>
+            <DatabaseShard index="2" masterDomain="10.32.20.128" slaveDomain="10.32.20.128">
+                <Database ip="10.32.20.128" port="3306" dbName="Shard_0" uid="na" pwd="qazwsxedc"/>
+            </DatabaseShard>
+        </DatabaseShards>
+    </Cluster>
+</DAL>

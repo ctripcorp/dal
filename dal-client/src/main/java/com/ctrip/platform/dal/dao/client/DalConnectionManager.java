@@ -124,6 +124,8 @@ public class DalConnectionManager {
 				DataSourceIdentity id = new ClusterDataSourceIdentity(db);
 				conn = locator.getConnection(id);
 				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
+				if (shardId == null)
+					shardId = String.valueOf(db.getShardIndex());
 			}
 			else if (selectedDataBase instanceof ProviderDataBase) {
 				ConnectionStringConfigureProvider provider = ((ProviderDataBase) selectedDataBase).getConnectionStringProvider();

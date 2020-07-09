@@ -2,6 +2,8 @@
     var Render = function () {
     };
 
+    var catalogChangeCount_up = 0;
+
     function refreshAllDB() {
         w2ui['grid'].clear();
         cblock($("body"));
@@ -39,7 +41,7 @@
                         searchField: 'title',
                         sortField: 'title',
                         options: [],
-                        create: false
+                        create: true
                     });
                 }
                 var dalgroup = $("#dalgroup");
@@ -57,6 +59,23 @@
                     });
                 }
                 $("#addDbModal").modal({"backdrop": "static"});
+                var dbcatalog = $("#dbcatalog");
+                var db_providerName = $.trim($("#dbtype").val());
+                if (db_providerName !== null || db_providerName.length > 0) {
+                    $.post("/rest/db/getAllDB", {
+                        dbType: db_providerName
+                    }, function (data) {
+                        var allCatalog_up = [];
+                        $.each($.parseJSON(data.info), function (index, value) {
+                            allCatalog_up.push({
+                                id: value, title: value
+                            });
+                        });
+                        dbcatalog[0].selectize.clearOptions();
+                        dbcatalog[0].selectize.addOption(allCatalog_up);
+                        dbcatalog[0].selectize.refreshOptions(false);
+                    });
+                }
             } else {
                 alert("请先加入一个DAL Team.");
             }
@@ -67,6 +86,46 @@
         });
     };
 
+    var getAllInOneKeyByDbName_up = function (allInOneName) {
+        var dbcatalog = $("#dbcatalog_up").val();
+        var allinonename = $("#allinonename_up");
+        if (allinonename[0] != undefined && allinonename[0].selectize != undefined) {
+            allinonename[0].selectize.clearOptions();
+        } else {
+            allinonename.selectize({
+                valueField: 'id',
+                labelField: 'title',
+                searchField: 'title',
+                sortField: 'title',
+                options: [],
+                create: true
+            });
+        }
+        $.post("/rest/db/getTitanKeyByDBName",{
+            dbName: dbcatalog
+        }, function (data) {
+            var allInOneNames = [];
+            if(data.info!="null"){
+                $.each($.parseJSON(data.info), function (index, value) {
+                    allInOneNames.push({
+                        id: value, title: value
+                    });
+                });
+            }
+            allinonename[0].selectize.clearOptions();
+            allinonename[0].selectize.addOption(allInOneNames);
+            allinonename[0].selectize.refreshOptions(false);
+
+            if (allInOneName!=""){
+                allinonename[0].selectize.addOption({
+                    id : allInOneName,
+                    title : allInOneName,
+                });
+                allinonename[0].selectize.setValue(allInOneName);
+            }
+        });
+    };
+    var  record=null;
     function editDB() {
         $("#update_error_msg").html('');
         $("#update_db_step1").show();
@@ -76,7 +135,7 @@
         $("#update_db_prev").hide();
         $("#update_db_save").hide();
         var records = w2ui['grid'].getSelection();
-        var record = w2ui['grid'].get(records[0]);
+        record= w2ui['grid'].get(records[0]);
         if (record == null) {
             alert('请先选择一个 database');
             return;
@@ -90,7 +149,7 @@
                 $("#dbport_up").val(db['db_port']);
                 $("#dbuser_up").val(db['db_user']);
                 $("#dbpassword_up").val(db['db_password']);
-                $("#allinonename_up").val(db['dbname']);
+                // $("#allinonename_up").val(db['dbname']);
                 if ($("#dbcatalog_up")[0] != undefined && $("#dbcatalog_up")[0].selectize != undefined) {
                     $("#dbcatalog_up")[0].selectize.clearOptions();
                 } else {
@@ -100,10 +159,31 @@
                         searchField: 'title',
                         sortField: 'title',
                         options: [],
-                        create: false
+                        create: true
                     });
                 }
                 $("#updateDbModal").modal({"backdrop": "static"});
+                var dbcatalog_up = $("#dbcatalog_up");
+                $.post("/rest/db/getAllDB", {
+                    dbType: db['db_providerName']
+                }, function (data) {
+                    var allCatalog_up = [];
+                    $.each($.parseJSON(data.info), function (index, value) {
+                        allCatalog_up.push({
+                            id: value, title: value
+                        });
+                    });
+                    dbcatalog_up[0].selectize.clearOptions();
+                    dbcatalog_up[0].selectize.addOption(allCatalog_up);
+                    dbcatalog_up[0].selectize.refreshOptions(false);
+                    $("#dbcatalog_up")[0].selectize.addOption({
+                        id : db['db_catalog'],
+                        title : db['db_catalog']
+                    });
+                    catalogChangeCount_up = 0;
+                    $("#dbcatalog_up")[0].selectize.setValue(db['db_catalog']);
+                    getAllInOneKeyByDbName_up(db['dbname']);
+                });
             } else {
                 $("#errorMess").html(data.info);
                 $("#errorNoticeDiv").modal({"backdrop": "static"});
@@ -308,17 +388,34 @@
 
     $(function () {
         var setDefaultDbVal = function () {
+            var dbcatalog = $("#dbcatalog");
             $("#error_msg").html(" ");
             var dbType = $.trim($("#dbtype").val());
 
-            $.post("/rest/user/getDefaultDBInfo", {
+            $.post("/rest/db/getAllDB", {
                 dbType: dbType
             }, function (data) {
-                $("#dbaddress").val(data.db_address);
-                $("#dbport").val(data.db_port);
-                $("#dbuser").val(data.db_user);
-                $("#dbpassword").val(data.db_password);
+                var allCatalog = [];
+                $.each($.parseJSON(data.info), function (index, value) {
+                    allCatalog.push({
+                        id: value, title: value
+                    });
+                });
+                dbcatalog[0].selectize.clearOptions();
+                dbcatalog[0].selectize.addOption(allCatalog);
+                dbcatalog[0].selectize.refreshOptions(false);
             });
+            var dbName = $("#dbcatalog").val();
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: dbType,
+                    dbName: dbName
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
+
         };
 
         var getAllCatalog = function (successInfo) {
@@ -327,7 +424,8 @@
             var dbPort = $("#dbport").val();
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
-            var dbcatalog = $("#dbcatalog");
+            var dbCatalog = $("#dbcatalog").val();
+
             var error_msg = $("#error_msg");
             error_msg.html("正在连接数据库，请稍等...");
             var result = true;
@@ -340,12 +438,13 @@
                     dbaddress: dbAddress,
                     dbport: dbPort,
                     dbuser: dbUser,
-                    dbpassword: dbPassword
+                    dbpassword: dbPassword,
+                    dbName: dbCatalog
                 },
                 async: false,
                 success: function (data) {
                     if (data.code == "OK") {
-                        var allCatalog = [];
+                        /*var allCatalog = [];
                         $.each($.parseJSON(data.info), function (index, value) {
                             allCatalog.push({
                                 id: value, title: value
@@ -353,7 +452,7 @@
                         });
                         dbcatalog[0].selectize.clearOptions();
                         dbcatalog[0].selectize.addOption(allCatalog);
-                        dbcatalog[0].selectize.refreshOptions(false);
+                        dbcatalog[0].selectize.refreshOptions(false);*/
                         error_msg.html(successInfo);
                     } else {
                         error_msg.html("连接失败:" + data.info);
@@ -363,6 +462,38 @@
             });
 
             return result;
+        };
+
+
+
+        var getAllInOneKeyByDbName = function () {
+            var dbcatalog = $("#dbcatalog").val();
+            var allinonename = $("#allinonename");
+            if (allinonename[0] != undefined && allinonename[0].selectize != undefined) {
+                allinonename[0].selectize.clearOptions();
+            } else {
+                allinonename.selectize({
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: true
+                });
+            }
+            $.post("/rest/db/getTitanKeyByDBName",{
+                dbName: dbcatalog
+            }, function (data) {
+                var allInOneNames = [];
+                $.each($.parseJSON(data.info), function (index, value) {
+                    allInOneNames.push({
+                        id: value, title: value
+                    });
+                });
+                allinonename[0].selectize.clearOptions();
+                allinonename[0].selectize.addOption(allInOneNames);
+                allinonename[0].selectize.refreshOptions(false);
+            });
         };
 
         var getUserGroups = function () {
@@ -393,6 +524,22 @@
                     setDefaultDbVal();
                 }
             });
+        });
+
+        $(document.body).on("change", "#dbcatalog", function () {
+            var dbcatalog = $("#dbcatalog").val();
+            var dbType = $.trim($("#dbtype").val());
+            if (dbType === "MySQL") {
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: dbType,
+                    dbName: dbcatalog
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
+            }
         });
 
         $(document.body).on("click", "#add_new_db_next", function () {
@@ -436,6 +583,8 @@
             $("#add_new_db_prev").show();
             $("#add_new_db_save").show();
             getUserGroups();
+
+            getAllInOneKeyByDbName();
         });
 
         $(document.body).on("click", "#add_new_db_prev", function () {
@@ -472,7 +621,7 @@
                 return;
             }
 
-            var result = validateKeyName($("#allinonename"), error_msg);
+            var result = validateKeyName($("#allinonename"), dbCatalog, error_msg);
             if (!result) {
                 return;
             }
@@ -528,15 +677,41 @@
         $(document.body).on("change", "#dbtype_up", function () {
             $("#error_msg").html(" ");
             var dbType = $.trim($("#dbtype_up").val());
+            var dbCatalog = $("#dbcatalog_up").val();
 
-            $.post("/rest/user/getDefaultDBInfo", {
-                dbType: dbType
-            }, function (data) {
-                $("#dbaddress_up").val(data.db_address);
-                $("#dbport_up").val(data.db_port);
-                $("#dbuser_up").val(data.db_user);
-                $("#dbpassword_up").val(data.db_password);
-            });
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: dbType,
+                    dbName: dbCatalog
+                }, function (data) {
+                    $("#dbaddress_up").val(data.db_address);
+                    $("#dbport_up").val(data.db_port);
+                    $("#dbuser_up").val(data.db_user);
+                    $("#dbpassword_up").val(data.db_password);
+                });
+
+        });
+
+        $(document.body).on("change", "#dbcatalog_up", function () {
+            var dbcatalog = $("#dbcatalog_up").val();
+            var dbType = $.trim($("#dbtype_up").val());
+            var dbaddress = $("#dbaddress_up").val();
+            catalogChangeCount_up = catalogChangeCount_up + 1;
+            if (dbType === "MySQL") {
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: dbType,
+                    dbName: dbcatalog
+                }, function (data) {
+                    if (catalogChangeCount_up > 1 && data.db_address !== "") {
+                        $("#dbaddress_up").val(data.db_address);
+                        $("#dbport_up").val(data.db_port);
+                        $("#dbuser_up").val(data.db_user);
+                        $("#dbpassword_up").val(data.db_password);
+                    }
+                });
+
+            }
+            getAllInOneKeyByDbName_up(record['dbname']);
+
         });
 
         var getUpdateCatalog = function (successInfo) {
@@ -546,6 +721,7 @@
             var dbPort = $("#dbport_up").val();
             var dbUser = $("#dbuser_up").val();
             var dbPassword = $("#dbpassword_up").val();
+            var dbName=$("#dbcatalog_up").val();
             var result = true;
 
             $.ajax({
@@ -556,12 +732,13 @@
                     dbaddress: dbAddress,
                     dbport: dbPort,
                     dbuser: dbUser,
-                    dbpassword: dbPassword
+                    dbpassword: dbPassword,
+                    dbName:dbName
                 },
                 async: false,
                 success: function (data) {
                     if (data.code == "OK") {
-                        var allCatalog = [];
+                        /*var allCatalog = [];
                         $.each($.parseJSON(data.info), function (index, value) {
                             allCatalog.push({
                                 id: value, title: value
@@ -569,9 +746,9 @@
                         });
                         $("#dbcatalog_up")[0].selectize.clearOptions();
                         $("#dbcatalog_up")[0].selectize.addOption(allCatalog);
-                        $("#dbcatalog_up")[0].selectize.refreshOptions(false);
+                        $("#dbcatalog_up")[0].selectize.refreshOptions(false);*/
                         $("#update_error_msg").html(successInfo);
-                        var records = w2ui['grid'].getSelection();
+                        /*var records = w2ui['grid'].getSelection();
                         var record = w2ui['grid'].get(records[0]);
                         $.post("/rest/db/getOneDB", {
                                 allinonename: record['dbname']
@@ -581,7 +758,7 @@
                                     var db = $.parseJSON(data.info);
                                     $("#dbcatalog_up")[0].selectize.setValue(db['db_catalog']);
                                 }
-                            });
+                            });*/
                     } else {
                         $("#update_error_msg").html("连接错误:" + data.info);
                         result = false;
@@ -592,7 +769,7 @@
             return result;
         };
 
-        var validateKeyName = function (obj, msg) {
+        var validateKeyName = function (obj, dbCatalog, msg) {
             var result = true;
             var key = obj.val();
             if (key.length == 0)
@@ -602,7 +779,7 @@
                 type: "GET",
                 dataType: "json",
                 url: "/rest/db/validation",
-                data: {"key": key},
+                data: {"key": key, "dbName": dbCatalog},
                 async: false,
                 success: function (data) {
                     if (data.info.length > 0) {
@@ -624,6 +801,7 @@
             var dbPort = $("#dbport_up").val();
             var dbUser = $("#dbuser_up").val();
             var dbPassword = $("#dbpassword_up").val();
+            var dbCatalog = $("#dbcatalog").val();
             var update_error_msg = $("#update_error_msg");
 
             if (dbType == "no") {
@@ -651,13 +829,13 @@
             if (!result) {
                 return;
             }
-
             $("#update_db_step1").hide();
             $("#update_db_step2").show();
             $("#update_conn_test").hide();
             $("#update_db_next").hide();
             $("#update_db_prev").show();
             $("#update_db_save").show();
+
         });
 
         $(document.body).on("click", "#update_db_prev", function () {
@@ -689,7 +867,7 @@
                 return;
             }
 
-            var result = validateKeyName($("#allinonename_up"), update_error_msg);
+            var result = validateKeyName($("#allinonename_up"), dbCatalog, update_error_msg);
             if (!result) {
                 return;
             }
@@ -737,7 +915,7 @@
         });
 
         $(document.body).on("click", "#validateKeyname", function () {
-            validateKeyName($("#allinonename"), $("#error_msg"));
+            validateKeyName($("#allinonename"), $("#dbcatalog").val(), $("#error_msg"));
         });
 
         isDefaultUser();

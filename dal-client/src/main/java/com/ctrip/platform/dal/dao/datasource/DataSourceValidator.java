@@ -1,11 +1,15 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
+import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.LogUtils;
 import com.mysql.jdbc.MySQLConnection;
+import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 
@@ -15,7 +19,6 @@ import java.sql.Statement;
 
 public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final int DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS = 1;
     private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
     private String IS_VALID_FORMAT = "isValid: %s";
@@ -34,7 +37,13 @@ public class DataSourceValidator implements ValidatorProxy {
             connectionUrl = LoggerHelper.getSimplifiedDBUrl(connection.getMetaData().getURL());
             transactionName = String.format(CONNECTION_VALIDATE_CONNECTION_FORMAT, connectionUrl);
             isValid = validateConnection(connection, validateAction);
-            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, String.format(IS_VALID_FORMAT, isValid), startTime);
+
+            PoolConfiguration poolConfig = getPoolProperties();
+            DataSourceIdentity dataSourceId = poolConfig instanceof DalExtendedPoolConfiguration ?
+                    ((DalExtendedPoolConfiguration) poolConfig).getDataSourceId() : null;
+
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, String.format(IS_VALID_FORMAT, isValid),
+                    LogUtils.buildPropertiesFromDataSourceId(dataSourceId), startTime);
 
             if (!isValid) {
                 LOGGER.warn(IS_VALID_RETURN_INFO);
@@ -63,12 +72,12 @@ public class DataSourceValidator implements ValidatorProxy {
 
         PoolProperties poolProperties = getPoolProperties();
         if (poolProperties == null) {
-            parameter.setValidationQueryTimeout(DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS);
+            parameter.setValidationQueryTimeout(DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT);
             return parameter;
         }
         int validationQueryTimeout = poolProperties.getValidationQueryTimeout();
         if (validationQueryTimeout <= 0) {
-            validationQueryTimeout = DEFAULT_VALIDATE_TIMEOUT_IN_SECONDS;
+            validationQueryTimeout = DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT;
         }
         parameter.setValidationQueryTimeout(validationQueryTimeout);
 
@@ -104,7 +113,7 @@ public class DataSourceValidator implements ValidatorProxy {
             MySQLConnection mySqlConnection = (MySQLConnection) connection;
             isValid = MySqlConnectionHelper.isValid(mySqlConnection, parameter.getValidationQueryTimeout());
         } else {
-            isValid = connection.isValid(parameter.getValidationQueryTimeout());
+            isValid = connection.isValid(parameter.getValidationQueryTimeoutS());
         }
 
         return isValid;
@@ -113,7 +122,7 @@ public class DataSourceValidator implements ValidatorProxy {
     private boolean executeInitSQL(Connection connection, QueryParameter parameter) throws SQLException {
         boolean isValid = false;
         String query = parameter.getQuery();
-        int validationQueryTimeout = parameter.getValidationQueryTimeout();
+        int validationQueryTimeout = parameter.getValidationQueryTimeoutS();
 
         Statement stmt = null;
         try {
@@ -134,7 +143,7 @@ public class DataSourceValidator implements ValidatorProxy {
 
     private class QueryParameter {
         private String query = null;
-        private int validationQueryTimeout = -1;
+        private int validationQueryTimeout = DataSourceConfigureConstants.DEFAULT_VALIDATIONQUERYTIMEOUT;
 
         public String getQuery() {
             return query;
@@ -145,7 +154,11 @@ public class DataSourceValidator implements ValidatorProxy {
         }
 
         public int getValidationQueryTimeout() {
-            return validationQueryTimeout;
+            return Math.max(validationQueryTimeout, DataSourceConfigureConstants.MIN_VALIDATIONQUERYTIMEOUT);
+        }
+
+        public int getValidationQueryTimeoutS() {
+            return validationQueryTimeout / 1000 + (validationQueryTimeout % 1000 > 0 ? 1 : 0);
         }
 
         public void setValidationQueryTimeout(int validationQueryTimeout) {

@@ -3,6 +3,7 @@ package com.ctrip.framework.dal.cluster.client.cluster;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
@@ -24,6 +25,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     private Map<Integer, DatabaseShard> databaseShards = new HashMap<>();
     private ShardStrategyProxy shardStrategyProxy;
     private ClusterIdGeneratorConfig idGeneratorConfig;
+    private LocalizationConfig localizationConfig;
 
     public DefaultCluster(ClusterConfigImpl clusterConfig) {
         this.clusterConfig = clusterConfig;
@@ -104,6 +106,11 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
         return idGeneratorConfig;
     }
 
+    @Override
+    public LocalizationConfig getLocalizationConfig() {
+        return localizationConfig;
+    }
+
     public void addDatabaseShard(DatabaseShard databaseShard) {
         databaseShards.put(databaseShard.getShardIndex(), databaseShard);
     }
@@ -115,6 +122,12 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
         this.idGeneratorConfig = idGeneratorConfig;
     }
+
+    public void setLocalizationConfig(LocalizationConfig localizationConfig) {
+        this.localizationConfig = localizationConfig;
+    }
+
+    public void validate() {}
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {

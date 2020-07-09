@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.tomcat;
 
 import com.ctrip.platform.dal.dao.datasource.AbstractConnectionListener;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
@@ -37,9 +38,8 @@ public class DalConnectionPoolTest {
         final AtomicInteger abandon = new AtomicInteger();
 
         DalConnectionPool.setConnectionListener(new AbstractConnectionListener() {
-
             @Override
-            public void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
+            public void doOnCreateConnection(String poolDesc, Connection connection, DataSourceIdentity dataSourceId, long startTime) {
                 create.incrementAndGet();
             }
 

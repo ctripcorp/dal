@@ -49,6 +49,11 @@ public class LogEntry implements ILogEntry{
 	private TableParser tableParser = new DefaultTableParser();
 	private static final String JSON_PATTERN = "{'Decode':'%s','Connect':'%s','Prepare':'%s','Excute':'%s','ClearUp':'%s'}";
 
+	private String clientZone;
+	private String dbZone;
+	private String ucsValidation;
+	private String dalValidation;
+
     /**
      * Internal performance recorder for performance cost in each stage.
      * As each low level DB operation will be logged once at ConnectionAction level, this recorder will
@@ -453,4 +458,37 @@ public class LogEntry implements ILogEntry{
 	public void setShardingCategory(ShardingCategory shardingCategory) {
 		this.shardingCategory = shardingCategory;
 	}
+
+	public String getClientZone() {
+		return clientZone;
+	}
+
+	public void setClientZone(String clientZone) {
+		this.clientZone = clientZone;
+	}
+
+	public String getDbZone() {
+		return dbZone;
+	}
+
+	public void setDbZone(String dbZone) {
+		this.dbZone = dbZone;
+	}
+
+	public String getUcsValidation() {
+		return ucsValidation;
+	}
+
+	public void setUcsValidation(String ucsValidation) {
+		this.ucsValidation = ucsValidation;
+	}
+
+	public String getDalValidation() {
+		return dalValidation;
+	}
+
+	public void setDalValidation(String dalValidation) {
+		this.dalValidation = dalValidation;
+	}
+
 }

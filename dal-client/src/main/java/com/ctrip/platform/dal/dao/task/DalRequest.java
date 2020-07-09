@@ -24,6 +24,11 @@ public interface DalRequest<T> {
 	void validateAndPrepare() throws SQLException;
 
 	/**
+	 * @return logic database name
+	 */
+	String getLogicDbName();
+
+	/**
 	 * @return true if it is cross shard
 	 */
     boolean isCrossShard() throws SQLException;

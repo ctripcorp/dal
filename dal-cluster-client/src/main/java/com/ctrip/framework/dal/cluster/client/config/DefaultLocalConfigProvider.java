@@ -1,6 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
+import com.ctrip.framework.dal.cluster.client.util.FileUtils;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -10,22 +11,30 @@ import java.net.URL;
  */
 public class DefaultLocalConfigProvider implements ClusterConfigProvider {
 
-    private String fileName;
-    private ClusterConfigParser parser = new ClusterConfigXMLParser();
+    private final String clusterName;
+    private final ClusterConfigParser parser;
 
     public DefaultLocalConfigProvider(String clusterName) {
-        this.fileName = clusterName + ".xml";
+        this(clusterName, new ClusterConfigXMLParser());
+    }
+
+    public DefaultLocalConfigProvider(String clusterName, ClusterConfigParser parser) {
+        this.clusterName = clusterName;
+        this.parser = parser;
     }
 
     @Override
     public ClusterConfig getClusterConfig() {
-        try {
-            URL url = DefaultLocalConfigProvider.class.getClassLoader().getResource(fileName);
-            InputStream is = url.openStream();
+        try (InputStream is = FileUtils.getResourceInputStream(getConfigFileName(),
+                DefaultLocalConfigProvider.class.getClassLoader())) {
             return parser.parse(is);
         } catch (Throwable t) {
-            throw new ClusterConfigException(t);
+            throw new ClusterConfigException("Load cluster config failed, cluster name: " + clusterName, t);
         }
+    }
+
+    protected String getConfigFileName() {
+        return clusterName != null ? clusterName + ".xml" : null;
     }
 
 }

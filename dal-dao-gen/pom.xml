@@ -1,23 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.ctrip.platform</groupId>
+    <parent>
+        <groupId>com.ctrip.platform</groupId>
+        <artifactId>dal-client-parent</artifactId>
+        <version>2.1.6</version>
+    </parent>
     <artifactId>dal-dao-gen</artifactId>
-    <version>1.16.17</version>
     <packaging>war</packaging>
+
     <properties>
         <environment>open</environment>
-        <file_encoding>UTF-8</file_encoding>
-        <dao-gen-core-version>1.16.17</dao-gen-core-version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dao-gen-core</artifactId>
-            <version>${dao-gen-core-version}</version>
         </dependency>
     </dependencies>
+
     <profiles>
         <profile>
             <id>open</id>
@@ -32,6 +36,7 @@
             </activation>
         </profile>
     </profiles>
+
     <build>
         <resources>
             <resource>
@@ -45,20 +50,7 @@
                 <directory>src/main/resources/log</directory>
             </resource>
         </resources>
-        <finalName>ROOT</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -86,37 +78,6 @@
                                 </resource>
                             </resources>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8.1</version>
-                <configuration>
-                    <encoding>${file_encoding}</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import javax.sql.DataSource;
@@ -42,8 +43,9 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private DataSourceIdentity id;
     private long switchListenerTimeout = DEFAULT_SWITCH_LISTENER_TIME_OUT; //ms
 
-    private volatile long firstAppearContinuousErrorTime = 0;
-    private volatile long lastReportContinuousErrorTime = 0;
+    private final AtomicLong firstAppearContinuousErrorTimeAtom = new AtomicLong(0);
+    private final AtomicLong continuousErrorCountAtom = new AtomicLong(0);
+    private final AtomicLong lastReportContinuousErrorTimeAtom = new AtomicLong(0);
 
     private int switchVersion = 0;
 
@@ -61,8 +63,8 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private static final String LISTENER_TIME_OUT = "SwitchListenerTimeout:%s";
     private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
     private static final String THREAD_NAME = "DataSourceRefresher";
-    public static final int CONTINUOUS_ERROR_DURATION_THRESHOLD = 60; //second
-    public static final int CONTINUOUS_ERROR_REPORT_PERIOD = 30; //second
+    public static final int CONTINUOUS_ERROR_DURATION_THRESHOLD = 60 * 1000;  // ms
+    public static final int CONTINUOUS_ERROR_REPORT_PERIOD = 30 * 1000;  // ms
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
         this.id = new DataSourceName(name);
@@ -124,33 +126,38 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         }, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
-    public void handleException(SQLException e){
+    public void handleException(SQLException e, boolean isUpdateOperation) {
         if (e != null) {
             long nowTime = System.currentTimeMillis();
-            if (firstAppearContinuousErrorTime == 0) {
-                firstAppearContinuousErrorTime = nowTime;
+            long firstAppear;
+            long continuousErrorCount;
+            synchronized (firstAppearContinuousErrorTimeAtom) {
+                firstAppear = firstAppearContinuousErrorTimeAtom.get();
+                firstAppearContinuousErrorTimeAtom.compareAndSet(0, nowTime);
+                continuousErrorCount = continuousErrorCountAtom.incrementAndGet();
             }
-            else {
-                long duration = nowTime - firstAppearContinuousErrorTime;
-                if (duration > CONTINUOUS_ERROR_DURATION_THRESHOLD * 1000) {
-                    if (isNeedToReport(nowTime)) {
-                        LOGGER.reportError(id.getId());
-                    }
-                }
+            if (firstAppear > 0 && nowTime - firstAppear >= CONTINUOUS_ERROR_DURATION_THRESHOLD &&
+                    needToReport(nowTime, continuousErrorCount)) {
+                LOGGER.reportError(id.getId());
             }
-        }
-        else {
-            firstAppearContinuousErrorTime = 0;
-            lastReportContinuousErrorTime = 0;
+        } else if (isUpdateOperation) {
+            synchronized (firstAppearContinuousErrorTimeAtom) {
+                continuousErrorCountAtom.set(0);
+                firstAppearContinuousErrorTimeAtom.set(0);
+            }
         }
     }
 
-    private synchronized boolean isNeedToReport(long nowTime) {
-        if (lastReportContinuousErrorTime == 0 || nowTime - lastReportContinuousErrorTime > CONTINUOUS_ERROR_REPORT_PERIOD * 1000) {
-            lastReportContinuousErrorTime = nowTime;
-            return true;
+    private boolean needToReport(long nowTime, long continuousErrorCount) {
+        synchronized (lastReportContinuousErrorTimeAtom) {
+            long lastReport = lastReportContinuousErrorTimeAtom.get();
+            if ((lastReport == 0 || nowTime - lastReport >= CONTINUOUS_ERROR_REPORT_PERIOD) &&
+                    continuousErrorCount >= 3) {
+                lastReportContinuousErrorTimeAtom.set(nowTime);
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -370,11 +377,15 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     }
 
     public long getFirstAppearContinuousErrorTime() {
-        return firstAppearContinuousErrorTime;
+        return firstAppearContinuousErrorTimeAtom.get();
     }
 
     public long getLastReportContinuousErrorTime() {
-        return lastReportContinuousErrorTime;
+        return lastReportContinuousErrorTimeAtom.get();
+    }
+
+    public long getContinuousErrorCount() {
+        return continuousErrorCountAtom.get();
     }
 
     @Override

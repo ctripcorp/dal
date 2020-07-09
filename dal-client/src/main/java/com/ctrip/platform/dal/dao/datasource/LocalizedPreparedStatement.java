@@ -143,7 +143,7 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public boolean execute() throws SQLException {
-        if (needValidate())
+        if (isUpdateOperation())
             validateLocalization();
         return preparedStatement.execute();
     }
@@ -324,9 +324,8 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
         return preparedStatement.executeLargeUpdate();
     }
 
-    @Override
-    protected boolean needValidate() {
-        return super.needValidate() && !SqlUtils.isReadOperation(firstAlphaCharUc);
+    protected boolean isUpdateOperation() {
+        return !isCallableStatement() && !SqlUtils.isReadOperation(firstAlphaCharUc);
     }
 
 }

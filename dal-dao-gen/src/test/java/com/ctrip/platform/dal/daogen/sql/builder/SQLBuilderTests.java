@@ -20,4 +20,5 @@ public class SQLBuilderTests {
         String sql2 = SqlBuilder.net2Java(sql);
         assertEquals(sql, sql2);
     }
+
 }

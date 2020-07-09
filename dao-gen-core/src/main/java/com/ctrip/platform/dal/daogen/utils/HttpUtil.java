@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.daogen.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+
 import com.ctrip.platform.dal.daogen.enums.HttpMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,6 +14,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpUtil {
@@ -42,11 +42,11 @@ public class HttpUtil {
             HttpPost request = new HttpPost();
             request.setURI(uri);
             if (parameters != null && parameters.size() > 0) {
-                JSONObject json = new JSONObject();
+                Map<String, Object> map = new HashMap<String, Object>();
                 for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-                    json.put(parameter.getKey(), parameter.getValue());
+                    map.put(parameter.getKey(), parameter.getValue());
                 }
-                StringEntity stringEntity = new StringEntity(json.toString());
+                StringEntity stringEntity = new StringEntity(JsonUtils.toJson(map));
                 request.setEntity(stringEntity);
             }
 
@@ -55,7 +55,7 @@ public class HttpUtil {
         }
 
         try {
-            result = JSON.parseObject(content, clazz);
+            result = JsonUtils.fromJson(content, clazz);
         } catch (Throwable e) {
         }
         return result;

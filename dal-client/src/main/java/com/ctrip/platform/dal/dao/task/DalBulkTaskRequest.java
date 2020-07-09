@@ -88,6 +88,11 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 	}
 
 	@Override
+	public String getLogicDbName() {
+		return logicDbName;
+	}
+
+	@Override
 	public boolean isCrossShard() throws SQLException {		
 		if(isAlreadySharded(logicDbName, rawTableName, hints))
 			return false;
@@ -259,6 +264,11 @@ public class DalBulkTaskRequest<K, T> implements DalRequest<K>{
 		@Override
 		public DalTaskContext getDalTaskContext() {
 			return this.taskContext;
+		}
+
+		@Override
+		public String getPreparedDbShard() {
+			return shuffledDbShard != null ? shuffledDbShard : hints.getShardId();
 		}
 	}
 }

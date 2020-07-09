@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -19,12 +20,18 @@ import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.datasource.LocalizationValidatable;
+import com.ctrip.platform.dal.dao.datasource.ValidationResult;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.task.DalContextConfigure;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.TransactionSystemException;
 
 public abstract class ConnectionAction<T> {
+    private static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
+
     public DalEventEnum operation;
     public String sql;
     public String callString;
@@ -155,6 +162,28 @@ public abstract class ConnectionAction<T> {
             entry.setMaster(connHolder.isMaster());
             entry.setShardId(connHolder.getShardId());
         }
+
+        recordLocalizationValidation();
+    }
+
+    private void recordLocalizationValidation() {
+        Statement stmt = statement != null ? statement : preparedStatement;
+        stmt = stmt != null ? stmt : callableStatement;
+        try {
+            if (stmt.isWrapperFor(LocalizationValidatable.class)) {
+                LocalizationValidatable validatable = stmt.unwrap(LocalizationValidatable.class);
+                LocalizationValidatable.ValidationStatus validationStatus = validatable.getLastValidationStatus();
+                ValidationResult validationResult = validatable.getLastValidationResult();
+                if ((validationStatus == LocalizationValidatable.ValidationStatus.OK ||
+                        validationStatus == LocalizationValidatable.ValidationStatus.FAILED) &&
+                        validationResult != null) {
+                    entry.setUcsValidation(validationResult.getUcsValidationMessage());
+                    entry.setDalValidation(validationResult.getDalValidationMessage());
+                }
+            }
+        } catch (Throwable t) {
+            // ignore
+        }
     }
 
     public void initLogEntry(String logicDbName, DalHints hints) {
@@ -163,10 +192,14 @@ public abstract class ConnectionAction<T> {
         if (databaseSet instanceof ClusterDatabaseSet) {
             Cluster cluster = ((ClusterDatabaseSet) databaseSet).getCluster();
             entry.setClusterName(cluster.getClusterName().toLowerCase());
+            LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
+            if (localizationConfig != null)
+                entry.setDbZone(localizationConfig.getZoneId());
         }
         entry.setLogicDbName(logicDbName);
         entry.setDbCategory(DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName).getDatabaseCategory());
         entry.setClientVersion(Version.getVersion());
+        entry.setClientZone(envUtils.getZone());
         entry.setSensitive(hints.is(DalHintEnum.sensitive));
         entry.setEvent(operation);
         entry.setShardingCategory(shardingCategory);

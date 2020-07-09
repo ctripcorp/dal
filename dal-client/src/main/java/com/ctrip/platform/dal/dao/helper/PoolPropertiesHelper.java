@@ -35,8 +35,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
         properties.setTestOnReturn(config.getBooleanProperty(TESTONRETURN, DEFAULT_TESTONRETURN));
 
         properties.setValidationQuery(config.getProperty(VALIDATIONQUERY, DEFAULT_VALIDATIONQUERY));
-        properties.setValidationQueryTimeout(
-                config.getIntProperty(VALIDATIONQUERYTIMEOUT, DEFAULT_VALIDATIONQUERYTIMEOUT));
+        properties.setValidationQueryTimeout(config.getValidationQueryTimeout());
         properties.setValidationInterval(config.getLongProperty(VALIDATIONINTERVAL, DEFAULT_VALIDATIONINTERVAL));
 
         properties.setTimeBetweenEvictionRunsMillis(
@@ -70,7 +69,9 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
         properties.setJmxEnabled(DEFAULT_JMXENABLED);
         properties.setJdbcInterceptors(config.getProperty(JDBC_INTERCEPTORS, DEFAULT_JDBCINTERCEPTORS));
 
-        properties.setServerWaitTimeout(config.getIntProperty(SERVER_WAIT_TIMEOUT, DEFAULT_SERVER_WAIT_TIMEOUT));
+        properties.setSessionWaitTimeout(config.getSessionWaitTimeout());
+
+        properties.setDataSourceId(config.getDataSourceId());
 
         return properties;
     }

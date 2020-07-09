@@ -1,5 +1,8 @@
 package com.ctrip.platform.dal.dao.log;
 
+import java.util.Map;
+import java.util.Properties;
+
 public interface ILogger {
     void logEvent(String type, String name, String message);
 
@@ -11,6 +14,10 @@ public interface ILogger {
     void logTransaction(String type, String name, String message, long startTime);
 
     void logTransaction(String type, String name, String message, Throwable exception, long startTime);
+
+    void logTransaction(String type, String name, String message, Map<String, String> properties, long startTime);
+
+    void logTransaction(String type, String name, String message, Map<String, String> properties, Throwable exception, long startTime);
 
     void info(final String msg);
 

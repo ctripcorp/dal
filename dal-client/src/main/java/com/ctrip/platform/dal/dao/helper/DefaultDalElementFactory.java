@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
@@ -32,6 +33,8 @@ public class DefaultDalElementFactory implements DalElementFactory {
     private Lock datasourceBackgroundExecutorLock = new ReentrantLock();
 
     private final AtomicReference<LocalizationValidatorFactory> localizationValidatorFactoryRef = new AtomicReference<>();
+
+    private final ObjectHolder<EnvUtils> envUtilsHolder = new ObjectHolder<>();
 
     @Override
     public ILogger getILogger() {
@@ -99,6 +102,11 @@ public class DefaultDalElementFactory implements DalElementFactory {
             }
         }
         return factory;
+    }
+
+    @Override
+    public EnvUtils getEnvUtils() {
+        return envUtilsHolder.getOrCreate(NullEnvUtils::new);
     }
 
     @Override

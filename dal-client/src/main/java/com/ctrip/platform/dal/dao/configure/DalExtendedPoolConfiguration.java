@@ -1,10 +1,14 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+
 /**
  * @author c7ch23en
  */
 public interface DalExtendedPoolConfiguration {
 
-    int getServerWaitTimeout();
+    int getSessionWaitTimeout();
+
+    DataSourceIdentity getDataSourceId();
 
 }

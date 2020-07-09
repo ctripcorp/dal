@@ -11,7 +11,8 @@ public interface DataSourceConfigureConstants {
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";
     String VALIDATIONQUERY = "validationQuery";
-    String VALIDATIONQUERYTIMEOUT = "validationQueryTimeout";
+    // validationQueryTimeout -> validationTimeoutMillis
+    String VALIDATIONQUERYTIMEOUT = "validationTimeoutMillis";
     String VALIDATIONINTERVAL = "validationInterval";
     String TIMEBETWEENEVICTIONRUNSMILLIS = "timeBetweenEvictionRunsMillis";
     String MAX_AGE = "maxAge";
@@ -27,7 +28,8 @@ public interface DataSourceConfigureConstants {
     String INIT_SQL = "initSql";
 
     // **********Dal extended properties key**********
-    String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";
+    String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";  // alias name for sessionWaitTimeout
+    String SESSION_WAIT_TIMEOUT = "sessionWaitTimeout";
 
     //used by mgr datasource
     String DB_TOKEN = "dbToken";
@@ -35,6 +37,9 @@ public interface DataSourceConfigureConstants {
     String DB_MODEL = "dbModel";
     String LOAD_BALANCE_STRATEGY = "loadBalanceStrategy";
     String SERVER_AFFINITY_ORDER = "serverAffinityOrder";
+    String LOCAL_ACCESS = "localAccess";
+    String IDC_PRIORITY = "idcPriority";
+    String IDC_PRIORITY_SEPARATOR = ",";
 
     // This is for typo error
     String INIT_SQL2 = "initSQL";
@@ -56,7 +61,10 @@ public interface DataSourceConfigureConstants {
     boolean DEFAULT_TESTONBORROW = true;
     boolean DEFAULT_TESTONRETURN = false;
     String DEFAULT_VALIDATIONQUERY = "SELECT 1";
-    int DEFAULT_VALIDATIONQUERYTIMEOUT = 5;
+    // 1s -> 250ms
+    int DEFAULT_VALIDATIONQUERYTIMEOUT = 250;
+    int MIN_VALIDATIONQUERYTIMEOUT = 100;
+
     long DEFAULT_VALIDATIONINTERVAL = 30000L;
     String DEFAULT_VALIDATORCLASSNAME = "com.ctrip.platform.dal.dao.datasource.DataSourceValidator";
     int DEFAULT_TIMEBETWEENEVICTIONRUNSMILLIS = 5000;
@@ -78,7 +86,7 @@ public interface DataSourceConfigureConstants {
     // com.ctrip.platform.dal.dao.interceptor.DefaultConnectionState
 
     // **********Dal extended properties default value**********
-    int DEFAULT_SERVER_WAIT_TIMEOUT = 120;
+    int DEFAULT_SESSION_WAIT_TIMEOUT = 120;
 
     //used by mgr datasource
     int DEFAULT_CALL_MYSQL_API_PERIOD = 3 * 1000; //ms

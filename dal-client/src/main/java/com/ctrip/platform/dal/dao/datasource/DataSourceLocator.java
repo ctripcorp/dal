@@ -13,6 +13,8 @@ import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.platform.dal.dao.cluster.ClusterManager;
+import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
@@ -32,17 +34,19 @@ public class DataSourceLocator {
 
     private DatasourceBackgroundExecutor executor = DalElementFactory.DEFAULT.getDatasourceBackgroundExecutor();
     private IntegratedConfigProvider provider;
+    private ClusterManager clusterManager;
     private LocalizationValidatorFactory factory = DalElementFactory.DEFAULT.getLocalizationValidatorFactory();
 
     private boolean isForceInitialize = false;
 
     public DataSourceLocator(IntegratedConfigProvider provider) {
-        this.provider = provider;
+        this(provider, false);
     }
 
     public DataSourceLocator(IntegratedConfigProvider provider, boolean isForceInitialize) {
         this.provider = provider;
         this.isForceInitialize = isForceInitialize;
+        this.clusterManager = new ClusterManagerImpl(provider);
     }
 
     // to be refactored
@@ -96,8 +100,7 @@ public class DataSourceLocator {
                 if (ds == null) {
                     try {
                         String clusterName = clusterInfo.getClusterName();
-                        ClusterConfig clusterConfig = provider.getClusterConfig(clusterName);
-                        ds = createDataSource(id, clusterInfo, new DynamicCluster(clusterConfig));
+                        ds = createDataSource(id, clusterInfo, clusterManager.getOrCreateCluster(clusterName));
                         cache.put(id, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating cluster datasource: %s", id.getId());
@@ -138,16 +141,16 @@ public class DataSourceLocator {
                     cluster != null && cluster.dbShardingEnabled());
             try {
                 if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
-                    DrcCluster drcCluster = cluster.unwrap(DrcCluster.class);
-                    LocalizationConfig localizationConfig = drcCluster.getLocalizationConfig();
+                    LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
                     LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
                     LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE,
                             clusterInfo.toString()), localizationConfig.toString());
                     return new LocalizedDataSource(validator, id, provider.getDataSourceConfigure(id));
                 }
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE_FAIL,
                         clusterInfo.toString()), e.getMessage());
+                throw e;
             }
         }
         LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_NORMAL_DATASOURCE, id.getId()), "");

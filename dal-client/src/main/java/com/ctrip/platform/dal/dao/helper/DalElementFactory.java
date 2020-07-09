@@ -20,4 +20,6 @@ public interface DalElementFactory extends Ordered {
 
     LocalizationValidatorFactory getLocalizationValidatorFactory();
 
+    EnvUtils getEnvUtils();
+
 }

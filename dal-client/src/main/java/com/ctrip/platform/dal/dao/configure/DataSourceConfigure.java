@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
@@ -10,12 +11,12 @@ import java.util.*;
 
 public class DataSourceConfigure extends AbstractDataSourceConfigure
         implements DataSourceConfigureConstants, DalConnectionStringConfigure, DalPoolPropertiesConfigure {
+
     private String name;
     private Properties properties = new Properties();
     private String version;
     private DalConnectionString connectionString;
-
-    private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
+    private DataSourceIdentity dataSourceId;
 
     public DataSourceConfigure() {
     }
@@ -63,7 +64,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setUserName(String userName) {
-        setProperty(USER_NAME, userName);
+        setProperty(USER_NAME, userName != null ? userName : "");
     }
 
     @Override
@@ -72,7 +73,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setPassword(String password) {
-        setProperty(PASSWORD, password);
+        setProperty(PASSWORD, password != null ? password : "");
     }
 
     @Override
@@ -144,7 +145,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     public void setProperty(String key, String value) {
-        properties.setProperty(key, value);
+        if (key != null && value != null)
+            properties.setProperty(key, value);
     }
 
 
@@ -254,6 +256,18 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return DBModel.toDBModel(getProperty(DB_MODEL, DEFAULT_DB_MODEL));
     }
 
+    @Override
+    public String getLocalAccess() {
+        return getProperty(LOCAL_ACCESS);
+    }
+
+    @Override
+    public String[] getIdcPriority() {
+        String value = getProperty(IDC_PRIORITY);
+        if (com.ctrip.framework.dal.cluster.client.util.StringUtils.isTrimmedEmpty(value))
+            return new String[0];
+        return StringUtils.split(value, IDC_PRIORITY_SEPARATOR);
+    }
 
     public String getInitSQL() {
         String initSQL = getProperty(INIT_SQL);
@@ -307,18 +321,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return Boolean.parseBoolean(value);
     }
 
-    public Integer getServerWaitTimeout() {
-        if (properties != null) {
-            String value = properties.getProperty(SERVER_WAIT_TIMEOUT);
-            if (value != null) {
-                try {
-                    return Integer.parseInt(value);
-                } catch (NumberFormatException e) {
-                    // ignore
-                }
-            }
-        }
-        return null;
+    public Integer getSessionWaitTimeout() {
+        return getIntProperty(SESSION_WAIT_TIMEOUT, getIntProperty(SERVER_WAIT_TIMEOUT, DEFAULT_SESSION_WAIT_TIMEOUT));
     }
 
     public DatabaseCategory getDatabaseCategory() {
@@ -347,6 +351,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         dataSourceConfigure.setProperties(p);
         dataSourceConfigure.setVersion(version);
         dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
+        dataSourceConfigure.setDataSourceId(dataSourceId);
         return dataSourceConfigure;
     }
 
@@ -356,18 +361,24 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         else {
             DataSourceConfigure dataSourceConfigure = new DataSourceConfigure();
             Properties properties = new Properties();
-            properties.setProperty(USER_NAME, configure.getUserName());
-            properties.setProperty(PASSWORD, configure.getPassword());
+            String username = configure.getUserName();
+            properties.setProperty(USER_NAME, username != null ? username : "");
+            String password = configure.getPassword();
+            properties.setProperty(PASSWORD, password != null ? password : "");
             String connectionUrl = configure.getConnectionUrl();
             if (connectionUrl == null)
-                throw new DalRuntimeException("connetion url cannot be null");
+                throw new DalRuntimeException("connection url cannot be null");
             properties.setProperty(CONNECTION_URL, connectionUrl);
-            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
-            if (StringUtils.isEmpty(hostAndPort.getHost())) {
-                properties.setProperty(HOST_NAME, "UnKnown");
-            }
-            else {
-                properties.setProperty(HOST_NAME, hostAndPort.getHost());
+
+            try {
+                HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(connectionUrl);
+                if (StringUtils.isEmpty(hostAndPort.getHost())) {
+                    properties.setProperty(HOST_NAME, "unknown");
+                } else {
+                    properties.setProperty(HOST_NAME, hostAndPort.getHost());
+                }
+            } catch (Throwable t) {
+                // ignore
             }
 
             if (configure.getDriverClass() != null)
@@ -412,6 +423,11 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 properties.setProperty(VALIDATORCLASSNAME, configure.getValidatorClassName());
             if (configure.getJdbcInterceptors() != null)
                 properties.setProperty(JDBC_INTERCEPTORS, configure.getJdbcInterceptors());
+            if (configure instanceof AbstractDataSourceConfigure) {
+                AbstractDataSourceConfigure configure1 = (AbstractDataSourceConfigure) configure;
+                if (configure1.getSessionWaitTimeout() != null)
+                    properties.setProperty(SESSION_WAIT_TIMEOUT, String.valueOf(configure1.getSessionWaitTimeout()));
+            }
             dataSourceConfigure.setProperties(properties);
             return dataSourceConfigure;
         }
@@ -420,6 +436,14 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     public void replaceURL(String ip, int port) {
         String newConnectionUrl = ConnectionStringParser.replaceHostAndPort(getConnectionUrl(),ip,String.valueOf(port));
         setConnectionUrl(newConnectionUrl);
+    }
+
+    public DataSourceIdentity getDataSourceId() {
+        return dataSourceId;
+    }
+
+    public void setDataSourceId(DataSourceIdentity dataSourceId) {
+        this.dataSourceId = dataSourceId;
     }
 
     @Override
@@ -451,7 +475,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                     equals(getJdbcInterceptors(), ref.getJdbcInterceptors()) &&
                     equals(getConnectionProperties(), ref.getConnectionProperties()) &&
                     equals(getJmxEnabled(), ref.getJmxEnabled()) &&
-                    equals(getServerWaitTimeout(), ref.getServerWaitTimeout()));
+                    equals(getSessionWaitTimeout(), ref.getSessionWaitTimeout()));
         }
         return false;
     }
@@ -488,7 +512,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 append(getJdbcInterceptors()).
                 append(getConnectionProperties()).
                 append(getJmxEnabled()).
-                append(getServerWaitTimeout()).
+                append(getSessionWaitTimeout()).
                 generate();
     }
 

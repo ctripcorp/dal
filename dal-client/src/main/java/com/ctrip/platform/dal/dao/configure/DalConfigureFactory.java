@@ -10,8 +10,8 @@ import javax.persistence.Entity;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.platform.dal.dao.cluster.ClusterManager;
+import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
@@ -183,30 +183,28 @@ public class DalConfigureFactory implements DalConfigConstants {
     private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalConnectionLocator locator) throws Exception {
         Map<String, DatabaseSet> databaseSets = new HashMap<>();
 
-        ClusterConfigProvider provider = locator.getIntegratedConfigProvider();
+        ClusterManager clusterManager = new ClusterManagerImpl(locator.getIntegratedConfigProvider());
         List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
-        for (int i = 0; i < clusterList.size(); i++) {
-            Node node = clusterList.get(i);
+        for (Node node : clusterList) {
             String name = getDatabaseSetName(node);
-            Cluster cluster = readCluster(node, provider);
-            databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator));
+            Cluster cluster = readCluster(node, clusterManager);
+            databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator, getSettings(node)));
         }
 
         List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
-        for (int i = 0; i < databaseSetList.size(); i++) {
-            DatabaseSet databaseSet = readDatabaseSet(databaseSetList.get(i));
+        for (Node node : databaseSetList) {
+            DatabaseSet databaseSet = readDatabaseSet(node);
             databaseSets.put(databaseSet.getName(), databaseSet);
         }
 
         return databaseSets;
     }
 
-    private Cluster readCluster(Node clusterNode, ClusterConfigProvider provider) throws Exception {
+    private Cluster readCluster(Node clusterNode, ClusterManager clusterManager) throws Exception {
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new DalConfigException("empty cluster name");
-        ClusterConfig config = provider.getClusterConfig(name);
-        return new DynamicCluster(config);
+        return clusterManager.getOrCreateCluster(name);
     }
 
     private String getDatabaseSetName(Node clusterNode) {
@@ -228,17 +226,17 @@ public class DalConfigureFactory implements DalConfigConstants {
         
         List<Node> databaseList = getChildNodes(databaseSetNode, ADD);
         Map<String, DataBase> databases = new HashMap<>();
-        for (int i = 0; i < databaseList.size(); i++) {
-            DataBase database = readDataBase(databaseList.get(i), !shardingStrategy.isEmpty());
+        for (Node node : databaseList) {
+            DataBase database = readDataBase(node, !shardingStrategy.isEmpty());
             databases.put(database.getName(), database);
         }
 
         if (shardingStrategy.isEmpty())
             return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    databases, idGenConfig);
+                    databases, idGenConfig, getSettings(databaseSetNode));
         else
             return new DefaultDatabaseSet(getAttribute(databaseSetNode, NAME), getAttribute(databaseSetNode, PROVIDER),
-                    shardingStrategy, databases, idGenConfig);
+                    shardingStrategy, databases, idGenConfig, getSettings(databaseSetNode));
     }
 
     private void tryAdaptToClusters(Map<String, DatabaseSet> databaseSets, DatabaseSetAdapter adapter) {

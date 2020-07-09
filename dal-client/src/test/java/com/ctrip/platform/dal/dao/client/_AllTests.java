@@ -20,6 +20,6 @@ import org.junit.runners.Suite.SuiteClasses;
 		DalCommandRollbackOnlyTest.class,
 		LogSamplingTest.class
 })
-public class AllTest {
+public class _AllTests {
 
 }

@@ -16,26 +16,26 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
     private String ON_WAIT_CONNECTION_FORMAT="[onWaitConnection]%s, %s";
 
     @Override
-    public void onCreateConnection(String poolDesc, Connection connection, long startTime) {
+    public void onCreateConnection(String poolDesc, Connection connection, DataSourceIdentity dataSourceId, long startTime) {
         if (connection == null)
             return;
 
-        doOnCreateConnection(poolDesc, connection, startTime);
+        doOnCreateConnection(poolDesc, connection, dataSourceId, startTime);
     }
 
-    protected void doOnCreateConnection(String poolDesc, Connection connection, long startTime) {
+    protected void doOnCreateConnection(String poolDesc, Connection connection, DataSourceIdentity dataSourceId, long startTime) {
         logInfo(ON_CREATE_CONNECTION_FORMAT, poolDesc, connection);
     }
 
     @Override
-    public void onCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+    public void onCreateConnectionFailed(String poolDesc, String connDesc, DataSourceIdentity dataSourceId, Throwable exception, long startTime) {
         if (exception == null)
             return;
 
-        doOnCreateConnectionFailed(poolDesc, connDesc, exception, startTime);
+        doOnCreateConnectionFailed(poolDesc, connDesc, dataSourceId, exception, startTime);
     }
 
-    protected void doOnCreateConnectionFailed(String poolDesc, String connDesc, Throwable exception, long startTime) {
+    protected void doOnCreateConnectionFailed(String poolDesc, String connDesc, DataSourceIdentity dataSourceId, Throwable exception, long startTime) {
         logError(ON_CREATE_CONNECTION_FAILED_FORMAT, poolDesc, connDesc, exception);
     }
 

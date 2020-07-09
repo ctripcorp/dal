@@ -33,7 +33,12 @@ public class DalRequestExecutorTest {
 				throw e;
 		}
 
-		@Override
+        @Override
+        public String getLogicDbName() {
+            return null;
+        }
+
+        @Override
 		public boolean isCrossShard() throws SQLException {
 			return values.length > 1;
 		}
@@ -61,6 +66,11 @@ public class DalRequestExecutorTest {
                 @Override
                 public DalTaskContext getDalTaskContext() {
                     return this.dalTaskContext;
+                }
+
+                @Override
+                public String getPreparedDbShard() {
+                    return null;
                 }
 
                 public Integer call() throws Exception {
@@ -112,6 +122,11 @@ public class DalRequestExecutorTest {
                 @Override
                 public DalTaskContext getDalTaskContext() {
                     return this.dalTaskContext;
+                }
+
+                @Override
+                public String getPreparedDbShard() {
+                    return null;
                 }
 
                 public Integer call() throws Exception {

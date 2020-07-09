@@ -5,6 +5,8 @@ import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
+import java.util.Objects;
+
 public class ApiDataSourceIdentity implements DataSourceIdentity {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -52,17 +54,16 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ApiDataSourceIdentity) {
-            ConnectionStringConfigureProvider objProvider = ((ApiDataSourceIdentity) obj).getProvider();
-            return (provider != null && provider.equals(objProvider)) || (provider == null && objProvider == null);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ApiDataSourceIdentity that = (ApiDataSourceIdentity) o;
+        return Objects.equals(provider, that.provider);
     }
 
     @Override
     public int hashCode() {
-        return provider != null ? provider.hashCode() : 0;
+        return Objects.hash(provider);
     }
 
     public static class ApiConnectionStringImpl implements DalConnectionString {
@@ -100,8 +101,9 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
 
         @Override
         public DalConnectionString clone() {
-            throw new UnsupportedOperationException("clone not supported");
+            return new ApiConnectionStringImpl(connectionStringConfigure);
         }
+
     }
 
 }

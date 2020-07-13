@@ -49,6 +49,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
             result = context.validate(config.getUnitStrategyId());
             if (result != null)
                 ucsMsg = result.name();
+            ucsClient.logRequestContextKey();
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result), Event.SUCCESS, buildUcsValidateLogMessage(result));
         } catch (Throwable t) {
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION"), Event.SUCCESS, t.getMessage());

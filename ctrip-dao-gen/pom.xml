@@ -6,9 +6,9 @@
     <parent>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>dal-client-trip-parent</artifactId>
-        <version>2.1.7-SNAPSHOT</version>
+        <version>2.1.7</version>
     </parent>
-    <groupId>com.ctrip.framework</groupId>
+    <groupId>com.ctrip.framework.dal</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
     <packaging>war</packaging>
 

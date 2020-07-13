@@ -67,7 +67,7 @@ public class HeraldTokenUtils {
             return token;
         } catch (HeraldTokenException e) {
             Cat.logEvent(DalLogTypes.DAL_VALIDATION, "HeraldTokenNotFound");
-            LOGGER.info("getTokenStringByAppID error, appId=" + appId, e);
+            LOGGER.info("HeraldTokenNotFound, appId=" + appId);
             return null;
         }
     }

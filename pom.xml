@@ -6,10 +6,10 @@
     <parent>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>dal-client-parent</artifactId>
-        <version>2.1.6</version>
+        <version>2.1.7</version>
     </parent>
     <artifactId>dal-client-trip-parent</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.7</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -20,8 +20,9 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <ctrip-datasource.version>${project.version}</ctrip-datasource.version>
         <dal-client.version>${project.version}</dal-client.version>
+        <ctrip-datasource.version>${project.version}</ctrip-datasource.version>
+        <ctrip-dal-client.version>${project.version}</ctrip-dal-client.version>
         <vi.version>0.11.5</vi.version>
         <framework-foundation.version>1.8.10</framework-foundation.version>
         <clogging-agent.version>4.2.9</clogging-agent.version>
@@ -41,13 +42,18 @@
         <dependencies>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
+                <artifactId>dal-client</artifactId>
+                <version>${dal-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
                 <artifactId>ctrip-datasource</artifactId>
                 <version>${ctrip-datasource.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
-                <artifactId>dal-client</artifactId>
-                <version>${dal-client.version}</version>
+                <artifactId>ctrip-dal-client</artifactId>
+                <version>${ctrip-dal-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.framework</groupId>

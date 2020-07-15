@@ -7,7 +7,11 @@ public class HostAndPort {
     private String connectionUrl;
     private boolean isValid = false;
 
-    public HostAndPort(){}
+    public HostAndPort() {}
+
+    public HostAndPort(String connectionUrl) {
+        this.connectionUrl = connectionUrl;
+    }
 
     public HostAndPort(String connectionUrl, String host, Integer port) {
         this.connectionUrl = connectionUrl;
@@ -46,4 +50,5 @@ public class HostAndPort {
     public void setValid(boolean valid) {
         isValid = valid;
     }
+
 }

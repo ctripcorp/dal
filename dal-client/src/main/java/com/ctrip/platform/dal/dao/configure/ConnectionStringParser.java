@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import org.apache.commons.lang.StringUtils;
 
@@ -39,8 +37,10 @@ public class ConnectionStringParser {
     public static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     public static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    private static final Pattern ipPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([\\S:]+):([^/]+)");
-    private static final Pattern ipPortPatternInSQLServerURL = Pattern.compile("(jdbc:sqlserver://)([\\S:]+):([^;]+)");
+    private static final Pattern hostPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([\\S:]+):([^/]+)");
+    private static final Pattern complexHostPatternInMySQLURL = Pattern.compile("(\\(host|,host)=([^\\),]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern complexPortPatternInMySQLURL = Pattern.compile("(\\(port|,port)=([^\\),]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern hostPortPatternInSQLServerURL = Pattern.compile("(jdbc:sqlserver://)([\\S:]+):([^;]+)");
 
     private static final Pattern urlReplacePatternInMySQLURL = Pattern.compile("jdbc:mysql://([^/]+)");
     private static final Pattern urlReplacePatternInMySQLMgrURL = Pattern.compile("jdbc:mysql:replication://([^/]+)");
@@ -155,18 +155,45 @@ public class ConnectionStringParser {
         if (StringUtils.isEmpty(url)) {
             return new HostAndPort();
         }
+
         if (url.toLowerCase().startsWith(MYSQL_URL_PREFIX)) {
-            Matcher matcher = ipPortPatternInMySQLURL.matcher(url);
+            String host = null;
+            Integer port = null;
+
+            // jdbc:mysql://address=(host=host)(port=port)/db
+            // jdbc:mysql://(host=host,port=port)/db
+            Matcher matcher = complexHostPatternInMySQLURL.matcher(url);
             if (matcher.find())
-                return new HostAndPort(url,matcher.group(2),Integer.parseInt(matcher.group(3)));
+                host = matcher.group(2);
+            matcher = complexPortPatternInMySQLURL.matcher(url);
+            if (matcher.find())
+                port = parseInt(matcher.group(2));
+
+            if (host == null && port == null) {
+                // jdbc:mysql://host:port/db
+                matcher = hostPortPatternInMySQLURL.matcher(url);
+                if (matcher.find()) {
+                    host = matcher.group(2);
+                    port = parseInt(matcher.group(3));
+                }
+            }
+            return new HostAndPort(url, host, port);
         }
 
         if (url.toLowerCase().startsWith(SQLSERVER_URL_PREFIX)) {
-            Matcher matcher = ipPortPatternInSQLServerURL.matcher(url);
+            Matcher matcher = hostPortPatternInSQLServerURL.matcher(url);
             if (matcher.find())
-                return new HostAndPort(url,matcher.group(2),Integer.parseInt(matcher.group(3)));
+                return new HostAndPort(url, matcher.group(2), parseInt(matcher.group(3)));
         }
 
-        return new HostAndPort();
+        return new HostAndPort(url);
+    }
+
+    private static Integer parseInt(String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 }

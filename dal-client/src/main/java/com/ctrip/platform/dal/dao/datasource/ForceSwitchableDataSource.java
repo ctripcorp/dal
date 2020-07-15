@@ -194,9 +194,9 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             }
             if (!currentHostAndPort.isValid()) {
                 setIpPortCache(ConnectionStringParser.parseHostPortFromURL(url));
-                return new SwitchableDataSourceStatus(isForceSwitched, currentHostAndPort.getHost(), currentHostAndPort.getPort(), false);
+                return buildSwitchableDataSourceStatus(isForceSwitched, currentHostAndPort.getHost(), url, currentHostAndPort.getPort(), false);
             }
-            return new SwitchableDataSourceStatus(isForceSwitched, currentHostAndPort.getHost(), currentHostAndPort.getPort(), poolCreated);
+            return buildSwitchableDataSourceStatus(isForceSwitched, currentHostAndPort.getHost(), url, currentHostAndPort.getPort(), poolCreated);
         }
     }
 
@@ -301,5 +301,12 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
     public FirstAidKit getFirstAidKit() {
         DataSourceConfigure dataSourceConfigure = getSingleDataSource().getDataSourceConfigure();
         return SerializableDataSourceConfig.valueOf(dataSourceConfigureConvert.desEncrypt(dataSourceConfigure));
+    }
+
+    private SwitchableDataSourceStatus buildSwitchableDataSourceStatus(boolean isForceSwitched, String hostName, String connUrl, Integer port, boolean poolCreated) {
+        if (hostName == null && port == null)
+            return new SwitchableDataSourceStatus(isForceSwitched, connUrl, port, poolCreated);
+        else
+            return new SwitchableDataSourceStatus(isForceSwitched, hostName, port, poolCreated);
     }
 }

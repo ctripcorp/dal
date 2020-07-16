@@ -167,8 +167,10 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
 
     /**
      * Set parameter
-     * 
-     * @param sqlType java.sql.Types
+     * @param name parameter name
+     * @param value parameter value
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder set(String name, Object value, int sqlType) {
         context.getParameters().set(nextIndex(), name, sqlType, value);
@@ -176,18 +178,23 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
     }
 
     /**
-     * Set parameter when value is not null
-     * 
-     * @param sqlType java.sql.Types
+     * Set parameter when the value is not null
+     * @param name parameter name
+     * @param value parameter value
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder setNullable(String name, Object value, int sqlType) {
         return set(value != null, name, value, sqlType);
     }
 
     /**
-     * Set parameter when condition is satisfied
-     * 
-     * @param sqlType java.sql.Types
+     * Set parameter when the condition is satisfied
+     * @param condition condition
+     * @param name parameter name
+     * @param value parameter value
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder set(boolean condition, String name, Object value, int sqlType) {
         set(name, value, sqlType);
@@ -197,32 +204,38 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
 
     /**
      * Set in parameter
-     * 
-     * @param sqlType java.sql.Types
+     * @param name parameter name
+     * @param values parameter values
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
-    public AbstractFreeSqlBuilder setIn(String name, List<?> values, int sqlType) throws SQLException {
+    public AbstractFreeSqlBuilder setIn(String name, List<?> values, int sqlType) {
         context.getParameters().setInParameter(nextIndex(), name, sqlType, values);
         return this;
     }
 
     /**
-     * Set in parameter when value is not null and all its elements are not null
-     * 
-     * @param sqlType java.sql.Types
+     * Set in parameter when the values are not null
+     * @param name parameter name
+     * @param values parameter values
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
-    public AbstractFreeSqlBuilder setInNullable(String name, List<?> values, int sqlType) throws SQLException {
+    public AbstractFreeSqlBuilder setInNullable(String name, List<?> values, int sqlType) {
         setIn(name, values, sqlType);
         getParameters().nullable();
         return this;
     }
 
     /**
-     * Set in parameter when condition is satisfied
-     * 
-     * @param sqlType java.sql.Types
+     * Set in parameter when the condition is satisfied
+     * @param condition condition
+     * @param name parameter name
+     * @param values parameter values
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
-    public AbstractFreeSqlBuilder setIn(boolean condition, String name, List<?> values, int sqlType)
-            throws SQLException {
+    public AbstractFreeSqlBuilder setIn(boolean condition, String name, List<?> values, int sqlType) {
         setIn(name, values, sqlType);
         getParameters().when(condition);
         return this;
@@ -686,8 +699,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param value the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder equal(String name, Object value, int sqlType) {
         return append(Expressions.equal(name, value, sqlType));
@@ -708,7 +721,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param value the value of the expression@return
-     * @param sqlType corresponding sql type of the value
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder notEqual(String name, Object value, int sqlType) {
         return append(Expressions.notEqual(name, value, sqlType));
@@ -729,8 +743,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param value the value of the expression@return
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder greaterThan(String name, Object value, int sqlType) {
         return append(Expressions.greaterThan(name, value, sqlType));
@@ -751,8 +765,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param value the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder greaterThanEquals(String name, Object value, int sqlType) {
         return append(Expressions.greaterThanEquals(name, value, sqlType));
@@ -773,8 +787,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param value the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder lessThan(String name, Object value, int sqlType) {
         return append(Expressions.lessThan(name, value, sqlType));
@@ -795,8 +809,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param value the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder lessThanEquals(String name, Object value, int sqlType) {
         return append(Expressions.lessThanEquals(name, value, sqlType));
@@ -818,8 +832,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * @param name column name, can not be expression.
      * @param lowerValue the lower value of the expression
      * @param upperValue the upper value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder between(String name, Object lowerValue, Object upperValue, int sqlType) {
         return append(Expressions.between(name, lowerValue, upperValue, sqlType));
@@ -841,8 +855,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * @param name column name, can not be expression.
      * @param lowerValue the lower value of the expression
      * @param upperValue the upper value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder notBetween(String name, Object lowerValue, Object upperValue, int sqlType) {
         return append(Expressions.notBetween(name, lowerValue, upperValue, sqlType));
@@ -865,9 +879,9 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * can use like with MatchPattern to indicate dal add % for you.
      * 
      * @param name column name, can not be expression.
-     * @param sqlType corresponding sql type of the value
      * @param value the value of the expression
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder like(String name, String value, int sqlType) {
         return append(Expressions.like(name, value, sqlType));
@@ -879,8 +893,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * @param name column name, can not be expression.
      * @param pattern match pattern
      * @param value the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder like(String name, String value, MatchPattern pattern, int sqlType) {
         return append(Expressions.like(name, value, pattern, sqlType));
@@ -903,9 +917,9 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * can use notLike with MatchPattern to indicate dal add % for you.
      * 
      * @param name column name, can not be expression.
-     * @param sqlType corresponding sql type of the value
      * @param value the value of the expression
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder notLike(String name, String value, int sqlType) {
         return append(Expressions.notLike(name, value, sqlType));
@@ -915,10 +929,10 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * Append NOT LIKE expression using the giving name, pattern, value and type
      * 
      * @param name column name, can not be expression.
-     * @param sqlType corresponding sql type of the value
-     * @param pattern match pattern
      * @param value the value of the expression
-     * @return
+     * @param pattern match pattern
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder notLike(String name, String value, MatchPattern pattern, int sqlType) {
         return append(Expressions.notLike(name, value, pattern, sqlType));
@@ -939,8 +953,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param values the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder in(String name, Collection<?> values, int sqlType) {
         return append(Expressions.in(name, values, sqlType));
@@ -961,8 +975,8 @@ public class AbstractFreeSqlBuilder extends AbstractSqlBuilder {
      * 
      * @param name column name, can not be expression.
      * @param values the value of the expression
-     * @param sqlType corresponding sql type of the value
-     * @return
+     * @param sqlType JDBC type (as defined in java.sql.Types)
+     * @return this builder
      */
     public AbstractFreeSqlBuilder notIn(String name, Collection<?> values, int sqlType) {
         return append(Expressions.notIn(name, values, sqlType));

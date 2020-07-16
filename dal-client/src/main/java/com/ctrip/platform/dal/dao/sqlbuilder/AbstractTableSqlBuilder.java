@@ -137,7 +137,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	
 	/**
 	 * 追加AND连接
-	 * @return
+	 * @return this builder
 	 */
 	public AbstractTableSqlBuilder and(){
 		return addInternal(AND);
@@ -145,21 +145,14 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	
 	/**
 	 * 追加OR连接
-	 * @return
+	 * @return this builder
 	 */
 	public AbstractTableSqlBuilder or(){
 	    return addInternal(OR);
 	}
 	
 	private static final boolean DEFAULT_SENSITIVE = false;
-	
-	/**
-	 *  等于操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder equal(String field, Object paramValue, int sqlType) throws SQLException {
 		return equal(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -167,14 +160,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	public AbstractTableSqlBuilder equal(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
 		return addParam(Expressions.equal(field), paramValue, sqlType, sensitive);
 	}
-	
-	/**
-	 *  等于操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder equalNullable(String field, Object paramValue, int sqlType) {
 		return equalNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -183,13 +169,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 		return addParamNullable(Expressions.equal(field), paramValue, sqlType, sensitive);
 	}
 
-	/**
-	 *  不等于操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder notEqual(String field, Object paramValue, int sqlType) throws SQLException {
 		return notEqual(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -197,14 +176,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	public AbstractTableSqlBuilder notEqual(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
 		return addParam(Expressions.notEqual(field), paramValue, sqlType, sensitive);
 	}
-	
-	/**
-	 *  不等于操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder notEqualNullable(String field, Object paramValue, int sqlType) {
 		return notEqualNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -213,13 +185,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 		return addParamNullable(Expressions.notEqual(field), paramValue, sqlType, sensitive);
 	}
 
-	/**
-	 *  大于操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder greaterThan(String field, Object paramValue, int sqlType) throws SQLException {
 		return greaterThan(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -227,14 +192,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	public AbstractTableSqlBuilder greaterThan(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
 		return addParam(Expressions.greaterThan(field), paramValue, sqlType, sensitive);
 	}
-	
-	/**
-	 *  大于操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder greaterThanNullable(String field, Object paramValue, int sqlType) {
 		return greaterThanNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -243,13 +201,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 		return addParamNullable(Expressions.greaterThan(field), paramValue, sqlType, sensitive);
 	}
 
-	/**
-	 *  大于等于操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder greaterThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
 		return greaterThanEquals(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -257,14 +208,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	public AbstractTableSqlBuilder greaterThanEquals(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
 		return addParam(Expressions.greaterThanEquals(field), paramValue, sqlType, sensitive);
 	}
-	
-	/**
-	 *  大于等于操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder greaterThanEqualsNullable(String field, Object paramValue, int sqlType) {
 		return greaterThanEqualsNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -273,13 +217,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 		return addParamNullable(Expressions.greaterThanEquals(field), paramValue, sqlType, sensitive);
 	}
 
-	/**
-	 *  小于操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder lessThan(String field, Object paramValue, int sqlType) throws SQLException {
 		return lessThan(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -287,14 +224,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	public AbstractTableSqlBuilder lessThan(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
 		return addParam(Expressions.lessThan(field), paramValue, sqlType, sensitive);
 	}
-	
-	/**
-	 *  小于操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder lessThanNullable(String field, Object paramValue, int sqlType) {
 		return lessThanNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -303,13 +233,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 		return addParamNullable(Expressions.lessThan(field), paramValue, sqlType, sensitive);
 	}
 
-	/**
-	 *  小于等于操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder lessThanEquals(String field, Object paramValue, int sqlType) throws SQLException {
 		return lessThanEquals(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -317,14 +240,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	public AbstractTableSqlBuilder lessThanEquals(String field, Object paramValue, int sqlType, boolean sensitive) throws SQLException {
 		return addParam(Expressions.lessThanEquals(field), paramValue, sqlType, sensitive);
 	}
-	
-	/**
-	 *  小于等于操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder lessThanEqualsNullable(String field, Object paramValue, int sqlType) {
 		return lessThanEqualsNullable(field, paramValue, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -333,14 +249,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 		return addParamNullable(Expressions.lessThanEquals(field), paramValue, sqlType, sensitive);
 	}
 
-	/**
-	 *  Between操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValue1 字段值1
-	 * @param paramValue2 字段值2
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder between(String field, Object paramValue1, Object paramValue2, int sqlType) throws SQLException {
 		return between(field, paramValue1, paramValue2, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -351,15 +259,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 
 		return addBetweenClause(field, paramValue1, paramValue2, sqlType, sensitive);
 	}
-	
-	/**
-	 *  Between操作，若字段值为NULL，则此条件不会加入SQL中
-	 * @param field 字段
-	 * @param paramValue1 字段值1
-	 * @param paramValue2 字段值2
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder betweenNullable(String field, Object paramValue1, Object paramValue2, int sqlType) {
 		return betweenNullable(field, paramValue1, paramValue2, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -390,6 +290,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	 *   
 	 * @param field 字段
 	 * @param paramValue 字段值, paramValue should contain "%" at the begining, end or in the middle.
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
 	 * @return
 	 * @throws SQLException
 	 * @Deprecated just a marker to catch your eye about the usage notification
@@ -410,6 +311,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      *   
      * @param field 字段
      * @param paramValue 字段值, paramValue should contain "%" at the begining, end or in the middle.
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
      * @param sensitive if the parameter will be replaced by "*" in the log output.
      * @return
      * @throws SQLException
@@ -431,6 +333,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      *  
 	 * @param field 字段
 	 * @param paramValue 字段值, paramValue should contain "%" at the begining, end or in the middle.
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
 	 * @return
 	 * @throws SQLException
      * @Deprecated just a marker to catch your eye about the usage notification
@@ -451,6 +354,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      *  
      * @param field 字段
      * @param paramValue 字段值, paramValue should contain "%" at the begining, end or in the middle.
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
      * @param sensitive if the parameter will be replaced by "*" in the log output.
      * @return
      * @throws SQLException
@@ -471,6 +375,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      * @param field 字段
      * @param paramValue 字段值
      * @param pattern how DAL will append "%" for the input paramValue
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
      * @return
      * @throws SQLException
      */
@@ -489,6 +394,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      * @param field 字段
      * @param paramValue 字段值
      * @param pattern how DAL will append "%" for the input paramValue
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
      * @param sensitive if the parameter will be replaced by "*" in the log output.
      * @return
      * @throws SQLException
@@ -508,6 +414,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      * @param field 字段
      * @param paramValue 字段值
      * @param pattern how DAL will append "%" for the input paramValue
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
      * @return
      * @throws SQLException
      */
@@ -526,6 +433,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
      * @param field 字段
      * @param paramValue 字段值
      * @param pattern how DAL will append "%" for the input paramValue
+	 * @param sqlType JDBC字段类型 (参考java.sql.Types)
      * @param sensitive if the parameter will be replaced by "*" in the log output.
      * @return
      * @throws SQLException
@@ -534,13 +442,6 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
         return addParamNullable(Expressions.like(field), process(paramValue, pattern), sqlType, sensitive);
     }
 
-	/**
-	 *  In操作，且字段值不能为NULL，否则会抛出SQLException
-	 * @param field 字段
-	 * @param paramValues 字段值
-	 * @return
-	 * @throws SQLException
-	 */
 	public AbstractTableSqlBuilder in(String field, List<?> paramValues, int sqlType) throws SQLException {
 		return in(field, paramValues, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -549,14 +450,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
 	    StatementParameter.validateInParams(field, paramValues);
 		return addInParam(field, paramValues, sqlType, sensitive);
 	}
-	
-	/**
-	 *  In操作，允许参数为NULL，或者字段值为NULL, 或者传入的字段值数量为0。
-	 * @param field 字段
-	 * @param paramValues 字段值
-	 * @return
-	 * @throws SQLException
-	 */
+
 	public AbstractTableSqlBuilder inNullable(String field, List<?> paramValues, int sqlType) throws SQLException {
 		return inNullable(field, paramValues, sqlType, DEFAULT_SENSITIVE);
 	}
@@ -566,14 +460,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
             return addInternal(NULL);
 		return addInParam(field, paramValues, sqlType, sensitive);
 	}
-	
-    /**
-     *  In操作，且字段值不能为NULL，否则会抛出SQLException
-     * @param field 字段
-     * @param paramValues 字段值
-     * @return
-     * @throws SQLException
-     */
+
     public AbstractTableSqlBuilder notIn(String field, List<?> paramValues, int sqlType) throws SQLException {
         return notIn(field, paramValues, sqlType, DEFAULT_SENSITIVE);
     }
@@ -582,14 +469,7 @@ public abstract class AbstractTableSqlBuilder extends AbstractCompatibleSqlBuild
         StatementParameter.validateInParams(field, paramValues);
         return addNotInParam(field, paramValues, sqlType, sensitive);
     }
-    
-    /**
-     *  In操作，允许参数为NULL，或者字段值为NULL, 或者传入的字段值数量为0。
-     * @param field 字段
-     * @param paramValues 字段值
-     * @return
-     * @throws SQLException
-     */
+
     public AbstractTableSqlBuilder notInNullable(String field, List<?> paramValues, int sqlType) throws SQLException {
         return notInNullable(field, paramValues, sqlType, DEFAULT_SENSITIVE);
     }

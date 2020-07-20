@@ -1,8 +1,8 @@
 package com.ctrip.datasource.datasource;
 
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
-import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.framework.ucs.client.api.RequestContext;
 import com.ctrip.framework.ucs.client.api.StrategyValidatedResult;
 import com.ctrip.framework.ucs.client.api.UcsClient;
@@ -10,6 +10,8 @@ import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidator;
 import com.ctrip.platform.dal.dao.datasource.ValidationResult;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -22,9 +24,11 @@ public class CtripLocalizationValidator implements LocalizationValidator {
     private static final String PATTERN_ZONE_MISMATCH_LOG_NAME = "ZoneMismatch:%s";
     private static final String PATTERN_ZONE_UNDEFINED_LOG_NAME = "ZoneUndefined:%s";
 
-    private static final String DAL_VALIDATE_PASS = "PASS";
-    private static final String DAL_VALIDATE_WARN = "WARN";
-    private static final String DAL_VALIDATE_REJECT = "REJECT";
+    protected static final String DAL_VALIDATE_PASS = "PASS";
+    protected static final String DAL_VALIDATE_WARN = "WARN";
+    protected static final String DAL_VALIDATE_REJECT = "REJECT";
+
+    private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 
     private UcsClient ucsClient;
     private DalPropertiesLocator locator;
@@ -57,8 +61,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
 
         if (result != null && !result.shouldProcessDBOperation()) {
             try {
-                boolean localized = locator.localizedForDrc(result.name());
-                if (localized) {
+                if (config.getLocalizationState() == LocalizationState.ACTIVE && locator.localizedForDrc(result.name())) {
                     Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false), DAL_VALIDATE_REJECT, "");
                     bResult = false;
                     dalMsg = DAL_VALIDATE_REJECT;
@@ -83,9 +86,9 @@ public class CtripLocalizationValidator implements LocalizationValidator {
     @Override
     public boolean validateZone() {
         try {
-            if (config != null) {
+            if (config.getLocalizationState() == LocalizationState.ACTIVE) {
                 String configZone = config.getZoneId();
-                String appZone = Foundation.server().getZone();
+                String appZone = ENV_UTILS.getZone();
                 if (!StringUtils.isEmpty(configZone) && !StringUtils.isEmpty(appZone)) {
                     if (configZone.equalsIgnoreCase(appZone))
                         return true;
@@ -97,8 +100,8 @@ public class CtripLocalizationValidator implements LocalizationValidator {
                 }
                 Cat.logEvent(DalLogTypes.DAL_VALIDATION, buildZoneUndefinedLogName(), Event.SUCCESS,
                         String.format("shard: %d, configZone: %s, appZone: %s", clusterInfo.getShardIndex(), configZone, appZone));
-                return true;
             }
+            return true;
         } catch (Throwable t) {
             // ignore
         }

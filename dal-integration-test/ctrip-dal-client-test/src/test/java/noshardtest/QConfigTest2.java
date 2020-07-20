@@ -86,7 +86,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(6000, pc.getMaxWait());
+				assertEquals(4000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -140,7 +140,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(6000, pc.getMaxWait());
+				assertEquals(4000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -221,7 +221,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(6000, pc.getMaxWait());
+				assertEquals(4000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -246,7 +246,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(30, pc.getMinIdle());
-				assertEquals(6000, pc.getMaxWait());
+				assertEquals(4000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());
@@ -301,7 +301,7 @@ public class QConfigTest2 {
 				assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
 				assertEquals(100, pc.getMaxActive());
 				assertEquals(1, pc.getMinIdle());
-				assertEquals(6000, pc.getMaxWait());
+				assertEquals(4000, pc.getMaxWait());
 				assertEquals(28000000, pc.getMaxAge());
 				assertEquals(1, pc.getInitialSize());
 				assertEquals(70, pc.getRemoveAbandonedTimeout());

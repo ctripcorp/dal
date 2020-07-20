@@ -7,6 +7,7 @@ import com.ctrip.framework.dal.cluster.client.cluster.DefaultDrcCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -42,6 +43,11 @@ public class DataSourceLocatorTest {
             @Override
             public String getZoneId() {
                 return "mockZone";
+            }
+
+            @Override
+            public LocalizationState getLocalizationState() {
+                return LocalizationState.ACTIVE;
             }
         });
 

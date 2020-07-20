@@ -66,7 +66,7 @@ public class QConfigTest1 {
             assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
             assertEquals(100, pc.getMaxActive());
             assertEquals(1, pc.getMinIdle());
-            assertEquals(6000, pc.getMaxWait());
+            assertEquals(4000, pc.getMaxWait());
             assertEquals(28000000, pc.getMaxAge());
             assertEquals(1, pc.getInitialSize());
             assertEquals(65, pc.getRemoveAbandonedTimeout());
@@ -142,7 +142,7 @@ public class QConfigTest1 {
             assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
             assertEquals(100, pc.getMaxActive());
             assertEquals(1, pc.getMinIdle());
-            assertEquals(6000, pc.getMaxWait());
+            assertEquals(4000, pc.getMaxWait());
             assertEquals(28000000, pc.getMaxAge());
             assertEquals(1, pc.getInitialSize());
             assertEquals(65, pc.getRemoveAbandonedTimeout());
@@ -200,7 +200,7 @@ public class QConfigTest1 {
             assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
             assertEquals(100, pc.getMaxActive());
             assertEquals(10, pc.getMinIdle());
-            assertEquals(6000, pc.getMaxWait());
+            assertEquals(4000, pc.getMaxWait());
             assertEquals(28000000, pc.getMaxAge());
             assertEquals(1, pc.getInitialSize());
             assertEquals(65, pc.getRemoveAbandonedTimeout());
@@ -224,7 +224,7 @@ public class QConfigTest1 {
             assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
             assertEquals(100, pc.getMaxActive());
             assertEquals(1, pc.getMinIdle());
-            assertEquals(6000, pc.getMaxWait());
+            assertEquals(4000, pc.getMaxWait());
             assertEquals(28000000, pc.getMaxAge());
             assertEquals(1, pc.getInitialSize());
             assertEquals(65, pc.getRemoveAbandonedTimeout());
@@ -305,7 +305,7 @@ public class QConfigTest1 {
             assertEquals(5000, pc.getTimeBetweenEvictionRunsMillis());
             assertEquals(100, pc.getMaxActive());
             assertEquals(1, pc.getMinIdle());
-            assertEquals(6000, pc.getMaxWait());
+            assertEquals(4000, pc.getMaxWait());
             assertEquals(28000000, pc.getMaxAge());
             assertEquals(1, pc.getInitialSize());
             assertEquals(65, pc.getRemoveAbandonedTimeout());

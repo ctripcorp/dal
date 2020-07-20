@@ -427,8 +427,9 @@ public class ClusterDaoTest {
                 "        }\n" +
                 "      ],\n" +
                 "      \"shardStrategies\": \"<UserHintStrategy default=\\\"true\\\"/>\",\n" +
-                "      \"type\": \"%s\",\n" +
-                "      \"unitStrategyId\": 1\n" +
+                (type == ClusterType.DRC ?
+                "      \"unitStrategyId\": 1,\n" : "") +
+                "      \"type\": \"%s\"\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}\n";

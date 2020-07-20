@@ -1,3 +1,4 @@
+import cluster.ClusterDaoTest;
 import idegentest.IdGenPrefetchTest;
 import idegentest.IdGenTestOnMysql;
 import noshardtest.*;
@@ -88,6 +89,7 @@ import testUtil.NetStatChecker;
             SpTestDaoUnitTest.class,
             TVPColumnsOrderDaoUnitTest.class,
             TestFor414.class,
+            ClusterDaoTest.class
     })
     public class AllTests {
         @BeforeClass

@@ -71,14 +71,14 @@ public interface DataSourceConfigureConstants {
     int DEFAULT_MAXAGE = 28000000;
     int DEFAULT_MAXACTIVE = 100;
     int DEFAULT_MINIDLE = 1;
-    int DEFAULT_MAXWAIT = 10000;
+    int DEFAULT_MAXWAIT = 4000;
     int DEFAULT_INITIALSIZE = 1;
     int DEFAULT_REMOVEABANDONEDTIMEOUT = 65;
     boolean DEFAULT_REMOVEABANDONED = true;
     boolean DEFAULT_LOGABANDONED = false;
     int DEFAULT_MINEVICTABLEIDLETIMEMILLIS = 30000;
     String DEFAULT_CONNECTIONPROPERTIES =
-            "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=2000;loginTimeout=2";
+            "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2";
     boolean DEFAULT_JMXENABLED = true;
     String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;";

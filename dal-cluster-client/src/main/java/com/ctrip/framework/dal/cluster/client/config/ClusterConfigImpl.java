@@ -64,7 +64,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     }
 
     private Cluster innerGenerate() {
-        DefaultCluster cluster = (clusterType == ClusterType.NORMAL ?
+        DefaultCluster cluster = (clusterType == ClusterType.NORMAL && unitStrategyId == null ?
                 new DefaultCluster(this) : new DefaultDrcCluster(this));
         for (DatabaseShardConfig databaseShardConfig : databaseShardConfigs)
             cluster.addDatabaseShard(databaseShardConfig.generate());
@@ -73,7 +73,12 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
             shardStrategy.addStrategy(strategy);
         cluster.setShardStrategy(shardStrategy);
         cluster.setIdGeneratorConfig(idGeneratorConfig);
-        cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId));
+        LocalizationState localizationState = LocalizationState.NONE;
+        if (clusterType == ClusterType.DRC)
+            localizationState = LocalizationState.ACTIVE;
+        else if (unitStrategyId != null)
+            localizationState = LocalizationState.PREPARED;
+        cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId, localizationState));
         cluster.validate();
         return cluster;
     }

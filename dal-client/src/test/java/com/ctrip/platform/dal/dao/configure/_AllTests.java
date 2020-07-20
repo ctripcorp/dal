@@ -9,7 +9,8 @@ import org.junit.runners.Suite.SuiteClasses;
         SlaveFreshnessScannerMysqlTest.class,
         DataSourceConfigureLocatorTest.class,
         ClusterConfigParserTest.class,
-        ClusterConfigValidatorTest.class
+        ClusterConfigValidatorTest.class,
+        ConnectionStringParserTest.class
 })
 public class _AllTests {
 

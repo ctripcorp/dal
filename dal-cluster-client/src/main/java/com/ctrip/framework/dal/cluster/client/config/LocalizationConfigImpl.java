@@ -7,10 +7,12 @@ public class LocalizationConfigImpl implements LocalizationConfig {
 
     private Integer unitStrategyId;
     private String zoneId;
+    private LocalizationState localizationState;
 
-    public LocalizationConfigImpl(Integer unitStrategyId, String zoneId) {
+    public LocalizationConfigImpl(Integer unitStrategyId, String zoneId, LocalizationState localizationState) {
         this.unitStrategyId = unitStrategyId;
         this.zoneId = zoneId;
+        this.localizationState = localizationState;
     }
 
     @Override
@@ -24,9 +26,17 @@ public class LocalizationConfigImpl implements LocalizationConfig {
     }
 
     @Override
+    public LocalizationState getLocalizationState() {
+        return localizationState;
+    }
+
+    @Override
     public String toString() {
-        return "unitStrategyId=" + unitStrategyId +
-                (zoneId == null ? "" : ", zoneId=" + zoneId);
+        return "LocalizationConfigImpl{" +
+                "unitStrategyId=" + unitStrategyId +
+                ", zoneId='" + zoneId + '\'' +
+                ", localizationState=" + localizationState +
+                '}';
     }
 
 }

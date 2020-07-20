@@ -9,4 +9,6 @@ public interface LocalizationConfig {
 
     String getZoneId();
 
+    LocalizationState getLocalizationState();
+
 }

@@ -2,13 +2,11 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
-import com.ctrip.platform.dal.dao.helper.ConnectionHelper;
+import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
-import com.mysql.jdbc.MySQLConnection;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,9 +14,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.*;
-import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.DRIVER_CLASS_NAME;
 
 public class RefreshableDataSourceTest {
     private ExecutorService executor = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS,
@@ -540,7 +535,7 @@ public class RefreshableDataSourceTest {
                         Connection connection = refreshableDataSource.getConnection();
                         long endTime = System.currentTimeMillis();
                         System.out.println(startTime + ":" + (endTime - startTime));
-                        if ("jdbc:mysql://10.32.20.128:3306/llj_test".equalsIgnoreCase(ConnectionHelper.obtainUrl(connection))) {
+                        if ("jdbc:mysql://10.32.20.128:3306/llj_test".equalsIgnoreCase(ConnectionUtils.getConnectionUrl(connection))) {
                             Assert.assertEquals(listenerOne.getStep(), 10);
                             Assert.assertEquals(listenerTwo.getStep(), 20);
                         }

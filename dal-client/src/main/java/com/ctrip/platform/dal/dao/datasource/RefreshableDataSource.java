@@ -15,7 +15,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
-import com.ctrip.platform.dal.dao.helper.ConnectionHelper;
+import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -368,7 +368,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 if (blockThreads.isNeedBlock()) {
                     long startTime = System.currentTimeMillis();
                     LockSupport.parkNanos(getSwitchListenerTimeout() * 1000000);
-                    LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(BLOCK_CONNECTION, ConnectionHelper.obtainUrl(connection)),
+                    LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(BLOCK_CONNECTION, ConnectionUtils.getConnectionUrl(connection)),
                             String.format(SWITCH_VERSION, currentSwitchVersion), startTime);
                 }
             }

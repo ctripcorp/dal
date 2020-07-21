@@ -69,6 +69,26 @@ public class ConnectionStringParserTest {
     }
 
     @Test
+    public void testParseMySqlUrl6() {
+        String ipUrl = "jdbc:mysql://10.1.1.1:3308/test?useUnicode=true&characterEncoding=UTF-8&" +
+                "loadBalanceStrategy=serverAffinity&serverAffinityOrder=" +
+                "address=(type=master)(protocol=tcp)(host=10.3.3.3)(port=3310):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.2.2.2)(port=3309):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.1.1.1)(port=3308):3306";
+        String domainUrl = "jdbc:mysql://test.db.com:3308/test?useUnicode=true&characterEncoding=UTF-8&" +
+                "loadBalanceStrategy=serverAffinity&serverAffinityOrder=" +
+                "address=(type=master)(protocol=tcp)(host=test3.db.com)(port=3310):3306," +
+                "address=(type=master)(protocol=tcp)(host=test2.db.com)(port=3309):3306," +
+                "address=(type=master)(protocol=tcp)(host=test.db.com)(port=3308):3306";
+        HostAndPort ipAndPort = ConnectionStringParser.parseHostPortFromURL(ipUrl);
+        Assert.assertEquals("10.1.1.1", ipAndPort.getHost());
+        Assert.assertEquals(3308, ipAndPort.getPort().intValue());
+        HostAndPort domainAndPort = ConnectionStringParser.parseHostPortFromURL(domainUrl);
+        Assert.assertEquals("test.db.com", domainAndPort.getHost());
+        Assert.assertEquals(3308, domainAndPort.getPort().intValue());
+    }
+
+    @Test
     public void testParseMySqlReplicationUrl() {
         String ipUrl = "jdbc:mysql:replication://" +
                 "address=(type=master)(protocol=tcp)(host=10.1.1.1)(port=3308)," +

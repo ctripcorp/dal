@@ -7,13 +7,12 @@ import java.util.TreeSet;
 
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.client.LogEntry;
+import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import org.apache.commons.lang.StringUtils;
 
 public class LoggerHelper {
 
 	public static final String SQLHIDDENString = "*";
-	private static final String MYSQL_URL_PREFIX = "jdbc:mysql://";
-	private static final String SQLSERVER_URL_PREFIX = "jdbc:sqlserver://";
 	public static final String NULL_SET = "NullSet";
 	public static final String EMPTY_SET = "EmptySet";
 
@@ -221,12 +220,13 @@ public class LoggerHelper {
 		if(StringUtils.isBlank(url))
 			return "blank url";
 
-		if (url.startsWith(MYSQL_URL_PREFIX)) {
+		if (url.startsWith(ConnectionStringParser.MYSQL_URL_PREFIX) ||
+				url.startsWith(ConnectionStringParser.REPLICATION_MYSQL_URL_PREFIX)) {
 			String[] mySqlUrlStrings = url.split("[?]");
 			return mySqlUrlStrings[0];
 		}
 
-		if (url.startsWith(SQLSERVER_URL_PREFIX)) {
+		if (url.startsWith(ConnectionStringParser.SQLSERVER_URL_PREFIX)) {
 			String[] sqlServerUrlStrings = url.split(";");
 			String databaseName = "";
 			for (String urlPart : sqlServerUrlStrings) {

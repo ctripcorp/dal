@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
@@ -21,7 +22,7 @@ public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
-    private String IS_VALID_FORMAT = "isValid: %s";
+    private String IS_VALID_FORMAT = "isValid: %s.";
     private String VALIDATE_ERROR_FORMAT = "Connection validation error:%s";
 
     private PoolProperties poolProperties;
@@ -30,19 +31,19 @@ public class DataSourceValidator implements ValidatorProxy {
     public boolean validate(Connection connection, int validateAction) {
         long startTime = System.currentTimeMillis();
         boolean isValid = false;
-        String connectionUrl = "";
         String transactionName = "";
 
         try {
-            connectionUrl = LoggerHelper.getSimplifiedDBUrl(connection.getMetaData().getURL());
-            transactionName = String.format(CONNECTION_VALIDATE_CONNECTION_FORMAT, connectionUrl);
-            isValid = validateConnection(connection, validateAction);
-
             PoolConfiguration poolConfig = getPoolProperties();
             DataSourceIdentity dataSourceId = poolConfig instanceof DalExtendedPoolConfiguration ?
                     ((DalExtendedPoolConfiguration) poolConfig).getDataSourceId() : null;
 
-            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, String.format(IS_VALID_FORMAT, isValid),
+            String connUrl = ConnectionUtils.getConnectionUrl(connection, poolConfig.getUrl());
+            transactionName = String.format(CONNECTION_VALIDATE_CONNECTION_FORMAT, connUrl);
+            isValid = validateConnection(connection, validateAction);
+
+            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName,
+                    String.format(IS_VALID_FORMAT, isValid) + " Connection url: " + poolConfig.getUrl(),
                     LogUtils.buildPropertiesFromDataSourceId(dataSourceId), startTime);
 
             if (!isValid) {

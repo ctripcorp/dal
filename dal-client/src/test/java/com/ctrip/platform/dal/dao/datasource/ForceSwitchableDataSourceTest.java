@@ -1,11 +1,13 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.*;
 import static org.junit.Assert.*;
@@ -366,5 +368,59 @@ public class ForceSwitchableDataSourceTest {
         Assert.assertFalse(status2.isForceSwitched());
         String url = dataSource.getSingleDataSource().getDataSourceConfigure().getConnectionUrl();
         Assert.assertEquals("jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin", url);
+    }
+
+    @Test
+    public void testMGRForceSwitch() throws Exception {
+        DataSourceConfigure config = new DataSourceConfigure("mgr");
+        config.setConnectionUrl("jdbc:mysql:replication://" +
+                "address=(type=master)(protocol=tcp)(host=10.32.20.5)(port=3306)," +
+                "address=(type=master)(protocol=tcp)(host=10.32.20.5)(port=3307)," +
+                "address=(type=master)(protocol=tcp)(host=10.32.20.5)(port=3308)/" +
+                "mytest?useUnicode=true&characterEncoding=UTF-8&" +
+                "loadBalanceStrategy=serverAffinity&serverAffinityOrder=" +
+                "address=(type=master)(protocol=tcp)(host=10.32.20.5)(port=3308):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.32.20.5)(port=3307):3306," +
+                "address=(type=master)(protocol=tcp)(host=10.32.20.5)(port=3306):3306");
+        config.setUserName("rpl_user");
+        config.setPassword("123456");
+        config.setDriverClass("com.mysql.jdbc.Driver");
+        ForceSwitchableDataSource dataSource = new ForceSwitchableDataSource(new IDataSourceConfigureProvider() {
+            @Override
+            public IDataSourceConfigure getDataSourceConfigure() {
+                return config;
+            }
+
+            @Override
+            public IDataSourceConfigure forceLoadDataSourceConfigure() {
+                return config;
+            }
+        });
+
+        SwitchableDataSourceStatus status = dataSource.getStatus();
+        Assert.assertFalse(status.isForceSwitched());
+        Assert.assertEquals("10.32.20.5", status.getHostName());
+        Assert.assertEquals(3308, status.getPort().intValue());
+        Assert.assertTrue(status.isPoolCreated());
+
+        dataSource.forceSwitch(null, "10.32.20.5", 3307);
+        status = dataSource.getStatus();
+        while (!status.isForceSwitched()) {
+            TimeUnit.MILLISECONDS.sleep(10);
+            status = dataSource.getStatus();
+        }
+        Assert.assertEquals("10.32.20.5", status.getHostName());
+        Assert.assertEquals(3307, status.getPort().intValue());
+        Assert.assertTrue(status.isPoolCreated());
+
+        dataSource.restore();
+        status = dataSource.getStatus();
+        while (status.isForceSwitched()) {
+            TimeUnit.MILLISECONDS.sleep(10);
+            status = dataSource.getStatus();
+        }
+        Assert.assertEquals("10.32.20.5", status.getHostName());
+        Assert.assertEquals(3308, status.getPort().intValue());
+        Assert.assertTrue(status.isPoolCreated());
     }
 }

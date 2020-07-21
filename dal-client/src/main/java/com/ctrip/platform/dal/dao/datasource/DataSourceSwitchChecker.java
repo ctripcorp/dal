@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -65,7 +66,7 @@ public class DataSourceSwitchChecker {
                 //ignore
             }
         }
-        String logName = configure.getName() != null ? configure.getName() : configure.getConnectionUrl();
+        String logName = configure.getName() != null ? configure.getName() : ConnectionUtils.getConnectionUrl(conn);
         LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_SWITCH_DATASOURCE, logName), serverName, startTime);
         return serverName;
     }

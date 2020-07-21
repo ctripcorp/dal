@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
@@ -121,11 +122,12 @@ public class DalConnectionPool extends ConnectionPool {
                 DatabaseCategory.MySql == DatabaseCategory.matchWithConnectionUrl(config.getUrl())) {
             int sessionWaitTimeout = ((DalExtendedPoolConfiguration) config).getSessionWaitTimeout();
             if (sessionWaitTimeout > 0) {
-                String connUrl = LoggerHelper.getSimplifiedDBUrl(config.getUrl());
+                String connUrl = ConnectionUtils.getConnectionUrl(conn, config.getUrl());
                 String logName = String.format("Connection::setSessionWaitTimeout:%s", connUrl);
                 try {
                     logger.logTransaction(DalLogTypes.DAL_DATASOURCE, logName,
-                            String.format("sessionWaitTimeout: %ds, connectionUrl: %s", sessionWaitTimeout, connUrl),
+                            String.format("sessionWaitTimeout: %ds. Connection url: %s",
+                                    sessionWaitTimeout, config.getUrl()),
                             () -> setSessionWaitTimeout(conn, sessionWaitTimeout));
                 } catch (Throwable t) {
                     logger.error("set sessionWaitTimeout exception: " + connUrl, t);

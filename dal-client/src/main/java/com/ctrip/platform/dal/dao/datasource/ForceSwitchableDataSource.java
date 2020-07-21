@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
@@ -85,7 +86,9 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                     name = getSingleDataSource().getName();
                 }
                 final String logName = String.format(FORCE_SWITCH, name);
-                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "forceSwitch", new Callback() {
+                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName,
+                        String.format("isNullDataSource: %s; newIp: %s, newPort: %s", isNullDataSource, ip, port),
+                        new Callback() {
                     @Override
                     public void execute() throws Exception {
                         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("old connection url: %s", usedConfigure.getConnectionUrl()));
@@ -152,7 +155,7 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             final String logName = String.format(GET_STATUS, name);
 
             try {
-                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "getStatus", new Callback() {
+                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, url, new Callback() {
                     @Override
                     public void execute() throws Exception {
                         if (!currentHostAndPort.isValid() || isUrlChanged(url)) {
@@ -162,8 +165,8 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
                                 final CountDownLatch latch = new CountDownLatch(1);
                                 executor.submit(new Runnable() {
                                     public void run() {
-                                        try {
-                                            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(getConnection().getMetaData().getURL());
+                                        try (Connection conn = getConnection()) {
+                                            HostAndPort hostAndPort = ConnectionStringParser.parseHostPortFromURL(conn.getMetaData().getURL());
                                             hostAndPort.setValid(true);
                                             setIpPortCache(hostAndPort);
                                             setPoolCreated(true);

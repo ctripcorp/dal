@@ -27,9 +27,9 @@ public class ConnectionStringParser {
     private static final Pattern versionPattern = Pattern.compile("(version)=([^;]+)", Pattern.CASE_INSENSITIVE);
 
     private static final String PORT_SPLIT = ",";
-    private static final String MYSQL_URL_PREFIX="jdbc:mysql://";
-    private static final String SQLSERVER_URL_PREFIX="jdbc:sqlserver://";
-    private static final String REPLICATION_MYSQL_URL_PREFIX = "jdbc:mysql:replication://";
+    public static final String MYSQL_URL_PREFIX="jdbc:mysql://";
+    public static final String SQLSERVER_URL_PREFIX="jdbc:sqlserver://";
+    public static final String REPLICATION_MYSQL_URL_PREFIX = "jdbc:mysql:replication://";
     public static final String DBURL_SQLSERVER = SQLSERVER_URL_PREFIX+"%s:%s;DatabaseName=%s";
     public static final String DBURL_MYSQL = MYSQL_URL_PREFIX+"%s:%s/%s?useUnicode=true&characterEncoding=%s";
     public static final String DEFAULT_ENCODING = "UTF-8";
@@ -37,7 +37,7 @@ public class ConnectionStringParser {
     public static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     public static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    private static final Pattern hostPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([\\S:]+):([^/]+)");
+    private static final Pattern hostPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([[^\\f\\n\\r\\t\\v=/]:]+):([^/]+)");
     private static final Pattern complexHostPatternInMySQLURL = Pattern.compile("(\\(host|,host)=([^\\),]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern complexPortPatternInMySQLURL = Pattern.compile("(\\(port|,port)=([^\\),]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern hostPortPatternInSQLServerURL = Pattern.compile("(jdbc:sqlserver://)([\\S:]+):([^;]+)");
@@ -160,22 +160,22 @@ public class ConnectionStringParser {
             String host = null;
             Integer port = null;
 
-            // jdbc:mysql://address=(host=host)(port=port)/db
-            // jdbc:mysql://(host=host,port=port)/db
-            Matcher matcher = complexHostPatternInMySQLURL.matcher(url);
-            if (matcher.find())
+            // jdbc:mysql://host:port/db
+            Matcher matcher = hostPortPatternInMySQLURL.matcher(url);
+            if (matcher.find()) {
                 host = matcher.group(2);
-            matcher = complexPortPatternInMySQLURL.matcher(url);
-            if (matcher.find())
-                port = parseInt(matcher.group(2));
+                port = parseInt(matcher.group(3));
+            }
 
             if (host == null && port == null) {
-                // jdbc:mysql://host:port/db
-                matcher = hostPortPatternInMySQLURL.matcher(url);
-                if (matcher.find()) {
+                // jdbc:mysql://address=(host=host)(port=port)/db
+                // jdbc:mysql://(host=host,port=port)/db
+                matcher = complexHostPatternInMySQLURL.matcher(url);
+                if (matcher.find())
                     host = matcher.group(2);
-                    port = parseInt(matcher.group(3));
-                }
+                matcher = complexPortPatternInMySQLURL.matcher(url);
+                if (matcher.find())
+                    port = parseInt(matcher.group(2));
             }
             return new HostAndPort(url, host, port);
         }

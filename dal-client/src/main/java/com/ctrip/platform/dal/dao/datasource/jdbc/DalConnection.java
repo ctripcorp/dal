@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -98,7 +99,7 @@ public class DalConnection implements Connection {
             try {
                 markDiscard(discardCause);
             } catch (Throwable t) {
-                LOGGER.warn("mark connection discarded exception", t);
+                LOGGER.warn("Mark connection discarded exception", t);
             } finally {
                 discardCauseRef.set(null);
             }
@@ -110,10 +111,11 @@ public class DalConnection implements Connection {
         long startTime = System.currentTimeMillis();
         PooledConnection conn = connection.unwrap(PooledConnection.class);
         conn.setDiscarded(true);
-        String connUrl = conn.getPoolProperties().getUrl();
-        String logName = String.format("Connection::discardConnection:%s", LoggerHelper.getSimplifiedDBUrl(connUrl));
-        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, logName, connUrl, startTime);
-        LOGGER.warn(String.format("connection marked discarded: %s", connUrl), cause);
+        String poolUrl = conn.getPoolProperties().getUrl();
+        String connUrl = ConnectionUtils.getConnectionUrl(connection, poolUrl);
+        String logName = String.format("Connection::discardConnection:%s", connUrl);
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, logName, poolUrl, startTime);
+        LOGGER.warn(String.format("Connection marked discarded: %s", connUrl), cause);
     }
 
     @Override

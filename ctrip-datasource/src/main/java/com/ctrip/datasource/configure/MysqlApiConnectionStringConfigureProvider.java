@@ -164,7 +164,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         return connectionStringConfigure;
     }
 
-    private void addMGRLocalToLocalParam(DataSourceConfigure connectionStringConfigure, List<ClusterNodeInfo> clusterNodeInfos) {
+    protected void addMGRLocalToLocalParam(DataSourceConfigure connectionStringConfigure, List<ClusterNodeInfo> clusterNodeInfos) {
         if (connectionStringConfigure != null) {
             String connectionUrl = connectionStringConfigure.getConnectionUrl();
             if (connectionUrl.startsWith(DatabaseCategory.REPLICATION_MYSQL_JDBC_URL_PREFIX)) {
@@ -178,37 +178,40 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
         }
     }
 
-    private String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
-        String serverAffinityOrder = "";
+    protected String getServerAffinityOrder(List<ClusterNodeInfo> clusterNodeInfos) {
+        StringBuilder builder = new StringBuilder();
 
-        Map<String, String> idcAndIpPort = new HashMap<>();
+        Map<String, TreeSet<String>> idcAndNodes = new HashMap<>();
         for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfos) {
-            if (ONLINE.equalsIgnoreCase(clusterNodeInfo.getStatus())) {
-                String ipPort = String.format(SERVER_AFFINITY_ORDER_FORMAT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port());
-                idcAndIpPort.put(clusterNodeInfo.getMachine_located_short().toLowerCase(), ipPort);
+            if (ONLINE.equalsIgnoreCase(clusterNodeInfo.getStatus()) &&
+                    clusterNodeInfo.getMachine_located_short() != null) {
+                String idc = clusterNodeInfo.getMachine_located_short().toLowerCase();
+                TreeSet<String> sortedNodes = idcAndNodes.computeIfAbsent(idc, k -> new TreeSet<>());
+                String node = String.format(SERVER_AFFINITY_ORDER_FORMAT, clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port());
+                sortedNodes.add(node);
             }
         }
 
         if (localAccess) {
             String currentIdc = envUtils.getIdc();
             if (!StringUtils.isEmpty(currentIdc)) {
-                currentIdc = currentIdc.toLowerCase();
-                String ipPortInCurrentIdc = idcAndIpPort.get(currentIdc);
-                if (!StringUtils.isEmpty(ipPortInCurrentIdc)) {
-                    serverAffinityOrder += ipPortInCurrentIdc + SEPARATED;
-                }
-                idcAndIpPort.remove(currentIdc);
+                TreeSet<String> nodes = idcAndNodes.remove(currentIdc.toLowerCase());
+                if (nodes != null)
+                    for (String node : nodes)
+                        builder.append(node).append(SEPARATED);
             }
         }
 
         for (String idc : idcPriority) {
-            String ipPort = idcAndIpPort.get(idc.toLowerCase());
-            if (!StringUtils.isEmpty(ipPort)) {
-                serverAffinityOrder += ipPort + SEPARATED;
-            }
+            TreeSet<String> nodes = idcAndNodes.remove(idc.toLowerCase());
+            if (nodes != null)
+                for (String node : nodes)
+                    builder.append(node).append(SEPARATED);
         }
 
-        return serverAffinityOrder.substring(0, serverAffinityOrder.length() - 1);
+        String serverAffinityOrder = builder.toString();
+        return serverAffinityOrder.isEmpty() ? serverAffinityOrder :
+                serverAffinityOrder.substring(0, serverAffinityOrder.length() - 1);
     }
 
     @Override

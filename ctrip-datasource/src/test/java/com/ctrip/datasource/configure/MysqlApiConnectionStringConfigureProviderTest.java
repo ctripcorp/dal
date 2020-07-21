@@ -2,6 +2,7 @@ package com.ctrip.datasource.configure;
 
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.util.CtripEnvUtils;
+import com.ctrip.datasource.util.entity.ClusterNodeInfo;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
@@ -16,6 +17,8 @@ import org.junit.Test;
 import javax.sql.DataSource;
 import java.io.UnsupportedEncodingException;
 import java.sql.DatabaseMetaData;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MysqlApiConnectionStringConfigureProviderTest {
 
@@ -92,13 +95,6 @@ public class MysqlApiConnectionStringConfigureProviderTest {
     }
 
     @Test
-    public void testCreateDataSource() throws Exception {
-        DalDataSourceFactory factory = new DalDataSourceFactory();
-        DataSource dataSource = factory.createVariableTypeDataSource(DB_NAME_1);
-        Assert.assertNotNull(dataSource);
-    }
-
-    @Test
     public void testCreateMGRDataSource() throws Exception {
         DalDataSourceFactory factory = new DalDataSourceFactory();
         envUtils.setEnv("pro");
@@ -126,8 +122,8 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         envUtils.setEnv("pro");
         ConnectionStringConfigureProvider provider = new MysqlApiConnectionStringConfigureProvider(DB_NAME_2);
         DalConnectionStringConfigure configure = provider.getConnectionString();
-        String normalUrl = configure.getConnectionUrl();
-        Assert.assertTrue(normalUrl.startsWith("jdbc:mysql://"));
+        String url = configure.getConnectionUrl();
+        Assert.assertTrue(url.startsWith("jdbc:mysql://"));
         DataSourceConfigureLocator dataSourceConfigureLocator = DataSourceConfigureManager.getInstance().getDataSourceConfigureLocator();
         PropertiesWrapper propertiesWrapper = dataSourceConfigureLocator.getPoolProperties();
         propertiesWrapper.getDatasourceProperties().get(DB_NAME_2).setProperty("dbModel", "mgr");
@@ -147,22 +143,61 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         System.out.println(sb.substring(0, sb.toString().indexOf(token)));
     }
 
+    @Test
+    public void testGetServerAffinityOrder() {
+        envUtils.setIdc("b");
+        List<ClusterNodeInfo> nodes = new ArrayList<>();
+        nodes.add(mockClusterNodeInfo("c", "1.1.1.1", 1111));
+        nodes.add(mockClusterNodeInfo("b", "2.2.2.2", 2222));
+        nodes.add(mockClusterNodeInfo("a", "3.3.3.3", 3333));
+        nodes.add(mockClusterNodeInfo("a", "4.4.4.4", 3333));
+        MockProvider provider1 = new MockProvider("test", false,
+                new String[] { "a", "b", "c" });
+        String params1 = "address=(type=master)(protocol=tcp)(host=3.3.3.3)(port=3333):3306," +
+                "address=(type=master)(protocol=tcp)(host=4.4.4.4)(port=3333):3306," +
+                "address=(type=master)(protocol=tcp)(host=2.2.2.2)(port=2222):3306," +
+                "address=(type=master)(protocol=tcp)(host=1.1.1.1)(port=1111):3306";
+        Assert.assertEquals(params1, provider1.getServerAffinityOrder(nodes));
+        MockProvider provider2 = new MockProvider("test", true,
+                new String[] { "a", "b", "c" });
+        String params2 = "address=(type=master)(protocol=tcp)(host=2.2.2.2)(port=2222):3306," +
+                "address=(type=master)(protocol=tcp)(host=3.3.3.3)(port=3333):3306," +
+                "address=(type=master)(protocol=tcp)(host=4.4.4.4)(port=3333):3306," +
+                "address=(type=master)(protocol=tcp)(host=1.1.1.1)(port=1111):3306";
+        Assert.assertEquals(params2, provider2.getServerAffinityOrder(nodes));
+        envUtils.setIdc(null);
+    }
+
+    private ClusterNodeInfo mockClusterNodeInfo(String idc, String ip, int port) {
+        ClusterNodeInfo node = new ClusterNodeInfo();
+        node.setMachine_located_short(idc);
+        node.setIp_business(ip);
+        node.setDns_port(port);
+        node.setStatus("online");
+        return node;
+    }
+
     static class MockProvider extends MysqlApiConnectionStringConfigureProvider {
-        boolean localAccess;
-        String[] idcPriority;
+        final boolean localAccess;
+        final String[] idcPriority;
 
         MockProvider(String dbName, boolean localAccess, String[] idcPriority) {
             super(dbName);
             this.localAccess = localAccess;
             this.idcPriority = idcPriority;
+            setProperties();
         }
 
         @Override
         protected void initMysqlApiConfigure() {
             super.initMysqlApiConfigure();
-            super.localAccess = this.localAccess;
-            if (this.idcPriority != null)
-                super.idcPriority = this.idcPriority;
+            setProperties();
+        }
+
+        private void setProperties() {
+            super.localAccess = localAccess;
+            if (idcPriority != null)
+                super.idcPriority = idcPriority;
         }
     }
 

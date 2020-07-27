@@ -3,10 +3,8 @@ package com.ctrip.datasource.configure;
 import com.ctrip.datasource.titan.DataSourceConfigureManager;
 import com.ctrip.datasource.util.CtripEnvUtils;
 import com.ctrip.datasource.util.entity.ClusterNodeInfo;
-import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
-import com.ctrip.platform.dal.dao.configure.PropertiesWrapper;
+import com.ctrip.platform.dal.common.enums.DBModel;
+import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -17,8 +15,7 @@ import org.junit.Test;
 import javax.sql.DataSource;
 import java.io.UnsupportedEncodingException;
 import java.sql.DatabaseMetaData;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MysqlApiConnectionStringConfigureProviderTest {
 
@@ -168,6 +165,25 @@ public class MysqlApiConnectionStringConfigureProviderTest {
         envUtils.setIdc(null);
     }
 
+    @Test
+    public void testGetMGRConfig() {
+        Properties appProperties = new Properties();
+        appProperties.setProperty(DataSourceConfigureConstants.DB_MODEL, "mgr");
+        Properties dsProperties = new Properties();
+        dsProperties.setProperty(DataSourceConfigureConstants.DB_TOKEN, "xyz");
+        dsProperties.setProperty(DataSourceConfigureConstants.LOCAL_ACCESS, "true");
+        dsProperties.setProperty(DataSourceConfigureConstants.IDC_PRIORITY, "c,b,a");
+        MockProvider2 provider = new MockProvider2("test", appProperties, dsProperties);
+        provider.initMysqlApiConfigure();
+        Assert.assertEquals(DBModel.MGR, provider.dbModel);
+        Assert.assertEquals( "xyz", provider.dbToken);
+        Assert.assertTrue(provider.localAccess);
+        Assert.assertEquals(3, provider.idcPriority.length);
+        Assert.assertEquals("c", provider.idcPriority[0]);
+        Assert.assertEquals("b", provider.idcPriority[1]);
+        Assert.assertEquals("a", provider.idcPriority[2]);
+    }
+
     private ClusterNodeInfo mockClusterNodeInfo(String idc, String ip, int port) {
         ClusterNodeInfo node = new ClusterNodeInfo();
         node.setMachine_located_short(idc);
@@ -198,6 +214,27 @@ public class MysqlApiConnectionStringConfigureProviderTest {
             super.localAccess = localAccess;
             if (idcPriority != null)
                 super.idcPriority = idcPriority;
+        }
+    }
+
+    static class MockProvider2 extends MysqlApiConnectionStringConfigureProvider {
+        final String dbName;
+        final Properties appProperties;
+        final Properties dsProperties;
+
+        MockProvider2(String dbName, Properties appProperties, Properties dsProperties) {
+            super(dbName);
+            this.dbName = dbName;
+            this.appProperties = appProperties;
+            this.dsProperties = dsProperties;
+        }
+
+        @Override
+        protected DalPoolPropertiesConfigure getMysqlApiConfigureProperties(PropertiesWrapper propertiesWrapper) {
+            Map<String, Properties> dsPropertiesMap = new HashMap<>();
+            dsPropertiesMap.put(dbName, dsProperties);
+            PropertiesWrapper wrapper = new PropertiesWrapper(null, appProperties, dsPropertiesMap);
+            return super.getMysqlApiConfigureProperties(wrapper);
         }
     }
 

@@ -82,7 +82,7 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
             idcPriority = idcPriorityConfig;
     }
 
-    private DalPoolPropertiesConfigure getMysqlApiConfigureProperties(PropertiesWrapper propertiesWrapper) {
+    protected DalPoolPropertiesConfigure getMysqlApiConfigureProperties(PropertiesWrapper propertiesWrapper) {
         Properties appProperties = propertiesWrapper.getAppProperties();
         Map<String, Properties> datasourcePropertiesMap = propertiesWrapper.getDatasourceProperties();
         Properties dataSourceProperties = datasourcePropertiesMap.get(dbName);
@@ -120,6 +120,16 @@ public class MysqlApiConnectionStringConfigureProvider implements ConnectionStri
             dbModel = DBModel.STANDALONE.getName();
         }
         mysqlApiConfigure.setProperty(DB_MODEL, dbModel);
+
+        String localAccess = dataSourceProperties.getProperty(LOCAL_ACCESS) != null ? dataSourceProperties.getProperty(LOCAL_ACCESS) : appProperties.getProperty(LOCAL_ACCESS);
+        if (!StringUtils.isEmpty(localAccess)) {
+            mysqlApiConfigure.setProperty(LOCAL_ACCESS, localAccess);
+        }
+
+        String idcPriority = dataSourceProperties.getProperty(IDC_PRIORITY) != null ? dataSourceProperties.getProperty(IDC_PRIORITY) : appProperties.getProperty(IDC_PRIORITY);
+        if (!StringUtils.isEmpty(idcPriority)) {
+            mysqlApiConfigure.setProperty(IDC_PRIORITY, idcPriority);
+        }
 
         dataSourceConfigure.setProperties(mysqlApiConfigure);
         return dataSourceConfigure;

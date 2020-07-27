@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.datasource.util.CtripEnvUtils;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -35,8 +37,12 @@ public class SlaveFreshnessScannerSqlSvrTest {
     private static final String[] masterShard = new String[]{"PerformanceTest", "daoTest"};    
     private static final Map<Integer, Map<String, Integer>> freshnessShardMap = new HashMap<>();
 
+    private static final CtripEnvUtils ENV_UTILS = (CtripEnvUtils) DalElementFactory.DEFAULT.getEnvUtils();
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        ENV_UTILS.setEnv("pro");
+
         freshnessMap.put("Shard_0", 3);
         freshnessMap.put("Shard_1", 5);
         freshnessMap.put("SimpleShard_0", 7);
@@ -61,7 +67,9 @@ public class SlaveFreshnessScannerSqlSvrTest {
     }
 
     @AfterClass
-    public static void tearDownAfterClass() throws Exception {}
+    public static void tearDownAfterClass() throws Exception {
+        ENV_UTILS.setEnv(null);
+    }
 
     @Before
     public void setUp() throws Exception {

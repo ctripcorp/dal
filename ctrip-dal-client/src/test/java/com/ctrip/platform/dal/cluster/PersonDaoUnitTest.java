@@ -159,7 +159,7 @@ public class PersonDaoUnitTest {
 	public void testCount() throws Exception {
 		for(int i = 0; i < 2; i++) {
 			for(int j = 0; j < 4; j++) {
-				int affected = dao.count(new DalHints().inShard(i).inTableShard(j));
+				int affected = dao.count(new DalHints().inShard(i).inTableShard(j).slaveOnly());
 				assertEquals(4, affected);
 			}
 		}
@@ -168,7 +168,7 @@ public class PersonDaoUnitTest {
 	@Test
 	public void testCountAllShards() throws Exception {
 		for(int j = 0; j < 4; j++) {
-			int affected = dao.count(new DalHints().inAllShards().inTableShard(j));
+			int affected = dao.count(new DalHints().inAllShards().inTableShard(j).slaveOnly());
 			assertEquals(8, affected);
 		}
 	}

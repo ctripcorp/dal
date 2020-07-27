@@ -3,12 +3,15 @@ package com.ctrip.datasource.util;
 import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
 import com.ctrip.framework.dal.cluster.client.util.ValueWrapper;
 import com.ctrip.framework.foundation.Foundation;
+import com.ctrip.platform.dal.dao.helper.DefaultEnvUtils;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 
 /**
  * @author c7ch23en
  */
-public class CtripEnvUtils implements EnvUtils {
+public class CtripEnvUtils extends DefaultEnvUtils implements EnvUtils {
+
+    private static final String PROD_IDENTITY = "pro";
 
     private final ObjectHolder<ValueWrapper<String>> env = new ObjectHolder<>();
     private final ObjectHolder<ValueWrapper<String>> subEnv = new ObjectHolder<>();
@@ -61,6 +64,12 @@ public class CtripEnvUtils implements EnvUtils {
             this.idc.set(new ValueWrapper<>(idc));
         else
             this.idc.set(null);
+    }
+
+    @Override
+    public boolean isProd() {
+        String env = getEnv();
+        return env != null && env.toLowerCase().contains(PROD_IDENTITY);
     }
 
     public void clear() {

@@ -11,7 +11,6 @@ import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
-import com.ctrip.platform.dal.dao.helper.NullEnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

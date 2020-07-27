@@ -69,13 +69,10 @@ public class SlaveFreshnessScannerMysqlTest {
     public void testNoFreshness() throws SQLException {
         DalQueryDao dao = new DalQueryDao(NO_FRESHNESS_DATABASE_NAME);
         String id = dao.queryForObject(GET_DB_NAME, new StatementParameters(), new DalHints().freshness(10), String.class);
-        Assert.assertEquals(NO_FRESHNESS_MASTER, id);        
-        try {
-            dao = new DalQueryDao(NO_FRESHNESS_DATABASE_NAME);
-            id = dao.queryForObject(GET_DB_NAME, new StatementParameters(), new DalHints().freshness(10).slaveOnly(), String.class);
-            Assert.fail();
-        } catch (Exception e) {
-        }
+        Assert.assertEquals(NO_FRESHNESS_MASTER, id);
+        dao = new DalQueryDao(NO_FRESHNESS_DATABASE_NAME);
+        id = dao.queryForObject(GET_DB_NAME, new StatementParameters(), new DalHints().freshness(10).slaveOnly(), String.class);
+        Assert.assertEquals(NO_FRESHNESS_MASTER, id);
     }
     
     @Test

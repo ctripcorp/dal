@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.ctrip.platform.dal.dao.DalHintEnum;
@@ -15,7 +17,17 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
 
-    @Override
+	private final EnvUtils envUtils;
+
+	public DefaultDatabaseSelector() {
+		envUtils = DalElementFactory.DEFAULT.getEnvUtils();
+	}
+
+	public DefaultDatabaseSelector(EnvUtils envUtils) {
+		this.envUtils = envUtils;
+	}
+
+	@Override
     public void initialize(Map<String, String> settings) throws Exception {
     }
 
@@ -28,9 +40,10 @@ public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
         List<DataBase> secondary = null;
 
         
-        if(context.getHints().is(DalHintEnum.slaveOnly)) {
+        if (context.getHints().is(DalHintEnum.slaveOnly)) {
             primary = context.getSlaves();
-        } else if(context.isMasterOnly() || !context.isSelect()) {
+            secondary = isNullOrEmpty(primary) && !envUtils.isProd() ? context.getMasters() : null;
+        } else if (context.isMasterOnly() || !context.isSelect()) {
 		    primary = context.getMasters();
 		} else {
 		    primary = context.getSlaves();

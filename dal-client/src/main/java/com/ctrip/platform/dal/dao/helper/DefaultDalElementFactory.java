@@ -106,7 +106,7 @@ public class DefaultDalElementFactory implements DalElementFactory {
 
     @Override
     public EnvUtils getEnvUtils() {
-        return envUtilsHolder.getOrCreate(NullEnvUtils::new);
+        return envUtilsHolder.getOrCreate(DefaultEnvUtils::new);
     }
 
     @Override

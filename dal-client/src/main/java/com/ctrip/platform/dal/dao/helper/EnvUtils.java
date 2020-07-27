@@ -5,12 +5,24 @@ package com.ctrip.platform.dal.dao.helper;
  */
 public interface EnvUtils {
 
-    String getEnv();
+    default String getEnv() {
+        return null;
+    }
 
-    String getSubEnv();
+    default String getSubEnv() {
+        return null;
+    }
 
-    String getZone();
+    default String getZone() {
+        return null;
+    }
 
-    String getIdc();
+    default String getIdc() {
+        return null;
+    }
+
+    default boolean isProd() {
+        return false;
+    }
 
 }

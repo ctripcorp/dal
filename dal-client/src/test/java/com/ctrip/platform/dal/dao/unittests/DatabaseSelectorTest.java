@@ -7,11 +7,13 @@ import com.ctrip.platform.dal.dao.configure.DataBase;
 import com.ctrip.platform.dal.dao.configure.DefaultDataBase;
 import com.ctrip.platform.dal.dao.configure.DefaultDatabaseSelector;
 import com.ctrip.platform.dal.dao.configure.SelectionContext;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.MockEnvUtils;
 import com.ctrip.platform.dal.dao.markdown.*;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,7 +34,8 @@ public class DatabaseSelectorTest {
 	private static final String S1 = "OracleShard_0";
 	private static final String S2 = "dao_test_sqlsvr_0";
 	private static final String S3 = "dao_test_sqlsvr_1";
-	private DefaultDatabaseSelector selector = new DefaultDatabaseSelector();
+	private static final MockEnvUtils ENV_UTILS = new MockEnvUtils();
+	private DefaultDatabaseSelector selector = new DefaultDatabaseSelector(ENV_UTILS);
 	static {
 		try {
 			DalClientFactory.initClientFactory();
@@ -1179,4 +1182,17 @@ public class DatabaseSelectorTest {
 		context = getContext(new DalHints().setHA(ha), null, ss, true, false);
 		assertSelector(context, ErrorCode.NullLogicDbName);
 	}
+
+	@Test
+	public void testSlaveOnly() {
+		ENV_UTILS.setEnv("pro");
+		List<DataBase> dbs = new ArrayList<>();
+		dbs.add(new DefaultDataBase("mock-master", true, "", "mock-master"));
+		SelectionContext ctx = getContext(new DalHints().slaveOnly(), dbs, null, false, true);
+		assertSelector(ctx, ErrorCode.NullLogicDbName);
+		ENV_UTILS.setEnv("uat");
+		assertSelector(ctx, "mock-master");
+		ENV_UTILS.setEnv(null);
+	}
+
 }

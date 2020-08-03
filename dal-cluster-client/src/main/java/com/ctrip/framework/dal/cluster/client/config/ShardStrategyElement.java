@@ -12,8 +12,8 @@ import java.util.*;
  */
 public abstract class ShardStrategyElement extends PropertyAccessorSupport implements ConfigElement, ShardStrategy {
 
-    private List<TablesElement> tablesElements = new LinkedList<>();
-    private Map<String, PropertyAccessor> tableProperties = new HashMap<>();
+    private final List<TablesElement> tablesElements = new LinkedList<>();
+    private final Map<String, PropertyAccessor> tableProperties = new HashMap<>();
 
     public ShardStrategyElement() {}
 
@@ -30,9 +30,7 @@ public abstract class ShardStrategyElement extends PropertyAccessorSupport imple
     }
 
     protected String getTableProperty(String tableName, String propertyName, String defaultValue) {
-        PropertyAccessor properties = tableProperties.get(tableName);
-        if (properties == null)
-            properties = this;
+        PropertyAccessor properties = getTableProperties(tableName);
         String property = properties.getProperty(propertyName);
         return property != null ? property : defaultValue;
     }
@@ -74,6 +72,13 @@ public abstract class ShardStrategyElement extends PropertyAccessorSupport imple
         } catch (Throwable t) {
             throw new ClusterRuntimeException("illegal long property", t);
         }
+    }
+
+    private PropertyAccessor getTableProperties(String tableName) {
+        if (tableName == null)
+            return this;
+        PropertyAccessor properties = tableProperties.get(tableName);
+        return properties != null ? properties : this;
     }
 
     @Override

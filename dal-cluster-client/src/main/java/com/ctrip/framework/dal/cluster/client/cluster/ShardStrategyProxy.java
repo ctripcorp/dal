@@ -15,8 +15,8 @@ import java.util.Set;
  */
 public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
 
-    private ShardStrategy defaultStrategy;
-    private Map<String, ShardStrategy> tableStrategies = new HashMap<>();
+    private final ShardStrategy defaultStrategy;
+    private final Map<String, ShardStrategy> tableStrategies = new HashMap<>();
 
     public ShardStrategyProxy(ShardStrategy defaultStrategy) {
         addStrategy(defaultStrategy);
@@ -25,28 +25,30 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
 
     @Override
     public Integer getDbShard(String tableName, DbShardContext context) {
-        return getAndCheckTableStrategy(tableName).getDbShard(tableName, context);
+        return getAndCheckStrategyForNullableTable(tableName).getDbShard(tableName, context);
     }
 
     @Override
     public boolean tableShardingEnabled(String tableName) {
-        ShardStrategy strategy = getTableStrategy(tableName);
+        if (tableName == null)
+            return false;
+        ShardStrategy strategy = getStrategyForTable(tableName);
         return strategy != null && strategy.tableShardingEnabled(tableName);
     }
 
     @Override
     public String getTableShard(String tableName, TableShardContext context) {
-        return getAndCheckTableStrategy(tableName).getTableShard(tableName, context);
+        return getAndCheckStrategyForTable(tableName).getTableShard(tableName, context);
     }
 
     @Override
     public Set<String> getAllTableShards(String tableName) {
-        return getAndCheckTableStrategy(tableName).getAllTableShards(tableName);
+        return getAndCheckStrategyForTable(tableName).getAllTableShards(tableName);
     }
 
     @Override
     public String getTableShardSeparator(String tableName) {
-        return getAndCheckTableStrategy(tableName).getTableShardSeparator(tableName);
+        return getAndCheckStrategyForTable(tableName).getTableShardSeparator(tableName);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
         throw new UnsupportedOperationException("unsupported operation for shard strategy proxy");
     }
 
-    private ShardStrategy getTableStrategy(String tableName) {
+    private ShardStrategy getStrategyForTable(String tableName) {
         if (tableName == null)
             throw new ClusterRuntimeException("table name is necessary");
         ShardStrategy strategy = tableStrategies.get(tableName);
@@ -63,8 +65,24 @@ public class ShardStrategyProxy implements ShardStrategy, Lifecycle {
         return strategy;
     }
 
-    private ShardStrategy getAndCheckTableStrategy(String tableName) {
-        ShardStrategy strategy = getTableStrategy(tableName);
+    private ShardStrategy getAndCheckStrategyForTable(String tableName) {
+        ShardStrategy strategy = getStrategyForTable(tableName);
+        if (strategy == null)
+            throw new ClusterRuntimeException(String.format("shard strategy not found for table '%s'", tableName));
+        return strategy;
+    }
+
+    private ShardStrategy getStrategyForNullableTable(String tableName) {
+        if (tableName == null)
+            return defaultStrategy;
+        ShardStrategy strategy = tableStrategies.get(tableName);
+        if (strategy == null)
+            strategy = defaultStrategy;
+        return strategy;
+    }
+
+    private ShardStrategy getAndCheckStrategyForNullableTable(String tableName) {
+        ShardStrategy strategy = getStrategyForNullableTable(tableName);
         if (strategy == null)
             throw new ClusterRuntimeException(String.format("shard strategy not found for table '%s'", tableName));
         return strategy;

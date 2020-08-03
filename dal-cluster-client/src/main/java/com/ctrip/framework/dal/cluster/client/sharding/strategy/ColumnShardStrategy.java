@@ -12,8 +12,12 @@ import java.util.List;
  */
 public abstract class ColumnShardStrategy extends BaseShardStrategy implements ShardStrategy {
 
-    private static final String DB_SHARD_COLUMN = "dbShardColumn";
-    private static final String TABLE_SHARD_COLUMN = "tableShardColumn";
+    protected static final String DB_SHARD_COLUMN = "dbShardColumn";
+    protected static final String TABLE_SHARD_COLUMN = "tableShardColumn";
+
+    // compatible with strategy of dal 1.x
+    protected static final String DB_SHARD_COLUMN_CANDIDATES = "dbShardColumnCandidates";
+    protected static final String COMMA_SPLITTER = ",";
 
     protected ColumnShardStrategy() {}
 
@@ -84,19 +88,56 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
     protected Object getDbShardValue(String tableName, ShardData shardData) {
         if (shardData == null)
             return null;
-        String dbShardColumn = getTableProperty(tableName, DB_SHARD_COLUMN);
-        if (dbShardColumn == null)
-            throw new ClusterRuntimeException(String.format("db shard column undefined for table '%s'", tableName));
-        return shardData.getValue(dbShardColumn);
+        String dbShardColumn = getDbShardColumn(tableName);
+        if (tableName == null)
+            return getDbShardValueForNullTable(shardData, dbShardColumn, getDbShardColumnCandidates());
+        else {
+            if (dbShardColumn == null)
+                throw new ClusterRuntimeException(String.format("db shard column undefined for table '%s'", tableName));
+            return shardData.getValue(dbShardColumn);
+        }
+    }
+
+    // compatible with strategy of dal 1.x
+    protected Object getDbShardValueForNullTable(ShardData shardData,
+                                                 String dbShardColumn, String[] dbShardColumnCandidates) {
+        if (shardData == null)
+            return null;
+        if (dbShardColumn != null) {
+            Object value = shardData.getValue(dbShardColumn);
+            if (value != null)
+                return value;
+        }
+        if (dbShardColumnCandidates != null)
+            for (String column : dbShardColumnCandidates) {
+                Object value = shardData.getValue(column);
+                if (value != null)
+                    return value;
+            }
+        return null;
     }
 
     protected Object getTableShardValue(String tableName, ShardData shardData) {
         if (shardData == null)
             return null;
-        String tableShardColumn = getTableProperty(tableName, TABLE_SHARD_COLUMN);
+        String tableShardColumn = getTableShardColumn(tableName);
         if (tableShardColumn == null)
             throw new ClusterRuntimeException(String.format("table shard column undefined for table '%s'", tableName));
         return shardData.getValue(tableShardColumn);
+    }
+
+    protected String getDbShardColumn(String tableName) {
+        return getTableProperty(tableName, DB_SHARD_COLUMN);
+    }
+
+    // compatible with strategy of dal 1.x
+    protected String[] getDbShardColumnCandidates() {
+        String value = getProperty(DB_SHARD_COLUMN_CANDIDATES);
+        return value != null ? value.split(COMMA_SPLITTER) : null;
+    }
+
+    protected String getTableShardColumn(String tableName) {
+        return getTableProperty(tableName, TABLE_SHARD_COLUMN);
     }
 
 }

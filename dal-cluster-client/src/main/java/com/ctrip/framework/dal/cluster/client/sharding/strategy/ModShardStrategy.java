@@ -10,14 +10,14 @@ import java.util.Set;
  */
 public class ModShardStrategy extends ColumnShardStrategy implements ShardStrategy {
 
-    private static final String DB_SHARD_MOD = "dbShardMod";
-    private static final String TABLE_SHARD_MOD = "tableShardMod";
+    protected static final String DB_SHARD_MOD = "dbShardMod";
+    protected static final String TABLE_SHARD_MOD = "tableShardMod";
 
     public ModShardStrategy() {}
 
     @Override
     protected Integer calcDbShard(String tableName, Object shardValue) {
-        Integer mod = getTableIntProperty(tableName, DB_SHARD_MOD);
+        Integer mod = getDbShardMod(tableName);
         if (mod == null)
             throw new ClusterRuntimeException(String.format("db shard mod undefined for table '%s'", tableName));
         return getModResult(mod, shardValue);
@@ -25,7 +25,7 @@ public class ModShardStrategy extends ColumnShardStrategy implements ShardStrate
 
     @Override
     protected String calcTableShard(String tableName, Object shardValue) {
-        Integer mod = getTableIntProperty(tableName, TABLE_SHARD_MOD);
+        Integer mod = getTableShardMod(tableName);
         if (mod == null)
             throw new ClusterRuntimeException(String.format("table shard mod undefined for table '%s'", tableName));
         return String.valueOf(getModResult(mod, shardValue));
@@ -33,13 +33,21 @@ public class ModShardStrategy extends ColumnShardStrategy implements ShardStrate
 
     @Override
     protected Set<String> calcAllTableShards(String tableName) {
-        Integer mod = getTableIntProperty(tableName, TABLE_SHARD_MOD);
+        Integer mod = getTableShardMod(tableName);
         if (mod == null)
             throw new ClusterRuntimeException(String.format("table shard mod undefined for table '%s'", tableName));
         Set<String> allShards = new HashSet<>();
         for (int i = 0; i < mod; i++)
             allShards.add(String.valueOf(i));
         return allShards;
+    }
+
+    protected Integer getDbShardMod(String tableName) {
+        return getTableIntProperty(tableName, DB_SHARD_MOD);
+    }
+
+    protected Integer getTableShardMod(String tableName) {
+        return getTableIntProperty(tableName, TABLE_SHARD_MOD);
     }
 
     protected int getModResult(int mod, Object shardValue) {

@@ -12,15 +12,15 @@ import java.util.Set;
  */
 public abstract class BaseShardStrategy extends ShardStrategyElement implements ShardStrategy {
 
-    private static final String TABLE_SHARDING = "tableSharding";
-    private static final String TABLE_SHARD_SEPARATOR = "tableShardSeparator";
-    private static final String DB_SHARD_OFFSET = "dbShardOffset";
-    private static final String TABLE_SHARD_OFFSET = "tableShardOffset";
+    protected static final String TABLE_SHARDING = "tableSharding";
+    protected static final String TABLE_SHARD_SEPARATOR = "tableShardSeparator";
+    protected static final String DB_SHARD_OFFSET = "dbShardOffset";
+    protected static final String TABLE_SHARD_OFFSET = "tableShardOffset";
 
-    private static final boolean DEFAULT_TABLE_SHARDING = false;
-    private static final String DEFAULT_TABLE_SHARD_SEPARATOR = "";
-    private static final int DEFAULT_DB_SHARD_OFFSET = 0;
-    private static final int DEFAULT_TABLE_SHARD_OFFSET = 0;
+    protected static final boolean DEFAULT_TABLE_SHARDING = false;
+    protected static final String DEFAULT_TABLE_SHARD_SEPARATOR = "";
+    protected static final int DEFAULT_DB_SHARD_OFFSET = 0;
+    protected static final int DEFAULT_TABLE_SHARD_OFFSET = 0;
 
     protected BaseShardStrategy() {}
 
@@ -52,7 +52,7 @@ public abstract class BaseShardStrategy extends ShardStrategyElement implements 
     }
 
     protected Set<String> calcAllTableShards(String tableName) {
-        throw new UnsupportedOperationException(String.format("Could not calculate all table shards for table '%s'", tableName));
+        throw new UnsupportedOperationException(String.format("could not calculate all table shards for table '%s'", tableName));
     }
 
     protected Integer offsetDbShard(String tableName, Integer shard) {

@@ -2,6 +2,7 @@ package com.ctrip.framework.dal.cluster.client.sharding.strategy;
 
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 
+import java.lang.annotation.ElementType;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,6 +13,9 @@ public class ModShardStrategy extends ColumnShardStrategy implements ShardStrate
 
     protected static final String DB_SHARD_MOD = "dbShardMod";
     protected static final String TABLE_SHARD_MOD = "tableShardMod";
+
+    protected static final String STRING_TYPE_HANDLER = "stringTypeHandler";
+    protected static final String STRING_TYPE_HANDLER_HASH = "hash";
 
     public ModShardStrategy() {}
 
@@ -60,9 +64,22 @@ public class ModShardStrategy extends ColumnShardStrategy implements ShardStrate
             return (Long) value;
         if (value instanceof Number)
             return ((Number) value).longValue();
-        if (value instanceof String)
-            return Long.parseLong((String) value);
+        if (value instanceof String) {
+            return parseLong((String) value);
+        }
         throw new ClusterRuntimeException(String.format("value [%s] cannot be parsed as a valid number", value.toString()));
+    }
+
+    protected long parseLong(String value) {
+        String stringTypeHandler = getProperty(STRING_TYPE_HANDLER);
+        if (STRING_TYPE_HANDLER_HASH.equalsIgnoreCase(stringTypeHandler))
+            return hash(value);
+        else
+            return Long.parseLong(value);
+    }
+
+    protected long hash(String value) {
+        return value.hashCode() & Integer.MAX_VALUE;
     }
 
 }

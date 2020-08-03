@@ -351,4 +351,120 @@ public class DefaultClusterTest {
         Assert.assertEquals("2", cluster.getTableShard("table11", tbShardCtx));
     }
 
+    @Test
+    public void testGetDbShardForNullTable() {
+        final DbShardContext assignationShardIdContext = new DbShardContext("whatever").setShardId(0);
+        final Integer AssignationShardIdShardIndex = cluster.getDbShard(null, assignationShardIdContext);
+        Assert.assertEquals(0, (int) AssignationShardIdShardIndex);
+
+        final DbShardContext assignationShardValueContext = new DbShardContext("whatever");
+        assignationShardValueContext.setShardValue(10);
+        final Integer assignationShardValueShardIndex = cluster.getDbShard(null, assignationShardValueContext);
+        Assert.assertEquals(1, (int) assignationShardValueShardIndex);
+
+        final DbShardContext assignationShardColValueContext = new DbShardContext("whatever");
+        final Map<String, Object> data = new HashMap<>();
+        data.put("no", 100);
+        data.put("age", 101);
+        data.put("id", 102);
+        final ShardData shardData = new MappedShardData(data);
+        assignationShardColValueContext.setShardColValues(shardData);
+        final Integer assignationShardColValueShardIndex = cluster.getDbShard(null, assignationShardColValueContext);
+        Assert.assertEquals(0, (int) assignationShardColValueShardIndex);
+
+        final DbShardContext assignationShardDataCandidates = new DbShardContext("whatever");
+        final Map<String, Object> data1 = new HashMap<>();
+        data1.put("no", 100);
+        data1.put("age", 101);
+        final ShardData shardData1 = new MappedShardData(data1);
+        assignationShardDataCandidates.addShardData(shardData1);
+        final Integer assignationShardDataCandidatesShardIndex = cluster.getDbShard(null, assignationShardDataCandidates);
+        Assert.assertEquals(1, (int) assignationShardDataCandidatesShardIndex);
+    }
+
+    @Test
+    public void testGetTableShardForNullTable() {
+        final TableShardContext assignationShardIdContext = new TableShardContext("whatever").setShardId("100");
+        try {
+            cluster.getTableShard(null, assignationShardIdContext);
+            Assert.fail();
+        } catch (Exception e) {
+            // ok
+        }
+
+        final TableShardContext assignationShardValueContext = new TableShardContext("whatever");
+        assignationShardValueContext.setShardValue(10);
+        try {
+            cluster.getTableShard(null, assignationShardValueContext);
+            Assert.fail();
+        } catch (Exception e) {
+            // ok
+        }
+
+        final TableShardContext assignationShardColValueContext = new TableShardContext("whatever");
+        final Map<String, Object> data = new HashMap<>();
+        data.put("other", 101); // ignore
+        data.put("id", 100001); // ignore
+        data.put("age", 18);
+        final ShardData shardData = new MappedShardData(data);
+        assignationShardColValueContext.setShardColValues(shardData);
+        try {
+            cluster.getTableShard(null, assignationShardColValueContext);
+            Assert.fail();
+        } catch (Exception e) {
+            // ok
+        }
+
+        final TableShardContext assignationShardDataCandidates = new TableShardContext("whatever");
+        final Map<String, Object> data1 = new HashMap<>();
+        data1.put("age", 100);
+        data1.put("id", 100002);
+        final ShardData shardData1 = new MappedShardData(data1);
+        assignationShardDataCandidates.addShardData(shardData1);
+        try {
+            cluster.getTableShard(null, assignationShardDataCandidates);
+            Assert.fail();
+        } catch (Exception e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testGetDbShardForStringColumn() {
+        String testString = "dal-cluster-test";
+        int testLong = testString.hashCode();
+
+        final DbShardContext assignationShardValueContext = new DbShardContext("whatever");
+        assignationShardValueContext.setShardValue(testString);
+        final Integer assignationShardValueShardIndex = cluster.getDbShard("table13", assignationShardValueContext);
+        Assert.assertEquals(testLong % 2, (int) assignationShardValueShardIndex);
+
+        final DbShardContext assignationShardColValueContext = new DbShardContext("whatever");
+        final Map<String, Object> data = new HashMap<>();
+        data.put("other", 101);
+        data.put("id", testString);
+        final ShardData shardData = new MappedShardData(data);
+        assignationShardColValueContext.setShardColValues(shardData);
+        final Integer assignationShardColValueShardIndex = cluster.getDbShard("table14", assignationShardColValueContext);
+        Assert.assertEquals(testLong % 2, (int) assignationShardColValueShardIndex);
+
+        final DbShardContext assignationShardDataCandidates = new DbShardContext("whatever");
+        final Map<String, Object> data1 = new HashMap<>();
+        data1.put("age", 100);
+        data1.put("id", testString);
+        final ShardData shardData1 = new MappedShardData(data1);
+        assignationShardDataCandidates.addShardData(shardData1);
+        final Integer assignationShardDataCandidatesShardIndex = cluster.getDbShard("table14", assignationShardDataCandidates);
+        Assert.assertEquals(testLong % 2, (int) assignationShardDataCandidatesShardIndex);
+
+        final DbShardContext assignationShardDataCandidates2 = new DbShardContext("whatever");
+        final Map<String, Object> data2 = new HashMap<>();
+        data2.put("age", 100);
+        data2.put("id", testString);
+        final ShardData shardData2 = new MappedShardData(data2);
+        assignationShardDataCandidates2.addShardData(shardData2);
+        final Integer assignationShardDataCandidatesShardIndex2 = cluster.getDbShard(null, assignationShardDataCandidates2);
+        Assert.assertEquals(testLong % 3, (int) assignationShardDataCandidatesShardIndex2);
+    }
+
 }

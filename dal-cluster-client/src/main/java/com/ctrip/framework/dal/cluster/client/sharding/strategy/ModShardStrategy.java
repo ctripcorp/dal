@@ -2,7 +2,6 @@ package com.ctrip.framework.dal.cluster.client.sharding.strategy;
 
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 
-import java.lang.annotation.ElementType;
 import java.util.HashSet;
 import java.util.Set;
 

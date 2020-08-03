@@ -20,9 +20,11 @@
         </DatabaseShards>
         <ShardStrategies>
             <ModStrategy default="true">
+                <Property name="stringTypeHandler" value="hash"/>
                 <Property name="tableSharding" value="true"/>
                 <Property name="dbShardColumn" value="id"/>
                 <Property name="dbShardMod" value="3"/>
+                <Property name="dbShardColumnCandidates" value="no,age"/>
                 <!--<Property name="dbShardOffset" value="1"/>-->
                 <Property name="tableShardColumn" value="age"/>
                 <Property name="tableShardMod" value="7"/>

@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao.datasource;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
@@ -21,6 +23,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
@@ -163,12 +166,19 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
     }
 
     private DataSourceIdentity getDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
-        switch (clusterInfo.getRole()) {
-            case MASTER:
-                return new ClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
-            default:
-                throw new UnsupportedOperationException(String.format("unsupported role '%s' for cluster '%s'",
-                        clusterInfo.getRole().getValue(), clusterInfo.getClusterName()));
+        if (clusterInfo.getRole() == DatabaseRole.MASTER)
+            return new ClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
+        else {
+            List<Database> slaves = cluster.getSlavesOnShard(clusterInfo.getShardIndex());
+            if (slaves == null || slaves.size() == 0)
+                throw new IllegalStateException(String.format(
+                        "slave is not found for cluster '%s', shard %d",
+                        clusterInfo.getClusterName(), clusterInfo.getShardIndex()));
+            if (slaves.size() > 1)
+                throw new UnsupportedOperationException(String.format(
+                        "multi slaves are found for cluster '%s', shard %d, which is not supported yet",
+                        clusterInfo.getClusterName(), clusterInfo.getShardIndex()));
+            return new ClusterDataSourceIdentity(slaves.iterator().next());
         }
     }
 

@@ -120,16 +120,14 @@ public class DalConnectionManager {
 		try {
 			DbMeta meta;
 			if (selectedDataBase instanceof ClusterDataBase) {
-				Database db = ((ClusterDataBase) selectedDataBase).getDatabase();
-				DataSourceIdentity id = new ClusterDataSourceIdentity(db);
-				conn = locator.getConnection(id);
-				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
+				ClusterDataBase clusterDataBase = (ClusterDataBase) selectedDataBase;
+				conn = locator.getConnection(clusterDataBase);
+				meta = DbMeta.createIfAbsent(clusterDataBase, dbSet.getDatabaseCategory(), conn);
 				if (shardId == null)
-					shardId = String.valueOf(db.getShardIndex());
+					shardId = String.valueOf(clusterDataBase.getDatabase().getShardIndex());
 			}
 			else if (selectedDataBase instanceof ProviderDataBase) {
-				ConnectionStringConfigureProvider provider = ((ProviderDataBase) selectedDataBase).getConnectionStringProvider();
-				DataSourceIdentity id = new ApiDataSourceIdentity(provider);
+				DataSourceIdentity id = selectedDataBase.getDataSourceIdentity();
 				conn = locator.getConnection(id);
 				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
 			}

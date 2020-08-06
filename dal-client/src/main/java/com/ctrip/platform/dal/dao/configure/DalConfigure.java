@@ -96,16 +96,7 @@ public class DalConfigure {
     public void warmUpConnection(DataBase db){
         Connection conn = null;
         try {
-            if (db instanceof ClusterDataBase) {
-                DataSourceIdentity id = new ClusterDataSourceIdentity(((ClusterDataBase) db).getDatabase());
-                conn = locator.getConnection(id);
-            }
-            else if (db instanceof ProviderDataBase) {
-                DataSourceIdentity id = new ApiDataSourceIdentity(((ProviderDataBase) db).getConnectionStringProvider());
-                conn = locator.getConnection(id);
-            }
-            else
-                conn = locator.getConnection(db.getConnectionString());
+            conn = locator.getConnection(db.getDataSourceIdentity());
         } catch (Throwable e) {
             dalLogger.error(String.format("create connection to %s error", db.getName()), e);
         } finally {

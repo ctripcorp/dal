@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -38,4 +40,10 @@ public class ProviderDataBase extends DefaultDataBase {
     public ConnectionStringConfigureProvider getConnectionStringProvider() {
         return connectionStringProvider;
     }
+
+    @Override
+    public DataSourceIdentity getDataSourceIdentity() {
+        return new ApiDataSourceIdentity(getConnectionStringProvider());
+    }
+
 }

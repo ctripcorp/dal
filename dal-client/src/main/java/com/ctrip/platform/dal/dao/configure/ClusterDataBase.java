@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
+import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 
 /**
  * @author c7ch23en
@@ -31,6 +31,11 @@ public class ClusterDataBase extends ClusterDataSourceIdentity implements DataBa
     @Override
     public String getConnectionString() {
         return getName();
+    }
+
+    @Override
+    public DataSourceIdentity getDataSourceIdentity() {
+        return this;
     }
 
 }

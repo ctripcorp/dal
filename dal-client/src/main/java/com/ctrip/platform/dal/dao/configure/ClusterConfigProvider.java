@@ -9,4 +9,8 @@ public interface ClusterConfigProvider {
 
     ClusterConfig getClusterConfig(String clusterName);
 
+    default ClusterConfig getClusterConfig(String clusterName, ClusterOptions options) {
+        return getClusterConfig(clusterName);
+    }
+
 }

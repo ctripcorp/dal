@@ -3,9 +3,11 @@ package com.ctrip.platform.dal.daogen.resource;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
+import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -107,11 +109,12 @@ public class DalGroupDbResource {
     @Path("add")
     public Status add(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
             @FormParam("dbname") String dbname, @FormParam("comment") String comment,
-            @FormParam("gen_default_dbset") boolean gen_default_dbset) throws Exception {
+            @FormParam("gen_default_dbset") boolean gen_default_dbset,
+            @FormParam("dbmodetype_dbmanage") String dbModeType) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
-            if (userNo == null || groupId == null || dbname == null) {
+            if (userNo == null || groupId == null || dbname == null || StringUtils.isEmpty(dbModeType)) {
                 Status status = Status.ERROR();
                 status.setInfo("Illegal parameters.");
                 return status;
@@ -134,8 +137,7 @@ public class DalGroupDbResource {
              */
             int ret = -1;
             if (null != groupdb) {
-                ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID);
-                BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), comment);
+                ret = BeanGetter.getDaoOfDalGroupDB().updateGroupDB(groupdb.getId(), groupID, comment, dbModeType);
             } else {
                 Status status = Status.ERROR();
                 status.setInfo(dbname + " 不存在，请先到数据库一览界面添加DB。");
@@ -148,7 +150,8 @@ public class DalGroupDbResource {
             }
 
             if (gen_default_dbset) {
-                Status status = genDefaultDbset(groupID, dbname, null);
+                String dbProvider = DatabaseType.getInstanceByValue(groupdb.getDb_providerName()).getValue();
+                Status status = genDefaultDbset(groupID, dbname, dbProvider, dbModeType);
                 if (status == Status.ERROR()) {
                     return status;
                 }
@@ -316,7 +319,7 @@ public class DalGroupDbResource {
         return false;
     }
 
-    public static Status genDefaultDbset(int groupId, String dbname, String dbProvider) throws Exception {
+    public static Status genDefaultDbset(int groupId, String dbname, String dbProvider, String modeType) throws Exception {
         Status status = Status.OK();
         List<DatabaseSet> exist = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname);
         if (exist != null && exist.size() > 0) {
@@ -338,18 +341,22 @@ public class DalGroupDbResource {
 
         dbset.setGroupId(groupId);
         int ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
-        if (ret > 0) {
-            dbset = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
-
-            DatabaseSetEntry entry = new DatabaseSetEntry();
-            entry.setDatabaseSet_Id(dbset.getId());
-            entry.setDatabaseType("Master");
-            entry.setName(dbname);
-            entry.setConnectionString(dbname);
-
-            BeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
+        if (ret > 0 && DbModeTypeEnum.Titan.getDes().equals(modeType)) {
+            genInsertDBSetEntry(dbset, dbname);
         }
         return status;
+    }
+
+    public static void genInsertDBSetEntry(DatabaseSet dbset, String dbname) throws SQLException {
+        dbset = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByName(dbname).get(0);
+
+        DatabaseSetEntry entry = new DatabaseSetEntry();
+        entry.setDatabaseSet_Id(dbset.getId());
+        entry.setDatabaseType("Master");
+        entry.setName(dbname);
+        entry.setConnectionString(dbname);
+
+        BeanGetter.getDaoOfDatabaseSet().insertDatabaseSetEntry(entry);
     }
 
 }

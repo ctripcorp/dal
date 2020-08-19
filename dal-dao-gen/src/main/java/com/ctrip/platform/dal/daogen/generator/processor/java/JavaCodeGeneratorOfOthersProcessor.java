@@ -15,7 +15,7 @@ public class JavaCodeGeneratorOfOthersProcessor implements DalProcessor {
                 processor = new CommonJavaCodeGeneratorOfOthersProcessor();
             } else {
                 Class<?> clazz = Class.forName(className);
-                processor = (DalProcessor) clazz.newInstance();
+                processor = (DalProcessor) clazz.getDeclaredConstructor().newInstance();
             }
 
             processor.process(context);

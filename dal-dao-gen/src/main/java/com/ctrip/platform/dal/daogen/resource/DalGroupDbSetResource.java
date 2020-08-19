@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
@@ -67,18 +68,22 @@ public class DalGroupDbSetResource {
     @Path("getDbset")
     @Produces(MediaType.APPLICATION_JSON)
     public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") int groupId,
-            @QueryParam("daoFlag") boolean daoFlag) throws SQLException {
+            @QueryParam("daoFlag") boolean daoFlag, @QueryParam("modeType") String modeType) throws SQLException {
         try {
             List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
             if (!daoFlag)
                 return dbsets;
 
             List<DatabaseSet> result = new ArrayList<>();
-            for (DatabaseSet dbset : dbsets) { // 排除没有entry的dbset
-                List<DatabaseSetEntry> entrys =
-                        BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.getId());
-                if (entrys != null && entrys.size() > 0)
+            for (DatabaseSet dbset : dbsets) {
+                if (DbModeTypeEnum.Cluster.getDes().equals(dbset.getMode_type())) { //cluster集群不需要有
                     result.add(dbset);
+                } else {// 排除没有entry的dbset
+                    List<DatabaseSetEntry> entrys =
+                            BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetEntryByDbsetid(dbset.getId());
+                    if (entrys != null && entrys.size() > 0)
+                        result.add(dbset);
+                }
             }
             return result;
         } catch (Throwable e) {
@@ -109,7 +114,7 @@ public class DalGroupDbSetResource {
     @Path("addDbset")
     public Status addDbset(@Context HttpServletRequest request, @FormParam("name") String name,
             @FormParam("provider") String provider, @FormParam("shardingStrategy") String shardingStrategy,
-            @FormParam("groupId") int groupID) throws Exception {
+            @FormParam("groupId") int groupID, @FormParam("dbModeType") String dbModeType) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -142,6 +147,7 @@ public class DalGroupDbSetResource {
             LoginUser user = BeanGetter.getDaoOfLoginUser().getUserByNo(userNo);
             String upNo = user.getUserName() + "(" + userNo + ")";
             dbset.setUpdate_user_no(upNo);
+            dbset.setMode_type(dbModeType);
             ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
             if (ret <= 0) {
                 Status status = Status.ERROR();

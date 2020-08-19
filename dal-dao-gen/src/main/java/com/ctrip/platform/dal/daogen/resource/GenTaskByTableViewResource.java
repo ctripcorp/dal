@@ -3,11 +3,13 @@ package com.ctrip.platform.dal.daogen.resource;
 import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
+import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.utils.DbUtils;
 import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import sun.security.pkcs11.Secmod;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -63,6 +65,11 @@ public class GenTaskByTableViewResource extends ApproveResource {
                 task.setComment(comment);
                 task.setSql_style(sql_style);
                 task.setApi_list(api_list);
+                if (set_name != null && set_name.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(set_name.substring(set_name.length() - 10))) {
+                    task.setMode_type(DbModeTypeEnum.Cluster.getDes());
+                }else {
+                    task.setMode_type(DbModeTypeEnum.Titan.getDes());
+                }
                 if (needApproveTask(project_id, user.getId())) {
                     task.setApproved(1);
                 } else {
@@ -102,10 +109,14 @@ public class GenTaskByTableViewResource extends ApproveResource {
         Status status = Status.OK();
 
         try {
+            String connectionString;
             List<DalApi> apis = null;
-            DatabaseSetEntry databaseSetEntry =
-                    BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-            DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
+            if (db_set_name != null && db_set_name.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(db_set_name.substring(db_set_name.length() - 10))) {
+                connectionString = db_set_name;
+            } else {
+                connectionString = BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name).getConnectionString();
+            }
+            DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(connectionString);
 
             if ("csharp".equalsIgnoreCase(sql_style)) {
                 if (dbCategory == DatabaseCategory.MySql) {

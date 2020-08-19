@@ -54,7 +54,7 @@ public class DaoOfDatabaseSet extends BaseDao {
     public List<DatabaseSet> getAllDatabaseSetByGroupId(Integer groupId) throws SQLException {
         FreeSelectSqlBuilder<List<DatabaseSet>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         builder.setTemplate(
-                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE groupId = ?");
+                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time, mode_type FROM databaseset WHERE groupId = ?");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "groupId", Types.INTEGER, groupId);

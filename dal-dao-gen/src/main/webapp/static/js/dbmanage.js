@@ -230,6 +230,10 @@
                     caption: 'DB Name',
                     type: 'text'
                 }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode Type',
+                    type: 'text'
+                }, {
                     field: 'comment',
                     caption: '备注',
                     type: 'text'
@@ -237,14 +241,21 @@
                 columns: [{
                     field: 'dbname',
                     caption: 'DB Name',
-                    size: '50%',
+                    size: '40%',
+                    sortable: true,
+                    attr: 'align=center'
+                }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode Type',
+                    size: '30%',
                     sortable: true,
                     attr: 'align=center'
                 }, {
                     field: 'comment',
                     caption: '备注',
-                    size: '50%',
-                    sortable: true
+                    size: '30%',
+                    sortable: true,
+                    attr: 'align=center'
                 }],
                 records: [],
                 onDblClick: function (target, data) {
@@ -266,6 +277,10 @@
         $(document.body).on("click", "#save_db", function () {
             var db_name = $("#databases").val();
             var comment = $("#comment").val();
+            var dbmodetype_dbmanage = $("#dbmodetype_dbmanage");
+            if (dbmodetype_dbmanage == null || dbmodetype_dbmanage == '') {
+                $("#error_msg").html('请选择DB Mode Type!');
+            }
             if (db_name == null || db_name == '') {
                 $("#error_msg").html('请选择DB!');
             } else {
@@ -273,6 +288,7 @@
                     groupId: w2ui['grid'].current_group,
                     dbname: db_name,
                     comment: comment,
+                    dbmodetype_dbmanage: dbmodetype_dbmanage,
                     gen_default_dbset: $("#gen_default_dbset").is(":checked")
                 }, function (data) {
                     if (data.code == "OK") {
@@ -330,6 +346,15 @@
             }).fail(function (data) {
                 $("#transferdb_error_msg").html(data.info);
             });
+        });
+
+        $(document.body).on("change", "#dbmodetype_dbmanage", function () {
+            var dbmodetype_dbmanage = $("#dbmodetype_dbmanage").val();
+            if (dbmodetype_dbmanage == "no") {
+                return;
+            } else {
+                ajaxutil.reload_dbservers(null, null, null, dbmodetype_dbmanage);
+            }
         });
     });
 })(window);

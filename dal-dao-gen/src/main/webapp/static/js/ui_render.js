@@ -483,13 +483,19 @@
                 columns: [{
                     field: 'id',
                     caption: 'ID',
-                    size: '5%',
+                    size: '4%',
                     sortable: true,
                     resizable: true
                 }, {
                     field: 'databaseSetName',
                     caption: '逻辑数据库',
-                    size: '20%',
+                    size: '15%',
+                    sortable: true,
+                    resizable: true
+                }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode Type',
+                    size: '8%',
                     sortable: true,
                     resizable: true
                 }, {
@@ -507,7 +513,7 @@
                 }, {
                     field: 'task_desc',
                     caption: '类型',
-                    size: '10%',
+                    size: '7%',
                     sortable: true,
                     resizable: true
                 }, {

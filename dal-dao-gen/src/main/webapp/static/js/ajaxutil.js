@@ -265,7 +265,7 @@
                 post_task_table_view_sp(postData);
             }
         },
-        reload_dbservers: function (callback, groupDBs, groupId) {
+        reload_dbservers: function (callback, groupDBs, groupId, dbmodetype) {
             cblock($("body"));
 
             var url = "/rest/db/dbs?rand=" + Math.random();
@@ -276,6 +276,9 @@
                 url += "&groupId=" + groupId;
             } else {
                 url += "&groupId=-1";
+            }
+            if (dbmodetype != null && dbmodetype != '') {
+                url += "&dbmodetype=" + dbmodetype;
             }
             $.get(url).done(function (data) {
                 // $("select[id$=servers] > option:gt(0)").remove();

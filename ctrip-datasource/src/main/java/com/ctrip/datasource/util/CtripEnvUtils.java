@@ -2,6 +2,7 @@ package com.ctrip.datasource.util;
 
 import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
 import com.ctrip.framework.dal.cluster.client.util.ValueWrapper;
+import com.ctrip.framework.foundation.Env;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.helper.DefaultEnvUtils;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
@@ -11,16 +12,14 @@ import com.ctrip.platform.dal.dao.helper.EnvUtils;
  */
 public class CtripEnvUtils extends DefaultEnvUtils implements EnvUtils {
 
-    private static final String PROD_IDENTITY = "pro";
-
-    private final ObjectHolder<ValueWrapper<String>> env = new ObjectHolder<>();
+    private final ObjectHolder<ValueWrapper<Env>> env = new ObjectHolder<>();
     private final ObjectHolder<ValueWrapper<String>> subEnv = new ObjectHolder<>();
     private final ObjectHolder<ValueWrapper<String>> zone = new ObjectHolder<>();
     private final ObjectHolder<ValueWrapper<String>> idc = new ObjectHolder<>();
 
     @Override
     public String getEnv() {
-        return env.getOrCreate(() -> new ValueWrapper<>(Foundation.server().getEnv().getName())).getValue();
+        return getOrInitEnv().getName();
     }
 
     @Override
@@ -39,6 +38,10 @@ public class CtripEnvUtils extends DefaultEnvUtils implements EnvUtils {
     }
 
     public void setEnv(String env) {
+        setEnv(Env.getByName(env, null));
+    }
+
+    protected void setEnv(Env env) {
         if (env != null)
             this.env.set(new ValueWrapper<>(env));
         else
@@ -68,12 +71,21 @@ public class CtripEnvUtils extends DefaultEnvUtils implements EnvUtils {
 
     @Override
     public boolean isProd() {
-        String env = getEnv();
-        return env != null && env.toLowerCase().contains(PROD_IDENTITY);
+        return getOrInitEnv() == Env.PRO;
+    }
+
+    @Override
+    public boolean isLocal() {
+        Env env = getOrInitEnv();
+        return env == Env.LOCAL || env == Env.DEV || env == Env.UNKNOWN;
+    }
+
+    protected Env getOrInitEnv() {
+        return env.getOrCreate(() -> new ValueWrapper<>(Foundation.server().getEnv())).getValue();
     }
 
     public void clear() {
-        setEnv(null);
+        setEnv((Env) null);
         setSubEnv(null);
         setZone(null);
         setIdc(null);

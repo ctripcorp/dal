@@ -1,6 +1,6 @@
 package com.ctrip.datasource.titan;
 
-import com.ctrip.datasource.configure.AllInOneConfigureReader;
+import com.ctrip.datasource.configure.CtripLocalConnectionStringProvider;
 import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
 import com.ctrip.datasource.configure.qconfig.IPDomainStatusProviderImpl;
 import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DataSourceConfigureManager extends DataSourceConfigureHelper {
@@ -77,12 +76,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     private static final String THREAD_NAME = "DataSourceConfigureManager";
 
-    /**
-     * Used to access local Database.config file fo dev environment
-     */
-    private AllInOneConfigureReader allInOneProvider = new AllInOneConfigureReader();
-
-    private ConnectionStringProvider connectionStringProvider = new ConnectionStringProviderImpl();
+    private ConnectionStringProvider connectionStringProvider;
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
     private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
 
@@ -104,10 +98,16 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             new LinkedBlockingQueue<Runnable>(), new CustomThreadFactory(THREAD_NAME));
 
     public synchronized void initialize(Map<String, String> settings) throws Exception {
+        initialize(settings, null);
+    }
+
+    public synchronized void initialize(Map<String, String> settings, DatabaseSets databaseSets) throws Exception {
         if (isInitialized)
             return;
-
         _initialize(settings);
+        connectionStringProvider = isLocal() ?
+                new CtripLocalConnectionStringProvider(getParsedDatabaseConfigPath(), getParsedDatabaseConfigFile(), databaseSets) :
+                new ConnectionStringProviderImpl();
         isInitialized = true;
     }
 
@@ -169,12 +169,10 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         if (names.isEmpty())
             return;
 
-        // set connection strings
-        Map<String, DalConnectionString> connectionStrings = getConnectionStrings(names, sourceType);
+        // setup connection strings
+        Map<String, DalConnectionString> connectionStrings = getConnectionStrings(names);
         dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
-
-        if (sourceType == SourceType.Remote)
-            addConnectionStringChangedListeners(names);
+        addConnectionStringChangedListeners(names);
     }
 
     private Set<String> getFilteredNames(Set<String> names, SourceType sourceType) throws Exception {
@@ -204,8 +202,8 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return set;
     }
 
-    private Map<String, DalConnectionString> getConnectionStrings(Set<String> names, SourceType sourceType) {
-        Map<String, DalConnectionString> connectionStrings = null;
+    private Map<String, DalConnectionString> getConnectionStrings(Set<String> names) {
+        Map<String, DalConnectionString> connectionStrings;
         if (isDebug) {
             connectionStrings = new HashMap<>();
             if (names == null || names.isEmpty())
@@ -219,17 +217,11 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             return connectionStrings;
         }
 
-        // If it uses local Database.Config
-        if (sourceType == SourceType.Local) {
-            boolean useLocal = getUseLocal();
-            connectionStrings = allInOneProvider.getConnectionStrings(names, useLocal, getDatabaseConfigLocation());
-        } else {
-            try {
-                connectionStrings = connectionStringProvider.getConnectionStrings(names);
-            } catch (Exception e) {
-                error("Fail to setup Titan Provider", e);
-                throw new RuntimeException(e);
-            }
+        try {
+            connectionStrings = connectionStringProvider.getConnectionStrings(names);
+        } catch (Exception e) {
+            error("Failed to get connectionStrings", e);
+            throw new RuntimeException(e);
         }
 
         return connectionStrings;

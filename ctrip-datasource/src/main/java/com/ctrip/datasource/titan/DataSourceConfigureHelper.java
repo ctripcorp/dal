@@ -3,26 +3,26 @@ package com.ctrip.datasource.titan;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.datasource.util.Version;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.status.ProductVersionManager;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    protected static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 
     private static final String EMPTY_ID = "999999";
     private static final String CTRIP_DATASOURCE_VERSION = "Ctrip.datasource.version";
@@ -39,6 +39,10 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     protected boolean useLocal;
     protected boolean ignoreExternalException = false;
     protected String databaseConfigLocation;
+    protected String parsedDatabaseConfigPath;
+    protected String parsedDatabaseConfigFile;
+
+    private boolean isLocal = false;
 
     private DalEncrypter dalEncrypter = null;
 
@@ -88,6 +92,10 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
             ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCELOCATION,
                     DataSourceConfigureParser.getInstance().getDataSourceXmlLocation());
         }
+
+        isLocal = useLocal || ENV_UTILS.isLocal();
+
+        parseDatabaseConfigLocation();
     }
 
     private String discoverAppId(Map<String, String> settings) throws DalException {
@@ -143,6 +151,29 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
         ent.msg = msg;
         ent.e = e;
         startUpLog.add(ent);
+    }
+
+    protected boolean isLocal() {
+        return isLocal;
+    }
+
+    protected void parseDatabaseConfigLocation() {
+        if (!StringUtils.isTrimmedEmpty(databaseConfigLocation)) {
+            int end = databaseConfigLocation.lastIndexOf("/") + 1;
+            if (end < databaseConfigLocation.length())
+                end += databaseConfigLocation.substring(end).lastIndexOf("\\") + 1;
+            parsedDatabaseConfigPath = databaseConfigLocation.substring(0, end);
+            if (end < databaseConfigLocation.length())
+                parsedDatabaseConfigFile = databaseConfigLocation.substring(end);
+        }
+    }
+
+    public String getParsedDatabaseConfigPath() {
+        return parsedDatabaseConfigPath;
+    }
+
+    public String getParsedDatabaseConfigFile() {
+        return parsedDatabaseConfigFile;
     }
 
 }

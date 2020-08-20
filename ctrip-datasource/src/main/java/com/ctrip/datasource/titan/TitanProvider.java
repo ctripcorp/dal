@@ -30,7 +30,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-public class TitanProvider implements IntegratedConfigProvider {
+public class TitanProvider extends InjectableComponentSupport implements IntegratedConfigProvider {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String USE_LOCAL_CONFIG = "useLocalConfig";
@@ -44,14 +44,17 @@ public class TitanProvider implements IntegratedConfigProvider {
     private SourceType sourceType = SourceType.Remote;
     private DalPropertiesManager dalPropertiesManager = DalPropertiesManager.getInstance();
     private ClusterConfigProvider clusterConfigProvider = new CtripClusterConfigProvider();
-    private ClusterInfoProvider clusterInfoProvider = new CtripClusterInfoProvider(DalPropertiesManager.getInstance().getDalPropertiesLocator(), HttpExecutor.getInstance());
+    private ClusterInfoProvider clusterInfoProvider =
+            new CtripClusterInfoProvider(DalPropertiesManager.getInstance().getDalPropertiesLocator(),
+                    HttpExecutor.getInstance());
 
     @Override
-    public void initialize(Map<String, String> settings) throws Exception {
+    protected void pInitialize(Map<String, String> settings) throws Exception {
         setSourceType(settings);
-        dataSourceConfigureManager.initialize(settings);
+        dataSourceConfigureManager.initialize(settings, getDatabaseSets());
         if (sourceType == SourceType.Local) {
-            clusterConfigProvider = new CtripLocalClusterConfigProvider();
+            clusterConfigProvider =
+                    new CtripLocalClusterConfigProvider(dataSourceConfigureManager.getParsedDatabaseConfigPath());
             clusterInfoProvider = new LocalClusterInfoProvider();
         }
     }

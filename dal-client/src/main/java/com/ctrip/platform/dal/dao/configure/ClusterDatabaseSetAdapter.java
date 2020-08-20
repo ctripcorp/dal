@@ -1,16 +1,13 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
-import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -23,11 +20,10 @@ import java.util.Map;
 public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
 
-    private ClusterInfoProvider clusterInfoProvider;
-    private ClusterManager clusterManager;
-    private DalConnectionLocator connectionLocator;
+    private final ClusterInfoProvider clusterInfoProvider;
+    private final ClusterManager clusterManager;
+    private final DalConnectionLocator connectionLocator;
 
     public ClusterDatabaseSetAdapter(DalConnectionLocator connectionLocator) {
         this.connectionLocator = connectionLocator;
@@ -58,7 +54,7 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
         boolean adaptable = true;
         if (defaultDatabaseSet.getDatabaseCategory() != DatabaseCategory.MySql)
             adaptable = false;
-        if (defaultDatabaseSet.getShardingStrategy() != null)
+        if (defaultDatabaseSet.getStrategyNullable() != null)
             adaptable = false;
         if (defaultDatabaseSet.getIdGenConfig() != null)
             adaptable = false;
@@ -84,10 +80,12 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
                             !clusterInfo.dbSharding()) {
                         String clusterName = clusterInfo.getClusterName();
                         Cluster cluster = clusterManager.getOrCreateCluster(clusterName);
-                        LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSucceeded",
-                                String.format("databaseSet: %s, clusterName: %s",
-                                        defaultDatabaseSet.getName(), clusterName));
-                        return new ClusterDatabaseSet(defaultDatabaseSet.getName(), cluster, connectionLocator);
+                        if (checkCluster(cluster)) {
+                            LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSucceeded",
+                                    String.format("databaseSet: %s, clusterName: %s",
+                                            defaultDatabaseSet.getName(), clusterName));
+                            return new ClusterDatabaseSet(defaultDatabaseSet.getName(), cluster, connectionLocator);
+                        }
                     }
                 }
             }
@@ -99,6 +97,16 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
             LOGGER.warn("Adapt DefaultDatabaseSet to ClusterDatabaseSet exception", t);
         }
         return null;
+    }
+
+    private boolean checkCluster(Cluster cluster) {
+        if (!cluster.dbShardingEnabled()) {
+            int theOnlyShard = cluster.getAllDbShards().iterator().next();
+            Database master = cluster.getMasterOnShard(theOnlyShard);
+            List<Database> slaves = cluster.getSlavesOnShard(theOnlyShard);
+            return master != null && (slaves == null || slaves.isEmpty());
+        }
+        return false;
     }
 
 }

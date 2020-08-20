@@ -114,4 +114,8 @@ public abstract class DatabaseSet implements IDatabaseSet {
         return !StringUtils.isEmpty(value) ? Boolean.parseBoolean(value) : null;
     }
 
+    protected Map<String, String> getProperties() {
+        return properties;
+    }
+
 }

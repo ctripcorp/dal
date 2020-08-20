@@ -21,11 +21,11 @@ public class DefaultDatabaseSet extends DatabaseSet {
     private DalShardingStrategy strategy;
     private Map<String, DataBase> databases;
     // Key is shard id, value is all database under in this shard
-    private Map<String, List<DataBase>> masterDbByShard = new HashMap<String, List<DataBase>>();
-    private Map<String, List<DataBase>> slaveDbByShard = new HashMap<String, List<DataBase>>();
+    private Map<String, List<DataBase>> masterDbByShard = new HashMap<>();
+    private Map<String, List<DataBase>> slaveDbByShard = new HashMap<>();
 
-    private List<DataBase> masterDbs = new ArrayList<DataBase>();
-    private List<DataBase> slaveDbs = new ArrayList<DataBase>();
+    private List<DataBase> masterDbs = new ArrayList<>();
+    private List<DataBase> slaveDbs = new ArrayList<>();
 
     private IIdGeneratorConfig idGenConfig;
 
@@ -55,7 +55,7 @@ public class DefaultDatabaseSet extends DatabaseSet {
     public DefaultDatabaseSet(String name, String provider, Map<String, DataBase> databases,
                               IIdGeneratorConfig idGenConfig, Map<String, String> properties)
             throws Exception {
-        this(name, provider, null, databases, idGenConfig, properties);
+        this(name, provider, (String) null, databases, idGenConfig, properties);
     }
 
     public DefaultDatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases,
@@ -65,35 +65,41 @@ public class DefaultDatabaseSet extends DatabaseSet {
 
     public DefaultDatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases,
                               IIdGeneratorConfig idGenConfig, Map<String, String> properties) throws Exception {
+        this(name, provider, initStrategy(shardStrategy), databases, idGenConfig, properties);
+    }
+
+    public DefaultDatabaseSet(String name, String provider, DalShardingStrategy strategy, Map<String, DataBase> databases,
+                              IIdGeneratorConfig idGenConfig, Map<String, String> properties) {
         super(properties);
         this.name = name;
         this.provider = provider;
         this.dbCategory = DatabaseCategory.matchWith(provider);
         this.databases = databases;
         this.idGenConfig = idGenConfig;
-        initStrategy(shardStrategy);
+        this.strategy = strategy;
         initShards();
     }
 
-    private void initStrategy(String shardStrategy) throws Exception {
+    private static DalShardingStrategy initStrategy(String shardStrategy) throws Exception {
         if (shardStrategy == null || shardStrategy.length() == 0)
-            return;
-
+            return null;
+        DalShardingStrategy strategy = null;
         String[] values = shardStrategy.split(ENTRY_SEPARATOR);
         String[] strategyDef = values[0].split(KEY_VALUE_SEPARATOR);
-
         if (strategyDef[0].trim().equals(CLASS))
             strategy = (DalShardingStrategy) Class.forName(strategyDef[1].trim()).newInstance();
-        Map<String, String> settings = new HashMap<String, String>();
+        Map<String, String> settings = new HashMap<>();
         for (int i = 1; i < values.length; i++) {
             String[] entry = values[i].split(KEY_VALUE_SEPARATOR);
             settings.put(entry[0].trim(), entry[1].trim());
         }
-        strategy.initialize(settings);
+        if (strategy != null)
+            strategy.initialize(settings);
+        return strategy;
     }
 
-    private void initShards() throws Exception {
-        if (strategy == null || !strategy.isShardingByDb()) {
+    private void initShards() {
+        if (getStrategyNullable() == null || !getStrategyNullable().isShardingByDb()) {
             // Init with no shard support
             for (DataBase db : databases.values()) {
                 if (db.isMaster())
@@ -129,11 +135,13 @@ public class DefaultDatabaseSet extends DatabaseSet {
     }
 
     public boolean isShardingSupported() {
-        return strategy != null && strategy.isShardingByDb();
+        return getStrategyNullable() != null && getStrategyNullable().isShardingByDb();
     }
 
     public boolean isTableShardingSupported(String tableName) {
-        return strategy != null && strategy.isShardingByTable() && strategy.isShardingEnable(tableName);
+        return getStrategyNullable() != null &&
+                getStrategyNullable().isShardingByTable() &&
+                getStrategyNullable().isShardingEnable(tableName);
     }
 
     public Map<String, DataBase> getDatabases() {
@@ -156,17 +164,16 @@ public class DefaultDatabaseSet extends DatabaseSet {
         if (tableName == null || tableName.isEmpty())
             throw new DalException(errorMsg + "Table name is null or empty.");
 
-        if (strategy == null)
+        if (getStrategyNullable() == null)
             throw new DalException(errorMsg + String.format("There is no sharding strategy for DatabaseSet %s.", name));
 
-        if (!(strategy instanceof ShardColModShardStrategy)) {
+        ShardColModShardStrategy modStrategy = tryGetModStrategy();
+        if (modStrategy == null) {
             throw new DalException(errorMsg
                     + String.format("The sharding strategy of DatabaseSet %s is not ShardColModShardStrategy.", name));
         }
 
-        ShardColModShardStrategy modStrategy = (ShardColModShardStrategy) strategy;
-        boolean isShardingEnabled = modStrategy.isShardingEnable(tableName);
-        if (!isShardingEnabled) {
+        if (!modStrategy.isShardingEnable(tableName)) {
             throw new DalException(errorMsg + String.format("Table sharding is not enabled for table %.", tableName));
         }
 
@@ -184,13 +191,20 @@ public class DefaultDatabaseSet extends DatabaseSet {
         return set;
     }
 
-    public DalShardingStrategy getStrategy() throws SQLException {
-        if (strategy == null)
-            throw new SQLException("No sharding strategy defined");
-        return strategy;
+    protected ShardColModShardStrategy tryGetModStrategy() {
+        if (getStrategyNullable() instanceof ShardColModShardStrategy)
+            return (ShardColModShardStrategy) getStrategyNullable();
+        else
+            return null;
     }
 
-    protected DalShardingStrategy getShardingStrategy() {
+    public DalShardingStrategy getStrategy() throws SQLException {
+        if (getStrategyNullable() == null)
+            throw new SQLException("No sharding strategy defined");
+        return getStrategyNullable();
+    }
+
+    protected DalShardingStrategy getStrategyNullable() {
         return strategy;
     }
 

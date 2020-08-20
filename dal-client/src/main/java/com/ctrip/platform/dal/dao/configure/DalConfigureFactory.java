@@ -101,23 +101,39 @@ public class DalConfigureFactory implements DalConfigConstants {
         DalTaskFactory factory = readComponent(root, TASK_FACTORY, new DefaultTaskFactory(), FACTORY);
 
         DalConnectionLocator locator =
-                readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR);
+                readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR, false);
 
-        Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS), locator);
+        Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
+        if (locator instanceof InjectableComponentSupport) {
+            ((InjectableComponentSupport) locator).inject(new DatabaseSetsImpl(databaseSets.values()));
+        }
+        locator.initialize(getSettings(getChildNode(root, CONNECTION_LOCATOR)));
 
-        locator.setup(databaseSets.values());
+        Map<String, DatabaseSet> clusters = readClusters(getChildNode(root, DATABASE_SETS), locator);
+        clusters.putAll(databaseSets);
+
+        locator.setup(clusters.values());
 
         DatabaseSetAdapter adapter = new ClusterDatabaseSetAdapter(locator);
-        tryAdaptToClusters(databaseSets, adapter);
+        tryAdaptDatabaseSets(clusters, adapter);
+        Map<String, DalConnectionString> connectionStrings =
+                DataSourceConfigureLocatorManager.getInstance().getAllConnectionStrings();
+        adapter = new LocalDatabaseSetAdapter(connectionStrings);
+        tryAdaptDatabaseSets(clusters, adapter);
 
         DatabaseSelector selector =
                 readComponent(root, DATABASE_SELECTOR, new DefaultDatabaseSelector(), SELECTOR);
 
-        return new DalConfigure(name, databaseSets, logger, locator, factory, selector);
+        return new DalConfigure(name, clusters, logger, locator, factory, selector);
     }
 
     private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl,
-            String implNodeName) throws Exception {
+                                                     String implNodeName) throws Exception {
+        return readComponent(root, componentName, defaultImpl, implNodeName, true);
+    }
+
+    private <T extends DalComponent> T readComponent(Node root, String componentName, T defaultImpl,
+            String implNodeName, boolean autoInitialize) throws Exception {
         Node node = getChildNode(root, componentName);
         T component = defaultImpl;
 
@@ -127,7 +143,8 @@ public class DalConfigureFactory implements DalConfigConstants {
                 component = (T) Class.forName(implNode.getTextContent()).newInstance();
         }
 
-        component.initialize(getSettings(node));
+        if (autoInitialize)
+            component.initialize(getSettings(node));
         return component;
     }
 
@@ -180,7 +197,7 @@ public class DalConfigureFactory implements DalConfigConstants {
         return found;
     }
 
-    private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode, DalConnectionLocator locator) throws Exception {
+    private Map<String, DatabaseSet> readClusters(Node databaseSetsNode, DalConnectionLocator locator) throws Exception {
         Map<String, DatabaseSet> databaseSets = new HashMap<>();
 
         ClusterManager clusterManager = new ClusterManagerImpl(locator.getIntegratedConfigProvider());
@@ -191,6 +208,12 @@ public class DalConfigureFactory implements DalConfigConstants {
             databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator, getSettings(node)));
         }
 
+        return databaseSets;
+    }
+
+    private Map<String, DatabaseSet> readDatabaseSets(Node databaseSetsNode) throws Exception {
+        Map<String, DatabaseSet> databaseSets = new HashMap<>();
+
         List<Node> databaseSetList = getChildNodes(databaseSetsNode, DATABASE_SET);
         for (Node node : databaseSetList) {
             DatabaseSet databaseSet = readDatabaseSet(node);
@@ -200,15 +223,15 @@ public class DalConfigureFactory implements DalConfigConstants {
         return databaseSets;
     }
 
+    private String getDatabaseSetName(Node clusterNode) {
+        return getAttribute(clusterNode, ALIAS, getAttribute(clusterNode, NAME));
+    }
+
     private Cluster readCluster(Node clusterNode, ClusterManager clusterManager) throws Exception {
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new DalConfigException("empty cluster name");
         return clusterManager.getOrCreateCluster(name);
-    }
-
-    private String getDatabaseSetName(Node clusterNode) {
-        return getAttribute(clusterNode, ALIAS, getAttribute(clusterNode, NAME));
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {
@@ -239,7 +262,7 @@ public class DalConfigureFactory implements DalConfigConstants {
                     shardingStrategy, databases, idGenConfig, getSettings(databaseSetNode));
     }
 
-    private void tryAdaptToClusters(Map<String, DatabaseSet> databaseSets, DatabaseSetAdapter adapter) {
+    private void tryAdaptDatabaseSets(Map<String, DatabaseSet> databaseSets, DatabaseSetAdapter adapter) {
         for (Map.Entry<String, DatabaseSet> entry : new HashMap<>(databaseSets).entrySet())
             databaseSets.put(entry.getKey(), adapter.adapt(entry.getValue()));
     }

@@ -25,4 +25,8 @@ public interface EnvUtils {
         return false;
     }
 
+    default boolean isLocal() {
+        return false;
+    }
+
 }

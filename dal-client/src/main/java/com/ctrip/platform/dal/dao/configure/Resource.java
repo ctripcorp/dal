@@ -7,4 +7,6 @@ public interface Resource<T> {
 
     T getContent();
 
+    boolean isEmpty();
+
 }

@@ -11,7 +11,7 @@ import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 
 import javax.sql.DataSource;
 
-public class DefaultDalConnectionLocator implements DalConnectionLocator {
+public class DefaultDalConnectionLocator extends InjectableComponentSupport implements DalConnectionLocator {
 
     public static final String DATASOURCE_CONFIG_PROVIDER = "dataSourceConfigureProvider";
 
@@ -19,12 +19,14 @@ public class DefaultDalConnectionLocator implements DalConnectionLocator {
     private IntegratedConfigProvider provider;
 
     @Override
-    public void initialize(Map<String, String> settings) throws Exception {
+    protected void pInitialize(Map<String, String> settings) throws Exception {
         provider = new DefaultDataSourceConfigureProvider();
         if (settings.containsKey(DATASOURCE_CONFIG_PROVIDER)) {
             provider = (IntegratedConfigProvider) Class.forName(settings.get(DATASOURCE_CONFIG_PROVIDER)).newInstance();
         }
 
+        if (provider instanceof InjectableComponentSupport)
+            ((InjectableComponentSupport) provider).inject(getDatabaseSets());
         provider.initialize(settings);
 
         locator = new DataSourceLocator(provider);

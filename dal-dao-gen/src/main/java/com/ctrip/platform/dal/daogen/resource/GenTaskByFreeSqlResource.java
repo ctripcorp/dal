@@ -1,15 +1,16 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.entity.DatabaseSetEntry;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
+import com.ctrip.platform.dal.daogen.entity.Parameter;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
+import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
-import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
-import com.ctrip.platform.dal.daogen.utils.SqlBuilder;
+import com.ctrip.platform.dal.daogen.utils.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,7 +21,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,14 +37,14 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Status addTask(@Context HttpServletRequest request, @FormParam("id") int id,
-            @FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
-            @FormParam("class_name") String class_name, @FormParam("pojo_name") String pojo_name,
-            @FormParam("method_name") String method_name, @FormParam("crud_type") String crud_type,
-            @FormParam("sql_content") String sql_content, @FormParam("params") String params,
-            @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
-            @FormParam("scalarType") String scalarType, @FormParam("pagination") boolean pagination,
-            @FormParam("sql_style") String sql_style, // C#风格或者Java风格 @FormParam("length") boolean length,
-            @FormParam("hints") String hints) throws Exception {
+                          @FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
+                          @FormParam("class_name") String class_name, @FormParam("pojo_name") String pojo_name,
+                          @FormParam("method_name") String method_name, @FormParam("crud_type") String crud_type,
+                          @FormParam("sql_content") String sql_content, @FormParam("params") String params,
+                          @FormParam("version") int version, @FormParam("action") String action, @FormParam("comment") String comment,
+                          @FormParam("scalarType") String scalarType, @FormParam("pagination") boolean pagination,
+                          @FormParam("sql_style") String sql_style, // C#风格或者Java风格 @FormParam("length") boolean length,
+                          @FormParam("hints") String hints) throws Exception {
         try {
             GenTaskByFreeSql task = new GenTaskByFreeSql();
 
@@ -68,6 +72,11 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
                 task.setPagination(pagination);
                 // task.setLength(length);
                 task.setSql_style(sql_style);
+                if (set_name != null && set_name.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(set_name.substring(set_name.length() - 10))) {
+                    task.setMode_type(DbModeTypeEnum.Cluster.getDes());
+                } else {
+                    task.setMode_type(DbModeTypeEnum.Titan.getDes());
+                }
 
                 if ("简单类型".equals(pojo_name)) {
                     task.setPojoType("SimpleType");
@@ -114,8 +123,8 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
     @POST
     @Path("buildPagingSQL")
     public Status buildPagingSQL(@FormParam("db_name") String db_set_name, // dbset// name
-            @FormParam("sql_style") String sql_style, // C#风格或者Java风格
-            @FormParam("sql_content") String sql_content) {
+                                 @FormParam("sql_style") String sql_style, // C#风格或者Java风格
+                                 @FormParam("sql_content") String sql_content) {
         try {
             Status status = Status.OK();
             DatabaseSetEntry databaseSetEntry =
@@ -208,8 +217,9 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("sqlValidate")
     public Status validateSQL(@FormParam("db_name") String set_name, @FormParam("crud_type") String crud_type,
-            @FormParam("sql_content") String sql_content, @FormParam("params") String params,
-            @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues) {
+                              @FormParam("sql_content") String sql_content, @FormParam("params") String params,
+                              @FormParam("pagination") boolean pagination, @FormParam("mockValues") String mockValues,
+                              @FormParam("mode_type") String modeType) {
         Status status = Status.OK();
         Boolean containsQuestionMark = sql_content.indexOf("?") > -1;
 
@@ -278,9 +288,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
             int[] sqlTypes = getTypes(list);
             values = getValues(list);
 
-            DatabaseSetEntry databaseSetEntry =
-                    BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(set_name);
-            String dbName = databaseSetEntry.getConnectionString();
+            String dbName = AllInOneNameUtils.getAllInOneName(set_name, modeType);
 
             ValidateResult validResult = null;
             String resultPrefix = "The affected rows is ";

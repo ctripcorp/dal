@@ -121,7 +121,7 @@
                     </div>
                     <div class="row-fluid" id="connectionString-control">
                         <div class="control-group">
-                            <label class="control-label popup_label" style="width: 130px;">Clsuter Name:</label>
+                            <label class="control-label popup_label" style="width: 130px;">Cluster Name:</label>
                             <input id="connectionString" class="span8 input-sm" type="text" readonly="readonly">
                         </div>
                     </div>

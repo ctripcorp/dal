@@ -195,6 +195,11 @@
             return;
         }
 
+        if (record['mode_type'] == "dalcluster") {
+            alert("cluster DB 不支持修改");
+            return;
+        }
+
         $("#dbsetname2").val(record['name']);
         $("#provider2").val(record['provider']);
         $("#shardingStrategy2").val(record['shardingStrategy']);

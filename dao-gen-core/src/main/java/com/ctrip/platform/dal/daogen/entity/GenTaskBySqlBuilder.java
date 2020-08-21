@@ -4,12 +4,7 @@ import com.ctrip.platform.dal.dao.DalPojo;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.annotation.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.sql.Types;
 
@@ -106,6 +101,10 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
     @Column(name = "hints")
     @Type(value = Types.VARCHAR)
     private String hints;
+
+    @Column(name = "mode_type")
+    @Type(value = Types.VARCHAR)
+    private String mode_type;
 
 //    @Column(name = "length")
 //    @Type(value = Types.TINYINT)
@@ -321,6 +320,14 @@ public class GenTaskBySqlBuilder implements Comparable<GenTaskBySqlBuilder>, Dal
 
     public String getStr_approved() {
         return str_approved;
+    }
+
+    public String getMode_type() {
+        return mode_type;
+    }
+
+    public void setMode_type(String mode_type) {
+        this.mode_type = mode_type;
     }
 
     @Override

@@ -336,7 +336,7 @@
             }
             var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
             cblock($("body"));
-            $.get("/rest/groupdbset/getDbset?rand=" + Math.random() + "&daoFlag=true&groupId=" + project['dal_group_id']).done(function (data) {
+            $.get("/rest/groupdbset/getDbset?rand=" + Math.random() + "&daoFlag=true&groupId=" + project['dal_group_id'] + "&modeType=" + $("#index-dbmodetype").val()).done(function (data) {
                 if ($("#databases")[0] != undefined && $("#databases")[0].selectize != undefined) {
                     $("#databases")[0].selectize.clearOptions();
                 } else {

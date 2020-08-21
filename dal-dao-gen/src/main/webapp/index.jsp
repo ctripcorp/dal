@@ -1,5 +1,4 @@
 <%@page pageEncoding="UTF-8" %>
-<%@page import="com.ctrip.platform.dal.daogen.utils.Configuration" %>
 <%
     String version = Configuration.get("version");
     String dotnetDbMapping = Configuration.get("dotnet_db_mapping");
@@ -196,11 +195,20 @@
                     <span class="glyphicon glyphicon-question-sign"></span>
                 </a>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
-                        style="margin-top: 8px">&times;</button>
+                        style="margin-top: 8px">&times;
+                </button>
             </div>
-            <div class="modal-body"
-                 style="position: relative; overflow: auto; width: auto;">
+            <div class="modal-body" style="position: relative; overflow: auto; width: auto;">
                 <div class="steps step1 row-fluid">
+                    <div class="row-fluid">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;">DB Mode Type：</label>
+                            <select id="index-dbmodetype" class="span8">
+                                <option value="dalcluster" selected="selected">Dal Cluster</option>
+                                <option value="titankey">TiTanKey</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="row-fluid">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">逻辑数据库：</label>
@@ -218,7 +226,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row-fluid">
+                    <div class="row-fluid" id="sql-style-select-control">
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">选择SQL风格：</label>
                             <a style="margin-left: 8px;" href="#" class="ctip"
@@ -230,6 +238,17 @@
                                 <option value="csharp" selected="selected">C#风格(参数形式为@Name)</option>
                                 <option value="java">JAVA风格(参数形式为?)</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="row-fluid" id="sql-style-input-control" style="display: none">
+                        <div class="control-group">
+                            <label class="control-label popup_label" style="width: 130px;">选择SQL风格：</label>
+                            <a style="margin-left: 8px;" href="#" class="ctip"
+                               data-toggle="tooltip" data-placement="left" title="1、同一个Project下不允许C#和Java DAO共存<br/>
+                               2、新建DAO时，语言强制指定为该Project下第一个DAO的语言类型">
+                                <span class="glyphicon glyphicon-question-sign"></span>
+                            </a>
+                            <input id="sql_style_input" class="span8 input-sm" type="text" readonly="readonly" placeholder="JAVA风格(参数形式为?)">
                         </div>
                     </div>
                     <div class="row-fluid">

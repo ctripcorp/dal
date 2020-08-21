@@ -5,8 +5,8 @@ import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DatabaseType;
 import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
@@ -108,9 +108,9 @@ public class DalGroupDbResource {
     @POST
     @Path("add")
     public Status add(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbname") String dbname, @FormParam("comment") String comment,
-            @FormParam("gen_default_dbset") boolean gen_default_dbset,
-            @FormParam("dbmodetype_dbmanage") String dbModeType) throws Exception {
+                      @FormParam("dbname") String dbname, @FormParam("comment") String comment,
+                      @FormParam("gen_default_dbset") boolean gen_default_dbset,
+                      @FormParam("dbmodetype_dbmanage") String dbModeType) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -169,7 +169,7 @@ public class DalGroupDbResource {
     @POST
     @Path("update")
     public Status update(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbId") String dbId, @FormParam("comment") String comment) throws Exception {
+                         @FormParam("dbId") String dbId, @FormParam("comment") String comment) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -209,7 +209,7 @@ public class DalGroupDbResource {
     @POST
     @Path("delete")
     public Status delete(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbId") String dbId) throws Exception {
+                         @FormParam("dbId") String dbId) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -248,7 +248,7 @@ public class DalGroupDbResource {
     @POST
     @Path("transferdb")
     public Status transferdb(@Context HttpServletRequest request, @FormParam("groupId") String groupId,
-            @FormParam("dbId") String dbId) throws Exception {
+                             @FormParam("dbId") String dbId) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -340,6 +340,7 @@ public class DalGroupDbResource {
         }
 
         dbset.setGroupId(groupId);
+        dbset.setMode_type(modeType);
         int ret = BeanGetter.getDaoOfDatabaseSet().insertDatabaseSet(dbset);
         if (ret > 0 && DbModeTypeEnum.Titan.getDes().equals(modeType)) {
             genInsertDBSetEntry(dbset, dbname);

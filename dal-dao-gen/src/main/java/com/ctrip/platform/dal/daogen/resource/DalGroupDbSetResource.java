@@ -4,8 +4,8 @@ import com.ctrip.platform.dal.daogen.domain.Status;
 import com.ctrip.platform.dal.daogen.entity.*;
 import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.RequestUtil;
 
 import javax.annotation.Resource;
 import javax.inject.Singleton;
@@ -68,9 +68,16 @@ public class DalGroupDbSetResource {
     @Path("getDbset")
     @Produces(MediaType.APPLICATION_JSON)
     public List<DatabaseSet> getDatabaseSetByGroupId(@QueryParam("groupId") int groupId,
-            @QueryParam("daoFlag") boolean daoFlag, @QueryParam("modeType") String modeType) throws SQLException {
+                                                     @QueryParam("daoFlag") boolean daoFlag, @QueryParam("modeType") String modeType) throws SQLException {
         try {
-            List<DatabaseSet> dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
+            List<DatabaseSet> dbsets;
+            if (DbModeTypeEnum.No.getDes().equals(modeType)) {
+                return new ArrayList<>();
+            } else if (modeType == null) {
+                dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupId(groupId);
+            } else {
+                dbsets = BeanGetter.getDaoOfDatabaseSet().getAllDatabaseSetByGroupIdAndModeType(groupId, modeType);
+            }
             if (!daoFlag)
                 return dbsets;
 
@@ -113,8 +120,8 @@ public class DalGroupDbSetResource {
     @POST
     @Path("addDbset")
     public Status addDbset(@Context HttpServletRequest request, @FormParam("name") String name,
-            @FormParam("provider") String provider, @FormParam("shardingStrategy") String shardingStrategy,
-            @FormParam("groupId") int groupID, @FormParam("dbModeType") String dbModeType) throws Exception {
+                           @FormParam("provider") String provider, @FormParam("shardingStrategy") String shardingStrategy,
+                           @FormParam("groupId") int groupID, @FormParam("dbModeType") String dbModeType) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -167,8 +174,8 @@ public class DalGroupDbSetResource {
     @POST
     @Path("updateDbset")
     public Status updateDbset(@Context HttpServletRequest request, @FormParam("id") int iD,
-            @FormParam("name") String name, @FormParam("provider") String provider,
-            @FormParam("shardingStrategy") String shardingStrategy, @FormParam("groupId") int groupID)
+                              @FormParam("name") String name, @FormParam("provider") String provider,
+                              @FormParam("shardingStrategy") String shardingStrategy, @FormParam("groupId") int groupID)
             throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
@@ -232,7 +239,7 @@ public class DalGroupDbSetResource {
     @POST
     @Path("deletedbset")
     public Status deleteDbset(@Context HttpServletRequest request, @FormParam("groupId") int groupID,
-            @FormParam("dbsetId") int dbsetID) throws Exception {
+                              @FormParam("dbsetId") int dbsetID) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -273,9 +280,9 @@ public class DalGroupDbSetResource {
     @POST
     @Path("addDbsetEntry")
     public Status addDbsetEntry(@Context HttpServletRequest request, @FormParam("name") String name,
-            @FormParam("databaseType") String databaseType, @FormParam("sharding") String sharding,
-            @FormParam("connectionString") String connectionString, @FormParam("dbsetId") int dbsetID,
-            @FormParam("groupId") int groupID) throws Exception {
+                                @FormParam("databaseType") String databaseType, @FormParam("sharding") String sharding,
+                                @FormParam("connectionString") String connectionString, @FormParam("dbsetId") int dbsetID,
+                                @FormParam("groupId") int groupID) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -327,9 +334,9 @@ public class DalGroupDbSetResource {
     @POST
     @Path("updateDbsetEntry")
     public Status updateDbsetEntry(@Context HttpServletRequest request, @FormParam("id") int dbsetEntyID,
-            @FormParam("name") String name, @FormParam("databaseType") String databaseType,
-            @FormParam("sharding") String sharding, @FormParam("connectionString") String connectionString,
-            @FormParam("dbsetId") int dbsetID, @FormParam("groupId") int groupID) throws Exception {
+                                   @FormParam("name") String name, @FormParam("databaseType") String databaseType,
+                                   @FormParam("sharding") String sharding, @FormParam("connectionString") String connectionString,
+                                   @FormParam("dbsetId") int dbsetID, @FormParam("groupId") int groupID) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 
@@ -382,7 +389,7 @@ public class DalGroupDbSetResource {
     @POST
     @Path("deletedbsetEntry")
     public Status deleteDbsetEntry(@Context HttpServletRequest request, @FormParam("groupId") int groupID,
-            @FormParam("dbsetEntryId") int dbsetEntryID, @FormParam("dbsetId") int dbsetID) throws Exception {
+                                   @FormParam("dbsetEntryId") int dbsetEntryID, @FormParam("dbsetId") int dbsetID) throws Exception {
         try {
             String userNo = RequestUtil.getUserNo(request);
 

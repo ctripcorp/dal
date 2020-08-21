@@ -2,10 +2,11 @@ package com.ctrip.platform.dal.daogen.enums;
 
 public enum DbModeTypeEnum {
     Cluster(0, "dalcluster"),
-    Titan(1, "titankey");
+    Titan(1, "titankey"),
+    No(2, "no");
 
     DbModeTypeEnum(int code, String des) {
-        this.code =  code;
+        this.code = code;
         this.des = des;
     }
 

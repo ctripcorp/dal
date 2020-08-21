@@ -672,6 +672,24 @@
     window.render = new Render();
 
     $(function () {
+        //更改mode type 类型时的联动
+        $(document.body).on("change", "#index-dbmodetype", function () {
+            var modetype = $("#index-dbmodetype").val();
+            if (modetype == "no") {
+                $("#sql-style-select-control").show();
+                $("#sql-style-input-control").hide();
+            }else if (modetype == "dalcluster") {
+                $("#sql-style-select-control").hide();
+                $("#sql-style-input-control").show();
+                $("#sql_style").val("java");
+                window.ajaxutil.reload_dbsets();
+            }else if (modetype == "titankey") {
+                $("#sql-style-select-control").show();
+                $("#sql-style-input-control").hide();
+                window.ajaxutil.reload_dbsets();
+            }
+        });
+
         $(document.body).on("click", "#generate_code", function () {
             window.ajaxutil.generate_code();
         });

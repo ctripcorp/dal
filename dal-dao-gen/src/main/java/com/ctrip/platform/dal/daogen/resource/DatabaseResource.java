@@ -20,8 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -103,14 +101,14 @@ public class DatabaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("connectionTest")
     public Status connectionTest(@FormParam("dbtype") String dbtype, @FormParam("dbaddress") String dbaddress,
-            @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-            @FormParam("dbpassword") String dbpassword, @FormParam("dbName") String dbName) throws Exception {
+                                 @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+                                 @FormParam("dbpassword") String dbpassword, @FormParam("dbName") String dbName) throws Exception {
         Connection conn = null;
         ResultSet rs = null;
         try {
             Status status = Status.OK();
             try {
-                String info=String.format("connectionTest:%s,user:%s,pwd:%s,dbname:%s,dbtype:%s",dbaddress,dbpassword,dbuser,dbName,dbtype);
+                String info = String.format("connectionTest:%s,user:%s,pwd:%s,dbname:%s,dbtype:%s", dbaddress, dbpassword, dbuser, dbName, dbtype);
                 LoggerManager.getInstance().info(info);
                 conn = DataSourceUtil.getConnection(dbaddress, dbport, dbuser, dbpassword,
                         DatabaseType.valueOf(dbtype).getValue(), dbName);
@@ -149,7 +147,7 @@ public class DatabaseResource {
         try {
             Status status = Status.OK();
             String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
-            if (StringUtils.isNotBlank(className) && "SQLServer".equalsIgnoreCase(dbType)) {
+            if (StringUtils.isNotBlank(className) && "SQLServer".equalsIgnoreCase(dbType) || StringUtils.isEmpty(dbModeType)) {
                 Class<?> clazz = Class.forName(className);
                 DBInfoApi dbInfoApi = (DBInfoApi) clazz.getDeclaredConstructor().newInstance();
                 List<DBLevelInfo> dbLevelInfos = dbInfoApi.getDBLevelInfo(dbType);
@@ -264,7 +262,9 @@ public class DatabaseResource {
             Map<String, List<DbInfos>> nameBaseMapDbInfos = dbInfoApi.getAllDbInfos().stream().collect(Collectors.groupingBy(DbInfos::getDbNameBase));
             List<String> result = new ArrayList<>();
             for (DbInfos dbInfo : nameBaseMapDbInfos.get(namebase)) {
-                result.add(dbInfo.getDbName());
+                if (!(Integer.valueOf(1).equals(dbInfo.getIsShard()) && !dbInfo.getDbNameBase().equals(dbInfo.getDbName()))) {
+                    result.add(dbInfo.getDbName());
+                }
             }
             status.setInfo(mapper.writeValueAsString(result));
             return status;
@@ -302,18 +302,18 @@ public class DatabaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("addNewAllInOneDB")
     public Status addNewAllInOneDB(@Context HttpServletRequest request, @FormParam("dbtype") String dbtype,
-            @FormParam("allinonename") String allinonename, @FormParam("dbaddress") String dbaddress,
-            @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
-            @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
-            @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId,
-            @FormParam("gen_default_dbset") boolean isGenDefault) throws Exception {
+                                   @FormParam("allinonename") String allinonename, @FormParam("dbaddress") String dbaddress,
+                                   @FormParam("dbport") String dbport, @FormParam("dbuser") String dbuser,
+                                   @FormParam("dbpassword") String dbpassword, @FormParam("dbcatalog") String dbcatalog,
+                                   @FormParam("addtogroup") boolean addToGroup, @FormParam("dalgroup") String groupId,
+                                   @FormParam("gen_default_dbset") boolean isGenDefault) throws Exception {
         try {
             Status status = Status.OK();
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
             String modeType = "";
             if ("_dalcluster".equals(allinonename.substring(allinonename.length() - 11))) {
                 modeType = "dalcluster";
-            }else {
+            } else {
                 modeType = "titankey";
             }
 
@@ -460,10 +460,10 @@ public class DatabaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("updateDB")
     public Status updateDB(@Context HttpServletRequest request, @FormParam("id") int id,
-            @FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename,
-            @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
-            @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
-            @FormParam("dbcatalog") String dbcatalog) throws Exception {
+                           @FormParam("dbtype") String dbtype, @FormParam("allinonename") String allinonename,
+                           @FormParam("dbaddress") String dbaddress, @FormParam("dbport") String dbport,
+                           @FormParam("dbuser") String dbuser, @FormParam("dbpassword") String dbpassword,
+                           @FormParam("dbcatalog") String dbcatalog) throws Exception {
         try {
             Status status = Status.OK();
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
@@ -538,11 +538,9 @@ public class DatabaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("tables")
-    public String getTableNames(@QueryParam("db_name") String db_set) throws Exception {
+    public String getTableNames(@QueryParam("db_name") String db_set, @QueryParam("mode_type") String modeType) throws Exception {
         try {
-            DatabaseSetEntry databaseSetEntry =
-                    BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set);
-            String dbName = databaseSetEntry.getConnectionString();
+            String dbName = AllInOneNameUtils.getAllInOneName(db_set, modeType);
             List<String> results = DbUtils.getAllTableNames(dbName);
             java.util.Collections.sort(results);
             return mapper.writeValueAsString(results);
@@ -556,13 +554,12 @@ public class DatabaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("fields")
     public List<ColumnMetaData> getFieldNames(@QueryParam("db_name") String dbName,
-            @QueryParam("table_name") String tableName) throws Exception {
+                                              @QueryParam("table_name") String tableName,
+                                              @QueryParam("mode_type") String modeType) throws Exception {
         List<ColumnMetaData> fields = new ArrayList<>();
         Connection connection = null;
         try {
-            DatabaseSetEntry databaseSetEntry =
-                    BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName);
-            String db_Name = databaseSetEntry.getConnectionString();
+            String db_Name = AllInOneNameUtils.getAllInOneName(dbName, modeType);
             connection = DataSourceUtil.getConnection(db_Name);
             Set<String> indexedColumns = new HashSet<>();
             Set<String> primaryKeys = new HashSet<>();
@@ -745,8 +742,7 @@ public class DatabaseResource {
                     }
                     if (dbName != null && dbName.equalsIgnoreCase(dbnameInTitanKey)) {
                         status.setInfo("");
-                    }
-                    else {
+                    } else {
                         status.setInfo("dbName is not matching");
                     }
                 }

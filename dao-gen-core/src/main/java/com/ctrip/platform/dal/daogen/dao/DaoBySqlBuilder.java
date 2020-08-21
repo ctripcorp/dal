@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.SelectSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
+import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
 import java.sql.SQLException;
@@ -62,8 +63,11 @@ public class DaoBySqlBuilder extends BaseDao {
             Date date = new Date(entity.getUpdate_time().getTime());
             entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         }
-
-        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+        if (DbModeTypeEnum.Cluster.getDes().equals(entity.getMode_type())) {
+            entity.setAllInOneName(entity.getDatabaseSetName());
+        } else {
+            entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+        }
     }
 
     public int getVersionById(int id) throws SQLException {
@@ -78,7 +82,7 @@ public class DaoBySqlBuilder extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskBySqlBuilder>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id,db_name, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
+                "SELECT id, project_id,db_name, mode_type, table_name,class_name,method_name,sql_style,crud_type,fields,where_condition,sql_content,`generated`,version,update_user_no,update_time,comment,scalarType,pagination,orderby,approved,approveMsg,hints ");
         sb.append("FROM task_auto WHERE project_id=? order by id ");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();

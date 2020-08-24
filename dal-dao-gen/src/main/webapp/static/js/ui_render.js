@@ -138,16 +138,24 @@
         $(".step2-3-3").hide();
         $(".step2-3-4").hide();
         $(".step2-3-5").hide();
+        $.ajaxSettings.async = false;
         setLanguageType(current_project);
         $("#page1").attr('is_update', '0');
         $("#page1").modal({"backdrop": "static"});
         window.ajaxutil.reload_dbsets();
+        $.ajaxSettings.async = true;
     };
 
     function setLanguageType(id) {
         $.getJSON("rest/task/getLanguageType", {project_id: id}, function (data) {
             var sql_style = $("#sql_style");
             if (data.code == "OK") {
+                if (data.info == "csharp") {
+                    $("#index-modetype-cluster").hide();
+                    $("#index-dbmodetype").val("titankey");
+                }else {
+                    $("#index-modetype-cluster").show();
+                }
                 sql_style.val(data.info);
                 sql_style.attr("readonly", true);
                 sql_style.change(function () {
@@ -155,6 +163,9 @@
                 });
             }
             else if (data.code == "Error") {
+                $("#index-modetype-cluster").show();
+                $("#sql-style-select-control").show();
+                $("#sql-style-input-control").hide();
                 recoverLanguageType();
             }
         });
@@ -177,6 +188,14 @@
         if (record == null || record == '') {
             alert("请先选择一个 DAO");
             return;
+        }
+        //隐藏mode_type选择框，mode_type不允许修改
+        if (record.mode_type == "dalcluster") {
+            alert("cluster类型暂不支持修改");
+            return;
+        } else {
+            $("#index-modetype-cluster").hide();
+            $("#index-dbmodetype").val("titankey");
         }
         if (!haveUpdateDaoPermision()) {
             return;

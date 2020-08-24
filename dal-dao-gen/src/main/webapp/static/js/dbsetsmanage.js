@@ -252,7 +252,7 @@
             alert("cluster集群无需添加databaseSet Entry");
             return;
         }
-        window.ajaxutil.reload_dbservers(null, true, current_group, null);
+        window.ajaxutil.reload_dbservers(null, true, current_group, "titankey");
         $("#addDbsetEntryModal").modal({"backdrop": "static"});
     };
 

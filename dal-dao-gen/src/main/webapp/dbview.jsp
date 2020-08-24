@@ -69,7 +69,7 @@
                             <label class="control-label popup_label" style="width: 130px;">DB Mode Type:</label>
                             <select id="dbmodetype" class="span8">
                                 <option value="dalcluster" selected="selected" id="cluster-option">DAL Cluster(推荐)</option>
-                                <option value="titankey">TiTtanKey</option>
+                                <option value="titankey">TiTanKey</option>
                             </select>
                         </div>
                     </div>

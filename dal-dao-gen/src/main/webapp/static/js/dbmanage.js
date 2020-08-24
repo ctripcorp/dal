@@ -277,7 +277,7 @@
         $(document.body).on("click", "#save_db", function () {
             var db_name = $("#databases").val();
             var comment = $("#comment").val();
-            var dbmodetype_dbmanage = $("#dbmodetype_dbmanage");
+            var dbmodetype_dbmanage = $("#dbmodetype_dbmanage").val();
             if (dbmodetype_dbmanage == null || dbmodetype_dbmanage == '') {
                 $("#error_msg").html('请选择DB Mode Type!');
             }

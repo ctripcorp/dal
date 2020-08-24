@@ -156,6 +156,10 @@
             alert('请先选择一个 database');
             return;
         }
+        if (record.mode_type == 'dalcluster') {
+            alert('dalcluster 暂时不支持修改!');
+            return;
+        }
         cblock($("body"));
         $.post("/rest/db/getOneDB", {allinonename: record['dbname']}, function (data) {
             if (data.code == "OK") {
@@ -242,7 +246,7 @@
             }
             $("body").unblock();
         });
-    }
+    };
 
     Render.prototype = {
         render_layout: function (render_obj) {
@@ -566,11 +570,13 @@
                     dbName: dbcatalog
                 }, function (data) {
                     var allInOneNames = [];
-                    $.each($.parseJSON(data.info), function (index, value) {
-                        allInOneNames.push({
-                            id: value, title: value
+                    if (data.info != "null") {
+                        $.each($.parseJSON(data.info), function (index, value) {
+                            allInOneNames.push({
+                                id: value, title: value
+                            });
                         });
-                    });
+                    }
                     allinonename[0].selectize.clearOptions();
                     allinonename[0].selectize.addOption(allInOneNames);
                     allinonename[0].selectize.refreshOptions(false);

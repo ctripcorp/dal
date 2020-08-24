@@ -76,10 +76,26 @@ public class DalGroupDBDao extends BaseDao {
         return queryDao.query(builder, parameters, hints);
     }
 
+    public List<DalGroupDB> getGroupDBsByGroupAndModeType(int groupId, String modeType) throws SQLException {
+        if (modeType == null) {
+            return getGroupDBsByGroup(groupId);
+        }
+        FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName, mode_type FROM alldbs WHERE dal_group_id=? and mode_type =?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        parameters.set(i++, "mode_type", Types.VARCHAR, modeType);
+        builder.mapWith(dalGroupDBRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        return queryDao.query(builder, parameters, hints);
+    }
+
     public DalGroupDB getGroupDBByDbName(String dbname) throws SQLException {
         FreeSelectSqlBuilder<DalGroupDB> builder = new FreeSelectSqlBuilder<>(dbCategory);
         builder.setTemplate(
-                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE dbname=?");
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName, mode_type FROM alldbs WHERE dbname=?");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "dbname", Types.VARCHAR, dbname);
@@ -118,7 +134,7 @@ public class DalGroupDBDao extends BaseDao {
     }
 
     public int updateGroupDB(int id, String dbname, String db_address, String db_port, String db_user,
-            String db_password, String db_catalog, String db_providerName) throws Exception {
+                             String db_password, String db_catalog, String db_providerName) throws Exception {
         FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
         builder.setTemplate(
                 "UPDATE alldbs SET dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=? WHERE id=?");

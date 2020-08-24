@@ -204,8 +204,8 @@
                         <div class="control-group">
                             <label class="control-label popup_label" style="width: 130px;">DB Mode Type：</label>
                             <select id="index-dbmodetype" class="span8">
-                                <option value="dalcluster" selected="selected">Dal Cluster</option>
-                                <option value="titankey">TiTanKey</option>
+                                <option id="index-modetype-cluster" value="dalcluster">Dal Cluster</option>
+                                <option value="titankey"  selected="selected">TiTanKey</option>
                             </select>
                         </div>
                     </div>

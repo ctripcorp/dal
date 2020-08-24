@@ -147,7 +147,8 @@ public class DatabaseResource {
         try {
             Status status = Status.OK();
             String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
-            if (StringUtils.isNotBlank(className) && "SQLServer".equalsIgnoreCase(dbType) || StringUtils.isEmpty(dbModeType)) {
+//             && "SQLServer".equalsIgnoreCase(dbType) || StringUtils.isEmpty(dbModeType)
+            if (StringUtils.isNotBlank(className)) {
                 Class<?> clazz = Class.forName(className);
                 DBInfoApi dbInfoApi = (DBInfoApi) clazz.getDeclaredConstructor().newInstance();
                 List<DBLevelInfo> dbLevelInfos = dbInfoApi.getDBLevelInfo(dbType);
@@ -262,7 +263,7 @@ public class DatabaseResource {
             Map<String, List<DbInfos>> nameBaseMapDbInfos = dbInfoApi.getAllDbInfos().stream().collect(Collectors.groupingBy(DbInfos::getDbNameBase));
             List<String> result = new ArrayList<>();
             for (DbInfos dbInfo : nameBaseMapDbInfos.get(namebase)) {
-                if (!(Integer.valueOf(1).equals(dbInfo.getIsShard()) && !dbInfo.getDbNameBase().equals(dbInfo.getDbName()))) {
+                if (!(Integer.valueOf(1).equals(dbInfo.getIsShard()) && dbInfo.getDbNameBase().equals(dbInfo.getDbName()))) {
                     result.add(dbInfo.getDbName());
                 }
             }
@@ -505,7 +506,7 @@ public class DatabaseResource {
             if (groupDBs) {
                 if (-1 != groupId && groupId > 0) {
                     Set<String> sets = new HashSet<>();
-                    List<DalGroupDB> dbs = BeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroup(groupId);
+                    List<DalGroupDB> dbs = BeanGetter.getDaoOfDalGroupDB().getGroupDBsByGroupAndModeType(groupId, dbModeType);
                     for (DalGroupDB db : dbs) {
                         sets.add(db.getDbname());
                     }

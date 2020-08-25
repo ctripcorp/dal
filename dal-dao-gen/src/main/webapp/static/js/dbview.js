@@ -21,8 +21,21 @@
         });
     };
 
+    function refInputs() {
+        $("#dbtype").val("no");
+        $("#dbnamebase").val("");
+        $("#dbmodetype").val("dalcluster");
+        $("#dbcatalog").val("");
+        $("#dbaddress").val("");
+        $("#dbport").val("");
+        $("#dbuser").val("");
+        $("#dbcatalog").val("");
+        $("#dbpassword").val("");
+    }
+
     //添加DB按钮，填入type之后检索所有db名称（添加dbmodetype参数）
     function addDB() {
+        refInputs();
         $.get("/rest/project/userGroups", {root: true, rand: Math.random()}).done(function (data) {
             if (data.length > 0 && data[0]['id'] > 0) {
                 $("#error_msg").html('');
@@ -671,6 +684,15 @@
             var dbcatalog = $("#dbcatalog");
             if (dbmodetype == "dalcluster") {
                 $("#dbcatalog-control").hide();
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: "MySQL",
+                    dbName: dbnamebase
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
             } else {
                 $("#dbcatalog-control").show();
                 $.post("/rest/db/getShardsByNameBase", {

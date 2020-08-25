@@ -111,8 +111,13 @@
         });
         return havePermision;
     };
+    function refInputs() {
+        $("#index-dbmodetype").val("titankey");
+        $("#databases").val("");
+    }
 
     var addDAO = function () {
+        refInputs();
         var current_project = w2ui['grid'].current_project;
         if (current_project == null || current_project == '') {
             alert('请先选择 Project');

@@ -16,4 +16,12 @@ public class AllInOneNameUtils {
             return databaseSetEntry.getConnectionString();
         }
     }
+
+    public static String getAllInOneNameByNameOnly (String dbName) throws SQLException {
+        if (dbName != null && dbName.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(dbName.substring(dbName.length() - 10))) {
+            return dbName;
+        } else {
+            return BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(dbName).getConnectionString();
+        }
+    }
 }

@@ -1,27 +1,45 @@
 package com.ctrip.platform.dal.daogen.resource;
 
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
 
 public class FileResourceTest {
 
-    private static volatile FileResource fileResource;
+    @InjectMocks
+    private FileResource fileResource;
 
-    static {
-        fileResource = new FileResource();
-    }
+    @Mock
+    private BufferedReader bufferedReader;
 
-    @Test
-    public void getClusterDatabaseSet() {
-        String s = "myteststring";
-        int first = s.indexOf("t");
-        System.out.println(first);
-        System.out.println(s.indexOf("t", first + 1));
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void isDalCluster() {
-        Assert.assertEquals(true, fileResource.isDalCluster("bbz_dalcluster"));
-        Assert.assertEquals(false, fileResource.isDalCluster("clustername"));
+        assertEquals(true, fileResource.isDalCluster("bbz_dalcluster"));
+        assertEquals(false, fileResource.isDalCluster("clustername"));
+    }
+
+    @Test
+    public void getClusterDatabaseSetTest() throws IOException {
+        String s = "\t\t<databaseSet name=\"corporderprocesslogshardbasedb_dalcluster\" provider=\"sqlserver\"/>";
+        String s1 = "\t\t<databasseSet name=\"corporderprocesslogshardbasedb_dalcluster\" provider=\"sqlserver\"/>";
+        Mockito.when(bufferedReader.readLine()).thenReturn("next");
+
+        String result = fileResource.getClusterDatabaseSet(s, bufferedReader);
+
+        assertEquals("\t\t<cluster name=\"corporderprocesslogshardbasedb_dalcluster\" />", result);
+        assertEquals(s1, fileResource.getClusterDatabaseSet(s1, bufferedReader));
     }
 }

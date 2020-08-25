@@ -205,7 +205,7 @@
                             <label class="control-label popup_label" style="width: 130px;">DB Mode Type：</label>
                             <select id="index-dbmodetype" class="span8">
                                 <option id="index-modetype-cluster" value="dalcluster">Dal Cluster</option>
-                                <option value="titankey"  selected="selected">TiTanKey</option>
+                                <option value="titankey" selected="selected">TiTanKey</option>
                             </select>
                         </div>
                     </div>
@@ -235,8 +235,8 @@
                                 <span class="glyphicon glyphicon-question-sign"></span>
                             </a>
                             <select id="sql_style" class="span8">
-                                <option value="csharp" selected="selected">C#风格(参数形式为@Name)</option>
-                                <option value="java">JAVA风格(参数形式为?)</option>
+                                <option value="csharp">C#风格(参数形式为@Name)</option>
+                                <option value="java" selected="selected">JAVA风格(参数形式为?)</option>
                             </select>
                         </div>
                     </div>
@@ -248,7 +248,8 @@
                                2、新建DAO时，语言强制指定为该Project下第一个DAO的语言类型">
                                 <span class="glyphicon glyphicon-question-sign"></span>
                             </a>
-                            <input id="sql_style_input" class="span8 input-sm" type="text" readonly="readonly" placeholder="JAVA风格(参数形式为?)">
+                            <input id="sql_style_input" class="span8 input-sm" type="text" readonly="readonly"
+                                   placeholder="JAVA风格(参数形式为?)">
                         </div>
                     </div>
                     <div class="row-fluid">

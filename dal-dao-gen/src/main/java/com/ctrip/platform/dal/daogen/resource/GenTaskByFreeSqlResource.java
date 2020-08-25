@@ -6,7 +6,6 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskByFreeSql;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Parameter;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
-import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
 import com.ctrip.platform.dal.daogen.sql.validate.SQLValidation;
 import com.ctrip.platform.dal.daogen.sql.validate.ValidateResult;
@@ -72,11 +71,7 @@ public class GenTaskByFreeSqlResource extends ApproveResource {
                 task.setPagination(pagination);
                 // task.setLength(length);
                 task.setSql_style(sql_style);
-                if (set_name != null && set_name.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(set_name.substring(set_name.length() - 10))) {
-                    task.setMode_type(DbModeTypeEnum.Cluster.getDes());
-                } else {
-                    task.setMode_type(DbModeTypeEnum.Titan.getDes());
-                }
+                task.setMode_type(DalClusterUtils.getModeTypeByDbBaseName(set_name));
 
                 if ("简单类型".equals(pojo_name)) {
                     task.setPojoType("SimpleType");

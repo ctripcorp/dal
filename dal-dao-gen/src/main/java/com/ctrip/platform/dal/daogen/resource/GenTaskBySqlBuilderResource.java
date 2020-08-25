@@ -6,7 +6,6 @@ import com.ctrip.platform.dal.daogen.entity.GenTaskBySqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.CurrentLanguage;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
-import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.host.AbstractParameterHost;
 import com.ctrip.platform.dal.daogen.host.java.JavaColumnNameResultSetExtractor;
 import com.ctrip.platform.dal.daogen.host.java.JavaParameterHost;
@@ -77,11 +76,7 @@ public class GenTaskBySqlBuilderResource extends ApproveResource {
                 task.setOrderby(orderby);
                 task.setHints(hints);
                 // task.setLength(length);
-                if (set_name != null && set_name.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(set_name.substring(set_name.length() - 10))) {
-                    task.setMode_type(DbModeTypeEnum.Cluster.getDes());
-                } else {
-                    task.setMode_type(DbModeTypeEnum.Titan.getDes());
-                }
+                task.setMode_type(DalClusterUtils.getModeTypeByDbBaseName(set_name));
 
                 if (needApproveTask(project_id, user.getId())) {
                     task.setApproved(1);

@@ -311,12 +311,7 @@ public class DatabaseResource {
         try {
             Status status = Status.OK();
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
-            String modeType = "";
-            if ("_dalcluster".equals(allinonename.substring(allinonename.length() - 11))) {
-                modeType = "dalcluster";
-            } else {
-                modeType = "titankey";
-            }
+            String modeType = "_dalcluster".equals(allinonename.substring(allinonename.length() - 11)) ? DbModeTypeEnum.Cluster.getDes() : DbModeTypeEnum.Titan.getDes();
 
             if (allDbDao.getGroupDBByDbName(allinonename) != null) {
                 status = Status.ERROR();
@@ -638,12 +633,7 @@ public class DatabaseResource {
         List<String> tables;
         List<StoredProcedure> sps;
         try {
-            String dbName;
-            if (setName != null && setName.length() > 11 && DbModeTypeEnum.Cluster.getDes().equals(setName.substring(setName.length() - 10))) {
-                dbName = setName;
-            } else {
-                dbName = BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(setName).getConnectionString();
-            }
+            String dbName = AllInOneNameUtils.getAllInOneNameByNameOnly(setName);
             views = DbUtils.getAllViewNames(dbName);
             tables = DbUtils.getAllTableNames(dbName);
             sps = DbUtils.getAllSpNames(dbName);

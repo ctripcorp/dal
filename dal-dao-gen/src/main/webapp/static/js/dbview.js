@@ -737,6 +737,7 @@
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
             var error_msg = $("#error_msg");
+            var dbcatalog = $("#dbcatalog").val();
 
             if (dbType == "no") {
                 error_msg.html("请选择数据库类型");
@@ -753,6 +754,10 @@
             } else {
                 $("#dbmodetype").val("titankey");
                 dbModeType = "titankey";
+            }
+            if (dbModeType == "titankey" && (dbcatalog == null || dbcatalog.length == 0)) {
+                error_msg.html("请选择DB Catalog");
+                return;
             }
             if (dbAddress == null || dbAddress.length == 0) {
                 error_msg.html("请选择数据库");

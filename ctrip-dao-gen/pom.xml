@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>dal-client-trip-parent</artifactId>
-        <version>2.1.11</version>
+        <version>2.1.12</version>
     </parent>
     <groupId>com.ctrip.framework.dal</groupId>
     <artifactId>ctrip-dao-gen</artifactId>
@@ -15,7 +15,7 @@
     <properties>
         <environment>local</environment>
         <framework-bom.version>4.19.0</framework-bom.version>
-        <dal-dao-gen.version>2.1.11.1-SNAPSHOT</dal-dao-gen.version>
+        <dal-dao-gen.version>2.1.12</dal-dao-gen.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <cas.version>3.1.15-30Days-no-jsessionid</cas.version>
         <credis.version>3.1.11</credis.version>

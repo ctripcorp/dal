@@ -275,7 +275,8 @@
         $.get("/rest/db/dbs", {
             groupDBs: true,
             groupId: w2ui['grid'].current_group,
-            rand: Math.random()
+            rand: Math.random(),
+            dbmodetype: "titankey"
         }).done(function (data) {
             if ($("#databases2")[0] != undefined && $("#databases2")[0].selectize != undefined) {
                 $("#databases2")[0].selectize.clearOptions();
@@ -508,7 +509,7 @@
                     type: 'text'
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     type: 'text'
                 }, {
                     field: 'provider',
@@ -527,7 +528,7 @@
                     resizable: true
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     size: '10%',
                     sortable: true,
                     resizable: true
@@ -690,8 +691,8 @@
             var dbsetname = $("#dbsetname").val();
             var provider = $("#provider").val();
             var dbmodetype = $("#dbmodetype_dbsetmanage").val();
-            if (dbmodetype == null || dbmodetype.length ==0) {
-                $("#adddbset_error_msg").html("请选择DB Mode Type!");
+            if (dbmodetype == "no") {
+                $("#adddbset_error_msg").html("请选择DB Mode!");
                 return;
             }else {
                 if (dbmodetype == "dalcluster") {

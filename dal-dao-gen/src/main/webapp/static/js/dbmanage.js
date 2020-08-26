@@ -24,7 +24,12 @@
         });
     };
 
+    function refOption() {
+        $("#dbmodetype_dbmanage").val("no");
+    };
+
     var addDB = function () {
+        refOption();
         $("#error_msg").html('');
         var current_group = w2ui['grid'].current_group;
         if (current_group == null || current_group == '') {
@@ -231,7 +236,7 @@
                     type: 'text'
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     type: 'text'
                 }, {
                     field: 'comment',
@@ -246,7 +251,7 @@
                     attr: 'align=center'
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     size: '30%',
                     sortable: true,
                     attr: 'align=center'
@@ -278,8 +283,9 @@
             var db_name = $("#databases").val();
             var comment = $("#comment").val();
             var dbmodetype_dbmanage = $("#dbmodetype_dbmanage").val();
-            if (dbmodetype_dbmanage == null || dbmodetype_dbmanage == '') {
-                $("#error_msg").html('请选择DB Mode Type!');
+            if (dbmodetype_dbmanage == "no") {
+                $("#error_msg").html('请选择DB Mode!');
+                return;
             }
             if (db_name == null || db_name == '') {
                 $("#error_msg").html('请选择DB!');

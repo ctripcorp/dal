@@ -157,17 +157,17 @@
             <div class="modal-body">
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">DB Mode Type:</label>
+                        <label class="control-label popup_label" style="width: 130px;">DB Mode:</label>
                         <select id="dbmodetype_dbsetmanage" class="span8">
                             <option value="no" selected="selected">请选择</option>
                             <option value="dalcluster">DAL Cluster</option>
-                            <option value="titankey">TiTtanKey</option>
+                            <option value="titankey">Titan Key</option>
                         </select>
                     </div>
                 </div>
                 <div class="row-fluid" id="dbsetname-select-control" style="display: none">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">databaseSet 名称:</label>
+                        <label class="control-label popup_label" style="width: 130px;">cluster 名称:</label>
                         <select id="dbsetname-select" class="span8"></select>
                     </div>
                 </div>

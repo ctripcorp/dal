@@ -311,7 +311,7 @@ public class DatabaseResource {
         try {
             Status status = Status.OK();
             DalGroupDBDao allDbDao = BeanGetter.getDaoOfDalGroupDB();
-            String modeType = "_dalcluster".equals(allinonename.substring(allinonename.length() - 11)) ? DbModeTypeEnum.Cluster.getDes() : DbModeTypeEnum.Titan.getDes();
+            String modeType = DalClusterUtils.getModeTypeByDbBaseName(allinonename);
 
             if (allDbDao.getGroupDBByDbName(allinonename) != null) {
                 status = Status.ERROR();

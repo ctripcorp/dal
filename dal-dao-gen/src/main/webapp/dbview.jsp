@@ -66,11 +66,11 @@
 
                     <div class="row-fluid" id="dbmodetype-control">
                         <div class="control-group">
-                            <label class="control-label popup_label" style="width: 130px;">DB Mode Type:</label>
+                            <label class="control-label popup_label" style="width: 130px;">DB Mode:</label>
                             <select id="dbmodetype" class="span8">
                                 <option value="dalcluster" selected="selected" id="cluster-option">DAL Cluster(推荐)
                                 </option>
-                                <option value="titankey">TiTanKey</option>
+                                <option value="titankey">Titan Key</option>
                             </select>
                         </div>
                     </div>

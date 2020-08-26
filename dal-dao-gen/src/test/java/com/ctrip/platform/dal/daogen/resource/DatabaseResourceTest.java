@@ -62,7 +62,7 @@ public class DatabaseResourceTest {
     }
 
     @Test
-    public void getBasesetNameListTest() throws Exception {
+    public void getBaseSetNameListTest() throws Exception {
         PowerMockito.mockStatic(BeanGetter.class);
         PowerMockito.when(BeanGetter.getDaoOfDalGroupDB()).thenReturn(dalGroupDBDao);
         Mockito.when(dalGroupDBDao.getDalClusterGroupDbsByGroupId(12, "dalcluster"))

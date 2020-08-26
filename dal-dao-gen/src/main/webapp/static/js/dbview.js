@@ -344,7 +344,7 @@
                     type: 'text'
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     type: 'text'
                 }, {
                     field: 'db_providerName',
@@ -367,7 +367,7 @@
                     resizable: true
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     size: '8%',
                     attr: 'align=center',
                     sortable: true,
@@ -826,17 +826,19 @@
             var dbmodetype = $("#dbmodetype").val();
             var dbnamebase = $("#dbnamebase").val();
 
-            if (dbnamebase == null || dbnamebase.length == 0) {
-                error_msg.html("请选择DB Name Base");
-                return;
-            }
+            if (dbType == "MySQL") {
+                if (dbnamebase == null || dbnamebase.length == 0) {
+                    error_msg.html("请选择DB Name Base");
+                    return;
+                }
 
-            if (dbmodetype == null || dbmodetype.length == 0) {
-                error_msg.html("请选择DB Mode");
-                return;
-            } else if (dbmodetype == "dalcluster") {
-                dbCatalog = dbnamebase;
-                all_In_One_Name = $("#connectionString").val();
+                if (dbmodetype == null || dbmodetype.length == 0) {
+                    error_msg.html("请选择DB Mode");
+                    return;
+                } else if (dbmodetype == "dalcluster") {
+                    dbCatalog = dbnamebase;
+                    all_In_One_Name = $("#connectionString").val();
+                }
             }
 
             if (dbType == "no") {

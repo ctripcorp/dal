@@ -518,7 +518,7 @@
                     resizable: true
                 }, {
                     field: 'mode_type',
-                    caption: 'DB Mode Type',
+                    caption: 'DB Mode',
                     size: '8%',
                     sortable: true,
                     resizable: true

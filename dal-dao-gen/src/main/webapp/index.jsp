@@ -202,10 +202,10 @@
                 <div class="steps step1 row-fluid">
                     <div class="row-fluid">
                         <div class="control-group">
-                            <label class="control-label popup_label" style="width: 130px;">DB Mode Type：</label>
+                            <label class="control-label popup_label" style="width: 130px;">DB Mode：</label>
                             <select id="index-dbmodetype" class="span8">
                                 <option id="index-modetype-cluster" value="dalcluster">Dal Cluster</option>
-                                <option value="titankey" selected="selected">TiTanKey</option>
+                                <option value="titankey" selected="selected">Titan Key</option>
                             </select>
                         </div>
                     </div>

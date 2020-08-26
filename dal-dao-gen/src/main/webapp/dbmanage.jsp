@@ -47,11 +47,11 @@
             <div class="modal-body">
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 90px;">Mode Type:</label>
+                        <label class="control-label popup_label" style="width: 90px;">DB Mode:</label>
                         <select id="dbmodetype_dbmanage" class="span8">
                             <option value="no" selected="selected">请选择</option>
                             <option value="dalcluster">DAL Cluster</option>
-                            <option value="titankey">TiTtanKey</option>
+                            <option value="titankey">Titan Key</option>
                         </select>
                     </div>
                 </div>

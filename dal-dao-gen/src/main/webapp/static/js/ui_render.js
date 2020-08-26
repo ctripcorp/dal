@@ -152,28 +152,60 @@
     };
 
     function setLanguageType(id) {
+        $.ajaxSettings.async = false;
+        var flag = false;
+        var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
+        if (selectedProject == undefined || selectedProject.length < 1 || selectedProject[0] == -1) {
+            alert("请单击一个项目，再操作！");
+            return;
+        }
+        var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
+        $.get("/rest/groupdbset/getDbset",{rand: Math.random(), daoFlag: true, groupId: project['dal_group_id'], modeType: "dalcluster"},
+            function (data) {
+            if (data.length > 0) {
+                flag = true;
+            }
+        });
         $.getJSON("rest/task/getLanguageType", {project_id: id}, function (data) {
             var sql_style = $("#sql_style");
             if (data.code == "OK") {
                 if (data.info == "csharp") {
                     $("#index-modetype-cluster").hide();
+                    $("#sql-style-input-control").hide();
+                    $("#sql-style-select-control").show();
                     $("#index-dbmodetype").val("titankey");
-                }else {
+                }else if (flag){
+                    $("#sql-style-input-control").show();
+                    $("#sql-style-select-control").hide();
                     $("#index-modetype-cluster").show();
+                    $("#index-dbmodetype").val("dalcluster");
+                } else {
+                    $("#sql-style-input-control").hide();
+                    $("#sql-style-select-control").show();
+                    $("#index-modetype-cluster").hide();
+                    $("#index-dbmodetype").val("titankey");
                 }
                 sql_style.val(data.info);
                 sql_style.attr("readonly", true);
                 sql_style.change(function () {
                     sql_style.val(data.info);
                 });
-            }
-            else if (data.code == "Error") {
-                $("#index-modetype-cluster").show();
-                $("#sql-style-select-control").show();
-                $("#sql-style-input-control").hide();
+            } else if (data.code == "Error") {
+                if (flag) {
+                    $("#sql-style-input-control").show();
+                    $("#sql-style-select-control").hide();
+                    $("#index-modetype-cluster").show();
+                    $("#index-dbmodetype").val("dalcluster");
+                } else {
+                    $("#index-modetype-cluster").hide();
+                    $("#sql-style-select-control").show();
+                    $("#sql-style-input-control").hide();
+                    $("#index-dbmodetype").val("titankey");
+                }
                 recoverLanguageType();
             }
         });
+        $.ajaxSettings.async = true;
     }
 
     function recoverLanguageType() {

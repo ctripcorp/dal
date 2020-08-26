@@ -30,11 +30,22 @@ public class DalGroupDBDao extends BaseDao {
         FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT a.id,a.dbname,a.dal_group_id,a.db_address,a.db_port,a.db_user,a.db_password,a.db_catalog,a.db_providerName,b.group_name as comment ");
+                "SELECT a.id,a.dbname,a.dal_group_id,a.db_address,a.db_port,a.db_user,a.db_password,a.db_catalog,a.db_providerName,a.mode_type,b.group_name as comment ");
         sb.append("FROM alldbs a LEFT JOIN dal_group b ON b.id = a.dal_group_id ");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();
         builder.mapWith(dalGroupDBRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        return queryDao.query(builder, parameters, hints);
+    }
+
+    public List<String> getDbAllinOneNamesByModeType(String modeType) throws SQLException {
+        FreeSelectSqlBuilder<List<String>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate("SELECT dbname FROM alldbs where mode_type = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "mode_type", Types.VARCHAR, modeType);
+        builder.mapWith(dalGroupDBRowMapper).simpleType();
         DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         return queryDao.query(builder, parameters, hints);
     }
@@ -56,7 +67,7 @@ public class DalGroupDBDao extends BaseDao {
     public List<DalGroupDB> getGroupDBsByGroup(int groupId) throws SQLException {
         FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         builder.setTemplate(
-                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE dal_group_id=?");
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName, mode_type FROM alldbs WHERE dal_group_id=?");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
@@ -65,10 +76,26 @@ public class DalGroupDBDao extends BaseDao {
         return queryDao.query(builder, parameters, hints);
     }
 
+    public List<DalGroupDB> getGroupDBsByGroupAndModeType(int groupId, String modeType) throws SQLException {
+        if (modeType == null) {
+            return getGroupDBsByGroup(groupId);
+        }
+        FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName, mode_type FROM alldbs WHERE dal_group_id=? and mode_type =?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        parameters.set(i++, "mode_type", Types.VARCHAR, modeType);
+        builder.mapWith(dalGroupDBRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        return queryDao.query(builder, parameters, hints);
+    }
+
     public DalGroupDB getGroupDBByDbName(String dbname) throws SQLException {
         FreeSelectSqlBuilder<DalGroupDB> builder = new FreeSelectSqlBuilder<>(dbCategory);
         builder.setTemplate(
-                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName FROM alldbs WHERE dbname=?");
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName, mode_type FROM alldbs WHERE dbname=?");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "dbname", Types.VARCHAR, dbname);
@@ -86,6 +113,19 @@ public class DalGroupDBDao extends BaseDao {
         return client.query(builder, hints);
     }
 
+    public List<DalGroupDB> getDalClusterGroupDbsByGroupId(int groupId, String dbModeType) throws SQLException {
+        FreeSelectSqlBuilder<List<DalGroupDB>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, dbname, comment,dal_group_id, db_address, db_port, db_user, db_password, db_catalog, db_providerName, mode_type FROM alldbs WHERE dal_group_id=? and mode_type=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        parameters.set(i++, "mode_type", Types.VARCHAR, dbModeType);
+        builder.mapWith(dalGroupDBRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        return queryDao.query(builder, parameters, hints);
+    }
+
     public int insertDalGroupDB(DalGroupDB groupDb) throws SQLException {
         if (null == groupDb)
             return 0;
@@ -94,7 +134,7 @@ public class DalGroupDBDao extends BaseDao {
     }
 
     public int updateGroupDB(int id, String dbname, String db_address, String db_port, String db_user,
-            String db_password, String db_catalog, String db_providerName) throws Exception {
+                             String db_password, String db_catalog, String db_providerName) throws Exception {
         FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
         builder.setTemplate(
                 "UPDATE alldbs SET dbname=?, db_address=?, db_port=?, db_user=?, db_password=?, db_catalog=?, db_providerName=? WHERE id=?");
@@ -129,6 +169,19 @@ public class DalGroupDBDao extends BaseDao {
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        parameters.set(i++, "id", Types.INTEGER, id);
+        DalHints hints = DalHints.createIfAbsent(null);
+        return queryDao.update(builder, parameters, hints);
+    }
+
+    public int updateGroupDB(int id, Integer groupId, String comment, String modeType) throws SQLException {
+        FreeUpdateSqlBuilder builder = new FreeUpdateSqlBuilder(dbCategory);
+        builder.setTemplate("UPDATE alldbs SET dal_group_id=?, comment=?, mode_type=? WHERE id=?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "dal_group_id", Types.INTEGER, groupId);
+        parameters.set(i++, "comment", Types.VARCHAR, comment);
+        parameters.set(i++, "mode_type", Types.VARCHAR, modeType);
         parameters.set(i++, "id", Types.INTEGER, id);
         DalHints hints = DalHints.createIfAbsent(null);
         return queryDao.update(builder, parameters, hints);

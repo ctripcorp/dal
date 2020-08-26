@@ -157,9 +157,24 @@
             <div class="modal-body">
                 <div class="row-fluid">
                     <div class="control-group">
-                        <label class="control-label popup_label" style="width: 130px;">databaseSet 名称:</label> <input
-                            id="dbsetname" class="span8 input-sm" type="text"
-                            style="height: 30px">
+                        <label class="control-label popup_label" style="width: 130px;">DB Mode:</label>
+                        <select id="dbmodetype_dbsetmanage" class="span8">
+                            <option value="no" selected="selected">请选择</option>
+                            <option value="dalcluster">DAL Cluster</option>
+                            <option value="titankey">Titan Key</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row-fluid" id="dbsetname-select-control" style="display: none">
+                    <div class="control-group">
+                        <label class="control-label popup_label" style="width: 130px;">cluster 名称:</label>
+                        <select id="dbsetname-select" class="span8"></select>
+                    </div>
+                </div>
+                <div class="row-fluid" id="dbsetname-input-control">
+                    <div class="control-group">
+                        <label class="control-label popup_label" style="width: 130px;">databaseSet 名称:</label>
+                        <input id="dbsetname" class="span8 input-sm" type="text" style="height: 30px;">
                     </div>
                 </div>
                 <div class="row-fluid">
@@ -170,13 +185,13 @@
                             <option value="sqlProvider">SQLServer</option>
                             <option value="mySqlProvider">MySQL</option>
                         </select>
+                        <input id="dbtype-dbset-manege" value="MySQL" class="span8 input-sm" type="text" style="height: 30px;display: none" readonly="readonly">
                     </div>
                 </div>
-                <div class="row-fluid">
+                <div class="row-fluid" id="strategy-dbset-manage">
                     <div class="control-group">
                         <label class="control-label popup_label" style="width: 130px;">shardingStrategy:</label>
-                        <textarea id="shardingStrategy" class="span12 popup_text"
-                                  cols="4"></textarea>
+                        <textarea id="shardingStrategy" class="span12 popup_text" cols="4"></textarea>
                     </div>
                 </div>
             </div>

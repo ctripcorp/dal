@@ -265,7 +265,7 @@
                 post_task_table_view_sp(postData);
             }
         },
-        reload_dbservers: function (callback, groupDBs, groupId) {
+        reload_dbservers: function (callback, groupDBs, groupId, dbmodetype) {
             cblock($("body"));
 
             var url = "/rest/db/dbs?rand=" + Math.random();
@@ -276,6 +276,9 @@
                 url += "&groupId=" + groupId;
             } else {
                 url += "&groupId=-1";
+            }
+            if (dbmodetype != null && dbmodetype != '') {
+                url += "&dbmodetype=" + dbmodetype;
             }
             $.get(url).done(function (data) {
                 // $("select[id$=servers] > option:gt(0)").remove();
@@ -333,7 +336,7 @@
             }
             var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
             cblock($("body"));
-            $.get("/rest/groupdbset/getDbset?rand=" + Math.random() + "&daoFlag=true&groupId=" + project['dal_group_id']).done(function (data) {
+            $.get("/rest/groupdbset/getDbset?rand=" + Math.random() + "&daoFlag=true&groupId=" + project['dal_group_id'] + "&modeType=" + $("#index-dbmodetype").val()).done(function (data) {
                 if ($("#databases")[0] != undefined && $("#databases")[0].selectize != undefined) {
                     $("#databases")[0].selectize.clearOptions();
                 } else {

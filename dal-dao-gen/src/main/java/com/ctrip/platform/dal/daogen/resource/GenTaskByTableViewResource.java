@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.daogen.resource;
 
 import com.ctrip.platform.dal.daogen.domain.Status;
-import com.ctrip.platform.dal.daogen.entity.*;
+import com.ctrip.platform.dal.daogen.entity.DalApi;
+import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.enums.DatabaseCategory;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
-import com.ctrip.platform.dal.daogen.utils.DbUtils;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
+import com.ctrip.platform.dal.daogen.utils.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Resource;
@@ -28,14 +28,14 @@ public class GenTaskByTableViewResource extends ApproveResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Status addTask(@Context HttpServletRequest request, @FormParam("id") int id,
-            @FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
-            @FormParam("table_names") String table_names, @FormParam("view_names") String view_names,
-            @FormParam("sp_names") String sp_names, @FormParam("prefix") String prefix,
-            @FormParam("suffix") String suffix, @FormParam("cud_by_sp") boolean cud_by_sp,
-            @FormParam("pagination") boolean pagination, @FormParam("version") int version,
-            @FormParam("action") String action, @FormParam("comment") String comment,
-            @FormParam("sql_style") String sql_style, // C#风格或者Java风格 @FormParam("length") boolean length,
-            @FormParam("api_list") String api_list) throws Exception {
+                          @FormParam("project_id") int project_id, @FormParam("db_name") String set_name,
+                          @FormParam("table_names") String table_names, @FormParam("view_names") String view_names,
+                          @FormParam("sp_names") String sp_names, @FormParam("prefix") String prefix,
+                          @FormParam("suffix") String suffix, @FormParam("cud_by_sp") boolean cud_by_sp,
+                          @FormParam("pagination") boolean pagination, @FormParam("version") int version,
+                          @FormParam("action") String action, @FormParam("comment") String comment,
+                          @FormParam("sql_style") String sql_style, // C#风格或者Java风格 @FormParam("length") boolean length,
+                          @FormParam("api_list") String api_list) throws Exception {
         try {
             GenTaskByTableViewSp task = new GenTaskByTableViewSp();
 
@@ -63,6 +63,7 @@ public class GenTaskByTableViewResource extends ApproveResource {
                 task.setComment(comment);
                 task.setSql_style(sql_style);
                 task.setApi_list(api_list);
+                task.setMode_type(DalClusterUtils.getModeTypeByDbBaseName(set_name));
                 if (needApproveTask(project_id, user.getId())) {
                     task.setApproved(1);
                 } else {
@@ -98,14 +99,14 @@ public class GenTaskByTableViewResource extends ApproveResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("apiList")
     public Status getApiList(@FormParam("db_name") String db_set_name, @FormParam("table_names") String table_names,
-            @FormParam("sql_style") String sql_style) {
+                             @FormParam("sql_style") String sql_style) {
         Status status = Status.OK();
 
         try {
+            String connectionString = AllInOneNameUtils.getAllInOneNameByNameOnly(db_set_name);
             List<DalApi> apis = null;
-            DatabaseSetEntry databaseSetEntry =
-                    BeanGetter.getDaoOfDatabaseSet().getMasterDatabaseSetEntryByDatabaseSetName(db_set_name);
-            DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(databaseSetEntry.getConnectionString());
+
+            DatabaseCategory dbCategory = DbUtils.getDatabaseCategory(connectionString);
 
             if ("csharp".equalsIgnoreCase(sql_style)) {
                 if (dbCategory == DatabaseCategory.MySql) {

@@ -95,6 +95,10 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
     @Type(value = Types.LONGVARCHAR)
     private String approveMsg;
 
+    @Column(name = "mode_type")
+    @Type(value = Types.VARCHAR)
+    private String mode_type;
+
     // @Column(name = "length")
     // @Type(value = Types.TINYINT)
     // private Boolean length;
@@ -279,6 +283,14 @@ public class GenTaskByTableViewSp implements Comparable<GenTaskByTableViewSp>, D
 
     public String getStr_approved() {
         return str_approved;
+    }
+
+    public String getMode_type() {
+        return mode_type;
+    }
+
+    public void setMode_type(String mode_type) {
+        this.mode_type = mode_type;
     }
 
     public String getApprovePreview() {

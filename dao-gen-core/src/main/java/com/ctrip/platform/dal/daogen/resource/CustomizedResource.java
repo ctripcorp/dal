@@ -22,6 +22,7 @@ public class CustomizedResource {
     private final String USER_INFO_CLASS_NAME = "userinfo_class";
     private final String DB_LEVEL_INFO_API_CLASS_NAME = "db_level_info_api";
     private final String ALL_IN_ONE_KEY_API_CLASS_NAME = "all_in_one_key_api";
+    private final String DAL_CLUSTER_INFO_API_CLASS_NAME = "dal_cluster_info_api";
     private UserInfo userInfo = null;
     private Boolean isDefaultUser = null;
 
@@ -120,6 +121,10 @@ public class CustomizedResource {
 
     public String getDBLevelInfoApiClassName() throws IOException {
         return getClassNameFromConf(DB_LEVEL_INFO_API_CLASS_NAME);
+    }
+
+    public String getDalClusterInfoClassName() throws IOException {
+        return getClassNameFromConf(DAL_CLUSTER_INFO_API_CLASS_NAME);
     }
 
     public String getAllInOneKeyApiClassName() throws IOException {

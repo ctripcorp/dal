@@ -47,6 +47,10 @@ public class DatabaseSet implements Comparable<DatabaseSet>, DalPojo {
     @Type(value = Types.TIMESTAMP)
     private Timestamp update_time;
 
+    @Column(name = "mode_type")
+    @Type(value = Types.VARCHAR)
+    private String mode_type;
+
     private String str_update_time;
 
     public Integer getId() {
@@ -115,6 +119,14 @@ public class DatabaseSet implements Comparable<DatabaseSet>, DalPojo {
 
     public void setStr_update_time(String str_update_time) {
         this.str_update_time = str_update_time;
+    }
+
+    public String getMode_type() {
+        return mode_type;
+    }
+
+    public void setMode_type(String mode_type) {
+        this.mode_type = mode_type;
     }
 
     @Override

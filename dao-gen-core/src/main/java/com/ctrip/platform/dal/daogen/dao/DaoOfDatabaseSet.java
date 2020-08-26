@@ -54,10 +54,25 @@ public class DaoOfDatabaseSet extends BaseDao {
     public List<DatabaseSet> getAllDatabaseSetByGroupId(Integer groupId) throws SQLException {
         FreeSelectSqlBuilder<List<DatabaseSet>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         builder.setTemplate(
-                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time FROM databaseset WHERE groupId = ?");
+                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time, mode_type FROM databaseset WHERE groupId = ?");
         StatementParameters parameters = new StatementParameters();
         int i = 1;
         parameters.set(i++, "groupId", Types.INTEGER, groupId);
+        builder.mapWith(databaseSetRowMapper);
+        DalHints hints = DalHints.createIfAbsent(null).allowPartial();
+        List<DatabaseSet> list = queryDao.query(builder, parameters, hints);
+        processList(list);
+        return list;
+    }
+
+    public List<DatabaseSet> getAllDatabaseSetByGroupIdAndModeType(Integer groupId, String modeType) throws SQLException {
+        FreeSelectSqlBuilder<List<DatabaseSet>> builder = new FreeSelectSqlBuilder<>(dbCategory);
+        builder.setTemplate(
+                "SELECT id, name, provider, shardingStrategy, groupId, update_user_no, update_time, mode_type FROM databaseset WHERE groupId = ? and mode_type = ?");
+        StatementParameters parameters = new StatementParameters();
+        int i = 1;
+        parameters.set(i++, "groupId", Types.INTEGER, groupId);
+        parameters.set(i++, "mode_type", Types.VARCHAR, modeType);
         builder.mapWith(databaseSetRowMapper);
         DalHints hints = DalHints.createIfAbsent(null).allowPartial();
         List<DatabaseSet> list = queryDao.query(builder, parameters, hints);

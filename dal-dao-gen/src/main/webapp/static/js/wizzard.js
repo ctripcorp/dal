@@ -146,8 +146,7 @@
                     if (data == "true") {
                         cudBySp.prop("checked", false);
                         mysqlHide.hide();
-                    }
-                    else {
+                    } else {
                         cudBySp.prop("checked", true);
                         mysqlHide.show();
                     }
@@ -266,6 +265,7 @@
         cblock($("body"));
         $.get("/rest/db/tables", {
             db_name: $("#databases").val(),
+            mode_type: $("#index-dbmodetype").val(),
             rand: Math.random()
         }, function (data) {
             var results = [];
@@ -480,9 +480,9 @@
         }
 
         if (checkDaoNameConflict(tableList.join(","), {
-                "prefix": $("#prefix").val(),
-                "suffix": $("#suffix").val()
-            })) {
+            "prefix": $("#prefix").val(),
+            "suffix": $("#suffix").val()
+        })) {
             return;
         }
         cblock($("body"));
@@ -644,6 +644,7 @@
         $.get("/rest/db/fields", {
             table_name: tables.val(),
             db_name: $("#databases").val(),
+            mode_type: $("#index-dbmodetype").val(),
             rand: Math.random()
         }, function (data) {
             var fieldList = [];
@@ -1041,6 +1042,7 @@
         var postData = {};
         postData.db_name = $("#databases").val();
         postData.table_name = $("#tables").val();
+        postData.mode_type = $("#index-dbmodetype").val();
         postData.crud_type = $("#crud_option").val();
         postData.fields = $('#fields').multipleSelect("getSelects").join(",");
         postData.pagination = $("#auto_sql_pagination").is(":checked");
@@ -1121,6 +1123,7 @@
         var postData = {};
         postData.db_name = $("#databases").val();
         postData.table_name = $("#tables").val();
+        postData.mode_type = $("#index-dbmodetype").val();
         postData.crud_type = $("#crud_option").val();
         postData.fields = $('#fields').multipleSelect("getSelects").join(",");
 
@@ -1289,8 +1292,7 @@
                         var realName = result[1];
                         if ($.inArray(realName, paramArray) > -1) {
                             continue;
-                        }
-                        else {
+                        } else {
                             paramArray.push(realName);
                         }
 
@@ -1435,6 +1437,7 @@
         var postData = {};
         postData.db_name = $("#databases").val();
         postData.crud_type = crudOption;
+        postData.mode_type = $("#index-dbmodetype").val();
         postData.sql_content = ace.edit("sql_editor").getValue();
 
         var paramList = [];

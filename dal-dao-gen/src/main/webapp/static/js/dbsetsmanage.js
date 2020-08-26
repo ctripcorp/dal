@@ -150,6 +150,8 @@
         var record = w2ui['grid'].get(records[0]);
         if (record == null || record == '') {
             return;
+        }else if (record.mode_type == "dalcluster") {
+            return;
         }
         cblock($("body"));
         $.get("/rest/groupdbset/getDbsetEntry", {dbsetId: record['id'], rand: Math.random()}, function (data) {
@@ -190,6 +192,11 @@
         var record = w2ui['grid'].get(records[0]);
         if (record == null || record == '') {
             alert("请先选择一个 databaseSet");
+            return;
+        }
+
+        if (record['mode_type'] == "dalcluster") {
+            alert("cluster DB 不支持修改");
             return;
         }
 
@@ -241,8 +248,11 @@
         if (record == null || record == '') {
             alert("请先选择一个 databaseSet");
             return;
+        } else if (record.mode_type == "dalcluster") {
+            alert("cluster集群无需添加databaseSet Entry");
+            return;
         }
-        window.ajaxutil.reload_dbservers(null, true, current_group);
+        window.ajaxutil.reload_dbservers(null, true, current_group, "titankey");
         $("#addDbsetEntryModal").modal({"backdrop": "static"});
     };
 
@@ -253,6 +263,9 @@
         if (record == null || record == '') {
             alert("请先选择一个 databaseSet Entry");
             return;
+        }else if (record.mode_type == "dalcluster") {
+            alert("cluster集群无需修改databaseSet Entry");
+            return;
         }
         $("#dbsetentryname2").val(record['name']);
         $("#databaseType2").val(record['databaseType']);
@@ -262,7 +275,8 @@
         $.get("/rest/db/dbs", {
             groupDBs: true,
             groupId: w2ui['grid'].current_group,
-            rand: Math.random()
+            rand: Math.random(),
+            dbmodetype: "titankey"
         }).done(function (data) {
             if ($("#databases2")[0] != undefined && $("#databases2")[0].selectize != undefined) {
                 $("#databases2")[0].selectize.clearOptions();
@@ -329,6 +343,36 @@
                 alert("删除失败！");
             });
         }
+    };
+
+    var getDataBaseSetList = function () {
+        var dbsetnameselect = $("#dbsetname-select");
+        var current_group = w2ui['grid'].current_group;
+        $.get("/rest/db/getBasesetNameList", {
+            groupId: current_group
+        }, function (data) {
+            var databasesets = [];
+            if (data.code == "OK") {
+                $.each($.parseJSON(data.info), function (index, value) {
+                    databasesets.push({
+                        id: value, title: value
+                    });
+                });
+            }
+            if (dbsetnameselect[0] == undefined || dbsetnameselect[0].selectize == undefined) {
+                dbsetnameselect.selectize({
+                    valueField: 'id',
+                    labelField: 'title',
+                    searchField: 'title',
+                    sortField: 'title',
+                    options: [],
+                    create: false
+                });
+            }
+            dbsetnameselect[0].selectize.clearOptions();
+            dbsetnameselect[0].selectize.addOption(databasesets);
+            dbsetnameselect[0].selectize.refreshOptions(false);
+        });
     };
 
     Render.prototype = {
@@ -464,6 +508,10 @@
                     caption: 'Name',
                     type: 'text'
                 }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode',
+                    type: 'text'
+                }, {
                     field: 'provider',
                     caption: 'provider',
                     type: 'text'
@@ -479,9 +527,15 @@
                     sortable: true,
                     resizable: true
                 }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode',
+                    size: '10%',
+                    sortable: true,
+                    resizable: true
+                }, {
                     field: 'provider',
                     caption: 'provider',
-                    size: '15%',
+                    size: '10%',
                     sortable: true,
                     resizable: true
                 }, {
@@ -493,12 +547,12 @@
                 }, {
                     field: 'update_user_no',
                     caption: '最后修改',
-                    size: '12%',
+                    size: '10%',
                     resizable: true
                 }, {
                     field: 'str_update_time',
                     caption: '最后修改时间',
-                    size: '13%',
+                    size: '10%',
                     resizable: true
                 }],
                 records: [],
@@ -636,6 +690,16 @@
         $(document.body).on("click", "#save_adddbset", function () {
             var dbsetname = $("#dbsetname").val();
             var provider = $("#provider").val();
+            var dbmodetype = $("#dbmodetype_dbsetmanage").val();
+            if (dbmodetype == "no") {
+                $("#adddbset_error_msg").html("请选择DB Mode!");
+                return;
+            }else {
+                if (dbmodetype == "dalcluster") {
+                    provider = "mySqlProvider";
+                    dbsetname = $("#dbsetname-select").val();
+                }
+            }
             if (provider == null || provider.length == 0) {
                 $("#adddbset_error_msg").html("请选择数据库类型!");
                 return;
@@ -649,7 +713,8 @@
                 name: dbsetname,
                 provider: provider,
                 shardingStrategy: shardingStrategy,
-                groupId: w2ui['grid'].current_group
+                groupId: w2ui['grid'].current_group,
+                dbModeType: dbmodetype
             }, function (data) {
                 if (data.code == "OK") {
                     $("#addDbsetModal").modal('hide');
@@ -773,5 +838,22 @@
         $(document.body).on("click", "#save_configtemplate", function () {
             updateConfigTemplate();
         });
+        $(document.body).on("change", "#dbmodetype_dbsetmanage", function () {
+            var dbmodetype_dbsetmanage = $("#dbmodetype_dbsetmanage").val();
+            if (dbmodetype_dbsetmanage == "dalcluster") {
+                $("#dbsetname-input-control").hide();
+                $("#dbsetname-select-control").show();
+                $("#provider").hide();
+                $("#dbtype-dbset-manege").show();
+                $("#strategy-dbset-manage").hide();
+                getDataBaseSetList();
+            } else {
+                $("#dbsetname-input-control").show();
+                $("#dbsetname-select-control").hide();
+                $("#provider").show();
+                $("#dbtype-dbset-manege").hide();
+                $("#strategy-dbset-manage").show();
+            }
+        })
     });
 })(window, document);

@@ -92,7 +92,7 @@ public class DatabaseResourceTest {
         PowerMockito.mockStatic(CustomizedResource.class);
         PowerMockito.when(CustomizedResource.getInstance()).thenReturn(customizedResource);
         Mockito.when(customizedResource.getDBLevelInfoApiClassName()).thenReturn("com.ctrip.platform.dal.daogen.utils.DBInfoApi");
-        Mockito.when(dbInfoApi.getAllDbInfos()).thenReturn(genDbInfos());
+        Mockito.when(dbInfoApi.getAllDbInfos("test")).thenReturn(genDbInfos());
         Status status = databaseResource.getAllNameBases();
 
         List<String> expect = Lists.newArrayList("test1", "test2", "test3");

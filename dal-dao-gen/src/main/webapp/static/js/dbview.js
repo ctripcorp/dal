@@ -945,12 +945,6 @@
             var dbPassword = $("#dbpassword_up").val();
             var dbName = $("#dbcatalog_up").val();
             var result = true;
-            var dbmodetype = $("#dbmodetype").val();
-            var dbnamebase = $("#dbnambase").val();
-
-            if (dbmodetype == "dalcluster") {
-                dbName = dbnamebase;
-            }
 
             $.ajax({
                 type: "POST",

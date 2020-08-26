@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface DBInfoApi {
     public List<DBLevelInfo> getDBLevelInfo(String dbType);
-    public List<DbInfos> getAllDbInfos();
+
+    public List<DbInfos> getAllDbInfos(String nameBases);
 }

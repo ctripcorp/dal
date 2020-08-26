@@ -201,7 +201,7 @@ public class DatabaseResource {
             String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
             Class<?> clazz = Class.forName(className);
             DBInfoApi dbInfoApi = (DBInfoApi) clazz.getDeclaredConstructor().newInstance();
-            List<DbInfos> dbInfos = dbInfoApi.getAllDbInfos();
+            List<DbInfos> dbInfos = dbInfoApi.getAllDbInfos(null);
             Set<String> allDbNameBases = new HashSet<>();
             for (DbInfos dbInfo : dbInfos) {
                 allDbNameBases.add(dbInfo.getDbNameBase());
@@ -260,7 +260,7 @@ public class DatabaseResource {
             String className = CustomizedResource.getInstance().getDBLevelInfoApiClassName();
             Class<?> clazz = Class.forName(className);
             DBInfoApi dbInfoApi = (DBInfoApi) clazz.getDeclaredConstructor().newInstance();
-            Map<String, List<DbInfos>> nameBaseMapDbInfos = dbInfoApi.getAllDbInfos().stream().collect(Collectors.groupingBy(DbInfos::getDbNameBase));
+            Map<String, List<DbInfos>> nameBaseMapDbInfos = dbInfoApi.getAllDbInfos(namebase).stream().collect(Collectors.groupingBy(DbInfos::getDbNameBase));
             List<String> result = new ArrayList<>();
             for (DbInfos dbInfo : nameBaseMapDbInfos.get(namebase)) {
                 if (!(Integer.valueOf(1).equals(dbInfo.getIsShard()) && dbInfo.getDbNameBase().equals(dbInfo.getDbName()))) {

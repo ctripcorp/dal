@@ -5,11 +5,7 @@ import com.ctrip.platform.dal.daogen.entity.LoginUser;
 import com.ctrip.platform.dal.daogen.entity.Project;
 import com.ctrip.platform.dal.daogen.entity.UserGroup;
 import com.ctrip.platform.dal.daogen.log.LoggerManager;
-import com.ctrip.platform.dal.daogen.utils.Configuration;
-import com.ctrip.platform.dal.daogen.utils.JavaIOUtils;
-import com.ctrip.platform.dal.daogen.utils.BeanGetter;
-import com.ctrip.platform.dal.daogen.utils.RequestUtil;
-import com.ctrip.platform.dal.daogen.utils.ZipFolder;
+import com.ctrip.platform.dal.daogen.utils.*;
 import com.google.common.base.Charsets;
 
 import javax.annotation.Resource;
@@ -44,7 +40,7 @@ public class FileResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<W2uiElement> getFiles(@QueryParam("id") String id, @QueryParam("language") String language,
-            @QueryParam("name") String name) {
+                                      @QueryParam("name") String name) {
         try {
             List<W2uiElement> files = new ArrayList<>();
 
@@ -92,7 +88,7 @@ public class FileResource {
     @Path("content")
     @Produces(MediaType.TEXT_PLAIN)
     public String getFileContent(@QueryParam("id") String id, @QueryParam("language") String language,
-            @QueryParam("name") String name) throws Exception {
+                                 @QueryParam("name") String name) throws Exception {
         File f = new File(new File(new File(generatePath, id), language), name);
         StringBuilder sb = new StringBuilder();
         if (f.exists()) {
@@ -102,7 +98,7 @@ public class FileResource {
 
                 String line = null;
                 while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                    sb.append(getClusterDatabaseSet(line, reader));
                     sb.append(System.getProperty("line.separator"));
                 }
             } catch (Throwable e) {
@@ -122,11 +118,29 @@ public class FileResource {
         return sb.toString();
     }
 
+    public String getClusterDatabaseSet(String conf, BufferedReader reader) throws IOException {
+        int nameStartIndex = conf.indexOf("\"");
+        int nameEndIndex = conf.indexOf("\"", nameStartIndex + 1);
+        if (conf.startsWith("\t\t<databaseSet") && isDalCluster(conf.substring(nameStartIndex + 1, nameEndIndex))) {
+            StringBuilder sb = new StringBuilder(conf);
+            sb.replace(0, "\t\t<databaseSet".length(), "\t\t<cluster");
+            sb.replace(nameEndIndex - 2, sb.length(), "/>");
+            reader.readLine();
+            return sb.toString();
+        }
+        return conf;
+    }
+
+    public boolean isDalCluster(String clusterName) {
+        int length = clusterName.length();
+        return length > 11 && "_dalcluster".equals(clusterName.substring(length - 11));
+    }
+
     @GET
     @Path("download")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public String download(@QueryParam("id") String id, @QueryParam("language") String name,
-            @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+                           @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
         File f = null;
         if (null != name && !name.isEmpty()) {
             f = new File(new File(generatePath, id), name);

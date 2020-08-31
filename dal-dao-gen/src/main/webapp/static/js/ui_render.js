@@ -111,8 +111,13 @@
         });
         return havePermision;
     };
+    function refInputs() {
+        $("#index-dbmodetype").val("titankey");
+        $("#databases").val("");
+    }
 
     var addDAO = function () {
+        refInputs();
         var current_project = w2ui['grid'].current_project;
         if (current_project == null || current_project == '') {
             alert('请先选择 Project');
@@ -138,26 +143,69 @@
         $(".step2-3-3").hide();
         $(".step2-3-4").hide();
         $(".step2-3-5").hide();
+        $.ajaxSettings.async = false;
         setLanguageType(current_project);
         $("#page1").attr('is_update', '0');
         $("#page1").modal({"backdrop": "static"});
         window.ajaxutil.reload_dbsets();
+        $.ajaxSettings.async = true;
     };
 
     function setLanguageType(id) {
+        $.ajaxSettings.async = false;
+        var flag = false;
+        var selectedProject = $.jstree.reference("#jstree_projects").get_selected();
+        if (selectedProject == undefined || selectedProject.length < 1 || selectedProject[0] == -1) {
+            alert("请单击一个项目，再操作！");
+            return;
+        }
+        var project = $.jstree.reference("#jstree_projects").get_node(selectedProject[0]).original;
+        $.get("/rest/groupdbset/getDbset",{rand: Math.random(), daoFlag: true, groupId: project['dal_group_id'], modeType: "dalcluster"},
+            function (data) {
+            if (data.length > 0) {
+                flag = true;
+            }
+        });
         $.getJSON("rest/task/getLanguageType", {project_id: id}, function (data) {
             var sql_style = $("#sql_style");
             if (data.code == "OK") {
+                if (data.info == "csharp") {
+                    $("#index-modetype-cluster").hide();
+                    $("#sql-style-input-control").hide();
+                    $("#sql-style-select-control").show();
+                    $("#index-dbmodetype").val("titankey");
+                }else if (flag){
+                    $("#sql-style-input-control").show();
+                    $("#sql-style-select-control").hide();
+                    $("#index-modetype-cluster").show();
+                    $("#index-dbmodetype").val("dalcluster");
+                } else {
+                    $("#sql-style-input-control").hide();
+                    $("#sql-style-select-control").show();
+                    $("#index-modetype-cluster").hide();
+                    $("#index-dbmodetype").val("titankey");
+                }
                 sql_style.val(data.info);
                 sql_style.attr("readonly", true);
                 sql_style.change(function () {
                     sql_style.val(data.info);
                 });
-            }
-            else if (data.code == "Error") {
+            } else if (data.code == "Error") {
+                if (flag) {
+                    $("#sql-style-input-control").show();
+                    $("#sql-style-select-control").hide();
+                    $("#index-modetype-cluster").show();
+                    $("#index-dbmodetype").val("dalcluster");
+                } else {
+                    $("#index-modetype-cluster").hide();
+                    $("#sql-style-select-control").show();
+                    $("#sql-style-input-control").hide();
+                    $("#index-dbmodetype").val("titankey");
+                }
                 recoverLanguageType();
             }
         });
+        $.ajaxSettings.async = true;
     }
 
     function recoverLanguageType() {
@@ -177,6 +225,14 @@
         if (record == null || record == '') {
             alert("请先选择一个 DAO");
             return;
+        }
+        //隐藏mode_type选择框，mode_type不允许修改
+        if (record.mode_type == "dalcluster") {
+            alert("cluster类型暂不支持修改");
+            return;
+        } else {
+            $("#index-modetype-cluster").hide();
+            $("#index-dbmodetype").val("titankey");
         }
         if (!haveUpdateDaoPermision()) {
             return;
@@ -483,13 +539,19 @@
                 columns: [{
                     field: 'id',
                     caption: 'ID',
-                    size: '5%',
+                    size: '4%',
                     sortable: true,
                     resizable: true
                 }, {
                     field: 'databaseSetName',
                     caption: '逻辑数据库',
-                    size: '20%',
+                    size: '15%',
+                    sortable: true,
+                    resizable: true
+                }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode',
+                    size: '8%',
                     sortable: true,
                     resizable: true
                 }, {
@@ -507,7 +569,7 @@
                 }, {
                     field: 'task_desc',
                     caption: '类型',
-                    size: '10%',
+                    size: '7%',
                     sortable: true,
                     resizable: true
                 }, {
@@ -666,6 +728,24 @@
     window.render = new Render();
 
     $(function () {
+        //更改mode type 类型时的联动
+        $(document.body).on("change", "#index-dbmodetype", function () {
+            var modetype = $("#index-dbmodetype").val();
+            if (modetype == "no") {
+                $("#sql-style-select-control").show();
+                $("#sql-style-input-control").hide();
+            }else if (modetype == "dalcluster") {
+                $("#sql-style-select-control").hide();
+                $("#sql-style-input-control").show();
+                $("#sql_style").val("java");
+                window.ajaxutil.reload_dbsets();
+            }else if (modetype == "titankey") {
+                $("#sql-style-select-control").show();
+                $("#sql-style-input-control").hide();
+                window.ajaxutil.reload_dbsets();
+            }
+        });
+
         $(document.body).on("click", "#generate_code", function () {
             window.ajaxutil.generate_code();
         });

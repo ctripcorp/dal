@@ -58,6 +58,18 @@ public class DalGroupDB implements Comparable<DalGroupDB>, DalPojo {
     @Type(value = Types.VARCHAR)
     private String db_providerName;
 
+    @Column(name = "mode_type")
+    @Type(value = Types.VARCHAR)
+    private String mode_type;
+
+    public String getMode_type() {
+        return mode_type;
+    }
+
+    public void setMode_type(String mode_type) {
+        this.mode_type = mode_type;
+    }
+
     public Integer getId() {
         return id;
     }

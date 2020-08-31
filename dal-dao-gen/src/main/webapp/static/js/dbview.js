@@ -21,7 +21,21 @@
         });
     };
 
+    function refInputs() {
+        $("#dbtype").val("no");
+        $("#dbnamebase").val("");
+        $("#dbmodetype").val("dalcluster");
+        $("#dbcatalog").val("");
+        $("#dbaddress").val("");
+        $("#dbport").val("");
+        $("#dbuser").val("");
+        $("#dbcatalog").val("");
+        $("#dbpassword").val("");
+    }
+
+    //添加DB按钮，填入type之后检索所有db名称（添加dbmodetype参数）
     function addDB() {
+        refInputs();
         $.get("/rest/project/userGroups", {root: true, rand: Math.random()}).done(function (data) {
             if (data.length > 0 && data[0]['id'] > 0) {
                 $("#error_msg").html('');
@@ -44,11 +58,23 @@
                         create: true
                     });
                 }
+                var dbnamebase = $("#dbnamebase");
+                if (dbnamebase[0] != undefined && dbnamebase[0].selectize != undefined) {
+                    dbnamebase[0].selectize.clearOptions();
+                } else {
+                    dbnamebase.selectize({
+                        valueField: 'id',
+                        labelField: 'title',
+                        searchField: 'title',
+                        sortField: 'title',
+                        options: [],
+                        create: true
+                    });
+                }
                 var dalgroup = $("#dalgroup");
                 if (dalgroup[0] != undefined && dalgroup[0].selectize != undefined) {
                     dalgroup[0].selectize.clearOptions();
-                }
-                else {
+                } else {
                     dalgroup.selectize({
                         valueField: 'id',
                         labelField: 'title',
@@ -61,9 +87,11 @@
                 $("#addDbModal").modal({"backdrop": "static"});
                 var dbcatalog = $("#dbcatalog");
                 var db_providerName = $.trim($("#dbtype").val());
+                var db_mode_type = $.trim($("#dbmodetype").val());
                 if (db_providerName !== null || db_providerName.length > 0) {
                     $.post("/rest/db/getAllDB", {
-                        dbType: db_providerName
+                        dbType: db_providerName,
+                        dbModeType: db_mode_type
                     }, function (data) {
                         var allCatalog_up = [];
                         $.each($.parseJSON(data.info), function (index, value) {
@@ -101,11 +129,11 @@
                 create: true
             });
         }
-        $.post("/rest/db/getTitanKeyByDBName",{
+        $.post("/rest/db/getTitanKeyByDBName", {
             dbName: dbcatalog
         }, function (data) {
             var allInOneNames = [];
-            if(data.info!="null"){
+            if (data.info != "null") {
                 $.each($.parseJSON(data.info), function (index, value) {
                     allInOneNames.push({
                         id: value, title: value
@@ -116,16 +144,17 @@
             allinonename[0].selectize.addOption(allInOneNames);
             allinonename[0].selectize.refreshOptions(false);
 
-            if (allInOneName!=""){
+            if (allInOneName != "") {
                 allinonename[0].selectize.addOption({
-                    id : allInOneName,
-                    title : allInOneName,
+                    id: allInOneName,
+                    title: allInOneName,
                 });
                 allinonename[0].selectize.setValue(allInOneName);
             }
         });
     };
-    var  record=null;
+    var record = null;
+
     function editDB() {
         $("#update_error_msg").html('');
         $("#update_db_step1").show();
@@ -135,9 +164,13 @@
         $("#update_db_prev").hide();
         $("#update_db_save").hide();
         var records = w2ui['grid'].getSelection();
-        record= w2ui['grid'].get(records[0]);
+        record = w2ui['grid'].get(records[0]);
         if (record == null) {
             alert('请先选择一个 database');
+            return;
+        }
+        if (record.mode_type == 'dalcluster') {
+            alert('dalcluster 暂时不支持修改!');
             return;
         }
         cblock($("body"));
@@ -165,7 +198,8 @@
                 $("#updateDbModal").modal({"backdrop": "static"});
                 var dbcatalog_up = $("#dbcatalog_up");
                 $.post("/rest/db/getAllDB", {
-                    dbType: db['db_providerName']
+                    dbType: db['db_providerName'],
+                    dbModeType: db['mode_type']
                 }, function (data) {
                     var allCatalog_up = [];
                     $.each($.parseJSON(data.info), function (index, value) {
@@ -177,8 +211,8 @@
                     dbcatalog_up[0].selectize.addOption(allCatalog_up);
                     dbcatalog_up[0].selectize.refreshOptions(false);
                     $("#dbcatalog_up")[0].selectize.addOption({
-                        id : db['db_catalog'],
-                        title : db['db_catalog']
+                        id: db['db_catalog'],
+                        title: db['db_catalog']
                     });
                     catalogChangeCount_up = 0;
                     $("#dbcatalog_up")[0].selectize.setValue(db['db_catalog']);
@@ -225,7 +259,7 @@
             }
             $("body").unblock();
         });
-    }
+    };
 
     Render.prototype = {
         render_layout: function (render_obj) {
@@ -309,6 +343,10 @@
                     caption: 'DB Catalog',
                     type: 'text'
                 }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode',
+                    type: 'text'
+                }, {
                     field: 'db_providerName',
                     caption: '数据库类型',
                     type: 'text'
@@ -323,7 +361,14 @@
                 }, {
                     field: 'comment',
                     caption: '所属 DAL Team',
-                    size: '15%',
+                    size: '10%',
+                    attr: 'align=center',
+                    sortable: true,
+                    resizable: true
+                }, {
+                    field: 'mode_type',
+                    caption: 'DB Mode',
+                    size: '8%',
                     attr: 'align=center',
                     sortable: true,
                     resizable: true
@@ -365,7 +410,7 @@
                 }, {
                     field: 'db_providerName',
                     caption: '数据库类型',
-                    size: '10%',
+                    size: '7%',
                     attr: 'align=center',
                     sortable: true,
                     resizable: true
@@ -387,25 +432,52 @@
     });
 
     $(function () {
+        //仅仅在更改数据库类型（mysql/sqlsever）的时候调用
         var setDefaultDbVal = function () {
             var dbcatalog = $("#dbcatalog");
             $("#error_msg").html(" ");
             var dbType = $.trim($("#dbtype").val());
+            var dbnamebase = $("#dbnamebase");
 
-            $.post("/rest/db/getAllDB", {
-                dbType: dbType
-            }, function (data) {
-                var allCatalog = [];
-                $.each($.parseJSON(data.info), function (index, value) {
-                    allCatalog.push({
-                        id: value, title: value
+            if (dbType == "MySQL") {
+                $.get("/rest/db/getAllNamebases", function (data) {
+                    var namebases = [];
+                    $.each($.parseJSON(data.info), function (index, value) {
+                        namebases.push({
+                            id: value, title: value
+                        });
                     });
+                    dbnamebase[0].selectize.clearOptions();
+                    dbnamebase[0].selectize.addOption(namebases);
+                    dbnamebase[0].selectize.refreshOptions(false);
                 });
-                dbcatalog[0].selectize.clearOptions();
-                dbcatalog[0].selectize.addOption(allCatalog);
-                dbcatalog[0].selectize.refreshOptions(false);
-            });
-            var dbName = $("#dbcatalog").val();
+                $("#dbaddress").val("");
+                $("#dbport").val("");
+                $("#dbuser").val("");
+                $("#dbpassword").val("");
+                $("#dbmodetype").val("dalcluster");
+                $("#cluster-option").show();
+                $("#dbnamebase-control").show();
+                $("#dbmodetype-control").show();
+                $("#dbcatalog-control").hide();
+            } else if (dbType == "SQLServer") {
+                $("#dbnamebase-control").hide();
+                $("#dbmodetype-control").hide();
+                $("#dbcatalog-control").show();
+                $.post("/rest/db/getAllDB", {
+                    dbType: dbType
+                }, function (data) {
+                    var allCatalog = [];
+                    $.each($.parseJSON(data.info), function (index, value) {
+                        allCatalog.push({
+                            id: value, title: value
+                        });
+                    });
+                    dbcatalog[0].selectize.clearOptions();
+                    dbcatalog[0].selectize.addOption(allCatalog);
+                    dbcatalog[0].selectize.refreshOptions(false);
+                });
+                var dbName = $("#dbcatalog").val();
                 $.post("/rest/user/getDefaultDBInfo", {
                     dbType: dbType,
                     dbName: dbName
@@ -415,6 +487,18 @@
                     $("#dbuser").val(data.db_user);
                     $("#dbpassword").val(data.db_password);
                 });
+            } else {
+                $("#dbmodetype-control").show();
+                $("#dbnamebase-control").show();
+                $("#dbaddress").val("");
+                $("#dbport").val("");
+                $("#dbuser").val("");
+                $("#dbpassword").val("");
+                $("#dbmodetype").val("dalcluster");
+                $("#cluster-option").show();
+                dbnamebase[0].selectize.clearOptions();
+                dbcatalog[0].selectize.clearOptions();
+            }
 
         };
 
@@ -424,11 +508,20 @@
             var dbPort = $("#dbport").val();
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
-            var dbCatalog = $("#dbcatalog").val();
+            var dbCatalog = '';
 
             var error_msg = $("#error_msg");
             error_msg.html("正在连接数据库，请稍等...");
             var result = true;
+
+            var dbmodetype = $("#dbmodetype").val();
+            var dbnamebase = $("#dbnamebase").val();
+
+            if (dbmodetype == "dalcluster") {
+                dbCatalog = dbnamebase;
+            } else {
+                dbCatalog = $("#dbcatalog").val();
+            }
 
             $.ajax({
                 type: "POST",
@@ -464,11 +557,12 @@
             return result;
         };
 
-
-
+        //根据 dbname和dbmode获取连接串
         var getAllInOneKeyByDbName = function () {
             var dbcatalog = $("#dbcatalog").val();
+            var dbmodetype = $("#dbmodetype").val();
             var allinonename = $("#allinonename");
+            var dbtype = $("#dbtype").val();
             if (allinonename[0] != undefined && allinonename[0].selectize != undefined) {
                 allinonename[0].selectize.clearOptions();
             } else {
@@ -481,19 +575,26 @@
                     create: true
                 });
             }
-            $.post("/rest/db/getTitanKeyByDBName",{
-                dbName: dbcatalog
-            }, function (data) {
-                var allInOneNames = [];
-                $.each($.parseJSON(data.info), function (index, value) {
-                    allInOneNames.push({
-                        id: value, title: value
-                    });
+            if (dbtype != "SQLServer" && dbmodetype == "dalcluster") {
+                var dbnamebase = $("#dbnamebase").val().concat("_dalcluster");
+                $("#connectionString").val(dbnamebase);
+            } else {
+                $.post("/rest/db/getTitanKeyByDBName", {
+                    dbName: dbcatalog
+                }, function (data) {
+                    var allInOneNames = [];
+                    if (data.info != "null") {
+                        $.each($.parseJSON(data.info), function (index, value) {
+                            allInOneNames.push({
+                                id: value, title: value
+                            });
+                        });
+                    }
+                    allinonename[0].selectize.clearOptions();
+                    allinonename[0].selectize.addOption(allInOneNames);
+                    allinonename[0].selectize.refreshOptions(false);
                 });
-                allinonename[0].selectize.clearOptions();
-                allinonename[0].selectize.addOption(allInOneNames);
-                allinonename[0].selectize.refreshOptions(false);
-            });
+            }
         };
 
         var getUserGroups = function () {
@@ -510,8 +611,7 @@
                         dalgroup[0].selectize.clearOptions();
                         dalgroup[0].selectize.addOption(groups);
                         dalgroup[0].selectize.refreshOptions(false);
-                    }
-                    else {
+                    } else {
                         $("#dalgroupspan").hide();
                     }
                 }
@@ -524,6 +624,91 @@
                     setDefaultDbVal();
                 }
             });
+        });
+
+        //选择dbnamebase修改，dbmodetype及以下联动
+        $(document.body).on("change", "#dbnamebase", function () {
+            var dbnamebase = $.trim($("#dbnamebase").val());
+            var dbmodetype = $.trim($("#dbmodetype").val());
+            var dbcatalog = $("#dbcatalog");
+            var tempData = "";
+            $("#dbcatalog").val("");
+            $.ajaxSettings.async = false;
+            $.post("/rest/db/hasDalCluster", {
+                namebase: dbnamebase
+            }, function (data) {
+                tempData = data;
+            });
+            if (tempData.info == "false") {
+                if (dbmodetype != "titankey") {
+                    $("#dbmodetype").val("titankey");
+                }
+                $("#dbcatalog-control").show();
+                $("#cluster-option").hide();
+                $.post("/rest/db/getShardsByNameBase", {
+                    namebase: dbnamebase
+                }, function (data) {
+                    var dbcatalogs = [];
+                    $.each($.parseJSON(data.info), function (index, value) {
+                        dbcatalogs.push({
+                            id: value, title: value
+                        });
+                    });
+                    dbcatalog[0].selectize.clearOptions();
+                    dbcatalog[0].selectize.addOption(dbcatalogs);
+                    dbcatalog[0].selectize.refreshOptions(false);
+                });
+            } else {
+                if (dbmodetype != "dalcluster") {
+                    $("#dbmodetype").val("dalcluster");
+                }
+                $("#dbcatalog-control").hide();
+                $("#cluster-option").show();
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: "MySQL",
+                    dbName: dbnamebase
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
+            }
+            $.ajaxSettings.async = true;
+        });
+
+        //选择dbmodetype改变，dbcatalog及以下联动
+        $(document.body).on("change", "#dbmodetype", function () {
+            var dbmodetype = $.trim($("#dbmodetype").val());
+            var dbnamebase = $.trim($("#dbnamebase").val());
+            var dbcatalog = $("#dbcatalog");
+            if (dbmodetype == "dalcluster") {
+                $("#dbcatalog-control").hide();
+                $.post("/rest/user/getDefaultDBInfo", {
+                    dbType: "MySQL",
+                    dbName: dbnamebase
+                }, function (data) {
+                    $("#dbaddress").val(data.db_address);
+                    $("#dbport").val(data.db_port);
+                    $("#dbuser").val(data.db_user);
+                    $("#dbpassword").val(data.db_password);
+                });
+            } else {
+                $("#dbcatalog-control").show();
+                $.post("/rest/db/getShardsByNameBase", {
+                    namebase: dbnamebase
+                }, function (data) {
+                    var dbcatalogs = [];
+                    $.each($.parseJSON(data.info), function (index, value) {
+                        dbcatalogs.push({
+                            id: value, title: value
+                        })
+                    });
+                    dbcatalog[0].selectize.clearOptions();
+                    dbcatalog[0].selectize.addOption(dbcatalogs);
+                    dbcatalog[0].selectize.refreshOptions(false);
+                });
+            }
         });
 
         $(document.body).on("change", "#dbcatalog", function () {
@@ -542,16 +727,36 @@
             }
         });
 
+        // 添加数据库--->点击 "下一步" 校验
         $(document.body).on("click", "#add_new_db_next", function () {
             var dbType = $("#dbtype").val();
+            var dbModeType = $("#dbmodetype").val();
+            var dbnamebase = $("#dbnamebase").val();
             var dbAddress = $("#dbaddress").val();
             var dbPort = $("#dbport").val();
             var dbUser = $("#dbuser").val();
             var dbPassword = $("#dbpassword").val();
             var error_msg = $("#error_msg");
+            var dbcatalog = $("#dbcatalog").val();
 
             if (dbType == "no") {
                 error_msg.html("请选择数据库类型");
+                return;
+            } else if (dbType == "MySQL") {
+                if (dbModeType == null || dbModeType.length == 0) {
+                    error_msg.html("请选择数据库连接方式");
+                    return;
+                }
+                if (dbnamebase == null || dbnamebase.length == 0) {
+                    error_msg.html("请选择DB Name Base");
+                    return;
+                }
+            } else {
+                $("#dbmodetype").val("titankey");
+                dbModeType = "titankey";
+            }
+            if (dbModeType == "titankey" && (dbcatalog == null || dbcatalog.length == 0)) {
+                error_msg.html("请选择DB Catalog");
                 return;
             }
             if (dbAddress == null || dbAddress.length == 0) {
@@ -582,11 +787,18 @@
             $("#add_new_db_next").hide();
             $("#add_new_db_prev").show();
             $("#add_new_db_save").show();
+            if (dbModeType == "dalcluster") {
+                $("#allinonename-control").hide();
+                $("#connectionString-control").show();
+            } else {
+                $("#allinonename-control").show();
+                $("#connectionString-control").hide();
+            }
             getUserGroups();
 
             getAllInOneKeyByDbName();
         });
-
+        // 添加数据库--->点击 "上一步" 回到上个页面
         $(document.body).on("click", "#add_new_db_prev", function () {
             $("#add_new_db_step1").show();
             $("#add_new_db_step2").hide();
@@ -611,6 +823,23 @@
             var dbCatalog = $("#dbcatalog").val();
             var dalGroup = $("#dalgroup").val();
             var error_msg = $("#error_msg");
+            var dbmodetype = $("#dbmodetype").val();
+            var dbnamebase = $("#dbnamebase").val();
+
+            if (dbType == "MySQL") {
+                if (dbnamebase == null || dbnamebase.length == 0) {
+                    error_msg.html("请选择DB Name Base");
+                    return;
+                }
+
+                if (dbmodetype == null || dbmodetype.length == 0) {
+                    error_msg.html("请选择DB Mode");
+                    return;
+                } else if (dbmodetype == "dalcluster") {
+                    dbCatalog = dbnamebase;
+                    all_In_One_Name = $("#connectionString").val();
+                }
+            }
 
             if (dbType == "no") {
                 error_msg.html("请选择数据库类型");
@@ -621,7 +850,7 @@
                 return;
             }
 
-            var result = validateKeyName($("#allinonename"), dbCatalog, error_msg);
+            var result = validateKeyName(all_In_One_Name, dbCatalog, error_msg, dbmodetype);
             if (!result) {
                 return;
             }
@@ -679,15 +908,15 @@
             var dbType = $.trim($("#dbtype_up").val());
             var dbCatalog = $("#dbcatalog_up").val();
 
-                $.post("/rest/user/getDefaultDBInfo", {
-                    dbType: dbType,
-                    dbName: dbCatalog
-                }, function (data) {
-                    $("#dbaddress_up").val(data.db_address);
-                    $("#dbport_up").val(data.db_port);
-                    $("#dbuser_up").val(data.db_user);
-                    $("#dbpassword_up").val(data.db_password);
-                });
+            $.post("/rest/user/getDefaultDBInfo", {
+                dbType: dbType,
+                dbName: dbCatalog
+            }, function (data) {
+                $("#dbaddress_up").val(data.db_address);
+                $("#dbport_up").val(data.db_port);
+                $("#dbuser_up").val(data.db_user);
+                $("#dbpassword_up").val(data.db_password);
+            });
 
         });
 
@@ -721,7 +950,7 @@
             var dbPort = $("#dbport_up").val();
             var dbUser = $("#dbuser_up").val();
             var dbPassword = $("#dbpassword_up").val();
-            var dbName=$("#dbcatalog_up").val();
+            var dbName = $("#dbcatalog_up").val();
             var result = true;
 
             $.ajax({
@@ -733,7 +962,7 @@
                     dbport: dbPort,
                     dbuser: dbUser,
                     dbpassword: dbPassword,
-                    dbName:dbName
+                    dbName: dbName
                 },
                 async: false,
                 success: function (data) {
@@ -769,9 +998,9 @@
             return result;
         };
 
-        var validateKeyName = function (obj, dbCatalog, msg) {
+        var validateKeyName = function (obj, dbCatalog, msg, dbModeType) {
             var result = true;
-            var key = obj.val();
+            var key = obj;
             if (key.length == 0)
                 return false;
 
@@ -779,7 +1008,7 @@
                 type: "GET",
                 dataType: "json",
                 url: "/rest/db/validation",
-                data: {"key": key, "dbName": dbCatalog},
+                data: {"key": key, "dbName": dbCatalog, "dbmodetype": dbModeType},
                 async: false,
                 success: function (data) {
                     if (data.info.length > 0) {
@@ -867,7 +1096,7 @@
                 return;
             }
 
-            var result = validateKeyName($("#allinonename_up"), dbCatalog, update_error_msg);
+            var result = validateKeyName($("#allinonename_up").val(), dbCatalog, update_error_msg, $("#dbmodetype").val());
             if (!result) {
                 return;
             }
@@ -915,7 +1144,12 @@
         });
 
         $(document.body).on("click", "#validateKeyname", function () {
-            validateKeyName($("#allinonename"), $("#dbcatalog").val(), $("#error_msg"));
+            var dbmodetype = $("#dbmodetype").val();
+            var allinonename = $("#allinonename").val();
+            if (dbmodetype == "dalcluster") {
+                allinonename = $("#connectionString").val();
+            }
+            validateKeyName(allinonename, $("#dbcatalog").val(), $("#error_msg"), dbmodetype);
         });
 
         isDefaultUser();

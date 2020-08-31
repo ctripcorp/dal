@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.helper.DalDefaultJpaParser;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeSelectSqlBuilder;
 import com.ctrip.platform.dal.dao.sqlbuilder.FreeUpdateSqlBuilder;
 import com.ctrip.platform.dal.daogen.entity.GenTaskByTableViewSp;
+import com.ctrip.platform.dal.daogen.enums.DbModeTypeEnum;
 import com.ctrip.platform.dal.daogen.utils.DatabaseSetUtils;
 
 import java.sql.SQLException;
@@ -53,8 +54,12 @@ public class DaoByTableViewSp extends BaseDao {
             Date date = new Date(entity.getUpdate_time().getTime());
             entity.setStr_update_time(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
         }
+        if (DbModeTypeEnum.Cluster.getDes().equals(entity.getMode_type())){
+            entity.setAllInOneName(entity.getDatabaseSetName());
+        } else {
+            entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
+        }
 
-        entity.setAllInOneName(DatabaseSetUtils.getAllInOneName(entity.getDatabaseSetName()));
     }
 
     public int getVersionById(int id) throws SQLException {
@@ -75,7 +80,7 @@ public class DaoByTableViewSp extends BaseDao {
         FreeSelectSqlBuilder<List<GenTaskByTableViewSp>> builder = new FreeSelectSqlBuilder<>(dbCategory);
         StringBuilder sb = new StringBuilder();
         sb.append(
-                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix, cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg ");
+                "SELECT id, project_id,db_name,table_names,view_names,sp_names,prefix,suffix, cud_by_sp,pagination,`generated`,version,update_user_no,update_time,comment,sql_style,api_list,approved,approveMsg, mode_type ");
         sb.append("FROM task_table WHERE project_id=? order by id");
         builder.setTemplate(sb.toString());
         StatementParameters parameters = new StatementParameters();

@@ -236,6 +236,7 @@
         getDatabaseCategory: function () {
             var postData = {};
             postData["db_set_name"] = $("#databases").val();
+            postData["mode_type"] = $("#index-dbmodetype").val();
             $.post("/rest/task/auto/getDatabaseCategory", postData, function (data) {
                 if (data.code == "OK") {
                     $(".step2-2-1").attr("dbCatalog", data.info);

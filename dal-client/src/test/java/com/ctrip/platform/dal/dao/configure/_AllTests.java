@@ -6,6 +6,11 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+        ClasspathResourceLoaderTest.class,
+        CommonFileLoaderTest.class,
+        InjectableComponentTest.class,
+        LocalDatabaseSetAdapterTest.class,
+        LocalDefaultDatabaseSetTest.class,
         SlaveFreshnessScannerMysqlTest.class,
         DataSourceConfigureLocatorTest.class,
         ClusterConfigParserTest.class,

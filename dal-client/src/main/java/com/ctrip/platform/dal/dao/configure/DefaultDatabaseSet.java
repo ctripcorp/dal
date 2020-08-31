@@ -66,9 +66,10 @@ public class DefaultDatabaseSet extends DatabaseSet {
     public DefaultDatabaseSet(String name, String provider, String shardStrategy, Map<String, DataBase> databases,
                               IIdGeneratorConfig idGenConfig, Map<String, String> properties) throws Exception {
         this(name, provider, initStrategy(shardStrategy), databases, idGenConfig, properties);
+        initShards();
     }
 
-    public DefaultDatabaseSet(String name, String provider, DalShardingStrategy strategy, Map<String, DataBase> databases,
+    protected DefaultDatabaseSet(String name, String provider, DalShardingStrategy strategy, Map<String, DataBase> databases,
                               IIdGeneratorConfig idGenConfig, Map<String, String> properties) {
         super(properties);
         this.name = name;
@@ -77,7 +78,6 @@ public class DefaultDatabaseSet extends DatabaseSet {
         this.databases = databases;
         this.idGenConfig = idGenConfig;
         this.strategy = strategy;
-        initShards();
     }
 
     private static DalShardingStrategy initStrategy(String shardStrategy) throws Exception {
@@ -98,7 +98,7 @@ public class DefaultDatabaseSet extends DatabaseSet {
         return strategy;
     }
 
-    private void initShards() {
+    protected void initShards() {
         if (getStrategyNullable() == null || !getStrategyNullable().isShardingByDb()) {
             // Init with no shard support
             for (DataBase db : databases.values()) {

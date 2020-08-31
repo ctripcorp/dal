@@ -32,6 +32,10 @@ public class LocalDatabaseSetAdapter implements DatabaseSetAdapter {
                 else
                     return original;
             }
+            String msg = String.format("DatabaseSet '%s' adapted to LocalDatabaseSet", original.getName());
+            if (tableShardingDisabled)
+                msg += ", tableSharding is disabled";
+            LOGGER.info(msg);
             return new LocalDefaultDatabaseSet((DefaultDatabaseSet) original, tableShardingDisabled);
         }
         return original;

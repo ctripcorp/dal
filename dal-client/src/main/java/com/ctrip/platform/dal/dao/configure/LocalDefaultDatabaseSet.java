@@ -19,6 +19,7 @@ public class LocalDefaultDatabaseSet extends DefaultDatabaseSet {
             shardStrategy = new LocalShardStrategyAdapter(strategy, tableShardingDisabled);
         else
             shardStrategy = null;
+        initShards();
     }
 
     @Override

@@ -52,7 +52,7 @@ public class LocalShardStrategyAdapter implements DalShardingStrategy {
     public String locateTableShard(DalConfigure configure, String logicDbName, String tabelName, DalHints hints) {
         if (tableShardingDisabled)
             throw new RuntimeException(
-                    String.format("[DAL-Local] Table sharding disabled for database '%s'", logicDbName));
+                    String.format("Table sharding disabled for database '%s' in local mode", logicDbName));
         return strategy.locateTableShard(configure, logicDbName, tabelName, hints);
     }
 

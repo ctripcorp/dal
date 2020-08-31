@@ -11,10 +11,13 @@ import java.util.Map;
 public class LocalShardStrategyAdapter implements DalShardingStrategy {
 
     private final DalShardingStrategy strategy;
+    private final boolean dbShardingDisabled;
     private final boolean tableShardingDisabled;
 
-    public LocalShardStrategyAdapter(DalShardingStrategy strategy, boolean tableShardingDisabled) {
+    public LocalShardStrategyAdapter(DalShardingStrategy strategy,
+                                     boolean dbShardingDisabled, boolean tableShardingDisabled) {
         this.strategy = strategy;
+        this.dbShardingDisabled = dbShardingDisabled;
         this.tableShardingDisabled = tableShardingDisabled;
     }
 
@@ -30,11 +33,14 @@ public class LocalShardStrategyAdapter implements DalShardingStrategy {
 
     @Override
     public boolean isShardingByDb() {
-        return strategy.isShardingByDb();
+        return !dbShardingDisabled && strategy.isShardingByDb();
     }
 
     @Override
     public String locateDbShard(DalConfigure configure, String logicDbName, DalHints hints) {
+        if (dbShardingDisabled)
+            throw new RuntimeException(
+                    String.format("Db sharding disabled for database '%s' in local mode", logicDbName));
         return strategy.locateDbShard(configure, logicDbName, hints);
     }
 

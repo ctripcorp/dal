@@ -263,8 +263,13 @@ public class DalConfigureFactory implements DalConfigConstants {
     }
 
     private void tryAdaptDatabaseSets(Map<String, DatabaseSet> databaseSets, DatabaseSetAdapter adapter) {
-        for (Map.Entry<String, DatabaseSet> entry : new HashMap<>(databaseSets).entrySet())
-            databaseSets.put(entry.getKey(), adapter.adapt(entry.getValue()));
+        for (Map.Entry<String, DatabaseSet> entry : new HashMap<>(databaseSets).entrySet()) {
+            try {
+                databaseSets.put(entry.getKey(), adapter.adapt(entry.getValue()));
+            } catch (Throwable t) {
+                // ignore
+            }
+        }
     }
 
     private IIdGeneratorConfig getIdGenConfig(Node databaseSetNode) throws Exception {

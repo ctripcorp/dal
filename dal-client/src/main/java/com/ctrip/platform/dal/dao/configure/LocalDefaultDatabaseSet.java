@@ -11,12 +11,13 @@ public class LocalDefaultDatabaseSet extends DefaultDatabaseSet {
 
     private final LocalShardStrategyAdapter shardStrategy;
 
-    public LocalDefaultDatabaseSet(DefaultDatabaseSet databaseSet, boolean tableShardingDisabled) {
+    public LocalDefaultDatabaseSet(DefaultDatabaseSet databaseSet,
+                                   boolean dbShardingDisabled, boolean tableShardingDisabled) {
         super(databaseSet.getName(), databaseSet.getProvider(), databaseSet.getStrategyNullable(),
                 databaseSet.getDatabases(), databaseSet.getIdGenConfig(), databaseSet.getProperties());
         DalShardingStrategy strategy = databaseSet.getStrategyNullable();
         if (strategy != null)
-            shardStrategy = new LocalShardStrategyAdapter(strategy, tableShardingDisabled);
+            shardStrategy = new LocalShardStrategyAdapter(strategy, dbShardingDisabled, tableShardingDisabled);
         else
             shardStrategy = null;
         initShards();

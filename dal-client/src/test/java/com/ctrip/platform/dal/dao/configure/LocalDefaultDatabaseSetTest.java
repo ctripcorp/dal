@@ -34,18 +34,20 @@ public class LocalDefaultDatabaseSetTest {
         Assert.assertEquals(mockProperties(), databaseSet.getProperties());
 
         LocalDefaultDatabaseSet localDatabaseSet1 =
-                new LocalDefaultDatabaseSet(databaseSet, false);
+                new LocalDefaultDatabaseSet(databaseSet, false,false);
         Assert.assertTrue(localDatabaseSet1.getStrategy() instanceof LocalShardStrategyAdapter);
         Assert.assertEquals(dbShards, localDatabaseSet1.getAllShards());
+        Assert.assertTrue(localDatabaseSet1.isShardingSupported());
         Assert.assertEquals(tblShards, localDatabaseSet1.getAllTableShards("tbl1"));
         Assert.assertFalse(localDatabaseSet1.isTableShardingSupported("tbl2"));
         Assert.assertEquals(tblShards, localDatabaseSet1.getAllTableShards("tbl3"));
         Assert.assertEquals(mockProperties(), localDatabaseSet1.getProperties());
 
         LocalDefaultDatabaseSet localDatabaseSet2 =
-                new LocalDefaultDatabaseSet(databaseSet, true);
+                new LocalDefaultDatabaseSet(databaseSet, true, true);
         Assert.assertTrue(localDatabaseSet2.getStrategy() instanceof LocalShardStrategyAdapter);
-        Assert.assertEquals(dbShards, localDatabaseSet2.getAllShards());
+        Assert.assertNotEquals(dbShards, localDatabaseSet2.getAllShards());
+        Assert.assertFalse(localDatabaseSet2.isShardingSupported());
         Assert.assertFalse(localDatabaseSet2.isTableShardingSupported("tbl1"));
         Assert.assertFalse(localDatabaseSet2.isTableShardingSupported("tbl2"));
         Assert.assertFalse(localDatabaseSet2.isTableShardingSupported("tbl3"));

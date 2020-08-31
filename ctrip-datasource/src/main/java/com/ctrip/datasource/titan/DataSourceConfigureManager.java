@@ -80,6 +80,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
     private static final String THREAD_NAME = "DataSourceConfigureManager";
 
     private ConnectionStringProvider connectionStringProvider;
+    private ConnectionStringProvider localConnectionStringProvider;
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
     private IPDomainStatusProvider ipDomainStatusProvider;
 
@@ -111,7 +112,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         if (isLocal()) {
             CtripLocalContext localContext = new CtripLocalContextImpl(getParsedDatabaseConfigPath(),
                     getParsedDatabaseConfigFile(), isFxLocal(), databaseSets);
-            connectionStringProvider = new CtripLocalConnectionStringProvider(localContext);
+            localConnectionStringProvider = new CtripLocalConnectionStringProvider(localContext);
             ipDomainStatusProvider = new ConstantIPDomainStatusProvider(IPDomainStatus.IP);
         } else {
             connectionStringProvider = new ConnectionStringProviderImpl();
@@ -179,9 +180,10 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             return;
 
         // setup connection strings
-        Map<String, DalConnectionString> connectionStrings = getConnectionStrings(names);
+        Map<String, DalConnectionString> connectionStrings = getConnectionStrings(names, sourceType);
         dataSourceConfigureLocator.setConnectionStrings(connectionStrings);
-        addConnectionStringChangedListeners(names);
+        if (sourceType == SourceType.Remote)
+            addConnectionStringChangedListeners(names);
     }
 
     private Set<String> getFilteredNames(Set<String> names, SourceType sourceType) throws Exception {
@@ -211,7 +213,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         return set;
     }
 
-    private Map<String, DalConnectionString> getConnectionStrings(Set<String> names) {
+    private Map<String, DalConnectionString> getConnectionStrings(Set<String> names, SourceType sourceType) {
         Map<String, DalConnectionString> connectionStrings;
         if (isDebug) {
             connectionStrings = new HashMap<>();
@@ -227,7 +229,19 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         }
 
         try {
-            connectionStrings = connectionStringProvider.getConnectionStrings(names);
+            if (sourceType == SourceType.Local) {
+                if (isLocal()) {
+                    connectionStrings = localConnectionStringProvider.getConnectionStrings(names);
+                } else {
+                    CtripLocalContext localContext = new CtripLocalContextImpl(getParsedDatabaseConfigPath(),
+                            getParsedDatabaseConfigFile(), isFxLocal(), null);
+                    connectionStrings = new CtripLocalConnectionStringProvider(localContext).getConnectionStrings(names);
+                }
+            } else {
+                if (connectionStringProvider == null)
+                    connectionStringProvider = new ConnectionStringProviderImpl();
+                connectionStrings = connectionStringProvider.getConnectionStrings(names);
+            }
         } catch (Exception e) {
             error("Failed to get connectionStrings", e);
             throw new RuntimeException(e);

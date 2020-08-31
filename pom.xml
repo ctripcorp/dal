@@ -24,7 +24,7 @@
         <ctrip-datasource.version>${project.version}</ctrip-datasource.version>
         <ctrip-dal-client.version>${project.version}</ctrip-dal-client.version>
         <vi.version>0.11.5</vi.version>
-        <framework-foundation.version>1.8.10</framework-foundation.version>
+        <framework-foundation.version>1.8.13</framework-foundation.version>
         <clogging-agent.version>4.2.9</clogging-agent.version>
         <cat-client.version>3.3.1</cat-client.version>
         <qconfig-client.version>1.100.19</qconfig-client.version>

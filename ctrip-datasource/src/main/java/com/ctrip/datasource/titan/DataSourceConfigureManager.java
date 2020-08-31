@@ -1,9 +1,12 @@
 package com.ctrip.datasource.titan;
 
 import com.ctrip.datasource.configure.CtripLocalConnectionStringProvider;
+import com.ctrip.datasource.configure.CtripLocalContext;
+import com.ctrip.datasource.configure.CtripLocalContextImpl;
 import com.ctrip.datasource.configure.qconfig.ConnectionStringProviderImpl;
 import com.ctrip.datasource.configure.qconfig.IPDomainStatusProviderImpl;
 import com.ctrip.datasource.configure.qconfig.PoolPropertiesProviderImpl;
+import com.ctrip.datasource.datasource.ConstantIPDomainStatusProvider;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
@@ -78,7 +81,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
     private ConnectionStringProvider connectionStringProvider;
     private PoolPropertiesProvider poolPropertiesProvider = new PoolPropertiesProviderImpl();
-    private IPDomainStatusProvider ipDomainStatusProvider = new IPDomainStatusProviderImpl();
+    private IPDomainStatusProvider ipDomainStatusProvider;
 
     private AtomicReference<Boolean> isPoolPropertiesListenerAdded = new AtomicReference<>(false);
     private AtomicReference<Boolean> isIPDomainStatusListenerAdded = new AtomicReference<>(false);
@@ -105,9 +108,15 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
         if (isInitialized)
             return;
         _initialize(settings);
-        connectionStringProvider = isLocal() ?
-                new CtripLocalConnectionStringProvider(getParsedDatabaseConfigPath(), getParsedDatabaseConfigFile(), databaseSets) :
-                new ConnectionStringProviderImpl();
+        if (isLocal()) {
+            CtripLocalContext localContext = new CtripLocalContextImpl(getParsedDatabaseConfigPath(),
+                    getParsedDatabaseConfigFile(), isFxLocal(), databaseSets);
+            connectionStringProvider = new CtripLocalConnectionStringProvider(localContext);
+            ipDomainStatusProvider = new ConstantIPDomainStatusProvider(IPDomainStatus.IP);
+        } else {
+            connectionStringProvider = new ConnectionStringProviderImpl();
+            ipDomainStatusProvider = new IPDomainStatusProviderImpl();
+        }
         isInitialized = true;
     }
 

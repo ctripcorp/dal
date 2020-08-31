@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ctrip.datasource.configure.CtripLocalContext;
+import com.ctrip.datasource.configure.CtripLocalContextImpl;
 import com.ctrip.platform.dal.dao.configure.LocalClusterInfoProvider;
 import com.ctrip.datasource.net.HttpExecutor;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
@@ -53,8 +55,11 @@ public class TitanProvider extends InjectableComponentSupport implements Integra
         setSourceType(settings);
         dataSourceConfigureManager.initialize(settings, getDatabaseSets());
         if (sourceType == SourceType.Local) {
-            clusterConfigProvider =
-                    new CtripLocalClusterConfigProvider(dataSourceConfigureManager.getParsedDatabaseConfigPath());
+            CtripLocalContext localContext =
+                    new CtripLocalContextImpl(dataSourceConfigureManager.getParsedDatabaseConfigPath(),
+                            dataSourceConfigureManager.getParsedDatabaseConfigFile(),
+                            dataSourceConfigureManager.isFxLocal(), null);
+            clusterConfigProvider = new CtripLocalClusterConfigProvider(localContext);
             clusterInfoProvider = new LocalClusterInfoProvider();
         }
     }

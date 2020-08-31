@@ -1,0 +1,13 @@
+<DAL>
+    <Cluster name="mock1_dalcluster" dbCategory="mysql" version="1">
+        <DatabaseShards>
+            <DatabaseShard index="0" masterDomain="dst56614" masterPort="3306" slaveDomain="dst56614" slavePort="3306">
+                <Database role="master" ip="10.32.20.128" port="3306" dbName="mock11" uid="root" pwd="root"/>
+            </DatabaseShard>
+            <DatabaseShard index="1" masterDomain="dst56614" masterPort="3306" slaveDomain="dst56614" slavePort="3306">
+                <Database role="master" ip="10.32.20.128" port="3306" dbName="mock12" uid="root" pwd="root"/>
+            </DatabaseShard>
+        </DatabaseShards>
+        <UnitStrategyId>3</UnitStrategyId>
+    </Cluster>
+</DAL>

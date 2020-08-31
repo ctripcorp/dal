@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
  */
 public class CtripLocalResourceLoader implements ResourceLoader<String> {
 
-    private static final String GROUP_ID = "DAL";
-    private static final String DEFAULT_PATH_WINDOWS = "/D:/WebSites/CtripAppData/";
-    private static final String DEFAULT_PATH_LINUX = "/opt/ctrip/AppData/";
-    private static final String PATH_CLASSPATH = "$classpath";
+    protected static final String GROUP_ID = "DAL";
+    protected static final String DEFAULT_PATH_WINDOWS = "/D:/WebSites/CtripAppData/";
+    protected static final String DEFAULT_PATH_LINUX = "/opt/ctrip/AppData/";
+    protected static final String PATH_CLASSPATH = "$classpath";
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -25,16 +25,15 @@ public class CtripLocalResourceLoader implements ResourceLoader<String> {
     private final CtripFxLocalResourceLoader fxPathLoader;
     private final String userDefinedPath;
     private final String defaultPath;
+    private final boolean isFxLocal;
 
     public CtripLocalResourceLoader() {
         this(null);
     }
 
-    public CtripLocalResourceLoader(String userDefinedPath) {
-        this(new CommonFileLoader(),
-                new ClasspathResourceLoader(),
-                new CtripFxLocalResourceLoader(GROUP_ID),
-                userDefinedPath);
+    public CtripLocalResourceLoader(CtripLocalContext context) {
+        this(new CommonFileLoader(), new ClasspathResourceLoader(),
+                new CtripFxLocalResourceLoader(GROUP_ID), context);
     }
 
     public CtripLocalResourceLoader(CommonFileLoader commonFileLoader,
@@ -46,12 +45,13 @@ public class CtripLocalResourceLoader implements ResourceLoader<String> {
     public CtripLocalResourceLoader(CommonFileLoader commonFileLoader,
                                     ClasspathResourceLoader classpathLoader,
                                     CtripFxLocalResourceLoader fxPathLoader,
-                                    String userDefinedPath) {
+                                    CtripLocalContext context) {
         this.commonFileLoader = commonFileLoader;
         this.classpathLoader = classpathLoader;
         this.fxPathLoader = fxPathLoader;
-        this.userDefinedPath = userDefinedPath;
+        this.userDefinedPath = context == null ? null : context.getUserDefinedDatabaseConfigPath();
         this.defaultPath = getDefaultPath();
+        this.isFxLocal = context == null || context.isFxLocal();
     }
 
     public String getDefaultPath() {
@@ -72,8 +72,10 @@ public class CtripLocalResourceLoader implements ResourceLoader<String> {
         } else if (!StringUtils.isEmpty(userDefinedPath)) {
             resource = commonFileLoader.getResource(userDefinedPath + resourceName);
         }
-        if (resource == null)
+        if (resource == null && isFxLocal)
             resource = fxPathLoader.getResource(resourceName);
+        if (resource == null)
+            resource = classpathLoader.getResource(resourceName);
         if (resource == null)
             resource = commonFileLoader.getResource(defaultPath + resourceName);
         return resource;

@@ -36,40 +36,25 @@ public class CtripLocalConnectionStringProvider implements ConnectionStringProvi
     private final String userDefinedFile;
 
     public CtripLocalConnectionStringProvider() {
-        this(null, null);
+        this(null);
+    }
+    public CtripLocalConnectionStringProvider(CtripLocalContext context) {
+        this(new CtripLocalResourceLoader(context), context);
     }
 
-    public CtripLocalConnectionStringProvider(String userDefinedPath, String userDefinedFile) {
-        this(userDefinedPath, userDefinedFile, null);
-    }
-
-    public CtripLocalConnectionStringProvider(DatabaseSets databaseSets) {
-        this(null, null, databaseSets);
-    }
-
-    public CtripLocalConnectionStringProvider(String userDefinedPath,
-                                              String userDefinedFile,
-                                              DatabaseSets databaseSets) {
-        this(new CtripLocalResourceLoader(userDefinedPath), databaseSets, userDefinedFile);
-    }
-
-    public CtripLocalConnectionStringProvider(CtripLocalResourceLoader resourceLoader,
-                                              DatabaseSets databaseSets,
-                                              String userDefinedFile) {
+    public CtripLocalConnectionStringProvider(CtripLocalResourceLoader resourceLoader, CtripLocalContext context) {
         this.resourceLoader = resourceLoader;
-        this.databaseSets = databaseSets;
-        this.userDefinedFile = userDefinedFile;
+        this.databaseSets = context == null ? null : context.getDatabaseSets();
+        this.userDefinedFile = context == null ? null : context.getUserDefinedDatabaseConfigFile();
     }
 
     @Override
     public Map<String, DalConnectionString> getConnectionStrings(Set<String> names) throws Exception {
-        Map<String, DalConnectionString> connectionStrings = new HashMap<>();
         Resource<String> localDatabasesResource =
                 resourceLoader.getResource(CtripLocalDatabasePropertiesParser.FILE_LOCAL_DATABASES);
-        if (localDatabasesResource != null) {
-            Properties localDatabasesProperties = PropertiesUtils.toProperties(localDatabasesResource.getContent());
-            connectionStrings.putAll(parseLocalDatabases(localDatabasesProperties, names));
-        }
+        Properties localDatabasesProperties = localDatabasesResource == null ? null :
+                PropertiesUtils.toProperties(localDatabasesResource.getContent());
+        Map<String, DalConnectionString>  connectionStrings = parseLocalDatabases(localDatabasesProperties, names);
         Resource<String> databaseConfigResource = resourceLoader.getResource(getDatabaseConfigFileName());
         if (databaseConfigResource != null && !StringUtils.isTrimmedEmpty(databaseConfigResource.getContent()))
             connectionStrings.putAll(parseDatabaseConfig(databaseConfigResource.getContent(), names));

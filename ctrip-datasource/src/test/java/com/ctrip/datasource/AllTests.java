@@ -15,6 +15,7 @@ import com.ctrip.datasource.dynamicdatasource.DataSourceConfigureEncryptTest;
 import com.ctrip.datasource.dynamicdatasource.MGRDataSourceSwitchTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import com.ctrip.datasource.readonly.SqlServerReadonlyTest;
+import com.ctrip.datasource.titan.DataSourceConfigureHelperTest;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtilsTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -60,7 +61,13 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 		ClusterSwitchTest.class,
 		DataSourceLocatorTest.class,
 		CtripClusterInfoProviderTest.class,
-		DataSourceMonitorTest.class
+		DataSourceMonitorTest.class,
+		CtripFxLocalResourceLoaderTest.class,
+		CtripLocalClusterConfigProviderTest.class,
+		CtripLocalConnectionStringProviderTest.class,
+		CtripLocalDatabasePropertiesParserTest.class,
+		CtripLocalResourceLoaderTest.class,
+		DataSourceConfigureHelperTest.class
 	})
 
 public class AllTests {

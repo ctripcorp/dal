@@ -1,11 +1,13 @@
 package com.ctrip.datasource.titan;
 
+import com.ctrip.datasource.configure.CtripLocalResourceLoader;
 import com.ctrip.datasource.util.DalEncrypter;
 import com.ctrip.datasource.util.Version;
 import com.ctrip.framework.clogging.agent.config.LogConfig;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.dao.client.LoggerAdapter;
+import com.ctrip.platform.dal.dao.configure.ClasspathResourceLoader;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureParser;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -41,8 +43,6 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     protected String databaseConfigLocation;
     protected String parsedDatabaseConfigPath;
     protected String parsedDatabaseConfigFile;
-
-    private boolean isLocal = false;
 
     private DalEncrypter dalEncrypter = null;
 
@@ -92,8 +92,6 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
             ProductVersionManager.getInstance().register(DAL_LOCAL_DATASOURCELOCATION,
                     DataSourceConfigureParser.getInstance().getDataSourceXmlLocation());
         }
-
-        isLocal = useLocal || ENV_UTILS.isLocal();
 
         parseDatabaseConfigLocation();
     }
@@ -154,7 +152,11 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     }
 
     protected boolean isLocal() {
-        return isLocal;
+        return useLocal || isFxLocal();
+    }
+
+    protected boolean isFxLocal() {
+        return ENV_UTILS.isLocal();
     }
 
     protected void parseDatabaseConfigLocation() {
@@ -165,6 +167,11 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
             parsedDatabaseConfigPath = databaseConfigLocation.substring(0, end);
             if (end < databaseConfigLocation.length())
                 parsedDatabaseConfigFile = databaseConfigLocation.substring(end);
+            if (StringUtils.isEmpty(parsedDatabaseConfigPath) &&
+                    "$classpath".equalsIgnoreCase(parsedDatabaseConfigFile)) {
+                parsedDatabaseConfigPath = "$classpath";
+                parsedDatabaseConfigFile = null;
+            }
         }
     }
 

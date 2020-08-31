@@ -23,8 +23,8 @@ public class CtripLocalClusterConfigProvider implements ClusterConfigProvider {
         this(null);
     }
 
-    public CtripLocalClusterConfigProvider(String userDefinedPath) {
-        this(new CtripLocalResourceLoader(userDefinedPath), new ClusterConfigXMLParser());
+    public CtripLocalClusterConfigProvider(CtripLocalContext context) {
+        this(new CtripLocalResourceLoader(context), new ClusterConfigXMLParser());
     }
 
     public CtripLocalClusterConfigProvider(CtripLocalResourceLoader resourceLoader,

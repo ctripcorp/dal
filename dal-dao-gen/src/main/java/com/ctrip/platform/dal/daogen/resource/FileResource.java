@@ -124,7 +124,7 @@ public class FileResource {
         if (conf.startsWith("\t\t<databaseSet") && isDalCluster(conf.substring(nameStartIndex + 1, nameEndIndex))) {
             StringBuilder sb = new StringBuilder(conf);
             sb.replace(0, "\t\t<databaseSet".length(), "\t\t<cluster");
-            sb.replace(nameEndIndex - 2, sb.length(), "/>");
+            sb.replace(nameEndIndex - 3, sb.length(), "/>");
             reader.readLine();
             return sb.toString();
         }

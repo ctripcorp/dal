@@ -235,8 +235,8 @@
                                 <span class="glyphicon glyphicon-question-sign"></span>
                             </a>
                             <select id="sql_style" class="span8">
-                                <option value="csharp">C#风格(参数形式为@Name)</option>
                                 <option value="java" selected="selected">JAVA风格(参数形式为?)</option>
+                                <option value="csharp">C#风格(参数形式为@Name)</option>
                             </select>
                         </div>
                     </div>
@@ -249,7 +249,7 @@
                                 <span class="glyphicon glyphicon-question-sign"></span>
                             </a>
                             <input id="sql_style_input" class="span8 input-sm" type="text" readonly="readonly"
-                                   placeholder="JAVA风格(参数形式为?)">
+                                   value="JAVA风格(参数形式为?)">
                         </div>
                     </div>
                     <div class="row-fluid">

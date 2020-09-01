@@ -1,0 +1,22 @@
+<dal name="dal.prize.test">
+  <databaseSets>
+    <databaseSet name="set1" provider="sqlProvider">
+      <add name="SimpleShard0" databaseType="Master" sharding="0" connectionString="SimpleShard_0"/>
+    </databaseSet>
+    <databaseSet name="set2" provider="sqlProvider">
+      <add name="SimpleShard1" databaseType="Master" sharding="0" connectionString="SimpleShard_1"/>
+    </databaseSet>
+  </databaseSets>
+  <LogListener enabled="true">
+      <logger>com.ctrip.platform.dal.sql.logging.TestDalLogger</logger>
+  </LogListener>
+  <ConnectionLocator>
+      <settings>
+         <useLocalConfig>true</useLocalConfig>
+         <dataSourceConfigureProvider>com.ctrip.datasource.titan.TitanProvider</dataSourceConfigureProvider>
+      </settings>
+  </ConnectionLocator>
+  <TaskFactory>
+      <factory>com.ctrip.platform.dal.dao.CtripTaskFactory</factory>
+  </TaskFactory>
+</dal>

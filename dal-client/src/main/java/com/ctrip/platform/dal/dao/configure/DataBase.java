@@ -17,7 +17,7 @@ public interface DataBase {
     String getConnectionString();
 
     default DataSourceIdentity getDataSourceIdentity() {
-        return new DataSourceName(getName());
+        return new DataSourceName(getConnectionString());
     }
 
 }

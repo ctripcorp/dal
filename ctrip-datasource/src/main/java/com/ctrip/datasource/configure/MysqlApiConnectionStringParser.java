@@ -63,7 +63,7 @@ public class MysqlApiConnectionStringParser {
                 charset = DEFAULT_ENCODING;
             }
 
-            String ipAndPortString = "";
+            String ipAndPortString;
             String masterIp = null;
             String masterPort = null;
             String nodeIp = null;
@@ -71,12 +71,14 @@ public class MysqlApiConnectionStringParser {
             int masterCount = 0;
             int validNodeCount = 0;
 
+            StringBuilder ipAndPortStringBuilder = new StringBuilder();
             List<ClusterNodeInfo> clusterNodeInfoList = info.getClusternodeinfolist();
             for (ClusterNodeInfo clusterNodeInfo : clusterNodeInfoList) {
                 if (checkClusterNodeInfo(clusterNodeInfo)) {
                     // mgr
-                    ipAndPortString += String.format(MGR_HOST_PORT_TEMPLATE, clusterNodeInfo.getIp_business(),
-                            clusterNodeInfo.getDns_port()) + COM_SPLIT;
+                    ipAndPortStringBuilder.append(String.format(MGR_HOST_PORT_TEMPLATE,
+                            clusterNodeInfo.getIp_business(), clusterNodeInfo.getDns_port()));
+                    ipAndPortStringBuilder.append(COM_SPLIT);
                     // master ip
                     if (MYSQL_MASTER.equalsIgnoreCase(clusterNodeInfo.getRole())) {
                         masterIp = clusterNodeInfo.getIp_business();
@@ -90,6 +92,7 @@ public class MysqlApiConnectionStringParser {
                     ++ validNodeCount;
                 }
             }
+            ipAndPortString = ipAndPortStringBuilder.toString();
 
             // mha must have only one master node
             if (info.getClustertype().equalsIgnoreCase(MYSQL_API_CLUSTER_TYPE_MHA) && masterCount == 1 && StringUtils.isNotBlank(masterIp)

@@ -19,6 +19,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -37,7 +38,9 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         StringReader reader = new StringReader(content);
         InputSource source = new InputSource(reader);
         try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            Document doc = factory.newDocumentBuilder().parse(source);
             return parse(doc);
         } catch (Throwable t) {
             throw new ClusterConfigException("parse cluster config error", t);
@@ -47,7 +50,9 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     @Override
     public ClusterConfig parse(InputStream stream) {
         try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            Document doc = factory.newDocumentBuilder().parse(stream);
             return parse(doc);
         } catch (Throwable t) {
             throw new ClusterConfigException("parse cluster config error", t);
@@ -316,7 +321,9 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         StringReader reader = new StringReader(content);
         InputSource source = new InputSource(reader);
         try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            Document doc = factory.newDocumentBuilder().parse(source);
             return doc.getDocumentElement();
         } catch (Throwable t) {
             throw new ClusterRuntimeException("parse xml content error", t);

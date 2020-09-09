@@ -14,6 +14,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.util.*;
@@ -119,7 +120,9 @@ public class CtripLocalConnectionStringProvider implements ConnectionStringProvi
     protected Map<String, DalConnectionString> parseDatabaseConfig(String content, Set<String> names) {
         try (StringReader reader = new StringReader(content)) {
             InputSource source = new InputSource(reader);
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            Document doc = factory.newDocumentBuilder().parse(source);
             Element root = doc.getDocumentElement();
             Map<String, DalConnectionString> connectionStrings = new HashMap<>();
             List<Node> databaseEntries = getChildNodes(root, DATABASE_ENTRY);

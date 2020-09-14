@@ -5,6 +5,8 @@ import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
 import com.ctrip.framework.clogging.agent.metrics.IMetric;
 import com.ctrip.framework.clogging.agent.metrics.MetricManager;
+import com.ctrip.framework.ucs.client.api.UcsClient;
+import com.ctrip.framework.ucs.client.api.UcsClientFactory;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.log.AbstractLogger;
 import com.ctrip.platform.dal.dao.log.Callback;
@@ -20,6 +22,8 @@ public class CtripLoggerImpl extends AbstractLogger {
     public static final String TITLE = "Dal Fx";
     private static final ILog logger = LogManager.getLogger(CtripLoggerImpl.class);
     private static IMetric metric = MetricManager.getMetricer();
+
+    private volatile UcsClient ucsClient;
 
     @Override
     public void logEvent(String type, String name, String message) {
@@ -176,5 +180,23 @@ public class CtripLoggerImpl extends AbstractLogger {
         String version = Version.getVersion();
         SQLErrorInfo errorInfo = new SQLErrorInfo(version, keyName);
         metric.log(SQLErrorInfo.ERROR, 1, errorInfo.toTag());
+    }
+
+    @Override
+    public void logRequestContext() {
+        UcsClient ucsClient = getOrCreateUcsClient();
+        if (ucsClient != null)
+            ucsClient.logRequestContextKey();
+    }
+
+    private UcsClient getOrCreateUcsClient() {
+        if (ucsClient == null) {
+            synchronized (this) {
+                if (ucsClient == null) {
+                    ucsClient = UcsClientFactory.getInstance().getUcsClient();
+                }
+            }
+        }
+        return ucsClient;
     }
 }

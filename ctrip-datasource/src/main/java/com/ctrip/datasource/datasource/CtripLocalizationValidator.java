@@ -43,7 +43,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
     }
 
     @Override
-    public ValidationResult validateRequest() {
+    public ValidationResult validateRequest(boolean isUpdateOperation) {
         boolean bResult;
         String ucsMsg = null;
         String dalMsg = null;
@@ -53,7 +53,6 @@ public class CtripLocalizationValidator implements LocalizationValidator {
             result = context.validate(config.getUnitStrategyId());
             if (result != null)
                 ucsMsg = result.name();
-            ucsClient.logRequestContextKey();
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result), Event.SUCCESS, buildUcsValidateLogMessage(result));
         } catch (Throwable t) {
             Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION"), Event.SUCCESS, t.getMessage());
@@ -61,7 +60,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
 
         if (result != null && !result.shouldProcessDBOperation()) {
             try {
-                if (config.getLocalizationState() == LocalizationState.ACTIVE && locator.localizedForDrc(result.name())) {
+                if (config.getLocalizationState() == LocalizationState.ACTIVE && locator.localizedForDrc(result.name(), isUpdateOperation)) {
                     Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false), DAL_VALIDATE_REJECT, "");
                     bResult = false;
                     dalMsg = DAL_VALIDATE_REJECT;

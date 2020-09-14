@@ -39,7 +39,7 @@ public class CtripLocalizationValidatorTest {
     public void testActiveLocalizationValidation() {
         CtripLocalizationValidator validator = new CtripLocalizationValidator(mockUcsClient(),
                 mockDalPropertiesLocator(), mockClusterInfo(), mockLocalizationConfig(LocalizationState.ACTIVE));
-        ValidationResult result = validator.validateRequest();
+        ValidationResult result = validator.validateRequest(true);
         Assert.assertFalse(result.getValidationResult());
         Assert.assertEquals(StrategyValidatedResult.ShardBlock.name(), result.getUcsValidationMessage());
         Assert.assertEquals(CtripLocalizationValidator.DAL_VALIDATE_REJECT, result.getDalValidationMessage());
@@ -50,7 +50,7 @@ public class CtripLocalizationValidatorTest {
     public void testPreparedLocalizationValidation() {
         CtripLocalizationValidator validator = new CtripLocalizationValidator(mockUcsClient(),
                 mockDalPropertiesLocator(), mockClusterInfo(), mockLocalizationConfig(LocalizationState.PREPARED));
-        ValidationResult result = validator.validateRequest();
+        ValidationResult result = validator.validateRequest(false);
         Assert.assertTrue(result.getValidationResult());
         Assert.assertEquals(StrategyValidatedResult.ShardBlock.name(), result.getUcsValidationMessage());
         Assert.assertEquals(CtripLocalizationValidator.DAL_VALIDATE_WARN, result.getDalValidationMessage());
@@ -77,7 +77,7 @@ public class CtripLocalizationValidatorTest {
     private DalPropertiesLocator mockDalPropertiesLocator() {
         return new DefaultDalPropertiesLocator() {
             @Override
-            public boolean localizedForDrc(String situation) {
+            public boolean localizedForDrc(String situation, boolean isUpdateOperation) {
                 return true;
             }
         };

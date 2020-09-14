@@ -5,7 +5,7 @@ package com.ctrip.platform.dal.dao.datasource;
  */
 public interface LocalizationValidatable {
 
-    boolean validate();
+    boolean validate(boolean isUpdateOperation);
 
     ValidationStatus getLastValidationStatus();
 

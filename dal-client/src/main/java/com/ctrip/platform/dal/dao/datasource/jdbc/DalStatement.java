@@ -1,10 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
+import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.sql.*;
 
 public class DalStatement implements Statement {
+
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
     private Statement statement;
     protected DalConnection connection;
@@ -291,6 +295,11 @@ public class DalStatement implements Statement {
     }
 
     protected <T> T innerExecute(SqlCallable<T> task, boolean isUpdateOperation) throws SQLException {
+        try {
+            LOGGER.logRequestContext();
+        } catch (Throwable t) {
+            // ignore
+        }
         return connection.innerExecute(task, isUpdateOperation);
     }
 

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public interface ILogger {
+
     void logEvent(String type, String name, String message);
 
     void logTransaction(String type, String name, String message, Callback callback) throws Exception;
@@ -30,5 +31,7 @@ public interface ILogger {
     void error(final String msg, final Throwable e);
 
     void reportError(final String keyName);
+
+    void logRequestContext();
 
 }

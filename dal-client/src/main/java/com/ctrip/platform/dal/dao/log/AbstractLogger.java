@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 public abstract class AbstractLogger implements ILogger {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLogger.class);
 
     @Override
@@ -106,4 +107,8 @@ public abstract class AbstractLogger implements ILogger {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void logRequestContext() {}
+
 }

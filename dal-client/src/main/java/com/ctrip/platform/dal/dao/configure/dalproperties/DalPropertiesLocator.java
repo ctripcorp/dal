@@ -21,9 +21,7 @@ public interface DalPropertiesLocator {
 
     String getClusterInfoQueryUrl();
 
-    boolean localizedForDrc();
-
-    boolean localizedForDrc(String situation);
+    boolean localizedForDrc(String situation, boolean isUpdateOperation);
 
     String getProperty(String name);
 

@@ -31,12 +31,13 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public ResultSet executeQuery() throws SQLException {
+        validateLocalization(false);
         return preparedStatement.executeQuery();
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        validateLocalization();
+        validateLocalization(true);
         return preparedStatement.executeUpdate();
     }
 
@@ -143,8 +144,7 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public boolean execute() throws SQLException {
-        if (isUpdateOperation())
-            validateLocalization();
+        validateLocalization(isUpdateOperation());
         return preparedStatement.execute();
     }
 
@@ -320,7 +320,7 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public long executeLargeUpdate() throws SQLException {
-        validateLocalization();
+        validateLocalization(true);
         return preparedStatement.executeLargeUpdate();
     }
 

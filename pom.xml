@@ -15,7 +15,7 @@
     <modules>
         <module>ctrip-datasource</module>
         <module>ctrip-dal-client</module>
-        <module>ctrip-dao-gen</module>
+        <!--<module>ctrip-dao-gen</module>-->
     </modules>
 
     <properties>

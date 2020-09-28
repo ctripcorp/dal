@@ -129,7 +129,7 @@ public class DalDataSourceFactory {
         DataSourceLocator locator = new DataSourceLocator(provider, isForceInitialize);
 
         if (clusterInfo == null || clusterInfo.getRole() != DatabaseRole.MASTER)
-            return locator.getDataSource(allInOneKey);
+            return locator.getDataSource(new TraceableDataSourceName(allInOneKey));
         else
             return locator.getDataSource(clusterInfo);
     }

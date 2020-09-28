@@ -20,7 +20,7 @@ public class CtripLocalizationValidator implements LocalizationValidator {
 
     private static final String UCS_VALIDATE_LOG_TYPE = "DAL.drc.ucs.validate";
     private static final String DAL_VALIDATE_LOG_TYPE = "DAL.drc.validate";
-    private static final String PATTERN_DRC_VALIDATE_LOG_NAME = "%s-%s:%s";
+    private static final String PATTERN_DRC_VALIDATE_LOG_NAME = "%s-%s:%s:%s";
     private static final String PATTERN_ZONE_MISMATCH_LOG_NAME = "ZoneMismatch:%s";
     private static final String PATTERN_ZONE_UNDEFINED_LOG_NAME = "ZoneUndefined:%s";
 
@@ -53,29 +53,29 @@ public class CtripLocalizationValidator implements LocalizationValidator {
             result = context.validate(config.getUnitStrategyId());
             if (result != null)
                 ucsMsg = result.name();
-            Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result), Event.SUCCESS, buildUcsValidateLogMessage(result));
+            Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildUcsValidateLogName(result, isUpdateOperation), Event.SUCCESS, buildUcsValidateLogMessage(result));
         } catch (Throwable t) {
-            Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION"), Event.SUCCESS, t.getMessage());
+            Cat.logEvent(UCS_VALIDATE_LOG_TYPE, buildValidateLogName("EXCEPTION", isUpdateOperation), Event.SUCCESS, t.getMessage());
         }
 
         if (result != null && !result.shouldProcessDBOperation()) {
             try {
                 if (config.getLocalizationState() == LocalizationState.ACTIVE && locator.localizedForDrc(result.name(), isUpdateOperation)) {
-                    Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false), DAL_VALIDATE_REJECT, "");
+                    Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(false, isUpdateOperation), DAL_VALIDATE_REJECT, "");
                     bResult = false;
                     dalMsg = DAL_VALIDATE_REJECT;
                 } else {
-                    Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildValidateLogName(DAL_VALIDATE_WARN));
+                    Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildValidateLogName(DAL_VALIDATE_WARN, isUpdateOperation));
                     bResult = true;
                     dalMsg = DAL_VALIDATE_WARN;
                 }
             } catch (Throwable t) {
-                Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(true), Event.SUCCESS, t.getMessage());
+                Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(true, isUpdateOperation), Event.SUCCESS, t.getMessage());
                 bResult = true;
                 dalMsg = DAL_VALIDATE_PASS;
             }
         } else {
-            Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(true));
+            Cat.logEvent(DAL_VALIDATE_LOG_TYPE, buildDalValidateLogName(true, isUpdateOperation));
             bResult = true;
             dalMsg = DAL_VALIDATE_PASS;
         }
@@ -114,20 +114,21 @@ public class CtripLocalizationValidator implements LocalizationValidator {
         return config;
     }
 
-    private String buildUcsValidateLogName(StrategyValidatedResult result) {
-        return buildValidateLogName(result != null ? result.name() : "NoResult");
+    private String buildUcsValidateLogName(StrategyValidatedResult result, boolean isUpdateOperation) {
+        return buildValidateLogName(result != null ? result.name() : "NoResult", isUpdateOperation);
     }
 
     private String buildUcsValidateLogMessage(StrategyValidatedResult result) {
         return result != null ? "shouldProcessDBOperation: " + result.shouldProcessDBOperation() : "";
     }
 
-    private String buildDalValidateLogName(boolean result) {
-        return buildValidateLogName(result ? DAL_VALIDATE_PASS : DAL_VALIDATE_REJECT);
+    private String buildDalValidateLogName(boolean result, boolean isUpdateOperation) {
+        return buildValidateLogName(result ? DAL_VALIDATE_PASS : DAL_VALIDATE_REJECT, isUpdateOperation);
     }
 
-    private String buildValidateLogName(String result) {
-        return String.format(PATTERN_DRC_VALIDATE_LOG_NAME, clusterInfo.getClusterName(), clusterInfo.getShardIndex(), result);
+    private String buildValidateLogName(String result, boolean isUpdateOperation) {
+        return String.format(PATTERN_DRC_VALIDATE_LOG_NAME, clusterInfo.getClusterName(), clusterInfo.getShardIndex(),
+                isUpdateOperation ? "write" : "read", result);
     }
 
     private String buildZoneMismatchLogName() {

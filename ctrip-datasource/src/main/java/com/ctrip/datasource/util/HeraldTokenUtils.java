@@ -22,7 +22,7 @@ public class HeraldTokenUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeraldTokenUtils.class);
 
-    private static final String HERALD_TOKEN_HEADER = "client-herald-token";
+    public static final String HERALD_TOKEN_HEADER = "client-herald-token";
 
     private static final AtomicReference<TokenValue> tokenRef = new AtomicReference<>();
 

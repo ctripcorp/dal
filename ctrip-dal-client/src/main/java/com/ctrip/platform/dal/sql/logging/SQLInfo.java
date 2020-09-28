@@ -10,7 +10,10 @@ public class SQLInfo {
 	public static final String COST = "arch.dal.sql.cost";
 	public static final String DAL_COST = "fx.dal.request.cost";
 
-	public static final String UNDEFINED = "Undefined";
+	public static final String UNDEFINED = "undefined";
+
+	public static final String CHANNEL = "Channel";
+	public static final String CHANNEL_DAL = "DAL.ORM";
 	
 	public static final String CLIENT = "Client";
 	private String version;
@@ -30,6 +33,9 @@ public class SQLInfo {
 	private static final String DB = "DB";
 	private String database;
 
+	private static final String DB_NAME = "DBName";
+	private String dbName;
+
 	private static final String TABLES = "Tables";
 	private String tables;
 
@@ -41,6 +47,9 @@ public class SQLInfo {
 
 	private static final String SHARD = "Shard";
 	private String shard;
+
+	private static final String ROLE = "Role";
+	private Boolean isMaster;
 
 	private static final String CLIENT_ZONE = "ClientZone";
 	private String clientZone;
@@ -55,8 +64,9 @@ public class SQLInfo {
 	private String dalValidation;
 
 	public SQLInfo(String dao, String version, String method, int size, String status, String database, String tables, String optType) {
-		this(dao, version, method, size, status, database, tables, optType,
-				null, null, null, null, null, null);
+		this(dao, version, method, size, status, database, null, tables, optType,
+				null, null, null,
+				null, null, null, null);
 	}
 
 	public SQLInfo(String dao, String version, String method, String status, String database, String tables, String optType) {
@@ -70,8 +80,8 @@ public class SQLInfo {
 	}
 
 	public SQLInfo(String dao, String version, String method, int size,
-				   String status, String database, String tables, String optType,
-				   String cluster, String shard, String clientZone, String dbZone,
+				   String status, String database, String dbName, String tables, String optType,
+				   String cluster, String shard, Boolean isMaster, String clientZone, String dbZone,
 				   String ucsValidation, String dalValidation) {
 		this.dao = dao;
 		this.method = method;
@@ -87,10 +97,12 @@ public class SQLInfo {
 		}
 		this.status = status;
 		this.database = database;
+		this.dbName = dbName;
 		this.tables = tables;
 		this.operationType = optType;
 		this.cluster = cluster != null ? StringUtils.toTrimmedLowerCase(cluster) : UNDEFINED;
 		this.shard = shard != null ? shard : UNDEFINED;
+		this.isMaster = isMaster;
 		this.clientZone = clientZone != null ? StringUtils.toTrimmedUpperCase(clientZone) : UNDEFINED;
 		this.dbZone = dbZone != null ? StringUtils.toTrimmedUpperCase(dbZone) : UNDEFINED;
 		this.ucsValidation = ucsValidation != null ? ucsValidation : UNDEFINED;
@@ -124,6 +136,7 @@ public class SQLInfo {
 	
 	public Map<String, String> toTag(){
 		Map<String, String> tags = new HashMap<>();
+		tags.put(CHANNEL, CHANNEL_DAL);
 		tags.put(DAO, this.dao);
 		tags.put(METHOD, this.method);
 		if (this.size != null) {
@@ -131,7 +144,7 @@ public class SQLInfo {
 		}
 		tags.put(STATUS, this.status);
 		tags.put(CLIENT, this.version);
-		tags.put(DB,this.database);
+		tags.put(DB, this.database);
 		tags.put(TABLES, this.tables);
 		tags.put(OPTTYPE,this.operationType);
 		if (this.cluster != null) {
@@ -139,6 +152,9 @@ public class SQLInfo {
 		}
 		if (this.shard != null) {
 			tags.put(SHARD, this.shard);
+		}
+		if (this.isMaster != null) {
+			tags.put(ROLE, isMaster ? "master" : "slave");
 		}
 		if (this.clientZone != null) {
 			tags.put(CLIENT_ZONE, this.clientZone);
@@ -151,6 +167,9 @@ public class SQLInfo {
 		}
 		if (this.dalValidation != null) {
 			tags.put(DAL_VALIDATION, this.dalValidation);
+		}
+		if (this.dbName != null) {
+			tags.put(DB_NAME, this.dbName.toLowerCase());
 		}
 		return tags;
 	}

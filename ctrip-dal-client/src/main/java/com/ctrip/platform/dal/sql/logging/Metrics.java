@@ -83,12 +83,12 @@ public class Metrics {
 
 //		arch.dal.sql.count & arch.dal.sql.cost
 		SQLInfo info = new SQLInfo(entry.getDao(), version, entry.getMethod(),
-				entry.getSqlSize(), status, database, tableString, optType,
-				entry.getClusterName(), entry.getShardId(), entry.getClientZone(),
+				entry.getSqlSize(), status, database, entry.getDatabaseName(), tableString, optType,
+				entry.getClusterName(), entry.getShardId(), entry.isMaster(), entry.getClientZone(),
 				entry.getDbZone(), entry.getUcsValidation(), entry.getDalValidation());
-		Map map = info.toTag();
-		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, info.toTag());
-		metric.log(SQLInfo.COUNT, 1, info.toTag());
+		Map<String, String> tags = info.toTag();
+		metric.log(SQLInfo.COST, duration * ticksPerMillisecond, tags);
+		metric.log(SQLInfo.COUNT, 1, tags);
 	}
 
 	private static void report(String databaseSet, String version, String databaseType, String operationType, String tableString ,String shardingCategory) {

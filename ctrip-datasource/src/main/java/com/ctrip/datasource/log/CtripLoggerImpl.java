@@ -19,9 +19,10 @@ import java.util.Map;
 import java.util.Properties;
 
 public class CtripLoggerImpl extends AbstractLogger {
+
     public static final String TITLE = "Dal Fx";
     private static final ILog logger = LogManager.getLogger(CtripLoggerImpl.class);
-    private static IMetric metric = MetricManager.getMetricer();
+    private static final IMetric metric = MetricManager.getMetricer();
 
     private volatile UcsClient ucsClient;
 
@@ -199,4 +200,10 @@ public class CtripLoggerImpl extends AbstractLogger {
         }
         return ucsClient;
     }
+
+    @Override
+    public void logMetric(String metricName, long duration, Map<String, String> tags) {
+        metric.log(metricName, duration, tags);
+    }
+
 }

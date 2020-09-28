@@ -51,6 +51,7 @@ public class ClusterSwitchTest {
         new ClusterDatabaseSet(CLUSTER_NAME1, cluster, locator);
 
         TitanProvider provider = new TitanProvider();
+        provider.initialize(new HashMap<>());
         provider.setup(new HashSet<>());
         DataSourceLocator dsLocator = new DataSourceLocator(provider);
         Set<DataSource> dsSet = new HashSet<>();
@@ -105,6 +106,7 @@ public class ClusterSwitchTest {
         MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME1));
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();
+        provider.initialize(new HashMap<>());
         provider.setup(new HashSet<>());
         ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, new DefaultLocalizationValidatorFactory());
 
@@ -127,6 +129,7 @@ public class ClusterSwitchTest {
         MockClusterConfig config = new MockClusterConfig(getClusterConfig(CLUSTER_NAME4));
         DynamicCluster cluster = new DynamicCluster(config);
         TitanProvider provider = new TitanProvider();
+        provider.initialize(new HashMap<>());
         provider.setup(new HashSet<>());
         DalPropertiesLocator locator = new DefaultDalPropertiesLocator();
         ClusterDynamicDataSource dataSource = new ClusterDynamicDataSource(clusterInfo, cluster, provider, new CtripLocalizationValidatorFactory(new UcsClient() {

@@ -28,6 +28,7 @@ public class DbMeta {
     private String url;
     private String simplifiedUrl;
     private String host;
+    private String databaseId;
 
     static {
         String regEx = "(?<=://)[\\w\\-_]+(\\.[\\w\\-_]+)+(?=[,|:|;])";
@@ -58,8 +59,10 @@ public class DbMeta {
             }
             if (id instanceof IClusterDataSourceIdentity) {
                 IClusterDataSourceIdentity clusterId = (IClusterDataSourceIdentity) id;
-                dataBaseKeyName = String.format("%s-%s-%s", clusterId.getClusterName(),
-                        clusterId.getShardIndex(), clusterId.getDatabaseRole());
+                databaseId = String.format("%s-%s-%s", clusterId.getClusterName(),
+                        clusterId.getShardIndex(), clusterId.getDatabaseRole().getValue());
+            } else {
+                databaseId = id.getId();
             }
         } catch (Throwable e) {
             ilogger.error(e.getMessage(),e);
@@ -72,7 +75,7 @@ public class DbMeta {
         entry.setServerAddress(host);
         entry.setDbUrl(simplifiedUrl);
         entry.setUserName(userName);
-        entry.setDataBaseKeyName(dataBaseKeyName);
+        entry.setDataBaseKeyName(databaseId);
     }
 
     public static DbMeta createIfAbsent(String realDbName, DatabaseCategory dbCategory, Connection conn)

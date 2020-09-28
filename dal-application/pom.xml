@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <dal.version>2.2.0-SNAPSHOT</dal.version>
+        <dal.version>2.2.0</dal.version>
     </properties>
 
     <dependencyManagement>
@@ -40,7 +40,7 @@
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
-                <version>3.42.0</version>
+                <version>4.34.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

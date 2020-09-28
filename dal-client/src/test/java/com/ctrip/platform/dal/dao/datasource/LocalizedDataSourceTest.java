@@ -383,6 +383,12 @@ public class LocalizedDataSourceTest {
         DataSourceConfigure config = getDataSourceConfig();
         return new LocalizedDataSource(new ConstantLocalizationValidator(false) {
             @Override
+            public ValidationResult validateRequest(boolean isUpdateOperation) {
+                return isUpdateOperation ? super.validateRequest(true) :
+                        new ValidationResult(true, "ucs pass", "dal pass");
+            }
+
+            @Override
             public LocalizationConfig getLocalizationConfig() {
                 return new LocalizationConfigImpl(1, TEST_ZONE, LocalizationState.ACTIVE);
             }

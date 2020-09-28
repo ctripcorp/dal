@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -25,10 +26,19 @@ public class DalConnection implements Connection {
     private Connection connection;
     private final AtomicReference<SQLException> discardCauseRef = new AtomicReference<>();
     private RefreshableDataSource dataSource;
+    private SqlContext context;
 
-    public DalConnection(Connection connection, RefreshableDataSource dataSource) {
+    public DalConnection(Connection connection, RefreshableDataSource dataSource, SqlContext context) {
         this.connection = connection;
         this.dataSource = dataSource;
+        this.context = context;
+        try {
+            String dbName = connection.getCatalog();
+            if (dbName != null)
+                this.context.populateDbName(dbName.toLowerCase());
+        } catch (Throwable t) {
+            // ignore
+        }
     }
 
     public Connection getConnection() {
@@ -54,17 +64,17 @@ public class DalConnection implements Connection {
 
     @Override
     public Statement createStatement() throws SQLException {
-        return new DalStatement(connection.createStatement(), this);
+        return new DalStatement(connection.createStatement(), this, context.fork());
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql), this, sql);
+        return new DalPreparedStatement(connection.prepareStatement(sql), this, sql, context.fork());
     }
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        return new DalCallableStatement(connection.prepareCall(sql), this, sql);
+        return new DalCallableStatement(connection.prepareCall(sql), this, sql, context.fork());
     }
 
     @Override
@@ -176,17 +186,17 @@ public class DalConnection implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency), this);
+        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency), this, context.fork());
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), this, sql);
+        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), this, sql, context.fork());
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetConcurrency), this, sql);
+        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetConcurrency), this, sql, context.fork());
     }
 
     @Override
@@ -231,32 +241,32 @@ public class DalConnection implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
+        return new DalStatement(connection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this, context.fork());
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), this, sql);
+        return new DalPreparedStatement(connection.prepareStatement(sql, resultSetType, resultSetConcurrency), this, sql, context.fork());
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetHoldability), this, sql);
+        return new DalCallableStatement(connection.prepareCall(sql, resultSetType, resultSetHoldability), this, sql, context.fork());
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, autoGeneratedKeys), this, sql);
+        return new DalPreparedStatement(connection.prepareStatement(sql, autoGeneratedKeys), this, sql, context.fork());
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, columnIndexes), this, sql);
+        return new DalPreparedStatement(connection.prepareStatement(sql, columnIndexes), this, sql, context.fork());
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-        return new DalPreparedStatement(connection.prepareStatement(sql, columnNames), this, sql);
+        return new DalPreparedStatement(connection.prepareStatement(sql, columnNames), this, sql, context.fork());
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.log;
 
 import java.util.Map;
-import java.util.Properties;
 
 public interface ILogger {
 
@@ -33,5 +32,7 @@ public interface ILogger {
     void reportError(final String keyName);
 
     void logRequestContext();
+
+    void logMetric(String metricName, long duration, Map<String, String> tags);
 
 }

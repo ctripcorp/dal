@@ -167,7 +167,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
 
     private DataSourceIdentity getDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
         if (clusterInfo.getRole() == DatabaseRole.MASTER)
-            return new ClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
+            return new TraceableClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
         else {
             List<Database> slaves = cluster.getSlavesOnShard(clusterInfo.getShardIndex());
             if (slaves == null || slaves.size() == 0)
@@ -178,7 +178,7 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                 throw new UnsupportedOperationException(String.format(
                         "multi slaves are found for cluster '%s', shard %d, which is not supported yet",
                         clusterInfo.getClusterName(), clusterInfo.getShardIndex()));
-            return new ClusterDataSourceIdentity(slaves.iterator().next());
+            return new TraceableClusterDataSourceIdentity(slaves.iterator().next());
         }
     }
 

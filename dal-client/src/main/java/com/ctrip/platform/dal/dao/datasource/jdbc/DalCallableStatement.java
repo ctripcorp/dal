@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -12,8 +14,8 @@ public class DalCallableStatement extends DalPreparedStatement implements Callab
 
     private CallableStatement callableStatement;
 
-    public DalCallableStatement(CallableStatement callableStatement, DalConnection connection, String sql) {
-        super(callableStatement, connection, sql);
+    public DalCallableStatement(CallableStatement callableStatement, DalConnection connection, String sql, SqlContext context) {
+        super(callableStatement, connection, sql, context);
         this.callableStatement = callableStatement;
     }
 

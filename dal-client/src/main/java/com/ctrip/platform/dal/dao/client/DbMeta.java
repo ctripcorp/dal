@@ -12,12 +12,10 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocator;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureLocatorManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
-import com.ctrip.platform.dal.dao.datasource.jdbc.ClusterDatabaseMetaData;
+import com.ctrip.platform.dal.dao.datasource.IClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.ILogger;
-
-
 
 public class DbMeta {
     private static Pattern hostRegxPattern = null;
@@ -57,6 +55,11 @@ public class DbMeta {
             DataSourceConfigure configure = configureLocator.getDataSourceConfigure(id);
             if (configure != null) {
                 userName = configure.getUserName();
+            }
+            if (id instanceof IClusterDataSourceIdentity) {
+                IClusterDataSourceIdentity clusterId = (IClusterDataSourceIdentity) id;
+                dataBaseKeyName = String.format("%s-%s-%s", clusterId.getClusterName(),
+                        clusterId.getShardIndex(), clusterId.getDatabaseRole());
             }
         } catch (Throwable e) {
             ilogger.error(e.getMessage(),e);

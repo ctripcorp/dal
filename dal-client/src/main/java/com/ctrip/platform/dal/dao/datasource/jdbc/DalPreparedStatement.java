@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 
 import java.io.InputStream;
@@ -14,8 +15,8 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
     private PreparedStatement preparedStatement;
     private char firstAlphaCharUc = 0;
 
-    public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection, String sql) {
-        super(preparedStatement, connection);
+    public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection, String sql, SqlContext context) {
+        super(preparedStatement, connection, context);
         this.preparedStatement = preparedStatement;
         this.firstAlphaCharUc = SqlUtils.firstAlphaCharUc(sql);
     }
@@ -26,12 +27,12 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return innerExecute(() -> preparedStatement.executeQuery(), false);
+        return executeStatement(() -> preparedStatement.executeQuery(), false);
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return innerExecute(() -> preparedStatement.executeUpdate(), true);
+        return executeStatement(() -> preparedStatement.executeUpdate(), true);
     }
 
     @Override
@@ -136,7 +137,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public boolean execute() throws SQLException {
-        return innerExecute(() -> preparedStatement.execute(), isUpdateOperation());
+        return executeStatement(() -> preparedStatement.execute(), isUpdateOperation());
     }
 
     @Override
@@ -311,7 +312,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public long executeLargeUpdate() throws SQLException {
-        return innerExecute(() -> preparedStatement.executeLargeUpdate(), true);
+        return executeStatement(() -> preparedStatement.executeLargeUpdate(), true);
     }
 
     protected boolean isUpdateOperation() {

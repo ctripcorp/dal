@@ -111,4 +111,7 @@ public abstract class AbstractLogger implements ILogger {
     @Override
     public void logRequestContext() {}
 
+    @Override
+    public void logMetric(String metricName, long duration, Map<String, String> tags) {}
+
 }

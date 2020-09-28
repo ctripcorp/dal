@@ -92,6 +92,8 @@ public class DataSourceLocator {
     }
 
     public DataSource getDataSource(ClusterInfo clusterInfo) {
+        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName());
+        clusterInfo.setCluster(cluster);
         DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
         DataSource ds = cache.get(id);
         if (ds == null) {
@@ -99,8 +101,7 @@ public class DataSourceLocator {
                 ds = cache.get(id);
                 if (ds == null) {
                     try {
-                        String clusterName = clusterInfo.getClusterName();
-                        ds = createDataSource(id, clusterInfo, clusterManager.getOrCreateCluster(clusterName));
+                        ds = createDataSource(id, clusterInfo, cluster);
                         cache.put(id, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating cluster datasource: %s", id.getId());

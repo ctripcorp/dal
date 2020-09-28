@@ -6,6 +6,8 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.datasource.log.NullSqlContext;
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 
 /**
  * @author c7ch23en
@@ -36,6 +38,11 @@ public class ClusterDataSourceIdentity implements DataSourceIdentity, IClusterDa
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public SqlContext createSqlContext() {
+        return new NullSqlContext();
     }
 
     public DalConnectionString getDalConnectionString() {

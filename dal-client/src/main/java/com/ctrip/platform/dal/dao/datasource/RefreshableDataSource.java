@@ -40,7 +40,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private volatile ScheduledExecutorService timer = null;
 
     private Map<Integer, DataSourceSwitchBlockThreads> waiters = new ConcurrentHashMap<>();
-    private DataSourceIdentity id;
+    private final DataSourceIdentity id;
     private long switchListenerTimeout = DEFAULT_SWITCH_LISTENER_TIME_OUT; //ms
 
     private final AtomicLong firstAppearContinuousErrorTimeAtom = new AtomicLong(0);
@@ -327,7 +327,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 LOGGER.warn(e);
             }
             if (dBServerReference.compareAndSet(null, currentServer)) {
-                return new DalConnection(connection, this);
+                return new DalConnection(connection, this, id.createSqlContext());
             }
             int currentSwitchVersion;
             synchronized (this) {
@@ -373,7 +373,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                 }
             }
         }
-        return new DalConnection(connection, this);
+        return new DalConnection(connection, this, id.createSqlContext());
     }
 
     public long getFirstAppearContinuousErrorTime() {

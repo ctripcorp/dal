@@ -1,8 +1,12 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.IClusterDataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContext;
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 
 public class ClusterInfo {
 
@@ -12,14 +16,20 @@ public class ClusterInfo {
     private Integer shardIndex;
     private DatabaseRole role;
     private boolean dbSharding;
+    private Cluster cluster;
 
     public ClusterInfo() {}
 
     public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, boolean dbSharding) {
+        this(clusterName, shardIndex, role, dbSharding, null);
+    }
+
+    public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, boolean dbSharding, Cluster cluster) {
         this.clusterName = clusterName;
         this.shardIndex = shardIndex;
         this.role = role;
         this.dbSharding = dbSharding;
+        this.cluster = cluster;
     }
 
     public String getClusterName() {
@@ -38,12 +48,12 @@ public class ClusterInfo {
         return dbSharding;
     }
 
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
     }
 
     public DataSourceIdentity toDataSourceIdentity() {
-        return new SimpleClusterDataSourceIdentity(this);
+        return new SimpleClusterDataSourceIdentity(this, cluster);
     }
 
     @Override
@@ -54,16 +64,26 @@ public class ClusterInfo {
     static class SimpleClusterDataSourceIdentity implements DataSourceIdentity, IClusterDataSourceIdentity {
 
         private ClusterInfo clusterInfo;
+        private Cluster cluster;
         private String id;
 
-        public SimpleClusterDataSourceIdentity(ClusterInfo clusterInfo) {
+        public SimpleClusterDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
             this.clusterInfo = clusterInfo;
+            this.cluster = cluster;
             this.id = clusterInfo.toString();
         }
 
         @Override
         public String getId() {
             return id;
+        }
+
+        @Override
+        public SqlContext createSqlContext() {
+            ClusterDbSqlContext context = new ClusterDbSqlContext(getClusterName(), getShardIndex(), getDatabaseRole());
+            if (cluster != null && cluster.getLocalizationConfig() != null)
+                context.populateDbZone(cluster.getLocalizationConfig().getZoneId());
+            return context;
         }
 
         @Override

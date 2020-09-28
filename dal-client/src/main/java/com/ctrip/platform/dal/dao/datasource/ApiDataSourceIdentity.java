@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.log.NullSqlContext;
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -51,6 +53,11 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public SqlContext createSqlContext() {
+        return new NullSqlContext();
     }
 
     @Override

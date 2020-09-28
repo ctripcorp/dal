@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.datasource.jdbc.DalStatement;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
@@ -39,6 +40,8 @@ public class LocalizedStatement implements Statement, LocalizationValidatable {
         ValidationResult result = validator.validateRequest(isUpdateOperation);
         lastValidationStatus = result.getValidationResult() ? ValidationStatus.OK : ValidationStatus.FAILED;
         lastValidationResult = result;
+        if (statement instanceof DalStatement)
+            ((DalStatement) statement).getSqlContext().populateValidationResult(result);
         return result.getValidationResult();
     }
 

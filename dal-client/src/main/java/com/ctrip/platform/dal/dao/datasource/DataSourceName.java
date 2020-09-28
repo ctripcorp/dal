@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.dao.datasource.log.NullSqlContext;
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 
 /**
  * @author c7ch23en
@@ -16,6 +18,11 @@ public class DataSourceName implements DataSourceIdentity {
     @Override
     public String getId() {
         return name != null ? StringUtils.toTrimmedLowerCase(name) : null;
+    }
+
+    @Override
+    public SqlContext createSqlContext() {
+        return new NullSqlContext();
     }
 
     public String getRawName() {

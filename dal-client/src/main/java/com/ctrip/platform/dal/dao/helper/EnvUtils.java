@@ -29,4 +29,8 @@ public interface EnvUtils {
         return false;
     }
 
+    default boolean isDalLocal() {
+        return false;
+    }
+
 }

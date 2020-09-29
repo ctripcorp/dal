@@ -18,11 +18,11 @@ public class TitanDataSourceLocatorTest {
     public void testGetFromTitanServiceSuccess() {
         TitanDataSourceLocator test = new TitanDataSourceLocator();
         String titanSvcUrl = "https://ws.titan.fws.qa.nt.ctripcorp.com/titanservice/query/";;
-        String name = "AbacusDB_INSERT_1";
+        String name = "fxdalclusterbenchmarkdb_w";
         
         try {
             DataSource ds = test.getDataSource(titanSvcUrl, name);
-            testDataSource(ds);
+            testDataSource(ds, "select database() as id");
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
@@ -36,23 +36,24 @@ public class TitanDataSourceLocatorTest {
         try {
             ctx = new ClassPathXmlApplicationContext("spring.xml");
             DataSource ds = ctx.getBean("titanDataSource", DataSource.class);
-            testDataSource(ds);
+            testDataSource(ds, "select db_name() as id");
         } catch (BeansException e) {
             Assert.fail();
         }
     }
     
-    private void testDataSource(DataSource ds) {
+    private void testDataSource(DataSource ds, String sql) {
         Connection conn;
         try {
             conn = ds.getConnection();
             Statement stat = conn.createStatement();
-            stat.execute("select DB_NAME() as id");
+            stat.execute(sql);
             ResultSet rs = stat.getResultSet();
             rs.next();
             String value = rs.getString(1);
             System.out.print(value);
         } catch (SQLException e) {
+            e.printStackTrace();
             Assert.fail();
         }
     }   

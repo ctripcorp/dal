@@ -76,8 +76,12 @@ public class CtripEnvUtils extends DefaultEnvUtils implements EnvUtils {
 
     @Override
     public boolean isLocal() {
-        Env env = getOrInitEnv();
-        return env == Env.LOCAL || env == Env.DEV || env == Env.UNKNOWN;
+        return getOrInitEnv() == Env.LOCAL;
+    }
+
+    @Override
+    public boolean isDalLocal() {
+        return isLocal() || getOrInitEnv() == Env.DEV || getOrInitEnv() == Env.UNKNOWN;
     }
 
     protected Env getOrInitEnv() {

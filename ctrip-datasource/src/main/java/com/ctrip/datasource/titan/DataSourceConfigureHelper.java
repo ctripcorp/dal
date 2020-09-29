@@ -152,7 +152,7 @@ public class DataSourceConfigureHelper implements DataSourceConfigureConstants {
     }
 
     protected boolean isLocal() {
-        return useLocal || isFxLocal();
+        return useLocal || ENV_UTILS.isDalLocal();
     }
 
     protected boolean isFxLocal() {

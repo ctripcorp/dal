@@ -16,6 +16,7 @@ import com.ctrip.datasource.dynamicdatasource.MGRDataSourceSwitchTest;
 import com.ctrip.datasource.dynamicdatasource.QConfigConnectionStringProvider.QConfigConnectionStringProviderTest;
 import com.ctrip.datasource.readonly.SqlServerReadonlyTest;
 import com.ctrip.datasource.titan.DataSourceConfigureHelperTest;
+import com.ctrip.datasource.titan.TitanDataSourceLocatorTest;
 import com.ctrip.datasource.util.MysqlApiConnectionStringUtilsTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -32,6 +33,7 @@ import com.ctrip.datasource.dynamicdatasource.DalPropertiesChangedTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+		TitanDataSourceLocatorTest.class,
 		ExceptionQConfigPoolPropertiesProviderTest.class,
 		DalPropertiesChangedTest.class,
 		TitanServiceReaderTest.class,

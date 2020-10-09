@@ -1,16 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author c7ch23en
  */
 public interface RouteStrategy {
 
-    void install(RouteConfig config);
-
-    Connection getConnection(ConnectionFactory factory, RequestContext context);
-
-    void uninstall();
+    Connection pickConnection(ConnectionFactory factory, RequestContext context, RouteOptions options)
+            throws SQLException;
 
 }

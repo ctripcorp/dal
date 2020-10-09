@@ -6,15 +6,13 @@ import java.util.Set;
 /**
  * @author c7ch23en
  */
-public interface RouteConfig {
+public interface RouteOptions {
 
-    Set<Host> configuredHosts();
+    Set<HostSpec> configuredHosts();
 
-    boolean localAccessEnabled();
+    List<HostSpec> orderedMasters(String clientZone);
 
-    List<Host> prioritizedHosts();
-
-    List<Host> orderedFailoverHosts(Host primaryHost);
+    List<HostSpec> orderedSlaves(String clientZone);
 
     long failoverTime();
 

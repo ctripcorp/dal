@@ -8,7 +8,7 @@ import java.sql.SQLException;
  */
 public interface RouteStrategy {
 
-    Connection pickConnection(ConnectionFactory factory, RequestContext context, RouteOptions options)
+    Connection pickConnection(ConnectionFactory connFactory, RequestContext requestCtx, RouteOptions options)
             throws SQLException;
 
 }

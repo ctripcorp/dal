@@ -19,7 +19,7 @@ public class MockedMultiHostDataSource extends MultiHostDataSource {
     protected RouteStrategy buildRouteStrategy() {
         return (factory, context, options) -> {
             List<HostSpec> primaryHost = options.orderedMasters(context.clientZone());
-            return factory.getConnectionForHost(primaryHost.get(0));
+            return factory.getPooledConnectionForHost(primaryHost.get(0));
         };
     }
 

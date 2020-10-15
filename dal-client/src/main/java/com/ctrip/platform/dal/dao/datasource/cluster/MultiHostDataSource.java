@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -42,7 +43,17 @@ public class MultiHostDataSource implements DataSource {
     }
 
     protected ConnectionFactory buildConnectionFactory() {
-        return host -> mappedDataSources.get(host).getDataSource().getConnection();
+        return new ConnectionFactory() {
+            @Override
+            public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
+                return mappedDataSources.get(host).getDataSource().getConnection();
+            }
+
+            @Override
+            public Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
+                return mappedDataSources.get(host).getDataSource().getConnection();
+            }
+        };
     }
 
     protected RouteOptions buildRouteOptions(MultiHostClusterOptions clusterOptions) {

@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -8,6 +10,8 @@ import java.sql.SQLException;
  */
 public interface ConnectionFactory {
 
-    Connection getConnectionForHost(HostSpec host) throws SQLException;
+    Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException;
+
+    Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException;
 
 }

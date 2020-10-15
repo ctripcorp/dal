@@ -11,4 +11,8 @@ public interface RouteStrategy {
     Connection pickConnection(ConnectionFactory connFactory, RequestContext requestCtx, RouteOptions options)
             throws SQLException;
 
+    default ConnectionValidator getConnectionValidator() {
+        return new NullConnectionValidator();
+    }
+
 }

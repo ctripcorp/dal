@@ -7,7 +7,7 @@ import java.sql.Connection;
  */
 public interface ConnectionValidator {
 
-    Result validate(Connection connection);
+    Result validate(Connection connection, RouteOptions options);
 
     enum Result {
         OK,

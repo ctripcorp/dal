@@ -51,4 +51,10 @@ public class HostSpec {
         return m_host + ':' + m_port + "::" + m_zone;
     }
 
+    @Override
+    public HostSpec clone() {
+        HostSpec clone = new HostSpec(this.m_host, this.m_port, this.m_zone);
+        return clone;
+    }
+
 }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultRouteStrategy implements RouteStrategy{
+public class MajorityHostRouteStrategy implements RouteStrategy{
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.pickConnection";
@@ -19,25 +19,33 @@ public class DefaultRouteStrategy implements RouteStrategy{
 
     @Override
     public Connection pickConnection(ConnectionFactory factory, RequestContext context, RouteOptions options) throws SQLException {
+        for (int i = 0; i < 3; i++) {
+            try {
+                String clientZone = context.clientZone();
+                List<HostSpec> orderHosts = options.orderedMasters(clientZone);
+                Set<HostSpec> configuredHosts = options.configuredHosts();
+                Long blackTimeOut = options.blacklistTimeout();
 
-        String clientZone = context.clientZone();
-        List<HostSpec> orderHosts = options.orderedMasters(clientZone);
-        Set<HostSpec> configuredHosts = options.configuredHosts();
-        Long blackTimeOut = options.blacklistTimeout();
+                HostSpec targetHost = pickHost(orderHosts, configuredHosts, blackTimeOut);
+                Connection targetConnection = factory.getConnectionForHost(targetHost);
+                return targetConnection;
+            } catch (DalException e) {
+                throw e;
+            }
+        }
 
-        HostSpec targetHost = pickHost(orderHosts, configuredHosts, blackTimeOut);
-        Connection targetConnection = factory.getConnectionForHost(targetHost);
-        return targetConnection;
+        throw new DalException(NO_HOST_AVAILABLE);
     }
 
     private HostSpec pickHost(List<HostSpec> orderHosts, Set<HostSpec> configuredHosts, long blackTimeOut) throws DalException {
-        Map<HostSpec, Long> hostBlackList = GlobalBlackListManager.getHostBlackList();
+        GlobalBlackListDepository depository = GlobalBlackListManager.getBlackListDepository();
+        Map<HostSpec, Long> hostBlackList = depository.getHostBlackList();
         for (HostSpec hostSpec : orderHosts) {
             if (!configuredHosts.contains(hostSpec)) {
                 LOGGER.warn(String.format(HOST_NOT_EXIST, hostSpec.toString()));
                 continue;
             }
-            if (hostBlackList.containsKey(hostSpec) && hostBlackList.get(hostSpec) + blackTimeOut> System.currentTimeMillis()){
+            if (hostBlackList.containsKey(hostSpec) && hostBlackList.get(hostSpec) + blackTimeOut > System.currentTimeMillis()){
                 continue;
             }
             return hostSpec;

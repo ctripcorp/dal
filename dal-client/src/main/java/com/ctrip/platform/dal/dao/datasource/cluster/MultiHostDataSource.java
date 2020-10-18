@@ -5,6 +5,8 @@ import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
+import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
@@ -18,6 +20,8 @@ import java.util.Map;
  */
 public class MultiHostDataSource extends DataSourceDelegate implements DataSource {
 
+    protected static final String DEFAULT_STRATEGY = "";
+    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
@@ -50,7 +54,16 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     }
 
     protected RouteStrategy prepareRouteStrategy() {
+        String strategyName = clusterProperties.routeStrategyName();
         RouteStrategy strategy = null;
+        try {
+            Class clazz = Class.forName(strategyName);
+            strategy = (RouteStrategy) clazz.newInstance();
+        } catch (Throwable t) {
+            String msg = "Errored constructing route strategy: " + strategyName;
+            LOGGER.error(msg, t);
+            throw new DalRuntimeException(msg, t);
+        }
         strategy.initialize(wrappedDataSources.keySet(), connFactory, clusterProperties.routeStrategyProperties());
         return strategy;
     }

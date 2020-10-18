@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public interface RouteStrategy {
 
-    void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions);
+    void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyProperties);
 
     Connection pickConnection(RequestContext request) throws SQLException;
 

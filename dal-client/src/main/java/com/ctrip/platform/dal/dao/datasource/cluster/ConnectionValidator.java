@@ -9,6 +9,6 @@ import java.util.Set;
  */
 public interface ConnectionValidator {
 
-    boolean validate(Connection connection, Set<HostSpec> configuredHosts) throws SQLException;
+    boolean validate(Connection connection) throws SQLException;
 
 }

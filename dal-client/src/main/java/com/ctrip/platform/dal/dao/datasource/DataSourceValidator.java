@@ -2,13 +2,14 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.dao.log.LogUtils;
+import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import com.mysql.jdbc.MySQLConnection;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -22,10 +23,11 @@ public class DataSourceValidator implements ValidatorProxy {
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CONNECTION_VALIDATE_CONNECTION_FORMAT = "Connection::validateConnection:%s";
     private static final String IS_VALID_RETURN_INFO = "isValid() returned false.";
-    private String IS_VALID_FORMAT = "isValid: %s.";
-    private String VALIDATE_ERROR_FORMAT = "Connection validation error:%s";
+    private String IS_VALID_FORMAT = "isValid: %s";
+    private String VALIDATE_ERROR_FORMAT = "Connection validation error: %s";
 
     private PoolProperties poolProperties;
+    private ConnectionValidator clusterConnValidator;
 
     @Override
     public boolean validate(Connection connection, int validateAction) {
@@ -40,6 +42,8 @@ public class DataSourceValidator implements ValidatorProxy {
 
             String connUrl = ConnectionUtils.getConnectionUrl(connection, poolConfig.getUrl());
             transactionName = String.format(CONNECTION_VALIDATE_CONNECTION_FORMAT, connUrl);
+
+            tryValidateClusterConnection(connection, validateAction);
             isValid = validateConnection(connection, validateAction);
 
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName,
@@ -49,23 +53,43 @@ public class DataSourceValidator implements ValidatorProxy {
             if (!isValid) {
                 LOGGER.warn(IS_VALID_RETURN_INFO);
             }
-        } catch (Throwable e) {
-            StringBuilder sb = new StringBuilder();
-            if (!isValid) {
-                sb.append(IS_VALID_RETURN_INFO);
-                sb.append(" "); // space
-            }
-            sb.append(String.format(VALIDATE_ERROR_FORMAT, e.getMessage()));
-            LOGGER.warn(sb.toString());
-            LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, sb.toString(), e, startTime);
+        } catch (InvalidConnectionException e) {
+            handleException(isValid, e, transactionName, startTime);
+            throw e;
+        } catch (Throwable t) {
+            handleException(isValid, t, transactionName, startTime);
         }
 
         return isValid;
     }
 
+    private void handleException(boolean isValid, Throwable t, String transactionName, long startTime) {
+        StringBuilder sb = new StringBuilder();
+        if (!isValid) {
+            sb.append(IS_VALID_RETURN_INFO);
+            sb.append(" ");
+        }
+        sb.append(String.format(VALIDATE_ERROR_FORMAT, t.getMessage()));
+        LOGGER.warn(sb.toString());
+        LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, transactionName, sb.toString(), t, startTime);
+    }
+
     private boolean validateConnection(Connection connection, int validateAction) throws SQLException {
         QueryParameter queryParameter = getQueryParameter(validateAction);
         return isValid(connection, queryParameter);
+    }
+
+    private void tryValidateClusterConnection(Connection connection, int validateAction) {
+        if (clusterConnValidator != null) {
+            boolean isValid = true;
+            try {
+                isValid = clusterConnValidator.validate(connection);
+            } catch (Throwable t) {
+                LOGGER.warn("tryValidateClusterConnection exception", t);
+            }
+            if (!isValid)
+                throw new InvalidConnectionException("Borrowed connection is invalid");
+        }
     }
 
     private QueryParameter getQueryParameter(int validateAction) {
@@ -174,6 +198,11 @@ public class DataSourceValidator implements ValidatorProxy {
     @Override
     public void setPoolProperties(PoolProperties poolProperties) {
         this.poolProperties = poolProperties;
+    }
+
+    @Override
+    public void setClusterConnValidator(ConnectionValidator clusterConnValidator) {
+        this.clusterConnValidator = clusterConnValidator;
     }
 
     public static void setILogger(ILogger logger) {

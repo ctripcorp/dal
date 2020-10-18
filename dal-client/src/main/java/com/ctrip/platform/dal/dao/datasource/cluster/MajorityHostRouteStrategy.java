@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 public class MajorityHostRouteStrategy implements RouteStrategy{
@@ -20,21 +21,39 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
 
     private ConnectionValidator connectionValidator;
     private HostValidator hostValidator;
+    private Set<HostSpec> configuredHosts;
+    private ConnectionFactory connFactory;
+    private Properties strategyOptions;
+    private List<HostSpec> orderHosts;
+    private String status; // new --> init --> destroy
+
+    private enum RouteStrategyStatus {
+        birth, init, destroy;
+    }
 
     public MajorityHostRouteStrategy() {
-        MajorityHostValidator validator = new MajorityHostValidator();
-        connectionValidator = validator;
-        hostValidator = validator;
+        status = RouteStrategyStatus.birth.name();
+    }
+
+    private void isInit() throws DalException {
+        if (!RouteStrategyStatus.birth.name().equalsIgnoreCase(status))
+            throw new DalException("MajorityHostRouteStrategy is not ready, status: " + this.status);
+    }
+
+    private void isDestroy () throws DalException {
+        if (RouteStrategyStatus.init.name().equalsIgnoreCase(status))
+            throw new DalException("MajorityHostRouteStrategy has been init, status: " + this.status);
     }
 
     @Override
-    public Connection pickConnection(ConnectionFactory factory, RequestContext context, RouteOptions options) throws SQLException {
+    public Connection pickConnection(RequestContext context) throws SQLException {
+        isInit();
         for (int i = 0; i < 9; i++) {
             try {
                 String clientZone = context.clientZone();
 
-                HostSpec targetHost = pickHost(factory, options, clientZone);
-                Connection targetConnection = factory.getPooledConnectionForHost(targetHost);
+                HostSpec targetHost = pickHost(connFactory, strategyOptions, clientZone);
+                Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
 
                 return targetConnection;
             } catch (InvalidConnectionException e) {
@@ -49,15 +68,43 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
     }
 
     @Override
-    public ConnectionValidator getConnectionValidator() {
+    public void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions) throws DalException {
+        isDestroy();
+        this.status = RouteStrategyStatus.init.name();
+        this.configuredHosts = configuredHosts;
+        this.connFactory = connFactory;
+        this.strategyOptions = strategyOptions;
+        buildValidator();
+        buildOrderHosts();
+    }
+
+    private void buildOrderHosts () {
+        // TODO buildOrderHosts
+    }
+
+    private void buildValidator() {
+        long failOverTime = 0;
+        long blackListTimeOut = 0;
+        MajorityHostValidator validator = new MajorityHostValidator(configuredHosts, failOverTime, blackListTimeOut);
+        this.connectionValidator = validator;
+        this.hostValidator = validator;
+    }
+
+    @Override
+    public ConnectionValidator getConnectionValidator() throws DalException {
+        isInit();
         return connectionValidator;
     }
 
-    private HostSpec pickHost(ConnectionFactory factory, RouteOptions options, String clientZone) throws DalException {
-        List<HostSpec> orderHosts = options.orderedMasters(clientZone);
+    @Override
+    public void destroy() throws DalException {
+        isInit();
+        this.status = RouteStrategyStatus.destroy.name();
+    }
 
+    private HostSpec pickHost(ConnectionFactory factory, Properties options, String clientZone) throws DalException {
         for (HostSpec hostSpec : orderHosts) {
-            if (hostValidator.available(factory, hostSpec, options)) {
+            if (hostValidator.available(factory, hostSpec)) {
                 return hostSpec;
             }
         }

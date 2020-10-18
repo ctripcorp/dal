@@ -9,7 +9,7 @@ import java.util.Set;
 public class NullConnectionValidator implements ConnectionValidator {
 
     @Override
-    public boolean validate(Connection connection, Set<HostSpec> configuredHosts) {
+    public boolean validate(Connection connection) {
         return true;
     }
 

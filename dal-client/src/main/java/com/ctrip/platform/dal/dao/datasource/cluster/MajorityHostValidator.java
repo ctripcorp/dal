@@ -5,6 +5,8 @@ import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import com.ctrip.platform.dal.dao.configure.HostAndPort;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.DalException;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,6 +32,9 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String VALIDATE_RESULT_UNKNOWN = "PreBlackList::resultUnknown";
 
     private volatile long lastValidateSecond = 0;
+    private volatile Set<HostSpec> configuredHosts;
+    private volatile long failOverTime;
+    private volatile long blackListTimeOut;
     private volatile ScheduledExecutorService executorService;
     private static volatile HashMap<HostSpec, Long> hostBlackList = new HashMap<>();
     private static volatile HashMap<HostSpec, Long> preBlackList = new HashMap<>();
@@ -45,38 +51,34 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         MEMBER_STATE, MEMBER_ID, CURRENT_MEMBER_ID;
     }
 
-    private enum Result {
-        OK, FAILED, UNKNOWN
-    }
-
     public MajorityHostValidator() {
         executorService = Executors.newSingleThreadScheduledExecutor();
         lastValidateSecond = System.currentTimeMillis() / 1000;
     }
 
-    @Override
-    public boolean available(ConnectionFactory factory, HostSpec host, RouteOptions options) {
-        long failOverTime = options.failoverTime();
-        long blackListTimeOut = options.blacklistTimeout();
-        Set<HostSpec> configuredHosts = options.configuredHosts();
+    public MajorityHostValidator(Set<HostSpec> configuredHosts, long failOverTime, long blackListTimeOut) {
+        this();
+        this.configuredHosts = configuredHosts;
+        this.failOverTime = failOverTime;
+        this.blackListTimeOut = blackListTimeOut;
+    }
 
-        if (hostBlackList.containsKey(host) && hostBlackList.get(host) > System.currentTimeMillis() - blackListTimeOut) {
-            return false;
+    @Override
+    public boolean available(ConnectionFactory factory, HostSpec host) {
+        if (!CollectionUtils.isEmpty(preBlackList)) {
+            validateWithNewConnection(factory, configuredHosts.size());
         }
 
-        if (preBlackList.containsKey(host)) {
-            validateWithNewConnection(factory, host, configuredHosts.size());
-
-             if (preBlackList.get(host) < System.currentTimeMillis() - failOverTime) {
-                 return false;
-             }
+        if ((hostBlackList.containsKey(host) && hostBlackList.get(host) > System.currentTimeMillis() - blackListTimeOut) ||
+                (preBlackList.get(host) < System.currentTimeMillis() - failOverTime)) {
+            return false;
         }
 
         return true;
     }
 
     @Override
-    public boolean validate(Connection connection, Set<HostSpec> configuredHosts) throws SQLException {
+    public boolean validate(Connection connection) throws SQLException {
         HostSpec currentHost = getHostSpecFromConnection(connection);
         return validateAndUpdate(connection, currentHost, configuredHosts.size());
     }
@@ -115,7 +117,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         }
     }
 
-    private void validateWithNewConnection(ConnectionFactory factory, HostSpec host, int clusterHostCount) {
+    private void validateWithNewConnection(ConnectionFactory factory, int clusterHostCount) {
         long currentSecond = System.currentTimeMillis() / 1000;
         //TODO 异步创建线程，并执行validate操作
         synchronized (this) {
@@ -126,14 +128,17 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
         this.lastValidateSecond = currentSecond;
         executorService.schedule(() -> {
-
-            try (Connection connection = factory.createConnectionForHost(host)){
-
-                validateAndUpdate(connection, host, clusterHostCount);
-            }catch (Throwable e) {
-                LOGGER.error(CAT_LOG_TYPE, e);
+            for (HostSpec host : preBlackList.keySet()) {
+                if (configuredHosts.contains(host)) {
+                    try (Connection connection = factory.createConnectionForHost(host)){
+                        validateAndUpdate(connection, host, clusterHostCount);
+                    }catch (Throwable e) {
+                        LOGGER.error(CAT_LOG_TYPE, e);
+                    }
+                }
             }
         }, 1, TimeUnit.MILLISECONDS);
+        // TODO init delay time decide
     }
 
     private boolean validate(Connection connection, int clusterHostCount) throws SQLException {

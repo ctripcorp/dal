@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,7 +29,7 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
 
     @Override
     public Connection pickConnection(ConnectionFactory factory, RequestContext context, RouteOptions options) throws SQLException {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 9; i++) {
             try {
                 String clientZone = context.clientZone();
 
@@ -36,8 +37,10 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
                 Connection targetConnection = factory.getPooledConnectionForHost(targetHost);
 
                 return targetConnection;
-                //TODO catch specify exception and rePickConnection
+            } catch (InvalidConnectionException e) {
+                // TODO log something
             } catch (DalException e) {
+                LOGGER.error(String.format(NO_HOST_AVAILABLE, " "), e);
                 throw e;
             }
         }
@@ -52,20 +55,13 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
 
     private HostSpec pickHost(ConnectionFactory factory, RouteOptions options, String clientZone) throws DalException {
         List<HostSpec> orderHosts = options.orderedMasters(clientZone);
-        long failOverTime = options.failoverTime();
-        Set<HostSpec> configuredHosts = options.configuredHosts();
 
         for (HostSpec hostSpec : orderHosts) {
-            if (hostValidator.available(factory, hostSpec, failOverTime, configuredHosts.size())) {
-                return hostSpec;
-            }
-        }
-        for (HostSpec hostSpec : configuredHosts) {
-            if (!orderHosts.contains(hostSpec) && hostValidator.available(factory, hostSpec, failOverTime, configuredHosts.size())) {
+            if (hostValidator.available(factory, hostSpec, options)) {
                 return hostSpec;
             }
         }
 
-        throw new DalException(String.format(NO_HOST_AVAILABLE, configuredHosts.toString()));
+        throw new DalException(String.format(NO_HOST_AVAILABLE, orderHosts.toString()));
     }
 }

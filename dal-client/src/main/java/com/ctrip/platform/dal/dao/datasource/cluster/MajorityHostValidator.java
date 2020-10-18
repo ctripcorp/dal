@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
@@ -54,14 +55,23 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     @Override
-    public boolean available(ConnectionFactory factory, HostSpec host, long failOverTime, int clusterHostCount) {
-        if (hostBlackList.containsKey(host) && hostBlackList.get(host) > System.currentTimeMillis() - failOverTime) {
+    public boolean available(ConnectionFactory factory, HostSpec host, RouteOptions options) {
+        long failOverTime = options.failoverTime();
+        long blackListTimeOut = options.blacklistTimeout();
+        Set<HostSpec> configuredHosts = options.configuredHosts();
+
+        if (hostBlackList.containsKey(host) && hostBlackList.get(host) > System.currentTimeMillis() - blackListTimeOut) {
             return false;
         }
 
         if (preBlackList.containsKey(host)) {
-            validateWithNewConnection(factory, host, clusterHostCount);
+            validateWithNewConnection(factory, host, configuredHosts.size());
+
+             if (preBlackList.get(host) < System.currentTimeMillis() - failOverTime) {
+                 return false;
+             }
         }
+
         return true;
     }
 
@@ -116,8 +126,9 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
         this.lastValidateSecond = currentSecond;
         executorService.schedule(() -> {
-            try {
-                Connection connection = factory.createConnectionForHost(host);
+
+            try (Connection connection = factory.createConnectionForHost(host)){
+
                 validateAndUpdate(connection, host, clusterHostCount);
             }catch (Throwable e) {
                 LOGGER.error(CAT_LOG_TYPE, e);
@@ -129,16 +140,19 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         boolean currentHostState = false;
         int onlineCount = 0;
 
-        ResultSet resultSet = connection.createStatement().executeQuery(validateSQL1);
-        while (resultSet.next()) {
-            String memberId = resultSet.getString(Columns.MEMBER_ID.name());
-            String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
-            String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
-            if (memberId.equals(currentMemberId)) {
-                currentHostState = MemberState.Online.name().equalsIgnoreCase(memberState);
-            }
-            if (MemberState.Online.name().equalsIgnoreCase(memberState)) {
-                onlineCount++;
+        try(Statement statement = connection.createStatement()) {
+            try(ResultSet resultSet = statement.executeQuery(validateSQL1)) {
+                while (resultSet.next()) {
+                    String memberId = resultSet.getString(Columns.MEMBER_ID.name());
+                    String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
+                    String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
+                    if (memberId.equals(currentMemberId)) {
+                        currentHostState = MemberState.Online.name().equalsIgnoreCase(memberState);
+                    }
+                    if (MemberState.Online.name().equalsIgnoreCase(memberState)) {
+                        onlineCount++;
+                    }
+                }
             }
         }
 

@@ -12,11 +12,15 @@ public class HostSpec {
     private final String m_zone;
 
     public static HostSpec of(String host, int port) {
-        return of(host, port, null);
+        return new HostSpec(host, port);
     }
 
     public static HostSpec of(String host, int port, String zone) {
         return new HostSpec(host, port, zone);
+    }
+
+    public HostSpec(String host, int port) {
+        this(host, port, null);
     }
 
     public HostSpec(String host, int port, String zone) {
@@ -53,12 +57,6 @@ public class HostSpec {
     @Override
     public String toString() {
         return m_host + ':' + m_port + "::" + m_zone;
-    }
-
-    @Override
-    public HostSpec clone() {
-        HostSpec clone = new HostSpec(this.m_host, this.m_port, this.m_zone);
-        return clone;
     }
 
 }

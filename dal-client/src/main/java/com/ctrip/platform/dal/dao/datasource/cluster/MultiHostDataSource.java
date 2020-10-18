@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public class MultiHostDataSource extends DataSourceDelegate implements DataSource {
 
-    protected static final String DEFAULT_STRATEGY = "";
+    protected static final String ORDERED_ACCESS_STRATEGY = "orderedAccess";
+    protected static final String LOCAL_ACCESS_STRATEGY = "localAccess";
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 
@@ -55,16 +56,20 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
     protected RouteStrategy prepareRouteStrategy() {
         String strategyName = clusterProperties.routeStrategyName();
-        RouteStrategy strategy = null;
-        try {
-            Class clazz = Class.forName(strategyName);
-            strategy = (RouteStrategy) clazz.newInstance();
-        } catch (Throwable t) {
-            String msg = "Errored constructing route strategy: " + strategyName;
-            LOGGER.error(msg, t);
-            throw new DalRuntimeException(msg, t);
+        RouteStrategy strategy;
+        if (ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
+            strategy = new MajorityHostRouteStrategy();
+        else {
+            try {
+                Class clazz = Class.forName(strategyName);
+                strategy = (RouteStrategy) clazz.newInstance();
+            } catch (Throwable t) {
+                String msg = "Errored constructing route strategy: " + strategyName;
+                LOGGER.error(msg, t);
+                throw new DalRuntimeException(msg, t);
+            }
         }
-        strategy.initialize(wrappedDataSources.keySet(), connFactory, clusterProperties.routeStrategyProperties());
+        strategy.initialize(dataSourceConfigs.keySet(), connFactory, clusterProperties.routeStrategyProperties());
         return strategy;
     }
 

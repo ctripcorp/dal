@@ -4,12 +4,12 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,19 +20,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MultiHostDataSourceTest {
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ExecutorService executor = Executors.newFixedThreadPool(16);
 
     @Test
-    public void testNormal1() throws Exception {
-        MultiHostDataSource dataSource = new MockedMultiHostDataSource(mockDataSourceConfigs(),
-                mockClusterOptions("zone1", "zone2"));
-        dataSource.reqCtxForTest = mockRequestContext("x");
-        CountDownLatch latch = new CountDownLatch(100);
+    public void testNormal() throws Exception {
+        MultiHostDataSource dataSource = new MockMultiHostDataSource(mockDataSourceConfigs(),
+                mockClusterProperties(), "zone1");
+        HostSpec expectedHost = HostSpec.of("10.32.20.128", 3306);
+        testNormal(dataSource, expectedHost);
+    }
+
+    @Test
+    public void testFailover() throws Exception {
+    }
+
+    private void testNormal(DataSource dataSource, HostSpec expectedHost) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1000);
         AtomicInteger failures = new AtomicInteger(0);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             executor.submit(() -> {
                 try (Connection connection = dataSource.getConnection()) {
-                    if (!connection.getMetaData().getURL().contains("10.32.20.128"))
+                    String url = connection.getMetaData().getURL();
+                    if (!url.contains(expectedHost.host()) || !url.contains(String.valueOf(expectedHost.port())))
                         failures.incrementAndGet();
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -45,18 +54,14 @@ public class MultiHostDataSourceTest {
         Assert.assertEquals(0, failures.get());
     }
 
-    @Test
-    public void testFailover() throws Exception {
-    }
-
     private Map<HostSpec, DataSourceConfigure> mockDataSourceConfigs() {
         Map<HostSpec, DataSourceConfigure> dataSourceConfigs = new HashMap<>();
         HostSpec host1 = HostSpec.of("10.32.20.128", 3306, "zone1");
         dataSourceConfigs.put(host1, mockDataSourceConfig(host1));
         HostSpec host2 = HostSpec.of("dst56614", 3306, "zone2");
         dataSourceConfigs.put(host2, mockDataSourceConfig(host2));
-//        HostSpec host3 = HostSpec.create("10.32.20.5", 3308, "zone3");
-//        dataSourceConfigs.put(host3, mockDataSourceConfig(host3));
+        HostSpec host3 = HostSpec.of("10.32.20.5", 3308, "zone3");
+        dataSourceConfigs.put(host3, mockDataSourceConfig(host3));
         return dataSourceConfigs;
     }
 
@@ -69,45 +74,16 @@ public class MultiHostDataSourceTest {
         return config;
     }
 
-    private MultiHostClusterProperties mockClusterOptions(String... zoneOrder) {
+    private MultiHostClusterProperties mockClusterProperties() {
         return new MultiHostClusterProperties() {
             @Override
-            public String routeStrategy() {
+            public String routeStrategyName() {
                 return null;
             }
 
             @Override
-            public boolean isLocalAccessMode() {
-                return false;
-            }
-
-            @Override
-            public List<String> zoneOrder() {
-                return Arrays.asList(zoneOrder);
-            }
-
-            @Override
-            public long failoverTime() {
-                return 3000;
-            }
-
-            @Override
-            public long blacklistTimeout() {
-                return 5000;
-            }
-        };
-    }
-
-    private RequestContext mockRequestContext(String clientZone) {
-        return new RequestContext() {
-            @Override
-            public String clientZone() {
-                return clientZone;
-            }
-
-            @Override
-            public boolean isWriteOperation() {
-                return false;
+            public Properties routeStrategyProperties() {
+                return null;
             }
         };
     }

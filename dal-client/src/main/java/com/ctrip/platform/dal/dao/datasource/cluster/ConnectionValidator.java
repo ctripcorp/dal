@@ -8,6 +8,6 @@ import java.util.Set;
  */
 public interface ConnectionValidator {
 
-    boolean validate(Connection connection, Set<HostSpec> configuredHosts);
+    boolean validate(Connection connection);
 
 }

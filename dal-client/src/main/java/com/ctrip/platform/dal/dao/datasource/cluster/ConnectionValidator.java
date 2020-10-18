@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Set;
 
 /**
@@ -8,6 +9,6 @@ import java.util.Set;
  */
 public interface ConnectionValidator {
 
-    boolean validate(Connection connection);
+    boolean validate(Connection connection) throws SQLException;
 
 }

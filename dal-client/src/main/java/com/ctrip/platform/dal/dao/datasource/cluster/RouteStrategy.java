@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.platform.dal.exceptions.DalException;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -14,7 +16,7 @@ public interface RouteStrategy {
 
     Connection pickConnection(RequestContext request) throws SQLException;
 
-    default ConnectionValidator getConnectionValidator() {
+    default ConnectionValidator getConnectionValidator(){
         return new NullConnectionValidator();
     }
 

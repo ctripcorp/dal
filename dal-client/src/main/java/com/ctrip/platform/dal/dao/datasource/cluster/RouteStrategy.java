@@ -12,14 +12,14 @@ import java.util.Set;
  */
 public interface RouteStrategy {
 
-    void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions) throws DalException;
+    void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions);
 
     Connection pickConnection(RequestContext request) throws SQLException;
 
-    default ConnectionValidator getConnectionValidator() throws DalException {
+    default ConnectionValidator getConnectionValidator(){
         return new NullConnectionValidator();
     }
 
-    void destroy() throws DalException;
+    void destroy();
 
 }

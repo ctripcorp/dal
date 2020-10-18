@@ -1,16 +1,15 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.StringValueComparator;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 public class MajorityHostRouteStrategy implements RouteStrategy{
 
@@ -35,14 +34,14 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
         status = RouteStrategyStatus.birth.name();
     }
 
-    private void isInit() throws DalException {
+    private void isInit() {
         if (!RouteStrategyStatus.birth.name().equalsIgnoreCase(status))
-            throw new DalException("MajorityHostRouteStrategy is not ready, status: " + this.status);
+            throw new DalRuntimeException("MajorityHostRouteStrategy is not ready, status: " + this.status);
     }
 
-    private void isDestroy () throws DalException {
+    private void isDestroy () {
         if (RouteStrategyStatus.init.name().equalsIgnoreCase(status))
-            throw new DalException("MajorityHostRouteStrategy has been init, status: " + this.status);
+            throw new DalRuntimeException("MajorityHostRouteStrategy has been init, status: " + this.status);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
     }
 
     @Override
-    public void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions) throws DalException {
+    public void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions) {
         isDestroy();
         this.status = RouteStrategyStatus.init.name();
         this.configuredHosts = configuredHosts;
@@ -79,25 +78,27 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
     }
 
     private void buildOrderHosts () {
-        // TODO buildOrderHosts
+        List<String> zoneOrder = (List<String>) strategyOptions.get("zoneOrder");
+        ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
+        this.orderHosts = sorter.sort(configuredHosts);
     }
 
     private void buildValidator() {
-        long failOverTime = 0;
-        long blackListTimeOut = 0;
+        long failOverTime = (long)strategyOptions.get("failOverTime");
+        long blackListTimeOut = (long)strategyOptions.get("blackListTimeOut");
         MajorityHostValidator validator = new MajorityHostValidator(configuredHosts, failOverTime, blackListTimeOut);
         this.connectionValidator = validator;
         this.hostValidator = validator;
     }
 
     @Override
-    public ConnectionValidator getConnectionValidator() throws DalException {
+    public ConnectionValidator getConnectionValidator(){
         isInit();
         return connectionValidator;
     }
 
     @Override
-    public void destroy() throws DalException {
+    public void destroy() {
         isInit();
         this.status = RouteStrategyStatus.destroy.name();
     }

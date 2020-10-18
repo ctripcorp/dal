@@ -11,12 +11,12 @@ import java.util.Map;
 public class MockedMultiHostDataSource extends MultiHostDataSource {
 
     public MockedMultiHostDataSource(Map<HostSpec, DataSourceConfigure> dataSourceConfigs,
-                                     MultiHostClusterOptions clusterOptions) {
+                                     MultiHostClusterProperties clusterOptions) {
         super(dataSourceConfigs, clusterOptions);
     }
 
     @Override
-    protected RouteStrategy buildRouteStrategy() {
+    protected RouteStrategy buildRouteStrategy(String routeStrategy) {
         return (factory, context, options) -> {
             List<HostSpec> primaryHost = options.orderedMasters(context.clientZone());
             return factory.getPooledConnectionForHost(primaryHost.get(0));

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author c7ch23en
  */
-public interface MultiHostClusterOptions {
+public interface MultiHostClusterProperties {
 
     String routeStrategy();
 

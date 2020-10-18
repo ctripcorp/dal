@@ -11,7 +11,11 @@ public class HostSpec {
     private final int m_port;
     private final String m_zone;
 
-    public static HostSpec create(String host, int port, String zone) {
+    public static HostSpec of(String host, int port) {
+        return of(host, port, null);
+    }
+
+    public static HostSpec of(String host, int port, String zone) {
         return new HostSpec(host, port, zone);
     }
 

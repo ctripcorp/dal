@@ -51,9 +51,9 @@ public class MultiHostDataSourceTest {
 
     private Map<HostSpec, DataSourceConfigure> mockDataSourceConfigs() {
         Map<HostSpec, DataSourceConfigure> dataSourceConfigs = new HashMap<>();
-        HostSpec host1 = HostSpec.create("10.32.20.128", 3306, "zone1");
+        HostSpec host1 = HostSpec.of("10.32.20.128", 3306, "zone1");
         dataSourceConfigs.put(host1, mockDataSourceConfig(host1));
-        HostSpec host2 = HostSpec.create("dst56614", 3306, "zone2");
+        HostSpec host2 = HostSpec.of("dst56614", 3306, "zone2");
         dataSourceConfigs.put(host2, mockDataSourceConfig(host2));
 //        HostSpec host3 = HostSpec.create("10.32.20.5", 3308, "zone3");
 //        dataSourceConfigs.put(host3, mockDataSourceConfig(host3));
@@ -69,8 +69,8 @@ public class MultiHostDataSourceTest {
         return config;
     }
 
-    private MultiHostClusterOptions mockClusterOptions(String... zoneOrder) {
-        return new MultiHostClusterOptions() {
+    private MultiHostClusterProperties mockClusterOptions(String... zoneOrder) {
+        return new MultiHostClusterProperties() {
             @Override
             public String routeStrategy() {
                 return null;

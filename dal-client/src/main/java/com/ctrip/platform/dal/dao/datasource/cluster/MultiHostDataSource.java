@@ -6,62 +6,61 @@ import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * @author c7ch23en
  */
-public class MultiHostDataSource implements DataSource {
+public class MultiHostDataSource extends DataSourceDelegate implements DataSource {
 
-    private final Map<HostSpec, SingleDataSource> mappedDataSources = new HashMap<>();
+    private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
     private final RouteOptions routeOptions;
     private final RouteStrategy routeStrategy;
+    private final RouteStrategyManager routeStrategyManager = RouteStrategyManager.DEFAULT;
 
     protected RequestContext reqCtxForTest;
 
     public MultiHostDataSource(Map<HostSpec, DataSourceConfigure> dataSourceConfigs,
-                               MultiHostClusterOptions clusterOptions) {
-        initDataSources(dataSourceConfigs);
+                               MultiHostClusterProperties clusterProperties) {
+        prepareDataSources(dataSourceConfigs);
         this.connFactory = buildConnectionFactory();
-        this.routeOptions = buildRouteOptions(clusterOptions);
-        this.routeStrategy = buildRouteStrategy();
+        this.routeOptions = buildRouteOptions(clusterProperties);
+        this.routeStrategy = buildRouteStrategy(clusterProperties.routeStrategy());
     }
 
-    private void initDataSources(Map<HostSpec, DataSourceConfigure> dataSourceConfigs) {
-        dataSourceConfigs.forEach((host, config) -> mappedDataSources.put(host, getOrCreateDataSource(config)));
+    private void prepareDataSources(Map<HostSpec, DataSourceConfigure> dataSourceConfigs) {
+        dataSourceConfigs.forEach((host, config) -> wrappedDataSources.put(host, prepareDataSource(config)));
     }
 
-    protected SingleDataSource getOrCreateDataSource(DataSourceConfigure dataSourceConfig) {
-        return DataSourceCreator.getInstance().getOrCreateDataSource(dataSourceConfig.getName(), dataSourceConfig);
+    protected SingleDataSource prepareDataSource(DataSourceConfigure dataSourceConfig) {
+        return DataSourceCreator.getInstance().getOrCreateDataSourceWithoutPool(dataSourceConfig.getName(),
+                dataSourceConfig, null);
     }
 
     protected ConnectionFactory buildConnectionFactory() {
         return new ConnectionFactory() {
             @Override
             public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return mappedDataSources.get(host).getDataSource().getConnection();
+                return wrappedDataSources.get(host).getDataSource().getConnection();
             }
 
             @Override
             public Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return mappedDataSources.get(host).getDataSource().getConnection();
+                return wrappedDataSources.get(host).getDataSource().getConnection();
             }
         };
     }
 
-    protected RouteOptions buildRouteOptions(MultiHostClusterOptions clusterOptions) {
-        return new DefaultRouteOptions(mappedDataSources.keySet(), clusterOptions);
+    protected RouteOptions buildRouteOptions(MultiHostClusterProperties clusterProperties) {
+        return new DefaultRouteOptions(wrappedDataSources.keySet(), clusterProperties);
     }
 
-    protected RouteStrategy buildRouteStrategy() {
-        return null;
+    protected RouteStrategy buildRouteStrategy(String routeStrategy) {
+        return routeStrategyManager.getOrCreateRouteStrategy(routeStrategy);
     }
 
     @Override
@@ -75,36 +74,8 @@ public class MultiHostDataSource implements DataSource {
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return false;
-    }
-
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return null;
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter out) throws SQLException {
-    }
-
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
+    public DataSource getDelegated() {
+        return wrappedDataSources.values().iterator().next().getDataSource();
     }
 
 }

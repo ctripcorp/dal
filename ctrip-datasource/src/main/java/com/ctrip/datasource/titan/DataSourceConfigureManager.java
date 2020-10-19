@@ -113,12 +113,17 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
             CtripLocalContext localContext = new CtripLocalContextImpl(getParsedDatabaseConfigPath(),
                     getParsedDatabaseConfigFile(), isFxLocal(), databaseSets);
             localConnectionStringProvider = new CtripLocalConnectionStringProvider(localContext);
-            ipDomainStatusProvider = new ConstantIPDomainStatusProvider(IPDomainStatus.IP);
         } else {
             connectionStringProvider = new ConnectionStringProviderImpl();
-            ipDomainStatusProvider = new IPDomainStatusProviderImpl();
         }
+        initIPDomainStatusProvider();
         isInitialized = true;
+    }
+
+    private void initIPDomainStatusProvider() {
+        if (ipDomainStatusProvider == null)
+            ipDomainStatusProvider = isLocal() ?
+                    new ConstantIPDomainStatusProvider(IPDomainStatus.IP) : new IPDomainStatusProviderImpl();
     }
 
     private void setupPoolProperties() {
@@ -151,6 +156,7 @@ public class DataSourceConfigureManager extends DataSourceConfigureHelper {
 
         try {
             // set ip domain status
+            initIPDomainStatusProvider();
             IPDomainStatus status = ipDomainStatusProvider.getStatus();
             dataSourceConfigureLocator.setIPDomainStatus(status);
         } catch (Throwable e) {

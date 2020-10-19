@@ -8,7 +8,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
@@ -27,6 +26,7 @@ import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -115,98 +115,110 @@ public class TitanDataSourceLocator {
     }
 
     private TitanData getConnectionStrings(String svcUrl, String name, String appid) throws Exception {
-        long start = System.currentTimeMillis();
-
-        StringBuilder sb = new StringBuilder();
-
-        URIBuilder builder = new URIBuilder(svcUrl);
-        StringBuilder body = new StringBuilder();
-        body.append("ids=").append(name);
-        body.append("&appid=").append(appid);
-        
-        String subEnv = Foundation.server().getSubEnv();
-        if (subEnv != null && subEnv.trim().length() > 0) {
-            subEnv = subEnv.trim();
-            body.append("&envt=").append(subEnv);
-            info("Sub environment: " + subEnv);
-        }
-
-        String idc = Foundation.server().getDataCenter();
-        if (idc != null && idc.trim().length() > 0) {
-            idc = idc.trim();
-            body.append("&idc=").append(idc);
-            info("IDC:" + idc);
-        }
-
-        URI uri = builder.build();
-        info(uri.toURL().toString());
-
-        HttpClient sslClient = initWeakSSLClient();
-        if (sslClient == null)
-            throw new IllegalStateException("Can not create SSL");
-        
-        HttpPost httpPost = new HttpPost();
-        httpPost.setURI(uri);
-        httpPost.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_FORM_URLENCODED));
-
+        Transaction transaction = Cat.newTransaction(DalLogTypes.DAL_CONFIGURE, "ConnectionString::getTitanConnectionString:" + name);
         try {
-            String token = HeraldTokenUtils.tryGetHeraldToken();
-            if (!StringUtils.isEmpty(token)) {
-                httpPost.addHeader(HeraldTokenUtils.HERALD_TOKEN_HEADER, token);
-                String msg = String.format("svcUrl=%s, configId=%s", svcUrl, name);
-                logger.info("Herald token registered: " + msg);
-                Cat.logEvent(DalLogTypes.DAL_VALIDATION,
-                        "HeraldTokenRegistered by TitanDataSourceLocator", Event.SUCCESS, msg);
+
+            long start = System.currentTimeMillis();
+
+            URIBuilder builder = new URIBuilder(svcUrl);
+            StringBuilder body = new StringBuilder();
+            body.append("ids=").append(name);
+            body.append("&appid=").append(appid);
+
+            String subEnv = Foundation.server().getSubEnv();
+            if (subEnv != null && subEnv.trim().length() > 0) {
+                subEnv = subEnv.trim();
+                body.append("&envt=").append(subEnv);
+                info("Sub environment: " + subEnv);
             }
+
+            String idc = Foundation.server().getDataCenter();
+            if (idc != null && idc.trim().length() > 0) {
+                idc = idc.trim();
+                body.append("&idc=").append(idc);
+                info("IDC:" + idc);
+            }
+
+            URI uri = builder.build();
+            info(uri.toURL().toString());
+
+            HttpClient sslClient = initWeakSSLClient();
+            if (sslClient == null)
+                throw new IllegalStateException("Can not create SSL");
+
+            HttpPost httpPost = new HttpPost();
+            httpPost.setURI(uri);
+            httpPost.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_FORM_URLENCODED));
+
+            try {
+                String token = HeraldTokenUtils.tryGetHeraldToken();
+                if (!StringUtils.isEmpty(token)) {
+                    httpPost.addHeader(HeraldTokenUtils.HERALD_TOKEN_HEADER, token);
+                    String msg = String.format("svcUrl=%s, configId=%s", svcUrl, name);
+                    logger.info("Herald token registered: " + msg);
+                    Cat.logEvent(DalLogTypes.DAL_VALIDATION,
+                            "HeraldTokenRegistered by TitanDataSourceLocator", Event.SUCCESS, msg);
+                }
+            } catch (Throwable t) {
+                // ignore
+            }
+
+            HttpResponse response = sslClient.execute(httpPost);
+
+            int code = response.getStatusLine().getStatusCode();
+
+            HttpEntity entity = response.getEntity();
+
+            String content = EntityUtils.toString(entity);
+
+            if (code != 200) {
+                throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
+                        code, content));
+            }
+
+            TitanResponse resp = null;
+            try {
+                resp = JsonUtils.fromJson(content, TitanResponse.class);
+            } catch (Throwable e) {
+                throw new DalException("Fail to get ALL-IN-ONE from Titan service when parse result. Message: " + content);
+            }
+
+            if (!"200".equals(resp.getStatus())) {
+                throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
+                        resp.getStatus(), resp.getMessage()));
+            }
+
+            TitanData data = resp.getData()[0];
+            info("Parsing " + data.getName());
+            // Fail fast
+            if (data.getErrorCode() != null) {
+                throw new DalException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
+                        data.getName(), data.getErrorCode(), data.getErrorMessage()));
+            }
+
+            // Decrypt raw connection string
+            info(data.getName() + " loaded");
+            if (data.getEnv() != null) {
+                info(String.format("Sub environment %s detected.", data.getEnv()));
+                reportTitanAccessSunEnv(subEnv, data.getName());
+            }
+
+            long cost = System.currentTimeMillis() - start;
+            info("Time costed by getting all in one connection string from titan service(ms): " + cost);
+            reportTitanAccessCost(cost);
+
+            Cat.logEvent(DalLogTypes.DAL_VALIDATION, "GetTitanConnectionString", Event.SUCCESS, "key=" + name);
+            transaction.setStatus(Transaction.SUCCESS);
+
+            return data;
+
         } catch (Throwable t) {
-            // ignore
+            Cat.logEvent(DalLogTypes.DAL_VALIDATION, "GetTitanConnectionString", t.getMessage(), "key=" + name);
+            transaction.setStatus(t);
+            throw t;
+        } finally {
+            transaction.complete();
         }
-
-        HttpResponse response = sslClient.execute(httpPost);
-        
-        int code = response.getStatusLine().getStatusCode();
-
-        HttpEntity entity = response.getEntity();
-
-        String content = EntityUtils.toString(entity);
-        
-        if(code != 200) {
-            throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service when send request. Code: %s. Message: %s",
-                    code, content));
-        }
-
-        TitanResponse resp = null;
-        try {
-            resp = JsonUtils.fromJson(content, TitanResponse.class);
-        } catch (Throwable e) {
-            throw new DalException("Fail to get ALL-IN-ONE from Titan service when parse result. Message: " + content);
-        }
-
-        if (!"200".equals(resp.getStatus())) {
-            throw new DalException(String.format("Fail to get ALL-IN-ONE from Titan service. Code: %s. Message: %s",
-                    resp.getStatus(), resp.getMessage()));
-        }
-
-        TitanData data = resp.getData()[0];
-        info("Parsing " + data.getName());
-        // Fail fast
-        if (data.getErrorCode() != null) {
-            throw new DalException(String.format("Error get ALL-In-ONE info for %s. ErrorCode: %s Error message: %s",
-                    data.getName(), data.getErrorCode(), data.getErrorMessage()));
-        }
-
-        // Decrypt raw connection string
-        info(data.getName() + " loaded");
-        if (data.getEnv() != null) {
-            info(String.format("Sub environment %s detected.", data.getEnv()));
-            reportTitanAccessSunEnv(subEnv, data.getName());
-        }
-
-        long cost = System.currentTimeMillis() - start;
-        info("Time costed by getting all in one connection string from titan service(ms): " + cost);
-        reportTitanAccessCost(cost);
-
-        return data;
     }
 
     private HttpClient initWeakSSLClient() {

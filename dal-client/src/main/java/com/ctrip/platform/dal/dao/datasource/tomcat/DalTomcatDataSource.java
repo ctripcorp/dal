@@ -32,7 +32,7 @@ public class DalTomcatDataSource extends DataSource {
         if (pool != null) {
             return pool;
         } else {
-            pool = new DalConnectionPool(poolProperties);
+            pool = new DalConnectionPool(poolProperties, clusterConnValidator);
             return pool;
         }
     }

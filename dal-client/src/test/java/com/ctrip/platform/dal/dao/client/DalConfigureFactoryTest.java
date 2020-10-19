@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -52,7 +53,7 @@ public class DalConfigureFactoryTest {
 		}
 	}
 
-//	@Test
+	@Test
 	public void testThreadPoolConfig() throws Exception {
 		DalRequestExecutor.shutdown();
 		DalConfigure configure = DalConfigureFactory.load(Thread.currentThread().getContextClassLoader().
@@ -65,6 +66,8 @@ public class DalConfigureFactoryTest {
 		Assert.assertEquals(0, executorConfig.getMaxThreadsPerShard("clusterName1"));
 		Assert.assertEquals(0, executorConfig.getMaxThreadsPerShard("clusterName2"));
 		Assert.assertEquals(3, executorConfig.getMaxThreadsPerShard("DbSetName"));
+		Assert.assertFalse(((DalThreadPoolExecutor) executor).allowsCoreThreadTimeOut());
+		Assert.assertEquals(1000, ((DalThreadPoolExecutor) executor).getQueue().remainingCapacity());
 		DalRequestExecutor.shutdown();
 	}
 

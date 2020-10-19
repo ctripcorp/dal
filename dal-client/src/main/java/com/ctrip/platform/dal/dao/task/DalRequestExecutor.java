@@ -41,11 +41,15 @@ public class DalRequestExecutor {
 
 	public static final String MAX_POOL_SIZE = "maxPoolSize";
 	public static final String KEEP_ALIVE_TIME = "keepAliveTime";
+	public static final String WORK_QUEUE_CAPACITY = "workQueueCapacity";
+	public static final String ALLOW_CORE_THREAD_TIMEOUT = "allowCoreThreadTimeOut";
 	public static final String MAX_THREADS_PER_SHARD = "maxThreadsPerShard";
 	
 	// To be consist with default connection max active size
 	public static final int DEFAULT_MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 	public static final int DEFAULT_KEEP_ALIVE_TIME = 10;
+	public static final int DEFAULT_WORK_QUEUE_CAPACITY = 0;
+	public static final boolean DEFAULT_ALLOW_CORE_THREAD_TIMEOUT = true;
 	public static final int DEFAULT_MAX_THREADS_PER_SHARD = 0;
 	
 	private DalLogger logger = DalClientFactory.getDalLogger();
@@ -89,13 +93,35 @@ public class DalRequestExecutor {
 			
 			int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
 			String maxPoolSizeStr = configure.getFactory().getProperty(MAX_POOL_SIZE);
-			if(!StringUtils.isEmpty(maxPoolSizeStr))
+			if(!StringUtils.isEmpty(maxPoolSizeStr)) {
 				maxPoolSize = Integer.parseInt(maxPoolSizeStr);
+				LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+						"MaxPoolSize:" + maxPoolSize, "");
+			}
 			
 			int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
 			String keepAliveTimeStr = configure.getFactory().getProperty(KEEP_ALIVE_TIME);
-			if(!StringUtils.isEmpty(keepAliveTimeStr))
-                keepAliveTime = Integer.parseInt(keepAliveTimeStr);
+			if(!StringUtils.isEmpty(keepAliveTimeStr)) {
+				keepAliveTime = Integer.parseInt(keepAliveTimeStr);
+				LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+						"KeepAliveTime:" + keepAliveTime, "");
+			}
+
+			int workQueueCapacity = DEFAULT_WORK_QUEUE_CAPACITY;
+			String workQueueCapacityStr = configure.getFactory().getProperty(WORK_QUEUE_CAPACITY);
+			if(!StringUtils.isEmpty(workQueueCapacityStr)) {
+				workQueueCapacity = Integer.parseInt(workQueueCapacityStr);
+				LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+						"WorkQueueCapacity:" + workQueueCapacity, "");
+			}
+
+			boolean allowCoreThreadTimeOut = DEFAULT_ALLOW_CORE_THREAD_TIMEOUT;
+			String allowCoreThreadTimeOutStr = configure.getFactory().getProperty(ALLOW_CORE_THREAD_TIMEOUT);
+			if(!StringUtils.isEmpty(allowCoreThreadTimeOutStr)) {
+				allowCoreThreadTimeOut = Boolean.parseBoolean(allowCoreThreadTimeOutStr);
+				LOGGER.logEvent(DalLogTypes.DAL_VALIDATION,
+						"AllowCoreThreadTimeOut:" + allowCoreThreadTimeOut, "");
+			}
 
 			int maxThreadsPerShard = DEFAULT_MAX_THREADS_PER_SHARD;
 			String maxThreadsPerShardStr = configure.getFactory().getProperty(MAX_THREADS_PER_SHARD);
@@ -120,16 +146,17 @@ public class DalRequestExecutor {
 							String.format("MaxThreadsPerShard::%s:%d", dbSetName, dbMaxThreadsPerShard), "");
 				}
 			}
-			
+
             ThreadPoolExecutor executor = new DalThreadPoolExecutor(builder.build(),
-					new LinkedBlockingQueue<>(), new ThreadFactory() {
+					workQueueCapacity > 0 ? new LinkedBlockingQueue<>(workQueueCapacity) : new LinkedBlockingQueue<>(),
+					new ThreadFactory() {
                 final AtomicInteger atomic = new AtomicInteger();
                 @Override
                 public Thread newThread(Runnable r) {
                     return new Thread(r, "DalRequestExecutor-Worker-" + this.atomic.getAndIncrement());
                 }
             });
-            executor.allowCoreThreadTimeOut(true);
+            executor.allowCoreThreadTimeOut(allowCoreThreadTimeOut);
             
             serviceRef.set(executor);
 		}

@@ -15,8 +15,12 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.pickConnection";
-    private static final String HOST_NOT_EXIST = "Router::hostNotExist:%s";
+    private static final String VALIDATE_FAILED = "Router::validateFailed:";
+    private static final String ROUTER_INITIALIZE = "Router::initialize";
+    private static final String ROUTER_ORDER_HOSTS = "Router::cluster:%s";
     private static final String NO_HOST_AVAILABLE = "Router::noHostAvailable:%s";
+    private static final String INITIALIZE_MSG = "configuredHosts:%s;strategyOptions:%s";
+    private static final String ORDER_HOSTS = "orderHosts:%s";
 
     private ConnectionValidator connectionValidator;
     private HostValidator hostValidator;
@@ -24,7 +28,7 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
     private ConnectionFactory connFactory;
     private Properties strategyOptions;
     private List<HostSpec> orderHosts;
-    private String status; // new --> init --> destroy
+    private String status; // birth --> init --> destroy
 
     private enum RouteStrategyStatus {
         birth, init, destroy;
@@ -34,32 +38,20 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
         status = RouteStrategyStatus.birth.name();
     }
 
-    private void isInit() {
-        if (!RouteStrategyStatus.birth.name().equalsIgnoreCase(status))
-            throw new DalRuntimeException("MajorityHostRouteStrategy is not ready, status: " + this.status);
-    }
-
-    private void isDestroy () {
-        if (RouteStrategyStatus.init.name().equalsIgnoreCase(status))
-            throw new DalRuntimeException("MajorityHostRouteStrategy has been init, status: " + this.status);
-    }
-
     @Override
     public Connection pickConnection(RequestContext context) throws SQLException {
         isInit();
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < configuredHosts.size(); i++) {
+            HostSpec targetHost = null;
             try {
-                String clientZone = context.clientZone();
-
-                HostSpec targetHost = pickHost(connFactory, strategyOptions, clientZone);
+                targetHost = pickHost();
                 Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
 
+                hostValidator.triggerValidate();
                 return targetConnection;
             } catch (InvalidConnectionException e) {
-                // TODO log something
-            } catch (DalException e) {
-                LOGGER.error(String.format(NO_HOST_AVAILABLE, " "), e);
-                throw e;
+                if (targetHost != null)
+                    LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_FAILED, targetHost.toString());
             }
         }
 
@@ -75,20 +67,34 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
         this.strategyOptions = strategyOptions;
         buildValidator();
         buildOrderHosts();
+        LOGGER.logEvent(CAT_LOG_TYPE, ROUTER_INITIALIZE, String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
     }
 
     private void buildOrderHosts () {
+        //TODO 确定zoneOrder的key是什么；确认可以知道是那个集群的order的嘛
         List<String> zoneOrder = (List<String>) strategyOptions.get("zoneOrder");
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
+        LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, "cluster"), String.format(ORDER_HOSTS, orderHosts.toString()));
     }
 
     private void buildValidator() {
+        // TODO 确认这两个参数的key是什么
         long failOverTime = (long)strategyOptions.get("failOverTime");
         long blackListTimeOut = (long)strategyOptions.get("blackListTimeOut");
-        MajorityHostValidator validator = new MajorityHostValidator(configuredHosts, failOverTime, blackListTimeOut);
+        MajorityHostValidator validator = new MajorityHostValidator(connFactory, configuredHosts, failOverTime, blackListTimeOut);
         this.connectionValidator = validator;
         this.hostValidator = validator;
+    }
+
+    private void isInit() {
+        if (!RouteStrategyStatus.init.name().equalsIgnoreCase(status))
+            throw new DalRuntimeException("MajorityHostRouteStrategy is not ready, status: " + this.status);
+    }
+
+    private void isDestroy () {
+        if (RouteStrategyStatus.init.name().equalsIgnoreCase(status))
+            throw new DalRuntimeException("MajorityHostRouteStrategy has been init, status: " + this.status);
     }
 
     @Override
@@ -103,9 +109,9 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
         this.status = RouteStrategyStatus.destroy.name();
     }
 
-    private HostSpec pickHost(ConnectionFactory factory, Properties options, String clientZone) throws DalException {
+    private HostSpec pickHost() throws DalException {
         for (HostSpec hostSpec : orderHosts) {
-            if (hostValidator.available(factory, hostSpec)) {
+            if (hostValidator.available(hostSpec)) {
                 return hostSpec;
             }
         }

@@ -16,9 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class MajorityHostValidator implements ConnectionValidator, HostValidator {
 
@@ -26,18 +24,20 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String CAT_LOG_TYPE = "DAL.pickConnection";
     private static final String FIND_NO_HOST_SPEC = "Validator::findNoHostSpec";
     private static final String CONNECTION_URL = "Validator::getConnectionUrl";
-    private static final String BLACK_LIST = "Validator::addTo%BlackHost";
     private static final String DEFAULT = "default";
-    private static final String ADD_BLACK_LIST = "BlackList::addBlackList";
-    private static final String VALIDATE_RESULT_UNKNOWN = "PreBlackList::resultUnknown";
+    private static final String ADD_BLACK_LIST = "Validator::addToBlackList";
+    private static final String ADD_PRE_BLACK_LIST = "Validator::addToPreBlackList";
+    private static final String REMOVE_BLACK_LIST = "Validator::removeFromBlackList";
+    private static final String REMOVE_PRE_BLACK_LIST = "Validator::removeFromPreBlackList";
 
     private volatile long lastValidateSecond = 0;
     private volatile Set<HostSpec> configuredHosts;
     private volatile long failOverTime;
     private volatile long blackListTimeOut;
-    private volatile ScheduledExecutorService executorService;
-    private static volatile HashMap<HostSpec, Long> hostBlackList = new HashMap<>();
-    private static volatile HashMap<HostSpec, Long> preBlackList = new HashMap<>();
+    private volatile ConnectionFactory factory;
+    private static volatile ExecutorService service = Executors.newFixedThreadPool(4);
+    private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
+    private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
     private static final String validateSQL1 = "select members.MEMBER_STATE MEMBER_STATE, " +
             "members.MEMBER_ID MEMBER_ID, " +
             "member_stats.MEMBER_ID CURRENT_MEMBER_ID " +
@@ -52,29 +52,30 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     public MajorityHostValidator() {
-        executorService = Executors.newSingleThreadScheduledExecutor();
         lastValidateSecond = System.currentTimeMillis() / 1000;
     }
 
-    public MajorityHostValidator(Set<HostSpec> configuredHosts, long failOverTime, long blackListTimeOut) {
+    public MajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, long failOverTime, long blackListTimeOut) {
         this();
+        this.factory = factory;
         this.configuredHosts = configuredHosts;
         this.failOverTime = failOverTime;
         this.blackListTimeOut = blackListTimeOut;
     }
 
     @Override
-    public boolean available(ConnectionFactory factory, HostSpec host) {
-        if (!CollectionUtils.isEmpty(preBlackList)) {
-            validateWithNewConnection(factory, configuredHosts.size());
-        }
-
+    public boolean available(HostSpec host) {
         if ((hostBlackList.containsKey(host) && hostBlackList.get(host) > System.currentTimeMillis() - blackListTimeOut) ||
-                (preBlackList.get(host) < System.currentTimeMillis() - failOverTime)) {
+                (preBlackList.containsKey(host) && preBlackList.get(host) < System.currentTimeMillis() - failOverTime)) {
             return false;
         }
 
         return true;
+    }
+
+    @Override
+    public void triggerValidate() {
+        validateWithNewConnection();
     }
 
     @Override
@@ -104,22 +105,20 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private boolean validateAndUpdate(Connection connection, HostSpec currentHost, int clusterHostCount) throws SQLException {
         try {
             if (validate(connection, clusterHostCount)) {
-                removeFromPreBlackList(currentHost);
+                removeFromAllBlackList(currentHost);
                 return true;
             } else {
-                addToBlackList(currentHost);
-                removeFromPreBlackList(currentHost);
+                addToBlackAndRemoveFromPre(currentHost);
                 return false;
             }
         } catch (SQLException e) {
-            addToPreBlackList(currentHost);
+            addToPreAndRemoveFromBlack(currentHost);
             throw e;
         }
     }
 
-    private void validateWithNewConnection(ConnectionFactory factory, int clusterHostCount) {
+    private void validateWithNewConnection() {
         long currentSecond = System.currentTimeMillis() / 1000;
-        //TODO 异步创建线程，并执行validate操作
         synchronized (this) {
             if (this.lastValidateSecond == currentSecond) {
                 return;
@@ -127,18 +126,22 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         }
 
         this.lastValidateSecond = currentSecond;
-        executorService.schedule(() -> {
-            for (HostSpec host : preBlackList.keySet()) {
-                if (configuredHosts.contains(host)) {
+        asyncValidate(preBlackList.keySet());
+        asyncValidate(hostBlackList.keySet());
+    }
+
+    private void asyncValidate(Set<HostSpec> hostSpecs) {
+        for (HostSpec host : hostSpecs) {
+            if (configuredHosts.contains(host)) {
+                service.submit(() -> {
                     try (Connection connection = factory.createConnectionForHost(host)){
-                        validateAndUpdate(connection, host, clusterHostCount);
+                        validateAndUpdate(connection, host, configuredHosts.size());
                     }catch (Throwable e) {
                         LOGGER.error(CAT_LOG_TYPE, e);
                     }
-                }
+                });
             }
-        }, 1, TimeUnit.MILLISECONDS);
-        // TODO init delay time decide
+        }
     }
 
     private boolean validate(Connection connection, int clusterHostCount) throws SQLException {
@@ -166,30 +169,22 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     private void addToPreBlackList(HostSpec hostSpec) {
         if (hostSpec == null) {
-            LOGGER.warn(String.format(BLACK_LIST, "Pre"));
             return;
         }
 
-        synchronized (MajorityHostValidator.class) {
-            LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_RESULT_UNKNOWN, hostSpec.toString());
-            if (!preBlackList.containsKey(hostSpec)) {
-                Long currentTime = System.currentTimeMillis();
-                preBlackList.put(hostSpec, currentTime);
-            }
-        }
+        LOGGER.logEvent(CAT_LOG_TYPE, ADD_PRE_BLACK_LIST, hostSpec.toString());
+        Long currentTime = System.currentTimeMillis();
+        preBlackList.putIfAbsent(hostSpec, currentTime);
     }
 
     private void addToBlackList(HostSpec hostSpec) {
         if (hostSpec == null) {
-            LOGGER.warn(String.format(BLACK_LIST, ""));
             return;
         }
 
-        synchronized (MajorityHostValidator.class) {
-            LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST, hostSpec.toString());
-            Long currentTime = System.currentTimeMillis();
-            hostBlackList.put(hostSpec, currentTime);
-        }
+        LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST, hostSpec.toString());
+        Long currentTime = System.currentTimeMillis();
+        hostBlackList.put(hostSpec, currentTime);
     }
 
     private void removeFromPreBlackList(HostSpec hostSpec) {
@@ -197,11 +192,32 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             return;
         }
 
-        synchronized (MajorityHostValidator.class) {
-            if (preBlackList.containsKey(hostSpec)) {
-                preBlackList.remove(hostSpec);
-            }
+        LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_PRE_BLACK_LIST, hostSpec.toString());
+        preBlackList.remove(hostSpec);
+    }
+
+    private void removeFromBlackList(HostSpec hostSpec) {
+        if (hostSpec == null) {
+            return;
         }
+
+        LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_BLACK_LIST, hostSpec.toString());
+        hostBlackList.remove(hostSpec);
+    }
+
+    private void addToBlackAndRemoveFromPre(HostSpec hostSpec) {
+        addToBlackList(hostSpec);
+        removeFromPreBlackList(hostSpec);
+    }
+
+    private void addToPreAndRemoveFromBlack(HostSpec hostSpec) {
+        addToPreBlackList(hostSpec);
+        removeFromBlackList(hostSpec);
+    }
+
+    private void removeFromAllBlackList(HostSpec hostSpec) {
+        removeFromBlackList(hostSpec);
+        removeFromPreBlackList(hostSpec);
     }
 
 }

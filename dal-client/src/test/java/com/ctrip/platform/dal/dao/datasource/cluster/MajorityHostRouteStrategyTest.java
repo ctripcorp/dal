@@ -10,8 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
-
 public class MajorityHostRouteStrategyTest {
 
     private final ExecutorService executor = Executors.newFixedThreadPool(16);

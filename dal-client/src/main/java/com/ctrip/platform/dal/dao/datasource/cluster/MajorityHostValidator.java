@@ -84,7 +84,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         return validateAndUpdate(connection, currentHost, configuredHosts.size());
     }
 
-    private HostSpec getHostSpecFromConnection(Connection connection) {
+    protected HostSpec getHostSpecFromConnection(Connection connection) {
         String urlForLog = null;
         try {
             urlForLog = connection.getMetaData().getURL();
@@ -112,7 +112,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                 return false;
             }
         } catch (SQLException e) {
-            addToPreAndRemoveFromBlack(currentHost);
+            addToPreBlackList(currentHost);
             throw e;
         }
     }
@@ -144,7 +144,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         }
     }
 
-    private boolean validate(Connection connection, int clusterHostCount) throws SQLException {
+    protected boolean validate(Connection connection, int clusterHostCount) throws SQLException {
         boolean currentHostState = false;
         int onlineCount = 0;
 

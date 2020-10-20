@@ -47,11 +47,12 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
                 targetHost = pickHost();
                 Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
 
-                hostValidator.triggerValidate();
                 return targetConnection;
             } catch (InvalidConnectionException e) {
                 if (targetHost != null)
                     LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_FAILED, targetHost.toString());
+            } finally {
+                hostValidator.triggerValidate();
             }
         }
 

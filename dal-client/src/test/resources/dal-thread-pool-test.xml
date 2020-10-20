@@ -30,13 +30,15 @@
         <locator>com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator</locator>
         <settings>
             <!--<path>/opt/settings/dal/database.properties</path>-->
-            <path>D:\dal\database.properties</path>
+<!--            <path>D:\dal\database.properties</path>-->
             <dataSourceConfigureProvider>com.ctrip.platform.dal.dao.configure.PropertyFileConfigureProvider</dataSourceConfigureProvider>
         </settings>
     </ConnectionLocator>
     <TaskFactory>
         <settings>
             <maxPoolSize>100</maxPoolSize>
+            <workQueueCapacity>1000</workQueueCapacity>
+            <allowCoreThreadTimeOut>false</allowCoreThreadTimeOut>
         </settings>
     </TaskFactory>
     <DatabaseSelector>

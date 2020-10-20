@@ -16,16 +16,19 @@ public class MajorityHostValidatorTest {
     private long failOverTime = 5000;
     private long blackListTimeOut = 5000;
     private ExecutorService service = Executors.newFixedThreadPool(16);
+    private HostSpec hostSpec1 = HostSpec.of("local", 3306);
+    private HostSpec hostSpec2 = HostSpec.of("local", 3307);
+    private HostSpec hostSpec3 = HostSpec.of("local", 3308);
+    Set<HostSpec> configuredHost = new HashSet<>();
 
-    @Test
-    public void availableTest() throws InterruptedException, SQLException {
-        HostSpec hostSpec1 = HostSpec.of("local", 3306);
-        HostSpec hostSpec2 = HostSpec.of("local", 3307);
-        HostSpec hostSpec3 = HostSpec.of("local", 3308);
-        Set<HostSpec> configuredHost = new HashSet<>();
+    {
         configuredHost.add(hostSpec1);
         configuredHost.add(hostSpec2);
         configuredHost.add(hostSpec3);
+    }
+
+    @Test
+    public void availableTest() throws InterruptedException, SQLException {
         MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
 
         assertEquals(true, validator.available(hostSpec1));
@@ -105,6 +108,63 @@ public class MajorityHostValidatorTest {
         };
     }
 
+    @Test
+    public void changeZone() throws SQLException, InterruptedException {
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        assertEquals(true, validator.available(hostSpec1));
+        MockConnection mockConnection1 = new MockConnection(hostSpec1);
+        MockConnection mockConnection2 = new MockConnection(hostSpec2);
+        MockConnection mockConnection3 = new MockConnection(hostSpec3);
+
+        validator.mysqlServer.put(hostSpec2, MockMajorityHostValidator.MysqlStatus.fail);
+        validator.mysqlServer.put(hostSpec3, MockMajorityHostValidator.MysqlStatus.fail);
+
+        assertEquals(false, validator.validate(mockConnection1));
+        assertEquals(false, validator.available(hostSpec2));
+
+        validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.fail);
+        validator.mysqlServer.put(hostSpec2, MockMajorityHostValidator.MysqlStatus.ok);
+        validator.mysqlServer.put(hostSpec3, MockMajorityHostValidator.MysqlStatus.ok);
+        assertEquals(false, validator.validate(mockConnection1));
+        assertEquals(true, validator.validate(mockConnection2));
+        assertEquals(true, validator.validate(mockConnection3));
+
+        TimeUnit.MILLISECONDS.sleep(failOverTime);
+        assertEquals(false, validator.available(hostSpec1));
+
+
+    }
+
+    @Test
+    public void failToUnKnown() throws SQLException, InterruptedException {
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.fail);
+        MockConnection mockConnection1 = new MockConnection(hostSpec1);
+
+        assertEquals(false, validator.validate(mockConnection1));
+        assertEquals(false, validator.available(hostSpec1));
+
+        validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.unknown);
+        TimeUnit.MILLISECONDS.sleep(failOverTime);
+        validator.triggerValidate();
+        TimeUnit.MILLISECONDS.sleep(10);
+        assertEquals(false, validator.available(hostSpec1));
+    }
+
+    @Test
+    public void okToUnknown() throws SQLException, InterruptedException {
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        MockConnection mockConnection1 = new MockConnection(hostSpec1);
+
+        assertEquals(true, validator.validate(mockConnection1));
+        assertEquals(true, validator.available(hostSpec1));
+
+        validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.unknown);
+        TimeUnit.MILLISECONDS.sleep(failOverTime);
+        validator.triggerValidate();
+        TimeUnit.MILLISECONDS.sleep(10);
+        assertEquals(true, validator.available(hostSpec1));
+    }
 
     @Test
     public void validate() throws SQLException, InterruptedException {

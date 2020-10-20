@@ -41,7 +41,14 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
 
         if (MysqlStatus.unknown.equals(mysqlServer.get(host)))
             throw new SQLException("");
-        return MysqlStatus.ok.equals(mysqlServer.get(host));
+
+        int onlineCount = 0;
+        for (Map.Entry<HostSpec, MysqlStatus> entry : mysqlServer.entrySet()) {
+            if (MysqlStatus.ok.equals(entry.getValue())) {
+                onlineCount++;
+            }
+        }
+        return MysqlStatus.ok.equals(mysqlServer.get(host)) && 2 * onlineCount > mysqlServer.size();
     }
 
     @Override
@@ -49,4 +56,6 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
         MockConnection mockConnection = (MockConnection)connection;
         return mockConnection.getHost();
     }
+
+
 }

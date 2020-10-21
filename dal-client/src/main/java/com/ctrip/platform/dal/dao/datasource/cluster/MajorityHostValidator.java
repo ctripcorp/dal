@@ -5,8 +5,7 @@ import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import com.ctrip.platform.dal.dao.configure.HostAndPort;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.ctrip.platform.dal.exceptions.DalException;
-import org.springframework.util.CollectionUtils;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -29,6 +28,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String ADD_PRE_BLACK_LIST = "Validator::addToPreBlackList";
     private static final String REMOVE_BLACK_LIST = "Validator::removeFromBlackList";
     private static final String REMOVE_PRE_BLACK_LIST = "Validator::removeFromPreBlackList";
+    private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
 
     private volatile long lastValidateSecond = 0;
     private volatile Set<HostSpec> configuredHosts;
@@ -112,7 +112,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                 return false;
             }
         } catch (SQLException e) {
-            addToPreBlackList(currentHost);
+            addToPreAbsentAndBlackPresent(currentHost);
             throw e;
         }
     }
@@ -149,6 +149,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         int onlineCount = 0;
 
         try(Statement statement = connection.createStatement()) {
+            statement.setQueryTimeout(1);
             try(ResultSet resultSet = statement.executeQuery(validateSQL1)) {
                 while (resultSet.next()) {
                     String memberId = resultSet.getString(Columns.MEMBER_ID.name());
@@ -161,13 +162,16 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                         onlineCount++;
                     }
                 }
+            } catch (MySQLSyntaxErrorException e) {
+                LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_COMMAND_DENIED, "");
+                return true;
             }
         }
 
         return currentHostState && 2 * onlineCount > clusterHostCount;
     }
 
-    private void addToPreBlackList(HostSpec hostSpec) {
+    private void addToPreAbsent(HostSpec hostSpec) {
         if (hostSpec == null) {
             return;
         }
@@ -185,6 +189,18 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST, hostSpec.toString());
         Long currentTime = System.currentTimeMillis();
         hostBlackList.put(hostSpec, currentTime);
+    }
+
+    private void addToBlackListPresent(HostSpec hostSpec) {
+        if (hostSpec == null) {
+            return;
+        }
+
+        Long currentTime = System.currentTimeMillis();
+        if (hostBlackList.containsKey(hostSpec)) {
+            LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST, hostSpec.toString());
+            hostBlackList.put(hostSpec, currentTime);
+        }
     }
 
     private void removeFromPreBlackList(HostSpec hostSpec) {
@@ -211,13 +227,18 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     private void addToPreAndRemoveFromBlack(HostSpec hostSpec) {
-        addToPreBlackList(hostSpec);
+        addToPreAbsent(hostSpec);
         removeFromBlackList(hostSpec);
     }
 
     private void removeFromAllBlackList(HostSpec hostSpec) {
         removeFromBlackList(hostSpec);
         removeFromPreBlackList(hostSpec);
+    }
+
+    private void addToPreAbsentAndBlackPresent(HostSpec hostSpec) {
+        addToPreAbsent(hostSpec);
+        addToBlackListPresent(hostSpec);
     }
 
 }

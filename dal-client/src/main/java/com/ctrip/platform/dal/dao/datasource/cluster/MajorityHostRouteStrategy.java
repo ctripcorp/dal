@@ -21,6 +21,8 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
     private static final String NO_HOST_AVAILABLE = "Router::noHostAvailable:%s";
     private static final String INITIALIZE_MSG = "configuredHosts:%s;strategyOptions:%s";
     private static final String ORDER_HOSTS = "orderHosts:%s";
+    private static final String CONNECTION_HOST_CHANGE = "Router::connectionHostChange:%s";
+    private static final String CHANGE_FROM_TO = "change from %s to %s";
 
     private ConnectionValidator connectionValidator;
     private HostValidator hostValidator;
@@ -28,6 +30,8 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
     private ConnectionFactory connFactory;
     private Properties strategyOptions;
     private List<HostSpec> orderHosts;
+    private volatile HostSpec currentHost;
+    private String cluster = "";
     private String status; // birth --> init --> destroy
 
     private enum RouteStrategyStatus {
@@ -45,6 +49,10 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
             HostSpec targetHost = null;
             try {
                 targetHost = pickHost();
+                if (!targetHost.equals(currentHost)) {
+                    LOGGER.logEvent(CAT_LOG_TYPE, String.format(CONNECTION_HOST_CHANGE, cluster), String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString()));
+                    currentHost = targetHost;
+                }
                 Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
 
                 return targetConnection;
@@ -68,21 +76,22 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
         this.strategyOptions = strategyOptions;
         buildValidator();
         buildOrderHosts();
+        this.currentHost = orderHosts.get(0);
         LOGGER.logEvent(CAT_LOG_TYPE, ROUTER_INITIALIZE, String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
     }
 
     private void buildOrderHosts () {
-        //TODO 确定zoneOrder的key是什么；确认可以知道是那个集群的order的嘛
-        List<String> zoneOrder = (List<String>) strategyOptions.get("zoneOrder");
+        //TODO clusterName to be
+        List<String> zoneOrder = (List<String>) strategyOptions.get("ZonesPriority");
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
-        LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, "cluster"), String.format(ORDER_HOSTS, orderHosts.toString()));
+        this.cluster = "cluster";
+        LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, cluster), String.format(ORDER_HOSTS, orderHosts.toString()));
     }
 
     private void buildValidator() {
-        // TODO 确认这两个参数的key是什么
-        long failOverTime = (long)strategyOptions.get("failOverTime");
-        long blackListTimeOut = (long)strategyOptions.get("blackListTimeOut");
+        long failOverTime = (long)strategyOptions.get("FailoverTimeMS");
+        long blackListTimeOut = (long)strategyOptions.get("BlacklistTimeoutMS");
         MajorityHostValidator validator = new MajorityHostValidator(connFactory, configuredHosts, failOverTime, blackListTimeOut);
         this.connectionValidator = validator;
         this.hostValidator = validator;

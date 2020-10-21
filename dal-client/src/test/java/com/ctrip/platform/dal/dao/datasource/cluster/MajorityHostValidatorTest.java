@@ -52,7 +52,7 @@ public class MajorityHostValidatorTest {
         }catch (Exception e) {
             assertEquals(e instanceof SQLException, true);
         }
-        assertEquals(true, validator.available(hostSpec1));
+        assertEquals(false, validator.available(hostSpec1));
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         assertEquals(false, validator.available(hostSpec1));
 
@@ -87,7 +87,7 @@ public class MajorityHostValidatorTest {
                }
             });
         }
-        assertEquals(true, validator.available(hostSpec1));
+        assertEquals(false, validator.available(hostSpec1));
         second.await();
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         assertEquals(false, validator.available(hostSpec1));
@@ -120,7 +120,7 @@ public class MajorityHostValidatorTest {
         validator.mysqlServer.put(hostSpec3, MockMajorityHostValidator.MysqlStatus.fail);
 
         assertEquals(false, validator.validate(mockConnection1));
-        assertEquals(false, validator.available(hostSpec2));
+        assertEquals(true, validator.available(hostSpec2));
 
         validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.fail);
         validator.mysqlServer.put(hostSpec2, MockMajorityHostValidator.MysqlStatus.ok);
@@ -129,8 +129,9 @@ public class MajorityHostValidatorTest {
         assertEquals(true, validator.validate(mockConnection2));
         assertEquals(true, validator.validate(mockConnection3));
 
-        TimeUnit.MILLISECONDS.sleep(failOverTime);
         assertEquals(false, validator.available(hostSpec1));
+        TimeUnit.MILLISECONDS.sleep(failOverTime);
+        assertEquals(true, validator.available(hostSpec1));
 
 
     }

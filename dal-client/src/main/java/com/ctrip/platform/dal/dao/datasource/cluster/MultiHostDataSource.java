@@ -58,7 +58,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         String strategyName = clusterProperties.routeStrategyName();
         RouteStrategy strategy;
         if (ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
-            strategy = new MajorityHostRouteStrategy();
+            strategy = new OrderedAccessStrategy();
         else {
             try {
                 Class clazz = Class.forName(strategyName);

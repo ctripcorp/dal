@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-public class MockMajorityHostRouteStrategy extends MajorityHostRouteStrategy {
+public class MockOrderedAccessStrategy extends OrderedAccessStrategy {
     private ConnectionValidator connectionValidator;
     private HostValidator hostValidator;
     private Set<HostSpec> configuredHosts;

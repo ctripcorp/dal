@@ -11,7 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class MajorityHostRouteStrategy implements RouteStrategy{
+public class OrderedAccessStrategy implements RouteStrategy{
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.pickConnection";
@@ -38,7 +38,7 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
         birth, init, destroy;
     }
 
-    public MajorityHostRouteStrategy() {
+    public OrderedAccessStrategy() {
         status = RouteStrategyStatus.birth.name();
     }
 
@@ -99,12 +99,12 @@ public class MajorityHostRouteStrategy implements RouteStrategy{
 
     private void isInit() {
         if (!RouteStrategyStatus.init.name().equalsIgnoreCase(status))
-            throw new DalRuntimeException("MajorityHostRouteStrategy is not ready, status: " + this.status);
+            throw new DalRuntimeException("OrderedAccessStrategy is not ready, status: " + this.status);
     }
 
     private void isDestroy () {
         if (RouteStrategyStatus.init.name().equalsIgnoreCase(status))
-            throw new DalRuntimeException("MajorityHostRouteStrategy has been init, status: " + this.status);
+            throw new DalRuntimeException("OrderedAccessStrategy has been init, status: " + this.status);
     }
 
     @Override

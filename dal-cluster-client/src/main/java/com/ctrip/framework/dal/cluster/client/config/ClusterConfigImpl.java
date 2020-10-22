@@ -8,6 +8,7 @@ import com.ctrip.framework.dal.cluster.client.cluster.DefaultDrcCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ShardStrategyProxy;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
 
@@ -28,6 +29,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private ShardStrategy defaultShardStrategy;
     private List<ShardStrategy> shardStrategies = new LinkedList<>();
     private ClusterIdGeneratorConfig idGeneratorConfig;
+    private ClusterRouteStrategyConfig routeStrategyConfig;
     private Integer unitStrategyId;
     private String zoneId;
 
@@ -64,7 +66,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     }
 
     private Cluster innerGenerate() {
-        DefaultCluster cluster = (clusterType == ClusterType.NORMAL && unitStrategyId == null ?
+        DefaultCluster cluster = (clusterType != ClusterType.DRC && unitStrategyId == null ?
                 new DefaultCluster(this) : new DefaultDrcCluster(this));
         for (DatabaseShardConfig databaseShardConfig : databaseShardConfigs)
             cluster.addDatabaseShard(databaseShardConfig.generate());
@@ -73,6 +75,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
             shardStrategy.addStrategy(strategy);
         cluster.setShardStrategy(shardStrategy);
         cluster.setIdGeneratorConfig(idGeneratorConfig);
+        cluster.setRouteStrategyConfig(routeStrategyConfig);
         LocalizationState localizationState = LocalizationState.NONE;
         if (clusterType == ClusterType.DRC)
             localizationState = LocalizationState.ACTIVE;
@@ -95,6 +98,10 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     @Override
     public String getClusterName() {
         return clusterName;
+    }
+
+    public ClusterType getClusterType() {
+        return clusterType;
     }
 
     public DatabaseCategory getDatabaseCategory() {
@@ -125,6 +132,10 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
         this.idGeneratorConfig = idGeneratorConfig;
+    }
+
+    public void setRouteStrategyConfig(ClusterRouteStrategyConfig routeStrategyConfig) {
+        this.routeStrategyConfig = routeStrategyConfig;
     }
 
     public void setUnitStrategyId(Integer unitStrategyId) {

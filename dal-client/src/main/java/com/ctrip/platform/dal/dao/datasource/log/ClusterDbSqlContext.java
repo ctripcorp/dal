@@ -15,8 +15,8 @@ public class ClusterDbSqlContext extends BaseSqlContext {
     protected static final String DB_KEY = "DB";
 
     private final String cluster;
-    private final Integer shard;
-    private final DatabaseRole role;
+    private Integer shard;
+    private DatabaseRole role;
 
     public ClusterDbSqlContext(String cluster, Integer shard, DatabaseRole role) {
         this(cluster, shard, role, null);
@@ -62,6 +62,14 @@ public class ClusterDbSqlContext extends BaseSqlContext {
                 getClientVersion(), getClientZone(), getDbName());
         context.populateDbZone(getDbZone());
         return context;
+    }
+
+    public void populateShard(Integer shard) {
+        this.shard = shard;
+    }
+
+    public void populateRole(DatabaseRole role) {
+        this.role = role;
     }
 
 }

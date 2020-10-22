@@ -6,6 +6,7 @@ import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
@@ -46,6 +47,8 @@ public interface Cluster extends Listenable<ClusterSwitchedEvent>, Wrapper {
     List<Database> getSlavesOnShard(int shardIndex);
 
     ClusterIdGeneratorConfig getIdGeneratorConfig();
+
+    ClusterRouteStrategyConfig getRouteStrategyConfig();
 
     LocalizationConfig getLocalizationConfig();
 

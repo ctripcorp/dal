@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 

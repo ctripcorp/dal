@@ -11,7 +11,7 @@ public interface DatabaseShard {
 
     int getShardIndex();
 
-    Database getMaster();
+    List<Database> getMasters();
 
     List<Database> getSlaves();
 

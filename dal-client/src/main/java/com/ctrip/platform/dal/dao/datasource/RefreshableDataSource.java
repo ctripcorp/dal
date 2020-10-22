@@ -1,27 +1,28 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import javax.sql.DataSource;
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
+import com.ctrip.platform.dal.dao.datasource.jdbc.DalDataSource;
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
-public class RefreshableDataSource implements DataSource, ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
+public class RefreshableDataSource extends DalDataSource implements DataSource,
+        ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
@@ -43,10 +44,6 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private final DataSourceIdentity id;
     private long switchListenerTimeout = DEFAULT_SWITCH_LISTENER_TIME_OUT; //ms
 
-    private final AtomicLong firstAppearContinuousErrorTimeAtom = new AtomicLong(0);
-    private final AtomicLong continuousErrorCountAtom = new AtomicLong(0);
-    private final AtomicLong lastReportContinuousErrorTimeAtom = new AtomicLong(0);
-
     private int switchVersion = 0;
 
     private static final int INIT_DELAY = 0;
@@ -58,13 +55,10 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private static final long KEEP_ALIVE_TIME = 1L;
     private static final long DEFAULT_SWITCH_LISTENER_TIME_OUT = 10; //ms
     private static final long MAX_SWITCH_LISTENER_TIME_OUT = 500; //ms
-    private static final long FIXED_DELAY = 60;//second
+    private static final long FIXED_DELAY = 60; //second
     private static final String SWITCH_VERSION = "SwitchVersion:%s";
     private static final String LISTENER_TIME_OUT = "SwitchListenerTimeout:%s";
     private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
-    private static final String THREAD_NAME = "DataSourceRefresher";
-    public static final int CONTINUOUS_ERROR_DURATION_THRESHOLD = 60 * 1000;  // ms
-    public static final int CONTINUOUS_ERROR_REPORT_PERIOD = 30 * 1000;  // ms
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
         this.id = new DataSourceName(name);
@@ -126,40 +120,6 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         }, INIT_DELAY, TimeUnit.MILLISECONDS);
     }
 
-    public void handleException(SQLException e, boolean isUpdateOperation) {
-        if (e != null) {
-            long nowTime = System.currentTimeMillis();
-            long firstAppear;
-            long continuousErrorCount;
-            synchronized (firstAppearContinuousErrorTimeAtom) {
-                firstAppear = firstAppearContinuousErrorTimeAtom.get();
-                firstAppearContinuousErrorTimeAtom.compareAndSet(0, nowTime);
-                continuousErrorCount = continuousErrorCountAtom.incrementAndGet();
-            }
-            if (firstAppear > 0 && nowTime - firstAppear >= CONTINUOUS_ERROR_DURATION_THRESHOLD &&
-                    needToReport(nowTime, continuousErrorCount)) {
-                LOGGER.reportError(id.getId());
-            }
-        } else if (isUpdateOperation) {
-            synchronized (firstAppearContinuousErrorTimeAtom) {
-                continuousErrorCountAtom.set(0);
-                firstAppearContinuousErrorTimeAtom.set(0);
-            }
-        }
-    }
-
-    private boolean needToReport(long nowTime, long continuousErrorCount) {
-        synchronized (lastReportContinuousErrorTimeAtom) {
-            long lastReport = lastReportContinuousErrorTimeAtom.get();
-            if ((lastReport == 0 || nowTime - lastReport >= CONTINUOUS_ERROR_REPORT_PERIOD) &&
-                    continuousErrorCount >= 3) {
-                lastReportContinuousErrorTimeAtom.set(nowTime);
-                return true;
-            }
-            return false;
-        }
-    }
-
     @Override
     public void close() {
         LOGGER.info(String.format("close RefreshableDataSource '%s'", id.getId()));
@@ -196,6 +156,26 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
 
     public DataSourceIdentity getId() {
         return id;
+    }
+
+    @Override
+    protected SqlContext createSqlContext() {
+        return id.createSqlContext();
+    }
+
+    @Override
+    public DatabaseCategory getDatabaseCategory() {
+        return getSingleDataSource().getDataSourceConfigure().getDatabaseCategory();
+    }
+
+    @Override
+    protected String getDataSourceName() {
+        return id.getId();
+    }
+
+    @Override
+    public DataSource getDelegated() {
+        return getDataSource();
     }
 
     public void addDataSourceSwitchListener(DataSourceSwitchListener dataSourceSwitchListener) {
@@ -240,7 +220,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
                             try {
                                 getConnection().close();
                             } catch (Exception e) {
-                                //ignore
+                                // ignore
                             }
                         }
                     }, INIT_DELAY, FIXED_DELAY, TimeUnit.SECONDS);
@@ -374,58 +354,6 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
             }
         }
         return new DalConnection(connection, this, id.createSqlContext());
-    }
-
-    public long getFirstAppearContinuousErrorTime() {
-        return firstAppearContinuousErrorTimeAtom.get();
-    }
-
-    public long getLastReportContinuousErrorTime() {
-        return lastReportContinuousErrorTimeAtom.get();
-    }
-
-    public long getContinuousErrorCount() {
-        return continuousErrorCountAtom.get();
-    }
-
-    @Override
-    public Connection getConnection(String paramString1, String paramString2) throws SQLException {
-        return getDataSource().getConnection(paramString1, paramString2);
-    }
-
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return getDataSource().getLogWriter();
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return getDataSource().getLoginTimeout();
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter paramPrintWriter) throws SQLException {
-        getDataSource().setLogWriter(paramPrintWriter);
-    }
-
-    @Override
-    public void setLoginTimeout(int paramInt) throws SQLException {
-        getDataSource().setLoginTimeout(paramInt);
-    }
-
-    @Override
-    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return getDataSource().getParentLogger();
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return getDataSource().unwrap(iface);
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return getDataSource().isWrapperFor(iface);
     }
 
 }

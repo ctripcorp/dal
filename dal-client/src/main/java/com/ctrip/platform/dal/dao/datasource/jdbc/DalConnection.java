@@ -1,9 +1,11 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.RefreshableDataSource;
+import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -25,10 +27,10 @@ public class DalConnection implements Connection {
 
     private Connection connection;
     private final AtomicReference<SQLException> discardCauseRef = new AtomicReference<>();
-    private RefreshableDataSource dataSource;
+    private DalDataSource dataSource;
     private SqlContext context;
 
-    public DalConnection(Connection connection, RefreshableDataSource dataSource, SqlContext context) {
+    public DalConnection(Connection connection, DalDataSource dataSource, SqlContext context) {
         this.connection = connection;
         this.dataSource = dataSource;
         this.context = context;
@@ -55,7 +57,7 @@ public class DalConnection implements Connection {
         }
         if (t1 == null)
             return false;
-        DatabaseCategory dbCategory = dataSource.getSingleDataSource().getDataSourceConfigure().getDatabaseCategory();
+        DatabaseCategory dbCategory = dataSource.getDatabaseCategory();
         SQLException se = (SQLException) t1;
         if (dbCategory.isSpecificException(se))
             return true;
@@ -138,9 +140,16 @@ public class DalConnection implements Connection {
         DatabaseMetaData metaData = connection.getMetaData();
         if (metaData == null)
             return null;
-        DataSourceIdentity id = dataSource.getId();
-        if (id instanceof ClusterDataSourceIdentity)
-            return new ClusterDatabaseMetaDataImpl(metaData, ((ClusterDataSourceIdentity) id).getDatabase());
+        if (dataSource instanceof RefreshableDataSource) {
+            DataSourceIdentity id = ((RefreshableDataSource) dataSource).getId();
+            if (id instanceof ClusterDataSourceIdentity) {
+                Database database = ((ClusterDataSourceIdentity) id).getDatabase();
+                return new ClusterDatabaseMetaDataImpl(metaData, database.getClusterName(), database.getShardIndex());
+            }
+        } else if (dataSource instanceof ClusterDataSource) {
+            ClusterDataSource clusterDataSource = (ClusterDataSource) dataSource;
+            return new ClusterDatabaseMetaDataImpl(metaData, clusterDataSource.getClusterName(), clusterDataSource.getShardIndex());
+        }
         return metaData;
     }
 

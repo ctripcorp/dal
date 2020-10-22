@@ -25,6 +25,7 @@ public class DatabaseConfigImpl implements DatabaseConfig {
     private String dbName;
     private String uid;
     private String pwd;
+    private String zone;
     private String charset = "UTF-8";
     private Integer readWeight = 1;
     private Set<String> tags = new HashSet<>();
@@ -72,6 +73,10 @@ public class DatabaseConfigImpl implements DatabaseConfig {
         return pwd;
     }
 
+    public String getZone() {
+        return zone;
+    }
+
     public String getCharset() {
         return charset;
     }
@@ -106,6 +111,10 @@ public class DatabaseConfigImpl implements DatabaseConfig {
 
     public void setPwd(String pwd) {
         this.pwd = pwd;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 
     public void setCharset(String charset) {

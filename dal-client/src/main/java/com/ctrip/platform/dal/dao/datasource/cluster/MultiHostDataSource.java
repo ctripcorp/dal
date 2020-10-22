@@ -1,8 +1,11 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
+import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -18,10 +21,9 @@ import java.util.Map;
 /**
  * @author c7ch23en
  */
-public class MultiHostDataSource extends DataSourceDelegate implements DataSource {
+public class MultiHostDataSource extends DataSourceDelegate implements DataSource, ClosableDataSource, SingleDataSourceWrapper {
 
-    protected static final String ORDERED_ACCESS_STRATEGY = "orderedAccess";
-    protected static final String LOCAL_ACCESS_STRATEGY = "localAccess";
+    protected static final String ORDERED_ACCESS_STRATEGY = "OrderedAccessStrategy";
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 
@@ -57,7 +59,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     protected RouteStrategy prepareRouteStrategy() {
         String strategyName = clusterProperties.routeStrategyName();
         RouteStrategy strategy;
-        if (ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
+        if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
             strategy = new OrderedAccessStrategy();
         else {
             try {
@@ -97,8 +99,27 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     }
 
     @Override
+    public void close() {
+        wrappedDataSources.values().forEach(dataSource -> {
+            if (dataSource != null)
+                DataSourceCreator.getInstance().returnDataSource(dataSource);
+        });
+        if (routeStrategy != null) {
+            routeStrategy.destroy();
+        }
+    }
+
+    @Override
     public DataSource getDelegated() {
         return wrappedDataSources.values().iterator().next().getDataSource();
     }
+
+    @Override
+    public SingleDataSource getSingleDataSource() {
+        return wrappedDataSources.values().iterator().next();
+    }
+
+    @Override
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {}
 
 }

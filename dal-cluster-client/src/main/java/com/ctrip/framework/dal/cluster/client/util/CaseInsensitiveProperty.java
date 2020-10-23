@@ -15,6 +15,9 @@ public class CaseInsensitiveProperty {
     }
 
     public String getString(String key, String defaultValue) {
+        if (StringUtils.isTrimmedEmpty(key)) {
+            return defaultValue;
+        }
         String value = properties.get(key);
         return StringUtils.isTrimmedEmpty(value) ? defaultValue : value;
     }

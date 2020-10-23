@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,7 +83,7 @@ public class MultiHostDataSourceTest {
             }
 
             @Override
-            public Properties routeStrategyProperties() {
+            public CaseInsensitiveProperties routeStrategyProperties() {
                 return null;
             }
         };

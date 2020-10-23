@@ -1,10 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Set;
  */
 public interface RouteStrategy {
 
-    void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyProperties);
+    void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties);
 
     Connection pickConnection(RequestContext request) throws SQLException;
 

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class OrderedAccessStrategyTest {
             }
 
             @Override
-            public Properties routeStrategyProperties() {
+            public CaseInsensitiveProperties routeStrategyProperties() {
                 Properties properties = new Properties();
                 properties.put("FailoverTimeMS", 10000L);
                 properties.put("BlacklistTimeoutMS", 10000L);
@@ -74,7 +75,7 @@ public class OrderedAccessStrategyTest {
                 zoneOrder.add("zone2");
                 zoneOrder.add("zone3");
                 properties.put("ZonesPriority", zoneOrder);
-                return properties;
+                return new CaseInsensitiveProperties(properties);
             }
         };
     }

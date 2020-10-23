@@ -1,8 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
-
-import java.util.Properties;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 
 /**
  * @author c7ch23en
@@ -21,7 +20,7 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     }
 
     @Override
-    public Properties routeStrategyProperties() {
+    public CaseInsensitiveProperties routeStrategyProperties() {
         return routeStrategyConfig.routeStrategyProperties();
     }
 

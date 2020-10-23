@@ -1,8 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperty;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.StringValueComparator;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;

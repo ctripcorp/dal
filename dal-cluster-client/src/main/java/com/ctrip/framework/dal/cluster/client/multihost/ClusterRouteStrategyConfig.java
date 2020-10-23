@@ -1,6 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.multihost;
 
-import java.util.Properties;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 
 /**
  * @author c7ch23en
@@ -9,6 +9,6 @@ public interface ClusterRouteStrategyConfig {
 
     String routeStrategyName();
 
-    Properties routeStrategyProperties();
+    CaseInsensitiveProperties routeStrategyProperties();
 
 }

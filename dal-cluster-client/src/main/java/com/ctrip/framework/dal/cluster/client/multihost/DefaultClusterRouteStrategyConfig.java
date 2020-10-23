@@ -1,8 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.multihost;
 
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
-
-import java.util.Properties;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 
 /**
  * @author c7ch23en
@@ -10,7 +9,7 @@ import java.util.Properties;
 public class DefaultClusterRouteStrategyConfig implements ClusterRouteStrategyConfig {
 
     private final String strategyName;
-    private final Properties properties = new Properties();
+    private final CaseInsensitiveProperties properties = new CaseInsensitiveProperties();
 
     public DefaultClusterRouteStrategyConfig(String strategyName) {
         this.strategyName = strategyName;
@@ -22,14 +21,14 @@ public class DefaultClusterRouteStrategyConfig implements ClusterRouteStrategyCo
     }
 
     @Override
-    public Properties routeStrategyProperties() {
+    public CaseInsensitiveProperties routeStrategyProperties() {
         return properties;
     }
 
     public void setProperty(String name, String value) {
-        if (properties.getProperty(name) != null)
+        if (properties.get(name) != null)
             throw new ClusterRuntimeException("Duplicate property: " + name);
-        properties.setProperty(name, value);
+        properties.set(name, value);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperty;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.StringValueComparator;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -49,9 +50,11 @@ public class OrderedAccessStrategy implements RouteStrategy{
             HostSpec targetHost = null;
             try {
                 targetHost = pickHost();
-                if (!targetHost.equals(currentHost)) {
-                    LOGGER.logEvent(CAT_LOG_TYPE, String.format(CONNECTION_HOST_CHANGE, cluster), String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString()));
-                    currentHost = targetHost;
+                synchronized (currentHost) {
+                    if (!targetHost.equals(currentHost)) {
+                        LOGGER.logEvent(CAT_LOG_TYPE, String.format(CONNECTION_HOST_CHANGE, cluster), String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString()));
+                        currentHost = targetHost;
+                    }
                 }
                 Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
 

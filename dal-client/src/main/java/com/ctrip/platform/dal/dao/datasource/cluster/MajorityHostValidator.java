@@ -208,8 +208,10 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             return;
         }
 
-        LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_PRE_BLACK_LIST, hostSpec.toString());
-        preBlackList.remove(hostSpec);
+        Long last = preBlackList.remove(hostSpec);
+        if (last != null) {
+            LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_PRE_BLACK_LIST, hostSpec.toString());
+        }
     }
 
     private void removeFromBlackList(HostSpec hostSpec) {
@@ -217,8 +219,10 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             return;
         }
 
-        LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_BLACK_LIST, hostSpec.toString());
-        hostBlackList.remove(hostSpec);
+        Long last = hostBlackList.remove(hostSpec);
+        if (last != null) {
+            LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_BLACK_LIST, hostSpec.toString());
+        }
     }
 
     private void addToBlackAndRemoveFromPre(HostSpec hostSpec) {

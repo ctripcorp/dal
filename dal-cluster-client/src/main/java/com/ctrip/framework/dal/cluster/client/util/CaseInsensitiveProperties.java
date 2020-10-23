@@ -51,4 +51,11 @@ public class CaseInsensitiveProperties {
         return value != null ? Arrays.asList(value.split(separator, -1)) : defaultValue;
     }
 
+    @Override
+    public String toString() {
+        return "CaseInsensitiveProperties{" +
+                "properties=" + properties.toString() +
+                '}';
+    }
+
 }

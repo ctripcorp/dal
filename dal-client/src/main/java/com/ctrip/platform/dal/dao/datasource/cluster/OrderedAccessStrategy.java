@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -27,7 +28,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     private HostValidator hostValidator;
     private Set<HostSpec> configuredHosts;
     private ConnectionFactory connFactory;
-    private Properties strategyOptions;
+    private CaseInsensitiveProperties strategyOptions;
     private List<HostSpec> orderHosts;
     private volatile HostSpec currentHost;
     private String cluster = "";
@@ -69,12 +70,12 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     @Override
-    public void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, Properties strategyOptions) {
+    public void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
         isDestroy();
         this.status = RouteStrategyStatus.init.name();
         this.configuredHosts = configuredHosts;
         this.connFactory = connFactory;
-        this.strategyOptions = strategyOptions;
+        this.strategyOptions = strategyProperties;
         buildValidator();
         buildOrderHosts();
         this.currentHost = orderHosts.get(0);
@@ -83,7 +84,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
 
     private void buildOrderHosts () {
         //TODO clusterName to be
-        List<String> zoneOrder = (List<String>) strategyOptions.get("ZonesPriority");
+        List<String> zoneOrder = strategyOptions.getStringList("zonesPriority", ",", null);
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
         this.cluster = "cluster";
@@ -91,8 +92,8 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     private void buildValidator() {
-        long failOverTime = (long)strategyOptions.get("FailoverTimeMS");
-        long blackListTimeOut = (long)strategyOptions.get("BlacklistTimeoutMS");
+        long failOverTime = strategyOptions.getLong("failoverTimeMS", 0);
+        long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 0);
         MajorityHostValidator validator = new MajorityHostValidator(connFactory, configuredHosts, failOverTime, blackListTimeOut);
         this.connectionValidator = validator;
         this.hostValidator = validator;

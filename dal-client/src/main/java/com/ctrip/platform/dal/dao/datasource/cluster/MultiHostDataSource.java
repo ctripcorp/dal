@@ -27,14 +27,16 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 
+    private final ShardMeta shardMeta;
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
     private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
     private final RouteStrategy routeStrategy;
     private final MultiHostClusterProperties clusterProperties;
 
-    public MultiHostDataSource(Map<HostSpec, DataSourceConfigure> dataSourceConfigs,
+    public MultiHostDataSource(ShardMeta shardMeta, Map<HostSpec, DataSourceConfigure> dataSourceConfigs,
                                MultiHostClusterProperties clusterProperties) {
+        this.shardMeta = shardMeta;
         this.dataSourceConfigs = dataSourceConfigs;
         this.clusterProperties = clusterProperties;
         this.connFactory = prepareConnectionFactory();
@@ -71,7 +73,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
                 throw new DalRuntimeException(msg, t);
             }
         }
-        strategy.initialize(dataSourceConfigs.keySet(), connFactory, clusterProperties.routeStrategyProperties());
+        strategy.initialize(shardMeta, connFactory, clusterProperties.routeStrategyProperties());
         return strategy;
     }
 

@@ -118,21 +118,23 @@ public class DalConnectionPool extends ConnectionPool {
     private void preHandleConnection(PooledConnection conn) {
         Connection connection = getConnection(conn);
         if (connection != null) {
-            tryValidateClusterConnection(connection);
+            tryValidateClusterConnection(conn);
             trySetSessionWaitTimeout(connection);
         }
     }
 
-    private void tryValidateClusterConnection(Connection conn) {
+    private void tryValidateClusterConnection(PooledConnection conn) {
         if (clusterConnValidator != null) {
             boolean isValid = true;
             try {
-                isValid = clusterConnValidator.validate(conn);
+                isValid = clusterConnValidator.validate(getConnection(conn));
             } catch (Throwable t) {
                 logger.warn("tryValidateClusterConnection exception", t);
             }
-            if (!isValid)
+            if (!isValid) {
+                release(conn);
                 throw new InvalidConnectionException("Created connection is invalid");
+            }
         }
     }
 

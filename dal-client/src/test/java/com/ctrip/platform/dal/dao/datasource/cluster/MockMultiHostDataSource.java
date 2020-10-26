@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author c7ch23en
@@ -15,7 +16,22 @@ public class MockMultiHostDataSource extends MultiHostDataSource {
     public MockMultiHostDataSource(Map<HostSpec, DataSourceConfigure> dataSourceConfigs,
                                    MultiHostClusterProperties clusterProperties,
                                    String mockClientZone) {
-        super(dataSourceConfigs, clusterProperties);
+        super(new ShardMeta() {
+            @Override
+            public int shardIndex() {
+                return 0;
+            }
+
+            @Override
+            public Set<HostSpec> configuredHosts() {
+                return dataSourceConfigs.keySet();
+            }
+
+            @Override
+            public String clusterName() {
+                return "mock";
+            }
+        }, dataSourceConfigs, clusterProperties);
         this.mockClientZone = mockClientZone;
     }
 

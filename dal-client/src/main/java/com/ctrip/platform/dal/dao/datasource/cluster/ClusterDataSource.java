@@ -19,10 +19,12 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.UnsupportedFeatureException;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author c7ch23en
@@ -46,6 +48,7 @@ public class ClusterDataSource extends DalDataSource implements DataSource,
         this.provider = provider;
         check();
         this.delegated = createInnerDataSource();
+        warmUp();
     }
 
     public String getClusterName() {
@@ -76,10 +79,37 @@ public class ClusterDataSource extends DalDataSource implements DataSource,
             });
             MultiHostClusterProperties properties = new MultiHostClusterPropertiesAdapter(cluster.getRouteStrategyConfig());
             LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_MULTI_HOST, getClusterName()), "");
-            return new MultiHostDataSource(dataSourceConfigs, properties);
+            return new MultiHostDataSource(buildShardMeta(dataSourceConfigs.keySet()), dataSourceConfigs, properties);
         } catch (Throwable t) {
             LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_MULTI_HOST_FAIL, getClusterName()), "");
             throw t;
+        }
+    }
+
+    private ShardMeta buildShardMeta(Set<HostSpec> configuredHosts) {
+        return new ShardMeta() {
+            @Override
+            public int shardIndex() {
+                return getShardIndex();
+            }
+
+            @Override
+            public Set<HostSpec> configuredHosts() {
+                return configuredHosts;
+            }
+
+            @Override
+            public String clusterName() {
+                return getClusterName();
+            }
+        };
+    }
+
+    public void warmUp() {
+        try (Connection connection = getConnection()) {
+            // do nothing
+        } catch (SQLException e) {
+            LOGGER.warn("warm up exception", e);
         }
     }
 

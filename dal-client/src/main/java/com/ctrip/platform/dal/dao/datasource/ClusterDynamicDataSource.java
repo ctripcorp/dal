@@ -7,6 +7,7 @@ import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
@@ -16,6 +17,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.cluster.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
+import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -29,7 +31,12 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 public class ClusterDynamicDataSource extends DataSourceDelegate implements DataSource,
@@ -158,5 +165,14 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     private DataSourceIdentity getMultiHostDataSourceIdentity(Cluster cluster) {
         return new DefaultClusterIdentity(cluster);
     }
+
+    // force switch
+
+    private static final String FORCE_SWITCH = "ForceSwitch::forceSwitch:%s";
+    private static final String GET_STATUS = "ForceSwitch::getStatus:%s";
+    private static final String RESTORE = "ForceSwitch::restore:%s";
+    private final Lock lock = new ReentrantLock();
+    private final AtomicReference<HostSpec> currentHost = new AtomicReference<>();
+    private static volatile ThreadPoolExecutor executor;
 
 }

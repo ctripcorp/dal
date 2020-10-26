@@ -111,10 +111,10 @@ public class MgrRequestTask {
                     try (Connection connection = dataSource.getConnection()){
                         try (Statement statement = connection.createStatement()){
                             statement.setQueryTimeout(1);
-                            try (ResultSet resultSet = statement.executeQuery("select * from mytest.dalservicetable where ID = 10086")){
+                            try (ResultSet resultSet = statement.executeQuery("select * from dalservicetable where ID = 10086")){
                                 boolean result = explainSelect(resultSet);
                                 if (!result) {
-                                    boolean insertResult = statement.execute("insert into mytest.dalservicetable values (10086, 'mgrtest', 20);");
+                                    boolean insertResult = statement.execute("insert into dalservicetable values (10086, 'mgrtest', 20);");
                                     Cat.logEvent("DalApplication", "MgrTest", Message.SUCCESS, String.valueOf(insertResult));
                                 }
 
@@ -124,7 +124,7 @@ public class MgrRequestTask {
                         }
                         try (Statement statement = connection.createStatement()){
                             statement.setQueryTimeout(1);
-                            Boolean flag = statement.execute("update mytest.dalservicetable set Age=" + (int)(Math.random() * 100) + " where ID=10086;");
+                            Boolean flag = statement.execute("update dalservicetable set Age=" + (int)(Math.random() * 100) + " where ID=10086;");
                             Cat.logEvent("DalApplication", "MgrUpdate", Message.SUCCESS, String.valueOf(flag));
                         }catch (Exception e) {
                             Cat.logEvent("DalApplication", "MgrUpdate", "fail", e.getMessage());

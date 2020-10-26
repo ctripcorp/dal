@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.application.service;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.application.Application;
 import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
@@ -30,6 +31,7 @@ public class MgrRequestTask {
     private int qps = 100;
     private int delay = 40;
     private SQLThread mySQLThread;
+    private String clusterName = "dalservice2db_dalcluster";
 
 
     @Autowired
@@ -44,13 +46,16 @@ public class MgrRequestTask {
             String qpsCfg = dalApplicationConfig.getQPS();
             if (qpsCfg != null)
                 qps = Integer.parseInt(qpsCfg);
+            String cluster = dalApplicationConfig.getClusterName();
+            if (!StringUtils.isTrimmedEmpty(cluster))
+                this.clusterName = cluster;
             delay = (1000 / qps) * 4;
         } catch (Exception e) {
             Cat.logError("get qps from QConfig error", e);
         }
 
         try {
-            mySQLThread = new MgrRequestTask.SQLThread(mySqlDao, delay);
+            mySQLThread = new MgrRequestTask.SQLThread(mySqlDao, delay, clusterName);
             startTasks();
             Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS, String.format("executor start with qps %s", getQps()));
         } catch (Exception e) {
@@ -84,17 +89,19 @@ public class MgrRequestTask {
         public volatile boolean exit = false;
         private final DALServiceDao dao;
         private final long delay;
+        private String clusterName;
 
-        public SQLThread(DALServiceDao dao, long delay) {
+        public SQLThread(DALServiceDao dao, long delay, String clusterName) {
             this.dao = dao;
             this.delay = delay;
+            this.clusterName = clusterName;
         }
 
         @Override
         public void run() {
             DataSource dataSource = null;
             try {
-                dataSource = new DalDataSourceFactory().getOrCreateDataSource("mytest_dalcluster");
+                dataSource = new DalDataSourceFactory().getOrCreateDataSource(clusterName);
             } catch (Exception e) {
                 e.printStackTrace();
             }

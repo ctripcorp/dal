@@ -72,7 +72,7 @@ public class DALRequestTask {
     }
 
     private void startTasks() {
-        executor.submit(mySQLThread);
+//        executor.submit(mySQLThread);
         executor.submit(clusterThread);
         executor.submit(sqlServerThread);
     }

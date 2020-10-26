@@ -15,7 +15,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.pickConnection";
-    private static final String VALIDATE_FAILED = "Router::validateFailed:";
+    private static final String VALIDATE_FAILED = "Router::validateFailed";
     private static final String ROUTER_INITIALIZE = "Router::initialize";
     private static final String ROUTER_ORDER_HOSTS = "Router::cluster:%s";
     private static final String NO_HOST_AVAILABLE = "Router::noHostAvailable:%s";
@@ -51,6 +51,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
                 targetHost = pickHost();
                 synchronized (currentHost) {
                     if (!targetHost.equals(currentHost)) {
+                        LOGGER.warn(String.format(CONNECTION_HOST_CHANGE, String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString())));
                         LOGGER.logEvent(CAT_LOG_TYPE, String.format(CONNECTION_HOST_CHANGE, cluster), String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString()));
                         currentHost = targetHost;
                     }
@@ -59,8 +60,10 @@ public class OrderedAccessStrategy implements RouteStrategy{
 
                 return targetConnection;
             } catch (InvalidConnectionException e) {
-                if (targetHost != null)
+                if (targetHost != null){
+                    LOGGER.warn(VALIDATE_FAILED + targetHost.toString());
                     LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_FAILED, targetHost.toString());
+                }
             } finally {
                 hostValidator.triggerValidate();
             }
@@ -70,15 +73,16 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     @Override
-    public void initialize(Set<HostSpec> configuredHosts, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
+    public void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
         isDestroy();
         this.status = RouteStrategyStatus.init.name();
-        this.configuredHosts = configuredHosts;
+        this.configuredHosts = shardMeta.configuredHosts();
         this.connFactory = connFactory;
         this.strategyOptions = strategyProperties;
         buildValidator();
         buildOrderHosts();
         this.currentHost = orderHosts.get(0);
+        LOGGER.info(ROUTER_INITIALIZE + ":" + String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
         LOGGER.logEvent(CAT_LOG_TYPE, ROUTER_INITIALIZE, String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
     }
 
@@ -88,6 +92,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
         this.cluster = "cluster";
+        LOGGER.info(ROUTER_ORDER_HOSTS + ":" + String.format(ORDER_HOSTS, orderHosts.toString()));
         LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, cluster), String.format(ORDER_HOSTS, orderHosts.toString()));
     }
 

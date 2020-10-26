@@ -97,8 +97,8 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     private void buildValidator() {
-        long failOverTime = strategyOptions.getLong("failoverTimeMS", 0);
-        long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 0);
+        long failOverTime = strategyOptions.getLong("failoverTimeMS", 10);
+        long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 10);
         MajorityHostValidator validator = new MajorityHostValidator(connFactory, configuredHosts, failOverTime, blackListTimeOut);
         this.connectionValidator = validator;
         this.hostValidator = validator;

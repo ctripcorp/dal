@@ -89,4 +89,8 @@ public class DalApplicationConfig {
     public String getQPS() {
         return applicationConfig != null ? applicationConfig.get("QPS") : null;
     }
+
+    public String getClusterName() {
+        return applicationConfig != null ? applicationConfig.get("clusterName") : null;
+    }
 }

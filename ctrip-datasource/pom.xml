@@ -15,7 +15,6 @@
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-client</artifactId>
-            <version>2.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework</groupId>

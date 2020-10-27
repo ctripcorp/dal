@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.application.Application;
 import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -18,26 +19,30 @@ import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 @Service
 public class MgrRequestTask {
-    private static final String selectValue = "ID=%sName=%sAge=%s";
+    private static final String selectSQL = "select * from dalservicetable limit 1;";
+    private static final String updateSQL = "update dalservicetable set Age=11 where ID=1;";
 
     private ExecutorService executor = Executors.newFixedThreadPool(4);
     private static Logger log = LoggerFactory.getLogger(Application.class);
     private int qps = 100;
     private int delay = 40;
-    private SQLThread mySQLThread;
+    private SQLThread selectSQLThread;
+    private SQLThread insertSQLThread;
+    private SQLThread updateSQLThread;
+    private SQLThread deleteSQLThread;
     private String clusterName = "dalservice2db_dalcluster";
 
 
     @Autowired
     private DalApplicationConfig dalApplicationConfig;
-    @Autowired
-    private DALServiceDao mySqlDao;
 
 
     @PostConstruct
@@ -51,13 +56,41 @@ public class MgrRequestTask {
                 this.clusterName = cluster;
             delay = (1000 / qps) * 4;
         } catch (Exception e) {
-            Cat.logError("get qps from QConfig error", e);
+            Cat.logError("get qps or clusterName from QConfig error", e);
         }
 
+        DataSource dataSource = new DalDataSourceFactory().getOrCreateDataSource(clusterName);
+
         try {
-            mySQLThread = new MgrRequestTask.SQLThread(mySqlDao, delay, clusterName);
+            selectSQLThread = new SQLThread(delay, dataSource) {
+                @Override
+                void execute(Statement statement) throws SQLException {
+                    Cat.logEvent("DalApplication", "mgrTestSelect", Message.SUCCESS, "execute select");
+                    statement.executeQuery(selectSQL);
+                }
+            };
+            insertSQLThread = new SQLThread(delay, dataSource) {
+                @Override
+                void execute(Statement statement) throws SQLException {
+                    Cat.logEvent("DalApplication", "mgrTestInsert", Message.SUCCESS, "execute insert");
+                    statement.execute("insert into dalservicetable (Name, Age) values ('insert', 10);");
+                }
+            };
+            updateSQLThread = new SQLThread(delay, dataSource) {
+                @Override
+                void execute(Statement statement) throws SQLException {
+                    Cat.logEvent("DalApplication", "mgrTestUpdate", Message.SUCCESS, "execute update");
+                    statement.execute(updateSQL);
+                }
+            };
+            deleteSQLThread = new SQLThread(delay, dataSource) {
+                @Override
+                void execute(Statement statement) throws SQLException {
+                    Cat.logEvent("DalApplication", "mgrTestDelete", Message.SUCCESS, "execute delete");
+                    statement.execute("delete from dalservicetable where ID=" + (int)System.currentTimeMillis());
+                }
+            };
             startTasks();
-            Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS, String.format("executor start with qps %s", getQps()));
         } catch (Exception e) {
             log.error("DALRequestTask init error", e);
         }
@@ -69,11 +102,17 @@ public class MgrRequestTask {
     }
 
     public void cancelTasks() {
-        mySQLThread.exit = true;
+        selectSQLThread.exit = true;
+        updateSQLThread.exit = true;
+        insertSQLThread.exit = true;
+        deleteSQLThread.exit = true;
     }
 
     private void startTasks() {
-        executor.submit(mySQLThread);
+        executor.submit(selectSQLThread);
+        executor.submit(updateSQLThread);
+        executor.submit(insertSQLThread);
+        executor.submit(deleteSQLThread);
     }
 
     public void restart() throws Exception {
@@ -85,82 +124,56 @@ public class MgrRequestTask {
         return qps;
     }
 
-    private static class SQLThread extends Thread {
+    private static abstract class SQLThread extends Thread {
         public volatile boolean exit = false;
-        private final DALServiceDao dao;
         private final long delay;
-        private String clusterName;
+        private DataSource dataSource;
 
-        public SQLThread(DALServiceDao dao, long delay, String clusterName) {
-            this.dao = dao;
+        public SQLThread(long delay, DataSource dataSource) {
             this.delay = delay;
-            this.clusterName = clusterName;
+            this.dataSource = dataSource;
         }
 
         @Override
         public void run() {
-            DataSource dataSource = null;
-            try {
-                dataSource = new DalDataSourceFactory().getOrCreateDataSource(clusterName);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             while (!exit) {
-                Transaction t = Cat.newTransaction("DAL.App.Task", dao.getDatabaseName());
-                try {
-                    try (Connection connection = dataSource.getConnection()){
-                        try (Statement statement = connection.createStatement()){
-                            statement.setQueryTimeout(1);
-                            try (ResultSet resultSet = statement.executeQuery("select * from dalservicetable where ID = 10086")){
-                                boolean result = explainSelect(resultSet);
-                                if (!result) {
-                                    boolean insertResult = statement.execute("insert into dalservicetable values (10086, 'mgrtest', 20);");
-                                    Cat.logEvent("DalApplication", "MgrTest", Message.SUCCESS, String.valueOf(insertResult));
-                                }
-
-                            } catch (Exception e) {
-                                Cat.logEvent("DalApplication", "MgrSelect", "fail", e.getMessage());
-                            }
-                        }
-                        try (Statement statement = connection.createStatement()){
-                            statement.setQueryTimeout(1);
-                            Boolean flag = statement.execute("update dalservicetable set Age=" + (int)(Math.random() * 100) + " where ID=10086;");
-                            Cat.logEvent("DalApplication", "MgrUpdate", Message.SUCCESS, String.valueOf(flag));
-                        }catch (Exception e) {
-                            Cat.logEvent("DalApplication", "MgrUpdate", "fail", e.getMessage());
-                        }
-                        t.setStatus(Transaction.SUCCESS);
-                    } catch (Exception e) {
-                        log.error(dao.getDatabaseName() + " error", e);
-                        t.setStatus(e);
-                    } finally {
-                        t.complete();
-                        try {
-                            Thread.sleep(delay);
-                        } catch (Exception e) {
-                        }
+                Transaction out = Cat.newTransaction("DAL.App.Task", "DalMgrTest");
+                try (Connection connection = getConnection()){
+                    try (Statement statement = connection.createStatement()){
+                        statement.setQueryTimeout(1);
+                        execute(statement);
                     }
+                    out.setStatus(Transaction.SUCCESS);
                 } catch (Exception e) {
-                    Cat.logEvent("DalApplication", "MgrTest",  "fail", e.getMessage());
+                    log.error("DalMgrTest error", e);
+                    Cat.logError("DalMgrTest error", e);
+                    out.setStatus(e);
+                } finally {
+                    out.complete();
+                    try {
+                        Thread.sleep(delay);
+                    } catch (Exception e) {
+                    }
                 }
             }
         }
 
-        private boolean explainSelect(ResultSet resultSet) {
+        private Connection getConnection() throws SQLException {
+            Transaction in = Cat.newTransaction("DAL.App.Task.in", "getConnection");
             try {
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("ID");
-                    String name = resultSet.getString("Name");
-                    int age = resultSet.getInt("Age");
-                    Cat.logEvent("DalApplication", "MgrTest", Message.SUCCESS, String.format(selectValue, id, name, age));
-                    return true;
-                }
-                return false;
-            }catch (Exception e) {
-                Cat.logEvent("DalApplication", "MgrTest", "fail", "no data");
-                return false;
+                Connection connection = dataSource.getConnection();
+                Cat.logEvent("MGR.getConnection", connection.getMetaData().getURL(), Message.SUCCESS, "getConnectionEnd");
+                in.setStatus(Transaction.SUCCESS);
+                return connection;
+            } catch (SQLException e) {
+                in.setStatus(e);
+                throw e;
+            } finally {
+                in.complete();
             }
         }
+
+        abstract void execute(Statement statement) throws SQLException;
     }
 
 }

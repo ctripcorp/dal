@@ -73,7 +73,7 @@ public class MgrRequestTask {
                 @Override
                 void execute(Statement statement) throws SQLException {
                     Cat.logEvent("DalApplication", "mgrTestInsert", Message.SUCCESS, "execute insert");
-                    statement.execute("insert into dalservicetable values (" + (int)System.currentTimeMillis() + ",'insert', 10);");
+                    statement.execute("insert into dalservicetable (Name, Age) values ('insert', 10);");
                 }
             };
             updateSQLThread = new SQLThread(delay, dataSource) {

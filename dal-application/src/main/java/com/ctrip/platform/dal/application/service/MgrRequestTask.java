@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.application.Application;
 import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -27,9 +28,7 @@ import java.util.function.Consumer;
 @Service
 public class MgrRequestTask {
     private static final String selectSQL = "select * from dalservicetable limit 1;";
-    private static final String insertSQL = "insert into dalservicetable values ('insert', 10);";
     private static final String updateSQL = "update dalservicetable set Age=11 where ID=1;";
-    private static final String deleteSQL = "delete from dalservicetable where ID=2;";
 
     private ExecutorService executor = Executors.newFixedThreadPool(4);
     private static Logger log = LoggerFactory.getLogger(Application.class);
@@ -66,37 +65,32 @@ public class MgrRequestTask {
             selectSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
-                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute select");
-                    log.info("execute select");
+                    Cat.logEvent("DalApplication", "mgrTestSelect", Message.SUCCESS, "execute select");
                     statement.executeQuery(selectSQL);
                 }
             };
             insertSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
-                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute insert");
-                    log.info("execute insert");
-                    statement.execute(insertSQL);
+                    Cat.logEvent("DalApplication", "mgrTestInsert", Message.SUCCESS, "execute insert");
+                    statement.execute("insert into dalservicetable values (" + (int)System.currentTimeMillis() + ",'insert', 10);");
                 }
             };
             updateSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
-                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute update");
-                    log.info("execute update");
+                    Cat.logEvent("DalApplication", "mgrTestUpdate", Message.SUCCESS, "execute update");
                     statement.execute(updateSQL);
                 }
             };
             deleteSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
-                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute delete");
-                    log.info("execute delete");
-                    statement.execute(deleteSQL);
+                    Cat.logEvent("DalApplication", "mgrTestDelete", Message.SUCCESS, "execute delete");
+                    statement.execute("delete from dalservicetable where ID=" + (int)System.currentTimeMillis());
                 }
             };
             startTasks();
-            Cat.logEvent("DalApplication", "ConfigChanged", Message.SUCCESS, String.format("executor start with qps %s", getQps()));
         } catch (Exception e) {
             log.error("DALRequestTask init error", e);
         }
@@ -144,28 +138,15 @@ public class MgrRequestTask {
         public void run() {
             while (!exit) {
                 Transaction out = Cat.newTransaction("DAL.App.Task", "DalMgrTest");
-                Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "getConnectionStart");
-                Transaction in = Cat.newTransaction("DAL.App.Task.in", "getConnection");
-                try (Connection connection = dataSource.getConnection()){
-                    Cat.logEvent("MGR.getConnection", connection.getMetaData().getURL(), Message.SUCCESS, "getConnectionEnd");
-                    in.setStatus(Transaction.SUCCESS);
-                    in.complete();
+                try (Connection connection = getConnection()){
                     try (Statement statement = connection.createStatement()){
                         statement.setQueryTimeout(1);
-                        Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "executeSQLStart");
-                        try {
-                            execute(statement);
-                            Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute SQL finish");
-                        } catch (Exception e) {
-                            Cat.logEvent("DalApplication", "mgrTest", "fail", "execute failed");
-                        }
-                    } catch (Exception e ) {
-                        Cat.logEvent("DalApplication", "mgrTest", "fail", "get statement failed");
+                        execute(statement);
                     }
                     out.setStatus(Transaction.SUCCESS);
                 } catch (Exception e) {
                     log.error("DalMgrTest error", e);
-                    Cat.logEvent("MGR.getConnection", "exception", "fail", "get connection failed");
+                    Cat.logError("DalMgrTest error", e);
                     out.setStatus(e);
                 } finally {
                     out.complete();
@@ -174,6 +155,21 @@ public class MgrRequestTask {
                     } catch (Exception e) {
                     }
                 }
+            }
+        }
+
+        private Connection getConnection() throws SQLException {
+            Transaction in = Cat.newTransaction("DAL.App.Task.in", "getConnection");
+            try {
+                Connection connection = dataSource.getConnection();
+                Cat.logEvent("MGR.getConnection", connection.getMetaData().getURL(), Message.SUCCESS, "getConnectionEnd");
+                in.setStatus(Transaction.SUCCESS);
+                return connection;
+            } catch (SQLException e) {
+                in.setStatus(e);
+                throw e;
+            } finally {
+                in.complete();
             }
         }
 

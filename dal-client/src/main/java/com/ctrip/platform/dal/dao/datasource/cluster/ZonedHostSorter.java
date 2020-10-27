@@ -33,7 +33,8 @@ public class ZonedHostSorter implements Sorter<HostSpec> {
         List<HostSpec> sorted = new LinkedList<>();
         zoneOrder.forEach(zone -> {
             TreeSet<HostSpec> set = map.remove(zone.toUpperCase());
-            sorted.addAll(set);
+            if (set != null)
+                sorted.addAll(set);
         });
         return sorted;
     }

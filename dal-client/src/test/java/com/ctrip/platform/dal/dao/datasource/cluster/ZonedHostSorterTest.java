@@ -14,7 +14,7 @@ public class ZonedHostSorterTest {
 
     @Test
     public void testSort() {
-        ZonedHostSorter sorter = new ZonedHostSorter("a", "b", "c");
+        ZonedHostSorter sorter = new ZonedHostSorter("0", "a", "b", "c");
         HostSpec host1 = HostSpec.of("ip1", 0, "c");
         HostSpec host2 = HostSpec.of("ip2", 0, "b");
         HostSpec host3 = HostSpec.of("ip3", 0, "b");

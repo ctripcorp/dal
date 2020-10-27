@@ -67,13 +67,15 @@ public class MgrRequestTask {
                 @Override
                 void execute(Statement statement) throws SQLException {
                     Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute select");
+                    log.info("execute select");
                     statement.executeQuery(selectSQL);
                 }
             };
             insertSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
-                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute select");
+                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute insert");
+                    log.info("execute insert");
                     statement.execute(insertSQL);
                 }
             };
@@ -81,13 +83,15 @@ public class MgrRequestTask {
                 @Override
                 void execute(Statement statement) throws SQLException {
                     Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute update");
+                    log.info("execute update");
                     statement.execute(updateSQL);
                 }
             };
             deleteSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
-                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute select");
+                    Cat.logEvent("DalApplication", "mgrTest", Message.SUCCESS, "execute delete");
+                    log.info("execute delete");
                     statement.execute(deleteSQL);
                 }
             };

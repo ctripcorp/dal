@@ -1,46 +1,33 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.Listener;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.datasource.cluster.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
-import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.UnsupportedFeatureException;
 
 import javax.sql.DataSource;
-import java.io.PrintWriter;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 
 public class ClusterDynamicDataSource extends DataSourceDelegate implements DataSource,
-        ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
+        ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener, IForceSwitchableDataSource {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
@@ -52,6 +39,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     private Cluster cluster;
     private DataSourceConfigureProvider provider;
     private LocalizationValidatorFactory factory;
+    private DataSourceIdentity dataSourceId;
     private AtomicReference<DataSource> dataSourceRef = new AtomicReference<>();
 
     public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider,
@@ -65,15 +53,28 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
 
     protected void prepare() {
         cluster.addListener(event -> {
-            try {
-                close(dataSourceRef.getAndSet(createInnerDataSource()));
-            } catch (Throwable t) {
-                String msg = "Cluster switch listener error";
-                LOGGER.error(msg, t);
-                throw new DalRuntimeException(msg, t);
-            }
+            if (status.get() == ForceSwitchedStatus.UnForceSwitched) {
+                try {
+                    switchDataSource();
+                } catch (Throwable t) {
+                    String msg = "Cluster switch listener error";
+                    LOGGER.error(msg, t);
+                    throw new DalRuntimeException(msg, t);
+                }
+            } else
+                LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE,
+                        String.format("switchIgnored:%s", cluster.getClusterName()), "");
         });
-        dataSourceRef.set(createInnerDataSource());
+        switchDataSource();
+    }
+
+    private void switchDataSource() {
+        switchDataSource(createInnerDataSource());
+        updateCurrentHost();
+    }
+
+    private void switchDataSource(DataSource newDataSource) {
+        close(dataSourceRef.getAndSet(newDataSource));
     }
 
     protected DataSource createInnerDataSource() {
@@ -84,6 +85,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
 
     protected DataSource createStandaloneDataSource() {
         DataSourceIdentity id = getStandaloneDataSourceIdentity(clusterInfo, cluster);
+        dataSourceId = id;
         DataSourceConfigure config = provider.getDataSourceConfigure(id);
         try {
             if (cluster.getClusterType() == ClusterType.DRC) {
@@ -104,14 +106,18 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
         if (cluster.dbShardingEnabled())
             throw new UnsupportedFeatureException("ClusterDataSource does not support sharding cluster, cluster name: " + cluster.getClusterName());
         DataSourceIdentity id = getMultiHostDataSourceIdentity(cluster);
+        dataSourceId = id;
         return new ClusterDataSource(id, cluster, provider);
     }
 
     @Override
     public void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
-        DataSource ds = getDelegated();
-        if (ds instanceof DataSourceConfigureChangeListener)
-            ((DataSourceConfigureChangeListener) ds).configChanged(event);
+        if (status.get() == ForceSwitchedStatus.UnForceSwitched) {
+            DataSource ds = getDelegated();
+            if (ds instanceof DataSourceConfigureChangeListener)
+                ((DataSourceConfigureChangeListener) ds).configChanged(event);
+        } else
+            LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, String.format("switchIgnored:%s", event.getName()), "");
     }
 
     @Override
@@ -172,7 +178,132 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     private static final String GET_STATUS = "ForceSwitch::getStatus:%s";
     private static final String RESTORE = "ForceSwitch::restore:%s";
     private final Lock lock = new ReentrantLock();
-    private final AtomicReference<HostSpec> currentHost = new AtomicReference<>();
-    private static volatile ThreadPoolExecutor executor;
+    private final AtomicReference<HostAndPort> currentHost = new AtomicReference<>();
+    private final AtomicReference<ForceSwitchedStatus> status = new AtomicReference<>(ForceSwitchedStatus.UnForceSwitched);
+    private final AtomicBoolean poolCreated = new AtomicBoolean(true);
+    private static ExecutorService executor;
+    private static final DataSourceConfigureConvert converter = ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
+
+    @Override
+    public SwitchableDataSourceStatus forceSwitch(FirstAidKit configure, final String ip, final Integer port) {
+        synchronized (lock) {
+            ForceSwitchedStatus prevStatus = status.getAndSet(ForceSwitchedStatus.ForceSwitching);
+            try {
+                SwitchableDataSourceStatus currentStatus = getStatus();
+                String logName = String.format(FORCE_SWITCH, clusterInfo.toString());
+                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, String.format("newIp: %s, newPort: %s", ip, port), () -> {
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
+                            String.format("old isForceSwitched before force switch: %s, old poolCreated before force switch: %s",
+                                    currentStatus.isForceSwitched(), currentStatus.isPoolCreated()));
+                    DataSourceConfigure dataSourceConfig = getSingleDataSource().getDataSourceConfigure().clone();
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("previous host(s): %s:%s", currentStatus.getHostName(), currentStatus.getPort()));
+                    dataSourceConfig.replaceURL(ip, port);
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new host(s): %s:%s", ip, port));
+                    getExecutor().submit(() -> {
+                        try {
+                            switchDataSource(new RefreshableDataSource(dataSourceId, dataSourceConfig));
+                            status.set(ForceSwitchedStatus.ForceSwitched);
+                            currentHost.set(new HostAndPort(null, ip, port));
+                        } catch (Throwable t) {
+                            LOGGER.error("DataSource creation failed", t);
+                            // TODO: handle pool creation failure
+                            status.set(prevStatus);
+                        }
+                    });
+                });
+                return currentStatus;
+            } catch (Throwable t) {
+                status.set(prevStatus);
+                LOGGER.error("Force switch error", t);
+                throw new DalRuntimeException("Force switch error", t);
+            }
+        }
+    }
+
+    @Override
+    public SwitchableDataSourceStatus restore() {
+        synchronized (lock) {
+            try {
+                SwitchableDataSourceStatus currentStatus = getStatus();
+                String logName = String.format(RESTORE, clusterInfo.toString());
+                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "restore", () -> {
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
+                            String.format("old isForceSwitched before restore: %s, old poolCreated before restore: %s",
+                                    currentStatus.isForceSwitched(), currentStatus.isPoolCreated()));
+                    if (status.get() != ForceSwitchedStatus.ForceSwitched) {
+                        LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, "not in force switched status");
+                        return;
+                    }
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("previous host(s): %s:%s", currentStatus.getHostName(), currentStatus.getPort()));
+                    HostAndPort newHost = buildHostAndPort(cluster);
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new host(s): %s:%s", newHost.getHost(), newHost.getPort()));
+                    getExecutor().submit(() -> {
+                        try {
+                            switchDataSource();
+                            status.set(ForceSwitchedStatus.UnForceSwitched);
+                        } catch (Throwable t) {
+                            LOGGER.error("DataSource restoring failed", t);
+                        }
+                    });
+                });
+                return currentStatus;
+            } catch (Throwable t) {
+                LOGGER.error("Restore error", t);
+                throw new DalRuntimeException("Restore error", t);
+            }
+        }
+    }
+
+    @Override
+    public SwitchableDataSourceStatus getStatus() {
+        String logName = String.format(GET_STATUS, clusterInfo.toString());
+        SwitchableDataSourceStatus currentStatus =
+                new SwitchableDataSourceStatus(status.get() == ForceSwitchedStatus.ForceSwitched,
+                currentHost.get().getHost(), currentHost.get().getPort(), poolCreated.get());
+        try {
+            LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, currentStatus.toString(), () -> {
+            });
+        } catch (Throwable t) {
+            // ignore
+        }
+        return currentStatus;
+    }
+
+    @Override
+    public FirstAidKit getFirstAidKit() {
+        DataSourceConfigure dataSourceConfig = getSingleDataSource().getDataSourceConfigure();
+        return SerializableDataSourceConfig.valueOf(converter.desEncrypt(dataSourceConfig));
+    }
+
+    @Override
+    public void addListener(SwitchListener listener) {
+        throw new UnsupportedOperationException("ClusterDynamicDataSource does not support SwitchListener");
+    }
+
+    private void updateCurrentHost() {
+        currentHost.set(buildHostAndPort(cluster));
+    }
+
+    private HostAndPort buildHostAndPort(Cluster cluster) {
+        if (cluster.getClusterType() == ClusterType.MGR) {
+            StringBuilder sb = new StringBuilder();
+            cluster.getDatabases().forEach(database -> {
+                ConnectionString connStr = database.getConnectionString();
+                if (sb.length() > 0)
+                    sb.append(",");
+                sb.append(connStr.getPrimaryHost()).append(":").append(connStr.getPrimaryPort());
+            });
+            return new HostAndPort(null, sb.toString(), 3306);
+        } else {
+            ConnectionString connStr = cluster.getMasterOnShard(clusterInfo.getShardIndex()).getConnectionString();
+            return new HostAndPort(null, connStr.getPrimaryHost(), connStr.getPrimaryPort());
+        }
+    }
+
+    private static ExecutorService getExecutor() {
+        if (executor == null)
+            executor = Executors.newFixedThreadPool(1);
+        return executor;
+    }
 
 }

@@ -23,7 +23,6 @@ import java.util.Map;
  */
 public class MultiHostDataSource extends DataSourceDelegate implements DataSource, ClosableDataSource, SingleDataSourceWrapper {
 
-    protected static final String ORDERED_ACCESS_STRATEGY = "OrderedAccessStrategy";
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
 

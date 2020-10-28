@@ -32,11 +32,21 @@
                 <artifactId>ctrip-datasource</artifactId>
                 <version>${dal.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.ctrip.framework.fireman</groupId>
-                <artifactId>fireman</artifactId>
-                <version>2.0.4</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.ctrip.framework.fireman</groupId>-->
+<!--                <artifactId>fireman</artifactId>-->
+<!--                <version>2.0.4</version>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <artifactId>retrofit</artifactId>-->
+<!--                        <groupId>com.squareup.retrofit2</groupId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <artifactId>okhttp</artifactId>-->
+<!--                        <groupId>com.squareup.okhttp3</groupId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>com.ctrip.framework</groupId>
                 <artifactId>framework-bom</artifactId>
@@ -59,10 +69,10 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>com.ctrip.framework.fireman</groupId>
-            <artifactId>fireman</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.ctrip.framework.fireman</groupId>-->
+<!--            <artifactId>fireman</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.ctrip.platform</groupId>
             <artifactId>ctrip-dal-client</artifactId>

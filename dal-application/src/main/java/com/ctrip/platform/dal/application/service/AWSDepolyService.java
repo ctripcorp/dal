@@ -19,13 +19,13 @@ public class AWSDepolyService {
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private static Logger log = LoggerFactory.getLogger(Application.class);
 
-    @Autowired
-    private DALServiceDao dao;
+//    @Autowired
+    private DALServiceDao dao = null;
 
     @PostConstruct
     private void init() throws Exception {
         try {
-            addTask();
+//            addTask();
         } catch (Exception e) {
             log.error("AwsDeployService init error", e);
         }

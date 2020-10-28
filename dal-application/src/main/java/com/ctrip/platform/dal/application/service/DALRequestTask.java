@@ -31,8 +31,8 @@ public class DALRequestTask {
 
     @Autowired
     private DalApplicationConfig dalApplicationConfig;
-    @Autowired
-    private DALServiceDao mySqlDao;
+//    @Autowired
+    private DALServiceDao mySqlDao = null;
     @Autowired
     private DALServiceDao clusterDao;
     @Autowired

@@ -12,7 +12,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * Created by lilj on 2018/6/2.
  */
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
-@ServletComponentScan("com.ctrip.framework.fireman")
+@ServletComponentScan("com.ctrip.framework.fireman.web")
 public class Application extends SpringBootServletInitializer{
     public static void main(String[] args) throws Exception{
         SpringApplication.run(Application.class,args);

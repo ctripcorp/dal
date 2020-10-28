@@ -18,8 +18,8 @@ import java.util.concurrent.Executors;
 @Service
 public class DALService {
 
-  @Autowired
-  private DALServiceDao mySqlDao;
+//  @Autowired
+  private DALServiceDao mySqlDao = null;
   @Autowired
   private DALServiceDao clusterDao;
   @Autowired

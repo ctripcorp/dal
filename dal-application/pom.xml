@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <dal.version>0.2.23</dal.version>
+        <dal.version>1.8.223</dal.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +36,16 @@
                 <groupId>com.ctrip.framework.fireman</groupId>
                 <artifactId>fireman</artifactId>
                 <version>2.0.4</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>hickwall-sdk</artifactId>
+                        <groupId>com.ctrip.ops</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>fastjson</artifactId>
+                        <groupId>com.alibaba</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.framework</groupId>

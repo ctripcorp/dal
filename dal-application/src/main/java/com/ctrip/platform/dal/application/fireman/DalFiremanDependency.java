@@ -6,13 +6,14 @@ import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.application.utils.Constants;
 import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import com.ctrip.platform.dal.dao.datasource.ForceSwitchableDataSource;
+import com.ctrip.platform.dal.dao.datasource.IForceSwitchableDataSource;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.google.common.collect.Lists;
 
 import java.util.List;
 
 public class DalFiremanDependency implements FiremanDependency {
-    private static final String KEY_NAME = "dalservice2db_fork";
+    private static final String KEY_NAME = "dalservice2db_dalcluster";
     private ConnectionStringParser parser = ConnectionStringParser.getInstance();
 
     @Override
@@ -29,13 +30,11 @@ public class DalFiremanDependency implements FiremanDependency {
 
     @Override
     public ForceSwitchableDataSource getDataSource() {
-        ForceSwitchableDataSource dataSource = null;
         try {
-            dataSource = (ForceSwitchableDataSource) new DalDataSourceFactory().createVariableTypeDataSource(Constants.DB_NAME, true);
+            return new WrappedForceSwitchableDataSource((IForceSwitchableDataSource) new DalDataSourceFactory().getOrCreateDataSource(KEY_NAME, true));
         } catch (Exception e) {
             throw new DalRuntimeException("get datasource error");
         }
-        return dataSource;
     }
 
     @Override

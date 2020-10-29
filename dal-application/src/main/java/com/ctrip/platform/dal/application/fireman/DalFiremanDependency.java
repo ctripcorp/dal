@@ -27,7 +27,8 @@ public class DalFiremanDependency implements FiremanDependency {
 
     @Override
     public String getDatabaseDomainName() {
-        return Constants.DB_NAME;
+//        return "fxqconfigtestdb";
+        return "fxqconfigtest.mysql.db.fat.qa.nt.ctripcorp.com";
 //        String domainConnectionString = getDataSource().getSingleDataSource().getDataSourceConfigure().getConnectionString().getDomainConnectionString();
 //        return parser.parse(KEY_NAME, domainConnectionString).getHostName();
     }

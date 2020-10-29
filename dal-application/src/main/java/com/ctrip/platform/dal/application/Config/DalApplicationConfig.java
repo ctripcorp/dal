@@ -93,4 +93,8 @@ public class DalApplicationConfig {
     public String getClusterName() {
         return applicationConfig != null ? applicationConfig.get("clusterName") : null;
     }
+
+    public String getDbDomainName() {
+        return applicationConfig != null ? applicationConfig.get("dbDomainName") : null;
+    }
 }

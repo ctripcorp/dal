@@ -14,15 +14,15 @@ import java.sql.SQLException;
 @ComponentScan(basePackages = "com.ctrip.platform.dal.application")
 public class AppConfig {
 
-//    @Bean
-//    public DALServiceDao dao() throws SQLException {
-//        return new DALServiceDao();
-//    }
+    @Bean
+    public DALServiceDao dao() throws SQLException {
+        return new DALServiceDao();
+    }
 
-//    @Bean
-//    public DALServiceDao mySqlDao() throws SQLException {
-//        return new DALServiceDao("DalMySqlTest");
-//    }
+    @Bean
+    public DALServiceDao mySqlDao() throws SQLException {
+        return new DALServiceDao("DalMySqlTest");
+    }
 
     @Bean
     public DALServiceDao clusterDao() throws SQLException {

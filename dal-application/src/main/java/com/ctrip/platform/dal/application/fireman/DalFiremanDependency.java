@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 
 public class DalFiremanDependency implements FiremanDependency {
-    private static final String KEY_NAME = "dalservice2db_dalcluster";
+    private static final String KEY_NAME = "dalservice2db_fork";
     private ConnectionStringParser parser = ConnectionStringParser.getInstance();
 
     @Override

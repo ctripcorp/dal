@@ -15,7 +15,12 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @ServletComponentScan("com.ctrip.framework.fireman.web")
 public class Application extends SpringBootServletInitializer{
     public static void main(String[] args) throws Exception{
-        SpringApplication.run(Application.class,args);
+        try {
+
+            SpringApplication.run(Application.class,args);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application){

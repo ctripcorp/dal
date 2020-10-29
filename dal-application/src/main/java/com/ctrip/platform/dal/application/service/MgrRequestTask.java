@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.application.Application;
 import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
+import com.ctrip.platform.dal.application.utils.RandomGenerator;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -27,8 +28,7 @@ import java.util.function.Consumer;
 
 @Service
 public class MgrRequestTask {
-    private static final String selectSQL = "select * from dalservicetable limit 1;";
-    private static final String updateSQL = "update dalservicetable set Age=11 where ID=1;";
+    private static final String selectSQL = "select * from user_favorites limit 1;";
 
     private ExecutorService executor = Executors.newFixedThreadPool(4);
     private static Logger log = LoggerFactory.getLogger(Application.class);
@@ -38,7 +38,7 @@ public class MgrRequestTask {
     private SQLThread insertSQLThread;
     private SQLThread updateSQLThread;
     private SQLThread deleteSQLThread;
-    private String clusterName = "dalservice2db_dalcluster";
+    private String clusterName = "fxqconfigtestdb_dalcluster";
 
 
     @Autowired
@@ -73,21 +73,23 @@ public class MgrRequestTask {
                 @Override
                 void execute(Statement statement) throws SQLException {
                     Cat.logEvent("DalApplication", "mgrTestInsert", Message.SUCCESS, "execute insert");
-                    statement.execute("insert into dalservicetable (Name, Age) values ('insert', 10);");
+                    statement.execute("insert into user_favorites (user, group_id, data_id, profile) values ('" +
+                            RandomGenerator.getRandomString(10) + "','" + RandomGenerator.getRandomString(10) + "','" +
+                            RandomGenerator.getRandomString(10) + "','" + RandomGenerator.getRandomString(10) +"');");
                 }
             };
             updateSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
                     Cat.logEvent("DalApplication", "mgrTestUpdate", Message.SUCCESS, "execute update");
-                    statement.execute(updateSQL);
+                    statement.execute("update user_favorites set user = '" + RandomGenerator.getRandomString(10) + "' where id=" + (int)System.currentTimeMillis());
                 }
             };
             deleteSQLThread = new SQLThread(delay, dataSource) {
                 @Override
                 void execute(Statement statement) throws SQLException {
                     Cat.logEvent("DalApplication", "mgrTestDelete", Message.SUCCESS, "execute delete");
-                    statement.execute("delete from dalservicetable where ID=" + (int)System.currentTimeMillis());
+                    statement.execute("delete from user_favorites where id=" + (int)System.currentTimeMillis());
                 }
             };
             startTasks();

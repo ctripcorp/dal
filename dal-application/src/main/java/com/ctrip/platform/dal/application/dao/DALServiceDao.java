@@ -39,9 +39,9 @@ public class DALServiceDao {
 	}
 
 	public DALServiceDao() throws SQLException {
-//		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(DALServiceTable.class));
-//		this.personGenRowMapper = new DalDefaultJpaMapper<>(DALServiceTable.class);
-//		this.queryDao = new DalQueryDao(DATA_BASE);
+		this.client = new DalTableDao<>(new DalDefaultJpaParser<>(DALServiceTable.class));
+		this.personGenRowMapper = new DalDefaultJpaMapper<>(DALServiceTable.class);
+		this.queryDao = new DalQueryDao(DATA_BASE);
 //		this.queryDaoSqlServer = new DalQueryDao("noShardTestOnSqlServer");
 	}
 

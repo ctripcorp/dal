@@ -31,8 +31,8 @@ public class DALRequestTask {
 
     @Autowired
     private DalApplicationConfig dalApplicationConfig;
-//    @Autowired
-    private DALServiceDao mySqlDao = null;
+    @Autowired
+    private DALServiceDao mySqlDao;
     @Autowired
     private DALServiceDao clusterDao;
     @Autowired
@@ -72,7 +72,7 @@ public class DALRequestTask {
     }
 
     private void startTasks() {
-//        executor.submit(mySQLThread);
+        executor.submit(mySQLThread);
         executor.submit(clusterThread);
         executor.submit(sqlServerThread);
     }

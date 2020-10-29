@@ -36,7 +36,7 @@ public class DalFiremanDependency implements FiremanDependency {
     @Override
     public ForceSwitchableDataSource getDataSource() {
         try {
-            return new WrappedForceSwitchableDataSource((IForceSwitchableDataSource) new DalDataSourceFactory().getOrCreateDataSource(Constants.Cluster_Name, true));
+            return (ForceSwitchableDataSource) new DalDataSourceFactory().getOrCreateDataSource(Constants.Cluster_Name, true);
         } catch (Exception e) {
             throw new DalRuntimeException("get datasource error");
         }

@@ -31,27 +31,27 @@ public class WrappedForceSwitchableDataSource extends ForceSwitchableDataSource 
 
     @Override
     public SwitchableDataSourceStatus forceSwitch(FirstAidKit configure, String ip, Integer port) {
-        return dataSource.forceSwitch(configure, ip, port);
+        return super.forceSwitch(configure, ip, port);
     }
 
     @Override
     public SwitchableDataSourceStatus getStatus() {
-        return dataSource.getStatus();
+        return super.getStatus();
     }
 
     @Override
     public SwitchableDataSourceStatus restore() {
-        return dataSource.restore();
+        return super.restore();
     }
 
     @Override
     public void addListener(SwitchListener listener) {
-        dataSource.addListener(listener);
+        super.addListener(listener);
     }
 
     @Override
     public FirstAidKit getFirstAidKit() {
-        return dataSource.getFirstAidKit();
+        return super.getFirstAidKit();
     }
 
 }

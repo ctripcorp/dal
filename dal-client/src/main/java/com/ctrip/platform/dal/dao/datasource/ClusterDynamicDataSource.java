@@ -19,7 +19,9 @@ import com.ctrip.platform.dal.exceptions.UnsupportedFeatureException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -187,9 +189,9 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     @Override
     public SwitchableDataSourceStatus forceSwitch(FirstAidKit configure, final String ip, final Integer port) {
         synchronized (lock) {
+            SwitchableDataSourceStatus currentStatus = getStatus();
             ForceSwitchedStatus prevStatus = status.getAndSet(ForceSwitchedStatus.ForceSwitching);
             try {
-                SwitchableDataSourceStatus currentStatus = getStatus();
                 String logName = String.format(FORCE_SWITCH, clusterInfo.toString());
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, String.format("newIp: %s, newPort: %s", ip, port), () -> {
                     LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
@@ -223,8 +225,8 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     @Override
     public SwitchableDataSourceStatus restore() {
         synchronized (lock) {
+            SwitchableDataSourceStatus currentStatus = getStatus();
             try {
-                SwitchableDataSourceStatus currentStatus = getStatus();
                 String logName = String.format(RESTORE, clusterInfo.toString());
                 LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "restore", () -> {
                     LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
@@ -286,14 +288,23 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
 
     private HostAndPort buildHostAndPort(Cluster cluster) {
         if (cluster.getClusterType() == ClusterType.MGR) {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder hosts = new StringBuilder();
+            StringBuilder hostsWithPorts = new StringBuilder();
+            Set<Integer> ports = new HashSet<>();
             cluster.getDatabases().forEach(database -> {
                 ConnectionString connStr = database.getConnectionString();
-                if (sb.length() > 0)
-                    sb.append(",");
-                sb.append(connStr.getPrimaryHost()).append(":").append(connStr.getPrimaryPort());
+                if (hosts.length() > 0)
+                    hosts.append(",");
+                if (hostsWithPorts.length() > 0)
+                    hostsWithPorts.append(",");
+                hosts.append(connStr.getPrimaryHost());
+                hostsWithPorts.append(connStr.getPrimaryHost()).append(":").append(connStr.getPrimaryPort());
+                ports.add(connStr.getPrimaryPort());
             });
-            return new HostAndPort(null, sb.toString(), 3306);
+            if (ports.size() == 1)
+                return new HostAndPort(null, hosts.toString(), ports.iterator().next());
+            else
+                return new HostAndPort(null, hostsWithPorts.toString(), 0);
         } else {
             ConnectionString connStr = cluster.getMasterOnShard(clusterInfo.getShardIndex()).getConnectionString();
             return new HostAndPort(null, connStr.getPrimaryHost(), connStr.getPrimaryPort());

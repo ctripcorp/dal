@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ForceSwitchableDataSource extends RefreshableDataSource implements IForceSwitchableDataSource {
+
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private IDataSourceConfigureProvider provider;
     private CopyOnWriteArraySet<SwitchListener> listeners = new CopyOnWriteArraySet<>();
@@ -312,4 +313,9 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
         else
             return new SwitchableDataSourceStatus(isForceSwitched, hostName, port, poolCreated);
     }
+
+    public static ForceSwitchableDataSource wrap(IForceSwitchableDataSource dataSource) {
+        return new WrappedForceSwitchableDataSource(dataSource);
+    }
+
 }

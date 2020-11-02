@@ -429,7 +429,7 @@ public class DalConnection implements Connection {
 
     private void handleExceptionForDataSource(SQLException e, boolean isUpdateOperation) {
         try {
-            dataSource.handleException(e, isUpdateOperation);
+            dataSource.handleException(e, isUpdateOperation, this);
         } catch (Throwable t) {
             LOGGER.warn("RefreshableDataSource handleException exception", t);
         }

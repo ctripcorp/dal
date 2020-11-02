@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
+import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -17,6 +18,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author c7ch23en
@@ -25,6 +30,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
+    private static final long DETECTION_INTERVAL_MS = 1000;
 
     private final ShardMeta shardMeta;
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
@@ -32,6 +38,12 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final ConnectionFactory connFactory;
     private final RouteStrategy routeStrategy;
     private final MultiHostClusterProperties clusterProperties;
+    private final ConnectionValidator connValidator;
+
+    private final ExecutorService executor =
+            Executors.newSingleThreadExecutor(new CustomThreadFactory("MultiHostDataSourceDetector"));
+    private final AtomicBoolean isDetecting = new AtomicBoolean(false);
+    private final AtomicLong lastDetectedTime = new AtomicLong(0);
 
     public MultiHostDataSource(ShardMeta shardMeta, Map<HostSpec, DataSourceConfigure> dataSourceConfigs,
                                MultiHostClusterProperties clusterProperties) {
@@ -40,6 +52,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         this.clusterProperties = clusterProperties;
         this.connFactory = prepareConnectionFactory();
         this.routeStrategy = prepareRouteStrategy();
+        this.connValidator = this.routeStrategy.getConnectionValidator();
         prepareDataSources();
     }
 
@@ -82,7 +95,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
     protected SingleDataSource prepareDataSource(DataSourceConfigure dataSourceConfig) {
         return DataSourceCreator.getInstance().getOrCreateDataSourceWithoutPool(dataSourceConfig.getName(),
-                dataSourceConfig, null, routeStrategy.getConnectionValidator());
+                dataSourceConfig, null, connValidator);
     }
 
     @Override
@@ -122,5 +135,20 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
     @Override
     public void forceRefreshDataSource(String name, DataSourceConfigure configure) {}
+
+    public void handleException(SQLException e, boolean isUpdateOperation, Connection connection) {
+        if (System.currentTimeMillis() - lastDetectedTime.get() > DETECTION_INTERVAL_MS &&
+                isDetecting.compareAndSet(false, true))
+            executor.submit(() -> {
+                try {
+                    connValidator.validate(connection);
+                } catch (Throwable t) {
+                    // ignore
+                } finally {
+                    lastDetectedTime.set(System.currentTimeMillis());
+                    isDetecting.set(false);
+                }
+            });
+    }
 
 }

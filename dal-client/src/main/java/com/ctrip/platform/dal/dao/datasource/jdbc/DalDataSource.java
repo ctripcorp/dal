@@ -34,7 +34,7 @@ public abstract class DalDataSource extends DataSourceDelegate {
 
     public abstract DatabaseCategory getDatabaseCategory();
 
-    public void handleException(SQLException e, boolean isUpdateOperation) {
+    public void handleException(SQLException e, boolean isUpdateOperation, Connection connection) {
         if (e != null) {
             long nowTime = System.currentTimeMillis();
             long firstAppear;

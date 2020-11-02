@@ -158,4 +158,11 @@ public class ClusterDataSource extends DalDataSource implements DataSource,
         return delegated;
     }
 
+    @Override
+    public void handleException(SQLException e, boolean isUpdateOperation, Connection connection) {
+        super.handleException(e, isUpdateOperation, connection);
+        if (delegated != null)
+            delegated.handleException(e, isUpdateOperation, connection);
+    }
+
 }

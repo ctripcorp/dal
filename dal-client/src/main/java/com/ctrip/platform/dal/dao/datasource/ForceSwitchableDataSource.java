@@ -58,6 +58,11 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
         getStatus();
     }
 
+    // for ForceSwitchableDataSourceAdapter
+    protected ForceSwitchableDataSource() {
+        super();
+    }
+
     private static IDataSourceConfigure getIDataSourceConfigure(IDataSourceConfigureProvider provider) {
         IDataSourceConfigure iDataSourceConfigure = null;
         try {
@@ -314,8 +319,8 @@ public class ForceSwitchableDataSource extends RefreshableDataSource implements 
             return new SwitchableDataSourceStatus(isForceSwitched, hostName, port, poolCreated);
     }
 
-    public static ForceSwitchableDataSource wrap(IForceSwitchableDataSource dataSource) {
-        return new WrappedForceSwitchableDataSource(dataSource);
+    public static ForceSwitchableDataSource adapt(IForceSwitchableDataSource dataSource) {
+        return new ForceSwitchableDataSourceAdapter(dataSource);
     }
 
 }

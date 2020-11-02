@@ -74,6 +74,11 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
         dataSourceReference.set(ds);
     }
 
+    // for ForceSwitchableDataSourceAdapter
+    protected RefreshableDataSource() {
+        id = null;
+    }
+
     @Override
     public synchronized void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
         String name = event.getName();

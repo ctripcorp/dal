@@ -8,12 +8,12 @@ import com.ctrip.platform.dal.dao.configure.SwitchableDataSourceStatus;
 /**
  * @author c7ch23en
  */
-public class WrappedForceSwitchableDataSource extends ForceSwitchableDataSource {
+public class ForceSwitchableDataSourceAdapter extends ForceSwitchableDataSource {
 
     private final IForceSwitchableDataSource dataSource;
 
-    public WrappedForceSwitchableDataSource(IForceSwitchableDataSource dataSource) {
-        super(new NullDataSourceConfigureProvider());
+    public ForceSwitchableDataSourceAdapter(IForceSwitchableDataSource dataSource) {
+        super();
         this.dataSource = dataSource;
     }
 

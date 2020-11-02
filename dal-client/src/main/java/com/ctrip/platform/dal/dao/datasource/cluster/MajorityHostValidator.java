@@ -7,13 +7,9 @@ import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Properties;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -30,12 +26,16 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String REMOVE_PRE_BLACK_LIST = "Validator::removeFromPreBlackList";
     private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
 
-    private volatile long lastValidateSecond = 0;
+    private volatile long lastValidateSecond;
     private volatile Set<HostSpec> configuredHosts;
+    private volatile List<HostSpec> orderHosts;
     private volatile long failOverTime;
     private volatile long blackListTimeOut;
+    private volatile long fixedValidatePeriod = 30000;
     private volatile ConnectionFactory factory;
-    private static volatile ExecutorService service = Executors.newFixedThreadPool(4);
+    private static volatile ScheduledExecutorService fixedPeriodValidateService = Executors.newSingleThreadScheduledExecutor();
+    private static volatile ScheduledExecutorService fixed1sValidateService = Executors.newSingleThreadScheduledExecutor();
+    private static volatile ExecutorService asyncService = Executors.newFixedThreadPool(4);
     private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
     private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
     private static final String validateSQL1 = "select members.MEMBER_STATE MEMBER_STATE, " +
@@ -44,38 +44,60 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             "from performance_schema.replication_group_members members left join performance_schema.replication_group_member_stats member_stats on member_stats.MEMBER_ID=members.MEMBER_ID;";
 
     private enum MemberState{
-        Online, Error, Offline, Recovering;
+        Online, Error, Offline, Recovering
     }
 
     private enum Columns {
-        MEMBER_STATE, MEMBER_ID, CURRENT_MEMBER_ID;
+        MEMBER_STATE, MEMBER_ID, CURRENT_MEMBER_ID
     }
 
     public MajorityHostValidator() {
         lastValidateSecond = System.currentTimeMillis() / 1000;
+        fixedScheduleStart();
     }
 
-    public MajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, long failOverTime, long blackListTimeOut) {
+    public MajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
         this();
         this.factory = factory;
         this.configuredHosts = configuredHosts;
         this.failOverTime = failOverTime;
         this.blackListTimeOut = blackListTimeOut;
+        this.orderHosts = orderHosts;
+        this.fixedValidatePeriod = fixedValidatePeriod;
+    }
+
+    private void fixedScheduleStart() {
+        try {
+            fixed1sValidateService.scheduleAtFixedRate(() -> asyncValidate(orderHosts), 1000, fixedValidatePeriod, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            LOGGER.error("start schedule1 error", e);
+        }
+
+        try {
+            fixedPeriodValidateService.scheduleAtFixedRate(() -> {
+                Set<HostSpec> keySet = preBlackList.keySet();
+                keySet.addAll(hostBlackList.keySet());
+                asyncValidate(new ArrayList<>(keySet));
+            }, 1000, 1000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            LOGGER.error("start schedule2 error", e);
+        }
     }
 
     @Override
     public boolean available(HostSpec host) {
-        if ((hostBlackList.containsKey(host) && hostBlackList.get(host) > System.currentTimeMillis() - blackListTimeOut) ||
-                (preBlackList.containsKey(host) && preBlackList.get(host) < System.currentTimeMillis() - failOverTime)) {
-            return false;
-        }
-
-        return true;
+        return (!hostBlackList.containsKey(host) || hostBlackList.get(host) <= System.currentTimeMillis() - blackListTimeOut) &&
+                (!preBlackList.containsKey(host) || preBlackList.get(host) >= System.currentTimeMillis() - failOverTime);
     }
 
     @Override
     public void triggerValidate() {
         validateWithNewConnection();
+    }
+
+    @Override
+    public void addToPreList(HostSpec hostSpec) {
+        addToPreAbsentAndBlackPresent(hostSpec);
     }
 
     @Override
@@ -85,7 +107,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     protected HostSpec getHostSpecFromConnection(Connection connection) {
-        String urlForLog = null;
+        String urlForLog;
         try {
             urlForLog = connection.getMetaData().getURL();
         } catch (SQLException e) {
@@ -127,16 +149,15 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         }
 
         this.lastValidateSecond = currentSecond;
-        asyncValidate(preBlackList.keySet());
-        asyncValidate(hostBlackList.keySet());
+        asyncValidate(orderHosts);
     }
 
-    private void asyncValidate(Set<HostSpec> hostSpecs) {
+    private void asyncValidate(List<HostSpec> hostSpecs) {
         for (HostSpec host : hostSpecs) {
             if (configuredHosts.contains(host)) {
-                service.submit(() -> {
+                asyncService.submit(() -> {
                     try (Connection connection = factory.createConnectionForHost(host)){
-                        validateAndUpdate(connection, host, configuredHosts.size());
+
                     }catch (Throwable e) {
                         LOGGER.error(CAT_LOG_TYPE, e);
                     }

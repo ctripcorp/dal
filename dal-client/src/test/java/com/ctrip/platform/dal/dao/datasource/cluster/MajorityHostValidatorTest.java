@@ -15,21 +15,27 @@ public class MajorityHostValidatorTest {
 
     private long failOverTime = 5000;
     private long blackListTimeOut = 5000;
+    private long fixedValidatePeriod = 15000;
     private ExecutorService service = Executors.newFixedThreadPool(16);
     private HostSpec hostSpec1 = HostSpec.of("local", 3306);
     private HostSpec hostSpec2 = HostSpec.of("local", 3307);
     private HostSpec hostSpec3 = HostSpec.of("local", 3308);
     Set<HostSpec> configuredHost = new HashSet<>();
+    List<HostSpec> orderedHosts = new ArrayList<>();
 
     {
         configuredHost.add(hostSpec1);
         configuredHost.add(hostSpec2);
         configuredHost.add(hostSpec3);
+        orderedHosts.add(hostSpec1);
+        orderedHosts.add(hostSpec2);
+        orderedHosts.add(hostSpec3);
+
     }
 
     @Test
     public void availableTest() throws InterruptedException, SQLException {
-        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, orderedHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
 
         assertEquals(true, validator.available(hostSpec1));
 
@@ -38,9 +44,6 @@ public class MajorityHostValidatorTest {
         validator.validate(new MockConnection(hostSpec1));
         assertEquals(false, validator.available(hostSpec1));
         TimeUnit.MILLISECONDS.sleep(blackListTimeOut);
-        assertEquals(true, validator.available(hostSpec1));
-        validator.triggerValidate();
-        TimeUnit.MILLISECONDS.sleep(1);
         assertEquals(false, validator.available(hostSpec1));
         TimeUnit.MILLISECONDS.sleep(blackListTimeOut);
         assertEquals(true, validator.available(hostSpec1));
@@ -110,7 +113,7 @@ public class MajorityHostValidatorTest {
 
     @Test
     public void changeZone() throws SQLException, InterruptedException {
-        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, orderedHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
         assertEquals(true, validator.available(hostSpec1));
         MockConnection mockConnection1 = new MockConnection(hostSpec1);
         MockConnection mockConnection2 = new MockConnection(hostSpec2);
@@ -138,7 +141,7 @@ public class MajorityHostValidatorTest {
 
     @Test
     public void failToUnKnown() throws SQLException, InterruptedException {
-        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, orderedHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
         validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.fail);
         MockConnection mockConnection1 = new MockConnection(hostSpec1);
 
@@ -154,7 +157,7 @@ public class MajorityHostValidatorTest {
 
     @Test
     public void okToUnknown() throws SQLException, InterruptedException {
-        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, failOverTime, blackListTimeOut);
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(buildConnectionFactory(), configuredHost, orderedHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
         MockConnection mockConnection1 = new MockConnection(hostSpec1);
 
         assertEquals(true, validator.validate(mockConnection1));

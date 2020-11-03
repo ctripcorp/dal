@@ -30,8 +30,8 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
         this.mysqlServer = mysqlServer;
     }
 
-    public MockMajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, long failOverTime, long blackListTimeOut) {
-        super(factory, configuredHosts, failOverTime, blackListTimeOut);
+    public MockMajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
+        super(factory, configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
     }
 
     @Override

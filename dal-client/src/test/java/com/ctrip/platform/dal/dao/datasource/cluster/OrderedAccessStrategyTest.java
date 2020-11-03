@@ -5,8 +5,10 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,22 +16,73 @@ import java.util.concurrent.TimeUnit;
 
 public class OrderedAccessStrategyTest {
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(16);
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private SQLThread selectSQLThread;
+    private SQLThread updateSQLThread;
 
     @Test
     public void testNormal() throws Exception {
         MultiHostDataSource dataSource = new MockMultiHostDataSource(mockDataSourceConfigs(),
                 mockClusterProperties(), "zone1");
+
+//
+//        selectSQLThread = new SQLThread(40, dataSource) {
+//            @Override
+//            void execute(Statement statement) throws SQLException {
+//                statement.executeQuery("select * from student limit 1;");
+//            }
+//        };
+//
+//        updateSQLThread = new SQLThread(40, dataSource) {
+//            @Override
+//            void execute(Statement statement) throws SQLException {
+//                statement.executeQuery("update student set name = 'test' where id = 1");
+//            }
+//        };
+//
+//        executor.submit(selectSQLThread);
+//        executor.submit(updateSQLThread);
+
+
         while (true) {
+//            executor.submit(() -> {
+//                try (Connection connection = dataSource.getConnection()) {
+//                    System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
+//                } catch (SQLException e) {
+//                    System.out.println("error time is :" + new Date().toString());
+//                    e.printStackTrace();
+//                }
+//            });
+
             executor.submit(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
-                } catch (SQLException e) {
+                    try (Statement statement = connection.createStatement()){
+                        statement.execute("select * from student limit 1;");
+                        TimeUnit.MILLISECONDS.sleep(10);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    System.out.println("error time is :" + new Date().toString());
+                    e.printStackTrace();
+                }
+
+                try (Connection connection = dataSource.getConnection()) {
+                    System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
+                    try (Statement statement = connection.createStatement()){
+                        statement.execute("update student set name = 'test' where id = 1");
+                        TimeUnit.MILLISECONDS.sleep(10);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
                     System.out.println("error time is :" + new Date().toString());
                     e.printStackTrace();
                 }
             });
-            TimeUnit.MILLISECONDS.sleep(20);
+
+            TimeUnit.MILLISECONDS.sleep(10);
         }
     }
 
@@ -62,22 +115,65 @@ public class OrderedAccessStrategyTest {
         return new MultiHostClusterProperties() {
             @Override
             public String routeStrategyName() {
-                return "orderedAccess";
+                return "OrderedAccessStrategy";
             }
 
             @Override
             public CaseInsensitiveProperties routeStrategyProperties() {
                 Properties properties = new Properties();
-                properties.put("FailoverTimeMS", 10000L);
-                properties.put("BlacklistTimeoutMS", 10000L);
-                List<String> zoneOrder = new ArrayList<>();
-                zoneOrder.add("zone1");
-                zoneOrder.add("zone2");
-                zoneOrder.add("zone3");
-                properties.put("ZonesPriority", zoneOrder);
+                properties.put("failoverTimeMS", "10000");
+                properties.put("blacklistTimeoutMS", "10000");
+                properties.put("fixedValidatePeriodMS", "30000");
+
+                properties.put("ZonesPriority", "zone1,zone2,zone3");
                 return new CaseInsensitiveProperties(properties);
             }
         };
+    }
+
+
+
+    private static abstract class SQLThread extends Thread {
+        public volatile boolean exit = false;
+        private final long delay;
+        private DataSource dataSource;
+
+        public SQLThread(long delay, DataSource dataSource) {
+            this.delay = delay;
+            this.dataSource = dataSource;
+        }
+
+        @Override
+        public void run() {
+            while (!exit) {
+                try (Connection connection = getConnection()){
+                    try (Statement statement = connection.createStatement()){
+                        statement.setQueryTimeout(1);
+                        execute(statement);
+                    }
+                } catch (Exception e) {
+                } finally {
+                    try {
+                        Thread.sleep(delay);
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }
+
+        private Connection getConnection() throws SQLException {
+            try {
+                Connection connection = dataSource.getConnection();
+                System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
+                return connection;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw e;
+            } finally {
+            }
+        }
+
+        abstract void execute(Statement statement) throws SQLException;
     }
 
 }

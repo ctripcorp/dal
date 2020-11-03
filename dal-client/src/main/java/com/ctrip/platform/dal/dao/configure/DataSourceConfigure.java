@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.configure;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +18,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     private String version;
     private DalConnectionString connectionString;
     private DataSourceIdentity dataSourceId;
+    private HostSpec host;
 
     public DataSourceConfigure() {
     }
@@ -444,6 +446,14 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
 
     public void setDataSourceId(DataSourceIdentity dataSourceId) {
         this.dataSourceId = dataSourceId;
+    }
+
+    public HostSpec getHost() {
+        return host;
+    }
+
+    public void setHost(HostSpec host) {
+        this.host = host;
     }
 
     @Override

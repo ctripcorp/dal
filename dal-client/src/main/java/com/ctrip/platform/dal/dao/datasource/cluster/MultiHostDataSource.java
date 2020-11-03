@@ -137,7 +137,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     public void forceRefreshDataSource(String name, DataSourceConfigure configure) {}
 
     public void handleException(SQLException e, boolean isUpdateOperation, Connection connection) {
-        if (System.currentTimeMillis() - lastDetectedTime.get() > DETECTION_INTERVAL_MS &&
+        if (e != null && System.currentTimeMillis() - lastDetectedTime.get() > DETECTION_INTERVAL_MS &&
                 isDetecting.compareAndSet(false, true))
 //            executor.submit(() -> {
                 try {

@@ -12,7 +12,7 @@ public interface RouteStrategy {
 
     void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties);
 
-    Connection pickConnection(RequestContext request) throws SQLException;
+    HostConnection pickConnection(RequestContext request) throws SQLException;
 
     default ConnectionValidator getConnectionValidator(){
         return new NullConnectionValidator();

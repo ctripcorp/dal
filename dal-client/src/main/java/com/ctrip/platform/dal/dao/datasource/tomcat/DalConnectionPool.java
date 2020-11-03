@@ -5,6 +5,8 @@ import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -127,7 +129,14 @@ public class DalConnectionPool extends ConnectionPool {
         if (clusterConnValidator != null) {
             boolean isValid = true;
             try {
-                isValid = clusterConnValidator.validate(getConnection(conn));
+                PoolConfiguration config = getPoolProperties();
+                HostConnection connection;
+                if (config instanceof DalExtendedPoolConfiguration)
+                    connection = new DefaultHostConnection(getConnection(conn),
+                            ((DalExtendedPoolConfiguration) config).getHost());
+                else
+                    connection = new DefaultHostConnection(getConnection(conn), null);
+                isValid = clusterConnValidator.validate(connection);
             } catch (Throwable t) {
                 logger.warn("tryValidateClusterConnection exception", t);
             }

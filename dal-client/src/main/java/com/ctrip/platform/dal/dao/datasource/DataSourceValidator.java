@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao.datasource;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.MySqlConnectionHelper;
@@ -15,6 +17,7 @@ import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 
+import java.security.Policy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -83,7 +86,13 @@ public class DataSourceValidator implements ValidatorProxy {
         if (clusterConnValidator != null) {
             boolean isValid = true;
             try {
-                isValid = clusterConnValidator.validate(connection);
+                HostConnection conn;
+                if (poolProperties instanceof DalExtendedPoolConfiguration)
+                    conn = new DefaultHostConnection(connection,
+                            ((DalExtendedPoolConfiguration) poolProperties).getHost());
+                else
+                    conn = new DefaultHostConnection(connection, null);
+                isValid = clusterConnValidator.validate(conn);
             } catch (Throwable t) {
                 LOGGER.warn("tryValidateClusterConnection exception", t);
             }

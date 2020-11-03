@@ -141,7 +141,12 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
                 isDetecting.compareAndSet(false, true))
 //            executor.submit(() -> {
                 try {
-                    connValidator.validate(connection);
+                    HostConnection conn;
+                    if (connection.isWrapperFor(HostConnection.class))
+                        conn = connection.unwrap(HostConnection.class);
+                    else
+                        conn = new DefaultHostConnection(connection, null);
+                    connValidator.validate(conn);
                 } catch (Throwable t) {
                     // ignore
                 } finally {

@@ -139,7 +139,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     public void handleException(SQLException e, boolean isUpdateOperation, Connection connection) {
         if (System.currentTimeMillis() - lastDetectedTime.get() > DETECTION_INTERVAL_MS &&
                 isDetecting.compareAndSet(false, true))
-            executor.submit(() -> {
+//            executor.submit(() -> {
                 try {
                     connValidator.validate(connection);
                 } catch (Throwable t) {
@@ -148,7 +148,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
                     lastDetectedTime.set(System.currentTimeMillis());
                     isDetecting.set(false);
                 }
-            });
+//            });
     }
 
 }

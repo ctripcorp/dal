@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
+import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,6 +17,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.pickConnection";
     private static final String VALIDATE_FAILED = "Router::validateFailed";
+    private static final String CURRENT_HOST = "Router::currentHost:";
     private static final String ROUTER_INITIALIZE = "Router::initialize";
     private static final String ROUTER_ORDER_HOSTS = "Router::cluster:%s";
     private static final String NO_HOST_AVAILABLE = "Router::noHostAvailable:%s";
@@ -23,6 +25,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     private static final String ORDER_HOSTS = "orderHosts:%s";
     private static final String CONNECTION_HOST_CHANGE = "Router::connectionHostChange:%s";
     private static final String CHANGE_FROM_TO = "change from %s to %s";
+    private static final String CREATE_CONNECTION_FAILED = "Router::createConnectionFailed";
 
     private ConnectionValidator connectionValidator;
     private HostValidator hostValidator;
@@ -35,7 +38,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     private String status; // birth --> init --> destroy
 
     private enum RouteStrategyStatus {
-        birth, init, destroy;
+        birth, init, destroy
     }
 
     public OrderedAccessStrategy() {
@@ -49,7 +52,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
             HostSpec targetHost = null;
             try {
                 targetHost = pickHost();
-                synchronized (currentHost) {
+                synchronized (this) {
                     if (!targetHost.equals(currentHost)) {
                         LOGGER.warn(String.format(CONNECTION_HOST_CHANGE, String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString())));
                         LOGGER.logEvent(CAT_LOG_TYPE, String.format(CONNECTION_HOST_CHANGE, cluster), String.format(CHANGE_FROM_TO, currentHost.toString(), targetHost.toString()));
@@ -57,15 +60,20 @@ public class OrderedAccessStrategy implements RouteStrategy{
                     }
                 }
                 Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
-
+                LOGGER.logEvent(CAT_LOG_TYPE, CURRENT_HOST, targetHost.toString());
                 return targetConnection;
             } catch (InvalidConnectionException e) {
                 if (targetHost != null){
                     LOGGER.warn(VALIDATE_FAILED + targetHost.toString());
                     LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_FAILED, targetHost.toString());
                 }
-            } finally {
                 hostValidator.triggerValidate();
+            } catch (CommunicationsException e) {
+                LOGGER.warn(CREATE_CONNECTION_FAILED + targetHost.toString());
+                LOGGER.logEvent(CAT_LOG_TYPE, CREATE_CONNECTION_FAILED, targetHost.toString());
+                hostValidator.addToPreList(currentHost);
+                hostValidator.triggerValidate();
+                throw e;
             }
         }
 
@@ -79,8 +87,8 @@ public class OrderedAccessStrategy implements RouteStrategy{
         this.configuredHosts = shardMeta.configuredHosts();
         this.connFactory = connFactory;
         this.strategyOptions = strategyProperties;
-        buildValidator();
         buildOrderHosts();
+        buildValidator();
         this.currentHost = orderHosts.get(0);
         LOGGER.info(ROUTER_INITIALIZE + ":" + String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
         LOGGER.logEvent(CAT_LOG_TYPE, ROUTER_INITIALIZE, String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
@@ -97,9 +105,10 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     private void buildValidator() {
-        long failOverTime = strategyOptions.getLong("failoverTimeMS", 10);
-        long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 10);
-        MajorityHostValidator validator = new MajorityHostValidator(connFactory, configuredHosts, failOverTime, blackListTimeOut);
+        long failOverTime = strategyOptions.getLong("failoverTimeMS", 10000);
+        long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 10000);
+        long fixedValidatePeriod = strategyOptions.getLong("fixedValidatePeriodMS", 30000);
+        MajorityHostValidator validator = new MajorityHostValidator(connFactory, configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
         this.connectionValidator = validator;
         this.hostValidator = validator;
     }

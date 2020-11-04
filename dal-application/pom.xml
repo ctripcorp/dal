@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <dal.version>1.8.223</dal.version>
+        <dal.version>1.8.2232</dal.version>
     </properties>
 
     <dependencyManagement>

@@ -42,6 +42,8 @@ public class MgrRequestTask {
     private SQLThread deleteSQLThread;
     private String clusterName = "fxqconfigtestdb_dalcluster";
     private String localIp;
+    private int highQpsDelay;
+    private int lowQpsDelay;
 
     private enum ProMachine {
         OY1("10.25.195.41"), OY2("10.25.195.42"), RB1("10.61.139.123"), RB2("10.61.139.148");
@@ -58,25 +60,27 @@ public class MgrRequestTask {
 
     @PostConstruct
     private void init() throws Exception {
-//        try {
-//            String qpsCfg = dalApplicationConfig.getQPS();
-//            if (qpsCfg != null)
-//                qps = Integer.parseInt(qpsCfg);
-//            String cluster = dalApplicationConfig.getClusterName();
-//            if (!StringUtils.isTrimmedEmpty(cluster))
-//                this.clusterName = cluster;
-//            delay = (1000 / qps) * 4;
-//        } catch (Exception e) {
-//            Cat.logError("get qps or clusterName from QConfig error", e);
-//        }
+        try {
+            String hQps = dalApplicationConfig.getHighQpsDelay();
+            if (hQps != null)
+                highQpsDelay = Integer.parseInt(hQps);
+            String lQps = dalApplicationConfig.getLowQpsDelay();
+            if (lQps != null)
+                lowQpsDelay = Integer.parseInt(lQps);
+            String cluster = dalApplicationConfig.getClusterName();
+            if (!StringUtils.isTrimmedEmpty(cluster))
+                this.clusterName = cluster;
+        } catch (Exception e) {
+            Cat.logError("get qps or clusterName from QConfig error", e);
+        }
 
         String ip = Foundation.net().getHostAddress();
         localIp = ip;
 
-        if (ProMachine.OY1.ip.equals(ip) || ProMachine.OY1.ip.equals(ip)) {
-            delay = 10;
+        if (ProMachine.OY1.ip.equals(ip) || ProMachine.RB1.ip.equals(ip)) {
+            delay = highQpsDelay;
         } else {
-            delay = 60000;
+            delay = lowQpsDelay;
         }
 
         DataSource dataSource = new DalDataSourceFactory().getOrCreateDataSource(clusterName);

@@ -42,8 +42,8 @@ public class MgrRequestTask {
     private SQLThread deleteSQLThread;
     private String clusterName = "fxqconfigtestdb_dalcluster";
     private String localIp;
-    private int highQpsDelay;
-    private int lowQpsDelay;
+    private int highQpsDelay = 40;
+    private int lowQpsDelay = 60000;
 
     private enum ProMachine {
         OY1("10.25.195.41"), OY2("10.25.195.42"), RB1("10.61.139.123"), RB2("10.61.139.148");
@@ -77,7 +77,7 @@ public class MgrRequestTask {
         String ip = Foundation.net().getHostAddress();
         localIp = ip;
 
-        if (ProMachine.OY1.ip.equals(ip) || ProMachine.RB1.ip.equals(ip)) {
+        if (ProMachine.OY1.ip.equals(ip) || ProMachine.OY2.ip.equals(ip)) {
             delay = highQpsDelay;
         } else {
             delay = lowQpsDelay;

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.application.service;
 
 import com.ctrip.datasource.configure.DalDataSourceFactory;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.framework.foundation.Foundation;
 import com.ctrip.platform.dal.application.Application;
 import com.ctrip.platform.dal.application.Config.DalApplicationConfig;
 import com.ctrip.platform.dal.application.dao.DALServiceDao;
@@ -22,6 +23,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -39,24 +41,46 @@ public class MgrRequestTask {
     private SQLThread updateSQLThread;
     private SQLThread deleteSQLThread;
     private String clusterName = "fxqconfigtestdb_dalcluster";
+    private String localIp;
+    private int highQpsDelay = 40;
+    private int lowQpsDelay = 60000;
+
+    private enum ProMachine {
+        OY1("10.25.195.41"), OY2("10.25.195.42"), RB1("10.61.139.123"), RB2("10.61.139.148");
+
+        public String ip;
+        ProMachine(String ip) {
+            this.ip = ip;
+        }
+    }
 
 
     @Autowired
     private DalApplicationConfig dalApplicationConfig;
 
-
     @PostConstruct
     private void init() throws Exception {
         try {
-            String qpsCfg = dalApplicationConfig.getQPS();
-            if (qpsCfg != null)
-                qps = Integer.parseInt(qpsCfg);
+            String hQps = dalApplicationConfig.getHighQpsDelay();
+            if (hQps != null)
+                highQpsDelay = Integer.parseInt(hQps);
+            String lQps = dalApplicationConfig.getLowQpsDelay();
+            if (lQps != null)
+                lowQpsDelay = Integer.parseInt(lQps);
             String cluster = dalApplicationConfig.getClusterName();
             if (!StringUtils.isTrimmedEmpty(cluster))
                 this.clusterName = cluster;
-            delay = (1000 / qps) * 4;
         } catch (Exception e) {
             Cat.logError("get qps or clusterName from QConfig error", e);
+        }
+
+        String ip = Foundation.net().getHostAddress();
+        localIp = ip;
+
+        if (ProMachine.OY1.ip.equals(ip) || ProMachine.OY2.ip.equals(ip)) {
+            delay = highQpsDelay;
+        } else {
+            delay = lowQpsDelay;
         }
 
         DataSource dataSource = new DalDataSourceFactory().getOrCreateDataSource(clusterName);
@@ -112,9 +136,11 @@ public class MgrRequestTask {
 
     private void startTasks() {
         executor.submit(selectSQLThread);
-        executor.submit(updateSQLThread);
-        executor.submit(insertSQLThread);
-        executor.submit(deleteSQLThread);
+        if (ProMachine.OY2.ip.equals(localIp) || ProMachine.RB2.ip.equals(localIp)) {
+            executor.submit(updateSQLThread);
+            executor.submit(insertSQLThread);
+            executor.submit(deleteSQLThread);
+        }
     }
 
     public void restart() throws Exception {

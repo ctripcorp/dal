@@ -90,6 +90,14 @@ public class DalApplicationConfig {
         return applicationConfig != null ? applicationConfig.get("QPS") : null;
     }
 
+    public String getHighQpsDelay() {
+        return applicationConfig != null ? applicationConfig.get("highQpsDelay") : null;
+    }
+
+    public String getLowQpsDelay() {
+        return applicationConfig != null ? applicationConfig.get("lowQpsDelay") : null;
+    }
+
     public String getClusterName() {
         return applicationConfig != null ? applicationConfig.get("clusterName") : null;
     }

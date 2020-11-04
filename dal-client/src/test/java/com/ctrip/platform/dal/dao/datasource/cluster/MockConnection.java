@@ -5,16 +5,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class MockConnection implements Connection {
+public class MockConnection extends DefaultHostConnection  {
 
-    private HostSpec host;
 
     public MockConnection(HostSpec host) {
-        this.host = host;
-    }
-
-    public HostSpec getHost() {
-        return host;
+        super(null, host);
     }
 
     @Override

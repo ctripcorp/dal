@@ -9,6 +9,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -25,6 +26,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String REMOVE_BLACK_LIST = "Validator::removeFromBlackList";
     private static final String REMOVE_PRE_BLACK_LIST = "Validator::removeFromPreBlackList";
     private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
+    private static final String VALIDATE_ERROR = "Validator::validateError";
 
     private volatile long lastValidateSecond;
     private volatile Set<HostSpec> configuredHosts;
@@ -33,8 +35,8 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private volatile long blackListTimeOut;
     private volatile long fixedValidatePeriod = 30000;
     private volatile ConnectionFactory factory;
-    private static volatile ScheduledExecutorService fixedPeriodValidateService = Executors.newSingleThreadScheduledExecutor();
-    private static volatile ScheduledExecutorService fixed1sValidateService = Executors.newSingleThreadScheduledExecutor();
+    private volatile ScheduledExecutorService fixedPeriodValidateService = Executors.newSingleThreadScheduledExecutor();
+    private volatile ScheduledExecutorService fixed1sValidateService = Executors.newSingleThreadScheduledExecutor();
     private static volatile ExecutorService asyncService = Executors.newFixedThreadPool(4);
     private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
     private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
@@ -68,14 +70,16 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     private void fixedScheduleStart() {
         try {
-            fixed1sValidateService.scheduleAtFixedRate(() -> asyncValidate(orderHosts), 1000, fixedValidatePeriod, TimeUnit.MILLISECONDS);
+            fixedPeriodValidateService.scheduleAtFixedRate(() -> {
+                asyncValidate(orderHosts);
+            }, 1000, fixedValidatePeriod, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             LOGGER.error("start schedule1 error", e);
         }
 
         try {
-            fixedPeriodValidateService.scheduleAtFixedRate(() -> {
-                Set<HostSpec> keySet = preBlackList.keySet();
+            fixed1sValidateService.scheduleAtFixedRate(() -> {
+                Set<HostSpec> keySet = new HashSet<>(preBlackList.keySet());
                 keySet.addAll(hostBlackList.keySet());
                 asyncValidate(new ArrayList<>(keySet));
             }, 1000, 1000, TimeUnit.MILLISECONDS);
@@ -96,14 +100,18 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     @Override
-    public void addToPreList(HostSpec hostSpec) {
-        addToPreAbsentAndBlackPresent(hostSpec);
-    }
-
-    @Override
-    public boolean validate(Connection connection) throws SQLException {
-        HostSpec currentHost = getHostSpecFromConnection(connection);
-        return validateAndUpdate(connection, currentHost, configuredHosts.size());
+    public boolean validate(HostConnection connection) throws SQLException {
+        try {
+            HostSpec currentHost = connection.getHost();
+            boolean validateResult = validateAndUpdate(connection, currentHost, configuredHosts.size());
+            if (!validateResult) {
+                validateWithNewConnection();
+            }
+            return validateResult;
+        } catch (SQLException e) {
+            validateWithNewConnection();
+            throw e;
+        }
     }
 
     protected HostSpec getHostSpecFromConnection(Connection connection) {
@@ -135,6 +143,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                 return false;
             }
         } catch (SQLException e) {
+            LOGGER.warn(VALIDATE_ERROR, e);
             addToPreAbsentAndBlackPresent(currentHost);
             throw e;
         }
@@ -156,13 +165,22 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         for (HostSpec host : hostSpecs) {
             if (configuredHosts.contains(host)) {
                 asyncService.submit(() -> {
-                    try (Connection connection = factory.createConnectionForHost(host)){
-
+                    try (Connection connection = getConnection(host)){
+                        validateAndUpdate(connection, host, configuredHosts.size());
                     }catch (Throwable e) {
                         LOGGER.error(CAT_LOG_TYPE, e);
                     }
                 });
             }
+        }
+    }
+
+    private Connection getConnection(HostSpec host) throws SQLException {
+        try {
+            return factory.createConnectionForHost(host);
+        } catch (SQLException e) {
+            addToPreAbsentAndBlackPresent(host);
+            throw e;
         }
     }
 
@@ -185,7 +203,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                     }
                 }
             } catch (MySQLSyntaxErrorException e) {
-                LOGGER.warn(VALIDATE_COMMAND_DENIED + ":" + e.getMessage());
+                LOGGER.warn(VALIDATE_COMMAND_DENIED, e);
                 LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_COMMAND_DENIED, e.getMessage());
                 return true;
             }

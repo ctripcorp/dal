@@ -46,7 +46,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     @Override
-    public Connection pickConnection(RequestContext context) throws SQLException {
+    public HostConnection pickConnection(RequestContext context) throws SQLException {
         isInit();
         for (int i = 0; i < configuredHosts.size(); i++) {
             HostSpec targetHost = null;
@@ -60,8 +60,8 @@ public class OrderedAccessStrategy implements RouteStrategy{
                     }
                 }
                 Connection targetConnection = connFactory.getPooledConnectionForHost(targetHost);
-                LOGGER.logEvent(CAT_LOG_TYPE, CURRENT_HOST, targetHost.toString());
-                return targetConnection;
+                LOGGER.logEvent(CAT_LOG_TYPE, CURRENT_HOST + targetHost.toString(), cluster);
+                return new DefaultHostConnection(targetConnection, targetHost);
             } catch (InvalidConnectionException e) {
                 if (targetHost != null){
                     LOGGER.warn(VALIDATE_FAILED + targetHost.toString());
@@ -71,7 +71,6 @@ public class OrderedAccessStrategy implements RouteStrategy{
             } catch (CommunicationsException e) {
                 LOGGER.warn(CREATE_CONNECTION_FAILED + targetHost.toString());
                 LOGGER.logEvent(CAT_LOG_TYPE, CREATE_CONNECTION_FAILED, targetHost.toString());
-                hostValidator.addToPreList(currentHost);
                 hostValidator.triggerValidate();
                 throw e;
             }

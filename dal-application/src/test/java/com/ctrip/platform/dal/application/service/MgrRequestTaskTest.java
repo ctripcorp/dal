@@ -41,8 +41,5 @@ public class MgrRequestTaskTest {
     @Test
     public void test1() {
         fixed1sValidateService.scheduleAtFixedRate(() -> System.out.println(new Date()), 1000, 1000, TimeUnit.MILLISECONDS);
-        while (true) {
-
-        }
     }
 }

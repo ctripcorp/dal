@@ -144,6 +144,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
                 isDetecting.compareAndSet(false, true))
 //            executor.submit(() -> {
                 try {
+                    LOGGER.warn("Execution error in MultiHostDataSource", e);
                     HostConnection conn;
                     if (connection.isWrapperFor(HostConnection.class))
                         conn = connection.unwrap(HostConnection.class);

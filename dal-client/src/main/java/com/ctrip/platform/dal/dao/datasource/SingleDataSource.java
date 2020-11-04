@@ -37,29 +37,19 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
 
     // sync create pool
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
-        this(name, dataSourceConfigure, (ConnectionValidator) null);
-    }
-
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure,
-                            ConnectionValidator clusterConnValidator) {
-        this(name, dataSourceConfigure, null, clusterConnValidator);
+        this(name, dataSourceConfigure, null);
         createPool();
     }
 
     // async create pool
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure,
                             DataSourceCreatePoolListener listener) {
-        this(name, dataSourceConfigure, listener, null);
-    }
-
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure,
-                            DataSourceCreatePoolListener listener, ConnectionValidator clusterConnValidator) {
         if (dataSourceConfigure == null)
             throw new DalRuntimeException("Can not find any connection configure for " + name);
         this.name = name;
         this.dataSourceConfigure = dataSourceConfigure;
         this.listener = listener;
-        this.clusterConnValidator = clusterConnValidator;
+        this.clusterConnValidator = dataSourceConfigure.getValidator();
         dataSourceRef.set(createDataSource());
     }
 

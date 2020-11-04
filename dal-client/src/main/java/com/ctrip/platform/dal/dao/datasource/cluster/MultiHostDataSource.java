@@ -92,13 +92,14 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private void prepareDataSources() {
         dataSourceConfigs.forEach((host, config) -> {
             config.setHost(host);
+            config.setValidator(connValidator);
             wrappedDataSources.put(host, prepareDataSource(config));
         });
     }
 
     protected SingleDataSource prepareDataSource(DataSourceConfigure dataSourceConfig) {
         return DataSourceCreator.getInstance().getOrCreateDataSourceWithoutPool(dataSourceConfig.getName(),
-                dataSourceConfig, null, connValidator);
+                dataSourceConfig, null);
     }
 
     @Override

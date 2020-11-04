@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -55,20 +54,15 @@ public class DataSourceCreator {
         return ds;
     }
 
-    public SingleDataSource getOrCreateDataSourceWithoutPool(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
-        return getOrCreateDataSourceWithoutPool(name, configure, listener, null);
-    }
-
     public SingleDataSource getOrCreateDataSourceWithoutPool(String name, DataSourceConfigure configure,
-                                                             DataSourceCreatePoolListener listener,
-                                                             ConnectionValidator clusterConnValidator) {
+                                                             DataSourceCreatePoolListener listener) {
         SingleDataSource ds = targetDataSourceCache.get(configure);
         if (ds == null) {
             synchronized (targetDataSourceCache) {
                 ds = targetDataSourceCache.get(configure);
                 if (ds == null) {
                     try {
-                        ds = createDataSourceWithoutPool(name, configure, listener, clusterConnValidator);
+                        ds = createDataSourceWithoutPool(name, configure, listener);
                         targetDataSourceCache.put(configure, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating single datasource: %s", name);
@@ -141,9 +135,8 @@ public class DataSourceCreator {
     }
 
     private SingleDataSource createDataSourceWithoutPool(String name, DataSourceConfigure configure,
-                                                         DataSourceCreatePoolListener listener,
-                                                         ConnectionValidator clusterConnValidator) {
-        return new SingleDataSource(name, configure, listener, clusterConnValidator);
+                                                         DataSourceCreatePoolListener listener) {
+        return new SingleDataSource(name, configure, listener);
     }
 
     private SingleDataSource asyncCreateDataSourceWithPool(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {

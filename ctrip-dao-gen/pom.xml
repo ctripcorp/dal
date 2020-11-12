@@ -14,7 +14,7 @@
 
     <properties>
         <environment>local</environment>
-        <framework-bom.version>4.19.0</framework-bom.version>
+        <framework-bom.version>4.39.2</framework-bom.version>
         <dal-dao-gen.version>${project.version}</dal-dao-gen.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <cas.version>3.1.15-30Days-no-jsessionid</cas.version>
@@ -23,6 +23,7 @@
         <jxl.version>2.6.12</jxl.version>
         <emailservice.version>1.2.1</emailservice.version>
         <maven-warpath-plugin.version>3.0.0</maven-warpath-plugin.version>
+        <jackson.version>2.10.3</jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -33,6 +34,11 @@
                 <version>${framework-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.platform</groupId>
+                <artifactId>dao-gen-core</artifactId>
+                <version>${dal-dao-gen.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
@@ -76,6 +82,12 @@
                 <groupId>net.sourceforge.jexcelapi</groupId>
                 <artifactId>jxl</artifactId>
                 <version>${jxl.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.soa.platform.basesystem.emailservice.v1</groupId>
@@ -92,6 +104,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -109,6 +122,12 @@
             <groupId>com.ctrip.platform</groupId>
             <artifactId>dal-dao-gen</artifactId>
             <type>war</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>activation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.ctrip.platform</groupId>

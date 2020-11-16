@@ -15,6 +15,8 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
+import com.ctrip.platform.dal.dao.datasource.monitor.DataSourceMonitor;
+import com.ctrip.platform.dal.dao.datasource.monitor.DefaultDataSourceMonitor;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -43,9 +45,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     private final DataSourceIdentity id;
     private long switchListenerTimeout = DEFAULT_SWITCH_LISTENER_TIME_OUT; //ms
 
-    private final AtomicLong firstAppearContinuousErrorTimeAtom = new AtomicLong(0);
-    private final AtomicLong continuousErrorCountAtom = new AtomicLong(0);
-    private final AtomicLong lastReportContinuousErrorTimeAtom = new AtomicLong(0);
+    private final DataSourceMonitor monitor;
 
     private int switchVersion = 0;
 
@@ -71,6 +71,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         SingleDataSource ds = createSingleDataSource(name, config);
         LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", name, ds.getName(), ds.getReferenceCount()));
         dataSourceReference.set(ds);
+        monitor = new DefaultDataSourceMonitor(id);
     }
 
     public RefreshableDataSource(DataSourceIdentity id, DataSourceConfigure config) {
@@ -78,6 +79,7 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
         SingleDataSource ds = createSingleDataSource(id.getId(), config);
         LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", id.getId(), ds.getName(), ds.getReferenceCount()));
         dataSourceReference.set(ds);
+        monitor = new DefaultDataSourceMonitor(id);
     }
 
     @Override
@@ -127,37 +129,8 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
     }
 
     public void handleException(SQLException e, boolean isUpdateOperation) {
-        if (e != null) {
-            long nowTime = System.currentTimeMillis();
-            long firstAppear;
-            long continuousErrorCount;
-            synchronized (firstAppearContinuousErrorTimeAtom) {
-                firstAppear = firstAppearContinuousErrorTimeAtom.get();
-                firstAppearContinuousErrorTimeAtom.compareAndSet(0, nowTime);
-                continuousErrorCount = continuousErrorCountAtom.incrementAndGet();
-            }
-            if (firstAppear > 0 && nowTime - firstAppear >= CONTINUOUS_ERROR_DURATION_THRESHOLD &&
-                    needToReport(nowTime, continuousErrorCount)) {
-                LOGGER.reportError(id.getId());
-            }
-        } else if (isUpdateOperation) {
-            synchronized (firstAppearContinuousErrorTimeAtom) {
-                continuousErrorCountAtom.set(0);
-                firstAppearContinuousErrorTimeAtom.set(0);
-            }
-        }
-    }
-
-    private boolean needToReport(long nowTime, long continuousErrorCount) {
-        synchronized (lastReportContinuousErrorTimeAtom) {
-            long lastReport = lastReportContinuousErrorTimeAtom.get();
-            if ((lastReport == 0 || nowTime - lastReport >= CONTINUOUS_ERROR_REPORT_PERIOD) &&
-                    continuousErrorCount >= 3) {
-                lastReportContinuousErrorTimeAtom.set(nowTime);
-                return true;
-            }
-            return false;
-        }
+        if (monitor != null)
+            monitor.report(e, isUpdateOperation);
     }
 
     @Override
@@ -374,18 +347,6 @@ public class RefreshableDataSource implements DataSource, ClosableDataSource, Si
             }
         }
         return new DalConnection(connection, this, id.createSqlContext());
-    }
-
-    public long getFirstAppearContinuousErrorTime() {
-        return firstAppearContinuousErrorTimeAtom.get();
-    }
-
-    public long getLastReportContinuousErrorTime() {
-        return lastReportContinuousErrorTimeAtom.get();
-    }
-
-    public long getContinuousErrorCount() {
-        return continuousErrorCountAtom.get();
     }
 
     @Override

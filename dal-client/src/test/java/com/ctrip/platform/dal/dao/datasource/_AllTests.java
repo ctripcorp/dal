@@ -5,6 +5,7 @@ import com.ctrip.platform.dal.dao.datasource.jdbc.DalDaoTest;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalStatementTest;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContextTest;
 import com.ctrip.platform.dal.dao.datasource.log.KeyedDbSqlContextTest;
+import com.ctrip.platform.dal.dao.datasource.monitor.DefaultDataSourceMonitorTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -19,7 +20,8 @@ import org.junit.runners.Suite.SuiteClasses;
         DalDaoTest.class,
         DalStatementTest.class,
 		ClusterDbSqlContextTest.class,
-		KeyedDbSqlContextTest.class
+		KeyedDbSqlContextTest.class,
+		DefaultDataSourceMonitorTest.class
 })
 public class _AllTests {
 

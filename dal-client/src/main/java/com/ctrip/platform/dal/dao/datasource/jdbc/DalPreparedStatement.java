@@ -316,7 +316,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
     }
 
     protected boolean isUpdateOperation() {
-        return !isCallableStatement() && !SqlUtils.isReadOperation(firstAlphaCharUc);
+        return !SqlUtils.isReadOperation(firstAlphaCharUc);
     }
 
 }

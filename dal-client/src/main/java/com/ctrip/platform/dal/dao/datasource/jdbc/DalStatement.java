@@ -335,11 +335,7 @@ public class DalStatement implements Statement {
     }
 
     protected boolean isUpdateOperation(String sql) {
-        return !isCallableStatement() && !SqlUtils.isReadOperation(sql);
-    }
-
-    protected boolean isCallableStatement() {
-        return this instanceof CallableStatement;
+        return !SqlUtils.isReadOperation(sql);
     }
 
 }

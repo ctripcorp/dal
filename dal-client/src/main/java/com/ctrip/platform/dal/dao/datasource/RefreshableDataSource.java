@@ -61,6 +61,7 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
     private static final String BLOCK_CONNECTION = "Connection::blockConnection:%s";
 
     public RefreshableDataSource(String name, DataSourceConfigure config) {
+        super(new DataSourceName(name));
         this.id = new DataSourceName(name);
         SingleDataSource ds = createSingleDataSource(name, config);
         LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", name, ds.getName(), ds.getReferenceCount()));
@@ -68,6 +69,7 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
     }
 
     public RefreshableDataSource(DataSourceIdentity id, DataSourceConfigure config) {
+        super(id);
         this.id = id;
         SingleDataSource ds = createSingleDataSource(id.getId(), config);
         LOGGER.info(String.format("create RefreshableDataSource '%s', with SingleDataSource '%s' ref count [%d]", id.getId(), ds.getName(), ds.getReferenceCount()));
@@ -76,6 +78,7 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
 
     // for ForceSwitchableDataSourceAdapter
     protected RefreshableDataSource() {
+        super(null);
         id = null;
     }
 
@@ -171,11 +174,6 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
     @Override
     public DatabaseCategory getDatabaseCategory() {
         return getSingleDataSource().getDataSourceConfigure().getDatabaseCategory();
-    }
-
-    @Override
-    protected String getDataSourceName() {
-        return id.getId();
     }
 
     @Override

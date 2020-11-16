@@ -628,4 +628,14 @@ public class DalCallableStatement extends DalPreparedStatement implements Callab
         callableStatement.registerOutParameter(parameterName, sqlType, typeName);
     }
 
+    @Override
+    protected boolean isUpdateOperation() {
+        return true;
+    }
+
+    @Override
+    protected boolean isUpdateOperation(String sql) {
+        return true;
+    }
+
 }

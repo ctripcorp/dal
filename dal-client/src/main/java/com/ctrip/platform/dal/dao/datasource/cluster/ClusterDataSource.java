@@ -43,6 +43,7 @@ public class ClusterDataSource extends DalDataSource implements DataSource,
     private final MultiHostDataSource delegated;
 
     public ClusterDataSource(DataSourceIdentity id, Cluster cluster, DataSourceConfigureProvider provider) {
+        super(id);
         this.id = id;
         this.cluster = cluster;
         this.provider = provider;
@@ -146,11 +147,6 @@ public class ClusterDataSource extends DalDataSource implements DataSource,
     @Override
     public DatabaseCategory getDatabaseCategory() {
         return DatabaseCategory.MySql;
-    }
-
-    @Override
-    protected String getDataSourceName() {
-        return getClusterName() + "-" + getShardIndex();
     }
 
     @Override

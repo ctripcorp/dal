@@ -266,11 +266,21 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     @Override
-    public String[] getIdcPriority() {
-        String value = getProperty(IDC_PRIORITY);
-        if (com.ctrip.framework.dal.cluster.client.util.StringUtils.isTrimmedEmpty(value))
-            return new String[0];
-        return StringUtils.split(value, IDC_PRIORITY_SEPARATOR);
+    public String getZonesPriority() {
+        String value = getProperty(ZONES_PRIORITY);
+        return StringUtils.isNotEmpty(value) ? value : getProperty(IDC_PRIORITY);
+    }
+
+    @Override
+    public Long getFailoverTimeMS() {
+        String value = getProperty(FAILOVER_TIME_MS);
+        return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
+    }
+
+    @Override
+    public Long getBlacklistTimeoutMS() {
+        String value = getProperty(BLACKLIST_TIMEOUT_MS);
+        return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
     }
 
     public String getInitSQL() {

@@ -11,6 +11,14 @@ public interface MultiHostConnectionStringConfigure extends DalConnectionStringC
 
     List<HostSpec> getHosts();
 
+    String getDbName();
+
+    String getZonesPriority();
+
+    Long getFailoverTimeMS();
+
+    Long getBlacklistTimeoutMS();
+
     @Override
     default String getHostName() {
         return null;

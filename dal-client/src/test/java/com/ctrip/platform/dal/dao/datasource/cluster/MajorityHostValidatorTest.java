@@ -43,55 +43,13 @@ public class MajorityHostValidatorTest {
         assertEquals(true, validator.available(hostSpec1));
         validator.validate(new MockConnection(hostSpec1));
         assertEquals(false, validator.available(hostSpec1));
-        TimeUnit.MILLISECONDS.sleep(blackListTimeOut);
-        assertEquals(false, validator.available(hostSpec1));
-        TimeUnit.MILLISECONDS.sleep(blackListTimeOut);
-        assertEquals(true, validator.available(hostSpec1));
 
         validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.unknown);
-        assertEquals(true, validator.available(hostSpec1));
+        assertEquals(false, validator.available(hostSpec1));
         try {
             validator.validate(new MockConnection(hostSpec1));
-        }catch (Exception e) {
-            assertEquals(e instanceof SQLException, true);
-        }
+        }catch (Exception e) { }
         assertEquals(false, validator.available(hostSpec1));
-        TimeUnit.MILLISECONDS.sleep(failOverTime);
-        assertEquals(false, validator.available(hostSpec1));
-
-
-        CountDownLatch countDownLatch = new CountDownLatch(100);
-        validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.fail);
-        for (int i=0; i< 100; i++) {
-            service.submit(() -> {
-                try {
-                    validator.validate(new MockConnection(hostSpec1));
-                }catch (Exception e) {
-                }finally {
-                    countDownLatch.countDown();
-                }
-            });
-        }
-        assertEquals(false, validator.available(hostSpec1));
-        countDownLatch.await();
-        TimeUnit.MILLISECONDS.sleep(blackListTimeOut);
-        assertEquals(true, validator.available(hostSpec1));
-
-        CountDownLatch second = new CountDownLatch(100);
-        validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.unknown);
-        for (int i=0; i<100; i++) {
-            service.submit(() -> {
-               try {
-                   validator.validate(new MockConnection(hostSpec1));
-               }catch (Exception e) {
-
-               }finally {
-                   second.countDown();
-               }
-            });
-        }
-        assertEquals(false, validator.available(hostSpec1));
-        second.await();
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         assertEquals(false, validator.available(hostSpec1));
 
@@ -134,7 +92,7 @@ public class MajorityHostValidatorTest {
 
         assertEquals(false, validator.available(hostSpec1));
         TimeUnit.MILLISECONDS.sleep(failOverTime);
-        assertEquals(true, validator.available(hostSpec1));
+        assertEquals(false, validator.available(hostSpec1));
 
 
     }
@@ -166,8 +124,8 @@ public class MajorityHostValidatorTest {
         validator.mysqlServer.put(hostSpec1, MockMajorityHostValidator.MysqlStatus.unknown);
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         validator.triggerValidate();
-        TimeUnit.MILLISECONDS.sleep(10);
-        assertEquals(true, validator.available(hostSpec1));
+        TimeUnit.MILLISECONDS.sleep(failOverTime);
+        assertEquals(false, validator.available(hostSpec1));
     }
 
     @Test

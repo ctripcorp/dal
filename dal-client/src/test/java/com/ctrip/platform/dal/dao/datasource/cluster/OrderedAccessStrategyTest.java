@@ -86,10 +86,6 @@ public class OrderedAccessStrategyTest {
         }
     }
 
-    @Test
-    public void testFailover() throws Exception {
-    }
-
     private Map<HostSpec, DataSourceConfigure> mockDataSourceConfigs() {
         Map<HostSpec, DataSourceConfigure> dataSourceConfigs = new HashMap<>();
         HostSpec host1 = HostSpec.of("10.32.20.12", 3306, "zone1");

@@ -15,6 +15,7 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
     private String zonesPriority;
     private Long failoverTimeMS;
     private Long blacklistTimeoutMS;
+    private Long fixedValidatePeriodMS;
 
     public MultiHostDataSourceConfigure(String dbName) {
         this.dbName = dbName;
@@ -59,6 +60,10 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
 
     public void setBlacklistTimeoutMS(Long blacklistTimeoutMS) {
         this.blacklistTimeoutMS = blacklistTimeoutMS;
+    }
+
+    public void setFixedValidatePeriodMS(Long fixedValidatePeriodMS) {
+        this.fixedValidatePeriodMS = fixedValidatePeriodMS;
     }
 
 }

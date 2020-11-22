@@ -283,6 +283,12 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
     }
 
+    @Override
+    public Long getFixedValidatePeriodMS() {
+        String value = getProperty(FIXED_VALIDATE_PERIOD_MS);
+        return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
+    }
+
     public String getInitSQL() {
         String initSQL = getProperty(INIT_SQL);
         if (initSQL != null && !initSQL.isEmpty())

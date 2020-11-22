@@ -16,4 +16,5 @@ public interface DalPoolPropertiesConfigure extends PoolPropertiesConfigure {
     String getZonesPriority();
     Long getFailoverTimeMS();
     Long getBlacklistTimeoutMS();
+    Long getFixedValidatePeriodMS();
 }

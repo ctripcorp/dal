@@ -13,6 +13,8 @@ import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -22,6 +24,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
 
     private final ConnectionStringConfigureProvider provider;
     private final AtomicReference<ClusterConfig> clusterConfigRef = new AtomicReference<>();
+    private final AtomicReference<DalConnectionStringConfigure> connStrConfigRef = new AtomicReference<>();
 
     public ClusterConfigAdapter(ConnectionStringConfigureProvider provider) {
         this.provider = provider;
@@ -57,12 +60,41 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         else
             clusterConfig = buildNormalClusterConfig(configure);
         clusterConfigRef.getAndSet(clusterConfig);
-        for (Listener<ClusterConfig> listener : getListeners()) {
-            try {
-                listener.onChanged(this);
-            } catch (Throwable t) {
-                // ignore
+        DalConnectionStringConfigure prev = connStrConfigRef.getAndSet(configure);
+        if (prev != null && !equals(prev, configure))
+            for (Listener<ClusterConfig> listener : getListeners()) {
+                try {
+                    listener.onChanged(this);
+                } catch (Throwable t) {
+                    // ignore
+                }
             }
+    }
+
+    private boolean equals(DalConnectionStringConfigure currentConfigure, DalConnectionStringConfigure newConfigure) {
+        if (currentConfigure == null && newConfigure == null)
+            return true;
+        if (currentConfigure == null || newConfigure == null)
+            return false;
+        if (currentConfigure.getClass() != newConfigure.getClass())
+            return false;
+        if (currentConfigure instanceof MultiHostConnectionStringConfigure) {
+            MultiHostConnectionStringConfigure currentConfigure1 = (MultiHostConnectionStringConfigure) currentConfigure;
+            MultiHostConnectionStringConfigure newConfigure1 = (MultiHostConnectionStringConfigure) newConfigure;
+            TreeSet<HostSpec> currentHosts = new TreeSet<>(currentConfigure1.getHosts());
+            TreeSet<HostSpec> newHosts = new TreeSet<>(newConfigure1.getHosts());
+            return Objects.equals(currentHosts, newHosts)
+                    && Objects.equals(currentConfigure1.getDbName(), newConfigure1.getDbName())
+                    && Objects.equals(currentConfigure1.getZonesPriority(), newConfigure1.getZonesPriority())
+                    && Objects.equals(currentConfigure1.getFailoverTimeMS(), newConfigure1.getFailoverTimeMS())
+                    && Objects.equals(currentConfigure1.getBlacklistTimeoutMS(), newConfigure1.getBlacklistTimeoutMS())
+                    && Objects.equals(currentConfigure1.getFixedValidatePeriodMS(), newConfigure1.getFixedValidatePeriodMS())
+                    && Objects.equals(currentConfigure1.getUserName(), newConfigure1.getUserName())
+                    && Objects.equals(currentConfigure1.getPassword(), newConfigure1.getPassword());
+        } else {
+            return Objects.equals(currentConfigure.getConnectionUrl(), newConfigure.getConnectionUrl())
+                    && Objects.equals(currentConfigure.getUserName(), newConfigure.getUserName())
+                    && Objects.equals(currentConfigure.getPassword(), newConfigure.getPassword());
         }
     }
 

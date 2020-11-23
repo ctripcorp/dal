@@ -17,7 +17,8 @@ import org.junit.runners.Suite.SuiteClasses;
         DalConnectionTest.class,
 		ClusterDbSqlContextTest.class,
 		KeyedDbSqlContextTest.class,
-		DefaultDataSourceMonitorTest.class
+		DefaultDataSourceMonitorTest.class,
+		ApiDataSourceIdentityTest.class
 })
 public class _AllTests {
 

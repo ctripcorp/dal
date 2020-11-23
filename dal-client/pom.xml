@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.ctrip.platform</groupId>
         <artifactId>dal-client-parent</artifactId>
-        <version>1.8.2234</version>
+        <version>1.8.224</version>
     </parent>
     <artifactId>dal-client</artifactId>
     <packaging>jar</packaging>

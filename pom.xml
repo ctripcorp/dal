@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client-parent</artifactId>
-    <version>1.8.2234</version>
+    <version>1.8.224</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -51,7 +51,7 @@
         <guava.version>21.0</guava.version>
         <commons-email.version>1.4</commons-email.version>
         <commons-io.version>2.5</commons-io.version>
-        <jackson.version>2.9.6</jackson.version>
+        <jackson.version>2.10.3</jackson.version>
         <poi.version>3.16</poi.version>
         <dom4j.version>2.1.1</dom4j.version>
         <velocity.version>1.7</velocity.version>

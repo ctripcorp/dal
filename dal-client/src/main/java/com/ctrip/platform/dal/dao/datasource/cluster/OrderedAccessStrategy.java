@@ -84,6 +84,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
         isDestroy();
         this.status = RouteStrategyStatus.init.name();
         this.configuredHosts = shardMeta.configuredHosts();
+        this.cluster = shardMeta.clusterName();
         this.connFactory = connFactory;
         this.strategyOptions = strategyProperties;
         buildOrderHosts();
@@ -98,7 +99,6 @@ public class OrderedAccessStrategy implements RouteStrategy{
         List<String> zoneOrder = strategyOptions.getStringList("zonesPriority", ",", null);
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
-        this.cluster = "cluster";
         LOGGER.info(ROUTER_ORDER_HOSTS + ":" + String.format(ORDER_HOSTS, orderHosts.toString()));
         LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, cluster), String.format(ORDER_HOSTS, orderHosts.toString()));
     }

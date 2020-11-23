@@ -19,6 +19,8 @@ public interface MultiHostConnectionStringConfigure extends DalConnectionStringC
 
     Long getBlacklistTimeoutMS();
 
+    Long getFixedValidatePeriodMS();
+
     @Override
     default String getHostName() {
         return null;

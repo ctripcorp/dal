@@ -1,13 +1,18 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
+import com.ctrip.platform.dal.dao.cluster.ClusterConfigAdapter;
+import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.log.NullSqlContext;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.sun.xml.internal.bind.v2.model.core.ID;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,17 +32,17 @@ public class ApiDataSourceIdentity implements ClusterInfoDelegateIdentity {
     }
 
     private void init() {
-        clusterHolder.getOrCreate(() -> {
+        Cluster cluster = getCluster();
+        id = String.format(ID_FORMAT, cluster.getClusterName());
+    }
+
+    private Cluster getCluster() {
+        return clusterHolder.getOrCreate(() -> {
             try {
-                DalConnectionStringConfigure connectionStringConfigure = provider.getConnectionString();
-                id = String.format(ID_FORMAT, connectionStringConfigure.getName());
-                if (connectionStringConfigure instanceof InvalidVariableConnectionString) {
-                    throw new DalRuntimeException("connectionString invalid",
-                            ((InvalidVariableConnectionString) connectionStringConfigure).getConnectionStringException());
-                }
-                // build cluster
+                ClusterConfig clusterConfig = new ClusterConfigAdapter(provider);
+                return new DynamicCluster(clusterConfig);
             } catch (Exception e) {
-                LOGGER.error("get connectionString from api failed!", e);
+                LOGGER.error("Create cluster failed for db:" + provider.getDbName(), e);
                 throw new DalRuntimeException(e);
             }
         });
@@ -49,7 +54,8 @@ public class ApiDataSourceIdentity implements ClusterInfoDelegateIdentity {
 
     @Override
     public ClusterInfo getClusterInfo() {
-        return null;
+        Cluster cluster = getCluster();
+        return new ClusterInfo(cluster.getClusterName(), 0, DatabaseRole.MASTER, false, cluster);
     }
 
     @Override

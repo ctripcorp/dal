@@ -46,6 +46,11 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
         return blacklistTimeoutMS;
     }
 
+    @Override
+    public Long getFixedValidatePeriodMS() {
+        return fixedValidatePeriodMS;
+    }
+
     public void addHost(HostSpec host) {
         hosts.add(host);
     }

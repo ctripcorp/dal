@@ -79,7 +79,14 @@ public class DataSourceLocator {
                 ds = cache.get(id);
                 if (ds == null) {
                     try {
-                        ds = createDataSource(id);
+                        if (id instanceof ClusterInfoDelegateIdentity) {
+                            ClusterInfo clusterInfo = ((ClusterInfoDelegateIdentity) id).getClusterInfo();
+                            Cluster cluster = clusterInfo.getCluster();
+                            if (cluster == null)
+                                throw new RuntimeException("Cluster not created");
+                            ds = createDataSource(id, clusterInfo, cluster);
+                        } else
+                            ds = createDataSource(id);
                         cache.put(id, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating datasource: %s", id.getId());

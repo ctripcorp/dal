@@ -43,7 +43,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
                 }
             });
         } catch (Exception e) {
-            throw new RuntimeException("Init ClusterConfigAdapter failed: " + provider.getDbName());
+            throw new RuntimeException("Init ClusterConfigAdapter failed: " + provider.getDbName(), e);
         }
     }
 

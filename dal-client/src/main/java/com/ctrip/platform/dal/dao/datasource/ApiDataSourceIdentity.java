@@ -12,10 +12,8 @@ import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
-import com.sun.xml.internal.bind.v2.model.core.ID;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ApiDataSourceIdentity implements ClusterInfoDelegateIdentity {
 

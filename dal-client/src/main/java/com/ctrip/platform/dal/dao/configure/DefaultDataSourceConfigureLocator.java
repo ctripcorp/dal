@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
@@ -41,6 +42,12 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     private static final String OVERRIDE_RESULT = " override result: ";
     private static final String DATASOURCE_XML_OVERRIDE_RESULT = "datasource.xml override result: ";
     private static final String CONNECTION_URL = "connection url:";
+    private static final String STATEMENT_INTERCEPTORS_KEY = "statementInterceptors";
+    private static final String CONNECTION_PROPERTIES = "connectionProperties";
+    private static final String STATEMENT_INTERCEPTORS_VALUE_FORMAT1 = "statementInterceptors=%s,%s";
+    private static final String STATEMENT_INTERCEPTORS_VALUE_FORMAT2 = ";statementInterceptors=%s";
+    private static final String CONNECTION_PROPERTIES_SEPARATOR = ";";
+    private static final String CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR = "=";
 
     private String FINAL_OVERRIDE_RESULT_FORMAT = "Final override result: %s";
     protected String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
@@ -520,6 +527,38 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         for (Map.Entry<Object, Object> entry : highLevel.entrySet()) {
             lowLevel.setProperty(entry.getKey().toString(), entry.getValue().toString());
         }
+        addInterceptorsToConnectionProperties(lowLevel);
+    }
+
+    private void addInterceptorsToConnectionProperties(Properties lowLevel) {
+        String interceptors = lowLevel.getProperty(STATEMENT_INTERCEPTORS_KEY);
+        if (StringUtils.isTrimmedEmpty(interceptors)) {
+            return;
+        }
+        String connectionProperties = lowLevel.getProperty(CONNECTION_PROPERTIES);
+        String[] properties = connectionProperties.split(CONNECTION_PROPERTIES_SEPARATOR);
+
+        boolean added = false;
+        for (int index = 0; index < properties.length; index++) {
+            if (properties[index].trim().startsWith(STATEMENT_INTERCEPTORS_KEY)) {
+                String[] keyAndValue = properties[index].trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
+                if (keyAndValue.length < 2) {
+                    properties[index] = "";
+                    break;
+                }
+                properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, keyAndValue[1], interceptors);
+                added = true;
+                break;
+            }
+        }
+
+        if (!added) {
+            connectionProperties += String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT2, interceptors);
+        } else {
+            connectionProperties = String.join(CONNECTION_PROPERTIES_SEPARATOR, properties);
+        }
+
+        lowLevel.setProperty(CONNECTION_PROPERTIES, connectionProperties);
     }
 
     @Override

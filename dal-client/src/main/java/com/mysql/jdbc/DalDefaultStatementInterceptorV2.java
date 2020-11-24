@@ -30,7 +30,7 @@ public class DalDefaultStatementInterceptorV2 implements StatementInterceptorV2 
 
     @Override
     public ResultSetInternalMethods postProcess(String sql, Statement interceptedStatement, ResultSetInternalMethods originalResultSet, Connection connection, int warningCount, boolean noIndexUsed, boolean noGoodIndexUsed, SQLException statementException) throws SQLException {
-        if (isSocketTimeOutException(statementException)) {
+        if (!noGoodIndexUsed && isSocketTimeOutException(statementException)) {
             resetCancelState(interceptedStatement);
             throw statementException;
         }

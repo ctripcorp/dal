@@ -39,9 +39,12 @@ public class DalDefaultStatementInterceptorV2 implements StatementInterceptorV2 
     }
 
     protected boolean isSocketTimeOutException(SQLException sqlEx) {
-        if (!(sqlEx instanceof CommunicationsException))
-            return false;
-        return sqlEx != null && sqlEx.getCause() instanceof SocketTimeoutException;
+        Throwable t1 = sqlEx;
+        while (t1 != null && !(t1 instanceof SQLException)) {
+            t1 = t1.getCause();
+        }
+
+        return sqlEx instanceof CommunicationsException;
     }
 
     protected void resetCancelState(Statement interceptedStatement) throws SQLException {

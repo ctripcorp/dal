@@ -12,13 +12,11 @@ import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.*;
 
 public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLocator {
     protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
@@ -42,9 +40,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     private static final String OVERRIDE_RESULT = " override result: ";
     private static final String DATASOURCE_XML_OVERRIDE_RESULT = "datasource.xml override result: ";
     private static final String CONNECTION_URL = "connection url:";
-    private static final String STATEMENT_INTERCEPTORS_KEY = "statementInterceptors";
-    private static final String CONNECTION_PROPERTIES = "connectionProperties";
-    private static final String STATEMENT_INTERCEPTORS_VALUE_FORMAT1 = "statementInterceptors=%s,%s";
+    private static final String STATEMENT_INTERCEPTORS_VALUE_FORMAT1 = "statementInterceptors=%s";
     private static final String STATEMENT_INTERCEPTORS_VALUE_FORMAT2 = ";statementInterceptors=%s";
     private static final String CONNECTION_PROPERTIES_SEPARATOR = ";";
     private static final String CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR = "=";
@@ -530,24 +526,27 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         addInterceptorsToConnectionProperties(lowLevel);
     }
 
-    private void addInterceptorsToConnectionProperties(Properties lowLevel) {
+    protected void addInterceptorsToConnectionProperties(Properties lowLevel) {
         String interceptors = lowLevel.getProperty(STATEMENT_INTERCEPTORS_KEY);
         if (StringUtils.isTrimmedEmpty(interceptors)) {
             return;
         }
-        String connectionProperties = lowLevel.getProperty(CONNECTION_PROPERTIES);
+        String connectionProperties = lowLevel.getProperty(CONNECTIONPROPERTIES);
         String[] properties = connectionProperties.split(CONNECTION_PROPERTIES_SEPARATOR);
 
         boolean added = false;
         for (int index = 0; index < properties.length; index++) {
             if (properties[index].trim().startsWith(STATEMENT_INTERCEPTORS_KEY)) {
-                String[] keyAndValue = properties[index].trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
-                if (keyAndValue.length < 2) {
-                    properties[index] = "";
+                added = true;
+                if (properties[index].trim().endsWith(DEFAULT_STATEMENT_INTERCEPTORS_VALUE)) {
                     break;
                 }
-                properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, keyAndValue[1], interceptors);
-                added = true;
+                String[] keyAndValue = properties[index].trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
+                if (keyAndValue.length < 2) {
+                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, interceptors);
+                } else {
+                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, moveOrAddDefaultInterceptorToLast(keyAndValue[1]));
+                }
                 break;
             }
         }
@@ -558,7 +557,26 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
             connectionProperties = String.join(CONNECTION_PROPERTIES_SEPARATOR, properties);
         }
 
-        lowLevel.setProperty(CONNECTION_PROPERTIES, connectionProperties);
+        lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties);
+    }
+
+    private String moveOrAddDefaultInterceptorToLast(String interceptors) {
+        String[] interceptorList = interceptors.split(IDC_PRIORITY_SEPARATOR);
+        int length = interceptorList.length;
+        boolean added = false;
+        for (int index = 0; index < length; index++) {
+            if (DEFAULT_STATEMENT_INTERCEPTORS_VALUE.equals(interceptorList[index].trim())) {
+                interceptorList[index] = interceptorList[length - 1];
+                interceptorList[length - 1] = DEFAULT_STATEMENT_INTERCEPTORS_VALUE;
+                added =  true;
+            }
+        }
+
+        if (!added) {
+            interceptorList = Arrays.copyOf(interceptorList, length + 1);
+            interceptorList[length] = DEFAULT_STATEMENT_INTERCEPTORS_VALUE;
+        }
+        return String.join(IDC_PRIORITY_SEPARATOR, interceptorList);
     }
 
     @Override

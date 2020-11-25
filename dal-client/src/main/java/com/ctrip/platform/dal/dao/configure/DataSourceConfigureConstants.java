@@ -26,6 +26,7 @@ public interface DataSourceConfigureConstants {
     String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
     String CONNECTIONPROPERTIES = "connectionProperties";
     String INIT_SQL = "initSql";
+    String STATEMENT_INTERCEPTORS_KEY = "statementInterceptors";
 
     // **********Dal extended properties key**********
     String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";  // alias name for sessionWaitTimeout
@@ -78,7 +79,7 @@ public interface DataSourceConfigureConstants {
     boolean DEFAULT_LOGABANDONED = false;
     int DEFAULT_MINEVICTABLEIDLETIMEMILLIS = 30000;
     String DEFAULT_CONNECTIONPROPERTIES =
-            "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2;statementInterceptors=com.mysql.jdbc.DalDefaultStatementInterceptorV2";
+            "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=1050;loginTimeout=2";
     boolean DEFAULT_JMXENABLED = true;
     String DEFAULT_JDBCINTERCEPTORS = "org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
             + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;";
@@ -88,6 +89,7 @@ public interface DataSourceConfigureConstants {
     // **********Dal extended properties default value**********
     int DEFAULT_SESSION_WAIT_TIMEOUT = 120;
 
+    String DEFAULT_STATEMENT_INTERCEPTORS_VALUE = "com.mysql.jdbc.DalDefaultStatementInterceptorV2";
     //used by mgr datasource
     int DEFAULT_CALL_MYSQL_API_PERIOD = 3 * 1000; //ms
     String DEFAULT_DB_MODEL = "standalone";

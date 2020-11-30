@@ -131,6 +131,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     @Override
     public void destroy() {
         isInit();
+        hostValidator.destroy();
         this.status = RouteStrategyStatus.destroy.name();
     }
 

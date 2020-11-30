@@ -8,10 +8,7 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class MajorityHostValidator implements ConnectionValidator, HostValidator {
@@ -28,18 +25,19 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
     private static final String VALIDATE_ERROR = "Validator::validateError";
 
-    private volatile long lastValidateSecond;
     private volatile Set<HostSpec> configuredHosts;
     private volatile List<HostSpec> orderHosts;
     private volatile long failOverTime;
     private volatile long blackListTimeOut;
     private volatile long fixedValidatePeriod = 30000;
     private volatile ConnectionFactory factory;
+    private volatile HashMap<HostSpec, Long> lastValidateMap = new HashMap<>();
     private volatile ScheduledExecutorService fixedPeriodValidateService = Executors.newSingleThreadScheduledExecutor();
     private volatile ScheduledExecutorService fixed1sValidateService = Executors.newSingleThreadScheduledExecutor();
     private static volatile ExecutorService asyncService = Executors.newFixedThreadPool(4);
     private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
     private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
+    private final Long ONE_SECOND = 1000L;
     private static final String validateSQL1 = "select members.MEMBER_STATE MEMBER_STATE, " +
             "members.MEMBER_ID MEMBER_ID, " +
             "member_stats.MEMBER_ID CURRENT_MEMBER_ID " +
@@ -54,7 +52,6 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     public MajorityHostValidator() {
-        lastValidateSecond = System.currentTimeMillis() / 1000;
         fixedScheduleStart();
     }
 
@@ -66,13 +63,22 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         this.blackListTimeOut = blackListTimeOut;
         this.orderHosts = orderHosts;
         this.fixedValidatePeriod = fixedValidatePeriod;
+        init();
+    }
+
+    private void init() {
+        initLastValidateMap();
+    }
+
+    private void initLastValidateMap() {
+        for (HostSpec host : orderHosts) {
+            lastValidateMap.put(host, System.currentTimeMillis());
+        }
     }
 
     private void fixedScheduleStart() {
         try {
-            fixedPeriodValidateService.scheduleAtFixedRate(() -> {
-                asyncValidate(orderHosts);
-            }, 1000, fixedValidatePeriod, TimeUnit.MILLISECONDS);
+            fixedPeriodValidateService.scheduleAtFixedRate(() -> asyncValidate(orderHosts), 1000, fixedValidatePeriod, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             LOGGER.error("start schedule1 error", e);
         }
@@ -96,7 +102,18 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     @Override
     public void triggerValidate() {
-        validateWithNewConnection();
+        asyncValidate(orderHosts);
+    }
+
+    @Override
+    public void destroy() {
+        if (!fixedPeriodValidateService.isShutdown()) {
+            fixedPeriodValidateService.shutdown();
+        }
+
+        if (!fixed1sValidateService.isShutdown()) {
+            fixed1sValidateService.shutdown();
+        }
     }
 
     @Override
@@ -105,11 +122,11 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             HostSpec currentHost = connection.getHost();
             boolean validateResult = validateAndUpdate(connection, currentHost, configuredHosts.size());
             if (!validateResult) {
-                validateWithNewConnection();
+                asyncValidate(orderHosts);
             }
             return validateResult;
         } catch (SQLException e) {
-            validateWithNewConnection();
+            asyncValidate(orderHosts);
             throw e;
         }
     }
@@ -133,9 +150,12 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         return new HostSpec(hostAndPort.getHost(), hostAndPort.getPort(), DEFAULT);
     }
 
-    private boolean validateAndUpdate(Connection connection, HostSpec currentHost, int clusterHostCount) throws SQLException {
+    protected boolean validateAndUpdate(Connection connection, HostSpec currentHost, int clusterHostCount) throws SQLException {
         try {
-            if (validate(connection, clusterHostCount)) {
+            boolean validateResult = validate(connection, clusterHostCount);
+            LOGGER.info(currentHost.toString() + ":" + validateResult);
+            LOGGER.logEvent(CAT_LOG_TYPE, currentHost.toString() + ":" + validateResult, null);
+            if (validateResult) {
                 removeFromAllBlackList(currentHost);
                 return true;
             } else {
@@ -144,26 +164,15 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             }
         } catch (SQLException e) {
             LOGGER.warn(VALIDATE_ERROR, e);
+            LOGGER.logEvent(CAT_LOG_TYPE, currentHost + ":error", e.getMessage());
             addToPreAbsentAndBlackPresent(currentHost);
             throw e;
         }
     }
 
-    private void validateWithNewConnection() {
-        long currentSecond = System.currentTimeMillis() / 1000;
-        synchronized (this) {
-            if (this.lastValidateSecond == currentSecond) {
-                return;
-            }
-        }
-
-        this.lastValidateSecond = currentSecond;
-        asyncValidate(orderHosts);
-    }
-
-    private void asyncValidate(List<HostSpec> hostSpecs) {
+    protected void asyncValidate(List<HostSpec> hostSpecs) {
         for (HostSpec host : hostSpecs) {
-            if (configuredHosts.contains(host)) {
+            if (configuredHosts.contains(host) && shouldValidate(host)) {
                 asyncService.submit(() -> {
                     try (Connection connection = getConnection(host)){
                         validateAndUpdate(connection, host, configuredHosts.size());
@@ -175,7 +184,17 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         }
     }
 
-    private Connection getConnection(HostSpec host) throws SQLException {
+    // return true : it's more than 1s from the last validate
+    private synchronized boolean shouldValidate(HostSpec hostSpec) {
+        Long timeNow = System.currentTimeMillis();
+         if (lastValidateMap.get(hostSpec) - timeNow > ONE_SECOND) {
+             lastValidateMap.put(hostSpec, timeNow);
+             return true;
+         }
+         return false;
+    }
+
+    protected Connection getConnection(HostSpec host) throws SQLException {
         try {
             return factory.createConnectionForHost(host);
         } catch (SQLException e) {

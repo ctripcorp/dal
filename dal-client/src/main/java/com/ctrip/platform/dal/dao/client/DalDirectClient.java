@@ -17,6 +17,8 @@ import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.HintsAwareExtractor;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.mysql.jdbc.JDBC4Connection;
+import com.mysql.jdbc.MySQLConnection;
 
 /**
  * The direct connection implementation for DalClient.
@@ -471,6 +473,19 @@ public class DalDirectClient implements DalContextClient {
         Connection conn = action.connHolder.getConn();
         connCost = System.currentTimeMillis() - connCost;
         action.entry.setConnectionCost(connCost);
+
+        try {
+            if (conn.isWrapperFor(MySQLConnection.class))
+                action.entry.setConnectionId(conn.unwrap(MySQLConnection.class).getId());
+        } catch (Throwable t) {
+            // ignore
+        }
+        try {
+            if (conn.isWrapperFor(JDBC4Connection.class))
+                action.entry.setLocalPort(conn.unwrap(JDBC4Connection.class).getIO().mysqlConnection.getLocalPort());
+        } catch (Throwable t) {
+            // ignore
+        }
 
         action.endConnect();
         return conn;

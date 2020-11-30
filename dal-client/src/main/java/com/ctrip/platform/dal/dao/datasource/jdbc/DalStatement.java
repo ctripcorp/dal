@@ -321,13 +321,21 @@ public class DalStatement implements Statement {
     }
 
     private void beforeExecution(OperationType operation) {
-        context.populateCaller();
-        context.populateOperationType(operation);
-        context.startExecution();
+        try {
+            context.populateCaller();
+            context.populateOperationType(operation);
+            context.startExecution();
+        } catch (Throwable t) {
+            // ignore
+        }
     }
 
     private void afterExecution(Throwable errorIfAny) {
-        context.endExecution(errorIfAny);
+        try {
+            context.endExecution(errorIfAny);
+        } catch (Throwable t) {
+            // ignore
+        }
     }
 
     public SqlContext getSqlContext() {

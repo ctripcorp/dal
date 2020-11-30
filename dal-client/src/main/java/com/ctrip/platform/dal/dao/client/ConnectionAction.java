@@ -191,6 +191,7 @@ public abstract class ConnectionAction<T> {
         DatabaseSet databaseSet = DalClientFactory.getDalConfigure().getDatabaseSet(logicDbName);
         if (databaseSet instanceof ClusterDatabaseSet) {
             Cluster cluster = ((ClusterDatabaseSet) databaseSet).getCluster();
+            entry.setCluster(cluster);
             entry.setClusterName(cluster.getClusterName().toLowerCase());
             LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
             if (localizationConfig != null)

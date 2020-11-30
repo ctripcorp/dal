@@ -5,8 +5,18 @@ package com.ctrip.framework.dal.cluster.client.config;
  */
 public enum LocalizationState {
 
-    NONE,
-    PREPARED,
-    ACTIVE
+    NONE("none"),
+    PREPARED("prepared"),
+    ACTIVE("active");
+
+    private String value;
+
+    LocalizationState(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
@@ -53,8 +54,11 @@ public class LogEntry implements ILogEntry{
 	private String dbZone;
 	private String ucsValidation;
 	private String dalValidation;
+	private Cluster cluster;
+	private Long connectionId;
+	private Integer localPort;
 
-    /**
+	/**
      * Internal performance recorder for performance cost in each stage.
      * As each low level DB operation will be logged once at ConnectionAction level, this recorder will
      * be set into LogEntry which is created as soon as ConnectionAction is created.
@@ -491,4 +495,27 @@ public class LogEntry implements ILogEntry{
 		this.dalValidation = dalValidation;
 	}
 
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
+	}
+
+	public Long getConnectionId() {
+		return connectionId;
+	}
+
+	public void setConnectionId(Long connectionId) {
+		this.connectionId = connectionId;
+	}
+
+	public Integer getLocalPort() {
+		return localPort;
+	}
+
+	public void setLocalPort(Integer localPort) {
+		this.localPort = localPort;
+	}
 }

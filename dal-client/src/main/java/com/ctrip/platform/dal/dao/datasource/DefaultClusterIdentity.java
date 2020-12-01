@@ -29,7 +29,7 @@ public class DefaultClusterIdentity implements ClusterIdentity {
 
     @Override
     public SqlContext createSqlContext() {
-        ClusterDbSqlContext context = new ClusterDbSqlContext(getClusterName(), null, null);
+        ClusterDbSqlContext context = new ClusterDbSqlContext(cluster, null, null);
         if (cluster != null && cluster.getLocalizationConfig() != null)
             context.populateDbZone(cluster.getLocalizationConfig().getZoneId());
         return context;

@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.UnsupportedFeatureException;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
@@ -258,17 +259,24 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
 
     @Override
     public SwitchableDataSourceStatus getStatus() {
-        String logName = String.format(GET_STATUS, clusterInfo.toString());
-        SwitchableDataSourceStatus currentStatus =
-                new SwitchableDataSourceStatus(status.get() == ForceSwitchedStatus.ForceSwitched,
-                currentHost.get().getHost(), currentHost.get().getPort(), poolCreated.get());
+        AtomicReference<HostAndPort> current = new AtomicReference<>();
         try {
-            LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, currentStatus.toString(), () -> {
+            String logName = String.format(GET_STATUS, clusterInfo.toString());
+            LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName,
+                    currentHost.get().getHost() + ":" + currentHost.get().getPort(), () -> {
+                try (Connection conn = getConnection()) {
+                    current.set(ConnectionStringParser.parseHostPortFromURL(conn.getMetaData().getURL()));
+                }
             });
         } catch (Throwable t) {
-            // ignore
+            LOGGER.warn("GetStatus error", t);
         }
-        return currentStatus;
+        if (current.get() != null)
+            return new SwitchableDataSourceStatus(status.get() == ForceSwitchedStatus.ForceSwitched,
+                    current.get().getHost(), current.get().getPort(), poolCreated.get());
+        else
+            return new SwitchableDataSourceStatus(status.get() == ForceSwitchedStatus.ForceSwitched,
+                    currentHost.get().getHost(), currentHost.get().getPort(), poolCreated.get());
     }
 
     @Override

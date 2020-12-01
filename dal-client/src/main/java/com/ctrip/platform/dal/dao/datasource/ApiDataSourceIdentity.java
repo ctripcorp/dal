@@ -18,20 +18,12 @@ import java.util.Objects;
 public class ApiDataSourceIdentity implements ClusterInfoDelegateIdentity {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String ID_FORMAT = "%s_api"; //dbName
 
     private ConnectionStringConfigureProvider provider;
-    private String id;
     private final ObjectHolder<Cluster> clusterHolder = new ObjectHolder<>();
 
     public ApiDataSourceIdentity(ConnectionStringConfigureProvider provider) {
         this.provider = provider;
-        init();
-    }
-
-    private void init() {
-        Cluster cluster = getCluster();
-        id = String.format(ID_FORMAT, cluster.getClusterName());
     }
 
     private Cluster getCluster() {
@@ -58,7 +50,7 @@ public class ApiDataSourceIdentity implements ClusterInfoDelegateIdentity {
 
     @Override
     public String getId() {
-        return id;
+        return provider.getDbName();
     }
 
     @Override

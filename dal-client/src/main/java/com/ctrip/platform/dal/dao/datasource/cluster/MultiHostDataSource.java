@@ -40,8 +40,6 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final MultiHostClusterProperties clusterProperties;
     private final ConnectionValidator connValidator;
 
-    private final ExecutorService executor =
-            Executors.newSingleThreadExecutor(new CustomThreadFactory("MultiHostDataSourceDetector"));
     private final AtomicBoolean isDetecting = new AtomicBoolean(false);
     private final AtomicLong lastDetectedTime = new AtomicLong(0);
 
@@ -65,7 +63,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
             @Override
             public Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return wrappedDataSources.get(host).getDataSource().getConnection();
+                return getPooledConnectionForHost(host);
             }
         };
     }

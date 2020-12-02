@@ -187,7 +187,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     // return true : it's more than 1s from the last validate
     private synchronized boolean shouldValidate(HostSpec hostSpec) {
         Long timeNow = System.currentTimeMillis();
-         if (lastValidateMap.get(hostSpec) - timeNow > ONE_SECOND) {
+         if (timeNow - lastValidateMap.get(hostSpec) > ONE_SECOND) {
              lastValidateMap.put(hostSpec, timeNow);
              return true;
          }

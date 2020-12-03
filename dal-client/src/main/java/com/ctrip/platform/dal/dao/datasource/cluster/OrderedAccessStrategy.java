@@ -95,11 +95,10 @@ public class OrderedAccessStrategy implements RouteStrategy{
     }
 
     private void buildOrderHosts () {
-        //TODO clusterName to be
         List<String> zoneOrder = strategyOptions.getStringList("zonesPriority", ",", null);
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
-        LOGGER.info(ROUTER_ORDER_HOSTS + ":" + String.format(ORDER_HOSTS, orderHosts.toString()));
+        LOGGER.info(String.format(ROUTER_ORDER_HOSTS, cluster) + ":" + String.format(ORDER_HOSTS, orderHosts.toString()));
         LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, cluster), String.format(ORDER_HOSTS, orderHosts.toString()));
     }
 

@@ -37,7 +37,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static volatile ExecutorService asyncService = Executors.newFixedThreadPool(4);
     private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
     private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
-    private final Long ONE_SECOND = 1000L;
+    private final Long ONE_SECOND = 900L; // 100ms threshold to tolerant schedule time fault
     private static final String validateSQL1 = "select members.MEMBER_STATE MEMBER_STATE, " +
             "members.MEMBER_ID MEMBER_ID, " +
             "member_stats.MEMBER_ID CURRENT_MEMBER_ID " +
@@ -153,7 +153,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     protected boolean validateAndUpdate(Connection connection, HostSpec currentHost, int clusterHostCount) throws SQLException {
         try {
             boolean validateResult = validate(connection, clusterHostCount);
-            LOGGER.info(currentHost.toString() + ":" + validateResult);
+            LOGGER.info(CAT_LOG_TYPE + ":" +  currentHost.toString() + ":" + validateResult);
             LOGGER.logEvent(CAT_LOG_TYPE, currentHost.toString() + ":" + validateResult, null);
             if (validateResult) {
                 removeFromAllBlackList(currentHost);

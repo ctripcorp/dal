@@ -154,4 +154,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public String getConnectionStringMysqlApiUrl() {
         throw new UnsupportedOperationException("getConnectionStringMysqlApiUrl not supported.");
     }
+
+    @Override
+    public String getStatementInterceptor() {
+        throw new UnsupportedOperationException("getStatementInterceptor not supported.");
+    }
 }

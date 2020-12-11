@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
@@ -527,8 +528,8 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     }
 
     protected void addInterceptorsToConnectionProperties(Properties lowLevel) {
-        String interceptors = lowLevel.getProperty(STATEMENT_INTERCEPTORS_KEY);
-        if (StringUtils.isTrimmedEmpty(interceptors)) {
+        String interceptor = DalPropertiesManager.getInstance().getDalPropertiesLocator().getStatementInterceptor();
+        if (StringUtils.isTrimmedEmpty(interceptor)) {
             return;
         }
         String connectionProperties = lowLevel.getProperty(CONNECTIONPROPERTIES);
@@ -543,7 +544,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
                 }
                 String[] keyAndValue = properties[index].trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
                 if (keyAndValue.length < 2) {
-                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, interceptors);
+                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, interceptor);
                 } else {
                     properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, moveOrAddDefaultInterceptorToLast(keyAndValue[1]));
                 }
@@ -552,7 +553,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         }
 
         if (!added) {
-            connectionProperties += String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT2, interceptors);
+            connectionProperties += String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT2, interceptor);
         } else {
             connectionProperties = String.join(CONNECTION_PROPERTIES_SEPARATOR, properties);
         }

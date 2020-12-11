@@ -22,6 +22,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     public static final String IMPLICIT_ALL_SHARDS_SWITCH = "ImplicitAllShardsSwitch";
     private static final String SET_IMPLICIT_ALL_SHARDS_SWITCH = "DalProperties::setImplicitAllShardsSwitch";
     private static final String SET_ALL_PROPERTIES = "DalProperties::setAllProperties";
+    public static final String STATEMENT_INTERCEPTORS = "statementInterceptors";
 
     private static final String PROPERTY_NAME_CLUSTER_INFO_QUERY_URL = "ClusterInfoQueryUrl";
     private static final String PROPERTY_NAME_DRC_STAGE = "DrcStage";
@@ -127,6 +128,11 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     @Override
     public String getConnectionStringMysqlApiUrl() {
         return getProperty(CONNECTION_STRING_MYSQL_API_URL);
+    }
+
+    @Override
+    public String getStatementInterceptor() {
+        return getProperty(STATEMENT_INTERCEPTORS);
     }
 
     private String getProperty(String name, String defaultValue) {

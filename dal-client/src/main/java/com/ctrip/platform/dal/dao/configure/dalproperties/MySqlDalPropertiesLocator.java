@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.configure.dalproperties;
 
+import static com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesLocator.STATEMENT_INTERCEPTORS;
+
 public class MySqlDalPropertiesLocator extends AbstractDalPropertiesLocator {
     private static final String JAVA_MYSQL_ERROR_CODES = "JavaMySqlErrorCodes";
 
@@ -24,4 +26,8 @@ public class MySqlDalPropertiesLocator extends AbstractDalPropertiesLocator {
         return array;
     }
 
+    @Override
+    public String getStatementInterceptor() {
+        return getProperty(STATEMENT_INTERCEPTORS);
+    }
 }

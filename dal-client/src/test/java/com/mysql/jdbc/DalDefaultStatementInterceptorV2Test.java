@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 import static org.junit.Assert.*;
 
-public class DalDefaultStatementInterceptorV2Test {
+public class DalDefaultStatementInterceptorV2Test extends DalDefaultStatementInterceptorV2{
 
     @Test
     public void postProcess() throws SQLException {

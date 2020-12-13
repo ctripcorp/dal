@@ -30,7 +30,7 @@ public class DalDefaultStatementInterceptorV2 implements StatementInterceptorV2 
 
     @Override
     public ResultSetInternalMethods postProcess(String sql, Statement interceptedStatement, ResultSetInternalMethods originalResultSet, Connection connection, int warningCount, boolean noIndexUsed, boolean noGoodIndexUsed, SQLException statementException) throws SQLException {
-        if (!noGoodIndexUsed && isSocketTimeOutException(statementException)) {
+        if (!noGoodIndexUsed && isCommunicationsException(statementException)) {
             resetCancelState(interceptedStatement);
             throw statementException;
         }
@@ -38,7 +38,7 @@ public class DalDefaultStatementInterceptorV2 implements StatementInterceptorV2 
         return null;
     }
 
-    protected boolean isSocketTimeOutException(SQLException sqlEx) {
+    protected boolean isCommunicationsException(SQLException sqlEx) {
         Throwable t1 = sqlEx;
         while (t1 != null && !(t1 instanceof SQLException)) {
             t1 = t1.getCause();

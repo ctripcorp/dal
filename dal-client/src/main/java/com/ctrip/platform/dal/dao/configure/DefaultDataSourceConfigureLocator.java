@@ -524,11 +524,11 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         for (Map.Entry<Object, Object> entry : highLevel.entrySet()) {
             lowLevel.setProperty(entry.getKey().toString(), entry.getValue().toString());
         }
-        addInterceptorsToConnectionProperties(lowLevel);
+        String interceptor = DalPropertiesManager.getInstance().getDalPropertiesLocator().getStatementInterceptor();
+        addInterceptorsToConnectionProperties(lowLevel, interceptor);
     }
 
-    protected void addInterceptorsToConnectionProperties(Properties lowLevel) {
-        String interceptor = DalPropertiesManager.getInstance().getDalPropertiesLocator().getStatementInterceptor();
+    protected void addInterceptorsToConnectionProperties(Properties lowLevel, String interceptor) {
         if (StringUtils.isTrimmedEmpty(interceptor)) {
             return;
         }

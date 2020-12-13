@@ -22,38 +22,30 @@ public class DefaultDataSourceConfigureLocatorTest {
         lowLevel.setProperty(STATEMENT_INTERCEPTORS_KEY, DEFAULT_STATEMENT_INTERCEPTORS_VALUE);
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties1);
 
-        //statementInterceptors has been set and is last one
-        locator.addInterceptorsToConnectionProperties(lowLevel);
+        String interceptor = "com.mysql.jdbc.DalDefaultStatementInterceptorV2";
+
+                //statementInterceptors has been set and is last one
+        locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties1, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
         //statementInterceptors has been set and not the last one
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties3);
-        locator.addInterceptorsToConnectionProperties(lowLevel);
+        locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties1, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
         //no interceptor in properties
+        interceptor = "";
         lowLevel.remove(STATEMENT_INTERCEPTORS_KEY);
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties3);
-        locator.addInterceptorsToConnectionProperties(lowLevel);
+        locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties3, lowLevel.getProperty(CONNECTIONPROPERTIES));
-
-        //no interceptor in connectionProperty and not in properties
-        lowLevel.remove(STATEMENT_INTERCEPTORS_KEY);
-        lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties2);
-        locator.addInterceptorsToConnectionProperties(lowLevel);
-        assertEquals(connectionProperties2, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
         //customer interceptor in connectionProperty and not in properties
         lowLevel.remove(STATEMENT_INTERCEPTORS_KEY);
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties4);
-        locator.addInterceptorsToConnectionProperties(lowLevel);
+        locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties4, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
-        //no interceptor in connectionProperty and default interceptor in properties
-        lowLevel.setProperty(STATEMENT_INTERCEPTORS_KEY, DEFAULT_STATEMENT_INTERCEPTORS_VALUE);
-        lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties2);
-        locator.addInterceptorsToConnectionProperties(lowLevel);
-        assertEquals(connectionProperties5, lowLevel.getProperty(CONNECTIONPROPERTIES));
     }
 
 }

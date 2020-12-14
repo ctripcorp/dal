@@ -16,8 +16,8 @@ public class TraceableClusterDataSourceIdentity extends ClusterDataSourceIdentit
 
     @Override
     public SqlContext createSqlContext() {
-        ClusterDbSqlContext context = new ClusterDbSqlContext(getClusterName(), getShardIndex(), getDatabaseRole());
         Cluster cluster = getDatabase().getCluster();
+        ClusterDbSqlContext context = new ClusterDbSqlContext(cluster, getShardIndex(), getDatabaseRole());
         if (cluster != null && cluster.getLocalizationConfig() != null)
             context.populateDbZone(cluster.getLocalizationConfig().getZoneId());
         return context;

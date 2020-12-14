@@ -25,9 +25,4 @@ public class MySqlDalPropertiesLocator extends AbstractDalPropertiesLocator {
 
         return array;
     }
-
-    @Override
-    public String getStatementInterceptor() {
-        return getProperty(STATEMENT_INTERCEPTORS);
-    }
 }

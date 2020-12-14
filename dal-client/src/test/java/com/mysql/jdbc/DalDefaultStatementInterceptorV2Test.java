@@ -19,5 +19,8 @@ public class DalDefaultStatementInterceptorV2Test{
         CommunicationsException exception = new CommunicationsException(null, 1000L, 1000L, null);
         assertEquals(true, v2.isCommunicationsException(exception));
 
+        e.initCause(exception);
+        assertEquals(true, v2.isCommunicationsException(e));
+
     }
 }

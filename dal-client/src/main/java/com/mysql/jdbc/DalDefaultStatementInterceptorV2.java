@@ -40,11 +40,14 @@ public class DalDefaultStatementInterceptorV2 implements StatementInterceptorV2 
 
     protected boolean isCommunicationsException(SQLException sqlEx) {
         Throwable t1 = sqlEx;
-        while (t1 != null && !(t1 instanceof SQLException)) {
+        while (t1 != null && (t1 instanceof SQLException)) {
+            if (t1 instanceof CommunicationsException) {
+                return true;
+            }
             t1 = t1.getCause();
         }
 
-        return sqlEx instanceof CommunicationsException;
+        return false;
     }
 
     protected void resetCancelState(Statement interceptedStatement) throws SQLException {

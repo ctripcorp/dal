@@ -7,15 +7,17 @@ import java.sql.SQLException;
 
 import static org.junit.Assert.*;
 
-public class DalDefaultStatementInterceptorV2Test extends DalDefaultStatementInterceptorV2{
+public class DalDefaultStatementInterceptorV2Test{
+
 
     @Test
-    public void postProcess() throws SQLException {
+    public void isCommunicationException() {
         DalDefaultStatementInterceptorV2 v2 = new DalDefaultStatementInterceptorV2();
-        try {
-            v2.postProcess(null, null, null, null, 0, false, true, null);
-        } catch (SQLException e) {
-            assertEquals(true, e instanceof CommunicationsException);
-        }
+        SQLException e = new SQLException();
+        assertEquals(false, v2.isCommunicationsException(e));
+
+        CommunicationsException exception = new CommunicationsException(null, 1000L, 1000L, null);
+        assertEquals(true, v2.isCommunicationsException(exception));
+
     }
 }

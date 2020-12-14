@@ -524,12 +524,12 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         for (Map.Entry<Object, Object> entry : highLevel.entrySet()) {
             lowLevel.setProperty(entry.getKey().toString(), entry.getValue().toString());
         }
-        String interceptor = DalPropertiesManager.getInstance().getDalPropertiesLocator().getStatementInterceptor();
-        addInterceptorsToConnectionProperties(lowLevel, interceptor);
+        String dalInterceptor = DalPropertiesManager.getInstance().getDalPropertiesLocator().getStatementInterceptor();
+        addInterceptorsToConnectionProperties(lowLevel, dalInterceptor);
     }
 
-    protected void addInterceptorsToConnectionProperties(Properties lowLevel, String interceptor) {
-        if (StringUtils.isTrimmedEmpty(interceptor)) {
+    protected void addInterceptorsToConnectionProperties(Properties lowLevel, String dalInterceptor) {
+        if (StringUtils.isTrimmedEmpty(dalInterceptor)) {
             return;
         }
         String connectionProperties = lowLevel.getProperty(CONNECTIONPROPERTIES);
@@ -544,16 +544,16 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
                 }
                 String[] keyAndValue = properties[index].trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
                 if (keyAndValue.length < 2) {
-                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, interceptor);
+                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, dalInterceptor.trim());
                 } else {
-                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, moveOrAddDefaultInterceptorToLast(keyAndValue[1]));
+                    properties[index] = String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT1, moveOrAddDefaultInterceptorToLast(keyAndValue[1], dalInterceptor.trim()));
                 }
                 break;
             }
         }
 
         if (!added) {
-            connectionProperties += String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT2, interceptor);
+            connectionProperties += String.format(STATEMENT_INTERCEPTORS_VALUE_FORMAT2, dalInterceptor.trim());
         } else {
             connectionProperties = String.join(CONNECTION_PROPERTIES_SEPARATOR, properties);
         }
@@ -561,8 +561,8 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties);
     }
 
-    private String moveOrAddDefaultInterceptorToLast(String interceptors) {
-        String[] interceptorList = interceptors.split(IDC_PRIORITY_SEPARATOR);
+    private String moveOrAddDefaultInterceptorToLast(String connectionInterceptors, String dalInterceptor) {
+        String[] interceptorList = connectionInterceptors.split(IDC_PRIORITY_SEPARATOR);
         int length = interceptorList.length;
         boolean added = false;
         for (int index = 0; index < length; index++) {
@@ -570,12 +570,13 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
                 interceptorList[index] = interceptorList[length - 1];
                 interceptorList[length - 1] = DEFAULT_STATEMENT_INTERCEPTORS_VALUE;
                 added =  true;
+                break;
             }
         }
 
         if (!added) {
             interceptorList = Arrays.copyOf(interceptorList, length + 1);
-            interceptorList[length] = DEFAULT_STATEMENT_INTERCEPTORS_VALUE;
+            interceptorList[length] = dalInterceptor.trim();
         }
         return String.join(IDC_PRIORITY_SEPARATOR, interceptorList);
     }

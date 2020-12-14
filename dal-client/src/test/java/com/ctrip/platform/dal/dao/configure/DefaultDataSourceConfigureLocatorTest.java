@@ -14,6 +14,7 @@ public class DefaultDataSourceConfigureLocatorTest {
     private static String connectionProperties3 = "connectTimeout=35000;socketTimeout=10000;statementInterceptors=com.mysql.jdbc.DalDefaultStatementInterceptorV2,com.mysql.jdbc.Customer";
     private static String connectionProperties4 = "connectTimeout=35000;socketTimeout=10000;statementInterceptors=com.mysql.jdbc.Customer";
     private static String connectionProperties5 = "connectTimeout=35000;socketTimeout=10000;statementInterceptors=com.mysql.jdbc.DalDefaultStatementInterceptorV2";
+    private static String connectionProperties6 = "connectTimeout=35000;socketTimeout=10000;statementInterceptors=com.mysql.jdbc.Customer,com.mysql.jdbc.Customer2,com.mysql.jdbc.DalDefaultStatementInterceptorV2";
 
     @Test
     public void addInterceptorsToConnectionProperties() {
@@ -24,27 +25,32 @@ public class DefaultDataSourceConfigureLocatorTest {
 
         String interceptor = "com.mysql.jdbc.DalDefaultStatementInterceptorV2";
 
-                //statementInterceptors has been set and is last one
+        //statementInterceptors has been set in connection properties and is last one
         locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties1, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
-        //statementInterceptors has been set and not the last one
+        //statementInterceptors has been set in connection properties and not the last one
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties3);
         locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties1, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
-        //no interceptor in properties
+        //no interceptor in dal.property
         interceptor = "";
-        lowLevel.remove(STATEMENT_INTERCEPTORS_KEY);
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties3);
         locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
         assertEquals(connectionProperties3, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
-        //customer interceptor in connectionProperty and not in properties
-        lowLevel.remove(STATEMENT_INTERCEPTORS_KEY);
+        //interceptor set more than one in dal.property
+        interceptor = "com.mysql.jdbc.Customer,com.mysql.jdbc.DalDefaultStatementInterceptorV2";
+        lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties2);
+        locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
+        assertEquals(connectionProperties1, lowLevel.getProperty(CONNECTIONPROPERTIES));
+
+        //interceptor set more than one in dal.property and connection property also has
+        interceptor = "com.mysql.jdbc.Customer2,com.mysql.jdbc.DalDefaultStatementInterceptorV2";
         lowLevel.setProperty(CONNECTIONPROPERTIES, connectionProperties4);
         locator.addInterceptorsToConnectionProperties(lowLevel, interceptor);
-        assertEquals(connectionProperties4, lowLevel.getProperty(CONNECTIONPROPERTIES));
+        assertEquals(connectionProperties6, lowLevel.getProperty(CONNECTIONPROPERTIES));
 
     }
 

@@ -29,4 +29,5 @@ import org.junit.runners.Suite.SuiteClasses;
 		com.ctrip.platform.dal.dao.markdown._AllTests.class,
 
 })
+// 7 errors
 public class AllTests {}

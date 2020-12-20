@@ -35,7 +35,7 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
     }
 
     @Override
-    protected boolean validate(Connection connection, int clusterHostCount) throws SQLException {
+    protected ValidateResult validate(Connection connection, int clusterHostCount) throws SQLException {
         MockConnection mockConnection = (MockConnection) connection;
         HostSpec host = mockConnection.getHost();
 
@@ -48,7 +48,11 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
                 onlineCount++;
             }
         }
-        return MysqlStatus.ok.equals(mysqlServer.get(host)) && 2 * onlineCount > mysqlServer.size();
+        if (MysqlStatus.ok.equals(mysqlServer.get(host)) && 2 * onlineCount > mysqlServer.size()) {
+            return new ValidateResult(true, "");
+        } else {
+            return new ValidateResult(false, "");
+        }
     }
 
     @Override

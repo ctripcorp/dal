@@ -1,14 +1,17 @@
-package com.ctrip.platform.dal.dao.datasource.cluster;
+package com.ctrip.platform.dal.dao.base;
+
+import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
 
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class MockConnection extends DefaultHostConnection  {
+public class MockDefaultHostConnection extends DefaultHostConnection {
 
 
-    public MockConnection(HostSpec host) {
+    public MockDefaultHostConnection(HostSpec host) {
         super(null, host);
     }
 

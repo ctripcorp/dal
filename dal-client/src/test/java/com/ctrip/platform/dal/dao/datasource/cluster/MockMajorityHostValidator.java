@@ -1,17 +1,16 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.ctrip.platform.dal.dao.base.MockConnection;
+import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MockMajorityHostValidator extends MajorityHostValidator {
 
     public volatile HashMap<HostSpec, MysqlStatus> mysqlServer = new HashMap<>();
+    public volatile HashMap<HostSpec, Connection> connectionMap = new HashMap<>();
 
     {
         HostSpec hostSpec1 = HostSpec.of("local", 3306);
@@ -36,8 +35,8 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
 
     @Override
     protected ValidateResult validate(Connection connection, int clusterHostCount) throws SQLException {
-        MockConnection mockConnection = (MockConnection) connection;
-        HostSpec host = mockConnection.getHost();
+        MockDefaultHostConnection mockDefaultHostConnection = (MockDefaultHostConnection) connection;
+        HostSpec host = mockDefaultHostConnection.getHost();
 
         if (MysqlStatus.unknown.equals(mysqlServer.get(host)))
             throw new SQLException("");
@@ -57,9 +56,17 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
 
     @Override
     protected HostSpec getHostSpecFromConnection(Connection connection) {
-        MockConnection mockConnection = (MockConnection)connection;
-        return mockConnection.getHost();
+        MockDefaultHostConnection mockDefaultHostConnection = (MockDefaultHostConnection)connection;
+        return mockDefaultHostConnection.getHost();
     }
 
+    @Override
+    protected boolean doubleCheckOnlineStatus(String currentMemberId, HostSpec currentHostSpec) {
+        return super.doubleCheckOnlineStatus(currentMemberId, currentHostSpec);
+    }
 
+    @Override
+    protected Connection getConnection(HostSpec host) throws SQLException {
+        return connectionMap.get(host);
+    }
 }

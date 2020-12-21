@@ -195,7 +195,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     protected boolean doubleCheckOnlineStatus(String currentMemberId, HostSpec currentHostSpec) {
-        if (StringUtils.isEmpty(currentMemberId)) {
+        if (StringUtils.isEmpty(currentMemberId) || (!preBlackList.containsKey(currentHostSpec) && !hostBlackList.containsKey(currentHostSpec))) {
             return false;
         }
 
@@ -209,7 +209,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                         if (result)
                             onlineCount.incrementAndGet();
                     }catch (Exception e) {
-
+                        LOGGER.error("doubleCheckOnlineStatus", e);
                     } finally {
                         failedCount.incrementAndGet();
                     }
@@ -217,7 +217,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             }
         }
 
-        while (onlineCount.get() * 2 < configuredHosts.size() || failedCount.get() * 2 < configuredHosts.size()) {
+        while (onlineCount.get() * 2 < configuredHosts.size() && failedCount.get() * 2 < configuredHosts.size()) {
             try {
                 TimeUnit.MILLISECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -294,15 +294,15 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     protected boolean doubleCheckValidate(Connection connection, String validateMemberId) throws SQLException {
-        String currentMemberId = "";
-
         try(Statement statement = connection.createStatement()) {
             statement.setQueryTimeout(1);
             try(ResultSet resultSet = statement.executeQuery(validateSQL1)) {
                 while (resultSet.next()) {
-                    currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
+                    String memberId = resultSet.getString(Columns.MEMBER_ID.name());
                     String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
-                    if (validateMemberId.equalsIgnoreCase(currentMemberId)) {
+                    String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
+                    LOGGER.info(String.format(VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
+                    if (validateMemberId.equalsIgnoreCase(memberId)) {
                         return  MemberState.Online.name().equalsIgnoreCase(memberState);
                     }
                 }

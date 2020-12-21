@@ -186,6 +186,11 @@ public class MajorityHostValidatorTest {
         ((MockResultSet)resultSet3).resetIndex();
         host1Map.put("MEMBER_STATE", "online");
         assertEquals(true, validator.doubleCheckOnlineStatus("host2", hostSpec2));
+
+        ((MockResultSet)resultSet1).resetIndex();
+        ((MockResultSet)resultSet3).resetIndex();
+        host3Map.put("default_timeout", "5");
+        assertEquals(true, validator.doubleCheckOnlineStatus("host2", hostSpec2));
         validator.destroy();
     }
 }

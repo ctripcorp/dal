@@ -199,12 +199,12 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     protected boolean doubleCheckOnlineStatus(String currentMemberId, HostSpec currentHostSpec) {
         CountDownLatch latch = new CountDownLatch(1);
-        List<FutureTask<Boolean>> futureTaskList = new ArrayList<>();
+        List<Future> futures = new ArrayList<>();
         AtomicInteger onlineCount = new AtomicInteger(1);
         AtomicInteger finishedCount = new AtomicInteger(0);
         for (HostSpec hostSpec : configuredHosts) {
             if (!currentHostSpec.equals(hostSpec)) {
-                FutureTask futureTask = new FutureTask(() -> {
+                Future future = doubleCheckService.submit(() -> {
                     try (Connection connection = getConnection(hostSpec)){
                         boolean result = doubleCheckValidate(connection, currentMemberId);
                         if (result)
@@ -219,20 +219,22 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                     }
                     return true;
                 });
-                futureTask.run();
-                futureTaskList.add(futureTask);
-                doubleCheckService.submit(futureTask);
+                futures.add(future);
             }
         }
 
         try {
             latch.await(1, TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
 
-        for (FutureTask futureTask : futureTaskList) {
-            futureTask.cancel(true);
+        for (Future future : futures) {
+            try {
+                future.cancel(true);
+            } catch (Throwable t) {
+
+            }
         }
 
         return onlineCount.get() * 2 > configuredHosts.size();

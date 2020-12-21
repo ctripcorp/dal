@@ -7,12 +7,15 @@ import java.net.URL;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class MockResultSet implements ResultSet {
     public List<HashMap<String, Object>> result = new ArrayList<>();
 
     // not concurrency
     public int index = -1;
+
+    private String default_timeout = "default_timeout";
 
     @Override
     public boolean next() throws SQLException {
@@ -26,6 +29,14 @@ public class MockResultSet implements ResultSet {
 
     @Override
     public String getString(String columnLabel) throws SQLException {
+        if (result.get(index).get(default_timeout) != null) {
+            int timeout = Integer.valueOf(result.get(index).get(default_timeout).toString());
+            try {
+                TimeUnit.SECONDS.sleep(timeout);
+            } catch (Exception e) {
+
+            }
+        }
         return result.get(index).get(columnLabel).toString();
     }
 

@@ -217,7 +217,6 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                         if (onlineCount.get() * 2 > configuredHosts.size() || (finishedCount.get() - onlineCount.get()) * 2 > configuredHosts.size())
                             latch.countDown();
                     }
-                    return true;
                 });
                 futures.add(future);
             }

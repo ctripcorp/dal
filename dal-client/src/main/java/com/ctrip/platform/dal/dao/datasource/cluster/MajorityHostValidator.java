@@ -201,7 +201,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         CountDownLatch latch = new CountDownLatch(1);
         List<Future> futures = new ArrayList<>();
         AtomicInteger onlineCount = new AtomicInteger(1);
-        AtomicInteger finishedCount = new AtomicInteger(0);
+        AtomicInteger finishedCount = new AtomicInteger(1);
         for (HostSpec hostSpec : configuredHosts) {
             if (!currentHostSpec.equals(hostSpec)) {
                 Future future = doubleCheckService.submit(() -> {
@@ -276,7 +276,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     protected ValidateResult validate(Connection connection, int clusterHostCount) throws SQLException {
         boolean currentHostState = false;
-        String currentMemberId = "";
+        String outputMemberId = "";
         int onlineCount = 0;
 
         try(Statement statement = connection.createStatement()) {
@@ -284,10 +284,11 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             try(ResultSet resultSet = statement.executeQuery(validateSQL1)) {
                 while (resultSet.next()) {
                     String memberId = resultSet.getString(Columns.MEMBER_ID.name());
-                    currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
+                    String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
                     String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
                     LOGGER.info(String.format(VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
                     if (memberId.equals(currentMemberId)) {
+                        outputMemberId = currentMemberId;
                         currentHostState = MemberState.Online.name().equalsIgnoreCase(memberState);
                     }
                     if (MemberState.Online.name().equalsIgnoreCase(memberState)) {
@@ -301,7 +302,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             }
         }
 
-        return currentHostState && 2 * onlineCount > clusterHostCount ? new ValidateResult(true, currentMemberId) : new ValidateResult(false, currentMemberId);
+        return currentHostState && 2 * onlineCount > clusterHostCount ? new ValidateResult(true, outputMemberId) : new ValidateResult(false, outputMemberId);
     }
 
     protected boolean doubleCheckValidate(Connection connection, String validateMemberId) throws SQLException {

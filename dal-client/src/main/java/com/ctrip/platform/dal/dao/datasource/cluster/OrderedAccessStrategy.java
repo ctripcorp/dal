@@ -15,7 +15,7 @@ import java.util.*;
 public class OrderedAccessStrategy implements RouteStrategy{
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String CAT_LOG_TYPE = "DAL.pickConnection";
+    private static final String CAT_LOG_TYPE = "MGR.pickConnection";
     private static final String VALIDATE_FAILED = "Router::validateFailed";
     private static final String CURRENT_HOST = "Router::currentHost:";
     private static final String ROUTER_INITIALIZE = "Router::initialize";
@@ -76,6 +76,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
             }
         }
 
+        LOGGER.logEvent(CAT_LOG_TYPE, String.format(NO_HOST_AVAILABLE, ""), orderHosts.toString());
         throw new DalException(NO_HOST_AVAILABLE);
     }
 

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MajorityHostValidator implements ConnectionValidator, HostValidator {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String CAT_LOG_TYPE = "DAL.pickConnection";
+    private static final String CAT_LOG_TYPE = "MGR.pickConnection";
     private static final String FIND_WRONG_HOST_SPEC = "Validator::findWrongHostSpec";
     private static final String CONNECTION_URL = "Validator::getConnectionUrl";
     private static final String DEFAULT = "default";
@@ -130,13 +130,34 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     @Override
     public void destroy() {
-        if (!fixedPeriodValidateService.isShutdown()) {
-            fixedPeriodValidateService.shutdown();
+        try {
+            if (!fixedPeriodValidateService.isShutdown()) {
+                fixedPeriodValidateService.shutdown();
+            }
+        } catch (Throwable e) {
+
         }
 
-        if (!fixed1sValidateService.isShutdown()) {
-            fixed1sValidateService.shutdown();
+        try {
+            if (!fixed1sValidateService.isShutdown()) {
+                fixed1sValidateService.shutdown();
+            }
+        } catch (Throwable e) {
+
         }
+
+        try {
+            preBlackList.clear();
+        } catch (Throwable t) {
+            preBlackList = new ConcurrentHashMap<>();
+        }
+
+        try {
+            hostBlackList.clear();
+        } catch (Throwable e) {
+            hostBlackList = new ConcurrentHashMap<>();
+        }
+
     }
 
     @Override

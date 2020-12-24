@@ -27,6 +27,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String VALIDATE_ERROR = "Validator::validateError";
     private static final String VALIDATE_RESULT = "Validator::validateResult:";
     private static final String VALIDATE_RESULT_DETAIL ="Validator::validateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
+    private static final String DOUBLE_CHECK_VALIDATE_RESULT_DETAIL ="Validator::doubleCheckValidateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
 
     private volatile Set<HostSpec> configuredHosts;
     private volatile List<HostSpec> orderHosts;
@@ -334,7 +335,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                     String memberId = resultSet.getString(Columns.MEMBER_ID.name());
                     String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
                     String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
-                    LOGGER.info(String.format(VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
+                    LOGGER.info(String.format(DOUBLE_CHECK_VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
                     if (validateMemberId.equalsIgnoreCase(memberId)) {
                         return  MemberState.Online.name().equalsIgnoreCase(memberState);
                     }

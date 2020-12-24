@@ -46,9 +46,14 @@ public class LocalDatabaseSetAdapterTest {
     private DalConnectionString mockConnectionString(String dbName, boolean local, boolean tableShardingDisabled) {
         if (local)
             return new LocalConnectionString(
-                    dbName, "mock", "mock", tableShardingDisabled);
+                    dbName,
+                    "Server=ip;port=3306;UID=u;password=p;database=mock",
+                    "Server=domain;port=3306;UID=u;password=p;database=mock",
+                    tableShardingDisabled);
         else
-            return new ConnectionString(dbName, "mock", "mock");
+            return new ConnectionString(dbName,
+                    "Server=ip;port=3306;UID=u;password=p;database=mock",
+                    "Server=domain;port=3306;UID=u;password=p;database=mock");
     }
 
     private DatabaseSet mockDatabaseSet(String logicName, String... dbNames) throws Exception {

@@ -19,7 +19,7 @@ public class ModifyDataSourceConfigureProvider implements IDataSourceConfigurePr
         String userName = "root";
         String password = "!QAZ@WSX1qaz2wsx";
         String driverClass = "com.mysql.jdbc.Driver";
-        String connectionProperties = "connectTimeout=2000";
+        String connectionProperties = "connectTimeout=1050";
         return new MockDataSourceConfigure(connectionUrl, userName, password, driverClass, connectionProperties);
     }
 }

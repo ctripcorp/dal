@@ -66,10 +66,12 @@ public class DefaultConnectionPhantomReferenceCleaner implements ConnectionPhant
         @Override
         public void run() {
             try {
-                ((ConcurrentHashMap) connectionPhantomReference.get(connectionPhantomReferenceClass)).clear();
-                LOGGER.info(String.format("ConnectionPhantomReference cleaned."));
+                ConcurrentHashMap ref = (ConcurrentHashMap) connectionPhantomReference.get(connectionPhantomReferenceClass);
+                int size = ref.size();
+                ref.clear();
+                LOGGER.info("ConnectionPhantomReference cleaned, previous size: " + size);
             } catch (Exception ex) {
-                LOGGER.warn(String.format("Cleaning ConnectionPhantomReference Error"), ex.getMessage());
+                LOGGER.warn("Cleaning ConnectionPhantomReference error: " + ex.getMessage());
             }
         }
     }

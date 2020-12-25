@@ -26,6 +26,7 @@ public interface DataSourceConfigureConstants {
     String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
     String CONNECTIONPROPERTIES = "connectionProperties";
     String INIT_SQL = "initSql";
+    String STATEMENT_INTERCEPTORS_KEY = "statementInterceptors";
 
     // **********Dal extended properties key**********
     String SERVER_WAIT_TIMEOUT = "serverWaitTimeout";  // alias name for sessionWaitTimeout
@@ -92,6 +93,7 @@ public interface DataSourceConfigureConstants {
     // **********Dal extended properties default value**********
     int DEFAULT_SESSION_WAIT_TIMEOUT = 120;
 
+    String DEFAULT_STATEMENT_INTERCEPTORS_VALUE = "com.mysql.jdbc.DalDefaultStatementInterceptorV2";
     //used by mgr datasource
     int DEFAULT_CALL_MYSQL_API_PERIOD = 3 * 1000; //ms
     String DEFAULT_DB_MODEL = "standalone";

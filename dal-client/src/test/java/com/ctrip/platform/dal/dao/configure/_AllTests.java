@@ -15,7 +15,8 @@ import org.junit.runners.Suite.SuiteClasses;
         DataSourceConfigureLocatorTest.class,
         ClusterConfigParserTest.class,
         ClusterConfigValidatorTest.class,
-        ConnectionStringParserTest.class
+        ConnectionStringParserTest.class,
+        DefaultDataSourceConfigureLocatorTest.class
 })
 public class _AllTests {
 

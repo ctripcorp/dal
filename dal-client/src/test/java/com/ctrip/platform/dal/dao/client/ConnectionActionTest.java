@@ -180,8 +180,9 @@ public class ConnectionActionTest {
                 connHolder.error(e);
 
                 test.cleanup();
-                assertTrue(c.isDiscarded());
-                assertTrue(c.isReleased());
+                // Connection discarding moved into datasource level
+/*                assertTrue(c.isDiscarded());
+                assertTrue(c.isReleased());*/
                 assertNotNull(test);
                 assertTrue(test.conn == null);
                 assertTrue(test.statement == null);
@@ -207,8 +208,9 @@ public class ConnectionActionTest {
             connHolder.error(new NullPointerException("0800"));
 
             test.cleanup();
-            assertTrue(!c.isDiscarded());
-            assertTrue(!c.isReleased());
+            // Connection discarding moved into datasource level
+/*            assertTrue(!c.isDiscarded());
+            assertTrue(!c.isReleased());*/
             assertNotNull(test);
             assertTrue(test.conn == null);
             assertTrue(test.statement == null);

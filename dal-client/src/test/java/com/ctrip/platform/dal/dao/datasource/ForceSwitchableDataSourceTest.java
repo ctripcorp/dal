@@ -222,11 +222,12 @@ public class ForceSwitchableDataSourceTest {
         Properties properties = new Properties();
         properties.setProperty(USER_NAME, "root");
         properties.setProperty(PASSWORD, "!QAZ@WSX1qaz2wsx");
-        properties.setProperty(CONNECTION_URL, "jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        properties.setProperty(CONNECTION_URL, "jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8");
         properties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+        properties.setProperty(CONNECTIONPROPERTIES, "connectTimeout=1050");
         DataSourceConfigure dataSourceConfigure = new DataSourceConfigure("DalService2DB_w", properties);
         dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure), DOMAINHOST, 3306);
-        Thread.sleep(2000);
+        Thread.sleep(1200);
 
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
         SwitchableDataSourceStatus status1 = dataSource.getStatus();
@@ -236,10 +237,10 @@ public class ForceSwitchableDataSourceTest {
         assertEquals("3306", status1.getPort().toString());
         assertEquals("root", dataSource.getSingleDataSource().getDataSourceConfigure().getUserName());
         assertEquals("!QAZ@WSX1qaz2wsx", dataSource.getSingleDataSource().getDataSourceConfigure().getPassword());
-        assertEquals("jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", dataSource.getSingleDataSource().getName());
+        assertEquals("jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8", dataSource.getSingleDataSource().getName());
 
         dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure), INVALIDHOST, 3306);
-        Thread.sleep(20000);
+        Thread.sleep(1200);
 
         assertEquals("onForceSwitchFail", listener.getOnCallMethodName());
         SwitchableDataSourceStatus status2 = dataSource.getStatus();
@@ -252,22 +253,23 @@ public class ForceSwitchableDataSourceTest {
         Properties properties1 = new Properties();
         properties1.setProperty(USER_NAME, "root");
         properties1.setProperty(PASSWORD, "!QAZ@WSX1qaz2wsx");
-        properties1.setProperty(CONNECTION_URL, "jdbc:mysql://dst56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;");
+        properties1.setProperty(CONNECTION_URL, "jdbc:mysql://dst56614:3306/llj_test?useUnicode=true&characterEncoding=UTF-8");
         properties1.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
+        properties1.setProperty(CONNECTIONPROPERTIES, "connectTimeout=1050");
         DataSourceConfigure dataSourceConfigure1 = new DataSourceConfigure("DalService2DB_w", properties1);
         dataSource.forceSwitch(SerializableDataSourceConfig.valueOf(dataSourceConfigure1), IPHOST, 3306);
-        Thread.sleep(10000);
+        Thread.sleep(1200);
 
         assertEquals("onForceSwitchSuccess", listener.getOnCallMethodName());
         SwitchableDataSourceStatus status3 = dataSource.getStatus();
         assertEquals(IPHOST, status3.getHostName().toLowerCase());
         assertTrue(status3.isForceSwitched());
         assertTrue(status3.isPoolCreated());
-        assertEquals("jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8;", dataSource.getSingleDataSource().getName());
+        assertEquals("jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8", dataSource.getSingleDataSource().getName());
         assertEquals("3306", status3.getPort().toString());
 
         dataSource.restore();
-        Thread.sleep(4000);
+        Thread.sleep(1200);
 
         SwitchableDataSourceStatus status4 = dataSource.getStatus();
         assertTrue(status4.isForceSwitched());
@@ -323,7 +325,8 @@ public class ForceSwitchableDataSourceTest {
         Assert.assertEquals("jdbc:mysql://127.0.0.1:12345/kevin?useUnicode=true&characterEncoding=UTF-8", url);
     }
 
-    @Test
+    // Discarded: replaced with DAL Cluster MGR
+//    @Test
     public void testSwitchMGRToNormal() throws Exception {
         IDataSourceConfigureProvider nullProvider = new ModifyDataSourceConfigureProvider();
         ForceSwitchableDataSource nullDataSource = new ForceSwitchableDataSource(nullProvider);
@@ -370,7 +373,8 @@ public class ForceSwitchableDataSourceTest {
         Assert.assertEquals("jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin", url);
     }
 
-    @Test
+    // Discarded: replaced with DAL Cluster MGR
+//    @Test
     public void testMGRForceSwitch() throws Exception {
         DataSourceConfigure config = new DataSourceConfigure("mgr");
         config.setConnectionUrl("jdbc:mysql:replication://" +

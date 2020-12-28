@@ -26,6 +26,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
     private static final String VALIDATE_ERROR = "Validator::validateError";
     private static final String VALIDATE_RESULT = "Validator::validateResult:";
+    private static final String ASYNC_VALIDATE_RESULT = "Validator::asyncValidateResult:";
     private static final String VALIDATE_RESULT_DETAIL ="Validator::validateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
     private static final String DOUBLE_CHECK_VALIDATE_RESULT_DETAIL ="Validator::doubleCheckValidateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
 
@@ -35,6 +36,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     private volatile long blackListTimeOut;
     private volatile long fixedValidatePeriod = 30000;
     private volatile ConnectionFactory factory;
+    private volatile RouteStrategyStatus status; // birth --> init --> destroy
     private volatile HashMap<HostSpec, Long> lastValidateMap = new HashMap<>();
     private volatile ScheduledExecutorService fixedPeriodValidateService = Executors.newSingleThreadScheduledExecutor();
     private volatile ScheduledExecutorService fixed1sValidateService = Executors.newSingleThreadScheduledExecutor();
@@ -57,9 +59,20 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         MEMBER_STATE, MEMBER_ID, CURRENT_MEMBER_ID
     }
 
+    private enum RouteStrategyStatus {
+        birth, init, destroy
+    }
+
     protected static class ValidateResult{
         public boolean validateResult = true;
         public String currentMemberId = "";
+        public String message;
+
+        public ValidateResult(boolean validateResult, String currentMemberId, String message) {
+            this.validateResult = validateResult;
+            this.currentMemberId = currentMemberId;
+            this.message = message;
+        }
 
         public ValidateResult(boolean validateResult, String currentMemberId) {
             this.validateResult = validateResult;
@@ -71,12 +84,17 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
         @Override
         public String toString() {
-            return validateResult + "";
+            return "ValidateResult{" +
+                    "validateResult=" + validateResult +
+                    ", currentMemberId='" + currentMemberId + '\'' +
+                    ", message='" + message + '\'' +
+                    '}';
         }
     }
 
     public MajorityHostValidator() {
         fixedScheduleStart();
+        status = RouteStrategyStatus.birth;
     }
 
     public MajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
@@ -92,6 +110,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     private void init() {
         initLastValidateMap();
+        status = RouteStrategyStatus.init;
     }
 
     private void initLastValidateMap() {
@@ -104,7 +123,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         try {
             fixedPeriodValidateService.scheduleAtFixedRate(() -> asyncValidate(orderHosts), 1000, fixedValidatePeriod, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("start schedule1 error", e);
+            LOGGER.warn("start schedule1 error", e);
         }
 
         try {
@@ -114,7 +133,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                 asyncValidate(new ArrayList<>(keySet));
             }, 1000, 1000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("start schedule2 error", e);
+            LOGGER.warn("start schedule2 error", e);
         }
     }
 
@@ -131,18 +150,15 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
     @Override
     public void destroy() {
+        status = RouteStrategyStatus.destroy;
         try {
-            if (!fixedPeriodValidateService.isShutdown()) {
-                fixedPeriodValidateService.shutdown();
-            }
+            fixedPeriodValidateService.shutdown();
         } catch (Throwable e) {
-
+//
         }
 
         try {
-            if (!fixed1sValidateService.isShutdown()) {
-                fixed1sValidateService.shutdown();
-            }
+            fixed1sValidateService.shutdown();
         } catch (Throwable e) {
 
         }
@@ -165,11 +181,13 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     public boolean validate(HostConnection connection) throws SQLException {
         try {
             HostSpec currentHost = connection.getHost();
-            boolean validateResult = validateAndUpdate(connection, currentHost, configuredHosts.size());
-            if (!validateResult) {
+            ValidateResult validateResult = validateAndUpdate(connection, currentHost, configuredHosts.size());
+            LOGGER.info(VALIDATE_RESULT +  currentHost.toString() + ":" + validateResult.validateResult);
+            LOGGER.logEvent(CAT_LOG_TYPE, currentHost.toString() + ":" + validateResult.validateResult, validateResult.toString());
+            if (!validateResult.validateResult) {
                 asyncValidate(orderHosts);
             }
-            return validateResult;
+            return validateResult.validateResult;
         } catch (SQLException e) {
             asyncValidate(orderHosts);
             throw e;
@@ -181,7 +199,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         try {
             urlForLog = connection.getMetaData().getURL();
         } catch (SQLException e) {
-            LOGGER.error(CONNECTION_URL, e);
+            LOGGER.warn(CONNECTION_URL, e);
             return null;
         }
 
@@ -195,22 +213,19 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         return new HostSpec(hostAndPort.getHost(), hostAndPort.getPort(), DEFAULT);
     }
 
-    protected boolean validateAndUpdate(Connection connection, HostSpec currentHost, int clusterHostCount) throws SQLException {
+    protected ValidateResult validateAndUpdate(Connection connection, HostSpec currentHost, int clusterHostCount) throws SQLException {
         try {
             ValidateResult validateResult = validate(connection, clusterHostCount);
-            LOGGER.info(VALIDATE_RESULT +  currentHost.toString() + ":" + validateResult);
-            LOGGER.logEvent(CAT_LOG_TYPE, currentHost.toString() + ":" + validateResult, null);
             if (validateResult.validateResult) {
                 // memberId is not empty and this host is in list and another host think it is online
                 if (!StringUtils.isEmpty(validateResult.currentMemberId) &&
                         (preBlackList.containsKey(currentHost) || hostBlackList.containsKey(currentHost)) &&
                         doubleCheckOnlineStatus(validateResult.currentMemberId, currentHost))
                     removeFromAllBlackList(currentHost);
-                return true;
             } else {
                 addToBlackAndRemoveFromPre(currentHost);
-                return false;
             }
+            return validateResult;
         } catch (SQLException e) {
             LOGGER.warn(VALIDATE_ERROR, e);
             LOGGER.logEvent(CAT_LOG_TYPE, currentHost + ":error", e.getMessage());
@@ -232,7 +247,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                         if (result)
                             onlineCount.incrementAndGet();
                     }catch (Exception e) {
-                        LOGGER.error("doubleCheckOnlineStatus", e);
+                        LOGGER.warn("doubleCheckOnlineStatus", e);
                     } finally {
                         finishedCount.incrementAndGet();
                         // online count is more than half or failed count is more than half
@@ -266,9 +281,10 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             if (configuredHosts.contains(host) && shouldValidate(host)) {
                 asyncService.submit(() -> {
                     try (Connection connection = getConnection(host)){
-                        validateAndUpdate(connection, host, configuredHosts.size());
+                        ValidateResult validateResult = validateAndUpdate(connection, host, configuredHosts.size());
+                        LOGGER.info(ASYNC_VALIDATE_RESULT + validateResult);
                     }catch (Throwable e) {
-                        LOGGER.error(CAT_LOG_TYPE, e);
+                        LOGGER.warn(CAT_LOG_TYPE, e);
                     }
                 });
             }
@@ -300,6 +316,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         boolean currentHostState = false;
         String outputMemberId = "";
         int onlineCount = 0;
+        StringBuilder message = new StringBuilder();
 
         try(Statement statement = connection.createStatement()) {
             statement.setQueryTimeout(1);
@@ -308,7 +325,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
                     String memberId = resultSet.getString(Columns.MEMBER_ID.name());
                     String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
                     String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
-                    LOGGER.info(String.format(VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
+                    message.append(String.format(VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
                     if (memberId.equals(currentMemberId)) {
                         outputMemberId = currentMemberId;
                         currentHostState = MemberState.Online.name().equalsIgnoreCase(memberState);
@@ -324,34 +341,44 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             }
         }
 
-        return currentHostState && 2 * onlineCount > clusterHostCount ? new ValidateResult(true, outputMemberId) : new ValidateResult(false, outputMemberId);
+        return currentHostState && 2 * onlineCount > clusterHostCount ? new ValidateResult(true, outputMemberId, message.toString()) : new ValidateResult(false, outputMemberId, message.toString());
     }
 
     protected boolean doubleCheckValidate(Connection connection, String validateMemberId) throws SQLException {
         try(Statement statement = connection.createStatement()) {
             statement.setQueryTimeout(1);
             try(ResultSet resultSet = statement.executeQuery(validateSQL1)) {
+                boolean flag = false;
+                StringBuilder message = new StringBuilder("validateMemberId:" + validateMemberId);
                 while (resultSet.next()) {
                     String memberId = resultSet.getString(Columns.MEMBER_ID.name());
                     String memberState = resultSet.getString(Columns.MEMBER_STATE.name());
                     String currentMemberId = resultSet.getString(Columns.CURRENT_MEMBER_ID.name());
-                    LOGGER.info(String.format(DOUBLE_CHECK_VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
+                    message.append(String.format(DOUBLE_CHECK_VALIDATE_RESULT_DETAIL, memberId, memberState, currentMemberId));
                     if (validateMemberId.equalsIgnoreCase(memberId)) {
-                        return  MemberState.Online.name().equalsIgnoreCase(memberState);
+                        flag = MemberState.Online.name().equalsIgnoreCase(memberState);
                     }
                 }
+                LOGGER.info("doubleCheckValidate:" + message.toString());
+                return flag;
             } catch (MySQLSyntaxErrorException e) {
                 LOGGER.warn(VALIDATE_COMMAND_DENIED, e);
                 LOGGER.logEvent(CAT_LOG_TYPE, VALIDATE_COMMAND_DENIED, e.getMessage());
                 return false;
             }
+        }catch (Exception e) {
+            LOGGER.warn("error occured while doubleCheckValidate:", e);
         }
 
         return false;
     }
 
+    private boolean isDestroy() {
+        return RouteStrategyStatus.destroy.equals(status);
+    }
+
     private void addToPreAbsent(HostSpec hostSpec) {
-        if (hostSpec == null) {
+        if (hostSpec == null || isDestroy()) {
             return;
         }
 
@@ -362,7 +389,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     private void addToBlackList(HostSpec hostSpec) {
-        if (hostSpec == null) {
+        if (hostSpec == null || isDestroy()) {
             return;
         }
 
@@ -373,7 +400,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     private void addToBlackListPresent(HostSpec hostSpec) {
-        if (hostSpec == null) {
+        if (hostSpec == null || isDestroy()) {
             return;
         }
 
@@ -386,7 +413,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     private void removeFromPreBlackList(HostSpec hostSpec) {
-        if (hostSpec == null) {
+        if (hostSpec == null || isDestroy()) {
             return;
         }
 
@@ -398,7 +425,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
     }
 
     private void removeFromBlackList(HostSpec hostSpec) {
-        if (hostSpec == null) {
+        if (hostSpec == null || isDestroy()) {
             return;
         }
 

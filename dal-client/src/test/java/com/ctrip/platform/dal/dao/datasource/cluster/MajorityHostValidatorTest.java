@@ -17,9 +17,9 @@ import static org.junit.Assert.*;
 
 public class MajorityHostValidatorTest {
 
-    private long failOverTime = 5000;
-    private long blackListTimeOut = 5000;
-    private long fixedValidatePeriod = 15000;
+    private long failOverTime = 1000;
+    private long blackListTimeOut = 1000;
+    private long fixedValidatePeriod = 3000;
     private ExecutorService service = Executors.newFixedThreadPool(16);
     private HostSpec hostSpec1 = HostSpec.of("local", 3306);
     private HostSpec hostSpec2 = HostSpec.of("local", 3307);
@@ -95,8 +95,8 @@ public class MajorityHostValidatorTest {
         assertEquals(true, validator.validate(mockDefaultHostConnection3));
 
         assertEquals(false, validator.available(hostSpec1));
-        TimeUnit.MILLISECONDS.sleep(failOverTime);
-        assertEquals(false, validator.available(hostSpec1));
+        TimeUnit.MILLISECONDS.sleep(failOverTime + 10);
+        assertEquals(true, validator.available(hostSpec1));
 
 
     }
@@ -114,7 +114,7 @@ public class MajorityHostValidatorTest {
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         validator.triggerValidate();
         TimeUnit.MILLISECONDS.sleep(10);
-        assertEquals(false, validator.available(hostSpec1));
+        assertEquals(true, validator.available(hostSpec1));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class MajorityHostValidatorTest {
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         validator.triggerValidate();
         TimeUnit.MILLISECONDS.sleep(failOverTime);
-        assertEquals(false, validator.available(hostSpec1));
+        assertEquals(true, validator.available(hostSpec1));
     }
 
     @Test

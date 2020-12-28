@@ -35,7 +35,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
     private List<HostSpec> orderHosts;
     private volatile HostSpec currentHost;
     private String cluster = "";
-    private String status; // birth --> init --> destroy
+    private volatile String status; // birth --> init --> destroy
 
     private enum RouteStrategyStatus {
         birth, init, destroy

@@ -19,9 +19,12 @@ import java.util.regex.Pattern;
 public class DefaultTableParser implements TableParser {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
     private static final String TABLEPARSE_ERROR = "TABLEPARSE::ERROR";
+    private static final String TABLE_PARSER_CACHE_ADD = "tableParser::CacheAdd";
     private static final String CACHE_DEFAULT_SIZE = "1000";
     private static final float LOAD_FACTOR = 0.8f;
     private static final int KEY_OF_CACHE_MAX_BYTES = 2000;
+    private static final String INSERT_SYMBOL = "value";
+    private static final String CONDITION_SYMBOL = "where";
     private static final Set<String> callStringElements = new HashSet<String>() {
         {
             add("{call");
@@ -122,6 +125,7 @@ public class DefaultTableParser implements TableParser {
         if (tables == null) {
             tables = finder.getTableList(CCJSqlParserUtil.parse(keySql));
             synchronized (sqlToTables) {
+                logger.logTransaction(DalLogTypes.DAL, TABLE_PARSER_CACHE_ADD, "size: " + sqlToTables.size(), System.currentTimeMillis());
                 sqlToTables.put(sql, tables);
             }
         }
@@ -131,12 +135,16 @@ public class DefaultTableParser implements TableParser {
 
     protected String ignoreWhereAndValues(String sql) {
         try {
-            int valueIndex = sql.lastIndexOf("value");
-            int whereIndex = sql.lastIndexOf("where");
-            int index = valueIndex > whereIndex ? valueIndex : whereIndex;
+            int statementStartPos = SqlUtils.findStartOfStatement(sql);
+            int valueIndex = sql.lastIndexOf(INSERT_SYMBOL);
+            if (valueIndex > -1) {
+                return sql.substring(statementStartPos , valueIndex);
+            }
 
-            if (index > 0) {
-                return sql.substring(0, index);
+            int whereIndex = sql.lastIndexOf(CONDITION_SYMBOL);
+
+            if (whereIndex > 0) {
+                return sql.substring(statementStartPos , whereIndex);
             }
         } catch (Exception e) {
 

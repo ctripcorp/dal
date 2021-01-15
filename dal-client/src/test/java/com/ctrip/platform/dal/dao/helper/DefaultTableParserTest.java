@@ -33,14 +33,14 @@ public class DefaultTableParserTest {
 
     @Test
     public void ignoreWhereAndValues() {
-        String sql = "insert into table values (id1, name1),(id1, name1),(id1, name1);";
+        String sql = "/* this is some thing explain message */insert into table values (id1, name1),(id1, name1),(id1, name1);";
         DefaultTableParser parser = new DefaultTableParser();
         Assert.assertEquals("insert into table ", parser.ignoreWhereAndValues(sql));
 
-        sql = "select * from table where id = 1 and name = name";
+        sql = "/* this is some thing explain message */select * from table where id = 1 and name = name";
         Assert.assertEquals("select * from table ", parser.ignoreWhereAndValues(sql));
 
-        sql = "update table set name = name";
+        sql = "/* this is some thing explain message */update table set name = name";
         Assert.assertEquals(sql, parser.ignoreWhereAndValues(sql));
     }
 

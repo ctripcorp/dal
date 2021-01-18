@@ -8,6 +8,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.commons.lang.StringUtils;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
@@ -42,6 +43,7 @@ public class DefaultTableParser implements TableParser {
     private Lock finderLock = new ReentrantLock();
     private static final Pattern pattern = Pattern.compile("(with)*\\s*\\(nolock\\)");
     private static int cacheInitSize = Integer.valueOf(DalPropertiesManager.getInstance().getDalPropertiesLocator().getTableParserCacheInitSize(CACHE_DEFAULT_SIZE));
+    private static Set<String> getTableListErrorSQLs = new HashSet<>();
 
     protected static LinkedHashMap<String, List<String>> sqlToTables = new LinkedHashMap(cacheInitSize, LOAD_FACTOR, true) {
         @Override
@@ -115,36 +117,59 @@ public class DefaultTableParser implements TableParser {
     }
 
     protected List<String> getTablesFromCache(String sql) throws JSQLParserException {
-        List<String> tables = null;
-        String keySql = ignoreWhereAndValues(sql);
-        if (KEY_OF_CACHE_MAX_BYTES < keySql.getBytes().length) {
-            return finder.getTableList(CCJSqlParserUtil.parse(keySql));
+        String setKeySql = ignoreMsgId(sql);
+        if (getTableListErrorSQLs.contains(setKeySql)) {
+            return finder.getTableList(CCJSqlParserUtil.parse(setKeySql));
         }
 
-        tables = sqlToTables.get(keySql);
+        List<String> tables = null;
+        String cacheKeySql = ignoreWhereAndValues(setKeySql);
+        if (KEY_OF_CACHE_MAX_BYTES < cacheKeySql.getBytes().length) {
+            addSQLToErrorSet(setKeySql);
+            return finder.getTableList(CCJSqlParserUtil.parse(setKeySql));
+        }
+
+        synchronized (sqlToTables) {
+            tables = sqlToTables.get(cacheKeySql);
+        }
         if (tables == null) {
-            tables = finder.getTableList(CCJSqlParserUtil.parse(keySql));
+            try {
+                tables = finder.getTableList(CCJSqlParserUtil.parse(cacheKeySql));
+            } catch (Throwable t) {
+                addSQLToErrorSet(setKeySql);
+                return finder.getTableList(CCJSqlParserUtil.parse(setKeySql));
+            }
             synchronized (sqlToTables) {
                 logger.logTransaction(DalLogTypes.DAL, TABLE_PARSER_CACHE_ADD, "size: " + sqlToTables.size(), System.currentTimeMillis());
-                sqlToTables.put(sql, tables);
+                sqlToTables.put(cacheKeySql, tables);
             }
         }
 
         return tables == null ? new ArrayList<>() : tables;
     }
 
+    protected void addSQLToErrorSet(String setKeySql) {
+        synchronized (getTableListErrorSQLs) {
+            getTableListErrorSQLs.add(setKeySql);
+        }
+    }
+
+    protected String ignoreMsgId(String sql) {
+        int statementStartPos = SqlUtils.findStartOfStatement(sql);
+        return sql.substring(statementStartPos);
+    }
+
     protected String ignoreWhereAndValues(String sql) {
         try {
-            int statementStartPos = SqlUtils.findStartOfStatement(sql);
             int valueIndex = sql.lastIndexOf(INSERT_SYMBOL);
             if (valueIndex > -1) {
-                return sql.substring(statementStartPos , valueIndex);
+                return sql.substring(0 , valueIndex);
             }
 
             int whereIndex = sql.lastIndexOf(CONDITION_SYMBOL);
 
             if (whereIndex > 0) {
-                return sql.substring(statementStartPos , whereIndex);
+                return sql.substring(0 , whereIndex);
             }
         } catch (Exception e) {
 

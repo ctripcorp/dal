@@ -24,24 +24,41 @@ public class DefaultTableParserTest {
                 " ORDER BY o.OrderID,f.Sequence limit 2000                                                                                                                                                                               ";
         parser.getTablesFromCache(sql);
         Assert.assertEquals(0, DefaultTableParser.sqlToTables.size());
-        sql = "select * from table1 left join table2 on table1.name = table2.name";
+        sql = "select * from table1 left join table2 on table1.name = table2.name where table1.id = 1";
         parser.getTablesFromCache(sql);
         Assert.assertEquals(1, DefaultTableParser.sqlToTables.size());
         parser.getTablesFromCache(sql);
         Assert.assertEquals(1, DefaultTableParser.sqlToTables.size());
+        Assert.assertEquals(true, DefaultTableParser.sqlToTables.containsKey("select * from table1 left join table2 on table1.name = table2.name "));
     }
 
     @Test
     public void ignoreWhereAndValues() {
         String sql = "/* this is some thing explain message */insert into table values (id1, name1),(id1, name1),(id1, name1);";
         DefaultTableParser parser = new DefaultTableParser();
-        Assert.assertEquals("insert into table ", parser.ignoreWhereAndValues(sql));
+        Assert.assertEquals("/* this is some thing explain message */insert into table ", parser.ignoreWhereAndValues(sql));
 
         sql = "/* this is some thing explain message */select * from table where id = 1 and name = name";
-        Assert.assertEquals("select * from table ", parser.ignoreWhereAndValues(sql));
+        Assert.assertEquals("/* this is some thing explain message */select * from table ", parser.ignoreWhereAndValues(sql));
 
         sql = "/* this is some thing explain message */update table set name = name";
         Assert.assertEquals(sql, parser.ignoreWhereAndValues(sql));
+    }
+
+    @Test
+    public void ignoreMsgId() {
+        String sql = "/* this is some thing explain message */insert into table values (id1, name1),(id1, name1),(id1, name1);";
+        DefaultTableParser parser = new DefaultTableParser();
+        Assert.assertEquals("insert into table values (id1, name1),(id1, name1),(id1, name1);", parser.ignoreMsgId(sql));
+
+        sql = "/* this is some thing explain message */select * from table where id = 1 and name = name";
+        Assert.assertEquals("select * from table where id = 1 and name = name", parser.ignoreMsgId(sql));
+
+        sql = "/* this is some thing explain message */update table set name = name";
+        Assert.assertEquals("update table set name = name", parser.ignoreMsgId(sql));
+
+        sql = "/* this is some thing explain message */";
+        Assert.assertEquals("", parser.ignoreMsgId(sql));
     }
 
     @Test

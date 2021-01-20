@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MajorityHostValidator implements ConnectionValidator, HostValidator {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String CAT_LOG_TYPE = "MGR.pickConnection";
+    private static final String CAT_LOG_TYPE = "DAL.mgr";
     private static final String FIND_WRONG_HOST_SPEC = "Validator::findWrongHostSpec";
     private static final String CONNECTION_URL = "Validator::getConnectionUrl";
     private static final String DEFAULT = "default";
@@ -228,7 +228,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             return validateResult;
         } catch (SQLException e) {
             LOGGER.warn(VALIDATE_ERROR, e);
-            LOGGER.logEvent(CAT_LOG_TYPE, currentHost + ":error", e.getMessage());
+            LOGGER.logEvent(CAT_LOG_TYPE, currentHost + ":unknown", e.getMessage());
             addToPreAbsentAndBlackPresent(currentHost);
             throw e;
         }
@@ -382,10 +382,10 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             return;
         }
 
-        LOGGER.warn(ADD_PRE_BLACK_LIST + ":" + hostSpec.toString());
-        LOGGER.logEvent(CAT_LOG_TYPE, ADD_PRE_BLACK_LIST, hostSpec.toString());
         Long currentTime = System.currentTimeMillis();
         preBlackList.putIfAbsent(hostSpec, currentTime);
+        LOGGER.warn(ADD_PRE_BLACK_LIST + ":" + hostSpec.toString());
+        LOGGER.logEvent(CAT_LOG_TYPE, ADD_PRE_BLACK_LIST + ":" + hostSpec.toString(), preBlackList.toString());
     }
 
     private void addToBlackList(HostSpec hostSpec) {
@@ -393,10 +393,10 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
             return;
         }
 
-        LOGGER.warn(ADD_BLACK_LIST + ":" + hostSpec.toString());
-        LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST, hostSpec.toString());
         Long currentTime = System.currentTimeMillis();
         hostBlackList.put(hostSpec, currentTime);
+        LOGGER.warn(ADD_BLACK_LIST + ":" + hostSpec.toString());
+        LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST + ":" + hostSpec.toString(), hostBlackList.toString());
     }
 
     private void addToBlackListPresent(HostSpec hostSpec) {
@@ -406,9 +406,9 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
 
         Long currentTime = System.currentTimeMillis();
         if (hostBlackList.containsKey(hostSpec)) {
-            LOGGER.warn(ADD_BLACK_LIST + ":" + hostSpec.toString());
-            LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST, hostSpec.toString());
             hostBlackList.put(hostSpec, currentTime);
+            LOGGER.warn(ADD_BLACK_LIST + ":" + hostSpec.toString());
+            LOGGER.logEvent(CAT_LOG_TYPE, ADD_BLACK_LIST + ":" + hostSpec, hostBlackList.toString());
         }
     }
 
@@ -420,7 +420,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         Long last = preBlackList.remove(hostSpec);
         if (last != null) {
             LOGGER.info(REMOVE_PRE_BLACK_LIST + ":" + hostSpec.toString());
-            LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_PRE_BLACK_LIST, hostSpec.toString());
+            LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_PRE_BLACK_LIST + ":" + hostSpec.toString(), preBlackList.toString());
         }
     }
 
@@ -432,7 +432,7 @@ public class MajorityHostValidator implements ConnectionValidator, HostValidator
         Long last = hostBlackList.remove(hostSpec);
         if (last != null) {
             LOGGER.info(REMOVE_BLACK_LIST + ":" + hostSpec.toString());
-            LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_BLACK_LIST, hostSpec.toString());
+            LOGGER.logEvent(CAT_LOG_TYPE, REMOVE_BLACK_LIST + ":" + hostSpec.toString(), hostBlackList.toString());
         }
     }
 

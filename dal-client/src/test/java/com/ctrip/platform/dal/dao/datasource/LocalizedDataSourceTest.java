@@ -399,7 +399,7 @@ public class LocalizedDataSourceTest {
         Properties p = new Properties();
         p.setProperty("userName", "root");
         p.setProperty("password", "!QAZ@WSX1qaz2wsx");
-        p.setProperty("connectionUrl", "jdbc:mysql://10.32.20.128:3306/llj_test?useUnicode=true&characterEncoding=UTF-8");
+        p.setProperty("connectionUrl", "jdbc:mysql://10.32.20.125:3306/llj_test?useUnicode=true&characterEncoding=UTF-8");
         p.setProperty("driverClassName", "com.mysql.jdbc.Driver");
         return new DataSourceConfigure("llj_test", p);
     }

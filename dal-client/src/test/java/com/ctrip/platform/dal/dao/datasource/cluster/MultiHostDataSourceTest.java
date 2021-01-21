@@ -27,7 +27,7 @@ public class MultiHostDataSourceTest {
     public void testNormal() throws Exception {
         MultiHostDataSource dataSource = new MockMultiHostDataSource(mockDataSourceConfigs(),
                 mockClusterProperties(), "zone1");
-        HostSpec expectedHost = HostSpec.of("10.32.20.128", 3306);
+        HostSpec expectedHost = HostSpec.of("10.32.20.125", 3306);
         testNormal(dataSource, expectedHost);
     }
 
@@ -57,7 +57,7 @@ public class MultiHostDataSourceTest {
 
     private Map<HostSpec, DataSourceConfigure> mockDataSourceConfigs() {
         Map<HostSpec, DataSourceConfigure> dataSourceConfigs = new HashMap<>();
-        HostSpec host1 = HostSpec.of("10.32.20.128", 3306, "zone1");
+        HostSpec host1 = HostSpec.of("10.32.20.125", 3306, "zone1");
         dataSourceConfigs.put(host1, mockDataSourceConfig(host1));
         HostSpec host2 = HostSpec.of("dst56614", 3306, "zone2");
         dataSourceConfigs.put(host2, mockDataSourceConfig(host2));

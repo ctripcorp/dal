@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.datasource.cluster.MajorityHostValidatorTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.OrderedAccessStrategyTest;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnectionTest;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContextTest;
 import com.ctrip.platform.dal.dao.datasource.log.KeyedDbSqlContextTest;
@@ -18,7 +20,9 @@ import org.junit.runners.Suite.SuiteClasses;
 		ClusterDbSqlContextTest.class,
 		KeyedDbSqlContextTest.class,
 		DefaultDataSourceMonitorTest.class,
-		ApiDataSourceIdentityTest.class
+		ApiDataSourceIdentityTest.class,
+		OrderedAccessStrategyTest.class,
+		MajorityHostValidatorTest.class
 })
 public class _AllTests {
 

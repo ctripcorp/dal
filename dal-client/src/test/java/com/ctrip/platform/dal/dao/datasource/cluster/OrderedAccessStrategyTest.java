@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.sql.DataSource;
@@ -16,75 +17,72 @@ import java.util.concurrent.TimeUnit;
 
 public class OrderedAccessStrategyTest {
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
-    private SQLThread selectSQLThread;
-    private SQLThread updateSQLThread;
+    private long failOverTime = 1000;
+    private long blackListTimeOut = 1000;
+    private long fixedValidatePeriod = 3000;
+    private HostSpec hostSpec1 = HostSpec.of("local", 3306);
+    private HostSpec hostSpec2 = HostSpec.of("local", 3307);
+    private HostSpec hostSpec3 = HostSpec.of("local", 3308);
+    Set<HostSpec> configuredHost = new HashSet<>();
+    List<HostSpec> orderedHosts = new ArrayList<>();
+
+    {
+        configuredHost.add(hostSpec1);
+        configuredHost.add(hostSpec2);
+        configuredHost.add(hostSpec3);
+        orderedHosts.add(hostSpec1);
+        orderedHosts.add(hostSpec2);
+        orderedHosts.add(hostSpec3);
+
+    }
 
     @Test
-    public void testNormal() throws Exception {
-        MultiHostDataSource dataSource = new MockMultiHostDataSource(mockDataSourceConfigs(),
-                mockClusterProperties(), "zone1");
+    public void pickConnectionTest() {
 
-//
-//        selectSQLThread = new SQLThread(40, dataSource) {
-//            @Override
-//            void execute(Statement statement) throws SQLException {
-//                statement.executeQuery("select * from student limit 1;");
-//            }
-//        };
-//
-//        updateSQLThread = new SQLThread(40, dataSource) {
-//            @Override
-//            void execute(Statement statement) throws SQLException {
-//                statement.executeQuery("update student set name = 'test' where id = 1");
-//            }
-//        };
-//
-//        executor.submit(selectSQLThread);
-//        executor.submit(updateSQLThread);
+    }
 
+    @Test
+    public void initializeTest() {
+        OrderedAccessStrategy strategy = new OrderedAccessStrategy();
+        try {
+            strategy.getConnectionValidator();
+        } catch (Exception e) {
+            Assert.assertEquals("OrderedAccessStrategy is not ready, status: birth", e.getMessage());
+        }
 
-        while (true) {
-//            executor.submit(() -> {
-//                try (Connection connection = dataSource.getConnection()) {
-//                    System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
-//                } catch (SQLException e) {
-//                    System.out.println("error time is :" + new Date().toString());
-//                    e.printStackTrace();
-//                }
-//            });
-
-            executor.submit(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
-                    try (Statement statement = connection.createStatement()){
-                        statement.execute("select * from student limit 1;");
-                        TimeUnit.MILLISECONDS.sleep(10);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                } catch (Exception e) {
-                    System.out.println("error time is :" + new Date().toString());
-                    e.printStackTrace();
-                }
-
-                try (Connection connection = dataSource.getConnection()) {
-                    System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
-                    try (Statement statement = connection.createStatement()){
-                        statement.execute("update student set name = 'test' where id = 1");
-                        TimeUnit.MILLISECONDS.sleep(10);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                } catch (Exception e) {
-                    System.out.println("error time is :" + new Date().toString());
-                    e.printStackTrace();
-                }
-            });
-
-            TimeUnit.MILLISECONDS.sleep(10);
+        try {
+            strategy.destroy();
+        } catch (Exception e) {
+            Assert.assertEquals("OrderedAccessStrategy is not ready, status: birth", e.getMessage());
         }
     }
+
+    private ShardMeta initShardMeta() {
+        Set<HostSpec> hostSpecList = new HashSet<>();
+        hostSpecList.add(HostSpec.of("local", 3306));
+        hostSpecList.add(HostSpec.of("local", 3307));
+        hostSpecList.add(HostSpec.of("local", 3308));
+
+        ShardMeta shardMeta = new ShardMeta(){
+            @Override
+            public String clusterName() {
+                return "LocalTest_dalCluster";
+            }
+
+            @Override
+            public int shardIndex() {
+                return 0;
+            }
+
+            @Override
+            public Set<HostSpec> configuredHosts() {
+                return hostSpecList;
+            }
+        };
+
+        return shardMeta;
+    }
+
 
     private Map<HostSpec, DataSourceConfigure> mockDataSourceConfigs() {
         Map<HostSpec, DataSourceConfigure> dataSourceConfigs = new HashMap<>();
@@ -125,51 +123,6 @@ public class OrderedAccessStrategyTest {
                 return new CaseInsensitiveProperties(properties);
             }
         };
-    }
-
-
-
-    private static abstract class SQLThread extends Thread {
-        public volatile boolean exit = false;
-        private final long delay;
-        private DataSource dataSource;
-
-        public SQLThread(long delay, DataSource dataSource) {
-            this.delay = delay;
-            this.dataSource = dataSource;
-        }
-
-        @Override
-        public void run() {
-            while (!exit) {
-                try (Connection connection = getConnection()){
-                    try (Statement statement = connection.createStatement()){
-                        statement.setQueryTimeout(1);
-                        execute(statement);
-                    }
-                } catch (Exception e) {
-                } finally {
-                    try {
-                        Thread.sleep(delay);
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        }
-
-        private Connection getConnection() throws SQLException {
-            try {
-                Connection connection = dataSource.getConnection();
-                System.out.println("return " + connection.getMetaData().getURL() + " time is :" + new Date().toString());
-                return connection;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                throw e;
-            } finally {
-            }
-        }
-
-        abstract void execute(Statement statement) throws SQLException;
     }
 
 }

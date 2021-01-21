@@ -20,7 +20,6 @@ public class MajorityHostValidatorTest {
     private long failOverTime = 1000;
     private long blackListTimeOut = 1000;
     private long fixedValidatePeriod = 3000;
-    private ExecutorService service = Executors.newFixedThreadPool(16);
     private HostSpec hostSpec1 = HostSpec.of("local", 3306);
     private HostSpec hostSpec2 = HostSpec.of("local", 3307);
     private HostSpec hostSpec3 = HostSpec.of("local", 3308);
@@ -59,7 +58,7 @@ public class MajorityHostValidatorTest {
 
     }
 
-    private ConnectionFactory buildConnectionFactory() {
+    public static ConnectionFactory buildConnectionFactory() {
         return new ConnectionFactory() {
             @Override
             public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {

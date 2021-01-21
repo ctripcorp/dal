@@ -95,7 +95,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
         LOGGER.logEvent(CAT_LOG_TYPE, ROUTER_INITIALIZE, String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
     }
 
-    private void buildOrderHosts () {
+    protected void buildOrderHosts () {
         List<String> zoneOrder = strategyOptions.getStringList("zonesPriority", ",", null);
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
@@ -103,7 +103,7 @@ public class OrderedAccessStrategy implements RouteStrategy{
         LOGGER.logEvent(CAT_LOG_TYPE, String.format(ROUTER_ORDER_HOSTS, cluster), String.format(ORDER_HOSTS, orderHosts.toString()));
     }
 
-    private void buildValidator() {
+    protected void buildValidator() {
         long failOverTime = strategyOptions.getLong("failoverTimeMS", 10000);
         long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 10000);
         long fixedValidatePeriod = strategyOptions.getLong("fixedValidatePeriodMS", 30000);

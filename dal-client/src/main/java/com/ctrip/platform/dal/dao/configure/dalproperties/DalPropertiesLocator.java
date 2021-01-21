@@ -29,4 +29,6 @@ public interface DalPropertiesLocator {
 
     String getStatementInterceptor();
 
+    String getTableParserCacheInitSize(String defaultSize);
+
 }

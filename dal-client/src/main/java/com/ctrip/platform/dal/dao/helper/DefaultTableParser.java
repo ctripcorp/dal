@@ -1,11 +1,14 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.commons.lang.StringUtils;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
@@ -17,6 +20,13 @@ import java.util.regex.Pattern;
 public class DefaultTableParser implements TableParser {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
     private static final String TABLEPARSE_ERROR = "TABLEPARSE::ERROR";
+    private static final String TABLEPARSE_TOTAL_COST = "TABLEPARSE::totalCost:";
+    private static final String TABLEPARSE_ACTUAL_COST = "TABLEPARSE::actualCost:";
+    private static final String CACHE_DEFAULT_SIZE = "1000";
+    private static final float LOAD_FACTOR = 0.8f;
+    private static final int KEY_OF_CACHE_MAX_BYTES = 2000;
+    private static final String INSERT_SYMBOL = "value";
+    private static final String CONDITION_SYMBOL = "where";
     private static final Set<String> callStringElements = new HashSet<String>() {
         {
             add("{call");
@@ -33,9 +43,19 @@ public class DefaultTableParser implements TableParser {
     private TablesNamesFinder finder = new TablesNamesFinder();
     private Lock finderLock = new ReentrantLock();
     private static final Pattern pattern = Pattern.compile("(with)*\\s*\\(nolock\\)");
+    private static int cacheInitSize = Integer.valueOf(DalPropertiesManager.getInstance().getDalPropertiesLocator().getTableParserCacheInitSize(CACHE_DEFAULT_SIZE));
+    private static Set<String> getTableListErrorSQLs = new HashSet<>();
+
+    protected static LinkedHashMap<String, List<String>> sqlToTables = new LinkedHashMap(cacheInitSize, LOAD_FACTOR, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() >= cacheInitSize * LOAD_FACTOR;
+        }
+    };
 
     @Override
     public Set<String> getTablesFromSqls(String... sqls) {
+        long startTime = System.currentTimeMillis();
         Set<String> tableSet = new HashSet<>();
         if (sqls == null || sqls.length == 0)
             return tableSet;
@@ -57,6 +77,7 @@ public class DefaultTableParser implements TableParser {
                     tableSet.addAll(extractTablesFromSql(sqlString));
             }
         }
+        logger.logTransaction(DalLogTypes.DAL, TABLEPARSE_TOTAL_COST, "size:" + sqlToTables.size(), startTime);
         return tableSet;
     }
 
@@ -83,7 +104,8 @@ public class DefaultTableParser implements TableParser {
             sql = ignoreUnsupportedSyntax(sql);
             finderLock.lock();
             try {
-                tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
+                //get from cache first
+                tableList = getTablesFromCache(sql);
             } catch (Throwable e) {
                 logger.logTransaction(DalLogTypes.DAL, TABLEPARSE_ERROR, e.getMessage(), startTime);
             } finally {
@@ -95,6 +117,74 @@ public class DefaultTableParser implements TableParser {
         }
         // remove mysql quote "``" or sqlserver quote "[]" and db prefix like "dbname.tablename"
         return removePrefixAndQuote(tableList);
+    }
+
+    protected List<String> getTablesFromCache(String sql) throws JSQLParserException {
+        String setKeySql = ignoreMsgId(sql);
+        if (getTableListErrorSQLs.contains(setKeySql)) {
+            return parseSql(setKeySql);
+        }
+
+        List<String> tables = null;
+        String cacheKeySql = ignoreWhereAndValues(setKeySql);
+        if (KEY_OF_CACHE_MAX_BYTES < cacheKeySql.getBytes().length) {
+            addSQLToErrorSet(setKeySql);
+            return parseSql(setKeySql);
+        }
+
+        synchronized (sqlToTables) {
+            tables = sqlToTables.get(cacheKeySql);
+        }
+        if (tables == null) {
+            try {
+                tables = parseSql(cacheKeySql);
+            } catch (Throwable t) {
+                addSQLToErrorSet(setKeySql);
+                return parseSql(setKeySql);
+            }
+            synchronized (sqlToTables) {
+                sqlToTables.put(cacheKeySql, tables);
+            }
+        }
+
+        return tables == null ? new ArrayList<>() : tables;
+    }
+
+    protected List<String> parseSql(String sql) throws JSQLParserException {
+        long startTime = System.currentTimeMillis();
+        List<String> tables = finder.getTableList(CCJSqlParserUtil.parse(sql));
+        logger.logTransaction(DalLogTypes.DAL, TABLEPARSE_ACTUAL_COST, "size: " + sqlToTables.size(), startTime);
+        return tables;
+    }
+
+    protected void addSQLToErrorSet(String setKeySql) {
+        synchronized (getTableListErrorSQLs) {
+            getTableListErrorSQLs.add(setKeySql);
+        }
+    }
+
+    protected String ignoreMsgId(String sql) {
+        int statementStartPos = SqlUtils.findStartOfStatement(sql);
+        return sql.substring(statementStartPos);
+    }
+
+    protected String ignoreWhereAndValues(String sql) {
+        try {
+            int valueIndex = sql.lastIndexOf(INSERT_SYMBOL);
+            if (valueIndex > -1) {
+                return sql.substring(0 , valueIndex);
+            }
+
+            int whereIndex = sql.lastIndexOf(CONDITION_SYMBOL);
+
+            if (whereIndex > 0) {
+                return sql.substring(0 , whereIndex);
+            }
+        } catch (Exception e) {
+
+        }
+
+        return sql;
     }
 
     private String ignoreUnsupportedSyntax(String sql) {

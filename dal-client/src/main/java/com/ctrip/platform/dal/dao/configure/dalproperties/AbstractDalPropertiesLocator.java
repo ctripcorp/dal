@@ -159,4 +159,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public String getStatementInterceptor() {
         throw new UnsupportedOperationException("getStatementInterceptor not supported.");
     }
+
+    @Override
+    public String getTableParserCacheInitSize(String defaultSize) {
+        throw new UnsupportedOperationException("getTableParserCacheInitSize not supported.");
+    }
 }

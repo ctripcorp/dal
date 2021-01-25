@@ -26,17 +26,37 @@ import com.mysql.jdbc.MySQLConnection;
  * @author jhhe
  */
 public class DalDirectClient implements DalContextClient {
-    private DalStatementCreator stmtCreator;
-    private DalConnectionManager connManager;
-    private DalTransactionManager transManager;
-    private DalLogger logger;
+    private volatile DalStatementCreator stmtCreator;
+    private volatile DalConnectionManager connManager;
+    private volatile DalTransactionManager transManager;
+    private volatile DalLogger logger;
 
     public DalDirectClient(DalConfigure config, String logicDbName) {
-        connManager = new DalConnectionManager(logicDbName, config);
-        transManager = new DalTransactionManager(connManager);
-        stmtCreator = new DalStatementCreator(config.getDatabaseSet(logicDbName).getDatabaseCategory());
-        logger = DalClientFactory.getDalLogger();
+        init(config, logicDbName);
     }
+
+    public DalDirectClient() {
+    }
+
+    @Override
+    public void init(DalConfigure configure, String logicDbName) {
+        if (stmtCreator == null) {
+            synchronized (DalDirectClient.class) {
+                if (stmtCreator == null) {
+                    connManager = new DalConnectionManager(logicDbName, configure);
+                    transManager = new DalTransactionManager(connManager);
+                    stmtCreator = new DalStatementCreator(configure.getDatabaseSet(logicDbName).getDatabaseCategory());
+                    logger = DalClientFactory.getDalLogger();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
 
     @Override
     public <T> T query(String sql, StatementParameters parameters, final DalHints hints,

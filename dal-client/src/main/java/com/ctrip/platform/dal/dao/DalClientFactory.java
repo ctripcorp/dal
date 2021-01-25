@@ -2,6 +2,8 @@ package com.ctrip.platform.dal.dao;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -18,6 +20,7 @@ import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.task.DalRequestExecutor;
 import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 public class DalClientFactory {
     private static ILogger iLogger = DalElementFactory.DEFAULT.getILogger();
@@ -25,6 +28,7 @@ public class DalClientFactory {
     private static final String INIT_DAL_JAVA_CLIENT = "Initialize";
     private static final String ALREADY_INITIALIZED = "Dal Java Client Factory is already initialized.";
     private static final String THREAD_NAME = "DAL-DalClientFactory-ShutdownHook";
+    private static final String CREATE_CUSTOMER_CLIENT_ERROR = "Error while creating customer DalClient";
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -116,12 +120,26 @@ public class DalClientFactory {
         if (logicDbName == null)
             throw new NullPointerException("Database Set name can not be null");
 
+        DalClient dalClient = null;
+
         DalConfigure config = getDalConfigure();
 
         // Verify if it is existed
         config.getDatabaseSet(logicDbName);
 
-        return new DalDirectClient(config, logicDbName);
+        String className = DalPropertiesManager.getInstance().getDalPropertiesLocator().getCustomerClientClassName();
+        if (StringUtils.isEmpty(className)) {
+            dalClient = new DalDirectClient(config, logicDbName);
+        } else {
+            try {
+                dalClient = (DalClient)Class.forName(className).newInstance();
+                dalClient.init(config, logicDbName);
+            } catch (Throwable t) {
+                throw new DalRuntimeException(CREATE_CUSTOMER_CLIENT_ERROR, t);
+            }
+        }
+
+        return dalClient;
     }
 
     public static DalConfigure getDalConfigure() {

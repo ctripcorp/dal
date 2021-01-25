@@ -24,6 +24,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     private static final String SET_ALL_PROPERTIES = "DalProperties::setAllProperties";
     public static final String STATEMENT_INTERCEPTORS = "statementInterceptors";
     public static final String TABLE_PARSER_CACHE_SIZE = "tableParserCacheSize";
+    public static final String CUSTOM_DAL_CLIENT = "customDalClient";
 
     private static final String PROPERTY_NAME_CLUSTER_INFO_QUERY_URL = "ClusterInfoQueryUrl";
     private static final String PROPERTY_NAME_DRC_STAGE = "DrcStage";
@@ -139,6 +140,11 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     @Override
     public String getTableParserCacheInitSize(String defaultSize) {
         return getProperty(TABLE_PARSER_CACHE_SIZE, defaultSize);
+    }
+
+    @Override
+    public String getCustomerClientClassName() {
+        return getProperty(CUSTOM_DAL_CLIENT);
     }
 
     private String getProperty(String name, String defaultValue) {

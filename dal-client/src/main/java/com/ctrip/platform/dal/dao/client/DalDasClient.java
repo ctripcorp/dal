@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.DalCommand;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.StatementParameters;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
 
 /**
  * This is the DalClient implementation for DAS mode.
@@ -81,5 +82,15 @@ public class DalDasClient implements DalClient {
 			throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void init(DalConfigure configure, String logDbName) {
+
+	}
+
+	@Override
+	public void destroy() {
+
 	}
 }

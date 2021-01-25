@@ -10,7 +10,7 @@ import java.util.Map;
  * in-direct(DAS mode) connection to DB.
  * @author jhhe
  */
-public interface DalClient{
+public interface DalClient extends DalClientExtension{
 	/**
 	 * Query against the given sql and parameters. The result set will be
 	 * processed by the given extractor

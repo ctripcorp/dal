@@ -164,4 +164,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public String getTableParserCacheInitSize(String defaultSize) {
         throw new UnsupportedOperationException("getTableParserCacheInitSize not supported.");
     }
+
+    @Override
+    public String getCustomerClientClassName() {
+        throw new UnsupportedOperationException("getCustomerClientClassName not supported.");
+    }
 }

@@ -12,7 +12,7 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 public class DalRowMapperExtractor <T> implements DalResultSetExtractor<List<T>>, HintsAwareExtractor<List<T>> {
 	private static final int COUNT_LIMIT = 5000000;
 
-	private DalRowMapper<T> mapper;
+	public DalRowMapper<T> mapper;
 	private int start;
 	private int count;
 	private DalHints hints;

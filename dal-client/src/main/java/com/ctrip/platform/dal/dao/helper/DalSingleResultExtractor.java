@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalSingleResultExtractor<T> implements DalResultSetExtractor<T>, HintsAwareExtractor<T> {
-	private DalRowMapper<T> mapper;
+	public DalRowMapper<T> mapper;
 	private boolean requireSingle;
 	private DalHints hints;
 	

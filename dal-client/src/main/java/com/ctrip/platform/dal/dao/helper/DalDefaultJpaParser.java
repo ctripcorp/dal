@@ -18,7 +18,7 @@ import com.ctrip.platform.dal.dao.DalRowMapper;
 public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements CustomizableMapper<T> {
 	
 	private Map<String, Field> fieldsMap;
-	private Class<T> clazz;
+	public Class<T> clazz;
 	private Field identity;
 	private boolean autoIncrement;
 	private DalDefaultJpaMapper<T> rowMapper;

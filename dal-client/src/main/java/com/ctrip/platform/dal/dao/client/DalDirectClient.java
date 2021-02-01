@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -26,10 +28,10 @@ import com.mysql.jdbc.MySQLConnection;
  * @author jhhe
  */
 public class DalDirectClient implements DalContextClient {
-    private volatile DalStatementCreator stmtCreator;
-    private volatile DalConnectionManager connManager;
-    private volatile DalTransactionManager transManager;
-    private volatile DalLogger logger;
+    protected volatile DalStatementCreator stmtCreator;
+    protected volatile DalConnectionManager connManager;
+    protected volatile DalTransactionManager transManager;
+    protected volatile DalLogger logger;
 
     public DalDirectClient(DalConfigure config, String logicDbName) {
         init(config, logicDbName);

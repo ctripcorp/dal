@@ -62,27 +62,34 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
             return shard;
 
         Object shardValue = context.getShardValue();
-        if (shardValue != null)
-            shard = calcTableShard(tableName, shardValue);
-        if (shard != null)
-            return offsetTableShard(tableName, shard);
+        if ((shard = getRawTableShard(tableName, shardValue)) != null)
+            return shard;
 
         shardValue = getTableShardValue(tableName, context.getShardColValues());
-        if (shardValue != null)
-            shard = calcTableShard(tableName, shardValue);
-        if (shard != null)
-            return offsetTableShard(tableName, shard);
+        if ((shard = getRawTableShard(tableName, shardValue)) != null)
+            return shard;
 
         for (ShardData shardData : context.getShardDataCandidates()) {
             shardValue = getTableShardValue(tableName, shardData);
-            if (shardValue != null) {
-                shard = calcTableShard(tableName, shardValue);
-                if (shard != null)
-                    return offsetTableShard(tableName, shard);
-            }
+            if ((shard = getRawTableShard(tableName, shardValue)) != null)
+                return shard;
         }
 
         return null;
+    }
+
+    protected String getRawTableShard(String tableName, Object shardValue) {
+        String shard = null;
+        if (shardValue != null) {
+            shard = calcTableShard(tableName, shardValue);
+            if (shard != null)
+                shard = offsetTableShard(tableName, shard);
+        }
+        return formatTableShard(shard);
+    }
+
+    protected String formatTableShard(String shard) {
+        return shard;
     }
 
     protected Object getDbShardValue(String tableName, ShardData shardData) {

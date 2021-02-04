@@ -84,8 +84,9 @@ public abstract class ColumnShardStrategy extends BaseShardStrategy implements S
             shard = calcTableShard(tableName, shardValue);
             if (shard != null)
                 shard = offsetTableShard(tableName, shard);
+            return formatTableShard(shard);
         }
-        return formatTableShard(shard);
+        return null;
     }
 
     protected String formatTableShard(String shard) {

@@ -7,6 +7,7 @@ import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
@@ -24,6 +25,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     private Map<Integer, DatabaseShard> databaseShards = new HashMap<>();
     private ShardStrategyProxy shardStrategyProxy;
     private ClusterIdGeneratorConfig idGeneratorConfig;
+    private ClusterRouteStrategyConfig routeStrategyConfig;
     private LocalizationConfig localizationConfig;
 
     public DefaultCluster(ClusterConfigImpl clusterConfig) {
@@ -37,7 +39,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
 
     @Override
     public ClusterType getClusterType() {
-        return ClusterType.NORMAL;
+        return clusterConfig.getClusterType();
     }
 
     @Override
@@ -84,7 +86,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     public List<Database> getDatabases() {
         List<Database> databases = new LinkedList<>();
         for (DatabaseShard databaseShard : databaseShards.values()) {
-            databases.add(databaseShard.getMaster());
+            databases.addAll(databaseShard.getMasters());
             databases.addAll(databaseShard.getSlaves());
         }
         return databases;
@@ -92,7 +94,12 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
 
     @Override
     public Database getMasterOnShard(int shardIndex) {
-        return databaseShards.get(shardIndex).getMaster();
+        List<Database> masters = databaseShards.get(shardIndex).getMasters();
+        if (masters == null || masters.isEmpty())
+            throw new ClusterRuntimeException("no master available");
+//        if (masters.size() > 1)
+//            throw new ClusterRuntimeException("multi masters available");
+        return masters.iterator().next();
     }
 
     @Override
@@ -103,6 +110,11 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     @Override
     public ClusterIdGeneratorConfig getIdGeneratorConfig() {
         return idGeneratorConfig;
+    }
+
+    @Override
+    public ClusterRouteStrategyConfig getRouteStrategyConfig() {
+        return routeStrategyConfig;
     }
 
     @Override
@@ -120,6 +132,10 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
 
     public void setIdGeneratorConfig(ClusterIdGeneratorConfig idGeneratorConfig) {
         this.idGeneratorConfig = idGeneratorConfig;
+    }
+
+    public void setRouteStrategyConfig(ClusterRouteStrategyConfig routeStrategyConfig) {
+        this.routeStrategyConfig = routeStrategyConfig;
     }
 
     public void setLocalizationConfig(LocalizationConfig localizationConfig) {

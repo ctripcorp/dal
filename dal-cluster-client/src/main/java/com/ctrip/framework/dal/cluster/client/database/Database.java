@@ -13,6 +13,8 @@ public interface Database {
 
     boolean isMaster();
 
+    String getZone();
+
     ConnectionString getConnectionString();
 
     String[] getAliasKeys();

@@ -9,6 +9,4 @@ public interface ClusterDatabaseMetaData extends DalDatabaseMetaData {
 
     int getShardIndex();
 
-    boolean isMaster();
-
 }

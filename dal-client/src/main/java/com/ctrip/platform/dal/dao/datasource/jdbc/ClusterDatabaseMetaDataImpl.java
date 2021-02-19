@@ -1,8 +1,5 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
-import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.*;
@@ -13,26 +10,23 @@ import java.sql.*;
 public class ClusterDatabaseMetaDataImpl implements ClusterDatabaseMetaData {
 
     protected final DatabaseMetaData metaData;
-    private final Database database;
+    private final String clusterName;
+    private final int shardIndex;
 
-    public ClusterDatabaseMetaDataImpl(DatabaseMetaData metaData, Database database) {
+    public ClusterDatabaseMetaDataImpl(DatabaseMetaData metaData, String clusterName, int shardIndex) {
         this.metaData = metaData;
-        this.database = database;
+        this.clusterName = clusterName;
+        this.shardIndex = shardIndex;
     }
 
     @Override
     public String getClusterName() {
-        return database.getClusterName();
+        return clusterName;
     }
 
     @Override
     public int getShardIndex() {
-        return database.getShardIndex();
-    }
-
-    @Override
-    public boolean isMaster() {
-        return database.isMaster();
+        return shardIndex;
     }
 
     @Override

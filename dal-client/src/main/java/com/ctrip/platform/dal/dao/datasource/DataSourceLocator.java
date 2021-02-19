@@ -18,6 +18,7 @@ import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -78,7 +79,14 @@ public class DataSourceLocator {
                 ds = cache.get(id);
                 if (ds == null) {
                     try {
-                        ds = createDataSource(id);
+                        if (id instanceof ClusterInfoDelegateIdentity) {
+                            ClusterInfo clusterInfo = ((ClusterInfoDelegateIdentity) id).getClusterInfo();
+                            Cluster cluster = clusterInfo.getCluster();
+                            if (cluster == null)
+                                throw new RuntimeException("Cluster not created");
+                            ds = createDataSource(id, clusterInfo, cluster);
+                        } else
+                            ds = createDataSource(id);
                         cache.put(id, ds);
                     } catch (Throwable t) {
                         String msg = String.format("error when creating datasource: %s", id.getId());

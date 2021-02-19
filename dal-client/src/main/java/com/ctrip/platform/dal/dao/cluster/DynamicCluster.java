@@ -11,6 +11,7 @@ import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
@@ -111,6 +112,11 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
     @Override
     public ClusterIdGeneratorConfig getIdGeneratorConfig() {
         return getInnerCluster().getIdGeneratorConfig();
+    }
+
+    @Override
+    public ClusterRouteStrategyConfig getRouteStrategyConfig() {
+        return getInnerCluster().getRouteStrategyConfig();
     }
 
     @Override

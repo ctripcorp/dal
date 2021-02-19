@@ -5,7 +5,8 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 public enum ClusterType {
 
     NORMAL("normal"),
-    DRC("drc");
+    DRC("drc"),
+    MGR("mgr");
 
     private String value;
 
@@ -22,7 +23,9 @@ public enum ClusterType {
             return NORMAL;
         if (DRC.getValue().equalsIgnoreCase(value))
             return DRC;
-        throw new ClusterRuntimeException("invalid cluster type");
+        if (MGR.getValue().equalsIgnoreCase(value))
+            return MGR;
+        throw new ClusterRuntimeException("Invalid cluster type");
     }
 
 }

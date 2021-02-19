@@ -27,7 +27,7 @@ import com.mysql.jdbc.MySQLConnection;
  *
  * @author jhhe
  */
-public class DalDirectClient implements DalContextClient {
+public class DalDirectClient implements DalContextClient, DalClientExtension {
     protected volatile DalStatementCreator stmtCreator;
     protected volatile DalConnectionManager connManager;
     protected volatile DalTransactionManager transManager;

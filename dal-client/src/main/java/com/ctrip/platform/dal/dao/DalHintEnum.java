@@ -273,6 +273,12 @@ public enum DalHintEnum {
      * @deprecated will be removed in the future
      * Table for the sql.
      */
-    specifiedTableName
+    specifiedTableName,
+
+    /**
+     * The entity class of the table.
+     * For customer DalClient to know the type class of result
+     */
+    resultClass
 
 }

@@ -133,7 +133,7 @@ public class DalClientFactory {
         } else {
             try {
                 dalClient = (DalClient)Class.forName(className).newInstance();
-                dalClient.init(config, logicDbName);
+                ((DalDirectClient)dalClient).init(config, logicDbName);
             } catch (Throwable t) {
                 throw new DalRuntimeException(CREATE_CUSTOMER_CLIENT_ERROR, t);
             }

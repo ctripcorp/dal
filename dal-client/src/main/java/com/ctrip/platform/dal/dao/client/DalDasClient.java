@@ -83,14 +83,4 @@ public class DalDasClient implements DalClient {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public void init(DalConfigure configure, String logDbName) {
-
-	}
-
-	@Override
-	public void destroy() {
-
-	}
 }

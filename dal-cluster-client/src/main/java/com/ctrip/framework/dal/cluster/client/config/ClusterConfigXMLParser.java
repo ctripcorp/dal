@@ -6,6 +6,8 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
@@ -96,6 +98,10 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         if (idGeneratorsNode != null)
             parseIdGenerators(clusterConfig, idGeneratorsNode);
 
+        Node routeStrategiesNode = getChildNode(clusterNode, ROUTE_STRATEGIES);
+        if (routeStrategiesNode != null)
+            parseRouteStrategies(clusterConfig, routeStrategiesNode);
+
         parseDrcConfig(clusterConfig, clusterNode);
 
         return clusterConfig;
@@ -112,6 +118,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     }
 
     private void setAttributesForDatabaseShard(DatabaseShardConfigImpl databaseShardConfig, Node databaseShardNode) {
+        databaseShardConfig.setZone(getAttribute(databaseShardNode, ZONE));
         databaseShardConfig.setMasterDomain(getAttribute(databaseShardNode, MASTER_DOMAIN));
         String masterPort = getAttribute(databaseShardNode, MASTER_PORT);
         if (!StringUtils.isEmpty(masterPort))
@@ -141,6 +148,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         databaseConfig.setDbName(getAttribute(databaseNode, DB_NAME));
         databaseConfig.setUid(getAttribute(databaseNode, UID));
         databaseConfig.setPwd(getAttribute(databaseNode, PWD));
+        databaseConfig.setZone(getAttribute(databaseNode, ZONE));
         String readWeight = getAttribute(databaseNode, READ_WEIGHT);
         if (!StringUtils.isEmpty(readWeight))
             databaseConfig.setReadWeight(Integer.parseInt(readWeight));
@@ -222,6 +230,24 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             Node idGeneratorNode = idGeneratorNodes.get(0);
             ClusterIdGeneratorConfig idGeneratorConfig = getIdGeneratorConfigXMLParser().parse(clusterConfig.getClusterName(), idGeneratorNode);
             clusterConfig.setIdGeneratorConfig(idGeneratorConfig);
+        }
+    }
+
+    private void parseRouteStrategies(ClusterConfigImpl clusterConfig, Node routeStrategiesNode) {
+        List<Node> routeStrategyNodes = getChildNodes(routeStrategiesNode, ORDERED_ACCESS_STRATEGY);
+        if (routeStrategyNodes.size() > 1)
+            throw new ClusterRuntimeException("multiple routeStrategies configured");
+        if (routeStrategyNodes.size() == 1) {
+            Node routeStrategyNode = routeStrategyNodes.get(0);
+            DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(routeStrategyNode.getNodeName());
+            List<Node> propertyNodes = getChildNodes(routeStrategyNode, PROPERTY);
+            propertyNodes.forEach(node -> {
+                String propertyName = getAttribute(node, NAME);
+                String propertyValue = getAttribute(node, VALUE);
+                if (propertyName != null && propertyValue != null)
+                    routeStrategyConfig.setProperty(propertyName, propertyValue);
+            });
+            clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
         }
     }
 

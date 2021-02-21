@@ -52,6 +52,10 @@ public class ClusterInfo {
         this.cluster = cluster;
     }
 
+    public Cluster getCluster() {
+        return cluster;
+    }
+
     public DataSourceIdentity toDataSourceIdentity() {
         return new SimpleClusterDataSourceIdentity(this, cluster);
     }

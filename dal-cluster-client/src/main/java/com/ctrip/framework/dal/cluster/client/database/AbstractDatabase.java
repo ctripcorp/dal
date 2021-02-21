@@ -25,7 +25,12 @@ public abstract class AbstractDatabase implements Database, ConnectionString {
 
     @Override
     public boolean isMaster() {
-        return getDatabaseConfig().getRole() == DatabaseRole.MASTER;
+        return databaseConfig.getRole() == DatabaseRole.MASTER;
+    }
+
+    @Override
+    public String getZone() {
+        return databaseConfig.getZone();
     }
 
     @Override

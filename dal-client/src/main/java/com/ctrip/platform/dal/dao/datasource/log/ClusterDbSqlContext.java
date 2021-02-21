@@ -21,8 +21,8 @@ public class ClusterDbSqlContext extends BaseSqlContext {
     protected static final String UCS_STRATEGY = "UcsStrategy";
 
     private final Cluster cluster;
-    private final Integer shard;
-    private final DatabaseRole role;
+    private Integer shard;
+    private DatabaseRole role;
 
     public ClusterDbSqlContext(Cluster cluster, Integer shard, DatabaseRole role) {
         this(cluster, shard, role, null);
@@ -79,6 +79,14 @@ public class ClusterDbSqlContext extends BaseSqlContext {
                 getClientVersion(), getClientZone(), getDbName());
         context.populateDbZone(getDbZone());
         return context;
+    }
+
+    public void populateShard(Integer shard) {
+        this.shard = shard;
+    }
+
+    public void populateRole(DatabaseRole role) {
+        this.role = role;
     }
 
 }

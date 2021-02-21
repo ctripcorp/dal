@@ -1,5 +1,11 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
+import com.ctrip.platform.dal.dao.cluster.ClusterConfigAdapter;
+import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.log.NullSqlContext;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
@@ -9,50 +15,42 @@ import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.Objects;
 
-public class ApiDataSourceIdentity implements DataSourceIdentity {
+public class ApiDataSourceIdentity implements ClusterInfoDelegateIdentity {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String ID_FORMAT = "%s_api"; //dbName
 
     private ConnectionStringConfigureProvider provider;
-    private String id;
-    private DalConnectionStringConfigure connectionStringConfigure;
-    private DalConnectionString connectionString;
+    private final ObjectHolder<Cluster> clusterHolder = new ObjectHolder<>();
 
     public ApiDataSourceIdentity(ConnectionStringConfigureProvider provider) {
         this.provider = provider;
     }
 
-    private void initConnectionString() {
-        try {
-            connectionStringConfigure = provider.getConnectionString();
-        } catch (Exception e) {
-            LOGGER.error("get connectionString from api failed!", e);
-            throw new DalRuntimeException(e);
-        }
-
-        id = String.format(ID_FORMAT, connectionStringConfigure.getName());
-
-        if (connectionStringConfigure instanceof InvalidVariableConnectionString) {
-            connectionString = new InvalidConnectionString(id, ((InvalidVariableConnectionString) connectionStringConfigure).getConnectionStringException());
-        }
-        else {
-            connectionString = new ApiConnectionStringImpl(connectionStringConfigure);
-        }
+    private Cluster getCluster() {
+        return clusterHolder.getOrCreate(() -> {
+            try {
+                ClusterConfig clusterConfig = new ClusterConfigAdapter(provider);
+                return new DynamicCluster(clusterConfig);
+            } catch (Exception e) {
+                LOGGER.error("Create cluster failed for db:" + provider.getDbName(), e);
+                throw new DalRuntimeException(e);
+            }
+        });
     }
 
     public ConnectionStringConfigureProvider getProvider() {
         return provider;
     }
 
-    public DalConnectionString getConnectionString() {
-        initConnectionString();
-        return connectionString;
+    @Override
+    public ClusterInfo getClusterInfo() {
+        Cluster cluster = getCluster();
+        return new ClusterInfo(cluster.getClusterName(), 0, DatabaseRole.MASTER, false, cluster);
     }
 
     @Override
     public String getId() {
-        return id;
+        return provider.getDbName();
     }
 
     @Override
@@ -71,46 +69,6 @@ public class ApiDataSourceIdentity implements DataSourceIdentity {
     @Override
     public int hashCode() {
         return Objects.hash(provider);
-    }
-
-    public static class ApiConnectionStringImpl implements DalConnectionString {
-
-        private DalConnectionStringConfigure connectionStringConfigure;
-
-        public ApiConnectionStringImpl(DalConnectionStringConfigure connectionStringConfigure) {
-            this.connectionStringConfigure = connectionStringConfigure;
-        }
-
-        @Override
-        public String getName() {
-            return connectionStringConfigure.getName();
-        }
-
-        @Override
-        public String getIPConnectionString() {
-            return connectionStringConfigure.getConnectionUrl();
-        }
-
-        @Override
-        public String getDomainConnectionString() {
-            return connectionStringConfigure.getConnectionUrl();
-        }
-
-        @Override
-        public DalConnectionStringConfigure getIPConnectionStringConfigure() {
-            return connectionStringConfigure;
-        }
-
-        @Override
-        public DalConnectionStringConfigure getDomainConnectionStringConfigure() {
-            return connectionStringConfigure;
-        }
-
-        @Override
-        public DalConnectionString clone() {
-            return new ApiConnectionStringImpl(connectionStringConfigure);
-        }
-
     }
 
 }

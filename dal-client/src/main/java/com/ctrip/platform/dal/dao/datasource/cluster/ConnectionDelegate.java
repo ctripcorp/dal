@@ -1,0 +1,231 @@
+package com.ctrip.platform.dal.dao.datasource.cluster;
+
+import com.ctrip.platform.dal.dao.helper.Delegate;
+
+import java.sql.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Executor;
+
+/**
+ * @author c7ch23en
+ */
+public abstract class ConnectionDelegate implements Connection, Delegate<Connection> {
+
+    public Statement createStatement() throws SQLException {
+        return getDelegated().createStatement();
+    }
+
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
+        return getDelegated().prepareStatement(sql);
+    }
+
+    public CallableStatement prepareCall(String sql) throws SQLException {
+        return getDelegated().prepareCall(sql);
+    }
+
+    public String nativeSQL(String sql) throws SQLException {
+        return getDelegated().nativeSQL(sql);
+    }
+
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+        getDelegated().setAutoCommit(autoCommit);
+    }
+
+    public boolean getAutoCommit() throws SQLException {
+        return getDelegated().getAutoCommit();
+    }
+
+    public void commit() throws SQLException {
+        getDelegated().commit();
+    }
+
+    public void rollback() throws SQLException {
+        getDelegated().rollback();
+    }
+
+    public void close() throws SQLException {
+        getDelegated().close();
+    }
+
+    public boolean isClosed() throws SQLException {
+        return getDelegated().isClosed();
+    }
+
+    public DatabaseMetaData getMetaData() throws SQLException {
+        return getDelegated().getMetaData();
+    }
+
+    public void setReadOnly(boolean readOnly) throws SQLException {
+        getDelegated().setReadOnly(readOnly);
+    }
+
+    public boolean isReadOnly() throws SQLException {
+        return getDelegated().isReadOnly();
+    }
+
+    public void setCatalog(String catalog) throws SQLException {
+        getDelegated().setCatalog(catalog);
+    }
+
+    public String getCatalog() throws SQLException {
+        return getDelegated().getCatalog();
+    }
+
+    public void setTransactionIsolation(int level) throws SQLException {
+        getDelegated().setTransactionIsolation(level);
+    }
+
+    public int getTransactionIsolation() throws SQLException {
+        return getDelegated().getTransactionIsolation();
+    }
+
+    public SQLWarning getWarnings() throws SQLException {
+        return getDelegated().getWarnings();
+    }
+
+    public void clearWarnings() throws SQLException {
+        getDelegated().clearWarnings();
+    }
+
+    public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+        return getDelegated().createStatement(resultSetType, resultSetConcurrency);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        return getDelegated().prepareStatement(sql, resultSetType, resultSetConcurrency);
+    }
+
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        return getDelegated().prepareCall(sql, resultSetType, resultSetConcurrency);
+    }
+
+    public Map<String, Class<?>> getTypeMap() throws SQLException {
+        return getDelegated().getTypeMap();
+    }
+
+    public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+        getDelegated().setTypeMap(map);
+    }
+
+    public void setHoldability(int holdability) throws SQLException {
+        getDelegated().setHoldability(holdability);
+    }
+
+    public int getHoldability() throws SQLException {
+        return getDelegated().getHoldability();
+    }
+
+    public Savepoint setSavepoint() throws SQLException {
+        return getDelegated().setSavepoint();
+    }
+
+    public Savepoint setSavepoint(String name) throws SQLException {
+        return getDelegated().setSavepoint(name);
+    }
+
+    public void rollback(Savepoint savepoint) throws SQLException {
+        getDelegated().rollback(savepoint);
+    }
+
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        getDelegated().releaseSavepoint(savepoint);
+    }
+
+    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        return getDelegated().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        return getDelegated().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        return getDelegated().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+        return getDelegated().prepareStatement(sql, autoGeneratedKeys);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
+        return getDelegated().prepareStatement(sql, columnIndexes);
+    }
+
+    public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
+        return getDelegated().prepareStatement(sql, columnNames);
+    }
+
+    public Clob createClob() throws SQLException {
+        return getDelegated().createClob();
+    }
+
+    public Blob createBlob() throws SQLException {
+        return getDelegated().createBlob();
+    }
+
+    public NClob createNClob() throws SQLException {
+        return getDelegated().createNClob();
+    }
+
+    public SQLXML createSQLXML() throws SQLException {
+        return getDelegated().createSQLXML();
+    }
+
+    public boolean isValid(int timeout) throws SQLException {
+        return getDelegated().isValid(timeout);
+    }
+
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
+        getDelegated().setClientInfo(name, value);
+    }
+
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+        getDelegated().setClientInfo(properties);
+    }
+
+    public String getClientInfo(String name) throws SQLException {
+        return getDelegated().getClientInfo(name);
+    }
+
+    public Properties getClientInfo() throws SQLException {
+        return getDelegated().getClientInfo();
+    }
+
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+        return getDelegated().createArrayOf(typeName, elements);
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+        return getDelegated().createStruct(typeName, attributes);
+    }
+
+    public void setSchema(String schema) throws SQLException {
+        getDelegated().setSchema(schema);
+    }
+
+    public String getSchema() throws SQLException {
+        return getDelegated().getSchema();
+    }
+
+    public void abort(Executor executor) throws SQLException {
+        getDelegated().abort(executor);
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        getDelegated().setNetworkTimeout(executor, milliseconds);
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        return getDelegated().getNetworkTimeout();
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return getDelegated().unwrap(iface);
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return getDelegated().isWrapperFor(iface);
+    }
+
+}

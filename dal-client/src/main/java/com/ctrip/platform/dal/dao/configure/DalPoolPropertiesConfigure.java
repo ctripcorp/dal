@@ -13,5 +13,8 @@ public interface DalPoolPropertiesConfigure extends PoolPropertiesConfigure {
     Integer getCallMysqlApiPeriod();
     DBModel getDBModel();
     String getLocalAccess();
-    String[] getIdcPriority();
+    String getZonesPriority();
+    Long getFailoverTimeMS();
+    Long getBlacklistTimeoutMS();
+    Long getFixedValidatePeriodMS();
 }

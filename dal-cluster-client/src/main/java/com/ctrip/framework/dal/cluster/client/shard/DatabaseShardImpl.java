@@ -2,7 +2,6 @@ package com.ctrip.framework.dal.cluster.client.shard;
 
 import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
 public class DatabaseShardImpl implements DatabaseShard {
 
     private DatabaseShardConfigImpl databaseShardConfig;
-    private Database master;
+    private List<Database> masters = new LinkedList<>();
     private List<Database> slaves = new LinkedList<>();
 
     public DatabaseShardImpl(DatabaseShardConfigImpl databaseShardConfig) {
@@ -26,8 +25,8 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     @Override
-    public Database getMaster() {
-        return master;
+    public List<Database> getMasters() {
+        return new LinkedList<>(masters);
     }
 
     @Override
@@ -36,13 +35,10 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     public void addDatabase(Database database) {
-        if (database.isMaster()) {
-            if (master != null)
-                throw new ClusterRuntimeException("duplicated master");
-            master = database;
-        } else {
+        if (database.isMaster())
+            masters.add(database);
+        else
             slaves.add(database);
-        }
     }
 
 }

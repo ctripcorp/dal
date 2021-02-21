@@ -4,13 +4,16 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
-import com.ctrip.platform.dal.dao.log.Callback;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
@@ -20,11 +23,17 @@ import java.sql.*;
 public class DalConnectionPool extends ConnectionPool {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
     private static ConnectionListener connectionListener = ServiceLoaderHelper.getInstance(ConnectionListener.class);
-
     private static ThreadLocal<Long> poolWaitTime = new ThreadLocal<>();
 
+    private final ConnectionValidator clusterConnValidator;
+
     public DalConnectionPool(PoolConfiguration prop) throws SQLException {
+        this(prop, null);
+    }
+
+    public DalConnectionPool(PoolConfiguration prop, ConnectionValidator clusterConnValidator) throws SQLException {
         super(prop);
+        this.clusterConnValidator = clusterConnValidator;
     }
 
     @Override
@@ -111,7 +120,30 @@ public class DalConnectionPool extends ConnectionPool {
     private void preHandleConnection(PooledConnection conn) {
         Connection connection = getConnection(conn);
         if (connection != null) {
+            tryValidateClusterConnection(conn);
             trySetSessionWaitTimeout(connection);
+        }
+    }
+
+    private void tryValidateClusterConnection(PooledConnection conn) {
+        if (clusterConnValidator != null) {
+            boolean isValid = true;
+            try {
+                PoolConfiguration config = getPoolProperties();
+                HostConnection connection;
+                if (config instanceof DalExtendedPoolConfiguration)
+                    connection = new DefaultHostConnection(getConnection(conn),
+                            ((DalExtendedPoolConfiguration) config).getHost());
+                else
+                    connection = new DefaultHostConnection(getConnection(conn), null);
+                isValid = clusterConnValidator.validate(connection);
+            } catch (Throwable t) {
+                logger.warn("tryValidateClusterConnection exception", t);
+            }
+            if (!isValid) {
+                release(conn);
+                throw new InvalidConnectionException("Created connection is invalid");
+            }
         }
     }
 

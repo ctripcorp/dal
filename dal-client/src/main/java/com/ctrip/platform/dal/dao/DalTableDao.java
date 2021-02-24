@@ -506,10 +506,10 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints, ShardExecutionCallback<K> callback) throws SQLException {
+        initDalHints(hints);
         DalSqlTaskRequest<K> request = new DalSqlTaskRequest<>(logicDbName, populate(builder), hints,
                 DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser,
                         builder.getResultExtractor(hints)), builder.getResultMerger(hints), callback);
-        initDalHints(hints);
         return executor.execute(hints, request, builder.isNullable(), callback);
     }
 

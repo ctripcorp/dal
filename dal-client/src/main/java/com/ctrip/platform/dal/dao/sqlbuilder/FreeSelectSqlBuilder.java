@@ -9,14 +9,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 import com.ctrip.platform.dal.dao.ResultMerger;
-import com.ctrip.platform.dal.dao.helper.DalFirstResultMerger;
-import com.ctrip.platform.dal.dao.helper.DalListMerger;
-import com.ctrip.platform.dal.dao.helper.DalObjectRowMapper;
-import com.ctrip.platform.dal.dao.helper.DalRangedResultMerger;
-import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
-import com.ctrip.platform.dal.dao.helper.DalSingleResultExtractor;
-import com.ctrip.platform.dal.dao.helper.DalSingleResultMerger;
-import com.ctrip.platform.dal.dao.helper.EntityManager;
+import com.ctrip.platform.dal.dao.helper.*;
 
 /**
  * A very flexible SQL builder that can build complete SQL alone with parameters for query purpose. It allows user add
@@ -181,6 +174,7 @@ public class FreeSelectSqlBuilder<K> extends AbstractFreeSqlBuilder implements S
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> ResultMerger<T> getResultMerger(DalHints hints) {
+        weaveDalHints(hints, mapper);
         if (hints.is(DalHintEnum.resultMerger))
             return (ResultMerger<T>) hints.get(DalHintEnum.resultMerger);
 
@@ -188,6 +182,18 @@ public class FreeSelectSqlBuilder<K> extends AbstractFreeSqlBuilder implements S
             return merger;
 
         return createResultMerger(hints);
+    }
+
+    // Weave some msg into dalHints
+    // Here we weave the query result class type into dalHints
+    private void weaveDalHints(DalHints hints, DalRowMapper mapper) {
+        if (mapper == null) {
+            return;
+        }else if (mapper instanceof DalDefaultJpaParser) {
+            hints.setResultClass(((DalDefaultJpaParser)mapper).getClazz());
+        } else if (mapper instanceof DalDefaultJpaMapper) {
+            hints.setResultClass(((DalDefaultJpaMapper)mapper).getClazz());
+        }
     }
 
     public <T> ResultMerger<T> createNewResultMerger(DalHints hints) {

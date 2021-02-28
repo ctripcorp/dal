@@ -54,7 +54,8 @@ public class DataSourceCreator {
         return ds;
     }
 
-    public SingleDataSource getOrCreateDataSourceWithoutPool(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+    public SingleDataSource getOrCreateDataSourceWithoutPool(String name, DataSourceConfigure configure,
+                                                             DataSourceCreatePoolListener listener) {
         SingleDataSource ds = targetDataSourceCache.get(configure);
         if (ds == null) {
             synchronized (targetDataSourceCache) {
@@ -133,7 +134,8 @@ public class DataSourceCreator {
         return new SingleDataSource(name, configure);
     }
 
-    private SingleDataSource createDataSourceWithoutPool(String name, DataSourceConfigure configure, DataSourceCreatePoolListener listener) {
+    private SingleDataSource createDataSourceWithoutPool(String name, DataSourceConfigure configure,
+                                                         DataSourceCreatePoolListener listener) {
         return new SingleDataSource(name, configure, listener);
     }
 

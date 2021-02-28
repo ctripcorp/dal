@@ -12,12 +12,13 @@ public class ProviderDataBase extends DefaultDataBase {
 
     private static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private ConnectionStringConfigureProvider connectionStringProvider;
+    private ApiDataSourceIdentity dataSourceIdentity;
 
     public ProviderDataBase(DataBase dataBase,
                             String connectionStringProvider) throws Exception {
         super(dataBase.getName(), dataBase.isMaster(), dataBase.getSharding(), dataBase.getConnectionString());
-
         initConnectionStringProvider(connectionStringProvider);
+        dataSourceIdentity = new ApiDataSourceIdentity(this.connectionStringProvider);
     }
 
     private void initConnectionStringProvider(String connectionStringProvider) throws Exception {
@@ -37,13 +38,9 @@ public class ProviderDataBase extends DefaultDataBase {
         }
     }
 
-    public ConnectionStringConfigureProvider getConnectionStringProvider() {
-        return connectionStringProvider;
-    }
-
     @Override
     public DataSourceIdentity getDataSourceIdentity() {
-        return new ApiDataSourceIdentity(getConnectionStringProvider());
+        return dataSourceIdentity;
     }
 
 }

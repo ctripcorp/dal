@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -19,6 +20,7 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
     private volatile int sessionWaitTimeout = DEFAULT_SESSION_WAIT_TIMEOUT;
 
     private DataSourceIdentity dataSourceId;
+    private HostSpec host;
 
     @Override
     public int getSessionWaitTimeout() {
@@ -60,6 +62,15 @@ public class DalExtendedPoolProperties extends PoolProperties implements DalExte
 
     public void setDataSourceId(DataSourceIdentity dataSourceId) {
         this.dataSourceId = dataSourceId;
+    }
+
+    @Override
+    public HostSpec getHost() {
+        return host;
+    }
+
+    public void setHost(HostSpec host) {
+        this.host = host;
     }
 
 }

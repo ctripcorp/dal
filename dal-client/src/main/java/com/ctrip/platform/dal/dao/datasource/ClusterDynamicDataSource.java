@@ -1,171 +1,160 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.Listener;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.datasource.cluster.*;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+import com.ctrip.platform.dal.exceptions.UnsupportedFeatureException;
 
 import javax.sql.DataSource;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class ClusterDynamicDataSource implements DataSource, ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
+public class ClusterDynamicDataSource extends DataSourceDelegate implements DataSource,
+        ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener, IForceSwitchableDataSource {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
-    private static final String CAT_LOG_TYPE = "DAL.dataSource";
+
+    private static final String CAT_LOG_NAME_NORMAL = "createNormalDataSource:%s";
     private static final String CAT_LOG_NAME_DRC = "createDrcDataSource:%s";
     private static final String CAT_LOG_NAME_DRC_FAIL = "createDrcDataSource:EXCEPTION:%s";
-    private static final String CAT_LOG_NAME_NORMAL = "createNormalDataSource:%s";
 
     private ClusterInfo clusterInfo;
     private Cluster cluster;
     private DataSourceConfigureProvider provider;
     private LocalizationValidatorFactory factory;
-
-    private AtomicReference<RefreshableDataSource> dataSourceRef = new AtomicReference<>();
+    private DataSourceIdentity dataSourceId;
+    private AtomicReference<DataSource> dataSourceRef = new AtomicReference<>();
 
     public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider,
                                     LocalizationValidatorFactory factory) {
-        this.cluster = cluster;
         this.clusterInfo = clusterInfo;
+        this.cluster = cluster;
         this.provider = provider;
         this.factory = factory;
-
-        registerListeners();
-        this.dataSourceRef.set(createInnerDataSource(clusterInfo, cluster, provider));
+        prepare();
     }
 
-    @Override
-    public void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
-        getInnerDataSource().configChanged(event);
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        return getInnerDataSource().getConnection();
-    }
-
-    @Override
-    public Connection getConnection(String paramString1, String paramString2) throws SQLException {
-        return getInnerDataSource().getConnection(paramString1, paramString2);
-    }
-
-    @Override
-    public SingleDataSource getSingleDataSource() {
-        return getInnerDataSource().getSingleDataSource();
-    }
-
-    @Override
-    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {
-        getInnerDataSource().forceRefreshDataSource(name, configure);
-    }
-
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return getInnerDataSource().getLogWriter();
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return getInnerDataSource().getLoginTimeout();
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter paramPrintWriter) throws SQLException {
-        getInnerDataSource().setLogWriter(paramPrintWriter);
-    }
-
-    @Override
-    public void setLoginTimeout(int paramInt) throws SQLException {
-        getInnerDataSource().setLoginTimeout(paramInt);
-    }
-
-    @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return getInnerDataSource().getParentLogger();
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return getInnerDataSource().unwrap(iface);
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return getInnerDataSource().isWrapperFor(iface);
-    }
-
-    @Override
-    public void close() {
-        RefreshableDataSource ds = getInnerDataSource();
-        if (ds != null) {
-            ds.close();
-        }
-    }
-
-    private RefreshableDataSource createInnerDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider) {
-        DataSourceIdentity id = getDataSourceIdentity(clusterInfo, cluster);
-        DataSourceConfigure config = provider.getDataSourceConfigure(id);
-        try {
-            if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
-                LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
-                LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
-                LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC, clusterInfo.toString()), localizationConfig.toString());
-                return new LocalizedDataSource(validator, id, config);
-            }
-        } catch (Exception e) {
-            LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_DRC_FAIL, clusterInfo.toString()), e.getMessage());
-            throw e;
-        }
-        LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_LOG_NAME_NORMAL, clusterInfo.toString()), "");
-        return new RefreshableDataSource(id, config);
-    }
-
-    private void registerListeners() {
-        cluster.addListener(new Listener<ClusterSwitchedEvent>() {
-            @Override
-            public void onChanged(ClusterSwitchedEvent event) {
+    protected void prepare() {
+        cluster.addListener(event -> {
+            if (status.get() == ForceSwitchedStatus.UnForceSwitched) {
                 try {
-                    doSwitch();
+                    switchDataSource();
                 } catch (Throwable t) {
                     String msg = "Cluster switch listener error";
                     LOGGER.error(msg, t);
                     throw new DalRuntimeException(msg, t);
                 }
-            }
+            } else
+                LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE,
+                        String.format("switchIgnored:%s", cluster.getClusterName()), "");
         });
+        switchDataSource();
     }
 
-    private RefreshableDataSource getInnerDataSource() {
+    private void switchDataSource() {
+        switchDataSource(createInnerDataSource());
+        updateCurrentHost();
+    }
+
+    private void switchDataSource(DataSource newDataSource) {
+        close(dataSourceRef.getAndSet(newDataSource));
+    }
+
+    protected DataSource createInnerDataSource() {
+        if (cluster == null)
+            throw new DalRuntimeException("null cluster");
+        return cluster.getClusterType() != ClusterType.MGR ? createStandaloneDataSource() : createMultiHostDataSource();
+    }
+
+    protected DataSource createStandaloneDataSource() {
+        DataSourceIdentity id = getStandaloneDataSourceIdentity(clusterInfo, cluster);
+        dataSourceId = id;
+        DataSourceConfigure config = provider.getDataSourceConfigure(id);
+        try {
+            if (cluster.getClusterType() == ClusterType.DRC) {
+                LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
+                LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
+                LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_DRC, clusterInfo.toString()), localizationConfig.toString());
+                return new LocalizedDataSource(validator, id, config);
+            }
+        } catch (Throwable t) {
+            LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_DRC_FAIL, clusterInfo.toString()), t.getMessage());
+            throw t;
+        }
+        LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_NORMAL, clusterInfo.toString()), "");
+        return new RefreshableDataSource(id, config);
+    }
+
+    protected DataSource createMultiHostDataSource() {
+        if (cluster.dbShardingEnabled())
+            throw new UnsupportedFeatureException("ClusterDataSource does not support sharding cluster, cluster name: " + cluster.getClusterName());
+        DataSourceIdentity id = getMultiHostDataSourceIdentity(cluster);
+        dataSourceId = id;
+        return new ClusterDataSource(id, cluster, provider);
+    }
+
+    @Override
+    public void configChanged(DataSourceConfigureChangeEvent event) throws SQLException {
+        if (status.get() == ForceSwitchedStatus.UnForceSwitched) {
+            DataSource ds = getDelegated();
+            if (ds instanceof DataSourceConfigureChangeListener)
+                ((DataSourceConfigureChangeListener) ds).configChanged(event);
+        } else
+            LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, String.format("switchIgnored:%s", event.getName()), "");
+    }
+
+    @Override
+    public SingleDataSource getSingleDataSource() {
+        DataSource ds = getDelegated();
+        if (ds instanceof SingleDataSourceWrapper)
+            return ((SingleDataSourceWrapper) ds).getSingleDataSource();
+        return null;
+    }
+
+    @Override
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {
+        DataSource ds = getDelegated();
+        if (ds instanceof SingleDataSourceWrapper)
+            ((SingleDataSourceWrapper) ds).forceRefreshDataSource(name, configure);
+    }
+
+    @Override
+    public void close() {
+        close(getDelegated());
+    }
+
+    protected void close(DataSource dataSource) {
+        if (dataSource instanceof ClosableDataSource) {
+            ((ClosableDataSource) dataSource).close();
+        }
+    }
+
+    @Override
+    public DataSource getDelegated() {
         return dataSourceRef.get();
     }
 
-    private void doSwitch() throws SQLException {
-        RefreshableDataSource ds = createInnerDataSource(clusterInfo, cluster, provider);
-        RefreshableDataSource oldDs = dataSourceRef.getAndSet(ds);
-        if (oldDs != null)
-            oldDs.close();
-    }
-
-    private DataSourceIdentity getDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
+    private DataSourceIdentity getStandaloneDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
         if (clusterInfo.getRole() == DatabaseRole.MASTER)
             return new TraceableClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
         else {
@@ -175,11 +164,165 @@ public class ClusterDynamicDataSource implements DataSource, ClosableDataSource,
                         "slave is not found for cluster '%s', shard %d",
                         clusterInfo.getClusterName(), clusterInfo.getShardIndex()));
             if (slaves.size() > 1)
-                throw new UnsupportedOperationException(String.format(
+                throw new UnsupportedFeatureException(String.format(
                         "multi slaves are found for cluster '%s', shard %d, which is not supported yet",
                         clusterInfo.getClusterName(), clusterInfo.getShardIndex()));
             return new TraceableClusterDataSourceIdentity(slaves.iterator().next());
         }
+    }
+
+    private DataSourceIdentity getMultiHostDataSourceIdentity(Cluster cluster) {
+        return new DefaultClusterIdentity(cluster);
+    }
+
+    // force switch
+
+    private static final String FORCE_SWITCH = "ForceSwitch::forceSwitch:%s";
+    private static final String GET_STATUS = "ForceSwitch::getStatus:%s";
+    private static final String RESTORE = "ForceSwitch::restore:%s";
+    private final Lock lock = new ReentrantLock();
+    private final AtomicReference<HostAndPort> currentHost = new AtomicReference<>();
+    private final AtomicReference<ForceSwitchedStatus> status = new AtomicReference<>(ForceSwitchedStatus.UnForceSwitched);
+    private final AtomicBoolean poolCreated = new AtomicBoolean(true);
+    private static ExecutorService executor;
+    private static final DataSourceConfigureConvert converter = ServiceLoaderHelper.getInstance(DataSourceConfigureConvert.class);
+
+    @Override
+    public SwitchableDataSourceStatus forceSwitch(FirstAidKit configure, final String ip, final Integer port) {
+        synchronized (lock) {
+            SwitchableDataSourceStatus currentStatus = getStatus();
+            ForceSwitchedStatus prevStatus = status.getAndSet(ForceSwitchedStatus.ForceSwitching);
+            try {
+                String logName = String.format(FORCE_SWITCH, clusterInfo.toString());
+                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, String.format("newIp: %s, newPort: %s", ip, port), () -> {
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
+                            String.format("old isForceSwitched before force switch: %s, old poolCreated before force switch: %s",
+                                    currentStatus.isForceSwitched(), currentStatus.isPoolCreated()));
+                    DataSourceConfigure dataSourceConfig = getSingleDataSource().getDataSourceConfigure().clone();
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("previous host(s): %s:%s", currentStatus.getHostName(), currentStatus.getPort()));
+                    dataSourceConfig.replaceURL(ip, port);
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new host(s): %s:%s", ip, port));
+                    getExecutor().submit(() -> {
+                        try {
+                            switchDataSource(new RefreshableDataSource(dataSourceId, dataSourceConfig));
+                            status.set(ForceSwitchedStatus.ForceSwitched);
+                            currentHost.set(new HostAndPort(null, ip, port));
+                        } catch (Throwable t) {
+                            LOGGER.error("DataSource creation failed", t);
+                            // TODO: handle pool creation failure
+                            status.set(prevStatus);
+                        }
+                    });
+                });
+                return currentStatus;
+            } catch (Throwable t) {
+                status.set(prevStatus);
+                LOGGER.error("Force switch error", t);
+                throw new DalRuntimeException("Force switch error", t);
+            }
+        }
+    }
+
+    @Override
+    public SwitchableDataSourceStatus restore() {
+        synchronized (lock) {
+            SwitchableDataSourceStatus currentStatus = getStatus();
+            try {
+                String logName = String.format(RESTORE, clusterInfo.toString());
+                LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName, "restore", () -> {
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
+                            String.format("old isForceSwitched before restore: %s, old poolCreated before restore: %s",
+                                    currentStatus.isForceSwitched(), currentStatus.isPoolCreated()));
+                    if (status.get() != ForceSwitchedStatus.ForceSwitched) {
+                        LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, "not in force switched status");
+                        return;
+                    }
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("previous host(s): %s:%s", currentStatus.getHostName(), currentStatus.getPort()));
+                    HostAndPort newHost = buildHostAndPort(cluster);
+                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new host(s): %s:%s", newHost.getHost(), newHost.getPort()));
+                    getExecutor().submit(() -> {
+                        try {
+                            switchDataSource();
+                            status.set(ForceSwitchedStatus.UnForceSwitched);
+                        } catch (Throwable t) {
+                            LOGGER.error("DataSource restoring failed", t);
+                        }
+                    });
+                });
+                return currentStatus;
+            } catch (Throwable t) {
+                LOGGER.error("Restore error", t);
+                throw new DalRuntimeException("Restore error", t);
+            }
+        }
+    }
+
+    @Override
+    public SwitchableDataSourceStatus getStatus() {
+        AtomicReference<HostAndPort> current = new AtomicReference<>();
+        try {
+            String logName = String.format(GET_STATUS, clusterInfo.toString());
+            LOGGER.logTransaction(DalLogTypes.DAL_CONFIGURE, logName,
+                    currentHost.get().getHost() + ":" + currentHost.get().getPort(), () -> {
+                try (Connection conn = getConnection()) {
+                    current.set(ConnectionStringParser.parseHostPortFromURL(conn.getMetaData().getURL()));
+                }
+            });
+        } catch (Throwable t) {
+            LOGGER.warn("GetStatus error", t);
+        }
+        if (current.get() != null)
+            return new SwitchableDataSourceStatus(status.get() == ForceSwitchedStatus.ForceSwitched,
+                    current.get().getHost(), current.get().getPort(), poolCreated.get());
+        else
+            return new SwitchableDataSourceStatus(status.get() == ForceSwitchedStatus.ForceSwitched,
+                    currentHost.get().getHost(), currentHost.get().getPort(), poolCreated.get());
+    }
+
+    @Override
+    public FirstAidKit getFirstAidKit() {
+        DataSourceConfigure dataSourceConfig = getSingleDataSource().getDataSourceConfigure();
+        return SerializableDataSourceConfig.valueOf(converter.desEncrypt(dataSourceConfig));
+    }
+
+    @Override
+    public void addListener(SwitchListener listener) {
+        throw new UnsupportedOperationException("ClusterDynamicDataSource does not support SwitchListener");
+    }
+
+    private void updateCurrentHost() {
+        currentHost.set(buildHostAndPort(cluster));
+    }
+
+    private HostAndPort buildHostAndPort(Cluster cluster) {
+        if (cluster.getClusterType() == ClusterType.MGR) {
+            StringBuilder hosts = new StringBuilder();
+            StringBuilder hostsWithPorts = new StringBuilder();
+            Set<Integer> ports = new HashSet<>();
+            cluster.getDatabases().forEach(database -> {
+                ConnectionString connStr = database.getConnectionString();
+                if (hosts.length() > 0)
+                    hosts.append(",");
+                if (hostsWithPorts.length() > 0)
+                    hostsWithPorts.append(",");
+                hosts.append(connStr.getPrimaryHost());
+                hostsWithPorts.append(connStr.getPrimaryHost()).append(":").append(connStr.getPrimaryPort());
+                ports.add(connStr.getPrimaryPort());
+            });
+            if (ports.size() == 1)
+                return new HostAndPort(null, hosts.toString(), ports.iterator().next());
+            else
+                return new HostAndPort(null, hostsWithPorts.toString(), 0);
+        } else {
+            ConnectionString connStr = cluster.getMasterOnShard(clusterInfo.getShardIndex()).getConnectionString();
+            return new HostAndPort(null, connStr.getPrimaryHost(), connStr.getPrimaryPort());
+        }
+    }
+
+    private static ExecutorService getExecutor() {
+        if (executor == null)
+            executor = Executors.newFixedThreadPool(1);
+        return executor;
     }
 
 }

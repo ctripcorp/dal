@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
 import com.ctrip.platform.dal.dao.helper.*;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -32,6 +33,8 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     private AtomicInteger referenceCount = new AtomicInteger(0);
     private volatile boolean closed = false;
 
+    private final ConnectionValidator clusterConnValidator;
+
     // sync create pool
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
         this(name, dataSourceConfigure, null);
@@ -39,12 +42,14 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     }
 
     // async create pool
-    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure, DataSourceCreatePoolListener listener) {
+    public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure,
+                            DataSourceCreatePoolListener listener) {
         if (dataSourceConfigure == null)
             throw new DalRuntimeException("Can not find any connection configure for " + name);
         this.name = name;
         this.dataSourceConfigure = dataSourceConfigure;
         this.listener = listener;
+        this.clusterConnValidator = dataSourceConfigure.getValidator();
         dataSourceRef.set(createDataSource());
     }
 
@@ -54,8 +59,8 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
             String message = String.format("Datasource[name=%s, Driver=%s] created,connection url:%s", name,
                     dataSourceConfigure.getDriverClass(), dataSourceConfigure.getConnectionUrl());
             PoolProperties poolProperties = poolPropertiesHelper.convert(dataSourceConfigure);
-            setPoolPropertiesIntoValidator(poolProperties);
-            DalTomcatDataSource ds =  new DalTomcatDataSource(poolProperties);
+            preHandleValidator(poolProperties, clusterConnValidator);
+            DalTomcatDataSource ds =  new DalTomcatDataSource(poolProperties, clusterConnValidator);
             LOGGER.logTransaction(DalLogTypes.DAL_DATASOURCE, String.format(DATASOURCE_CREATE_DATASOURCE, name), message, startTime);
             LOGGER.info(message);
             return ds;
@@ -113,16 +118,15 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
         return dataSourceRef.get();
     }
 
-    private void setPoolPropertiesIntoValidator(PoolProperties poolProperties) {
+    private void preHandleValidator(PoolProperties poolProperties, ConnectionValidator clusterConnValidator) {
         if (poolProperties == null)
             return;
         Validator validator = poolProperties.getValidator();
-        if (validator == null)
-            return;
-        if (!(validator instanceof ValidatorProxy))
-            return;
-        ValidatorProxy dsValidator = (ValidatorProxy) validator;
-        dsValidator.setPoolProperties(poolProperties);
+        if (validator instanceof ValidatorProxy) {
+            ValidatorProxy dsValidator = (ValidatorProxy) validator;
+            dsValidator.setPoolProperties(poolProperties);
+            dsValidator.setClusterConnValidator(clusterConnValidator);
+        }
     }
 
     public void reCreateDataSource() {

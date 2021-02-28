@@ -15,6 +15,7 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
 
     private ClusterConfigImpl clusterConfig;
     private int shardIndex;
+    private String zone;
     private String masterDomain;
     private Integer masterPort;
     private String masterKeys;
@@ -44,6 +45,10 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         return shardIndex;
     }
 
+    public String getZone() {
+        return zone;
+    }
+
     public String getMasterDomain() {
         return masterDomain;
     }
@@ -66,6 +71,10 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
 
     public String[] getSlaveKeys() {
         return slaveKeys != null ? slaveKeys.split(ALIAS_KEYS_SPLITTER) : null;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 
     public void setMasterDomain(String masterDomain) {

@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao.configure;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +19,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     private String version;
     private DalConnectionString connectionString;
     private DataSourceIdentity dataSourceId;
+    private HostSpec host;
+    private ConnectionValidator validator;
 
     public DataSourceConfigure() {
     }
@@ -262,11 +266,27 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     }
 
     @Override
-    public String[] getIdcPriority() {
-        String value = getProperty(IDC_PRIORITY);
-        if (com.ctrip.framework.dal.cluster.client.util.StringUtils.isTrimmedEmpty(value))
-            return new String[0];
-        return StringUtils.split(value, IDC_PRIORITY_SEPARATOR);
+    public String getZonesPriority() {
+        String value = getProperty(ZONES_PRIORITY);
+        return StringUtils.isNotEmpty(value) ? value : getProperty(IDC_PRIORITY);
+    }
+
+    @Override
+    public Long getFailoverTimeMS() {
+        String value = getProperty(FAILOVER_TIME_MS);
+        return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
+    }
+
+    @Override
+    public Long getBlacklistTimeoutMS() {
+        String value = getProperty(BLACKLIST_TIMEOUT_MS);
+        return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
+    }
+
+    @Override
+    public Long getFixedValidatePeriodMS() {
+        String value = getProperty(FIXED_VALIDATE_PERIOD_MS);
+        return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
     }
 
     public String getInitSQL() {
@@ -352,6 +372,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         dataSourceConfigure.setVersion(version);
         dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
         dataSourceConfigure.setDataSourceId(dataSourceId);
+//        dataSourceConfigure.setHost(host);
+//        dataSourceConfigure.setValidator(validator);
         return dataSourceConfigure;
     }
 
@@ -446,11 +468,27 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         this.dataSourceId = dataSourceId;
     }
 
+    public HostSpec getHost() {
+        return host;
+    }
+
+    public void setHost(HostSpec host) {
+        this.host = host;
+    }
+
+    public ConnectionValidator getValidator() {
+        return validator;
+    }
+
+    public void setValidator(ConnectionValidator validator) {
+        this.validator = validator;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof DataSourceConfigure) {
             DataSourceConfigure ref = (DataSourceConfigure) obj;
-            return (equals(getConnectionUrl(), ref.getConnectionUrl()) &&
+            return equals(getConnectionUrl(), ref.getConnectionUrl()) &&
                     equals(getUserName(), ref.getUserName()) &&
                     equals(getPassword(), ref.getPassword()) &&
                     equals(getDriverClass(), ref.getDriverClass()) &&
@@ -475,7 +513,9 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                     equals(getJdbcInterceptors(), ref.getJdbcInterceptors()) &&
                     equals(getConnectionProperties(), ref.getConnectionProperties()) &&
                     equals(getJmxEnabled(), ref.getJmxEnabled()) &&
-                    equals(getSessionWaitTimeout(), ref.getSessionWaitTimeout()));
+                    equals(getSessionWaitTimeout(), ref.getSessionWaitTimeout()) &&
+                    equals(getHost(), ref.getHost()) &&
+                    equals(getValidator(), ref.getValidator());
         }
         return false;
     }
@@ -513,6 +553,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
                 append(getConnectionProperties()).
                 append(getJmxEnabled()).
                 append(getSessionWaitTimeout()).
+                append(getHost()).
+                append(getValidator()).
                 generate();
     }
 

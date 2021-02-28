@@ -5,6 +5,8 @@ import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 
 public interface ConnectionStringConfigureProvider extends Listenable<DalConnectionStringConfigure> {
 
-    public DalConnectionStringConfigure getConnectionString() throws Exception;
+    String getDbName();
+
+    DalConnectionStringConfigure getConnectionString() throws Exception;
 
 }

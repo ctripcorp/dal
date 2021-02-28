@@ -9,6 +9,7 @@ import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
@@ -136,6 +137,11 @@ public class ClusterDbSqlContextTest extends BaseSqlContextTest {
 
             @Override
             public ClusterIdGeneratorConfig getIdGeneratorConfig() {
+                return null;
+            }
+
+            @Override
+            public ClusterRouteStrategyConfig getRouteStrategyConfig() {
                 return null;
             }
 

@@ -19,7 +19,7 @@ import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, CustomizableMapper<T> {
 
-    public Class<T> clazz = null;
+    private Class<T> clazz = null;
     private String[] columnNames = null;
     private Map<String, Field> fieldsMap = null;
     private boolean ignorMissingFields = false;

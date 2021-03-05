@@ -5,8 +5,10 @@ import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.DefaultCluster;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedClass;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -124,6 +126,16 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
         return getInnerCluster().getLocalizationConfig();
     }
 
+    @Override
+    public LocalizationConfig getLastLocalizationConfig() {
+        return getInnerCluster().getLastLocalizationConfig();
+    }
+
+    @Override
+    public DalConfigCustomizedClass getCustomizedClass() {
+        return getInnerCluster().getCustomizedClass();
+    }
+
     private void registerListener() {
         clusterConfig.addListener(new Listener<ClusterConfig>() {
             @Override
@@ -144,6 +156,8 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
         LOGGER.logTransaction(CAT_LOG_TYPE, logName, "", () -> {
             Cluster curr = clusterConfig.generate();
             Cluster prev = innerCluster.getAndSet(curr);
+            ((DefaultCluster)curr).setLastLocalizationConfig(prev.getLocalizationConfig());
+            ((DefaultCluster)curr).setLastLocalizationConfig(prev.getLastLocalizationConfig());
             try {
                 if (prev.getClusterType() != ClusterType.DRC && curr.getClusterType() == ClusterType.DRC)
                     LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_EVENT_NAME_NORMAL_TO_DRC, getClusterName()), "");

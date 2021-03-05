@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.DefaultCluster;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedClass;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
@@ -205,6 +207,8 @@ public class DalConfigureFactory implements DalConfigConstants {
         for (Node node : clusterList) {
             String name = getDatabaseSetName(node);
             Cluster cluster = readCluster(node, clusterManager);
+            DalConfigCustomizedClass customizedClass = createCustomizedClass(node);
+            ((DefaultCluster)cluster).setCustomizedClass(customizedClass);
             databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator, getSettings(node)));
         }
 
@@ -227,11 +231,22 @@ public class DalConfigureFactory implements DalConfigConstants {
         return getAttribute(clusterNode, ALIAS, getAttribute(clusterNode, NAME));
     }
 
+    private String getConsistencyCustomizedClass(Node clusterNode) {
+        return getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null);
+    }
+
     private Cluster readCluster(Node clusterNode, ClusterManager clusterManager) throws Exception {
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new DalConfigException("empty cluster name");
         return clusterManager.getOrCreateCluster(name);
+    }
+
+    private DalConfigCustomizedClass createCustomizedClass(Node clusterNode) {
+        DefaultDalConfigCustomizedClass customizedClass = new DefaultDalConfigCustomizedClass();
+        String consistencyCustomizedClass = getConsistencyCustomizedClass(clusterNode);
+        customizedClass.setConsistencyTypeCustomizedClass(consistencyCustomizedClass);
+        return customizedClass;
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {

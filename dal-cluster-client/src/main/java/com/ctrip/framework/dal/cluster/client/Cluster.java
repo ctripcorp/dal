@@ -3,6 +3,7 @@ package com.ctrip.framework.dal.cluster.client;
 import com.ctrip.framework.dal.cluster.client.base.Listenable;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedClass;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -51,5 +52,9 @@ public interface Cluster extends Listenable<ClusterSwitchedEvent>, Wrapper {
     ClusterRouteStrategyConfig getRouteStrategyConfig();
 
     LocalizationConfig getLocalizationConfig();
+
+    LocalizationConfig getLastLocalizationConfig();
+
+    DalConfigCustomizedClass getCustomizedClass();
 
 }

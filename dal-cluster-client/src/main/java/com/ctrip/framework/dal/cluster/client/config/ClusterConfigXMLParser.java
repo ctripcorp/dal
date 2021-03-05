@@ -2,6 +2,7 @@ package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.base.PropertyAccessor;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
@@ -269,6 +270,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             if (!StringUtils.isEmpty(zoneIdText)) {
                 clusterConfig.setZoneId(zoneIdText);
             }
+        }
+        Node unitConsistencyStrategyNode = getChildNode(clusterNode, CONSISTENCY_TYPE);
+        // default consistency type is HIGH_AVAILABILITY
+        clusterConfig.setDrcConsistencyType(DrcConsistencyTypeEnum.HIGH_AVAILABILITY);
+        if (unitConsistencyStrategyNode != null) {
+            String unitConsistencyStrategyText = unitConsistencyStrategyNode.getTextContent();
+            clusterConfig.setDrcConsistencyType(DrcConsistencyTypeEnum.parse(unitConsistencyStrategyText));
         }
     }
 

@@ -12,6 +12,10 @@ public class SqlUtils {
         return firstAlphaCharUc == 'S';
     }
 
+    public static boolean isInsertOperation(char firstAlphaCharUc) {
+        return firstAlphaCharUc == 'I';
+    }
+
     public static char firstAlphaCharUc(String sql) {
         return StringUtils.firstAlphaCharUc(sql, findStartOfStatement(sql));
     }

@@ -27,6 +27,7 @@ public interface DalConfigConstants {
     String LOCATOR = "locator";
     String DATABASE_SELECTOR = "DatabaseSelector";
     String SELECTOR = "selector";
+    String CONSISTENCY_TYPE_CUSTOMIZED_CLASS = "consistencyTypeCustomizedClass";
 
     String ID_GENERATOR = "idGenerator";
     String ID_GENERATOR_FACTORY = "factory";

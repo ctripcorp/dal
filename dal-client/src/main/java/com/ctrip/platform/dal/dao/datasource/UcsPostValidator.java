@@ -1,13 +1,16 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.datasource.log.OperationType;
+
 public interface UcsPostValidator {
 
-    long drcDelayTime = 2000; // ms
+    long drcDelayTime = 3000; // ms
 
     boolean validate(UcsConsistencyValidateContext context);
 
-    default boolean dalValidate(long datasourceCreateTime, boolean isSameZone) {
-        return isSameZone || (System.currentTimeMillis() - datasourceCreateTime) > drcDelayTime;
+    default boolean dalValidate(long datasourceCreateTime, boolean isSameZone, OperationType operationType) {
+        return OperationType.QUERY.equals(operationType)
+                || isSameZone || (System.currentTimeMillis() - datasourceCreateTime) > drcDelayTime;
     }
 
 }

@@ -157,7 +157,6 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
             Cluster curr = clusterConfig.generate();
             Cluster prev = innerCluster.getAndSet(curr);
             ((DefaultCluster)curr).setLastLocalizationConfig(prev.getLocalizationConfig());
-            ((DefaultCluster)curr).setLastLocalizationConfig(prev.getLastLocalizationConfig());
             try {
                 if (prev.getClusterType() != ClusterType.DRC && curr.getClusterType() == ClusterType.DRC)
                     LOGGER.logEvent(CAT_LOG_TYPE, String.format(CAT_EVENT_NAME_NORMAL_TO_DRC, getClusterName()), "");

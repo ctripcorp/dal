@@ -32,5 +32,19 @@ public class UcsConsistencyValidateContext {
         return isSameZone;
     }
 
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
+    }
 
+    public void setUcsValidateResult(String ucsValidateResult) {
+        this.ucsValidateResult = ucsValidateResult;
+    }
+
+    public void setDatasourceCreateTime(long datasourceCreateTime) {
+        this.datasourceCreateTime = datasourceCreateTime;
+    }
+
+    public void setSameZone(boolean sameZone) {
+        isSameZone = sameZone;
+    }
 }

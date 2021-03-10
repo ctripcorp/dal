@@ -341,7 +341,7 @@ public class LocalizedStatement implements Statement, LocalizationValidatable {
 
     protected OperationType getOperationType(String sql) {
         char firstAlphaCharUc = SqlUtils.firstAlphaCharUc(sql);
-        return SqlUtils.isReadOperation(firstAlphaCharUc) ? QUERY : diffInsertFromUpdate(firstAlphaCharUc);
+        return (isCallableStatement() || SqlUtils.isReadOperation(firstAlphaCharUc)) ? QUERY : diffInsertFromUpdate(firstAlphaCharUc);
     }
 
     protected OperationType getOperationType(char firstAlphaCharUc) {

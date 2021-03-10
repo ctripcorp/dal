@@ -208,7 +208,7 @@ public class DalConfigureFactory implements DalConfigConstants {
             String name = getDatabaseSetName(node);
             Cluster cluster = readCluster(node, clusterManager);
             DalConfigCustomizedClass customizedClass = createCustomizedClass(node);
-            ((DefaultCluster)cluster).setCustomizedClass(customizedClass);
+            (cluster.unwrap(DefaultCluster.class)).setCustomizedClass(customizedClass);
             databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator, getSettings(node)));
         }
 

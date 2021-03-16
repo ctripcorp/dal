@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -25,18 +27,38 @@ import com.mysql.jdbc.MySQLConnection;
  *
  * @author jhhe
  */
-public class DalDirectClient implements DalContextClient {
-    private DalStatementCreator stmtCreator;
-    private DalConnectionManager connManager;
-    private DalTransactionManager transManager;
-    private DalLogger logger;
+public class DalDirectClient implements DalContextClient, DalClientExtension {
+    protected volatile DalStatementCreator stmtCreator;
+    protected volatile DalConnectionManager connManager;
+    protected volatile DalTransactionManager transManager;
+    protected volatile DalLogger logger;
 
     public DalDirectClient(DalConfigure config, String logicDbName) {
-        connManager = new DalConnectionManager(logicDbName, config);
-        transManager = new DalTransactionManager(connManager);
-        stmtCreator = new DalStatementCreator(config.getDatabaseSet(logicDbName).getDatabaseCategory());
-        logger = DalClientFactory.getDalLogger();
+        init(config, logicDbName);
     }
+
+    public DalDirectClient() {
+    }
+
+    @Override
+    public void init(DalConfigure configure, String logicDbName) {
+        if (stmtCreator == null) {
+            synchronized (DalDirectClient.class) {
+                if (stmtCreator == null) {
+                    connManager = new DalConnectionManager(logicDbName, configure);
+                    transManager = new DalTransactionManager(connManager);
+                    stmtCreator = new DalStatementCreator(configure.getDatabaseSet(logicDbName).getDatabaseCategory());
+                    logger = DalClientFactory.getDalLogger();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
 
     @Override
     public <T> T query(String sql, StatementParameters parameters, final DalHints hints,

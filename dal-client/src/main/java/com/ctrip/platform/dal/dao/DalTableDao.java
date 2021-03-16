@@ -48,6 +48,8 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     private DalRequestExecutor executor;
 
+    private Class clazz;
+
     public DalTableDao(DalParser<T> parser) {
         this(parser, DalClientFactory.getTaskFactory());
     }
@@ -75,7 +77,22 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     public DalTableDao(DalParser<T> parser, DalTaskFactory factory, DalRequestExecutor executor) {
         initialize(parser);
         initTasks(factory);
+        initRecord(parser);
         this.executor = executor;
+    }
+
+    protected void initRecord(DalParser<T> parser) {
+        recordParserClazz(parser);
+    }
+
+    protected void recordParserClazz(DalParser<T> parser) {
+        try {
+            if (parser instanceof DalDefaultJpaParser) {
+                this.clazz = ((DalDefaultJpaParser)parser).getClazz();
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     private void initTasks(DalTaskFactory factory) {
@@ -489,6 +506,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     private <K> K commonQuery(SelectSqlBuilder builder, DalHints hints, ShardExecutionCallback<K> callback) throws SQLException {
+        initDalHints(hints);
         DalSqlTaskRequest<K> request = new DalSqlTaskRequest<>(logicDbName, populate(builder), hints,
                 DalClientFactory.getTaskFactory().createQuerySqlTask((DalParser<K>) parser,
                         builder.getResultExtractor(hints)), builder.getResultMerger(hints), callback);
@@ -946,7 +964,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     private DalHints setSize(DalHints hints, KeyHolder keyHolder, List<T> pojos) {
-        keyHolder = vaidateKeyHolder(hints, keyHolder);
+        keyHolder = validateKeyHolder(hints, keyHolder);
 
         if (keyHolder != null && pojos != null)
             keyHolder.initialize(pojos.size());
@@ -955,7 +973,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
     }
 
     private DalHints setSize(DalHints hints, KeyHolder keyHolder, T pojo) {
-        keyHolder = vaidateKeyHolder(hints, keyHolder);
+        keyHolder = validateKeyHolder(hints, keyHolder);
 
         if (keyHolder != null && pojo != null)
             keyHolder.initialize(1);
@@ -963,10 +981,19 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
         return hints.setKeyHolder(keyHolder);
     }
 
-    private KeyHolder vaidateKeyHolder(DalHints hints, KeyHolder keyHolder) {
+    private KeyHolder validateKeyHolder(DalHints hints, KeyHolder keyHolder) {
         if (hints.is(DalHintEnum.setIdentityBack))
             keyHolder = keyHolder == null ? new KeyHolder() : keyHolder;
         return keyHolder;
+    }
+
+    /**
+     * Add some message to DalHints that all query may be need.
+     * resultClass: the result type of query.
+     * @param hints
+     */
+    protected void initDalHints(DalHints hints) {
+        hints.setResultClass(this.clazz);
     }
 
 }

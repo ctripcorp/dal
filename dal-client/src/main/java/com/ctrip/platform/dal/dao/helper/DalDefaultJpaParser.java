@@ -122,4 +122,8 @@ public class DalDefaultJpaParser<T> extends AbstractDalParser<T> implements Cust
     public DalRowMapper<T> mapWith(String[] columns) throws SQLException {
         return rowMapper.mapWith(columns);
     }
+
+    public Class getClazz() {
+		return this.clazz;
+	}
 }

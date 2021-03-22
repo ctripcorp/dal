@@ -30,6 +30,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private Integer unitStrategyId;
     private String zoneId;
     private DrcConsistencyTypeEnum drcConsistencyType;
+    private DalConfigCustomizedOption customizedOption; // this variable is from dal.config or datasource parameter
 
     private final AtomicReference<Cluster> generatedClusterRef = new AtomicReference<>();
 
@@ -80,6 +81,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         else if (unitStrategyId != null)
             localizationState = LocalizationState.PREPARED;
         cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId, localizationState, drcConsistencyType));
+        cluster.setCustomizedClass(customizedOption);
         cluster.validate();
         return cluster;
     }
@@ -146,6 +148,14 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     public void setDrcConsistencyType(DrcConsistencyTypeEnum type) {
         this.drcConsistencyType = type;
+    }
+
+    public void setCustomizedOption(DalConfigCustomizedOption customizedOption) {
+        this.customizedOption = customizedOption;
+    }
+
+    public DalConfigCustomizedOption getCustomizedOption() {
+        return customizedOption;
     }
 
     @Override

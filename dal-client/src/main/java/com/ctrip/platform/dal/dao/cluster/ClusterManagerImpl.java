@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.cluster;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.ClusterConfigProvider;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -22,7 +23,7 @@ public class ClusterManagerImpl implements ClusterManager {
     }
 
     @Override
-    public Cluster getOrCreateCluster(String clusterName) {
+    public Cluster getOrCreateCluster(String clusterName, DalConfigCustomizedOption customizedOption) {
         if (StringUtils.isEmpty(clusterName))
             throw new DalRuntimeException("cluster name is empty");
         clusterName = StringUtils.toTrimmedLowerCase(clusterName);
@@ -31,15 +32,15 @@ public class ClusterManagerImpl implements ClusterManager {
             synchronized (clusters) {
                 cluster = clusters.get(clusterName);
                 if (cluster == null) {
-                    cluster = createCluster(clusterName);
+                    cluster = createCluster(clusterName, customizedOption);
                     clusters.put(clusterName, cluster);
                 }
             }
         return cluster;
     }
 
-    private Cluster createCluster(String clusterName) {
-        ClusterConfig config = configProvider.getClusterConfig(clusterName);
+    private Cluster createCluster(String clusterName, DalConfigCustomizedOption customizedOption) {
+        ClusterConfig config = configProvider.getClusterConfig(clusterName, customizedOption);
         return new DynamicCluster(config);
     }
 

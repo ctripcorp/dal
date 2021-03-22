@@ -3,8 +3,10 @@ package com.ctrip.framework.dal.cluster.client.cluster;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigProvider;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.MappedShardData;
 import com.ctrip.framework.dal.cluster.client.sharding.context.ShardData;
@@ -30,8 +32,43 @@ public class DefaultClusterTest {
     @BeforeClass
     public static void init() {
         ClusterConfigProvider provider = new DefaultLocalConfigProvider("demo-cluster");
-        ClusterConfig config = provider.getClusterConfig();
+        // todo-lhj xiu dance
+        ClusterConfig config = provider.getClusterConfig(mockCustomizedOption());
         cluster = config.generate();
+    }
+
+    public static DalConfigCustomizedOption mockCustomizedOption() {
+        return new DalConfigCustomizedOption() {
+            @Override
+            public String getConsistencyTypeCustomizedClass() {
+                return null;
+            }
+
+            @Override
+            public boolean isIgnoreShardingResourceNotFound() {
+                return false;
+            }
+
+            @Override
+            public boolean isForceInitialize() {
+                return false;
+            }
+
+            @Override
+            public Integer getShardIndex() {
+                return null;
+            }
+
+            @Override
+            public DatabaseRole getDatabaseRole() {
+                return null;
+            }
+
+            @Override
+            public DalConfigCustomizedOption clone() {
+                return null;
+            }
+        };
     }
 
     @Test

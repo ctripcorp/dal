@@ -24,10 +24,10 @@ public class DefaultLocalConfigProvider implements ClusterConfigProvider {
     }
 
     @Override
-    public ClusterConfig getClusterConfig() {
+    public ClusterConfig getClusterConfig(DalConfigCustomizedOption customizedOption) {
         try (InputStream is = FileUtils.getResourceInputStream(getConfigFileName(),
                 DefaultLocalConfigProvider.class.getClassLoader())) {
-            return parser.parse(is);
+            return parser.parse(is, customizedOption);
         } catch (Throwable t) {
             throw new ClusterConfigException("Load cluster config failed, cluster name: " + clusterName, t);
         }

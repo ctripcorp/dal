@@ -10,8 +10,7 @@ import javax.persistence.Entity;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.DefaultCluster;
-import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedClass;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
@@ -104,6 +103,8 @@ public class DalConfigureFactory implements DalConfigConstants {
 
         DalConnectionLocator locator =
                 readComponent(root, CONNECTION_LOCATOR, new DefaultDalConnectionLocator(), LOCATOR, false);
+        // read config of ''
+        DalConfigCustomizedOption defaultOption = readOverridableProperty(root);
 
         Map<String, DatabaseSet> databaseSets = readDatabaseSets(getChildNode(root, DATABASE_SETS));
         if (locator instanceof InjectableComponentSupport) {
@@ -111,7 +112,7 @@ public class DalConfigureFactory implements DalConfigConstants {
         }
         locator.initialize(getSettings(getChildNode(root, CONNECTION_LOCATOR)));
 
-        Map<String, DatabaseSet> clusters = readClusters(getChildNode(root, DATABASE_SETS), locator);
+        Map<String, DatabaseSet> clusters = readClusters(getChildNode(root, DATABASE_SETS), locator, defaultOption);
         clusters.putAll(databaseSets);
 
         locator.setup(clusters.values());
@@ -168,12 +169,21 @@ public class DalConfigureFactory implements DalConfigConstants {
         return settings;
     }
 
-    private String getAttribute(Node node, String attributeName) {
-        String attribute =  node.getAttributes().getNamedItem(attributeName).getNodeValue();
-        if (attribute != null) {
-            attribute = attribute.trim();
+    protected DalConfigCustomizedOption readOverridableProperty(Element root) {
+        DefaultDalConfigCustomizedOption defaultOption = new DefaultDalConfigCustomizedOption();
+        String attribute = getAttribute(getChildNode(root, DATABASE_SETS), IGNORE_RESOURCE_NOT_FOUND);
+        if (!StringUtils.isEmpty(attribute) && attribute.trim().equalsIgnoreCase("sharding")) {
+            defaultOption.ignoreShardingResourceNotFound(true);
         }
-        return attribute;
+        return defaultOption;
+    }
+
+    private String getAttribute(Node node, String attributeName) {
+        Node attributeNode = node.getAttributes().getNamedItem(attributeName);
+        if (attributeNode == null || attributeNode.getNodeValue() == null) {
+            return null;
+        }
+        return attributeNode.getNodeValue().trim();
     }
 
     private String getAttribute(Node node, String attributeName, String defaultValue) {
@@ -199,16 +209,16 @@ public class DalConfigureFactory implements DalConfigConstants {
         return found;
     }
 
-    private Map<String, DatabaseSet> readClusters(Node databaseSetsNode, DalConnectionLocator locator) throws Exception {
+    private Map<String, DatabaseSet> readClusters(Node databaseSetsNode, DalConnectionLocator locator, DalConfigCustomizedOption defaultOption) throws Exception {
         Map<String, DatabaseSet> databaseSets = new HashMap<>();
 
         ClusterManager clusterManager = new ClusterManagerImpl(locator.getIntegratedConfigProvider());
         List<Node> clusterList = getChildNodes(databaseSetsNode, CLUSTER);
         for (Node node : clusterList) {
+            DalConfigCustomizedOption option = defaultOption.clone();
             String name = getDatabaseSetName(node);
-            Cluster cluster = readCluster(node, clusterManager);
-            DalConfigCustomizedClass customizedClass = createCustomizedClass(node);
-            (cluster.unwrap(DefaultCluster.class)).setCustomizedClass(customizedClass);
+            overrideDefaultConfig(node, option);
+            Cluster cluster = readCluster(node, clusterManager, option);
             databaseSets.put(name, new ClusterDatabaseSet(name, cluster, locator, getSettings(node)));
         }
 
@@ -231,22 +241,16 @@ public class DalConfigureFactory implements DalConfigConstants {
         return getAttribute(clusterNode, ALIAS, getAttribute(clusterNode, NAME));
     }
 
-    private String getConsistencyCustomizedClass(Node clusterNode) {
-        return getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null);
-    }
-
-    private Cluster readCluster(Node clusterNode, ClusterManager clusterManager) throws Exception {
+    private Cluster readCluster(Node clusterNode, ClusterManager clusterManager, DalConfigCustomizedOption customizedClass) throws Exception {
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new DalConfigException("empty cluster name");
-        return clusterManager.getOrCreateCluster(name);
+        return clusterManager.getOrCreateCluster(name, customizedClass);
     }
 
-    private DalConfigCustomizedClass createCustomizedClass(Node clusterNode) {
-        DefaultDalConfigCustomizedClass customizedClass = new DefaultDalConfigCustomizedClass();
-        String consistencyCustomizedClass = getConsistencyCustomizedClass(clusterNode);
-        customizedClass.setConsistencyTypeCustomizedClass(consistencyCustomizedClass);
-        return customizedClass;
+    private void overrideDefaultConfig(Node clusterNode, DalConfigCustomizedOption defaultOption) {
+        ((DefaultDalConfigCustomizedOption)defaultOption)
+                .consistencyTypeCustomizedClass(getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null));
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {

@@ -5,7 +5,7 @@ import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
-import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedClass;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
 import com.ctrip.framework.dal.cluster.client.database.Database;
@@ -178,7 +178,7 @@ public class ClusterDbSqlContextTest extends BaseSqlContextTest {
             }
 
             @Override
-            public DalConfigCustomizedClass getCustomizedClass() {
+            public DalConfigCustomizedOption getCustomizedOption() {
                 return null;
             }
 

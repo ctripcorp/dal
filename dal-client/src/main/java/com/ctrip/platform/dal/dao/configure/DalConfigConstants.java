@@ -6,6 +6,7 @@ public interface DalConfigConstants {
 
     String NAME = "name";
     String DATABASE_SETS = "databaseSets";
+    String IGNORE_RESOURCE_NOT_FOUND = "ignoreResourceNotFound";
     String DATABASE_SET = "databaseSet";
     String CLUSTER = "cluster";
     String ALIAS = "alias";

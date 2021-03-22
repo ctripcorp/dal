@@ -5,6 +5,6 @@ package com.ctrip.framework.dal.cluster.client.config;
  */
 public interface ClusterConfigProvider {
 
-    ClusterConfig getClusterConfig();
+    ClusterConfig getClusterConfig(DalConfigCustomizedOption customizedOption);
 
 }

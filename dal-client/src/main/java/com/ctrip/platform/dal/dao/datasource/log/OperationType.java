@@ -13,7 +13,7 @@ public enum OperationType {
     private boolean isUpdateOperation;
 
     OperationType(boolean isUpdateOperation) {
-        isUpdateOperation = isUpdateOperation;
+        this.isUpdateOperation = isUpdateOperation;
     }
 
     public boolean isUpdateOperation() {

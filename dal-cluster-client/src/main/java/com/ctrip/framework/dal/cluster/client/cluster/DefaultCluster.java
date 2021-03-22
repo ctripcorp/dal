@@ -3,7 +3,7 @@ package com.ctrip.framework.dal.cluster.client.cluster;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
-import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedClass;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
@@ -29,7 +29,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     private ClusterRouteStrategyConfig routeStrategyConfig;
     private LocalizationConfig localizationConfig;
     private LocalizationConfig lastLocalizationConfig;
-    private DalConfigCustomizedClass customizedClass;
+    private DalConfigCustomizedOption customizedOption;
 
     public DefaultCluster(ClusterConfigImpl clusterConfig) {
         this.clusterConfig = clusterConfig;
@@ -131,12 +131,12 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
     }
 
     @Override
-    public DalConfigCustomizedClass getCustomizedClass() {
-        return this.customizedClass;
+    public DalConfigCustomizedOption getCustomizedOption() {
+        return this.customizedOption;
     }
 
-    public void setCustomizedClass(DalConfigCustomizedClass customizedClass) {
-        this.customizedClass = customizedClass;
+    public void setCustomizedClass(DalConfigCustomizedOption customizedOption) {
+        this.customizedOption = customizedOption;
     }
 
     public void setLastLocalizationConfig(LocalizationConfig lastConfig) {

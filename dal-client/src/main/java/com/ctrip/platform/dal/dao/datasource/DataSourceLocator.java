@@ -100,7 +100,8 @@ public class DataSourceLocator {
     }
 
     public DataSource getDataSource(ClusterInfo clusterInfo) {
-        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName());
+        // todo-lhj 为什么根据clusterInfo还要重新创建一遍cluster
+        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), null);
         clusterInfo.setCluster(cluster);
         DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
         DataSource ds = cache.get(id);

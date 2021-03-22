@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
@@ -114,8 +115,8 @@ public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
     }
 
     @Override
-    public ClusterConfig getClusterConfig(String clusterName) {
-        return clusterConfigProvider.getClusterConfig(clusterName);
+    public ClusterConfig getClusterConfig(String clusterName, DalConfigCustomizedOption customizedOption) {
+        return clusterConfigProvider.getClusterConfig(clusterName, customizedOption);
     }
 
     @Override

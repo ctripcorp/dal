@@ -17,5 +17,6 @@ import org.junit.runners.Suite;
         ObjectHolderTest.class,
         CaseInsensitivePropertiesTest.class
 })
+// test: 99/99 passed/all env:fat
 public class AllTests {
 }

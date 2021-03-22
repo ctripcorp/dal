@@ -29,4 +29,6 @@ public interface DalPropertiesLocator {
 
     String getTableParserCacheInitSize(String defaultSize);
 
+    String getCustomerClientClassName();
+
 }

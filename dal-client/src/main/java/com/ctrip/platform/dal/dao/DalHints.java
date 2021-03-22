@@ -542,4 +542,12 @@ public class DalHints {
     public String getSpecifiedTableName() {
         return getString(DalHintEnum.specifiedTableName);
     }
+
+    public DalHints setResultClass(Class clazz) {
+        return getResultClass() == null ? set(DalHintEnum.resultClass, clazz) : this;
+    }
+
+    public Class getResultClass() {
+        return (Class)get(DalHintEnum.resultClass);
+    }
 }

@@ -119,7 +119,7 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, CustomizableMapp
      * For map partial result set with given column names. Copy fields from rawMapper
      * 
      * @param rawMapper
-     * @param clazz
+     * @param columns
      * @throws SQLException
      */
     private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, String[] columns) throws SQLException {
@@ -133,7 +133,7 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, CustomizableMapp
      * For map partial result set with given column names. Copy fields from rawMapper
      * 
      * @param rawMapper
-     * @param clazz
+     * @param rs
      * @throws SQLException
      */
     private DalDefaultJpaMapper(DalDefaultJpaMapper<T> rawMapper, ResultSet rs, DalHints hints) throws SQLException {
@@ -173,5 +173,9 @@ public class DalDefaultJpaMapper<T> implements DalRowMapper<T>, CustomizableMapp
         for (String v : values)
             s.add(v);
         return s;
+    }
+
+    public Class getClazz() {
+        return this.clazz;
     }
 }

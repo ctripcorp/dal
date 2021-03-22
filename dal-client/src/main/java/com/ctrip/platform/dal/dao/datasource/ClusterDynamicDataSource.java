@@ -48,6 +48,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider,
                                     LocalizationValidatorFactory factory) {
         this.clusterInfo = clusterInfo;
+        this.clusterInfo.setCluster(cluster);
         this.cluster = cluster;
         this.provider = provider;
         this.factory = factory;

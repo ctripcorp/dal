@@ -135,7 +135,7 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
         return this.customizedOption;
     }
 
-    public void setCustomizedClass(DalConfigCustomizedOption customizedOption) {
+    public void setCustomizedOption(DalConfigCustomizedOption customizedOption) {
         this.customizedOption = customizedOption;
     }
 

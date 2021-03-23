@@ -80,7 +80,7 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
                             !clusterInfo.dbSharding()) {
                         String clusterName = clusterInfo.getClusterName();
                         //todo-lhj 弄明白怎么回事
-                        Cluster cluster = clusterManager.getOrCreateCluster(clusterName, null);
+                        Cluster cluster = clusterManager.getOrCreateCluster(clusterName, new DefaultDalConfigCustomizedOption());
                         if (checkCluster(cluster)) {
                             LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSucceeded",
                                     String.format("databaseSet: %s, clusterName: %s",

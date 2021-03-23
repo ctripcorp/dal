@@ -23,17 +23,17 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
 
     @Override
     public boolean isForceInitialize() {
-        return false;
+        return forceInitialize;
     }
 
     @Override
     public Integer getShardIndex() {
-        return null;
+        return shardIndex;
     }
 
     @Override
     public DatabaseRole getDatabaseRole() {
-        return null;
+        return databaseRole;
     }
 
     public DefaultDalConfigCustomizedOption consistencyTypeCustomizedClass(String clazz) {

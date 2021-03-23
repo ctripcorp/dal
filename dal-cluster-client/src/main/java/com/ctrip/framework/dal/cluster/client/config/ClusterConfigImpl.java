@@ -81,7 +81,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         else if (unitStrategyId != null)
             localizationState = LocalizationState.PREPARED;
         cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId, localizationState, drcConsistencyType));
-        cluster.setCustomizedClass(customizedOption);
+        cluster.setCustomizedOption(customizedOption);
         cluster.validate();
         return cluster;
     }

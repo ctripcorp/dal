@@ -141,11 +141,6 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     }
 
     @Override
-    public boolean localizedForDrc(String situation, boolean isUpdateOperation) {
-        throw new UnsupportedOperationException("localizedForDrc not supported.");
-    }
-
-    @Override
     public String getProperty(String name) {
         throw new UnsupportedOperationException("getProperty not supported.");
     }

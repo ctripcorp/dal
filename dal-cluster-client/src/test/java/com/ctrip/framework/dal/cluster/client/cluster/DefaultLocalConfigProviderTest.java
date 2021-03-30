@@ -18,7 +18,8 @@ public class DefaultLocalConfigProviderTest {
     @Test
     public void test() {
         ClusterConfigProvider provider = new DefaultLocalConfigProvider("demo-cluster");
-        ClusterConfig config = provider.getClusterConfig();
+        // todo-lhj xiu dan ce
+        ClusterConfig config = provider.getClusterConfig(DefaultClusterTest.mockCustomizedOption());
         LOGGER.info(String.format("cluster config: %s", config.toString()));
     }
 

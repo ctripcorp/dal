@@ -544,10 +544,10 @@ public class DalHints {
     }
 
     public DalHints setResultClass(Class clazz) {
-        return getResultClass() == null ? set(DalHintEnum.resultClass, clazz) : this;
+        return getResultClass() != null ? set(DalHintEnum.resultClass, clazz) : this;
     }
 
     public Class getResultClass() {
-        return (Class)get(DalHintEnum.resultClass);
+        return get(DalHintEnum.resultClass) == null ? null : (Class)get(DalHintEnum.resultClass);
     }
 }

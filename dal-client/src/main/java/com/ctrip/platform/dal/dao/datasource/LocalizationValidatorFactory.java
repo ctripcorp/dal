@@ -8,6 +8,6 @@ import com.ctrip.platform.dal.dao.configure.ClusterInfo;
  */
 public interface LocalizationValidatorFactory {
 
-    LocalizationValidator createValidator(ClusterInfo clusterInfo, LocalizationConfig localizationConfig);
+    LocalizationValidator createValidator(ClusterInfo clusterInfo, LocalizationConfig localizationConfig, LocalizationConfig lastLocalizationConfig);
 
 }

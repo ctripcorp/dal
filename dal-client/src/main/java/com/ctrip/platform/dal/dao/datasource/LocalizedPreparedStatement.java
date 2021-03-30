@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 
 import java.io.InputStream;
@@ -31,13 +32,13 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        validateLocalization(false);
+        validateLocalization(OperationType.QUERY);
         return preparedStatement.executeQuery();
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        validateLocalization(true);
+        validateLocalization(OperationType.UPDATE);
         return preparedStatement.executeUpdate();
     }
 
@@ -144,7 +145,7 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public boolean execute() throws SQLException {
-        validateLocalization(isUpdateOperation());
+        validateLocalization(getOperationType(firstAlphaCharUc));
         return preparedStatement.execute();
     }
 
@@ -320,7 +321,7 @@ public class LocalizedPreparedStatement extends LocalizedStatement implements Pr
 
     @Override
     public long executeLargeUpdate() throws SQLException {
-        validateLocalization(true);
+        validateLocalization(OperationType.UPDATE);
         return preparedStatement.executeLargeUpdate();
     }
 

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 
@@ -20,9 +21,9 @@ public class LocalClusterConfigProvider extends AbstractClusterConfigProvider im
     }
 
     @Override
-    public ClusterConfig getClusterConfig(String clusterName) {
+    public ClusterConfig getClusterConfig(String clusterName, DalConfigCustomizedOption customizedOption) {
         DefaultLocalConfigProvider configProvider = new DefaultLocalConfigProvider(clusterName, getParser());
-        return configProvider.getClusterConfig();
+        return configProvider.getClusterConfig(customizedOption);
     }
 
 }

@@ -1,9 +1,11 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfigImpl;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
+import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 import org.junit.Assert;
@@ -383,14 +385,15 @@ public class LocalizedDataSourceTest {
         DataSourceConfigure config = getDataSourceConfig();
         return new LocalizedDataSource(new ConstantLocalizationValidator(false) {
             @Override
-            public ValidationResult validateRequest(boolean isUpdateOperation) {
-                return isUpdateOperation ? super.validateRequest(true) :
+            public ValidationResult validateRequest(OperationType operationType) {
+                return operationType.isUpdateOperation() ? super.validateRequest(OperationType.UPDATE) :
                         new ValidationResult(true, "ucs pass", "dal pass");
             }
 
             @Override
             public LocalizationConfig getLocalizationConfig() {
-                return new LocalizationConfigImpl(1, TEST_ZONE, LocalizationState.ACTIVE);
+                return new LocalizationConfigImpl(1, TEST_ZONE, LocalizationState.ACTIVE, DrcConsistencyTypeEnum.HIGH_AVAILABILITY);
+                // todo-lhj test  修复
             }
         }, config.getName(), config);
     }

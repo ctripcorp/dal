@@ -79,7 +79,8 @@ public class ClusterDatabaseSetAdapter implements DatabaseSetAdapter {
                     if (clusterInfo != null && clusterInfo.getRole() == DatabaseRole.MASTER &&
                             !clusterInfo.dbSharding()) {
                         String clusterName = clusterInfo.getClusterName();
-                        Cluster cluster = clusterManager.getOrCreateCluster(clusterName);
+                        //todo-lhj 弄明白怎么回事
+                        Cluster cluster = clusterManager.getOrCreateCluster(clusterName, new DefaultDalConfigCustomizedOption());
                         if (checkCluster(cluster)) {
                             LOGGER.logEvent(DalLogTypes.DAL_VALIDATION, "ClusterAdaptSucceeded",
                                     String.format("databaseSet: %s, clusterName: %s",

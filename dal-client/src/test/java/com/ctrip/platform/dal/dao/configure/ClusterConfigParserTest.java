@@ -14,7 +14,8 @@ public class ClusterConfigParserTest {
     @Test
     public void test() {
         ClusterConfigProvider provider = new DefaultLocalConfigProvider("TestCluster");
-        ClusterConfig config = provider.getClusterConfig();
+        // todo-lhj
+        ClusterConfig config = provider.getClusterConfig(new DefaultDalConfigCustomizedOption());
         LOGGER.info(String.format("cluster config: %s", config.toString()));
     }
 

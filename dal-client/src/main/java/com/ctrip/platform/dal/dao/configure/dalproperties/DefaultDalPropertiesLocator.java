@@ -110,19 +110,6 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     }
 
     @Override
-    public boolean localizedForDrc(String situation, boolean isUpdateOperation) {
-        String drcStage = getProperty(PROPERTY_NAME_DRC_STAGE, DEFAULT_DRC_STAGE);
-        String localized = getProperty(String.format("DrcStage.%s.Localized", drcStage), DEFAULT_DRC_LOCALIZED);
-        String operation = isUpdateOperation ? "write" : "read";
-        localized = getProperty(String.format("DrcStage.%s.%s.Localized", drcStage, operation), localized);
-        if (!StringUtils.isEmpty(situation)) {
-            localized = getProperty(String.format("DrcStage.%s.%s.Localized", drcStage, situation), localized);
-            localized = getProperty(String.format("DrcStage.%s.%s.%s.Localized", drcStage, situation, operation), localized);
-        }
-        return Boolean.parseBoolean(localized);
-    }
-
-    @Override
     public String getProperty(String name) {
         return allProperties.get().get(name.toLowerCase());
     }

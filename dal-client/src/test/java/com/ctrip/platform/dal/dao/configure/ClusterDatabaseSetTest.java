@@ -21,7 +21,9 @@ public class ClusterDatabaseSetTest {
     @Test
     public void testNonShardingCluster() {
         ClusterConfigProvider provider = new DefaultLocalConfigProvider("NonShardingCluster");
-        ClusterConfig config = provider.getClusterConfig();
+        // todo-lhj
+        ClusterConfig config = provider.getClusterConfig(new DefaultDalConfigCustomizedOption());
+
         Cluster cluster = config.generate();
         ClusterDatabaseSet databaseSet = new ClusterDatabaseSet("NonShardingCluster", cluster, new DalConnectionLocator() {
             @Override

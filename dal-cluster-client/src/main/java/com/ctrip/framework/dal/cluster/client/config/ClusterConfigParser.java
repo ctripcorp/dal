@@ -7,8 +7,8 @@ import java.io.InputStream;
  */
 public interface ClusterConfigParser {
 
-    ClusterConfig parse(String content);
+    ClusterConfig parse(String content, DalConfigCustomizedOption customizedOption);
 
-    ClusterConfig parse(InputStream stream);
+    ClusterConfig parse(InputStream stream, DalConfigCustomizedOption customizedOption);
 
 }

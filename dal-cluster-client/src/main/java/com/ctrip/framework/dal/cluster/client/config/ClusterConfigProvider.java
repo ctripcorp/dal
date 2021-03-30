@@ -7,4 +7,6 @@ public interface ClusterConfigProvider {
 
     ClusterConfig getClusterConfig();
 
+    ClusterConfig getClusterConfig(DalConfigCustomizedOption customizedOption);
+
 }

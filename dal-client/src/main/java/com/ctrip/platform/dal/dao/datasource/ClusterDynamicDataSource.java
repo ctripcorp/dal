@@ -48,6 +48,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     public ClusterDynamicDataSource(ClusterInfo clusterInfo, Cluster cluster, DataSourceConfigureProvider provider,
                                     LocalizationValidatorFactory factory) {
         this.clusterInfo = clusterInfo;
+        this.clusterInfo.setCluster(cluster);
         this.cluster = cluster;
         this.provider = provider;
         this.factory = factory;
@@ -93,7 +94,8 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
         try {
             if (cluster.getClusterType() == ClusterType.DRC) {
                 LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
-                LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
+                LocalizationConfig lastLocalizationConfig = cluster.getLastLocalizationConfig();
+                LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig, lastLocalizationConfig);
                 LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_DRC, clusterInfo.toString()), localizationConfig.toString());
                 return new LocalizedDataSource(validator, id, config);
             }

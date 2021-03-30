@@ -2,11 +2,11 @@ package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.base.PropertyAccessor;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
-import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy;
@@ -36,42 +36,42 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     private volatile IdGeneratorConfigXMLParser idGeneratorConfigXMLParser;
 
     @Override
-    public ClusterConfig parse(String content) {
+    public ClusterConfig parse(String content, DalConfigCustomizedOption customizedOption) {
         StringReader reader = new StringReader(content);
         InputSource source = new InputSource(reader);
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             Document doc = factory.newDocumentBuilder().parse(source);
-            return parse(doc);
+            return parse(doc, customizedOption);
         } catch (Throwable t) {
             throw new ClusterConfigException("parse cluster config error", t);
         }
     }
 
     @Override
-    public ClusterConfig parse(InputStream stream) {
+    public ClusterConfig parse(InputStream stream, DalConfigCustomizedOption customizedOption) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             Document doc = factory.newDocumentBuilder().parse(stream);
-            return parse(doc);
+            return parse(doc, customizedOption);
         } catch (Throwable t) {
             throw new ClusterConfigException("parse cluster config error", t);
         }
     }
 
-    private ClusterConfig parse(Document doc) {
+    private ClusterConfig parse(Document doc, DalConfigCustomizedOption customizedOption) {
         Element root = doc.getDocumentElement();
         if (root == null || !DAL.equalsIgnoreCase(root.getTagName()))
             throw new ClusterConfigException("root element should be <DAL>");
         Node clusterNode = getChildNode(root, CLUSTER);
         if (clusterNode == null)
             throw new ClusterConfigException("cluster element not found");
-        return parseCluster(clusterNode);
+        return parseCluster(clusterNode, customizedOption);
     }
 
-    private ClusterConfig parseCluster(Node clusterNode) {
+    private ClusterConfig parseCluster(Node clusterNode, DalConfigCustomizedOption customizedOption) {
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new ClusterConfigException("cluster name undefined");
@@ -83,6 +83,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         int version = Integer.parseInt(getAttribute(clusterNode, VERSION));
         ClusterConfigImpl clusterConfig = new ClusterConfigImpl(name, clusterType, dbCategory, version);
 
+        clusterConfig.setCustomizedOption(customizedOption);
         Node databaseShardsNode = getChildNode(clusterNode, DATABASE_SHARDS);
         if (databaseShardsNode != null) {
             List<Node> databaseShardNodes = getChildNodes(databaseShardsNode, DATABASE_SHARD);
@@ -178,7 +179,9 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             ShardStrategy strategy = (ShardStrategy) Class.forName(className).newInstance();
             parseShardStrategy(clusterConfig, strategyNode, strategy);
         } catch (Throwable t) {
-            throw new ClusterRuntimeException("invalid custom strategy impl class", t);
+            if (!clusterConfig.getCustomizedOption().isIgnoreShardingResourceNotFound()) {
+                throw new ClusterRuntimeException("invalid custom strategy impl class", t);
+            }
         }
     }
 
@@ -269,6 +272,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             if (!StringUtils.isEmpty(zoneIdText)) {
                 clusterConfig.setZoneId(zoneIdText);
             }
+        }
+        Node unitConsistencyStrategyNode = getChildNode(clusterNode, CONSISTENCY_TYPE);
+        // default consistency type is HIGH_AVAILABILITY
+        clusterConfig.setDrcConsistencyType(DrcConsistencyTypeEnum.HIGH_AVAILABILITY);
+        if (unitConsistencyStrategyNode != null) {
+            String unitConsistencyStrategyText = unitConsistencyStrategyNode.getTextContent();
+            clusterConfig.setDrcConsistencyType(DrcConsistencyTypeEnum.parse(unitConsistencyStrategyText));
         }
     }
 

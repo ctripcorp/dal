@@ -6,6 +6,7 @@ public interface DalConfigConstants {
 
     String NAME = "name";
     String DATABASE_SETS = "databaseSets";
+    String IGNORE_RESOURCE_NOT_FOUND = "ignoreResourceNotFound";
     String DATABASE_SET = "databaseSet";
     String CLUSTER = "cluster";
     String ALIAS = "alias";
@@ -27,6 +28,7 @@ public interface DalConfigConstants {
     String LOCATOR = "locator";
     String DATABASE_SELECTOR = "DatabaseSelector";
     String SELECTOR = "selector";
+    String CONSISTENCY_TYPE_CUSTOMIZED_CLASS = "consistencyTypeCustomizedClass";
 
     String ID_GENERATOR = "idGenerator";
     String ID_GENERATOR_FACTORY = "factory";

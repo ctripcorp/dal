@@ -2,10 +2,7 @@ package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.DefaultCluster;
-import com.ctrip.framework.dal.cluster.client.cluster.DefaultDrcCluster;
-import com.ctrip.framework.dal.cluster.client.cluster.ShardStrategyProxy;
+import com.ctrip.framework.dal.cluster.client.cluster.*;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
@@ -32,6 +29,8 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private ClusterRouteStrategyConfig routeStrategyConfig;
     private Integer unitStrategyId;
     private String zoneId;
+    private DrcConsistencyTypeEnum drcConsistencyType;
+    private DalConfigCustomizedOption customizedOption; // this variable is from dal.config or datasource parameter
 
     private final AtomicReference<Cluster> generatedClusterRef = new AtomicReference<>();
 
@@ -81,7 +80,8 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
             localizationState = LocalizationState.ACTIVE;
         else if (unitStrategyId != null)
             localizationState = LocalizationState.PREPARED;
-        cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId, localizationState));
+        cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId, localizationState, drcConsistencyType));
+        cluster.setCustomizedOption(customizedOption);
         cluster.validate();
         return cluster;
     }
@@ -144,6 +144,18 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     public void setZoneId(String zoneId) {
         this.zoneId = zoneId;
+    }
+
+    public void setDrcConsistencyType(DrcConsistencyTypeEnum type) {
+        this.drcConsistencyType = type;
+    }
+
+    public void setCustomizedOption(DalConfigCustomizedOption customizedOption) {
+        this.customizedOption = customizedOption;
+    }
+
+    public DalConfigCustomizedOption getCustomizedOption() {
+        return customizedOption;
     }
 
     @Override

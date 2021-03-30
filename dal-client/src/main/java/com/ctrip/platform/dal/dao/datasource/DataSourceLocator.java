@@ -100,7 +100,8 @@ public class DataSourceLocator {
     }
 
     public DataSource getDataSource(ClusterInfo clusterInfo) {
-        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName());
+        // todo-lhj 为什么根据clusterInfo还要重新创建一遍cluster
+        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), null);
         clusterInfo.setCluster(cluster);
         DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
         DataSource ds = cache.get(id);
@@ -147,11 +148,12 @@ public class DataSourceLocator {
             Cluster cluster = database.getCluster();
             ClusterInfo clusterInfo = new ClusterInfo(database.getClusterName(), database.getShardIndex(),
                     database.isMaster() ? DatabaseRole.MASTER : DatabaseRole.SLAVE,
-                    cluster != null && cluster.dbShardingEnabled());
+                    cluster != null && cluster.dbShardingEnabled(), cluster);
             try {
                 if (cluster != null && cluster.getClusterType() == ClusterType.DRC) {
                     LocalizationConfig localizationConfig = cluster.getLocalizationConfig();
-                    LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig);
+                    LocalizationConfig lastLocalizationConfig = cluster.getLastLocalizationConfig();
+                    LocalizationValidator validator = factory.createValidator(clusterInfo, localizationConfig, lastLocalizationConfig);
                     LOGGER.logEvent(LOG_TYPE_CREATE_DATASOURCE, String.format(LOG_NAME_CREATE_DRC_DATASOURCE,
                             clusterInfo.toString()), localizationConfig.toString());
                     return new LocalizedDataSource(validator, id, provider.getDataSourceConfigure(id));

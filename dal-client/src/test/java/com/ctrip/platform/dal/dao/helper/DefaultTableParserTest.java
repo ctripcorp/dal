@@ -32,6 +32,17 @@ public class DefaultTableParserTest {
         Assert.assertEquals(true, DefaultTableParser.sqlToTables.containsKey("select * from table1 left join table2 on table1.name = table2.name "));
     }
 
+    public static void main(String[] args) throws JSQLParserException {
+        DefaultTableParser parser = new DefaultTableParser();
+        String s = "select productid, name, producttype, destinationcountryid, destinationcityid, productcategoryid, productpatternid, productlevel, chargeunit, departureplace, departuretime, insurancetermsurl, insuranceamount, insuranceid, ishighrisk, highriskitemid, highriskdescription, advancebookingdays, advancebookingtime, isweekendwork, isholidaywork, ischoosedate, ischooserequired, isdefaultchoose, formodifyorder, isautomatch, mintraveldays, maxtraveldays, minpersonquantity, maxpersonquantity, minquantity, maxquantity, foradultquantity, foradultproductquantity, forchildquantity, forchildproductquantity, quantitycalculatemode, canfirstdaybooking, canlastdaybooking, settlementmode, costpricesettlementtype, costpricecurrency, costpricetype, inventorytype, vendorid, vendorconfirmmodeid, isclientassign, vendorconfirmhours, isreturncommission, commissioncontent, isvendormaintain, bookingmode, issmsnotice, hasgoodstodelivery, deliverygoodsdescription, exchangemode, operationnote, paymenttype, pmeid, paeid, active, salemode, isbundle, sequencenumber, createuser, createtime, modifyuser, visaconfrimday, visadeliverday, visaorderandstuff, visastuffmaketime, visawaittime, visaworkday, smsinfo, departuredays, customerinfomode, customerinfotemplateid, msgvendertoconfirmfax, isrealquota, isautovisa, resourcesource, advancebookingstarttime, advancebookinghours, ifnull(deliverytype, 0) as deliverytype, businessowner, businessownerflag, insurancetiming, datachange_lasttime, pbmeid, insurancetermsh5url, isautogetvisa, optiontypeid, itemtype, childminage, childmaxage, isdisplay, salechannel, pricemode, businesstype, productregionid, isvisaontheirown, isvisadelivery, peoplegroup, visapeoplegroup, canmobilebooking, canmodify, foradult, forchild, issmsvbknotice, ishotelshareroom, ischildneedextrapricefornotshareroom, connectionvendorid, isskudistribution, distributionchannel, customerinforequire, salepricecurrency, vendorresourcecode, vendorbookingphone, vendorbookingcontact, usergroupid, inputlocale, fillinnumberlimit, advancebookingtimezoneid, vendorbookingphoneareacode, vendorbookingphonenew, vendorbookingemergencycontact, vendorbookingemergencyphone, vendorbookingemergencyphoneareacode, ispublicemergencycontact, vendorcomplaincontact, vendorcomplainphone, vendorcomplainemail, vendorcomplainphoneareacode, needcertificate, worktemplateid, picategoryid, picustomerinfotemplateid, carids from res_resource_9 where productid in (1757641)";
+        String sql = "select DestinationCityID, ProductID, ProductCategoryID, name from Res_Resource_1  where ProductID = 3";
+        String sql2 = "select * from prd_product_delete_log where PrdProductDeleteLogId = (select max(PrdProductDeleteLogId) from prd_product_delete_log where ProductId=%s and IsDeleted='%s')";
+        System.out.println(parser.getTablesFromCache(sql));
+        System.out.println(parser.ignoreWhereAndValues(sql));
+        System.out.println(parser.ignoreWhereAndValues(sql2));
+        System.out.println(s.getBytes().length);
+    }
+
     @Test
     public void ignoreWhereAndValues() {
         String sql = "/* this is some thing explain message */insert into table values (id1, name1),(id1, name1),(id1, name1);";

@@ -164,4 +164,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public String getCustomerClientClassName() {
         throw new UnsupportedOperationException("getCustomerClientClassName not supported.");
     }
+
+    @Override
+    public int getTableParserCacheKeyBytes(String defaultBytes) {
+        return Integer.valueOf(defaultBytes);
+    }
 }

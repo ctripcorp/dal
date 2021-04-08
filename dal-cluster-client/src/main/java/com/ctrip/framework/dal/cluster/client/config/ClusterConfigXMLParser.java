@@ -9,9 +9,7 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
-import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy;
-import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
-import com.ctrip.framework.dal.cluster.client.sharding.strategy.UserHintStrategy;
+import com.ctrip.framework.dal.cluster.client.sharding.strategy.*;
 import com.ctrip.framework.dal.cluster.client.util.SPIUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import org.w3c.dom.Document;
@@ -176,13 +174,26 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     private void parseCustomStrategy(ClusterConfigImpl clusterConfig, Node strategyNode) {
         String className = getAttribute(strategyNode, CLASS);
         try {
-            ShardStrategy strategy = (ShardStrategy) Class.forName(className).newInstance();
+            ShardStrategy strategy = instancingCustomShardStrategy(clusterConfig, className);
             parseShardStrategy(clusterConfig, strategyNode, strategy);
         } catch (Throwable t) {
             if (!clusterConfig.getCustomizedOption().isIgnoreShardingResourceNotFound()) {
                 throw new ClusterRuntimeException("invalid custom strategy impl class", t);
             }
         }
+    }
+
+    private ShardStrategy instancingCustomShardStrategy(ClusterConfigImpl clusterConfig, String className) {
+        ShardStrategy strategy = null;
+        try{
+            strategy = (ShardStrategy) Class.forName(className).newInstance();
+        } catch (Throwable t){
+            if (!clusterConfig.getCustomizedOption().isIgnoreShardingResourceNotFound()) {
+                throw new ClusterRuntimeException("invalid custom strategy impl class", t);
+            }
+            strategy = new NonsupportCustomStrategy();
+        }
+        return strategy;
     }
 
     private void parseShardStrategy(ClusterConfigImpl clusterConfig, Node strategyNode, ShardStrategy strategy) {

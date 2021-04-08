@@ -81,6 +81,14 @@ public abstract class ShardStrategyElement extends PropertyAccessorSupport imple
         return properties != null ? properties : this;
     }
 
+    public List<TablesElement> getTablesElements() {
+        return tablesElements;
+    }
+
+    public Map<String, PropertyAccessor> getTableProperties() {
+        return tableProperties;
+    }
+
     @Override
     public void addSubElement(ConfigElement subElement) {
         if (subElement instanceof TablesElement)

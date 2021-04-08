@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -24,9 +25,10 @@ public class DefaultTableParser implements TableParser {
     private static final String TABLEPARSE_ACTUAL_COST = "TABLEPARSE::actualCost:";
     private static final String CACHE_DEFAULT_SIZE = "1000";
     private static final float LOAD_FACTOR = 0.8f;
-    private static final int KEY_OF_CACHE_MAX_BYTES = 2000;
+    private static final String KEY_OF_CACHE_MAX_BYTES = "5000";
     private static final String INSERT_SYMBOL = "value";
     private static final String CONDITION_SYMBOL = "where";
+    private static final DalPropertiesLocator locator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
     private static final Set<String> callStringElements = new HashSet<String>() {
         {
             add("{call");
@@ -43,8 +45,7 @@ public class DefaultTableParser implements TableParser {
     private TablesNamesFinder finder = new TablesNamesFinder();
     private Lock finderLock = new ReentrantLock();
     private static final Pattern pattern = Pattern.compile("(with)*\\s*\\(nolock\\)");
-    private static int cacheInitSize = Integer.valueOf(DalPropertiesManager.getInstance().getDalPropertiesLocator().getTableParserCacheInitSize(CACHE_DEFAULT_SIZE));
-    private static Set<String> getTableListErrorSQLs = new HashSet<>();
+    private static int cacheInitSize = Integer.valueOf(locator.getTableParserCacheInitSize(CACHE_DEFAULT_SIZE));
 
     protected static LinkedHashMap<String, List<String>> sqlToTables = new LinkedHashMap(cacheInitSize, LOAD_FACTOR, true) {
         @Override
@@ -121,14 +122,10 @@ public class DefaultTableParser implements TableParser {
 
     protected List<String> getTablesFromCache(String sql) throws JSQLParserException {
         String setKeySql = ignoreMsgId(sql);
-        if (getTableListErrorSQLs.contains(setKeySql)) {
-            return parseSql(setKeySql);
-        }
 
         List<String> tables = null;
         String cacheKeySql = ignoreWhereAndValues(setKeySql);
-        if (KEY_OF_CACHE_MAX_BYTES < cacheKeySql.getBytes().length) {
-            addSQLToErrorSet(setKeySql);
+        if (locator.getTableParserCacheKeyBytes(KEY_OF_CACHE_MAX_BYTES) < cacheKeySql.getBytes().length) {
             return parseSql(setKeySql);
         }
 
@@ -137,13 +134,12 @@ public class DefaultTableParser implements TableParser {
         }
         if (tables == null) {
             try {
-                tables = parseSql(cacheKeySql);
+                tables = parseSql(setKeySql);
+                synchronized (sqlToTables) {
+                    sqlToTables.put(cacheKeySql, tables);
+                }
             } catch (Throwable t) {
-                addSQLToErrorSet(setKeySql);
-                return parseSql(setKeySql);
-            }
-            synchronized (sqlToTables) {
-                sqlToTables.put(cacheKeySql, tables);
+                logger.logEvent(DalLogTypes.DAL, TABLEPARSE_ERROR, setKeySql + ":" + t.getMessage());
             }
         }
 
@@ -157,12 +153,6 @@ public class DefaultTableParser implements TableParser {
         return tables;
     }
 
-    protected void addSQLToErrorSet(String setKeySql) {
-        synchronized (getTableListErrorSQLs) {
-            getTableListErrorSQLs.add(setKeySql);
-        }
-    }
-
     protected String ignoreMsgId(String sql) {
         int statementStartPos = SqlUtils.findStartOfStatement(sql);
         return sql.substring(statementStartPos);
@@ -170,15 +160,14 @@ public class DefaultTableParser implements TableParser {
 
     protected String ignoreWhereAndValues(String sql) {
         try {
+            int whereIndex = sql.lastIndexOf(CONDITION_SYMBOL);
+            if (whereIndex > 0) {
+                return sql.substring(0 , whereIndex);
+            }
+
             int valueIndex = sql.lastIndexOf(INSERT_SYMBOL);
             if (valueIndex > -1) {
                 return sql.substring(0 , valueIndex);
-            }
-
-            int whereIndex = sql.lastIndexOf(CONDITION_SYMBOL);
-
-            if (whereIndex > 0) {
-                return sql.substring(0 , whereIndex);
             }
         } catch (Exception e) {
 

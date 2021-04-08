@@ -158,8 +158,8 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         return customizedOption;
     }
 
-    public List<DatabaseShardConfig> getDatabaseShardConfigs() {
-        return databaseShardConfigs;
+    public List<ShardStrategy> getShardStrategies() {
+        return shardStrategies;
     }
 
     public ShardStrategy getDefaultShardStrategy() {

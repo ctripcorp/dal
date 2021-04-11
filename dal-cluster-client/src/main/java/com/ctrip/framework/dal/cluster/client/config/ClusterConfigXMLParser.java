@@ -191,7 +191,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             if (!clusterConfig.getCustomizedOption().isIgnoreShardingResourceNotFound()) {
                 throw new ClusterRuntimeException("invalid custom strategy impl class", t);
             }
-            strategy = new NonsupportCustomStrategy();
+            strategy = new NonsupportCustomStrategy(className);
         }
         return strategy;
     }

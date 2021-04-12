@@ -25,7 +25,7 @@ public class DefaultTableParser implements TableParser {
     private static final String TABLEPARSE_ACTUAL_COST = "TABLEPARSE::actualCost:";
     private static final String CACHE_DEFAULT_SIZE = "1000";
     private static final float LOAD_FACTOR = 0.8f;
-    private static final String KEY_OF_CACHE_MAX_BYTES = "2000";
+    private static final String KEY_OF_CACHE_MAX_BYTES = "5000";
     private static final String INSERT_SYMBOL = "value";
     private static final String CONDITION_SYMBOL = "where";
     private static final DalPropertiesLocator locator = DalPropertiesManager.getInstance().getDalPropertiesLocator();

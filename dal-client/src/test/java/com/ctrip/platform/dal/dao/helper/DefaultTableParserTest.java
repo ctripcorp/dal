@@ -15,6 +15,7 @@ public class DefaultTableParserTest {
 
     @Test
     public void getTablesFromCache() throws JSQLParserException {
+        DefaultTableParser.sqlToTables.clear();
         DefaultTableParser parser = new DefaultTableParser();
         String sql = "SELECT DISTINCT    o.FlightClass,    o.OrderID,    f.Sequence,    f.RecordNo,    f.Flight,    f.DPort,    f.APort,    f.TakeOffTime,    f.ArrivalTime,    f.TakeOffTimeOfBeijing,    f.ArriveTimeOfBeijing,    f.Class AS ClassLevel,    f.SubClass,    f.CarrierFlightNo,    fe.DepartAirportBuildingName AS DBuilding,    fe.ArriveAirportBuildingName AS ABuilding,    fe.DepartAirportBuildingID AS DBuildingId,    fe.ArriveAirportBuildingID AS ABuildingId,    f.OfficeNo AS BookingOfficeNO,    o.OrderDate AS EffectiveTime FROM   O_Flight f        LEFT JOIN    O_FlightExtend fe ON fe.OrderID = f.OrderID        AND fe.Sequence = f.Sequence        JOIN    O_Orders o ON f.OrderID = o.OrderID        JOIN    o_Orderdetail d ON d.OrderID = f.OrderID        AND (d.IsPostPoneFee IS NULL        OR d.IsPostPoneFee = 0)        JOIN    O_Passenger e ON e.OrderID = f.orderid WHERE    1 =1 AND O.OrderStatus not in('C','R')\n" +
                 " AND f.DPort= ?                                                                                                                                                                                                                          \n" +

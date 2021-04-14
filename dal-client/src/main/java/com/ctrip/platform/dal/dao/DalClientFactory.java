@@ -29,6 +29,7 @@ public class DalClientFactory {
     private static final String ALREADY_INITIALIZED = "Dal Java Client Factory is already initialized.";
     private static final String THREAD_NAME = "DAL-DalClientFactory-ShutdownHook";
     private static final String CREATE_CUSTOMER_CLIENT_ERROR = "Error while creating customer DalClient";
+    private static final String CUSTOM_DAL_CLIENT_CLASS = "customDalClient";
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -127,7 +128,11 @@ public class DalClientFactory {
         // Verify if it is existed
         config.getDatabaseSet(logicDbName);
 
-        String className = DalPropertiesManager.getInstance().getDalPropertiesLocator().getCustomerClientClassName();
+        String className = config.getFactory().getProperty(CUSTOM_DAL_CLIENT_CLASS);
+        if (StringUtils.isEmpty(className)) {
+            className = DalPropertiesManager.getInstance().getDalPropertiesLocator().getCustomerClientClassName();
+        }
+
         if (StringUtils.isEmpty(className)) {
             dalClient = new DalDirectClient(config, logicDbName);
         } else {

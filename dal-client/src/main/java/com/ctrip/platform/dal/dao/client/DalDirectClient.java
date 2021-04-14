@@ -401,6 +401,10 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
         return connManager.getLogicDbName();
     }
 
+    public String getDbCategory() {
+        return dbCategory;
+    }
+
     /**
      * First try getRow(), then try parse result
      *

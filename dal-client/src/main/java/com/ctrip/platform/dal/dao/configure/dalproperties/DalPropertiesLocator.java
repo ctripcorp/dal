@@ -33,4 +33,6 @@ public interface DalPropertiesLocator {
 
     String getCustomerClientClassName();
 
+    boolean enableUcsContextLog();
+
 }

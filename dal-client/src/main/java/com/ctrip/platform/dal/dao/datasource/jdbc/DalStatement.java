@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -300,7 +301,8 @@ public class DalStatement implements Statement {
 
     protected <T> T innerExecute(SqlCallable<T> task, boolean isUpdateOperation) throws SQLException {
         try {
-            LOGGER.logRequestContext();
+            if (DalPropertiesManager.getInstance().getDalPropertiesLocator().enableUcsContextLog())
+                LOGGER.logRequestContext();
         } catch (Throwable t) {
             // ignore
         }

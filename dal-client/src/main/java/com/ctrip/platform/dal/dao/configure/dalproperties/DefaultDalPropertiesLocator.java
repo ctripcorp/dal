@@ -25,6 +25,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     public static final String STATEMENT_INTERCEPTORS = "statementInterceptors";
     public static final String TABLE_PARSER_CACHE_SIZE = "tableParserCacheSize";
     public static final String CUSTOM_DAL_CLIENT = "customDalClient";
+    public static final String TABLE_PARSER_CACHE_KEY_BYTES = "tableParserCacheKeyBytes";
 
     private static final String PROPERTY_NAME_CLUSTER_INFO_QUERY_URL = "ClusterInfoQueryUrl";
     private static final String PROPERTY_NAME_DRC_STAGE = "DrcStage";
@@ -127,6 +128,11 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     @Override
     public String getTableParserCacheInitSize(String defaultSize) {
         return getProperty(TABLE_PARSER_CACHE_SIZE, defaultSize);
+    }
+
+    @Override
+    public int getTableParserCacheKeyBytes(String defaultBytes) {
+        return Integer.valueOf(getProperty(TABLE_PARSER_CACHE_KEY_BYTES, defaultBytes));
     }
 
     @Override

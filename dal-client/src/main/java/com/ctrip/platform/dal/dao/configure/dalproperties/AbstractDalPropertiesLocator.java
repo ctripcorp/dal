@@ -169,4 +169,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public int getTableParserCacheKeyBytes(String defaultBytes) {
         return Integer.valueOf(defaultBytes);
     }
+
+    @Override
+    public boolean enableUcsContextLog() {
+        return true;
+    }
 }

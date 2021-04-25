@@ -36,4 +36,8 @@ public interface DalConfigCustomizedOption {
     DatabaseRole getDatabaseRole();
 
     DalConfigCustomizedOption clone();
+
+    String getReadStrategy();
+
+    String getTag();
 }

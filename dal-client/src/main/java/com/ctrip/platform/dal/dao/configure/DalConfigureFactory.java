@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
@@ -250,7 +251,10 @@ public class DalConfigureFactory implements DalConfigConstants {
 
     private void overrideDefaultConfig(Node clusterNode, DalConfigCustomizedOption defaultOption) {
         ((DefaultDalConfigCustomizedOption)defaultOption)
-                .consistencyTypeCustomizedClass(getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null));
+                .consistencyTypeCustomizedClass(getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null))
+                .readStrategy(ReadStrategyEnum.getClazz(getAttribute(clusterNode, READ_STRATEGY, ReadStrategyEnum.READ_MASTER.name())))
+                // todo-lhj what's default tag
+                .tag(getAttribute(clusterNode, TAG, "tag"));
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {

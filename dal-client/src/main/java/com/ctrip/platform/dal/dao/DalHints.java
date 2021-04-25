@@ -544,7 +544,7 @@ public class DalHints {
     }
 
     public DalHints setResultClass(Class clazz) {
-        return set(DalHintEnum.resultClass, clazz);
+        return clazz == null ? this : set(DalHintEnum.resultClass, clazz);
     }
 
     public Class getResultClass() {

@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;

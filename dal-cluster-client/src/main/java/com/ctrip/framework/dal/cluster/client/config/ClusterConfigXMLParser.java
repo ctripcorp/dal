@@ -3,6 +3,7 @@ package com.ctrip.framework.dal.cluster.client.config;
 import com.ctrip.framework.dal.cluster.client.base.PropertyAccessor;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
+import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
@@ -98,7 +99,9 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             parseIdGenerators(clusterConfig, idGeneratorsNode);
 
         Node routeStrategiesNode = getChildNode(clusterNode, ROUTE_STRATEGIES);
-        if (routeStrategiesNode != null)
+        if (!StringUtils.isEmpty(customizedOption.getReadStrategy())) {
+            initReadStrategy(clusterConfig, customizedOption);
+        } else if (routeStrategiesNode != null)
             parseRouteStrategies(clusterConfig, routeStrategiesNode);
 
         parseDrcConfig(clusterConfig, clusterNode);
@@ -247,8 +250,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
     }
 
+    protected void initReadStrategy(ClusterConfigImpl clusterConfig, DalConfigCustomizedOption customizedOption) {
+        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(customizedOption.getReadStrategy());
+        clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
+    }
+
     private void parseRouteStrategies(ClusterConfigImpl clusterConfig, Node routeStrategiesNode) {
-        List<Node> routeStrategyNodes = getChildNodes(routeStrategiesNode, ORDERED_ACCESS_STRATEGY);
+        List<Node> routeStrategyNodes = getRouteStrategyNodes(routeStrategiesNode);
         if (routeStrategyNodes.size() > 1)
             throw new ClusterRuntimeException("multiple routeStrategies configured");
         if (routeStrategyNodes.size() == 1) {
@@ -263,6 +271,21 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             });
             clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
         }
+    }
+
+    protected List<Node> getRouteStrategyNodes(Node routeStrategiesNode) {
+        List<Node> readStrategyNodes = new ArrayList<>();
+        // mgr-strategy
+        List<Node> mgrStrategyNodes = getChildNodes(routeStrategiesNode, ORDERED_ACCESS_STRATEGY);
+        // read-strategy
+        for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()){
+            Node node = getChildNode(routeStrategiesNode, readStrategyEnum.getAlias());
+            if (node != null)
+                readStrategyNodes.add(node);
+        }
+        readStrategyNodes.addAll(mgrStrategyNodes);
+
+        return readStrategyNodes;
     }
 
     private void parseDrcConfig(ClusterConfigImpl clusterConfig, Node clusterNode) {

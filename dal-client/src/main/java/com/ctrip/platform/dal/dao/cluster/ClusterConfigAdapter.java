@@ -9,7 +9,7 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
-import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;

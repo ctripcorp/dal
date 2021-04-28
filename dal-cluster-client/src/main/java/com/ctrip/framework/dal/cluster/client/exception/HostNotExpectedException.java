@@ -1,6 +1,6 @@
-package com.ctrip.platform.dal.exceptions;
+package com.ctrip.framework.dal.cluster.client.exception;
 
-public class HostNotExpectedException extends Exception {
+public class HostNotExpectedException extends ClusterRuntimeException {
 
     public HostNotExpectedException() {
     }
@@ -17,7 +17,4 @@ public class HostNotExpectedException extends Exception {
         super(cause);
     }
 
-    public HostNotExpectedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

@@ -2,8 +2,13 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -143,6 +148,17 @@ public class DalConnectionManager {
 	}
 
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
+		if (dbSet instanceof ClusterDatabaseSet) {
+			Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
+			DatabaseShard databaseShard;
+			if (StringUtils.isEmpty(shard))
+				databaseShard = cluster.getDatabaseShard(0);
+			else
+				databaseShard = cluster.getDatabaseShard(Integer.valueOf(shard));
+			HostSpec hostSpec = databaseShard.getReadStrategy().pickRead(parseDalHints(hints));
+			return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
+		}
+
 		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
 
 		if(shard == null) {
@@ -154,6 +170,10 @@ public class DalConnectionManager {
 		}
 
 		return config.getSelector().select(context);
+	}
+
+	private HashMap<String, String> parseDalHints(DalHints dalHints) {
+		return new HashMap<>();
 	}
 
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

@@ -58,6 +58,16 @@ public class DefaultLocalConfigProvider implements ClusterConfigProvider {
                 public DalConfigCustomizedOption clone() {
                     return null;
                 }
+
+                @Override
+                public String getReadStrategy() {
+                    return null;
+                }
+
+                @Override
+                public String getTag() {
+                    return null;
+                }
             });
         } catch (Throwable t) {
             throw new ClusterConfigException("Load cluster config failed, cluster name: " + clusterName, t);

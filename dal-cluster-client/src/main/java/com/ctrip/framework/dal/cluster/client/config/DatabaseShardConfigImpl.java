@@ -34,6 +34,7 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         DatabaseShardImpl databaseShard = new DatabaseShardImpl(this);
         for (DatabaseConfig databaseConfig : databaseConfigs)
             databaseShard.addDatabase(databaseConfig.generate());
+        databaseShard.initReadStrategy();
         return databaseShard;
     }
 

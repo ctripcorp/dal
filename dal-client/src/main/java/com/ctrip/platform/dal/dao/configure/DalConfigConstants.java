@@ -29,7 +29,7 @@ public interface DalConfigConstants {
     String DATABASE_SELECTOR = "DatabaseSelector";
     String SELECTOR = "selector";
     String CONSISTENCY_TYPE_CUSTOMIZED_CLASS = "consistencyTypeCustomizedClass";
-    String READ_STRATEGY = "readStrategy";
+    String ROUTE_STRATEGY = "routeStrategy";
     String TAG = "tag";
 
     String ID_GENERATOR = "idGenerator";

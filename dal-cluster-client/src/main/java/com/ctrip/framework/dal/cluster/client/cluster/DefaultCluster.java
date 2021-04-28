@@ -135,6 +135,11 @@ public class DefaultCluster extends UnsupportedListenable<ClusterSwitchedEvent> 
         return this.customizedOption;
     }
 
+    @Override
+    public DatabaseShard getDatabaseShard(int shardIndex) {
+        return databaseShards.get(shardIndex);
+    }
+
     public void setCustomizedOption(DalConfigCustomizedOption customizedOption) {
         this.customizedOption = customizedOption;
     }

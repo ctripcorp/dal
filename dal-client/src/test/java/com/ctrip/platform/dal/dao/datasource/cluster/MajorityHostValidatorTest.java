@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.base.MockConnection;
 import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
 import com.ctrip.platform.dal.dao.base.MockResultSet;

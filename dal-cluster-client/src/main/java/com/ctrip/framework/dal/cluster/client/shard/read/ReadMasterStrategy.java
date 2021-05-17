@@ -7,43 +7,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ReadMasterStrategy implements ReadStrategy {
-
-    protected HashMap<String, Set<HostSpec>> hostMap = new HashMap<>();
+public class ReadMasterStrategy extends ReadSlavesFirstStrategy {
 
     @Override
     public void init(Set<HostSpec> hostSpecs) {
-        Set<HostSpec> masters = new HashSet<>();
-        Set<HostSpec> slaves = new HashSet<>();
-
-        for (HostSpec hostSpec : hostSpecs) {
-            if (hostSpec.isMaster())
-                masters.add(hostSpec);
-            else slaves.add(hostSpec);
-        }
-
-        hostMap.putIfAbsent(masterRole, masters);
-        hostMap.putIfAbsent(slaveRole, slaves);
+        super.init(hostSpecs);
     }
 
     @Override
     public HostSpec pickRead(HashMap map) throws HostNotExpectedException {
-        if ((boolean)map.get(slaveOnly))
+        if ((boolean)map.get(slaveOnly) && (boolean)map.get(isPro))
             return slaveOnly();
 
-        Set<HostSpec> masters = hostMap.get(masterRole);
-        if (masters == null || masters.size() < 1)
-            throw new HostNotExpectedException(NO_MASTER_AVAILABLE);
-        return masters.iterator().next();
-    }
+        if ((boolean)map.get(slaveOnly))
+            return super.pickRead(map);
 
-    protected HostSpec slaveOnly() {
-        return loadBalancePickHost(hostMap.get(slaveRole));
-    }
-
-    protected HostSpec loadBalancePickHost(Set<HostSpec> hostSpecs) {
-        // todo-lhj load-balance strategy implement
-        return hostSpecs.iterator().next();
+        return pickMaster();
     }
 
     @Override

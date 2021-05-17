@@ -177,21 +177,8 @@ public class DalConnectionManager {
 			return new ClusterDataBase(databaseShard.getMasters().iterator().next());
 		}
 
-		HostSpec hostSpec = databaseShard.getReadStrategy().pickRead(parseDalHints(hints));
+		HostSpec hostSpec = databaseShard.getReadStrategy().pickRead(config.getSelector().parseDalHints(hints));
 		return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
-	}
-
-	private HashMap<String, Object> parseDalHints(DalHints dalHints) {
-		HashMap<String, Object> map = new HashMap<>();
-		if (dalHints == null)
-			return  map;
-
-		map.put(DalHintEnum.slaveOnly.name(), dalHints.is(DalHintEnum.slaveOnly));
-		map.put(DalHintEnum.userDefined1.name(), dalHints.get(DalHintEnum.userDefined1));
-		map.put(DalHintEnum.userDefined2.name(), dalHints.get(DalHintEnum.userDefined2));
-		map.put(DalHintEnum.userDefined3.name(), dalHints.get(DalHintEnum.userDefined3));
-
-		return map;
 	}
 
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

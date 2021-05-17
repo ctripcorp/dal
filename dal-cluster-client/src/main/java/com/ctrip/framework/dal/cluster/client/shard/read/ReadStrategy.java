@@ -18,6 +18,7 @@ public interface ReadStrategy {
     String masterRole = "master";
     String slaveRole = "slave";
     String slaveOnly = "slaveOnly";
+    String isPro = "isPro";
 
     // message
     String NO_MASTER_AVAILABLE = "No master available";

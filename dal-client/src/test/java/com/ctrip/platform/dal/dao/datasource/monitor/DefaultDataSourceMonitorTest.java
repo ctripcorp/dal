@@ -2,10 +2,14 @@ package com.ctrip.platform.dal.dao.datasource.monitor;
 
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 import com.ctrip.platform.dal.dao.util.ThreadUtils;
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
+import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -193,7 +197,7 @@ public class DefaultDataSourceMonitorTest {
     public void testContinuousWriteFailuresWithReadSuccessesConcurrent() {
         AtomicLong errorCount = new AtomicLong(0);
         AtomicLong alertCount = new AtomicLong(0);
-        DefaultDataSourceMonitorDelegate monitor = createMonitor(errorCount::incrementAndGet, alertCount::incrementAndGet);
+        DefaultDataSourceMonitorDelegate monitor = createMonitor(errorCount::incrementAndGet, alertCount::incrementAndGet, null);
         ExecutorService executor1 = Executors.newFixedThreadPool(4);
         ExecutorService executor2 = Executors.newFixedThreadPool(4);
         CountDownLatch latch = new CountDownLatch(100);
@@ -239,14 +243,39 @@ public class DefaultDataSourceMonitorTest {
         Assert.assertTrue(alertCount.get() > 0);
     }
 
+    @Test
+    public void parseIgnoreExceptionsTest() {
+        DefaultDataSourceMonitorDelegate delegate = createMonitor("");
+        Assert.assertEquals(0, delegate.ignoreExceptions.size());
+
+        delegate.reparseIgnoreExceptions("com.mysql.jdbc.exceptions.MySQLSyntaxErrorException, com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException");
+        Assert.assertEquals(2, delegate.ignoreExceptions.size());
+        List<Class> expectExceptions = new ArrayList<>();
+        expectExceptions.add(MySQLSyntaxErrorException.class);
+        expectExceptions.add(MySQLIntegrityConstraintViolationException.class);
+
+        Assert.assertEquals(true, delegate.ignoreExceptions.containsAll(expectExceptions));
+    }
+
+    @Test
+    public void isExecuteException() {
+        DefaultDataSourceMonitorDelegate delegate = createMonitor("com.mysql.jdbc.exceptions.MySQLSyntaxErrorException, com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException");
+        Assert.assertEquals(true, delegate.isExecuteException(mockException("com.mysql.jdbc.exceptions.MySQLSyntaxErrorException")));
+        Assert.assertEquals(false, delegate.isExecuteException(mockException()));
+    }
+
     private DefaultDataSourceMonitorDelegate createMonitor() {
-        return createMonitor(null, null);
+        return createMonitor(null, null, null);
+    }
+
+    private DefaultDataSourceMonitorDelegate createMonitor(String exception) {
+        return createMonitor(null, null, exception);
     }
 
     private DefaultDataSourceMonitorDelegate createMonitor(Runnable checkStatusCallback,
-                                                           Runnable checkAlertFrequencyCallback) {
+                                                           Runnable checkAlertFrequencyCallback, String exception) {
         DefaultDataSourceMonitorDelegate monitor = new DefaultDataSourceMonitorDelegate(new DataSourceName("test"),
-                checkStatusCallback, checkAlertFrequencyCallback);
+                checkStatusCallback, checkAlertFrequencyCallback, exception);
         monitor.setAlertThresholdMs(TEST_ALERT_THRESHOLD_MS);
         monitor.setAlertThresholdSamples(TEST_ALERT_THRESHOLD_SAMPLES);
         monitor.setAlertIntervalMs(TEST_ALERT_INTERVAL_MS);
@@ -255,6 +284,15 @@ public class DefaultDataSourceMonitorTest {
 
     private SQLException mockException() {
         return new SQLException("test");
+    }
+
+    private SQLException mockException(String exception) {
+        try {
+            return  (SQLException)Class.forName(exception).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

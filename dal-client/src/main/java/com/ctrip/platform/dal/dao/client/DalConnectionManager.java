@@ -149,14 +149,7 @@ public class DalConnectionManager {
 
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
 		if (dbSet instanceof ClusterDatabaseSet) {
-			Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
-			DatabaseShard databaseShard;
-			if (StringUtils.isEmpty(shard))
-				databaseShard = cluster.getDatabaseShard(0);
-			else
-				databaseShard = cluster.getDatabaseShard(Integer.valueOf(shard));
-			HostSpec hostSpec = databaseShard.getReadStrategy().pickRead(parseDalHints(hints));
-			return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
+			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
 		}
 
 		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);
@@ -172,8 +165,33 @@ public class DalConnectionManager {
 		return config.getSelector().select(context);
 	}
 
-	private HashMap<String, String> parseDalHints(DalHints dalHints) {
-		return new HashMap<>();
+	protected DataBase clusterSelect(DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) {
+		Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
+		DatabaseShard databaseShard;
+		if (StringUtils.isEmpty(shard))
+			databaseShard = cluster.getDatabaseShard(0);
+		else
+			databaseShard = cluster.getDatabaseShard(Integer.valueOf(shard));
+
+		if (isMaster || !isSelect) {
+			return new ClusterDataBase(databaseShard.getMasters().iterator().next());
+		}
+
+		HostSpec hostSpec = databaseShard.getReadStrategy().pickRead(parseDalHints(hints));
+		return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
+	}
+
+	private HashMap<String, Object> parseDalHints(DalHints dalHints) {
+		HashMap<String, Object> map = new HashMap<>();
+		if (dalHints == null)
+			return  map;
+
+		map.put(DalHintEnum.slaveOnly.name(), dalHints.is(DalHintEnum.slaveOnly));
+		map.put(DalHintEnum.userDefined1.name(), dalHints.get(DalHintEnum.userDefined1));
+		map.put(DalHintEnum.userDefined2.name(), dalHints.get(DalHintEnum.userDefined2));
+		map.put(DalHintEnum.userDefined3.name(), dalHints.get(DalHintEnum.userDefined3));
+
+		return map;
 	}
 
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

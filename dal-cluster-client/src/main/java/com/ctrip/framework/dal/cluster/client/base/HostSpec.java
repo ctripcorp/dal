@@ -60,17 +60,17 @@ public class HostSpec {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HostSpec host = (HostSpec) o;
-        return m_port == host.m_port && Objects.equals(m_host, host.m_host);
+        return m_port == host.m_port && Objects.equals(m_host, host.m_host) && isMaster == host.isMaster;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(m_host, m_port);
+        return Objects.hash(m_host, m_port, isMaster);
     }
 
     @Override
     public String toString() {
-        return m_host + ':' + m_port + "::" + m_zone;
+        return m_host + ':' + m_port + "::" + m_zone + "::" + isMaster;
     }
 
 }

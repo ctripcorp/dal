@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ReadMasterStrategy implements ReadStrategy {
-    // todo-lhj 策略内容实现
 
     protected HashMap<String, Set<HostSpec>> hostMap = new HashMap<>();
 
@@ -29,10 +28,22 @@ public class ReadMasterStrategy implements ReadStrategy {
 
     @Override
     public HostSpec pickRead(HashMap map) throws HostNotExpectedException {
+        if ((boolean)map.get(slaveOnly))
+            return slaveOnly();
+
         Set<HostSpec> masters = hostMap.get(masterRole);
         if (masters == null || masters.size() < 1)
             throw new HostNotExpectedException(NO_MASTER_AVAILABLE);
         return masters.iterator().next();
+    }
+
+    protected HostSpec slaveOnly() {
+        return loadBalancePickHost(hostMap.get(slaveRole));
+    }
+
+    protected HostSpec loadBalancePickHost(Set<HostSpec> hostSpecs) {
+        // todo-lhj load-balance strategy implement
+        return hostSpecs.iterator().next();
     }
 
     @Override

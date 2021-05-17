@@ -25,6 +25,12 @@ public class DefaultDataSourceMonitorDelegate extends DefaultDataSourceMonitor {
         this.checkAlertFrequencyCallback = checkAlertFrequencyCallback;
     }
 
+    public DefaultDataSourceMonitorDelegate(DataSourceIdentity dataSourceId,
+                                            Runnable checkStatusCallback, Runnable checkAlertFrequencyCallback, String exception) {
+        this(dataSourceId, checkStatusCallback, checkAlertFrequencyCallback);
+        super.ignoreExceptions = super.parseIgnoreExceptions(exception);
+    }
+
     @Override
     public void report(SQLException e, boolean isUpdateOperation) {
         reset();
@@ -45,6 +51,10 @@ public class DefaultDataSourceMonitorDelegate extends DefaultDataSourceMonitor {
         if (checkAlertFrequencyResult && checkAlertFrequencyCallback != null)
             checkAlertFrequencyCallback.run();
         return checkAlertFrequencyResult;
+    }
+
+    public void reparseIgnoreExceptions(String exception) {
+        super.ignoreExceptions = super.parseIgnoreExceptions(exception);
     }
 
     public Boolean getCheckStatusResult() {

@@ -15,11 +15,14 @@ public class ReadSlavesFirstStrategy extends ReadMasterStrategy {
 
     @Override
     public HostSpec pickRead(HashMap map) throws HostNotExpectedException {
+        if ((boolean)map.get(slaveOnly))
+            return slaveOnly();
+
         Set<HostSpec> slaves = hostMap.get(slaveRole);
         if (slaves == null || slaves.isEmpty())
             return super.pickRead(map);
-        // todo-lhj 设计负载均衡式/权重式 选取节点 方案
-        return slaves.iterator().next();
+
+        return loadBalancePickHost(slaves);
     }
 
     @Override

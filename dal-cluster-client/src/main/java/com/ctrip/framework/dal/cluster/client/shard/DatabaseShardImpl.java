@@ -70,7 +70,7 @@ public class DatabaseShardImpl implements DatabaseShard {
 
     @Override
     public ReadStrategy getReadStrategy() {
-        return null;
+        return readStrategy;
     }
 
     @Override

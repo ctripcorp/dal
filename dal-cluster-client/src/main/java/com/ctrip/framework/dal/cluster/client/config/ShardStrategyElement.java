@@ -13,7 +13,7 @@ import java.util.*;
 public abstract class ShardStrategyElement extends PropertyAccessorSupport implements ConfigElement, ShardStrategy {
 
     private final List<TablesElement> tablesElements = new LinkedList<>();
-    private final Map<String, PropertyAccessor> tableProperties = new HashMap<>();
+    private final Map<String, PropertyAccessor> tableProperties = new LinkedHashMap<>();
 
     public ShardStrategyElement() {}
 

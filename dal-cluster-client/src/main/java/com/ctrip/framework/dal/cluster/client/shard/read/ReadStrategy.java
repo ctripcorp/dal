@@ -17,6 +17,7 @@ public interface ReadStrategy {
     // constant
     String masterRole = "master";
     String slaveRole = "slave";
+    String slaveOnly = "slaveOnly";
 
     // message
     String NO_MASTER_AVAILABLE = "No master available";
@@ -27,7 +28,7 @@ public interface ReadStrategy {
      */
     void init(Set<HostSpec> hostSpecs);
 
-    HostSpec pickRead(HashMap<String, String> map) throws HostNotExpectedException;
+    HostSpec pickRead(HashMap<String, Object> map) throws HostNotExpectedException;
 
     void onChange(Set<HostSpec> hostSpecs);
 

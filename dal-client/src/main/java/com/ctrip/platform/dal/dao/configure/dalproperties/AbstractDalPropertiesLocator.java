@@ -174,4 +174,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public boolean enableUcsContextLog() {
         return true;
     }
+
+    @Override
+    public String ignoreExceptionsForDataSourceMonitor() {
+        return "";
+    }
 }

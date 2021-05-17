@@ -24,12 +24,12 @@ public class DefaultTableParserTest {
                 " AND f.Flight = ?                                                                                                                                                                                                                \n" +
                 " ORDER BY o.OrderID,f.Sequence limit 2000                                                                                                                                                                               ";
         parser.getTablesFromCache(sql);
-        Assert.assertEquals(0, DefaultTableParser.sqlToTables.size());
+        Assert.assertEquals(1, DefaultTableParser.sqlToTables.size());
         sql = "select * from table1 left join table2 on table1.name = table2.name where table1.id = 1";
         parser.getTablesFromCache(sql);
-        Assert.assertEquals(1, DefaultTableParser.sqlToTables.size());
+        Assert.assertEquals(2, DefaultTableParser.sqlToTables.size());
         parser.getTablesFromCache(sql);
-        Assert.assertEquals(1, DefaultTableParser.sqlToTables.size());
+        Assert.assertEquals(2, DefaultTableParser.sqlToTables.size());
         Assert.assertEquals(true, DefaultTableParser.sqlToTables.containsKey("select * from table1 left join table2 on table1.name = table2.name "));
     }
 

@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.ctrip.platform</groupId>
-        <artifactId>dal-client-parent</artifactId>
-        <version>2.3.1</version>
-    </parent>
+    <groupId>com.ctrip.platform</groupId>
+    <artifactId>dal-client-parent</artifactId>
+    <version>2.3.2</version>
+</parent>
     <groupId>com.ctrip.framework.dal</groupId>
     <artifactId>dal-cluster-client</artifactId>
     <packaging>jar</packaging>

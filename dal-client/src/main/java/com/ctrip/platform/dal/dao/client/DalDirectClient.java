@@ -12,8 +12,10 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.helper.DalColumnMapRowMapper;
 import com.ctrip.platform.dal.dao.helper.DalRowMapperExtractor;
 import com.ctrip.platform.dal.dao.helper.HintsAwareExtractor;
@@ -21,6 +23,9 @@ import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.mysql.jdbc.JDBC4Connection;
 import com.mysql.jdbc.MySQLConnection;
+
+import static com.ctrip.platform.dal.dao.client.DalDirectClient.DbCategory.mysql;
+import static com.ctrip.platform.dal.dao.client.DalDirectClient.DbCategory.sqlserver;
 
 /**
  * The direct connection implementation for DalClient.
@@ -32,6 +37,7 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     protected volatile DalConnectionManager connManager;
     protected volatile DalTransactionManager transManager;
     protected volatile DalLogger logger;
+    protected String dbCategory;
 
     public DalDirectClient(DalConfigure config, String logicDbName) {
         init(config, logicDbName);
@@ -49,9 +55,29 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
                     transManager = new DalTransactionManager(connManager);
                     stmtCreator = new DalStatementCreator(configure.getDatabaseSet(logicDbName).getDatabaseCategory());
                     logger = DalClientFactory.getDalLogger();
+                    initCategory(configure, logicDbName);
                 }
             }
         }
+    }
+
+    private void initCategory(DalConfigure configure, String logicDbName) {
+        try{
+            DatabaseSet databaseSet = configure.getDatabaseSet(logicDbName);
+            if (StringUtils.isEmpty(databaseSet.getProvider())) {
+                this.dbCategory = "";
+            } else if (databaseSet.getProvider().trim().toLowerCase().startsWith(mysql.name())){
+                this.dbCategory = mysql.name();
+            } else {
+                this.dbCategory = sqlserver.name();
+            }
+        } catch (Throwable t) {
+
+        }
+    }
+
+    enum DbCategory {
+        mysql, sqlserver
     }
 
     @Override
@@ -369,6 +395,14 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     public int[] batchCall(String callString, StatementParameters[] parametersList, final DalHints hints)
             throws SQLException {
         return batchCall(callString, parametersList, hints, null);
+    }
+
+    public String getLogicDbName() {
+        return connManager.getLogicDbName();
+    }
+
+    public String getDbCategory() {
+        return dbCategory;
     }
 
     /**

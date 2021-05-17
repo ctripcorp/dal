@@ -10,6 +10,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ctrip.platform.dal.common.enums.DalTransactionStatus;
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.DalTransactionHelper;
 import com.ctrip.platform.dal.dao.log.Callback;
@@ -61,6 +64,15 @@ public class DalTransaction {
 
         if (desiganateShard == null)
             return;
+
+        try{
+            DalConfigure dalConfigure = DalClientFactory.getDalConfigure();
+            DatabaseSet databaseSet = dalConfigure.getDatabaseSet(desiganateLogicDbName);
+            if (databaseSet instanceof ClusterDatabaseSet && Integer.valueOf(curShard).equals(Integer.valueOf(desiganateShard)))
+                return;
+        } catch (Exception e) {
+            // needn't handle
+        }
 
         if (!curShard.equals(desiganateShard))
             throw new DalException(ErrorCode.TransactionDistributedShard, curShard, desiganateShard);

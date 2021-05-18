@@ -252,7 +252,7 @@ public class DalConfigureFactory implements DalConfigConstants {
     private void overrideDefaultConfig(Node clusterNode, DalConfigCustomizedOption defaultOption) {
         ((DefaultDalConfigCustomizedOption)defaultOption)
                 .consistencyTypeCustomizedClass(getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null))
-                .readStrategy(ReadStrategyEnum.getStrategyName(getAttribute(clusterNode, ROUTE_STRATEGY, ReadStrategyEnum.READ_MASTER.getAlias())))
+                .readStrategy(getAttribute(clusterNode, ROUTE_STRATEGY, ""))
                 // todo-lhj what's default tag
                 .tag(getAttribute(clusterNode, TAG, "tag"));
     }

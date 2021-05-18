@@ -2,20 +2,16 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
@@ -148,7 +144,7 @@ public class DalConnectionManager {
 	}
 
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
-		if (dbSet instanceof ClusterDatabaseSet) {
+		if (dbSet instanceof ClusterDatabaseSet && !ClusterType.MGR.equals(((ClusterDatabaseSet) dbSet).getCluster().getClusterType())) {
 			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
 		}
 
@@ -177,7 +173,7 @@ public class DalConnectionManager {
 			return new ClusterDataBase(databaseShard.getMasters().iterator().next());
 		}
 
-		HostSpec hostSpec = databaseShard.getReadStrategy().pickRead(config.getSelector().parseDalHints(hints));
+		HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(config.getSelector().parseDalHints(hints));
 		return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
 	}
 

@@ -13,7 +13,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class OrderedAccessStrategy implements RouteStrategy{
+public class OrderedAccessStrategy implements MGRStrategy {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final String CAT_LOG_TYPE = "DAL.mgr";

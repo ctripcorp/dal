@@ -3,8 +3,7 @@ package com.ctrip.framework.dal.cluster.client.shard.read;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ReadMasterStrategy extends ReadSlavesFirstStrategy {
@@ -15,7 +14,7 @@ public class ReadMasterStrategy extends ReadSlavesFirstStrategy {
     }
 
     @Override
-    public HostSpec pickRead(HashMap map) throws HostNotExpectedException {
+    public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
         if ((boolean)map.get(slaveOnly) && (boolean)map.get(isPro))
             return slaveOnly();
 

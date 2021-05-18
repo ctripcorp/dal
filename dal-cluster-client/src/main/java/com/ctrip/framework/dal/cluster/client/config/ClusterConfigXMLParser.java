@@ -103,6 +103,8 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             initReadStrategy(clusterConfig, customizedOption);
         } else if (routeStrategiesNode != null)
             parseRouteStrategies(clusterConfig, routeStrategiesNode);
+        else
+            initReadStrategy(clusterConfig);
 
         parseDrcConfig(clusterConfig, clusterNode);
 
@@ -255,6 +257,11 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
     }
 
+    protected void initReadStrategy(ClusterConfigImpl clusterConfig) {
+        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(ReadStrategyEnum.READ_MASTER.name());
+        clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
+    }
+
     private void parseRouteStrategies(ClusterConfigImpl clusterConfig, Node routeStrategiesNode) {
         List<Node> routeStrategyNodes = getRouteStrategyNodes(routeStrategiesNode);
         if (routeStrategyNodes.size() > 1)
@@ -279,7 +286,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         List<Node> mgrStrategyNodes = getChildNodes(routeStrategiesNode, ORDERED_ACCESS_STRATEGY);
         // read-strategy
         for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()){
-            Node node = getChildNode(routeStrategiesNode, readStrategyEnum.getAlias());
+            Node node = getChildNode(routeStrategiesNode, readStrategyEnum.name());
             if (node != null)
                 readStrategyNodes.add(node);
         }

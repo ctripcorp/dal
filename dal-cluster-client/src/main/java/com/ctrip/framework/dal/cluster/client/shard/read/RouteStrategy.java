@@ -3,10 +3,10 @@ package com.ctrip.framework.dal.cluster.client.shard.read;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-public interface ReadStrategy {
+public interface RouteStrategy {
 
     boolean enable = false;
     boolean readOnly = false;
@@ -21,7 +21,7 @@ public interface ReadStrategy {
     String isPro = "isPro";
 
     // message
-    String NO_MASTER_AVAILABLE = "No master available";
+    String NO_HOST_AVAILABLE = "No %s available";
 
     /**
      * All candidate hosts.
@@ -29,7 +29,7 @@ public interface ReadStrategy {
      */
     void init(Set<HostSpec> hostSpecs);
 
-    HostSpec pickRead(HashMap<String, Object> map) throws HostNotExpectedException;
+    HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException;
 
     void onChange(Set<HostSpec> hostSpecs);
 

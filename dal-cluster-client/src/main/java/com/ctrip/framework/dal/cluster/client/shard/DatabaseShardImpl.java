@@ -1,12 +1,13 @@
 package com.ctrip.framework.dal.cluster.client.shard;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.shard.read.ReadMasterStrategy;
-import com.ctrip.framework.dal.cluster.client.shard.read.ReadStrategy;
+import com.ctrip.framework.dal.cluster.client.shard.read.RouteStrategy;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 
 import java.util.*;
@@ -22,7 +23,7 @@ public class DatabaseShardImpl implements DatabaseShard {
     private DatabaseShardConfigImpl databaseShardConfig;
     private List<Database> masters = new LinkedList<>();
     private List<Database> slaves = new LinkedList<>();
-    private ReadStrategy readStrategy;
+    private RouteStrategy routeStrategy;
     private ConcurrentHashMap<HostSpec, Database> hostToDataBase = new ConcurrentHashMap<>();
 
     public DatabaseShardImpl(DatabaseShardConfigImpl databaseShardConfig) {
@@ -30,11 +31,9 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     public void initReadStrategy() {
-        String clazz = databaseShardConfig.getClusterConfig().getCustomizedOption().getReadStrategy();
+        String clazz = ReadStrategyEnum.parse(databaseShardConfig.getClusterConfig().getRouteStrategyConfig().routeStrategyName());
         try{
-            if (StringUtils.isEmpty(clazz) || clazz.equalsIgnoreCase(ORDERED_ACCESS_STRATEGY))
-                readStrategy = new ReadMasterStrategy();
-            else readStrategy = (ReadStrategy)Class.forName(clazz).newInstance();
+            routeStrategy = (RouteStrategy)Class.forName(clazz).newInstance();
         } catch (Throwable t) {
             throw new ClusterRuntimeException(t);
         }
@@ -50,7 +49,7 @@ public class DatabaseShardImpl implements DatabaseShard {
             hostSpecs.add(host);
         });
 
-        readStrategy.init(hostSpecs);
+        routeStrategy.init(hostSpecs);
     }
 
     @Override
@@ -69,8 +68,8 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     @Override
-    public ReadStrategy getReadStrategy() {
-        return readStrategy;
+    public RouteStrategy getRouteStrategy() {
+        return routeStrategy;
     }
 
     @Override

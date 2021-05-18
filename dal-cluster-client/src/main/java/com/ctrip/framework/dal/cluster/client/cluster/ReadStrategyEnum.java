@@ -26,6 +26,14 @@ public enum ReadStrategyEnum {
         return alias;
     }
 
+    public static String parse(String name) {
+        for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()) {
+            if (readStrategyEnum.name().equalsIgnoreCase(name))
+                return readStrategyEnum.clazz;
+        }
+        return name;
+    }
+
 
     public String getAlias() {
         return alias;

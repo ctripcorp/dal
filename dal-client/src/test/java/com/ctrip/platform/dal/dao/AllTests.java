@@ -31,5 +31,6 @@ import org.junit.runners.Suite.SuiteClasses;
 		com.ctrip.platform.dal.dao.markdown._AllTests.class,
 
 })
+
 // test: 1841/1841 passed/all env:fat ps:DefaultTableParserTest.getTablesFromCache rerun will pass
 public class AllTests {}

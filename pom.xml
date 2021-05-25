@@ -14,8 +14,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>dal-cluster-client</module>
-        <module>dal-client</module>
+<!--        <module>dal-cluster-client</module>-->
+<!--        <module>dal-client</module>-->
         <!--<module>dao-gen-core</module>
         <module>dal-dao-gen</module>-->
     </modules>

@@ -17,7 +17,7 @@
         <tomcat-jdbc-version>7.0.76</tomcat-jdbc-version>
         <mysql-connector-version>5.1.41</mysql-connector-version>
         <commons-email-version>1.4</commons-email-version>
-        <commons-io-version>2.5</commons-io-version>
+        <commons-io-version>2.7</commons-io-version>
         <jcl-over-slf4j>1.7.21</jcl-over-slf4j>
         <logback-version>1.2.2</logback-version>
         <fastjson-version>1.2.60</fastjson-version>

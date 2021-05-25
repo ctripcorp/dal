@@ -1,5 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.config;
 
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShardImpl;
 
@@ -34,6 +35,8 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         DatabaseShardImpl databaseShard = new DatabaseShardImpl(this);
         for (DatabaseConfig databaseConfig : databaseConfigs)
             databaseShard.addDatabase(databaseConfig.generate());
+        if (!ClusterType.MGR.equals(clusterConfig.getClusterType()))
+            databaseShard.initReadStrategy();
         return databaseShard;
     }
 

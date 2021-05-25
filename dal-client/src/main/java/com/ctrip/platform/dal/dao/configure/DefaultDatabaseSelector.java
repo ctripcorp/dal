@@ -1,9 +1,11 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import org.apache.commons.lang.StringUtils;
@@ -95,7 +97,22 @@ public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
 		
 		throw new DalException(ErrorCode.MarkdownConnection, sb.toString());
 	}
-	
+
+	@Override
+	public HashMap<String, Object> parseDalHints(DalHints dalHints) {
+		HashMap<String, Object> map = new HashMap<>();
+		if (dalHints == null)
+			return  map;
+
+		map.put(DalHintEnum.slaveOnly.name(), dalHints.is(DalHintEnum.slaveOnly));
+		map.put("isPro", envUtils.isProd());
+		map.put(DalHintEnum.userDefined1.name(), dalHints.get(DalHintEnum.userDefined1));
+		map.put(DalHintEnum.userDefined2.name(), dalHints.get(DalHintEnum.userDefined2));
+		map.put(DalHintEnum.userDefined3.name(), dalHints.get(DalHintEnum.userDefined3));
+
+		return map;
+	}
+
 	private DataBase getAvailableDb(DalHA ha, List<DataBase> candidates) throws DalException{
 		if(isNullOrEmpty(candidates))
 			return null;

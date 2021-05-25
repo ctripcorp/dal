@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import org.junit.Assert;
 import org.junit.Test;
 

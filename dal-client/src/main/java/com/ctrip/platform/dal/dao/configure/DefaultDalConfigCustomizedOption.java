@@ -10,6 +10,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private boolean forceInitialize = false;
     private Integer shardIndex;
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
+    private String readStrategy;
+    private String tag;
 
     @Override
     public String getConsistencyTypeCustomizedClass() {
@@ -34,6 +36,16 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public DatabaseRole getDatabaseRole() {
         return databaseRole;
+    }
+
+    @Override
+    public String getReadStrategy() {
+        return readStrategy;
+    }
+
+    @Override
+    public String getTag() {
+        return tag;
     }
 
     public DefaultDalConfigCustomizedOption consistencyTypeCustomizedClass(String clazz) {
@@ -61,6 +73,16 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
+    public DefaultDalConfigCustomizedOption readStrategy(String readStrategy) {
+        this.readStrategy = readStrategy;
+        return this;
+    }
+
+    public DefaultDalConfigCustomizedOption tag(String tag) {
+        this.tag = tag;
+        return this;
+    }
+
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
@@ -68,6 +90,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
                 .shardIndex(this.shardIndex)
                 .forceInitialize(this.forceInitialize)
                 .ignoreShardingResourceNotFound(this.ignoreShardingResourceNotFound)
-                .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass);
+                .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
+                .readStrategy(this.readStrategy)
+                .tag(this.tag);
     }
 }

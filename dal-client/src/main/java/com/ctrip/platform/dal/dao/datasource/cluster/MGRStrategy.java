@@ -8,7 +8,7 @@ import java.sql.SQLException;
 /**
  * @author c7ch23en
  */
-public interface RouteStrategy {
+public interface MGRStrategy {
 
     void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties);
 

@@ -1,10 +1,15 @@
 package com.ctrip.platform.dal.dao.datasource.monitor;
 
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -24,6 +29,12 @@ public class DefaultDataSourceMonitor implements DataSourceMonitor {
     private long alertThresholdMs = ALERT_THRESHOLD_MS;
     private long alertThresholdSamples = ALERT_THRESHOLD_SAMPLES;
     private long alertIntervalMs = ALERT_INTERVAL_MS;
+    private DalPropertiesLocator locator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
+    protected List<Class> ignoreExceptions;
+
+    {
+        ignoreExceptions = parseIgnoreExceptions(locator.ignoreExceptionsForDataSourceMonitor());
+    }
 
     public DefaultDataSourceMonitor(DataSourceIdentity dataSourceId) {
         this.dataSourceId = dataSourceId;
@@ -31,7 +42,7 @@ public class DefaultDataSourceMonitor implements DataSourceMonitor {
 
     @Override
     public void report(SQLException e, boolean isUpdateOperation) {
-        if (e != null) {
+        if (!isExecuteException(e)) {
             totalStats.record();
             if (isUpdateOperation)
                 writeStats.record();
@@ -42,6 +53,40 @@ public class DefaultDataSourceMonitor implements DataSourceMonitor {
             if (isUpdateOperation)
                 writeStats.clear();
         }
+    }
+
+    protected boolean isExecuteException(SQLException e) {
+        if (e == null)
+            return true;
+
+        Throwable t1 = e;
+        for (Class clazz : ignoreExceptions)
+            while (t1 != null && (t1 instanceof SQLException)) {
+                if (clazz.isInstance(t1)) {
+                    return true;
+                }
+                t1 = t1.getCause();
+            }
+
+        return false;
+    }
+
+    protected List<Class> parseIgnoreExceptions(String exception) {
+        List<Class> ignoreExceptions = new ArrayList<>();
+        if (StringUtils.isEmpty(exception)) {
+            return ignoreExceptions;
+        }
+        String[] exceptions = exception.split(",");
+        for (String s : exceptions) {
+            if (StringUtils.isEmpty(s))
+                continue;
+            try {
+                ignoreExceptions.add(Class.forName(s.trim()));
+            } catch (Exception e) {
+                // no need do something
+            }
+        }
+        return ignoreExceptions;
     }
 
     protected boolean checkStatus() {

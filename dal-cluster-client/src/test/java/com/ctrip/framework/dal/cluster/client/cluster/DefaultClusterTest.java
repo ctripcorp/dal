@@ -68,6 +68,16 @@ public class DefaultClusterTest {
             public DalConfigCustomizedOption clone() {
                 return null;
             }
+
+            @Override
+            public String getReadStrategy() {
+                return null;
+            }
+
+            @Override
+            public String getTag() {
+                return null;
+            }
         };
     }
 

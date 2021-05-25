@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 public class FreshnessSelector implements DatabaseSelector {
@@ -46,6 +48,11 @@ public class FreshnessSelector implements DatabaseSelector {
 
         interval = settings.containsKey(UPDATE_INTERVAL) ? Integer.parseInt(settings.get(UPDATE_INTERVAL))
                 : DEFAULT_INTERVAL;
+    }
+
+    @Override
+    public HashMap<String, Object> parseDalHints(DalHints dalHints) {
+        return defaultSelector.parseDalHints(dalHints);
     }
 
     /**

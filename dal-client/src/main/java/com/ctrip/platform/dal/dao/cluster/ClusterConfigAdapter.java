@@ -9,7 +9,7 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
-import com.ctrip.platform.dal.dao.datasource.cluster.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
@@ -129,6 +129,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
             routeStrategy.setProperty(DataSourceConfigureConstants.FIXED_VALIDATE_PERIOD_MS,
                     String.valueOf(configure.getFixedValidatePeriodMS()));
         clusterConfig.setRouteStrategyConfig(routeStrategy);
+        clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;
     }
 
@@ -145,6 +146,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         databaseConfig.setPwd(configure.getPassword());
         databaseShardConfig.addDatabaseConfig(databaseConfig);
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
+        clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;
     }
 

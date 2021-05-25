@@ -35,4 +35,6 @@ public interface DalPropertiesLocator {
 
     boolean enableUcsContextLog();
 
+    String ignoreExceptionsForDataSourceMonitor();
+
 }

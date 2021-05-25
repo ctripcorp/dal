@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.base.PropertyAccessorSupport;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +14,7 @@ import java.util.Set;
  */
 public class TablesElement extends PropertyAccessorSupport implements ConfigElement {
 
-    private Map<String, TableElement> tableElements = new HashMap<>();
+    private Map<String, TableElement> tableElements = new LinkedHashMap<>();
 
     public TablesElement() {}
 

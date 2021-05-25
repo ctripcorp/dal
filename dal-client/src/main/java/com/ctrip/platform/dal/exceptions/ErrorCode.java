@@ -180,6 +180,8 @@ public enum ErrorCode {
 
     NullLogicDbName(ErrorClassify.Connection, 5302, "The master/slave database set is empty"),
 
+    NoMasterNode(ErrorClassify.Connection, 5302, "The master database set is empty"),
+
     NoMoreConnectionToFailOver(ErrorClassify.Connection, 5303, "There is no more fail over connections to try"),
 
     MarkdownLogicDb(ErrorClassify.Connection, 5304, "Database Set %s has been marked down"),

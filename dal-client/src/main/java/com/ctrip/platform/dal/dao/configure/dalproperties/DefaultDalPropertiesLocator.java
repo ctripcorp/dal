@@ -27,6 +27,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     public static final String CUSTOM_DAL_CLIENT = "customDalClient";
     public static final String TABLE_PARSER_CACHE_KEY_BYTES = "tableParserCacheKeyBytes";
     public static final String ENABLE_UCS_CONTEXT_LOG = "enableUcsContextLog";
+    public static final String DATASOURCE_MONITOR_FILTER_EXCEPTIONS = "datasourceMonitorFilterExceptions";
 
     private static final String PROPERTY_NAME_CLUSTER_INFO_QUERY_URL = "ClusterInfoQueryUrl";
     private static final String PROPERTY_NAME_DRC_STAGE = "DrcStage";
@@ -144,6 +145,11 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     @Override
     public boolean enableUcsContextLog() {
         return Boolean.valueOf(getProperty(ENABLE_UCS_CONTEXT_LOG, "true"));
+    }
+
+    @Override
+    public String ignoreExceptionsForDataSourceMonitor() {
+        return getProperty(DATASOURCE_MONITOR_FILTER_EXCEPTIONS);
     }
 
     private String getProperty(String name, String defaultValue) {

@@ -1,12 +1,12 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
-import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -18,8 +18,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -36,7 +34,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
     private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
-    private final RouteStrategy routeStrategy;
+    private final MGRStrategy mgrStrategy;
     private final MultiHostClusterProperties clusterProperties;
     private final ConnectionValidator connValidator;
 
@@ -49,8 +47,8 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         this.dataSourceConfigs = dataSourceConfigs;
         this.clusterProperties = clusterProperties;
         this.connFactory = prepareConnectionFactory();
-        this.routeStrategy = prepareRouteStrategy();
-        this.connValidator = this.routeStrategy.getConnectionValidator();
+        this.mgrStrategy = prepareRouteStrategy();
+        this.connValidator = this.mgrStrategy.getConnectionValidator();
         prepareDataSources();
     }
 
@@ -68,15 +66,15 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         };
     }
 
-    protected RouteStrategy prepareRouteStrategy() {
+    protected MGRStrategy prepareRouteStrategy() {
         String strategyName = clusterProperties.routeStrategyName();
-        RouteStrategy strategy;
+        MGRStrategy strategy;
         if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
             strategy = new OrderedAccessStrategy();
         else {
             try {
                 Class clazz = Class.forName(strategyName);
-                strategy = (RouteStrategy) clazz.newInstance();
+                strategy = (MGRStrategy) clazz.newInstance();
             } catch (Throwable t) {
                 String msg = "Errored constructing route strategy: " + strategyName;
                 LOGGER.error(msg, t);
@@ -102,7 +100,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
     @Override
     public Connection getConnection() throws SQLException {
-        return routeStrategy.pickConnection(buildRequestContext());
+        return mgrStrategy.pickConnection(buildRequestContext());
     }
 
     protected RequestContext buildRequestContext() {
@@ -120,8 +118,8 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
             if (dataSource != null)
                 DataSourceCreator.getInstance().returnDataSource(dataSource);
         });
-        if (routeStrategy != null) {
-            routeStrategy.destroy();
+        if (mgrStrategy != null) {
+            mgrStrategy.destroy();
         }
     }
 

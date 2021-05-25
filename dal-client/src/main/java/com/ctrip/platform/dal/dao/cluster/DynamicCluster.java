@@ -13,6 +13,7 @@ import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
@@ -193,4 +194,8 @@ public class DynamicCluster extends ListenableSupport<ClusterSwitchedEvent> impl
         return getInnerCluster().isWrapperFor(iface);
     }
 
+    @Override
+    public DatabaseShard getDatabaseShard(int shardIndex) {
+        return getInnerCluster().getDatabaseShard(shardIndex);
+    }
 }

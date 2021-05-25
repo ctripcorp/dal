@@ -138,6 +138,10 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
         this.routeStrategyConfig = routeStrategyConfig;
     }
 
+    public ClusterRouteStrategyConfig getRouteStrategyConfig() {
+        return routeStrategyConfig;
+    }
+
     public void setUnitStrategyId(Integer unitStrategyId) {
         this.unitStrategyId = unitStrategyId;
     }

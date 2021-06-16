@@ -171,8 +171,10 @@ public class DalShardingHelper {
         DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
         DalShardingStrategy strategy = dbSet.getStrategy();
         DalHints tmpHints = new DalHints();
-        if (hints != null)
+        if (hints != null) {
+            tmpHints.inShard(hints.getShardId());
             tmpHints.setRequestContext(hints.getRequestContext());
+        }
         for (int i = 0; i < daoPojos.size(); i++) {
             Map<String, ?> pojo = daoPojos.get(i);
 
@@ -373,7 +375,7 @@ public class DalShardingHelper {
             return;
 
         Set<String> notNullShardIds =
-                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos, hints).keySet());
+                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, hints.getShardId(), daoPojos, hints).keySet());
         if (notNullShardIds.size() > 1)
             logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST, "");
 

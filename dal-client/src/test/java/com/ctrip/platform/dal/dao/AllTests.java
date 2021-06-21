@@ -32,5 +32,5 @@ import org.junit.runners.Suite.SuiteClasses;
 
 })
 
-// test: 1841/1841 passed/all env:fat ps:DefaultTableParserTest.getTablesFromCache rerun will pass
+// test: 1841/1841 passed/all env:fat
 public class AllTests {}

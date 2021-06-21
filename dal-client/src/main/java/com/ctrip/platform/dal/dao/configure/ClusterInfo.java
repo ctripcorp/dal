@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.configure;
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.IClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContext;
@@ -11,10 +12,12 @@ import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 public class ClusterInfo {
 
     private static final String ID_FORMAT = "%s-%d-%s";
+    private static final String TAG = "-%s";
 
     private String clusterName;
     private Integer shardIndex;
     private DatabaseRole role;
+    private String tag;
     private boolean dbSharding;
     private Cluster cluster;
 
@@ -25,9 +28,14 @@ public class ClusterInfo {
     }
 
     public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, boolean dbSharding, Cluster cluster) {
+        this(clusterName, shardIndex, role, null, dbSharding, cluster);
+    }
+
+    public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, String tag, boolean dbSharding, Cluster cluster) {
         this.clusterName = clusterName;
         this.shardIndex = shardIndex;
         this.role = role;
+        this.tag = tag;
         this.dbSharding = dbSharding;
         this.cluster = cluster;
     }
@@ -56,13 +64,18 @@ public class ClusterInfo {
         return cluster;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
     public DataSourceIdentity toDataSourceIdentity() {
         return new SimpleClusterDataSourceIdentity(this, cluster);
     }
 
     @Override
     public String toString() {
-        return String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null);
+        return StringUtils.isEmpty(tag) ? String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null) :
+                String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null) + String.format(TAG, tag);
     }
 
     static class SimpleClusterDataSourceIdentity implements DataSourceIdentity, IClusterDataSourceIdentity {

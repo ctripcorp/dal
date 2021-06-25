@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.framework.dal.cluster.client.Cluster;
@@ -157,6 +158,8 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     }
 
     private DataSourceIdentity getStandaloneDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
+        if (!StringUtils.isEmpty(clusterInfo.getTag()))
+            return new TagDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()), clusterInfo.getTag());
         if (clusterInfo.getRole() == DatabaseRole.MASTER)
             return new TraceableClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
         else {

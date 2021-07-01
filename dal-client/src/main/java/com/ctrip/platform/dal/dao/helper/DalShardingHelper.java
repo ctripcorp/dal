@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
@@ -174,6 +175,9 @@ public class DalShardingHelper {
         if (hints != null) {
 //            tmpHints.inShard(hints.getShardId());
             tmpHints.setRequestContext(hints.getRequestContext());
+            tmpHints.set(DalHintEnum.userDefined1, hints.get(DalHintEnum.userDefined1));
+            tmpHints.set(DalHintEnum.userDefined2, hints.get(DalHintEnum.userDefined2));
+            tmpHints.set(DalHintEnum.userDefined3, hints.get(DalHintEnum.userDefined3));
         }
         for (int i = 0; i < daoPojos.size(); i++) {
             Map<String, ?> pojo = daoPojos.get(i);
@@ -375,7 +379,7 @@ public class DalShardingHelper {
             return;
 
         Set<String> notNullShardIds =
-                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos, hints).keySet());
+                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, hints.getShardId(), daoPojos, hints).keySet());
         if (notNullShardIds.size() > 1)
             logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST, "");
 

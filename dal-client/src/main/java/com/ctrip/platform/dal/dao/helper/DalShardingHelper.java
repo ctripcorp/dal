@@ -240,8 +240,10 @@ public class DalShardingHelper {
         DalShardingStrategy strategy = dbSet.getStrategy();
 
         DalHints tmpHints = new DalHints();
-        if (hints != null)
+        if (hints != null){
+            tmpHints = hints.clone();
             tmpHints.setRequestContext(hints.getRequestContext());
+        }
         for (int i = 0; i < parameters.size(); i++) {
             Object value = parameters.get(i);
 

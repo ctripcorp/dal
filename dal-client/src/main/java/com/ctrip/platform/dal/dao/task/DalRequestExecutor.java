@@ -341,7 +341,7 @@ public class DalRequestExecutor {
 				executionResult = new ShardExecutionResultImpl<>(shard, null, partial);
 			} catch (Throwable e) {
 				error = e;
-				executionResult = new ShardExecutionResultImpl<>(shard, null, e);
+				executionResult = new ShardExecutionResultImpl<>(shard, null, tasks.get(shard), e);
 			}
 			hints.handleError("There is error during sequential execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(shard);

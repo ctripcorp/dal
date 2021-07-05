@@ -45,4 +45,8 @@ public class ShardExecutionResultImpl<V> extends ExecutionResultImpl<V> implemen
         return tableShard;
     }
 
+    @Override
+    public StatementParameters getStatementParameters() {
+        return statementParameters;
+    }
 }

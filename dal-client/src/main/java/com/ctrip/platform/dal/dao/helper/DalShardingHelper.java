@@ -173,11 +173,8 @@ public class DalShardingHelper {
         DalShardingStrategy strategy = dbSet.getStrategy();
         DalHints tmpHints = new DalHints();
         if (hints != null) {
-//            tmpHints.inShard(hints.getShardId());
+            tmpHints = hints.clone();
             tmpHints.setRequestContext(hints.getRequestContext());
-            tmpHints.set(DalHintEnum.userDefined1, hints.get(DalHintEnum.userDefined1));
-            tmpHints.set(DalHintEnum.userDefined2, hints.get(DalHintEnum.userDefined2));
-            tmpHints.set(DalHintEnum.userDefined3, hints.get(DalHintEnum.userDefined3));
         }
         for (int i = 0; i < daoPojos.size(); i++) {
             Map<String, ?> pojo = daoPojos.get(i);

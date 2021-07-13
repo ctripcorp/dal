@@ -171,8 +171,10 @@ public class DalShardingHelper {
         DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
         DalShardingStrategy strategy = dbSet.getStrategy();
         DalHints tmpHints = new DalHints();
-        if (hints != null)
+        if (hints != null) {
+//            tmpHints.inShard(hints.getShardId());
             tmpHints.setRequestContext(hints.getRequestContext());
+        }
         for (int i = 0; i < daoPojos.size(); i++) {
             Map<String, ?> pojo = daoPojos.get(i);
 

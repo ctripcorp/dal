@@ -42,7 +42,7 @@ public class ApiDataSourceIdentityTest {
         Assert.assertEquals("localhost", database.getConnectionString().getPrimaryHost());
         Assert.assertEquals(3306, database.getConnectionString().getPrimaryPort());
         ClusterRouteStrategyConfig routeStrategy = cluster.getRouteStrategyConfig();
-        Assert.assertNull(routeStrategy);
+        Assert.assertNotNull(routeStrategy);
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
 import com.ctrip.framework.dal.cluster.client.base.Listener;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.config.*;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
@@ -146,6 +147,8 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         databaseConfig.setPwd(configure.getPassword());
         databaseShardConfig.addDatabaseConfig(databaseConfig);
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
+        // todo-lhj  make configurable RouteStrategy of
+        clusterConfig.setRouteStrategyConfig(new DefaultClusterRouteStrategyConfig(ReadStrategyEnum.READ_MASTER.name()));
         clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;
     }

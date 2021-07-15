@@ -37,6 +37,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     private BulkTask<Integer, T> combinedInsertTask;
     private BulkTask<Integer, T> combinedReplaceTask;
+    private BulkTask<Integer, T> combinedDeleteTask;
 
     private BulkTask<int[], T> batchInsertTask;
     private BulkTask<int[], T> batchDeleteTask;
@@ -103,6 +104,7 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
         combinedInsertTask = factory.createCombinedInsertTask(parser);
         combinedReplaceTask = factory.createCombinedReplaceTask(parser);
+        combinedDeleteTask = factory.createCombinedDeleteTask(parser);
 
         batchInsertTask = factory.createBatchInsertTask(parser);
         batchDeleteTask = factory.createBatchDeleteTask(parser);
@@ -600,6 +602,18 @@ public final class DalTableDao<T> extends TaskAdapter<T> {
 
     public int combinedInsert(DalHints hints, List<T> daoPojos, ShardExecutionCallback<Integer> callback) throws SQLException {
         return combinedInsert(hints, hints.getKeyHolder(), daoPojos, callback);
+    }
+
+    /**
+     * Delete multiple pojos in one DELETE SQL.
+     *
+     * @param hints Additional parameters that instruct how DAL Client perform database operation.
+     * @param daoPojos list of pojos to be inserted
+     * @return how many rows been affected
+     * @throws SQLException
+     */
+    public int combinedDelete(DalHints hints, List<T> daoPojos) throws SQLException {
+        return getSafeResult(executor.execute(hints, new DalBulkTaskRequest<>(logicDbName, rawTableName, hints, daoPojos, combinedDeleteTask, null), null));
     }
 
     /**

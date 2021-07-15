@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
@@ -17,6 +18,7 @@ import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
 
 public class DalConnectionManager {
@@ -164,8 +166,14 @@ public class DalConnectionManager {
 	protected DataBase clusterSelect(DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) {
 		Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
 		DatabaseShard databaseShard;
-		if (StringUtils.isEmpty(shard))
-			databaseShard = cluster.getDatabaseShard(0);
+		if (StringUtils.isEmpty(shard)) {
+			Set<Integer> shards = cluster.getAllDbShards();
+			if (shards.size() == 0)
+				throw new DalRuntimeException("no shards found for this cluster");
+			if (shards.size() > 1)
+				throw new DalRuntimeException("multiple shards detected for non sharding cluster");
+			databaseShard = cluster.getDatabaseShard(shards.iterator().next());
+		}
 		else
 			databaseShard = cluster.getDatabaseShard(Integer.valueOf(shard));
 

@@ -25,7 +25,9 @@ public interface DalTaskFactory extends DalComponent {
 	<T> BulkTask<Integer, T> createCombinedInsertTask(DalParser<T> parser);
 
 	<T> BulkTask<Integer, T> createCombinedReplaceTask(DalParser<T> parser);
-	
+
+	<T> BulkTask<Integer, T> createCombinedDeleteTask(DalParser<T> parser);
+
 	<T> BulkTask<int[], T> createBatchInsertTask(DalParser<T> parser);
 
 	<T> BulkTask<int[], T> createBatchReplaceTask(DalParser<T> parser);

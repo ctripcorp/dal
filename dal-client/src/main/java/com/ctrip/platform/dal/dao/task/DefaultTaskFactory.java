@@ -83,6 +83,17 @@ public class DefaultTaskFactory implements DalTaskFactory {
 	}
 
 	@Override
+	public <T> BulkTask<Integer, T> createCombinedDeleteTask(DalParser<T> parser) {
+		if(DatabaseCategory.MySql == getDbCategory(parser)) {
+			CombinedDeleteTask<T> combinedDeleteTask = new CombinedDeleteTask<T>();
+			combinedDeleteTask.initialize(parser);
+			return combinedDeleteTask;
+		}
+
+		return null;
+	}
+
+	@Override
 	public <T> BulkTask<int[], T> createBatchInsertTask(DalParser<T> parser) {
 		BatchInsertTask<T> batchInsertTask = new BatchInsertTask<T>();
 		batchInsertTask.initialize(parser);

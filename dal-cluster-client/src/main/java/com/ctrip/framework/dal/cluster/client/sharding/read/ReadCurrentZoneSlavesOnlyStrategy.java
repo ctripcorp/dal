@@ -31,7 +31,7 @@ public class ReadCurrentZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
 
     @Override
     public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
-        if (map.containsKey(routeStrategy))
+        if (map.get(routeStrategy) != null)
             return dalHintsRoute(map);
 
         return null;

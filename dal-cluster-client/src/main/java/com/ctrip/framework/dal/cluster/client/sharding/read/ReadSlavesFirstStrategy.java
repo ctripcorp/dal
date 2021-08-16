@@ -37,7 +37,7 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
 
     @Override
     public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
-        if (map.containsKey(routeStrategy))
+        if (map.get(routeStrategy) != null)
             return dalHintsRoute(map);
 
         if ((boolean)map.get(slaveOnly) && (boolean)map.get(isPro))

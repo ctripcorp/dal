@@ -279,6 +279,11 @@ public enum DalHintEnum {
      * The entity class of the table.
      * For customer DalClient to know the type class of result
      */
-    resultClass
+    resultClass,
+
+    /**
+     * support sql level decide which read/write strategy to use
+     */
+    routeStrategy
 
 }

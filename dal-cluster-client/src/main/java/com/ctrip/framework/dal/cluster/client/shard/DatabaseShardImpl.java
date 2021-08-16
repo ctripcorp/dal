@@ -6,14 +6,10 @@ import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
-import com.ctrip.framework.dal.cluster.client.shard.read.ReadMasterStrategy;
-import com.ctrip.framework.dal.cluster.client.shard.read.RouteStrategy;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY;
 
 /**
  * @author c7ch23en
@@ -49,7 +45,11 @@ public class DatabaseShardImpl implements DatabaseShard {
             hostSpecs.add(host);
         });
 
-        routeStrategy.init(hostSpecs);
+        try{
+            routeStrategy.init(hostSpecs);
+        } catch (DalMetadataException error) {
+            throw new DalMetadataException(databaseShardConfig.getClusterConfig().getClusterName() + error.getMessage());
+        }
     }
 
     @Override

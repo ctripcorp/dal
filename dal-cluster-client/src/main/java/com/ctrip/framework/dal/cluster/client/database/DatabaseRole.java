@@ -8,7 +8,8 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 public enum DatabaseRole {
 
     MASTER("master"),
-    SLAVE("slave");
+    SLAVE("slave"),
+    MIX("mix");
 
     private String value;
 

@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.read;
+package com.ctrip.framework.dal.cluster.client.sharding.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;

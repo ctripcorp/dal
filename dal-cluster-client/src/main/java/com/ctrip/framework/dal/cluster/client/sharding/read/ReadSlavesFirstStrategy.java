@@ -1,19 +1,15 @@
-package com.ctrip.platform.dal.dao.read;
+package com.ctrip.framework.dal.cluster.client.sharding.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 import com.ctrip.framework.dal.cluster.client.shard.RouteStrategy;
-import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.EnvUtils;
 
 import java.util.*;
 
 import static com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum.READ_SLAVES_FIRST;
 
 public class ReadSlavesFirstStrategy implements RouteStrategy {
-
-    protected EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
 
     protected HashMap<String, List<HostSpec>> hostMap = new HashMap<>();
     protected HashMap<ReadStrategyEnum, RouteStrategy> routeStrategies = new HashMap<>();

@@ -29,4 +29,8 @@ public class StringUtils {
         return s != null ? Integer.parseInt(s) : null;
     }
 
+    public static String trimToEmpty(String str) {
+        return str == null ? "" : str.trim();
+    }
+
 }

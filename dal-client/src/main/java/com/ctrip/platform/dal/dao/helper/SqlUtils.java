@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
+import com.ctrip.platform.dal.common.enums.SqlType;
 import com.mysql.jdbc.StringUtils;
 
 public class SqlUtils {
@@ -44,6 +45,12 @@ public class SqlUtils {
         }
 
         return statementStartPos;
+    }
+
+    public static SqlType getSqlType(String sql) {
+        // todo-lhj 需要对比两种解析sql的实现方式的效率，根据压测情况对比
+
+        return null;
     }
 
 }

@@ -1,14 +1,13 @@
-package com.ctrip.platform.dal.dao.datasource;
+package com.ctrip.platform.dal.dao.datasource.read;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.platform.dal.dao.datasource.AbstractDataSource;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 public class GroupDataSource extends AbstractDataSource {
     private static final Integer DEFAULT_SHARD = null;
@@ -16,8 +15,9 @@ public class GroupDataSource extends AbstractDataSource {
     private static final String UNINITIALIZED = "%s:%d has not been initialized";
     private static final String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
 
-    protected DataSource writeDataSource;
-    protected Map<Database, DataSource> readDataSource;
+    private DataSource writeDataSource;
+    private DataSource
+
     protected volatile boolean init = false;
     protected ClusterInfo clusterInfo;
     protected Integer shardIndex;
@@ -33,17 +33,6 @@ public class GroupDataSource extends AbstractDataSource {
         this.cluster = clusterInfo.getCluster();
         this.clusterName = cluster.getClusterName();
         this.shardIndex = shardIndex;
-
-        init(clusterInfo, shardIndex);
-    }
-
-    protected synchronized void init(ClusterInfo clusterInfo, Integer shardIndex) {
-        if (init)
-            throw new DalRuntimeException(String.format(DUPLICATE_INIT, clusterName, shardIndex));
-
-        //todo-lhj  初始化动态数据源
-
-        this.init = true;
     }
 
 
@@ -59,6 +48,6 @@ public class GroupDataSource extends AbstractDataSource {
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return null;
+        return new GroupConnection(this.clusterInfo, this.shardIndex);
     }
 }

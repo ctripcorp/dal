@@ -1,11 +1,9 @@
-package com.ctrip.platform.dal.dao.datasource;
+package com.ctrip.platform.dal.dao.datasource.read;
 
-import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
-import com.ctrip.platform.dal.dao.datasource.jdbc.DalStatement;
-import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
+import com.ctrip.platform.dal.dao.datasource.GroupResultSet;
+import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class GroupStatement implements Statement {
@@ -230,7 +228,11 @@ public class GroupStatement implements Statement {
 
     @Override
     public int getResultSetHoldability() throws SQLException {
-        return 0;
+        return this.resultSetHoldability;
+    }
+
+    public void setResultSetHoldability(int resultSetHoldability) {
+        this.resultSetHoldability = resultSetHoldability;
     }
 
     @Override

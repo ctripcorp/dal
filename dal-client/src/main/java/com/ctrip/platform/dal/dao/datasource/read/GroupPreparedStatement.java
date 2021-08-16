@@ -1,16 +1,11 @@
-package com.ctrip.platform.dal.dao.datasource;
-
-import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
-import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
+package com.ctrip.platform.dal.dao.datasource.read;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 public class GroupPreparedStatement extends GroupStatement implements PreparedStatement {
 
@@ -175,6 +170,14 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         return null;
+    }
+
+    public void setColumnIndexes(int[] columnIndexes) {
+        this.columnIndexes = columnIndexes;
+    }
+
+    public void setColumnNames(String[] columnNames) {
+        this.columnNames = columnNames;
     }
 
     @Override

@@ -109,7 +109,10 @@ public class DefaultDatabaseSelector implements DatabaseSelector, DalComponent {
 		map.put(DalHintEnum.userDefined1.name(), dalHints.get(DalHintEnum.userDefined1));
 		map.put(DalHintEnum.userDefined2.name(), dalHints.get(DalHintEnum.userDefined2));
 		map.put(DalHintEnum.userDefined3.name(), dalHints.get(DalHintEnum.userDefined3));
-		map.put(DalHintEnum.routeStrategy.name(), dalHints.getRouteStrategy());
+
+		if (dalHints.getRouteStrategy() != null) {
+			map.put(DalHintEnum.routeStrategy.name(), dalHints.getRouteStrategy());
+		}
 
 		return map;
 	}

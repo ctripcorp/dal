@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.read;
+package com.ctrip.framework.dal.cluster.client.sharding.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
@@ -6,18 +6,26 @@ import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException
 import java.util.Map;
 import java.util.Set;
 
-public class ReadMasterZoneSlavesFirstStrategy extends ReadSlavesFirstStrategy {
+public class ReadMasterStrategy extends ReadSlavesFirstStrategy {
+
     @Override
     public void init(Set<HostSpec> hostSpecs) {
-
+        super.init(hostSpecs);
     }
 
     @Override
     public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
-        if (map.containsKey(routeStrategy))
+        if (map.get(routeStrategy) != null)
             return dalHintsRoute(map);
 
-        return null;
+        if ((boolean)map.get(slaveOnly) && (boolean)map.get(isPro))
+            return slaveOnly();
+
+        // if not pro: slaveOnly will act as ReadSlavesFirstStrategy
+        if ((boolean)map.get(slaveOnly))
+            return super.pickRead(map);
+
+        return pickMaster();
     }
 
     @Override

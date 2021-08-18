@@ -43,6 +43,7 @@ public class GroupDataSource extends AbstractDataSource {
     private void init() {
         writeDataSource = createWriteDataSource();
         createReadDataSource();
+        init = true;
     }
 
     private DataSource createWriteDataSource() {
@@ -72,6 +73,7 @@ public class GroupDataSource extends AbstractDataSource {
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return new GroupConnection(this.clusterInfo, this.clusterInfo.getShardIndex());
+        checkInit();
+        return new GroupConnection(this.clusterInfo, writeDataSource, readDataSource);
     }
 }

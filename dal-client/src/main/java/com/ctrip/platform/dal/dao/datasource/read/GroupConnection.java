@@ -1,8 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
 
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.RouterType;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
@@ -22,8 +24,10 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
     private DataSource writeDataSource;
     Map<Database, DataSource> readDataSource;
+
     private volatile Connection rConnection;
     private volatile Connection wConnection;
+    // todo-lhj 看看是否需要，不需要的话直接删除
     private RouterType routerType;
     private List<Statement> openedStatements = new ArrayList<Statement>();
     private int transactionIsolation = -1;
@@ -33,9 +37,11 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private String schema;
 
 
-    public GroupConnection(ClusterInfo clusterInfo, Integer shardIndex) {
+    public GroupConnection(ClusterInfo clusterInfo, DataSource writeDataSource, Map<Database, DataSource> readDataSource) {
         this.clusterInfo = clusterInfo;
-        this.shardIndex = shardIndex;
+        this.writeDataSource = writeDataSource;
+        this.readDataSource = readDataSource;
+        this.shardIndex = clusterInfo.getShardIndex();
     }
 
     private void checkClosed() throws SQLException {
@@ -60,12 +66,11 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         return pstmt;
     }
 
-    private Connection getReadConnection() throws SQLException {
+    protected Connection getReadConnection() throws SQLException {
         if (rConnection == null) {
             synchronized (this) {
                 if (rConnection == null) {
-                    // todo-lhj 读节点选取逻辑
-                    rConnection = readDataSource.values().iterator().next().getConnection();
+                    rConnection = pickRead();
                 }
                 if (catalog != null) {
                     rConnection.setCatalog(catalog);
@@ -79,7 +84,23 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         return rConnection;
     }
 
-    private Connection getWriteConnection() throws SQLException {
+    protected Connection pickRead() throws SQLException {
+        DatabaseShard databaseShard = clusterInfo.getCluster().getDatabaseShard(shardIndex);
+        HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(buildContext());
+        // todo-lhj 如果节点被拉出或者新的节点被添加需要考虑找不到对应的host的情况下的处理逻辑
+        System.out.println(hostSpec);
+        return readDataSource.get(databaseShard.parseFromHostSpec(hostSpec)).getConnection();
+    }
+
+    protected Map<String, Object> buildContext() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("slaveOnly", false);
+        map.put("isPro", false);
+        return map;
+    }
+
+    protected Connection getWriteConnection() throws SQLException {
+        System.out.println("master");
         if (wConnection == null) {
             synchronized (this) {
                 if (wConnection == null) {
@@ -118,6 +139,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         }
 
         SqlType sqlType = SqlUtils.getSqlType(sql);
+        System.out.println(sql + ":" + sqlType.value());
         if (sqlType.isRead()) {
             return getReadConnection();
         } else {

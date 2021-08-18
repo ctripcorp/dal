@@ -1,4 +1,4 @@
-package com.ctrip.platform.dal.dao.datasource;
+package com.ctrip.platform.dal.dao.datasource.read;
 
 import java.io.InputStream;
 import java.io.Reader;

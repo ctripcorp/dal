@@ -43,9 +43,6 @@ public abstract class AbstractDataSource implements DataSource {
         throw new UnsupportedOperationException("getParentLogger");
     }
 
-    protected void init() {
-    }
-
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         if(iface == null) {

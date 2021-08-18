@@ -64,6 +64,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         if (rConnection == null) {
             synchronized (this) {
                 if (rConnection == null) {
+                    // todo-lhj 读节点选取逻辑
                     rConnection = readDataSource.values().iterator().next().getConnection();
                 }
                 if (catalog != null) {

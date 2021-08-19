@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.datasource.cluster.validator.MajorityHostValidatorTest;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.*;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.SimpleHostValidatorTest;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnectionTest;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContextTest;
 import com.ctrip.platform.dal.dao.datasource.log.KeyedDbSqlContextTest;
@@ -27,6 +28,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		RoundRobinAccessStrategyTest.class,
 		ShardMetaDividerTest.class,
 		LocalizedStrategyTransformerTest.class,
+		SimpleHostValidatorTest.class,
 		MajorityHostValidatorTest.class
 })
 public class _AllTests {

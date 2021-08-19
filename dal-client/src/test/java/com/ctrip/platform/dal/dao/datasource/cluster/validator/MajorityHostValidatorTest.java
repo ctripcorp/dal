@@ -1,42 +1,20 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.validator;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.base.MockConnection;
 import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
 import com.ctrip.platform.dal.dao.base.MockResultSet;
 import com.ctrip.platform.dal.dao.base.MockStatement;
-import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
-import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-public class MajorityHostValidatorTest {
-
-    private long failOverTime = 1000;
-    private long blackListTimeOut = 1000;
-    private long fixedValidatePeriod = 3000;
-    private HostSpec hostSpec1 = HostSpec.of("local", 3306);
-    private HostSpec hostSpec2 = HostSpec.of("local", 3307);
-    private HostSpec hostSpec3 = HostSpec.of("local", 3308);
-    Set<HostSpec> configuredHost = new HashSet<>();
-    List<HostSpec> orderedHosts = new ArrayList<>();
-
-    {
-        configuredHost.add(hostSpec1);
-        configuredHost.add(hostSpec2);
-        configuredHost.add(hostSpec3);
-        orderedHosts.add(hostSpec1);
-        orderedHosts.add(hostSpec2);
-        orderedHosts.add(hostSpec3);
-
-    }
+public class MajorityHostValidatorTest extends AbstractHostValidatorTest {
 
     @Test
     public void availableTest() throws InterruptedException, SQLException {
@@ -58,20 +36,6 @@ public class MajorityHostValidatorTest {
         TimeUnit.MILLISECONDS.sleep(failOverTime);
         assertEquals(false, validator.available(hostSpec1));
 
-    }
-
-    public static ConnectionFactory buildConnectionFactory() {
-        return new ConnectionFactory() {
-            @Override
-            public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return null;
-            }
-
-            @Override
-            public Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return new MockDefaultHostConnection(host);
-            }
-        };
     }
 
     @Test

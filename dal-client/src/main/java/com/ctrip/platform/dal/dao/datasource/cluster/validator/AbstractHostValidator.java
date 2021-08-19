@@ -38,7 +38,7 @@ public abstract class AbstractHostValidator implements HostValidator {
     private static volatile ExecutorService asyncService = Executors.newFixedThreadPool(4);
     private static volatile ConcurrentHashMap<HostSpec, Long> hostBlackList = new ConcurrentHashMap<>();
     private static volatile ConcurrentHashMap<HostSpec, Long> preBlackList = new ConcurrentHashMap<>();
-    private final Long ONE_SECOND = 900L; // 100ms threshold to tolerant schedule time fault
+    protected Long ONE_SECOND = 900L; // 100ms threshold to tolerant schedule time fault
 
     private enum RouteStrategyStatus {
         birth, init, destroy

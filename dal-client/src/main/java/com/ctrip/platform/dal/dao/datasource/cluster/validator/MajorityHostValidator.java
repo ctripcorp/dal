@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MajorityHostValidator extends AbstractHostValidator implements HostValidator {
 
-    private static final String CAT_LOG_TYPE = "DAL.mgr";
     private static final String VALIDATE_COMMAND_DENIED = "Validator::validateCommandDenied";
     private static final String VALIDATE_ERROR = "Validator::validateError";
     private static final String VALIDATE_RESULT = "Validator::validateResult:";

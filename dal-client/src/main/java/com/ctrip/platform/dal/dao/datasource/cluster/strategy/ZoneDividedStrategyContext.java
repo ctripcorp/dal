@@ -4,6 +4,7 @@ import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.ShardMeta;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostValidator;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,10 +22,14 @@ public class ZoneDividedStrategyContext extends HashMap<String, Set<HostSpec>> i
 
     private CaseInsensitiveProperties strategyProperties;
 
-    public ZoneDividedStrategyContext(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
+    private HostValidator hostValidator;
+
+    public ZoneDividedStrategyContext(ShardMeta shardMeta, ConnectionFactory connFactory,
+                                      CaseInsensitiveProperties strategyProperties, HostValidator hostValidator) {
         this.shardMeta = shardMeta;
         this.connFactory = connFactory;
         this.strategyProperties = strategyProperties;
+        this.hostValidator = hostValidator;
     }
 
     public int shardIndex() {
@@ -41,6 +46,10 @@ public class ZoneDividedStrategyContext extends HashMap<String, Set<HostSpec>> i
 
     public CaseInsensitiveProperties getStrategyProperties() {
         return strategyProperties;
+    }
+
+    public HostValidator getHostValidator() {
+        return hostValidator;
     }
 
     @Override

@@ -22,7 +22,7 @@ public class LocalizedStrategyTransformerTest extends ShardMetaGenerator {
     public void setUp() throws Exception {
         super.setUp();
         strategyTransformer = new LocalizedStrategyTransformer();
-        strategyContext = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties);
+        strategyContext = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties, hostValidator);
     }
 
     @Test

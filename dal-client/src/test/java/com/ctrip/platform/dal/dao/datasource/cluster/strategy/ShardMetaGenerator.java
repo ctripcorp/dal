@@ -7,13 +7,13 @@ import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultRequestContext;
 import com.ctrip.platform.dal.dao.datasource.cluster.RequestContext;
 import com.ctrip.platform.dal.dao.datasource.cluster.ShardMeta;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.SimpleHostValidator;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import org.junit.Before;
 
 import java.sql.Connection;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Author limingdong
@@ -67,7 +67,13 @@ public abstract class ShardMetaGenerator {
         }
     };
 
+    protected HostValidator newHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
+        return new SimpleHostValidator(factory, configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
+    }
+
     protected RequestContext requestContext;
+
+    protected HostValidator hostValidator;
 
     protected StrategyTransformer strategyTransformer = new LocalizedStrategyTransformer();
 
@@ -79,6 +85,8 @@ public abstract class ShardMetaGenerator {
         addOY();
         addRB();
         addXY();
+
+        hostValidator = newHostValidator(connectionFactory, hostSpecs, new ArrayList<>(hostSpecs), 10000, 10000, 30000);
     }
 
     protected String getRequestZone() {

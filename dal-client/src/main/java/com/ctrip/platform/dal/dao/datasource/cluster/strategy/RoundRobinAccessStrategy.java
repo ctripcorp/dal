@@ -45,11 +45,6 @@ public class RoundRobinAccessStrategy extends AbstractMultiHostStrategy implemen
     }
 
     @Override
-    protected void buildValidator() {
-        // not validate inside of zone
-    }
-
-    @Override
     protected HostSpec pickHost() throws DalException {
         for (int i = 0; i < hostsSize; ++i) {
             int currentIndex = getIndex();

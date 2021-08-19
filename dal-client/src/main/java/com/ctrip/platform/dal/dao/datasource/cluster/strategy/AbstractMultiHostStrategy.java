@@ -6,6 +6,7 @@ import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.*;
 import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostValidatorAware;
 import com.ctrip.platform.dal.dao.datasource.cluster.validator.MajorityHostValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -113,6 +114,9 @@ public abstract class AbstractMultiHostStrategy implements MultiHostStrategy {
     }
 
     protected void buildValidator() {
+        if (this instanceof HostValidatorAware) {
+            return;
+        }
         long failOverTime = strategyOptions.getLong("failoverTimeMS", 10000);
         long blackListTimeOut = strategyOptions.getLong("blacklistTimeoutMS", 10000);
         long fixedValidatePeriod = strategyOptions.getLong("fixedValidatePeriodMS", 30000);

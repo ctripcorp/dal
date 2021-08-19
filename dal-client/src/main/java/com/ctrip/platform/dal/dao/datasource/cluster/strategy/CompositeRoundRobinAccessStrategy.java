@@ -11,6 +11,7 @@ import com.ctrip.platform.dal.dao.datasource.cluster.validator.SimpleHostValidat
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,10 +26,10 @@ public class CompositeRoundRobinAccessStrategy extends AbstractMultiHostStrategy
 
     @Override
     public void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
-        ZoneDividedStrategyContext strategyGenerator = new ZoneDividedStrategyContext(shardMeta, connFactory, strategyProperties);
+        super.initialize(shardMeta, connFactory, strategyProperties);
+        ZoneDividedStrategyContext strategyGenerator = new ZoneDividedStrategyContext(shardMeta, connFactory, strategyProperties, this.hostValidator);
         delegate = (LocalizedAccessStrategy) strategyGenerator.accept(new LocalizedStrategyTransformer());
         // start validator to monitor shardMeta in all zone instead of monitoring every zone in RoundRobinAccessStrategy to reducing thread resources
-        buildValidator();
     }
 
     @Override
@@ -48,7 +49,7 @@ public class CompositeRoundRobinAccessStrategy extends AbstractMultiHostStrategy
 
     @Override
     protected void doBuildOrderHosts() {
-        throw new UnsupportedOperationException("MultiRoundRobinAccessStrategy not support");
+        this.orderHosts = new ArrayList<>(configuredHosts);
     }
 
     @Override

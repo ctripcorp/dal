@@ -23,12 +23,13 @@ public class LocalizedStrategyTransformer implements StrategyTransformer {
                 for (Map.Entry<String, Set<HostSpec>> entry : obStrategyGenerator.entrySet()) {
                     String zone = entry.getKey();
                     Set<HostSpec> hostSpecSet = entry.getValue();
-                    MultiHostStrategy strategy = new RoundRobinAccessStrategy();
+                    ValidatorAwareRoundRobinAccessStrategy strategy = new ValidatorAwareRoundRobinAccessStrategy();
                     strategy.initialize(getShardMeta(obStrategyGenerator.shardIndex(),
                             hostSpecSet,
                             obStrategyGenerator.clusterName()),
                             obStrategyGenerator.getConnFactory(),
                             obStrategyGenerator.getStrategyProperties());
+                    strategy.setHostValidator(obStrategyGenerator.getHostValidator());
 
                     localizedAccessStrategy.put(zone, strategy);
                 }

@@ -20,7 +20,7 @@ public class LocalizedAccessStrategyTest extends ShardMetaGenerator {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ZoneDividedStrategyContext shardMetaDivider = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties);
+        ZoneDividedStrategyContext shardMetaDivider = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties, hostValidator);
         localizedAccessStrategy = (LocalizedAccessStrategy) shardMetaDivider.accept(strategyTransformer);
     }
 

@@ -15,7 +15,7 @@ public class ShardMetaDividerTest extends ShardMetaGenerator {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        strategyContext = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties);
+        strategyContext = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties, hostValidator);
     }
 
     @Test

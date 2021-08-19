@@ -4,7 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;

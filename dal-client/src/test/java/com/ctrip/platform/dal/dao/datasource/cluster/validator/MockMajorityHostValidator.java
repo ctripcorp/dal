@@ -1,11 +1,15 @@
-package com.ctrip.platform.dal.dao.datasource.cluster;
+package com.ctrip.platform.dal.dao.datasource.cluster.validator;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MockMajorityHostValidator extends MajorityHostValidator {
 
@@ -23,10 +27,6 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
 
     enum MysqlStatus{
         ok, unknown, fail
-    }
-
-    public MockMajorityHostValidator(HashMap<HostSpec, MysqlStatus> mysqlServer) {
-        this.mysqlServer = mysqlServer;
     }
 
     public MockMajorityHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
@@ -52,12 +52,6 @@ public class MockMajorityHostValidator extends MajorityHostValidator {
         } else {
             return new ValidateResult(false, "");
         }
-    }
-
-    @Override
-    protected HostSpec getHostSpecFromConnection(Connection connection) {
-        MockDefaultHostConnection mockDefaultHostConnection = (MockDefaultHostConnection)connection;
-        return mockDefaultHostConnection.getHost();
     }
 
     @Override

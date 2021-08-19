@@ -7,6 +7,10 @@ import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.CompositeRoundRobinAccessStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.OrderedAccessStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -34,7 +38,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
     private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
-    private final MGRStrategy mgrStrategy;
+    private final MultiHostStrategy mgrStrategy;
     private final MultiHostClusterProperties clusterProperties;
     private final ConnectionValidator connValidator;
 
@@ -66,15 +70,17 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         };
     }
 
-    protected MGRStrategy prepareRouteStrategy() {
+    protected MultiHostStrategy prepareRouteStrategy() {
         String strategyName = clusterProperties.routeStrategyName();
-        MGRStrategy strategy;
-        if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
+        MultiHostStrategy strategy;
+        if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) {
             strategy = new OrderedAccessStrategy();
-        else {
+        } else if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) { //TODO lmd
+            strategy = new CompositeRoundRobinAccessStrategy();
+        } else {
             try {
                 Class clazz = Class.forName(strategyName);
-                strategy = (MGRStrategy) clazz.newInstance();
+                strategy = (MultiHostStrategy) clazz.newInstance();
             } catch (Throwable t) {
                 String msg = "Errored constructing route strategy: " + strategyName;
                 LOGGER.error(msg, t);

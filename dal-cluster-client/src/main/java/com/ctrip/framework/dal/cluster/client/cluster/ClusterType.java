@@ -4,9 +4,30 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 
 public enum ClusterType {
 
-    NORMAL("normal"),
-    DRC("drc"),
-    MGR("mgr");
+    NORMAL("normal") {
+        @Override
+        public boolean isAllMaster() {
+            return false;
+        }
+    },
+    DRC("drc") {
+        @Override
+        public boolean isAllMaster() {
+            return false;
+        }
+    },
+    MGR("mgr") {
+        @Override
+        public boolean isAllMaster() {
+            return true;
+        }
+    },
+    OB("ob") {
+        @Override
+        public boolean isAllMaster() {
+            return true;
+        }
+    };
 
     private String value;
 
@@ -25,7 +46,11 @@ public enum ClusterType {
             return DRC;
         if (MGR.getValue().equalsIgnoreCase(value))
             return MGR;
+        if (OB.getValue().equalsIgnoreCase(value))
+            return OB;
         throw new ClusterRuntimeException("Invalid cluster type");
     }
+
+    public abstract boolean isAllMaster();
 
 }

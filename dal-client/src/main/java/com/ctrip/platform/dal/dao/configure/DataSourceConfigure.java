@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.configure;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;

@@ -146,7 +146,7 @@ public class DalConnectionManager {
 	}
 
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
-		if (dbSet instanceof ClusterDatabaseSet && !ClusterType.MGR.equals(((ClusterDatabaseSet) dbSet).getCluster().getClusterType())) {
+		if (dbSet instanceof ClusterDatabaseSet && !((ClusterDatabaseSet) dbSet).getCluster().getClusterType().isAllMaster()) {
 			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
 		}
 

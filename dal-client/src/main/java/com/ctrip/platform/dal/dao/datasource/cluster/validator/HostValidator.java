@@ -1,8 +1,8 @@
-package com.ctrip.platform.dal.dao.datasource.cluster;
+package com.ctrip.platform.dal.dao.datasource.cluster.validator;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 
-public interface HostValidator {
+public interface HostValidator extends ConnectionValidator {
 
     boolean available(HostSpec host);
 

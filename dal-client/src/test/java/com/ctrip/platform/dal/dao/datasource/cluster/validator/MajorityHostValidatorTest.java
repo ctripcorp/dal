@@ -1,10 +1,11 @@
-package com.ctrip.platform.dal.dao.datasource.cluster;
+package com.ctrip.platform.dal.dao.datasource.cluster.validator;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.base.MockConnection;
 import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
 import com.ctrip.platform.dal.dao.base.MockResultSet;
 import com.ctrip.platform.dal.dao.base.MockStatement;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import org.junit.Test;
 

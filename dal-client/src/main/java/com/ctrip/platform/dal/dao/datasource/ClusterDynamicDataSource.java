@@ -85,7 +85,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     protected DataSource createInnerDataSource() {
         if (cluster == null)
             throw new DalRuntimeException("null cluster");
-        return cluster.getClusterType() != ClusterType.MGR ? createStandaloneDataSource() : createMultiHostDataSource();
+        return !cluster.getClusterType().isAllMaster() ? createStandaloneDataSource() : createMultiHostDataSource();
     }
 
     protected DataSource createStandaloneDataSource() {

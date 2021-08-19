@@ -1,14 +1,16 @@
-package com.ctrip.platform.dal.dao.datasource.cluster;
+package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.datasource.cluster.*;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.NullConnectionValidator;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
  * @author c7ch23en
  */
-public interface MGRStrategy {
+public interface MultiHostStrategy {
 
     void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties);
 

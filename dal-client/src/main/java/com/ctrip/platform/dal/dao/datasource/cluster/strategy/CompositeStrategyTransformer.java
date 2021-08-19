@@ -11,7 +11,7 @@ import java.util.Set;
  * @Author limingdong
  * @create 2021/8/18
  */
-public class LocalizedStrategyTransformer implements StrategyTransformer {
+public class CompositeStrategyTransformer implements StrategyTransformer {
 
     @Override
     public MultiHostStrategy visit(StrategyContext strategyContext) {

@@ -39,7 +39,7 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
         MultiHostStrategy strategy;
         if (ClusterType.MGR.equals(clusterType) && ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) {
             strategy = new OrderedAccessStrategy();
-        } else if (ClusterType.OB.equals(clusterType) && ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) {
+        } else if (ClusterType.OB.equals(clusterType) && ClusterConfigXMLConstants.LOCALIZED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) {
             strategy = new LocalizedAccessStrategy();
         } else {
             try {

@@ -75,7 +75,7 @@ public abstract class ShardMetaGenerator {
 
     protected HostValidator hostValidator;
 
-    protected StrategyTransformer strategyTransformer = new LocalizedStrategyTransformer();
+    protected StrategyTransformer strategyTransformer = new CompositeStrategyTransformer();
 
     @Before
     public void setUp() throws Exception {

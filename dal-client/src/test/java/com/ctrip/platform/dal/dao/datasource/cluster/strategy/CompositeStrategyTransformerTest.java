@@ -12,16 +12,16 @@ import java.sql.SQLException;
  * @Author limingdong
  * @create 2021/8/18
  */
-public class LocalizedStrategyTransformerTest extends ShardMetaGenerator {
+public class CompositeStrategyTransformerTest extends ShardMetaGenerator {
 
-    private LocalizedStrategyTransformer strategyTransformer;
+    private CompositeStrategyTransformer strategyTransformer;
 
     private StrategyContext strategyContext;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        strategyTransformer = new LocalizedStrategyTransformer();
+        strategyTransformer = new CompositeStrategyTransformer();
         strategyContext = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties, hostValidator);
     }
 

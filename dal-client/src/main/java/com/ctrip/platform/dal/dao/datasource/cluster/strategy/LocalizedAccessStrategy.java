@@ -27,7 +27,7 @@ public class LocalizedAccessStrategy extends AbstractMultiHostStrategy implement
     public void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
         super.initialize(shardMeta, connFactory, strategyProperties);
         ZoneDividedStrategyContext strategyGenerator = new ZoneDividedStrategyContext(shardMeta, connFactory, strategyProperties, this.hostValidator);
-        delegate = (CompositeRoundRobinAccessStrategy) strategyGenerator.accept(new LocalizedStrategyTransformer()); // start validator to monitor shardMeta in all zone instead of monitoring every zone in ValidatorAwareRoundRobinAccessStrategy to reducing thread resources
+        delegate = (CompositeRoundRobinAccessStrategy) strategyGenerator.accept(new CompositeStrategyTransformer()); // start validator to monitor shardMeta in all zone instead of monitoring every zone in ValidatorAwareRoundRobinAccessStrategy to reducing thread resources
     }
 
     @Override

@@ -20,7 +20,7 @@ public class ShardMetaDividerTest extends ShardMetaGenerator {
 
     @Test
     public void divide() {
-        LocalizedAccessStrategy localizedAccessStrategy = (LocalizedAccessStrategy) strategyContext.accept(strategyTransformer);
+        CompositeRoundRobinAccessStrategy localizedAccessStrategy = (CompositeRoundRobinAccessStrategy) strategyContext.accept(strategyTransformer);
         Assert.assertEquals(3, localizedAccessStrategy.size());
     }
 

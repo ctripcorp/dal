@@ -1,70 +1,60 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.RequestContext;
 import com.ctrip.platform.dal.dao.datasource.cluster.ShardMeta;
-import com.ctrip.platform.dal.exceptions.DalException;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.SimpleHostValidator;
+import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.AbstractMultiHostStrategy.NO_HOST_AVAILABLE;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @Author limingdong
  * @create 2021/8/18
  */
-public class LocalizedAccessStrategy extends ConcurrentHashMap<String, MultiHostStrategy> implements MultiHostStrategy {
+public class LocalizedAccessStrategy extends AbstractMultiHostStrategy implements MultiHostStrategy {
+
+    private CompositeRoundRobinAccessStrategy delegate;
 
     @Override
     public void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
-        throw new UnsupportedOperationException("LocalizedAccessStrategy not support");
+        super.initialize(shardMeta, connFactory, strategyProperties);
+        ZoneDividedStrategyContext strategyGenerator = new ZoneDividedStrategyContext(shardMeta, connFactory, strategyProperties, this.hostValidator);
+        delegate = (CompositeRoundRobinAccessStrategy) strategyGenerator.accept(new LocalizedStrategyTransformer()); // start validator to monitor shardMeta in all zone instead of monitoring every zone in ValidatorAwareRoundRobinAccessStrategy to reducing thread resources
     }
 
     @Override
     public HostConnection pickConnection(RequestContext request) throws SQLException {
-        try {
-            return pickConnectionInLocalZone(request);
-        } catch (SQLException e) {
-            return pickConnectionNotInLocalZone(request);
-        }
+        return delegate.pickConnection(request);
     }
 
-
-    private HostConnection pickConnectionInLocalZone(RequestContext request) throws SQLException {
-        String zone = request.clientZone();
-        MultiHostStrategy multiHostStrategy = get(zone);
-        return pickConnectionInOneZone(multiHostStrategy, request);
+    @Override
+    protected HostValidator newHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
+        return new SimpleHostValidator(factory, configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
     }
-
-    private HostConnection pickConnectionNotInLocalZone(RequestContext request) throws SQLException {
-        for (Map.Entry<String, MultiHostStrategy> entry : entrySet()) {
-            if (!entry.getKey().equalsIgnoreCase(request.clientZone())) {
-                try {
-                    return pickConnectionInOneZone(entry.getValue(), request);
-                } catch (SQLException e1) {
-                    // nothing to do
-                }
-            }
-        }
-
-        throw new DalException(NO_HOST_AVAILABLE);
-    }
-
-    private HostConnection pickConnectionInOneZone(MultiHostStrategy multiHostStrategy, RequestContext request) throws SQLException {
-        if (multiHostStrategy == null) {
-            throw new DalException(NO_HOST_AVAILABLE);
-        }
-
-        return multiHostStrategy.pickConnection(request);
-    }
-
 
     @Override
     public void destroy() {
-        values().forEach(s -> s.destroy());
+        delegate.destroy();
+    }
+
+    @Override
+    protected void doBuildOrderHosts() {
+        this.orderHosts = new ArrayList<>(configuredHosts);
+    }
+
+    @Override
+    protected void isInit() {
+        if (delegate == null || delegate.isEmpty()) {
+            throw new DalRuntimeException("MultiRoundRobinAccessStrategy is not set delegate");
+        }
+        super.isInit();
     }
 }

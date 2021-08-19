@@ -27,7 +27,7 @@ public class LocalizedStrategyTransformerTest extends ShardMetaGenerator {
 
     @Test
     public void visit() throws SQLException {
-        LocalizedAccessStrategy localizedAccessStrategy = (LocalizedAccessStrategy) strategyContext.accept(strategyTransformer);
+        CompositeRoundRobinAccessStrategy localizedAccessStrategy = (CompositeRoundRobinAccessStrategy) strategyContext.accept(strategyTransformer);
         Assert.assertTrue(!localizedAccessStrategy.isEmpty());
 
         HostConnection hostConnection = localizedAccessStrategy.pickConnection(requestContext);

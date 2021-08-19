@@ -14,12 +14,12 @@ import java.sql.SQLException;
  */
 public class CompositeRoundRobinAccessStrategyTest extends ShardMetaGenerator {
 
-    private CompositeRoundRobinAccessStrategy roundRobinAccessStrategy;
+    private LocalizedAccessStrategy roundRobinAccessStrategy;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        roundRobinAccessStrategy = new CompositeRoundRobinAccessStrategy();
+        roundRobinAccessStrategy = new LocalizedAccessStrategy();
         roundRobinAccessStrategy.initialize(shardMeta, connectionFactory, caseInsensitiveProperties);
     }
 

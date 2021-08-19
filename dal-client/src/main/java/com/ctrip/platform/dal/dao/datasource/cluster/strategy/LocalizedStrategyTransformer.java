@@ -18,7 +18,7 @@ public class LocalizedStrategyTransformer implements StrategyTransformer {
         try {
             if (strategyContext instanceof ZoneDividedStrategyContext) {
                 ZoneDividedStrategyContext obStrategyGenerator = (ZoneDividedStrategyContext) strategyContext;
-                LocalizedAccessStrategy localizedAccessStrategy = new LocalizedAccessStrategy();
+                CompositeRoundRobinAccessStrategy localizedAccessStrategy = new CompositeRoundRobinAccessStrategy();
 
                 for (Map.Entry<String, Set<HostSpec>> entry : obStrategyGenerator.entrySet()) {
                     String zone = entry.getKey();

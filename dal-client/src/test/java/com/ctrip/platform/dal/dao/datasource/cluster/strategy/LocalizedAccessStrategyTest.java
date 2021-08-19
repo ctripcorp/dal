@@ -15,13 +15,13 @@ import java.sql.SQLException;
  */
 public class LocalizedAccessStrategyTest extends ShardMetaGenerator {
 
-    private LocalizedAccessStrategy localizedAccessStrategy;
+    private CompositeRoundRobinAccessStrategy localizedAccessStrategy;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         ZoneDividedStrategyContext shardMetaDivider = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties, hostValidator);
-        localizedAccessStrategy = (LocalizedAccessStrategy) shardMetaDivider.accept(strategyTransformer);
+        localizedAccessStrategy = (CompositeRoundRobinAccessStrategy) shardMetaDivider.accept(strategyTransformer);
     }
 
     @After

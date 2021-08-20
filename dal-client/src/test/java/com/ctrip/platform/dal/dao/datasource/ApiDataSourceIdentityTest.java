@@ -82,7 +82,7 @@ public class ApiDataSourceIdentityTest {
         Assert.assertTrue(zones.contains("z2"));
         Assert.assertTrue(zones.contains("z3"));
         ClusterRouteStrategyConfig routeStrategy = cluster.getRouteStrategyConfig();
-        Assert.assertEquals(ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY, routeStrategy.routeStrategyName());
+        Assert.assertEquals(ClusterType.MGR.defaultRouteStrategies(), routeStrategy.routeStrategyName());
         CaseInsensitiveProperties properties = routeStrategy.routeStrategyProperties();
         Assert.assertEquals("z3,z2,z1", properties.get(DataSourceConfigureConstants.ZONES_PRIORITY));
         Assert.assertEquals("10000", properties.get(DataSourceConfigureConstants.FAILOVER_TIME_MS));

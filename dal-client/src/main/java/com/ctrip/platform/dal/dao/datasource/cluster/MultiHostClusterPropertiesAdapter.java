@@ -1,13 +1,15 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.LocalizedAccessStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.OrderedAccessStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
+
+import static com.ctrip.framework.dal.cluster.client.cluster.ClusterType.MGR;
+import static com.ctrip.framework.dal.cluster.client.cluster.ClusterType.OB;
 
 /**
  * @author c7ch23en
@@ -37,9 +39,9 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     public MultiHostStrategy getMultiHostStrategy() {
         String strategyName = routeStrategyName();
         MultiHostStrategy strategy;
-        if (ClusterType.MGR.equals(clusterType) && ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) {
+        if (MGR.equals(clusterType) && MGR.defaultRouteStrategies().equalsIgnoreCase(strategyName)) {
             strategy = new OrderedAccessStrategy();
-        } else if (ClusterType.OB.equals(clusterType) && ClusterConfigXMLConstants.LOCALIZED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName)) {
+        } else if (OB.equals(clusterType) && OB.defaultRouteStrategies().equalsIgnoreCase(strategyName)) {
             strategy = new LocalizedAccessStrategy();
         } else {
             try {

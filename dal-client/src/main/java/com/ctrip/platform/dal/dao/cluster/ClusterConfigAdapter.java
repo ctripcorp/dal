@@ -116,7 +116,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         });
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY);
+                new DefaultClusterRouteStrategyConfig(ClusterType.MGR.defaultRouteStrategies());
         if (configure.getZonesPriority() != null)
             routeStrategy.setProperty(DataSourceConfigureConstants.ZONES_PRIORITY,
                     configure.getZonesPriority());

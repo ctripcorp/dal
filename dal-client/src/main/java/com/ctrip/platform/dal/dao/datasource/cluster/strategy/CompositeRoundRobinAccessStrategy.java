@@ -19,6 +19,8 @@ import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.AbstractMul
  */
 public class CompositeRoundRobinAccessStrategy extends ConcurrentHashMap<String, MultiHostStrategy> implements MultiHostStrategy {
 
+    private static final String NO_ZONE_AVAILABLE = "Router::noZOneAvailable";
+
     @Override
     public void initialize(ShardMeta shardMeta, ConnectionFactory connFactory, CaseInsensitiveProperties strategyProperties) {
         throw new UnsupportedOperationException("LocalizedAccessStrategy not support");
@@ -36,6 +38,9 @@ public class CompositeRoundRobinAccessStrategy extends ConcurrentHashMap<String,
 
     private HostConnection pickConnectionInLocalZone(RequestContext request) throws SQLException {
         String zone = request.clientZone();
+        if (zone == null) {
+            throw new DalException(NO_ZONE_AVAILABLE);
+        }
         MultiHostStrategy multiHostStrategy = get(zone);
         return pickConnectionInOneZone(multiHostStrategy, request);
     }

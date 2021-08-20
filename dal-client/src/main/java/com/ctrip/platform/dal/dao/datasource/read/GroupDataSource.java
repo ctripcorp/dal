@@ -58,6 +58,8 @@ public class GroupDataSource extends AbstractDataSource {
             readDataSource.put(database, locator.getDataSource(slaveClusterInfo));
             slaveIndex++;
         }
+
+        readDataSource.put(cluster.getMasterOnShard(clusterInfo.getShardIndex()), writeDataSource);
     }
 
 

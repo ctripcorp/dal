@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster.validator;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
+import com.ctrip.platform.dal.dao.client.CustomConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
@@ -41,7 +42,7 @@ public abstract class AbstractHostValidatorTest {
         return new ConnectionFactory() {
             @Override
             public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return null;
+                return new CustomConnection();
             }
 
             @Override

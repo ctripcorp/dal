@@ -6,6 +6,8 @@ import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
 
@@ -15,19 +17,47 @@ import java.util.Set;
  */
 public class SimpleHostValidator extends AbstractHostValidator implements HostValidator  {
 
+    private String INIT_SQL = "select 1";
+
     public SimpleHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
         super(factory, configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
     }
 
     @Override
     public boolean validate(HostConnection connection) {
-        return true;
+        return doValidate(connection);
+    }
+
+    private boolean doValidate(Connection connection) {
+        boolean isValid;
+
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            stmt.setQueryTimeout(1);
+            stmt.execute(INIT_SQL);
+            isValid = true;
+        } catch (SQLException e) {
+            isValid = false;
+        } finally {
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (Exception ignore2) {
+                    /* NOOP */}
+        }
+
+        return isValid;
     }
 
     @Override
     protected void doAsyncValidate(HostSpec host) {
-        try (Connection ignored = getConnection(host)){
-            removeFromAllBlackList(host);
+        try (Connection connection = getConnection(host)){
+            if (doValidate(connection)) {
+                removeFromAllBlackList(host);
+            } else {
+                addToBlackAndRemoveFromPre(host);
+            }
             LOGGER.info(ASYNC_VALIDATE_RESULT + "OK");
         } catch (Throwable e) {
             addToBlackAndRemoveFromPre(host);

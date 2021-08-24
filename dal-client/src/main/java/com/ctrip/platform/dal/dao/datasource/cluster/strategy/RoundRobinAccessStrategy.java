@@ -47,8 +47,7 @@ public class RoundRobinAccessStrategy extends AbstractMultiHostStrategy implemen
     @Override
     protected HostSpec pickHost() throws DalException {
         for (int i = 0; i < hostsSize; ++i) {
-            int currentIndex = getIndex();
-            HostSpec hostSpec = orderHosts.get(currentIndex % hostsSize);
+            HostSpec hostSpec = orderHosts.get(getIndex());
             if (hostValidator.available(hostSpec)) {
                 return hostSpec;
             }
@@ -58,12 +57,9 @@ public class RoundRobinAccessStrategy extends AbstractMultiHostStrategy implemen
     }
 
     private int getIndex() {
-        int currentIndex = index.getAndAdd(1);
-        if (currentIndex < 0) {
-            currentIndex = 0;
-            index.set(1);
-        }
-        return currentIndex;
+        index.compareAndSet(hostsSize, 0);
+        int currentIndex = Math.abs(index.getAndIncrement());
+        return currentIndex % hostsSize;
     }
 
 }

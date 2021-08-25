@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.cluster.shard;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.cluster.exception.HostNotExpectedException;
 import com.ctrip.platform.dal.dao.DalHints;
 
 /**
@@ -9,5 +10,5 @@ import com.ctrip.platform.dal.dao.DalHints;
  */
 public interface RouteStrategy extends RouteStrategyLifecycle, ExceptionInterceptor {
 
-    HostSpec pickNode(DalHints hints);
+    HostSpec pickNode(DalHints hints) throws HostNotExpectedException;
 }

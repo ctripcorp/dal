@@ -249,6 +249,10 @@ public class DalSqlTaskRequest<T> implements DalRequest<T> {
             this.merger = createResultMerger(isTableShardingEnabled, merger, builder, hints);
         }
 
+        public StatementParameters getParameters() {
+            return parameters;
+        }
+
         private String getTableName() {
             String tableName = "";
 

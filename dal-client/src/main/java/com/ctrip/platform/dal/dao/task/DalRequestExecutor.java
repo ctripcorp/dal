@@ -216,7 +216,7 @@ public class DalRequestExecutor {
 			if(request.isCrossShard())
 				result = crossShardExecute(logContext, hints, request, callback);
 			else
-				result = nonCrossShardExecute(logContext, hints, request);
+				result = nonCrossShardExecute(logContext, hints, request, callback);
 
 			if(result == null && !nullable)
 				throw new DalException(ErrorCode.AssertNull);
@@ -236,13 +236,24 @@ public class DalRequestExecutor {
 		return result;
 	}
 
-	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
+	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request, ShardExecutionCallback<T> callback) throws Exception {
         logContext.setSingleTask(true);
 		String logicDbName = request.getLogicDbName();
 		TaskCallable<T> task = request.createTask();
 		String shard = task.getPreparedDbShard();
 	    Callable<T> taskWrapper = new RequestTaskWrapper<T>(logicDbName, shard, task, logContext);
-		T result = taskWrapper.call();
+		T result = null;
+		ShardExecutionResult<T> executionResult;
+		Throwable error = null;
+		try {
+			result = taskWrapper.call();
+			executionResult = new ShardExecutionResultImpl<>(null, null, result);
+		} catch (Throwable t) {
+			error = t;
+			executionResult = new ShardExecutionResultImpl<>(null, null, task, error);
+		}
+
+		hints.handleError("There is an error during nonCrossShard execution: ", error, callback, executionResult);
 
 		logContext.setStatementExecuteTime(task.getDalTaskContext().getStatementExecuteTime());
 		logContext.setEntries(toList(task.getDalTaskContext().getLogEntry()));
@@ -314,7 +325,7 @@ public class DalRequestExecutor {
 				executionResult = new ShardExecutionResultImpl<>(dbShard, null, partial);
 			} catch (Throwable e) {
 				error = e;
-				executionResult = new ShardExecutionResultImpl<>(dbShard, null, e);
+				executionResult = new ShardExecutionResultImpl<>(dbShard, null, tasks.get(dbShard), e);
 			}
 			hints.handleError("There is error during parallel execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(entry.getKey());
@@ -341,7 +352,7 @@ public class DalRequestExecutor {
 				executionResult = new ShardExecutionResultImpl<>(shard, null, partial);
 			} catch (Throwable e) {
 				error = e;
-				executionResult = new ShardExecutionResultImpl<>(shard, null, e);
+				executionResult = new ShardExecutionResultImpl<>(shard, null, tasks.get(shard), e);
 			}
 			hints.handleError("There is error during sequential execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(shard);

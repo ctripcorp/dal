@@ -1,16 +1,26 @@
-package com.ctrip.framework.dal.cluster.client.shard.read;
+package com.ctrip.framework.dal.cluster.client.sharding.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
+import com.ctrip.framework.dal.cluster.client.shard.RouteStrategy;
 
 import java.util.*;
+
+import static com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum.READ_SLAVES_FIRST;
 
 public class ReadSlavesFirstStrategy implements RouteStrategy {
 
     protected HashMap<String, List<HostSpec>> hostMap = new HashMap<>();
+    protected HashMap<ReadStrategyEnum, RouteStrategy> routeStrategies = new HashMap<>();
+    protected final String ZONE_MISS = "%s hostspec of %s zone message missed.";
+
+    private ReadStrategyEnum readStrategyEnum = READ_SLAVES_FIRST;
+    private Set<HostSpec> hostSpecs;
 
     @Override
     public void init(Set<HostSpec> hostSpecs) {
+        this.hostSpecs = hostSpecs;
         List<HostSpec> masters = new ArrayList<>();
         List<HostSpec> slaves = new ArrayList<>();
 
@@ -27,6 +37,9 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
 
     @Override
     public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
+        if (map.get(routeStrategy) != null)
+            return dalHintsRoute(map);
+
         if ((boolean)map.get(slaveOnly) && (boolean)map.get(isPro))
             return slaveOnly();
 
@@ -62,7 +75,32 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
 
 
     protected HostSpec choseByRandom(List<HostSpec> hostSpecs) {
+        if (hostSpecs == null || hostSpecs.size() == 0)
+            throw new HostNotExpectedException(String.format(NO_HOST_AVAILABLE, "random host"));
         return hostSpecs.get((int)(Math.random() * hostSpecs.size()));
+    }
+
+    protected HostSpec dalHintsRoute (Map<String, Object> map) {
+        ReadStrategyEnum strategyEnum = (ReadStrategyEnum)map.get(routeStrategy);
+        map.remove(routeStrategy);
+        if (readStrategyEnum.equals(strategyEnum))
+            return this.pickRead(map);
+
+        if (routeStrategies.get(strategyEnum) == null) {
+            synchronized (routeStrategies) {
+                if (routeStrategies.get(strategyEnum) == null) {
+                    try {
+                        RouteStrategy tempRouteStrategy = (RouteStrategy)Class.forName(strategyEnum.getClazz()).newInstance();
+                        tempRouteStrategy.init(hostSpecs);
+                        routeStrategies.put(strategyEnum, tempRouteStrategy);
+                    } catch (Throwable e) {
+
+                    }
+                }
+            }
+        }
+
+        return routeStrategies.get(strategyEnum).pickRead(map);
     }
 
     @Override

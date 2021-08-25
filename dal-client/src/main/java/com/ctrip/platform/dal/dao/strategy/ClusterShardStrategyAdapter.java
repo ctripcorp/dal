@@ -8,6 +8,7 @@ import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
 import com.ctrip.platform.dal.dao.helper.RequestContext;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -104,6 +105,15 @@ public class ClusterShardStrategyAdapter implements DalShardingStrategy {
             ctx.addShardData(parameters);
         if (fields != null)
             ctx.addShardData(new MappedShardData(fields));
+        Map<String, Object> userDefined = new HashMap<>();
+        if (hints.get(DalHintEnum.userDefined1) != null)
+            userDefined.put(DalHintEnum.userDefined1.name(), hints.get(DalHintEnum.userDefined1));
+        if (hints.get(DalHintEnum.userDefined2) != null)
+            userDefined.put(DalHintEnum.userDefined2.name(), hints.get(DalHintEnum.userDefined2));
+        if (hints.get(DalHintEnum.userDefined3) != null)
+            userDefined.put(DalHintEnum.userDefined3.name(), hints.get(DalHintEnum.userDefined3));
+        if (userDefined.size() != 0)
+            ctx.addShardData(new MappedShardData(userDefined));
     }
 
 }

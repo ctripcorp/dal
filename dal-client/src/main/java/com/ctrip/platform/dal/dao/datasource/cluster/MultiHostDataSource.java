@@ -7,7 +7,7 @@ import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -36,7 +36,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final ConnectionFactory connFactory;
     private final MultiHostStrategy mgrStrategy;
     private final MultiHostClusterProperties clusterProperties;
-    private final ConnectionValidator connValidator;
+    private final HostConnectionValidator connValidator;
 
     private final AtomicBoolean isDetecting = new AtomicBoolean(false);
     private final AtomicLong lastDetectedTime = new AtomicLong(0);

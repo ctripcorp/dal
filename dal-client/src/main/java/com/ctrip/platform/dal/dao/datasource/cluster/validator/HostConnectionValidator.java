@@ -7,7 +7,7 @@ import java.sql.SQLException;
 /**
  * @author c7ch23en
  */
-public interface ConnectionValidator {
+public interface HostConnectionValidator {
 
     boolean validate(HostConnection connection) throws SQLException;
 

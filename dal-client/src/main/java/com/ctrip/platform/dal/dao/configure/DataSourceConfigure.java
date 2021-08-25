@@ -4,7 +4,7 @@ import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +20,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     private DalConnectionString connectionString;
     private DataSourceIdentity dataSourceId;
     private HostSpec host;
-    private ConnectionValidator validator;
+    private HostConnectionValidator validator;
 
     public DataSourceConfigure() {
     }
@@ -476,11 +476,11 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         this.host = host;
     }
 
-    public ConnectionValidator getValidator() {
+    public HostConnectionValidator getValidator() {
         return validator;
     }
 
-    public void setValidator(ConnectionValidator validator) {
+    public void setValidator(HostConnectionValidator validator) {
         this.validator = validator;
     }
 

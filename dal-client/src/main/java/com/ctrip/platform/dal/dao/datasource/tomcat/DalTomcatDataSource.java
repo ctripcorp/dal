@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.tomcat;
 
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostConnectionValidator;
 import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
@@ -9,13 +9,13 @@ import java.sql.SQLException;
 
 public class DalTomcatDataSource extends DataSource {
 
-    private final ConnectionValidator clusterConnValidator;
+    private final HostConnectionValidator clusterConnValidator;
 
     public DalTomcatDataSource(PoolConfiguration poolProperties) {
         this(poolProperties, null);
     }
 
-    public DalTomcatDataSource(PoolConfiguration poolProperties, ConnectionValidator clusterConnValidator) {
+    public DalTomcatDataSource(PoolConfiguration poolProperties, HostConnectionValidator clusterConnValidator) {
         super(poolProperties);
         this.clusterConnValidator = clusterConnValidator;
     }

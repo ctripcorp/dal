@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
@@ -29,7 +29,7 @@ public class DataSourceValidator implements ValidatorProxy {
     private String VALIDATE_ERROR_FORMAT = "Connection validation error: %s";
 
     private PoolProperties poolProperties;
-    private ConnectionValidator clusterConnValidator;
+    private HostConnectionValidator clusterConnValidator;
 
     @Override
     public boolean validate(Connection connection, int validateAction) {
@@ -209,7 +209,7 @@ public class DataSourceValidator implements ValidatorProxy {
     }
 
     @Override
-    public void setClusterConnValidator(ConnectionValidator clusterConnValidator) {
+    public void setClusterConnValidator(HostConnectionValidator clusterConnValidator) {
         this.clusterConnValidator = clusterConnValidator;
     }
 

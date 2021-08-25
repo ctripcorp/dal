@@ -5,6 +5,42 @@ import com.mysql.jdbc.StringUtils;
 
 public class SqlUtils {
 
+    private static final String SELECT_KEY = "select";
+
+    private static final String INSERT_KEY = "insert";
+
+    private static final String UPDATE_KEY = "update";
+
+    private static final String DELETE_KEY = "delete";
+
+    private static final String SHOW_KEY = "show";
+
+    private static final String REPLACE_KEY = "replace";
+
+    private static final String TRUNCATE_KEY = "truncate";
+
+    private static final String CREATE_KEY = "create";
+
+    private static final String DROP_KEY = "drop";
+
+    private static final String LOAD_KEY = "load";
+
+    private static final String MERGE_KEY = "merge";
+
+    private static final String EXPLAIN_KEY = "explain";
+
+    private static final String EXECUTE_KEY = "call";
+
+    private static final String IDENTITY_PATTERN = "@@identity";
+
+    private static final String LAST_INSERT_PATTERN = "last_insert_id(";
+
+    private static final String FOR_PATTERN = "for";
+
+    private static final String UPDATE_PATTERN = "update";
+
+    private static final String ALTER_PATTERN = "alter";
+
     public static boolean isReadOperation(String sql) {
         return isReadOperation(firstAlphaCharUc(sql));
     }
@@ -46,49 +82,6 @@ public class SqlUtils {
 
         return statementStartPos;
     }
-
-//    public static SqlType getSqlType(String sql) {
-//        // todo-lhj 需要对比两种解析sql的实现方式的效率，根据压测情况对比
-//
-//        return null;
-//    }
-
-
-    private static final String SELECT_KEY = "select";
-
-    private static final String INSERT_KEY = "insert";
-
-    private static final String UPDATE_KEY = "update";
-
-    private static final String DELETE_KEY = "delete";
-
-    private static final String SHOW_KEY = "show";
-
-    private static final String REPLACE_KEY = "replace";
-
-    private static final String TRUNCATE_KEY = "truncate";
-
-    private static final String CREATE_KEY = "create";
-
-    private static final String DROP_KEY = "drop";
-
-    private static final String LOAD_KEY = "load";
-
-    private static final String MERGE_KEY = "merge";
-
-    private static final String EXPLAIN_KEY = "explain";
-
-    private static final String EXECUTE_KEY = "call";
-
-    private static final String IDENTITY_PATTERN = "@@identity";
-
-    private static final String LAST_INSERT_PATTERN = "last_insert_id(";
-
-    private static final String FOR_PATTERN = "for";
-
-    private static final String UPDATE_PATTERN = "update";
-
-    private static final String ALTER_PATTERN = "alter";
 
     public static SqlType getSqlType(String sql) {
         if (StringUtils.isNullOrEmpty(sql)) {

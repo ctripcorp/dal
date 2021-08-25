@@ -27,7 +27,6 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
     private volatile Connection rConnection;
     private volatile Connection wConnection;
-    // todo-lhj 看看是否需要，不需要的话直接删除
     private RouterType routerType;
     private List<Statement> openedStatements = new ArrayList<Statement>();
     private int transactionIsolation = -1;
@@ -37,11 +36,12 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private String schema;
 
 
-    public GroupConnection(ClusterInfo clusterInfo, DataSource writeDataSource, Map<Database, DataSource> readDataSource) {
+    public GroupConnection(ClusterInfo clusterInfo, DataSource writeDataSource, Map<Database, DataSource> readDataSource, RouterType routerType) {
         this.clusterInfo = clusterInfo;
         this.writeDataSource = writeDataSource;
         this.readDataSource = readDataSource;
         this.shardIndex = clusterInfo.getShardIndex();
+        this.routerType = routerType;
     }
 
     private void checkClosed() throws SQLException {

@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
+import com.ctrip.platform.dal.cluster.base.ListenableSupport;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.MultiHostConnectionStringConfigure;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
 
 import java.util.ArrayList;
 import java.util.List;

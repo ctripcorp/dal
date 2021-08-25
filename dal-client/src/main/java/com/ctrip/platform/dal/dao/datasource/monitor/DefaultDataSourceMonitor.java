@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.monitor;
 
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;

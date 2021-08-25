@@ -1,12 +1,11 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
-import com.ctrip.platform.dal.dao.datasource.ApiDataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;

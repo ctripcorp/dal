@@ -1,7 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
+
+import com.ctrip.platform.dal.cluster.config.ClusterConfigParser;
+import com.ctrip.platform.dal.cluster.config.ClusterConfigXMLParser;
 
 /**
  * @author c7ch23en

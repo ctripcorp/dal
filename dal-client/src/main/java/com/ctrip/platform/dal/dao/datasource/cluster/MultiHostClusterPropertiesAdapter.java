@@ -1,15 +1,15 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
-import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.cluster.cluster.ClusterType;
+import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.LocalizedAccessStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.OrderedAccessStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
-import static com.ctrip.framework.dal.cluster.client.cluster.ClusterType.MGR;
-import static com.ctrip.framework.dal.cluster.client.cluster.ClusterType.OB;
+import static com.ctrip.platform.dal.cluster.cluster.ClusterType.MGR;
+import static com.ctrip.platform.dal.cluster.cluster.ClusterType.OB;
 
 /**
  * @author c7ch23en

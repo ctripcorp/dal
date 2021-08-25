@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.validator;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.cluster.cluster.ClusterType;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;

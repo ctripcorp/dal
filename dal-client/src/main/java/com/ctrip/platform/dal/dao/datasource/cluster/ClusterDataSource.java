@@ -1,10 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.cluster.database.ConnectionString;
+import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.platform.dal.cluster.database.DatabaseRole;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeEvent;

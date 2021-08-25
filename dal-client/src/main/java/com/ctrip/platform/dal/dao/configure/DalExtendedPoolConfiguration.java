@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 
 /**
  * @author c7ch23en

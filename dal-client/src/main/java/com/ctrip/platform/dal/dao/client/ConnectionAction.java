@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.DalClientFactory;

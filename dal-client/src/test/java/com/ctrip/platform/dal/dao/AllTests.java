@@ -11,6 +11,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 		com.ctrip.platform.dal.dao.client._AllTests.class,
+		com.ctrip.platform.dal.cluster.AllTests.class,
 		com.ctrip.platform.dal.dao.common._AllTests.class,
 		com.ctrip.platform.dal.dao.datasource._AllTests.class,
 		com.ctrip.platform.dal.dao.dialet.mysql.MySqlHelperTest.class,

@@ -1,13 +1,12 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
-import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.cluster.ClusterType;
+import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
+import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
 import org.junit.Assert;

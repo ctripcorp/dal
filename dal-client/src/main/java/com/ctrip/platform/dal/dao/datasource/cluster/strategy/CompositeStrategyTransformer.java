@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.dao.datasource.cluster.ShardMeta;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 

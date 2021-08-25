@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
 import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 
 public class ConstantLocalizationValidator implements LocalizationValidator {

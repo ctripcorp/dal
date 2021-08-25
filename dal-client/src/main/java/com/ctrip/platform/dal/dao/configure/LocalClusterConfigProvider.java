@@ -1,13 +1,9 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
-import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
-import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
-
-import java.io.InputStream;
-import java.net.URL;
+import com.ctrip.platform.dal.cluster.config.ClusterConfig;
+import com.ctrip.platform.dal.cluster.config.ClusterConfigParser;
+import com.ctrip.platform.dal.cluster.config.DalConfigCustomizedOption;
+import com.ctrip.platform.dal.cluster.config.DefaultLocalConfigProvider;
 
 /**
  * @author c7ch23en

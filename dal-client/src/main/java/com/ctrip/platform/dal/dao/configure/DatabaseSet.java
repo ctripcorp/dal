@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao.configure;
 import java.sql.SQLException;
 import java.util.*;
 
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.sharding.idgen.IIdGeneratorConfig;

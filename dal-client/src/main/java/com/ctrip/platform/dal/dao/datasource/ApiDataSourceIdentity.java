@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.config.ClusterConfig;
+import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.util.ObjectHolder;
 import com.ctrip.platform.dal.dao.cluster.ClusterConfigAdapter;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
 import com.ctrip.platform.dal.dao.configure.*;

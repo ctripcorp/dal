@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.dao;
 import java.util.*;
 import java.util.List;
 
-import com.ctrip.framework.dal.cluster.client.sharding.context.ShardData;
+import com.ctrip.platform.dal.cluster.sharding.context.ShardData;
 import com.ctrip.platform.dal.common.enums.ParameterDirection;
 import com.ctrip.platform.dal.common.enums.ParametersType;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;

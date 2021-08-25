@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
 
 /**

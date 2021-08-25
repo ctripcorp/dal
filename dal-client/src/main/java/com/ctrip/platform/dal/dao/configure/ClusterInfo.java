@@ -1,9 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.IClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContext;

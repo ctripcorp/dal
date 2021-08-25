@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.ShardMeta;

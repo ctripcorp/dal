@@ -1,39 +1,35 @@
 package com.ctrip.platform.dal.dao.configure;
 
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.config.DalConfigCustomizedOption;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.annotation.Database;
+import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
+import com.ctrip.platform.dal.dao.client.DalLogger;
+import com.ctrip.platform.dal.dao.client.DefaultLogger;
+import com.ctrip.platform.dal.dao.cluster.ClusterManager;
+import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
+import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
+import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
+import com.ctrip.platform.dal.dao.helper.ClassScanner;
+import com.ctrip.platform.dal.dao.helper.DalClassScanner;
+import com.ctrip.platform.dal.dao.task.DalTaskFactory;
+import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import com.ctrip.platform.dal.exceptions.DalConfigException;
+import com.ctrip.platform.dal.sharding.idgen.*;
+import org.w3c.dom.*;
+
+import javax.persistence.Entity;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
-
-import javax.persistence.Entity;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
-import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
-import com.ctrip.platform.dal.dao.cluster.ClusterManager;
-import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
-import com.ctrip.platform.dal.dao.annotation.Database;
-import com.ctrip.platform.dal.dao.helper.ClassScanFilter;
-import com.ctrip.platform.dal.dao.helper.ClassScanner;
-import com.ctrip.platform.dal.dao.helper.DalClassScanner;
-import com.ctrip.platform.dal.exceptions.DalConfigException;
-import com.ctrip.platform.dal.sharding.idgen.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
-import com.ctrip.platform.dal.dao.client.DalLogger;
-import com.ctrip.platform.dal.dao.client.DefaultLogger;
-import com.ctrip.platform.dal.dao.datasource.DefaultDalConnectionLocator;
-import com.ctrip.platform.dal.dao.task.DalTaskFactory;
-import com.ctrip.platform.dal.dao.task.DefaultTaskFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DalConfigureFactory implements DalConfigConstants {
     private static DalConfigureFactory factory = new DalConfigureFactory();

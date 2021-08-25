@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
-import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.*;
 import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.validator.NullConnectionValidator;

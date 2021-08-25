@@ -34,6 +34,10 @@ public enum ReadStrategyEnum {
         return name;
     }
 
+    public String getClazz() {
+        return this.clazz;
+    }
+
 
     public String getAlias() {
         return alias;

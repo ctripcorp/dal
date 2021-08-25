@@ -1,4 +1,4 @@
-package com.ctrip.framework.dal.cluster.client.shard.read;
+package com.ctrip.framework.dal.cluster.client.shard;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
@@ -19,6 +19,7 @@ public interface RouteStrategy {
     String slaveRole = "slave";
     String slaveOnly = "slaveOnly";
     String isPro = "isPro";
+    String routeStrategy = "routeStrategy";
 
     // message
     String NO_HOST_AVAILABLE = "No %s available";

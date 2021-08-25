@@ -6,6 +6,8 @@ import com.ctrip.platform.dal.cluster.exception.HostNotExpectedException;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ctrip.platform.dal.dao.DalHintEnum.routeStrategy;
+
 public class ReadSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     @Override
     public void init(Set<HostSpec> hostSpecs) {
@@ -14,7 +16,10 @@ public class ReadSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
 
     @Override
     public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
-        return null;
+        if (map.get(routeStrategy) != null)
+            return dalHintsRoute(map);
+
+        return slaveOnly();
     }
 
     @Override

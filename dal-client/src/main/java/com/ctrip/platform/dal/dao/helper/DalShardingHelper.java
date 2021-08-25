@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import com.ctrip.platform.dal.dao.DalClientFactory;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.client.DalTransactionManager;
@@ -172,7 +173,7 @@ public class DalShardingHelper {
         DalShardingStrategy strategy = dbSet.getStrategy();
         DalHints tmpHints = new DalHints();
         if (hints != null) {
-//            tmpHints.inShard(hints.getShardId());
+            tmpHints = hints.clone();
             tmpHints.setRequestContext(hints.getRequestContext());
         }
         for (int i = 0; i < daoPojos.size(); i++) {
@@ -236,8 +237,10 @@ public class DalShardingHelper {
         DalShardingStrategy strategy = dbSet.getStrategy();
 
         DalHints tmpHints = new DalHints();
-        if (hints != null)
+        if (hints != null){
+            tmpHints = hints.clone();
             tmpHints.setRequestContext(hints.getRequestContext());
+        }
         for (int i = 0; i < parameters.size(); i++) {
             Object value = parameters.get(i);
 
@@ -375,7 +378,7 @@ public class DalShardingHelper {
             return;
 
         Set<String> notNullShardIds =
-                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, null, daoPojos, hints).keySet());
+                getNotNullShardIds(getPojosGroupedByShardId(logicDbName, hints.getShardId(), daoPojos, hints).keySet());
         if (notNullShardIds.size() > 1)
             logger.logEvent(DalLogTypes.DAL_VALIDATION, CROSSSHARD_BULKREQUEST, "");
 

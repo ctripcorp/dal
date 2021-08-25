@@ -1,13 +1,11 @@
-package com.ctrip.platform.dal.cluster.shard.read;
+package com.ctrip.framework.dal.cluster.client.sharding.read;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.exception.HostNotExpectedException;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static com.ctrip.platform.dal.dao.DalHintEnum.routeStrategy;
-
+import static com.ctrip.framework.dal.cluster.client.shard.RouteStrategy.routeStrategy;
 
 public class ReadCurrentZoneSlavesFirstStrategy extends ReadCurrentZoneSlavesOnlyStrategy {
 

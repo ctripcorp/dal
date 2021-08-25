@@ -9,4 +9,6 @@ public interface ShardExecutionResult<V> extends ExecutionResult<V> {
 
     String getTableShard();
 
+    StatementParameters getStatementParameters();
+
 }

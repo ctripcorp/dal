@@ -6,6 +6,7 @@ import com.ctrip.platform.dal.cluster.config.DatabaseShardConfigImpl;
 import com.ctrip.platform.dal.cluster.database.ConnectionString;
 import com.ctrip.platform.dal.cluster.database.Database;
 import com.ctrip.platform.dal.cluster.exception.ClusterRuntimeException;
+import com.ctrip.platform.dal.cluster.exception.DalMetadataException;
 import com.ctrip.platform.dal.cluster.shard.read.RouteStrategy;
 
 import java.util.*;
@@ -45,7 +46,11 @@ public class DatabaseShardImpl implements DatabaseShard {
             hostSpecs.add(host);
         });
 
-        routeStrategy.init(hostSpecs);
+        try{
+            routeStrategy.init(hostSpecs);
+        } catch (DalMetadataException error) {
+            throw new DalMetadataException(databaseShardConfig.getClusterConfig().getClusterName() + error.getMessage());
+        }
     }
 
     @Override

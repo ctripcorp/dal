@@ -2,10 +2,10 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.platform.dal.cluster.cluster.ClusterType;
 import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.LocalizedAccessStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.OrderedAccessStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import static com.ctrip.platform.dal.cluster.cluster.ClusterType.MGR;
@@ -20,9 +20,19 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
 
     private ClusterType clusterType;
 
-    public MultiHostClusterPropertiesAdapter(ClusterRouteStrategyConfig routeStrategyConfig, ClusterType clusterType) {
+    public MultiHostClusterPropertiesAdapter(ClusterRouteStrategyConfig routeStrategyConfig, ClusterType clusterType, String clusterName) {
         this.routeStrategyConfig = routeStrategyConfig;
         this.clusterType = clusterType;
+        setClusterName(clusterName);
+    }
+
+    private void setClusterName(String clusterName) {
+        if (this.routeStrategyConfig != null) {
+            CaseInsensitiveProperties properties = this.routeStrategyConfig.routeStrategyProperties();
+            if (properties != null) {
+                properties.set(CLUSTER_NAME, clusterName);
+            }
+        }
     }
 
     @Override
@@ -36,17 +46,17 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     }
 
     @Override
-    public MultiHostStrategy getMultiHostStrategy() {
+    public RouteStrategy getRouteStrategy() {
         String strategyName = routeStrategyName();
-        MultiHostStrategy strategy;
+        RouteStrategy strategy;
         if (MGR.equals(clusterType) && MGR.defaultRouteStrategies().equalsIgnoreCase(strategyName)) {
-            strategy = new OrderedAccessStrategy();
+            strategy = new MGRStrategy();
         } else if (OB.equals(clusterType) && OB.defaultRouteStrategies().equalsIgnoreCase(strategyName)) {
-            strategy = new LocalizedAccessStrategy();
+            strategy = new OBStrategy();
         } else {
             try {
                 Class clazz = Class.forName(strategyName);
-                strategy = (MultiHostStrategy) clazz.newInstance();
+                strategy = (RouteStrategy) clazz.newInstance();
             } catch (Throwable t) {
                 String msg = "Errored constructing route strategy: " + strategyName;
                 throw new DalRuntimeException(msg, t);

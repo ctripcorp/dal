@@ -2,9 +2,9 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.LocalizedAccessStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.OrderedAccessStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,7 +19,9 @@ import static com.ctrip.platform.dal.cluster.cluster.ClusterType.OB;
  */
 public class MultiHostClusterPropertiesAdapterTest {
 
-    public static final String CUSTOM_STRATEGY = "CustomDefineStrategy";
+    private static final String CUSTOM_STRATEGY = "CustomDefineStrategy";
+
+    private static final String CLUSTER_NAME = "test_cluster_name";
 
     private MultiHostClusterPropertiesAdapter clusterPropertiesAdapter;
 
@@ -69,28 +71,28 @@ public class MultiHostClusterPropertiesAdapterTest {
     }
 
     @Test
-    public void getMultiHostStrategy() {
-        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, MGR);
+    public void getRouteStrategy() {
+        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, MGR, CLUSTER_NAME);
         String routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(MGR.defaultRouteStrategies(), routeStrategy);
-        MultiHostStrategy multiHostStrategy = clusterPropertiesAdapter.getMultiHostStrategy();
-        Assert.assertTrue(multiHostStrategy instanceof OrderedAccessStrategy);
+        RouteStrategy multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
+        Assert.assertTrue(multiHostStrategy instanceof MGRStrategy);
 
-        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(obRouteStrategyConfig, OB);
+        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(obRouteStrategyConfig, OB, CLUSTER_NAME);
         routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(OB.defaultRouteStrategies(), routeStrategy);
-        multiHostStrategy = clusterPropertiesAdapter.getMultiHostStrategy();
-        Assert.assertTrue(multiHostStrategy instanceof LocalizedAccessStrategy);
+        multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
+        Assert.assertTrue(multiHostStrategy instanceof OBStrategy);
 
-        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, MGR);
+        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, MGR, CLUSTER_NAME);
 
     }
 
     @Test(expected = DalRuntimeException.class)
-    public void getMultiHostStrategyWithException() {
-        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(customRouteStrategyConfig, MGR);
+    public void getRouteStrategyWithException() {
+        clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(customRouteStrategyConfig, MGR, CLUSTER_NAME);
         String routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(CUSTOM_STRATEGY, routeStrategy);
-        clusterPropertiesAdapter.getMultiHostStrategy();
+        clusterPropertiesAdapter.getRouteStrategy();
     }
 }

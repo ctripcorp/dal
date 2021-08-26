@@ -2,13 +2,16 @@ package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.client.CustomConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultRequestContext;
 import com.ctrip.platform.dal.dao.datasource.cluster.RequestContext;
 import com.ctrip.platform.dal.dao.datasource.cluster.ShardMeta;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.HostValidator;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.SimpleHostValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.CompositeStrategyTransformer;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.StrategyTransformer;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.SimpleHostValidator;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 import org.junit.Before;
 
@@ -51,24 +54,26 @@ public abstract class ShardMetaGenerator {
 
     protected Set<HostSpec> hostSpecs = new HashSet<>();
 
+    protected HostSpec HostSpecOY_1 = new HostSpec(SHAOY_IP1, SHAOY_PORT1, SHAOY, true);
+    protected HostSpec HostSpecOY_2 = new HostSpec(SHAOY_IP2, SHAOY_PORT2, SHAOY, true);
+
     protected ShardMeta shardMeta;
 
+    protected DalHints dalHints = new DalHints();
+
     protected CaseInsensitiveProperties caseInsensitiveProperties = new CaseInsensitiveProperties();
+
+    protected RouteStrategy routeStrategy;
 
     protected ConnectionFactory connectionFactory = new ConnectionFactory() {
         @Override
         public Connection getPooledConnectionForHost(HostSpec host) throws InvalidConnectionException {
             return new CustomConnection();
         }
-
-        @Override
-        public Connection createConnectionForHost(HostSpec host) throws InvalidConnectionException {
-            return new CustomConnection();
-        }
     };
 
-    protected HostValidator newHostValidator(ConnectionFactory factory, Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
-        return new SimpleHostValidator(factory, configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
+    protected HostValidator newHostValidator(Set<HostSpec> configuredHosts, List<HostSpec> orderHosts, long failOverTime, long blackListTimeOut, long fixedValidatePeriod) {
+        return new SimpleHostValidator(configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
     }
 
     protected RequestContext requestContext;
@@ -86,16 +91,30 @@ public abstract class ShardMetaGenerator {
         addRB();
         addXY();
 
-        hostValidator = newHostValidator(connectionFactory, hostSpecs, new ArrayList<>(hostSpecs), 10000, 10000, 30000);
+        hostValidator = newHostValidator(hostSpecs, new ArrayList<>(hostSpecs), 10000, 10000, 30000);
+
+        routeStrategy = getRouteStrategy();
+        if (routeStrategy != null) {
+            try {
+                routeStrategy.init(shardMeta.configuredHosts(), caseInsensitiveProperties);
+            } catch (UnsupportedOperationException e) {
+                // nothing to do
+            }
+            if (routeStrategy.isWrapperFor(ConnectionFactoryAware.class)) {
+                routeStrategy.unwrap(ConnectionFactoryAware.class).setConnectionFactory(connectionFactory);
+            }
+        }
     }
+
+    abstract protected RouteStrategy getRouteStrategy();
 
     protected String getRequestZone() {
         return SHAOY;
     }
 
     protected void addOY() {
-        hostSpecs.add(new HostSpec(SHAOY_IP1, SHAOY_PORT1, SHAOY, true));
-        hostSpecs.add(new HostSpec(SHAOY_IP2, SHAOY_PORT2, SHAOY, true));
+        hostSpecs.add(HostSpecOY_1);
+        hostSpecs.add(HostSpecOY_2);
     }
 
     protected void addRB() {

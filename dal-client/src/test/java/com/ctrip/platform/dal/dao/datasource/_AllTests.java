@@ -1,9 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.datasource.cluster.MultiHostClusterPropertiesAdapterTest;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.MajorityHostValidatorTest;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.*;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.SimpleHostValidatorTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.CompositeRoundRobinAccessStrategyTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.CompositeStrategyTransformerTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RoundRobinAccessStrategyTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ShardMetaDividerTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategyTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategyTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.MajorityHostValidatorTest;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.SimpleHostValidatorTest;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnectionTest;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContextTest;
 import com.ctrip.platform.dal.dao.datasource.log.KeyedDbSqlContextTest;
@@ -23,8 +28,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		KeyedDbSqlContextTest.class,
 		DefaultDataSourceMonitorTest.class,
 		ApiDataSourceIdentityTest.class,
-		OrderedAccessStrategyTest.class,
-		LocalizedAccessStrategyTest.class,
+		MGRStrategyTest.class,
+		OBStrategyTest.class,
 		CompositeRoundRobinAccessStrategyTest.class,
 		RoundRobinAccessStrategyTest.class,
 		ShardMetaDividerTest.class,

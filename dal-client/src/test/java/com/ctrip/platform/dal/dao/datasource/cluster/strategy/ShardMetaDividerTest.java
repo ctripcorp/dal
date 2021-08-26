@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.CompositeRoundRobinStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.ZoneDividedStrategyContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,12 +17,17 @@ public class ShardMetaDividerTest extends ShardMetaGenerator {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        strategyContext = new ZoneDividedStrategyContext(shardMeta, connectionFactory, caseInsensitiveProperties, hostValidator);
+        strategyContext = new ZoneDividedStrategyContext(shardMeta.configuredHosts(), caseInsensitiveProperties, hostValidator);
+    }
+
+    @Override
+    protected RouteStrategy getRouteStrategy() {
+        return null;
     }
 
     @Test
     public void divide() {
-        CompositeRoundRobinAccessStrategy localizedAccessStrategy = (CompositeRoundRobinAccessStrategy) strategyContext.accept(strategyTransformer);
+        CompositeRoundRobinStrategy localizedAccessStrategy = (CompositeRoundRobinStrategy) strategyContext.accept(strategyTransformer);
         Assert.assertEquals(3, localizedAccessStrategy.size());
     }
 

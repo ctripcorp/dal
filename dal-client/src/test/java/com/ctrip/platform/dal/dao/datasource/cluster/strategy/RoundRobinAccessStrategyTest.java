@@ -1,18 +1,20 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
-import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
-import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
-import com.mysql.jdbc.exceptions.jdbc4.CommunicationsException;
+import com.ctrip.platform.dal.cluster.exception.HostNotExpectedException;
+import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.RoundRobinStrategy;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
+
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy.BLACK_LIST_TIMEOUT_MS;
 
 /**
  * @Author limingdong
@@ -21,81 +23,70 @@ import java.sql.SQLException;
 @FixMethodOrder(value = MethodSorters.NAME_ASCENDING)
 public class RoundRobinAccessStrategyTest extends ShardMetaGenerator {
 
-    private RoundRobinAccessStrategy accessStrategy;
+    private long custom_black_list_timeout = 10;
 
     @Before
     public void setUp() throws Exception {
+        caseInsensitiveProperties.set(BLACK_LIST_TIMEOUT_MS, String.valueOf(custom_black_list_timeout));
         super.setUp();
-        accessStrategy = new RoundRobinAccessStrategy();
+    }
+
+    @Override
+    protected RouteStrategy getRouteStrategy() {
+        return new RoundRobinStrategy();
     }
 
     @Test
-    public void pickConnection_1() throws SQLException {
-        accessStrategy.initialize(shardMeta, connectionFactory, caseInsensitiveProperties);
+    public void pickNode_1() {
+        routeStrategy.init(shardMeta.configuredHosts(), caseInsensitiveProperties);
 
-        HostConnection hostConnection = accessStrategy.pickConnection(requestContext);
-        HostSpec hostSpec = hostConnection.getHost();
+        HostSpec hostSpec = routeStrategy.pickNode(dalHints);
         Assert.assertEquals(getRequestZone(), hostSpec.zone());  // pick from local
 
-        hostConnection = accessStrategy.pickConnection(requestContext);
-        HostSpec hostSpec1 = hostConnection.getHost();
+        HostSpec hostSpec1 = routeStrategy.pickNode(dalHints);
         Assert.assertEquals(getRequestZone(), hostSpec1.zone());  // pick from local
 
-        hostConnection = accessStrategy.pickConnection(requestContext);
-        HostSpec hostSpec2 = hostConnection.getHost();
+        HostSpec hostSpec2  = routeStrategy.pickNode(dalHints);
         Assert.assertEquals(hostSpec, hostSpec2);  // pick from local
 
-        hostConnection = accessStrategy.pickConnection(requestContext);
-        HostSpec hostSpec3 = hostConnection.getHost();
+        HostSpec hostSpec3  = routeStrategy.pickNode(dalHints);
         Assert.assertEquals(hostSpec1, hostSpec3);  // pick from local
 
-        accessStrategy.destroy();
+        routeStrategy.dispose();
     }
 
-    @Test(expected = SQLException.class)
-    public void pickConnection_2_InvalidConnectionException() throws SQLException {
+    @Test(expected = HostNotExpectedException.class)
+    public void pickNode_2_NoHostsException() {
 
-        ConnectionFactory localConnectionFactory = new ConnectionFactory() {
-            @Override
-            public Connection getPooledConnectionForHost(HostSpec host) throws InvalidConnectionException {
-                throw new InvalidConnectionException();
-            }
+        RouteStrategy strategy = getRouteStrategy();
+        strategy.init(new HashSet<>(), caseInsensitiveProperties);
 
-            @Override
-            public Connection createConnectionForHost(HostSpec host) throws InvalidConnectionException {
-                throw new InvalidConnectionException();
-            }
-        };
+        strategy.pickNode(dalHints);
 
-        RoundRobinAccessStrategy localAccessStrategy = new RoundRobinAccessStrategy();
-        localAccessStrategy.initialize(shardMeta, localConnectionFactory, caseInsensitiveProperties);
-
-        localAccessStrategy.pickConnection(requestContext);
-
-        localAccessStrategy.destroy();
+        strategy.dispose();
     }
 
-    @Test(expected = SQLException.class)
-    public void pickConnection_3_CommunicationsException() throws SQLException {
+    @Test
+    public void pickNode_3_exceptionNode() throws InterruptedException {
 
-        ConnectionFactory localConnectionFactory = new ConnectionFactory() {
-            @Override
-            public Connection getPooledConnectionForHost(HostSpec host) throws InvalidConnectionException, CommunicationsException {
-                throw new CommunicationsException(null, 0l, 0l, null);
-            }
+        RouteStrategy strategy = getRouteStrategy();
+        strategy.init(shardMeta.configuredHosts(), caseInsensitiveProperties);
+        routeStrategy.interceptException(new SQLException("test"), new DefaultHostConnection(null, HostSpecOY_1));
 
-            @Override
-            public Connection createConnectionForHost(HostSpec host) throws InvalidConnectionException, CommunicationsException {
-                throw new CommunicationsException(null, 0l, 0l, null);
-            }
-        };
+        HostSpec hostSpec1 = strategy.pickNode(dalHints);
+        HostSpec hostSpec2 = strategy.pickNode(dalHints);
 
-        RoundRobinAccessStrategy localAccessStrategy = new RoundRobinAccessStrategy();
-        localAccessStrategy.initialize(shardMeta, localConnectionFactory, caseInsensitiveProperties);
+        Assert.assertEquals(HostSpecOY_2, hostSpec1);
+        Assert.assertEquals(HostSpecOY_2, hostSpec2);
 
-        localAccessStrategy.pickConnection(requestContext);
+        TimeUnit.MILLISECONDS.sleep(custom_black_list_timeout + 1);
 
-        localAccessStrategy.destroy();
+        // remove from black list
+        hostSpec1 = strategy.pickNode(dalHints);
+        hostSpec2 = strategy.pickNode(dalHints);
+
+        Assert.assertNotEquals(hostSpec1, hostSpec2);
+        strategy.dispose();
     }
 
     @Override

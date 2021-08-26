@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigValidator;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParser;
+import com.ctrip.platform.dal.cluster.config.ClusterConfigValidator;
+import com.ctrip.platform.dal.cluster.config.ClusterConfigXMLParser;
 import com.ctrip.platform.dal.dao.util.FileReader;
 import org.junit.Assert;
 import org.junit.Test;

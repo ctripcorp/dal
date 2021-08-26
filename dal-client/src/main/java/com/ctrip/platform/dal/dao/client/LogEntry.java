@@ -1,11 +1,10 @@
 package com.ctrip.platform.dal.dao.client;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.platform.dal.cluster.Cluster;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.helper.DefaultTableParser;
-import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.TableParser;
 
 import java.util.*;

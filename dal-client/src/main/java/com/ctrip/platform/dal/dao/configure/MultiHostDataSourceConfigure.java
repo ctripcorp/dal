@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+
+import com.ctrip.platform.dal.cluster.base.HostSpec;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,16 +1,16 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
@@ -34,7 +34,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
     private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
-    private final MGRStrategy mgrStrategy;
+    private final MultiHostStrategy mgrStrategy;
     private final MultiHostClusterProperties clusterProperties;
     private final ConnectionValidator connValidator;
 
@@ -66,21 +66,8 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         };
     }
 
-    protected MGRStrategy prepareRouteStrategy() {
-        String strategyName = clusterProperties.routeStrategyName();
-        MGRStrategy strategy;
-        if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
-            strategy = new OrderedAccessStrategy();
-        else {
-            try {
-                Class clazz = Class.forName(strategyName);
-                strategy = (MGRStrategy) clazz.newInstance();
-            } catch (Throwable t) {
-                String msg = "Errored constructing route strategy: " + strategyName;
-                LOGGER.error(msg, t);
-                throw new DalRuntimeException(msg, t);
-            }
-        }
+    protected MultiHostStrategy prepareRouteStrategy() {
+        MultiHostStrategy strategy = this.clusterProperties.getMultiHostStrategy();
         strategy.initialize(shardMeta, connFactory, clusterProperties.routeStrategyProperties());
         return strategy;
     }

@@ -2,10 +2,12 @@
     <Cluster name="clustername1" dbCategory="mysql" version="1">
         <DatabaseShards>
             <DatabaseShard index="0" masterDomain="10.32.20.125" slaveDomain="10.32.20.125">
-                <Database ip="10.32.20.125" port="3306" dbName="Shard_0" uid="na" pwd="qazwsxedc"/>
+                <Database role="master" ip="10.32.20.125" port="3306" dbName="Shard_0" uid="na" pwd="qazwsxedc"/>
+                <Database role="slave" ip="10.32.20.125" port="3306" dbName="Shard_0" uid="na" pwd="qazwsxedc"/>
             </DatabaseShard>
             <DatabaseShard index="1" masterDomain="10.32.20.125" slaveDomain="10.32.20.125">
-                <Database ip="10.32.20.125" port="3306" dbName="Shard_1" uid="na" pwd="qazwsxedc"/>
+                <Database role="master" ip="10.32.20.125" port="3306" dbName="Shard_1" uid="na" pwd="qazwsxedc"/>
+                <Database role="slave" ip="10.32.20.125" port="3306" dbName="Shard_0" uid="na" pwd="qazwsxedc"/>
             </DatabaseShard>
         </DatabaseShards>
         <ShardStrategies>

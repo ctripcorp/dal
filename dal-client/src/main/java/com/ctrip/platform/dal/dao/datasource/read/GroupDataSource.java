@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.RouterType;
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.shard.read.RouterType;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
 import com.ctrip.platform.dal.dao.datasource.AbstractDataSource;
@@ -38,12 +38,17 @@ public class GroupDataSource extends AbstractDataSource {
         this.provider = provider;
         locator = new DataSourceLocator(this.provider);
         init();
+        this.init = true;
     }
 
     protected void init() {
+        if (routerType == RouterType.MASTER_ONLY) {
+            writeDataSource = createWriteDataSource();
+            return;
+        }
+
         writeDataSource = createWriteDataSource();
         createReadDataSource();
-        init = true;
     }
 
     protected DataSource createWriteDataSource() {
@@ -59,7 +64,7 @@ public class GroupDataSource extends AbstractDataSource {
             slaveIndex++;
         }
 
-        readDataSource.put(cluster.getMasterOnShard(clusterInfo.getShardIndex()), writeDataSource);
+        readDataSource.put(cluster.getMasterOnShard(clusterInfo.getShardIndex()), createWriteDataSource());
     }
 
 

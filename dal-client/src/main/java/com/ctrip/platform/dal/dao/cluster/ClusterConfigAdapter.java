@@ -1,16 +1,16 @@
 package com.ctrip.platform.dal.dao.cluster;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
-import com.ctrip.framework.dal.cluster.client.base.Listener;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.ReadStrategyEnum;
-import com.ctrip.framework.dal.cluster.client.config.*;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
-import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.base.ListenableSupport;
+import com.ctrip.platform.dal.cluster.base.Listener;
+import com.ctrip.platform.dal.cluster.cluster.ClusterType;
+import com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum;
+import com.ctrip.platform.dal.cluster.config.*;
+import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
+import com.ctrip.platform.dal.cluster.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
@@ -116,7 +116,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         });
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY);
+                new DefaultClusterRouteStrategyConfig(ClusterType.MGR.defaultRouteStrategies());
         if (configure.getZonesPriority() != null)
             routeStrategy.setProperty(DataSourceConfigureConstants.ZONES_PRIORITY,
                     configure.getZonesPriority());

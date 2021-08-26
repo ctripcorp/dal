@@ -1,14 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.cluster.RouterType;
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
+import com.ctrip.platform.dal.cluster.shard.read.RouterType;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
+import org.apache.commons.lang.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;

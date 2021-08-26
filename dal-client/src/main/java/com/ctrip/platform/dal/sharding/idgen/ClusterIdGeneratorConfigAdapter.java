@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.sharding.idgen;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGenerator;
-import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.sharding.idgen.ClusterIdGenerator;
+import com.ctrip.platform.dal.cluster.sharding.idgen.ClusterIdGeneratorConfig;
 
 public class ClusterIdGeneratorConfigAdapter implements IIdGeneratorConfig {
 

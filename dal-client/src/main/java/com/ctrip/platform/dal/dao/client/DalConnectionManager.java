@@ -1,14 +1,9 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Set;
-
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
@@ -20,6 +15,10 @@ import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Set;
 
 public class DalConnectionManager {
 	private DalConfigure config;
@@ -146,7 +145,7 @@ public class DalConnectionManager {
 	}
 
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
-		if (dbSet instanceof ClusterDatabaseSet && !ClusterType.MGR.equals(((ClusterDatabaseSet) dbSet).getCluster().getClusterType())) {
+		if (dbSet instanceof ClusterDatabaseSet && !((ClusterDatabaseSet) dbSet).getCluster().getClusterType().isAllMaster()) {
 			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
 		}
 

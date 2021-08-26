@@ -1,0 +1,88 @@
+<DAL>
+    <Cluster name="demo-cluster" dbCategory="mysql" version="1">
+        <DatabaseShards>
+            <DatabaseShard index="1" masterDomain="demodbshard00.mysql.db.ctripcorp.com" slaveDomain="demodbshard00read.mysql.db.ctripcorp.com">
+                <Database ip="10.25.44.1" port="55944" dbName="demoDbShard00" uid="user_w" pwd="xyzw" readWeight="0"/>
+                <Database role="slave" ip="10.25.44.2" port="55944" dbName="demoDbShard00" uid="user_r" pwd="xyzr" readWeight="1" tags="a,b"/>
+                <Database role="slave" ip="10.25.44.3" port="55944" dbName="demoDbShard00" uid="user_r" pwd="xyzr" readWeight="1" tags="b,c"/>
+            </DatabaseShard>
+            <DatabaseShard index="2" masterDomain="demodbshard01.mysql.db.ctripcorp.com" slaveDomain="demodbshard01read.mysql.db.ctripcorp.com">
+                <Database ip="10.25.44.11" port="55944" dbName="demoDbShard01" uid="user_w" pwd="xyzw" readWeight="1"/>
+                <Database role="slave" ip="10.25.44.12" port="55944" dbName="demoDbShard01" uid="user_r" pwd="xyzr" readWeight="1"/>
+            </DatabaseShard>
+            <DatabaseShard index="3" masterDomain="demodbshard02.mysql.db.ctripcorp.com" slaveDomain="demodbshard02read.mysql.db.ctripcorp.com">
+                <Database ip="10.25.44.21" port="55944" dbName="demoDbShard02" uid="user_w" pwd="xyzw" readWeight="1"/>
+            </DatabaseShard>
+            <DatabaseShard index="4" masterDomain="demodbshard03.mysql.db.ctripcorp.com" slaveDomain="demodbshard03read.mysql.db.ctripcorp.com">
+                <Database ip="10.25.44.31" port="55944" dbName="demoDbShard03" uid="user_w" pwd="xyzw" readWeight="0"/>
+                <Database role="slave" ip="10.25.44.31" port="55944" dbName="demoDbShard03" uid="user_r" pwd="xyzw" readWeight="1"/>
+            </DatabaseShard>
+        </DatabaseShards>
+        <ShardStrategies>
+            <ModStrategy default="true">
+                <Property name="stringTypeHandler" value="hash"/>
+                <Property name="tableSharding" value="true"/>
+                <Property name="dbShardColumn" value="id"/>
+                <Property name="dbShardMod" value="3"/>
+                <Property name="dbShardColumnCandidates" value="no,age"/>
+                <!--<Property name="dbShardOffset" value="1"/>-->
+                <Property name="tableShardColumn" value="age"/>
+                <Property name="tableShardMod" value="7"/>
+                <Tables>
+                    <Property name="tableSharding" value="true"/>
+                    <Property name="dbShardColumn" value="id"/>
+                    <Property name="dbShardMod" value="4"/>
+                    <Property name="tableShardColumn" value="age"/>
+                    <Property name="tableShardMod" value="3"/>
+                    <Property name="tableShardSeparator" value="_"/>
+                    <Table name="table11">
+                        <Property name="dbShardOffset" value="1"/>
+                        <Property name="tableShardOffset" value="1"/>
+                    </Table>
+                    <Table name="table12"/>
+                    <Table name="table13">
+                        <Property name="tableSharding" value="true"/>
+                        <Property name="dbShardColumn" value="age"/>
+                        <Property name="dbShardMod" value="2"/>
+                        <Property name="tableShardColumn" value="age"/>
+                        <Property name="tableShardMod" value="4"/>
+                    </Table>
+                    <Table name="table14">
+                        <Property name="tableSharding" value="true"/>
+                        <Property name="dbShardColumn" value="id"/>
+                        <Property name="dbShardMod" value="2"/>
+                        <Property name="tableShardColumn" value="age"/>
+                        <Property name="tableShardMod" value="4"/>
+                    </Table>
+                    <Table name="table15">
+                        <Property name="tableSharding" value="false"/>
+                        <Property name="tableShardSeparator" value=""/>
+                    </Table>
+                </Tables>
+            </ModStrategy>
+            <CustomStrategy class="com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy">
+                <Property name="n1" value=""/>
+                <Property name="n2" value=""/>
+                <Tables>
+                    <Property name="n1" value=""/>
+                    <Property name="n3" value=""/>
+                    <Table name="table21"/>
+                    <Table name="table22">
+                        <Property name="n1" value=""/>
+                        <Property name="n4" value=""/>
+                    </Table>
+                </Tables>
+            </CustomStrategy>
+            <UserHintStrategy>
+                <Property name="dbShardOffset" value="1"/>
+                <Property name="tableShardOffset" value="1"/>
+                <Tables>
+                    <Table name="table31"/>
+                </Tables>
+            </UserHintStrategy>
+        </ShardStrategies>
+        <IdGenerators>
+            <IdGenerator/>
+        </IdGenerators>
+    </Cluster>
+</DAL>

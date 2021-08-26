@@ -3,8 +3,8 @@ package com.ctrip.platform.dal.dao.datasource;
 import java.sql.Connection;
 import java.util.*;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.database.Database;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;

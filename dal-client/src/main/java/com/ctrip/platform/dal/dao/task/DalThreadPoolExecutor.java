@@ -1,10 +1,7 @@
 package com.ctrip.platform.dal.dao.task;
 
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.cluster.util.StringUtils;
 import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfig;
-import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.log.DalLogTypes;
-import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.util.Map;
 import java.util.Objects;

@@ -263,7 +263,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     }
 
     private void parseRouteStrategies(ClusterConfigImpl clusterConfig, Node routeStrategiesNode) {
-        List<Node> routeStrategyNodes = getRouteStrategyNodes(routeStrategiesNode);
+        List<Node> routeStrategyNodes = getRouteStrategyNodes(clusterConfig.getClusterType(), routeStrategiesNode);
         if (routeStrategyNodes.size() > 1)
             throw new ClusterRuntimeException("multiple routeStrategies configured");
         if (routeStrategyNodes.size() == 1) {
@@ -280,10 +280,10 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
     }
 
-    protected List<Node> getRouteStrategyNodes(Node routeStrategiesNode) {
+    protected List<Node> getRouteStrategyNodes(ClusterType clusterType, Node routeStrategiesNode) {
         List<Node> readStrategyNodes = new ArrayList<>();
         // mgr-strategy
-        List<Node> mgrStrategyNodes = getChildNodes(routeStrategiesNode, ORDERED_ACCESS_STRATEGY);
+        List<Node> mgrStrategyNodes = getChildNodes(routeStrategiesNode, clusterType.defaultRouteStrategies());
         // read-strategy
         for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()){
             Node node = getChildNode(routeStrategiesNode, readStrategyEnum.name());

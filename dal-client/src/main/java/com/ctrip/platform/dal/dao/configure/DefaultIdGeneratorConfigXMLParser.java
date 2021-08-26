@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
-import com.ctrip.framework.dal.cluster.client.config.IdGeneratorConfigXMLParser;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
-import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
+import com.ctrip.platform.dal.cluster.config.ClusterConfigXMLConstants;
+import com.ctrip.platform.dal.cluster.config.IdGeneratorConfigXMLParser;
+import com.ctrip.platform.dal.cluster.exception.ClusterConfigException;
+import com.ctrip.platform.dal.cluster.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.sharding.idgen.*;
 import org.w3c.dom.Document;

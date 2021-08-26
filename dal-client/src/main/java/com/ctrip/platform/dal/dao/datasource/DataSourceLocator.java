@@ -7,18 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
-import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
-import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.platform.dal.cluster.Cluster;
+import com.ctrip.platform.dal.cluster.cluster.ClusterType;
+import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
+import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.platform.dal.cluster.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
-import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
@@ -56,7 +52,7 @@ public class DataSourceLocator {
     }
 
     /**
-     * This is used for initialize datasource for thirdparty framework
+     * This is used for initialize datasource for thirdparty platform
      */
     public DataSourceLocator() {
         this(new DefaultDataSourceConfigureProvider());
@@ -101,8 +97,13 @@ public class DataSourceLocator {
 
     public DataSource getDataSource(ClusterInfo clusterInfo) {
         // todo-lhj 为什么根据clusterInfo还要重新创建一遍cluster
-        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), new DefaultDalConfigCustomizedOption());
-        clusterInfo.setCluster(cluster);
+//        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), new DefaultDalConfigCustomizedOption());
+//        clusterInfo.setCluster(cluster);
+        Cluster cluster = clusterInfo.getCluster();
+        if (cluster == null) {
+            cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), new DefaultDalConfigCustomizedOption());
+            clusterInfo.setCluster(cluster);
+        }
         DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
         DataSource ds = cache.get(id);
         if (ds == null) {

@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.helper;
 
-import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
+import com.ctrip.platform.dal.cluster.util.ObjectHolder;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DefaultDalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;

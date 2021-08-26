@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.platform.dal.cluster.Cluster;
 import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContext;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 

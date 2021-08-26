@@ -140,6 +140,7 @@
     </databaseSet>
     <cluster name="clusterName1"/>
     <cluster name="clusterName2" alias="DbSetName"/>
+    <cluster name="clusterName3"/>
   </databaseSets>
   <LogListener enabled="true">
   	  <logger>com.ctrip.platform.dal.dao.client.DefaultLogger</logger>

@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigProvider;
-import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
+import com.ctrip.platform.dal.cluster.config.ClusterConfig;
+import com.ctrip.platform.dal.cluster.config.ClusterConfigProvider;
+import com.ctrip.platform.dal.cluster.config.DefaultLocalConfigProvider;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

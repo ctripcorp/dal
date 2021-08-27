@@ -56,6 +56,7 @@ public class LogEntry implements ILogEntry{
 	private Cluster cluster;
 	private Long connectionId;
 	private Integer localPort;
+	private Integer queryTimeout;
 
 	/**
      * Internal performance recorder for performance cost in each stage.
@@ -517,4 +518,14 @@ public class LogEntry implements ILogEntry{
 	public void setLocalPort(Integer localPort) {
 		this.localPort = localPort;
 	}
+
+
+	public Integer getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(Integer queryTimeout) {
+		this.queryTimeout = queryTimeout;
+	}
+
 }

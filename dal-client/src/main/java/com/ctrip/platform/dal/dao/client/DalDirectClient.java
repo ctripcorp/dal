@@ -575,6 +575,9 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     }
 
     private ResultSet executeQuery(final PreparedStatement preparedStatement, final LogEntry entry) throws Exception {
+        if (entry != null)
+            entry.setQueryTimeout(preparedStatement.getQueryTimeout());
+
         return execute(new Callable<ResultSet>() {
             public ResultSet call() throws Exception {
                 return preparedStatement.executeQuery();
@@ -583,6 +586,9 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     }
 
     private void executeMultiple(final PreparedStatement preparedStatement, final LogEntry entry) throws Exception {
+        if (entry != null)
+            entry.setQueryTimeout(preparedStatement.getQueryTimeout());
+
         execute(new Callable<Object>() {
             public Object call() throws Exception {
                 preparedStatement.execute();
@@ -592,6 +598,9 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     }
 
     private int executeUpdate(final PreparedStatement preparedStatement, final LogEntry entry) throws Exception {
+        if (entry != null)
+            entry.setQueryTimeout(preparedStatement.getQueryTimeout());
+
         return execute(new Callable<Integer>() {
             public Integer call() throws Exception {
                 return entry.setAffectedRows(preparedStatement.executeUpdate());
@@ -600,6 +609,9 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     }
 
     private int[] executeBatch(final Statement statement, final LogEntry entry) throws Exception {
+        if (entry != null)
+            entry.setQueryTimeout(statement.getQueryTimeout());
+
         return execute(new Callable<int[]>() {
             public int[] call() throws Exception {
                 return entry.setAffectedRowsArray(statement.executeBatch());
@@ -608,6 +620,9 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     }
 
     private Boolean executeCall(final CallableStatement callableStatement, final LogEntry entry) throws Exception {
+        if (entry != null)
+            entry.setQueryTimeout(callableStatement.getQueryTimeout());
+
         return execute(new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 return callableStatement.execute();
@@ -616,6 +631,9 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
     }
 
     private int[] executeBatch(final CallableStatement callableStatement, final LogEntry entry) throws Exception {
+        if (entry != null)
+            entry.setQueryTimeout(callableStatement.getQueryTimeout());
+
         return execute(new Callable<int[]>() {
             public int[] call() throws Exception {
                 return entry.setAffectedRowsArray(callableStatement.executeBatch());

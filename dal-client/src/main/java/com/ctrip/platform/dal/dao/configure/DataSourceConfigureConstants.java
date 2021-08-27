@@ -25,6 +25,8 @@ public interface DataSourceConfigureConstants {
     String LOGABANDONED = "logAbandoned";
     String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
     String CONNECTIONPROPERTIES = "connectionProperties";
+    String SOCKET_TIMEOUT = "socketTimeout";
+    String CONNECT_TIMEOUT = "connectTimeout";
     String INIT_SQL = "initSql";
     String STATEMENT_INTERCEPTORS_KEY = "statementInterceptors";
 

@@ -1,20 +1,19 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ConnectionFactoryAware;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.HostConnectionValidatorHolder;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ConnectionFactoryAware;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.HostConnectionValidatorHolder;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -55,12 +54,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     }
 
     protected ConnectionFactory prepareConnectionFactory() {
-        return new ConnectionFactory() {
-            @Override
-            public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return wrappedDataSources.get(host).getDataSource().getConnection();
-            }
-        };
+        return host -> wrappedDataSources.get(host).getDataSource().getConnection();
     }
 
     protected RouteStrategy prepareRouteStrategy() {
@@ -68,7 +62,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         strategy.init(shardMeta.configuredHosts(), clusterProperties.routeStrategyProperties());
 
         if (strategy instanceof ConnectionFactoryAware) {
-            ((ConnectionFactoryAware) strategy).setConnectionFactory(this.connFactory); // TODO separate datasource
+            ((ConnectionFactoryAware) strategy).setConnectionFactory(this.connFactory);
         }
         if (strategy instanceof HostConnectionValidatorHolder) {
             this.connValidator = ((HostConnectionValidatorHolder) strategy).getHostConnectionValidator();

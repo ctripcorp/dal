@@ -19,8 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GroupDataSource extends AbstractDataSource {
     private static final String UNINITIALIZED = "%s:%d has not been initialized";
 
-    protected DataSource writeDataSource;
-    protected Map<Database, DataSource> readDataSource = new ConcurrentHashMap<>();
+    protected volatile DataSource writeDataSource;
+    protected volatile Map<Database, DataSource> readDataSource = new ConcurrentHashMap<>();
 
     protected volatile boolean init = false;
     protected RouterType routerType;
@@ -81,6 +81,6 @@ public class GroupDataSource extends AbstractDataSource {
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
         checkInit();
-        return new GroupConnection(this.clusterInfo, writeDataSource, readDataSource, routerType);
+        return new GroupConnection(this);
     }
 }

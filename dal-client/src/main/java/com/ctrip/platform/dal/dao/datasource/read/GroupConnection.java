@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
 import com.ctrip.platform.dal.cluster.shard.read.RouterType;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
+import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -25,6 +26,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private DataSource writeDataSource;
     Map<Database, DataSource> readDataSource;
 
+    private volatile GroupDataSource groupDataSource;
     private volatile Connection rConnection;
     private volatile Connection wConnection;
     private RouterType routerType;
@@ -36,12 +38,13 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private String schema;
 
 
-    public GroupConnection(ClusterInfo clusterInfo, DataSource writeDataSource, Map<Database, DataSource> readDataSource, RouterType routerType) {
-        this.clusterInfo = clusterInfo;
-        this.writeDataSource = writeDataSource;
-        this.readDataSource = readDataSource;
+    public GroupConnection(GroupDataSource groupDataSource) {
+        this.groupDataSource = groupDataSource;
+        this.clusterInfo = groupDataSource.clusterInfo;
+        this.writeDataSource = groupDataSource.writeDataSource;
+        this.readDataSource = groupDataSource.readDataSource;
         this.shardIndex = clusterInfo.getShardIndex();
-        this.routerType = routerType;
+        this.routerType = groupDataSource.routerType;
     }
 
     private void checkClosed() throws SQLException {
@@ -87,9 +90,19 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     protected Connection pickRead() throws SQLException {
         DatabaseShard databaseShard = clusterInfo.getCluster().getDatabaseShard(shardIndex);
         HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(buildContext());
-        // todo-lhj 如果节点被拉出或者新的节点被添加需要考虑找不到对应的host的情况下的处理逻辑
+        DataSource dataSource = readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+        if (dataSource == null) {
+            synchronized (groupDataSource) {
+                dataSource = readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+                if (dataSource == null) {
+                    groupDataSource.init();
+                    this.readDataSource = groupDataSource.readDataSource;
+                    this.readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+                }
+            }
+        }
         System.out.println(hostSpec);
-        return readDataSource.get(databaseShard.parseFromHostSpec(hostSpec)).getConnection();
+        return dataSource.getConnection();
     }
 
     protected Map<String, Object> buildContext() {

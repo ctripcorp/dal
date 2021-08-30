@@ -10,7 +10,7 @@ public enum DatabaseRole {
     MASTER("master"),
     SLAVE("slave"),
     MIX("mix"),
-    SLAVES("mix-read");
+    SLAVES("slaves");
 
     private String value;
 

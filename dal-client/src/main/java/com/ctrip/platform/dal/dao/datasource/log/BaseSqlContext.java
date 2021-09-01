@@ -37,6 +37,7 @@ public abstract class BaseSqlContext implements SqlContext {
     protected static final String UCS_VALIDATION = "UcsValidation";
     protected static final String DAL_VALIDATION = "DalValidation";
     protected static final String STATUS = "Status";
+    protected static final String READ_STRATEGY = "ReadStrategy";
 
     protected static final String CHANNEL_DATASOURCE = "DAL.DataSource";
     protected static final String STATUS_FAIL = "fail";
@@ -57,6 +58,7 @@ public abstract class BaseSqlContext implements SqlContext {
     private String dalValidation;
     private Throwable errorIfAny;
     private long executionEndTime;
+    private String readStrategy;
 
     public BaseSqlContext() {
         this(null);
@@ -149,6 +151,11 @@ public abstract class BaseSqlContext implements SqlContext {
         logMetric();
     }
 
+    @Override
+    public void populateReadStrategy(String readStrategy) {
+        this.readStrategy = readStrategy;
+    }
+
     protected void logMetric() {
         LOGGER.logMetric(METRIC_NAME, getExecutionTime() * TICKS_PER_MILLISECOND, toMetricTags());
     }
@@ -170,6 +177,7 @@ public abstract class BaseSqlContext implements SqlContext {
         addTag(tags, OP_TYPE, operation);
         addTag(tags, UCS_VALIDATION, ucsValidation);
         addTag(tags, DAL_VALIDATION, dalValidation);
+        addTag(tags, READ_STRATEGY, readStrategy);
         addTag(tags, STATUS, errorIfAny != null ? STATUS_FAIL : STATUS_SUCCESS);
         return tags;
     }
@@ -201,4 +209,11 @@ public abstract class BaseSqlContext implements SqlContext {
         return dbZone;
     }
 
+    public String getReadStrategy() {
+        return readStrategy;
+    }
+
+    public void setReadStrategy(String readStrategy) {
+        this.readStrategy = readStrategy;
+    }
 }

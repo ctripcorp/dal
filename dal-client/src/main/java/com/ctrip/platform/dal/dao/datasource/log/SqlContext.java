@@ -31,4 +31,6 @@ public interface SqlContext {
 
     SqlContext fork();
 
+    void populateReadStrategy(String readStrategy);
+
 }

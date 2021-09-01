@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -164,6 +165,7 @@ public class DalConnectionManager {
 
 	protected DataBase clusterSelect(DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) {
 		Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
+		GroupConnection.logReadStrategy(cluster);
 		DatabaseShard databaseShard;
 		if (StringUtils.isEmpty(shard)) {
 			Set<Integer> shards = cluster.getAllDbShards();

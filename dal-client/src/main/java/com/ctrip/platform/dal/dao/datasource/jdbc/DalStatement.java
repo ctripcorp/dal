@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.jdbc;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
+import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -327,6 +328,7 @@ public class DalStatement implements Statement {
             context.populateCaller();
             context.populateOperationType(operation);
             context.startExecution();
+            context.populateReadStrategy(GroupConnection.getLogContext().getReadStrategy());
         } catch (Throwable t) {
             // ignore
         }

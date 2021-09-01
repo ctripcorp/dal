@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
 
+import com.ctrip.platform.dal.cluster.Cluster;
 import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.cluster.database.Database;
 import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
@@ -8,6 +9,7 @@ import com.ctrip.platform.dal.cluster.shard.read.RouterType;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
+import com.ctrip.platform.dal.dao.datasource.log.DataSourceLogContext;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -18,6 +20,13 @@ import java.util.concurrent.Executor;
 
 public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
+    private static final ThreadLocal<DataSourceLogContext> logContext = new ThreadLocal(){
+
+        @Override
+        protected Object initialValue() {
+            return new DataSourceLogContext();
+        }
+    };
     private static final String SQL_FORCE_WRITE_HINT = "/*+dal:write*/";
 
     private ClusterInfo clusterInfo;
@@ -139,6 +148,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     }
 
     Connection getRealConnection(String sql, boolean forceWrite) throws SQLException {
+        logReadStrategy(clusterInfo.getCluster());
         if (this.routerType == RouterType.SLAVE_ONLY) {
             return getReadConnection();
         } else if (this.routerType == RouterType.MASTER_ONLY) {
@@ -495,5 +505,21 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return this.getClass().isAssignableFrom(iface);
+    }
+
+    public static DataSourceLogContext getLogContext() {
+        return logContext.get();
+    }
+
+    public static void logReadStrategy(Cluster cluster) {
+        try {
+            getLogContext().setReadStrategy(cluster.getCustomizedOption().getReadStrategy());
+        } catch (Throwable t) {
+
+        }
+    }
+
+    public static void markLogged(boolean hasLogged) {
+        getLogContext().setHasLogged(hasLogged);
     }
 }

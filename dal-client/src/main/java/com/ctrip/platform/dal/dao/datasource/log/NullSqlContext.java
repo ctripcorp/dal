@@ -44,4 +44,9 @@ public class NullSqlContext implements SqlContext {
         return this;
     }
 
+    @Override
+    public void populateReadStrategy(String readStrategy) {
+
+    }
+
 }

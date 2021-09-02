@@ -59,6 +59,11 @@ public abstract class BaseSqlContext implements SqlContext {
     private Throwable errorIfAny;
     private long executionEndTime;
     private String readStrategy;
+    private long sqlTransactionStartTime;
+    private long recordRows;
+    private String sql;
+    private String database;
+    private String params;
 
     public BaseSqlContext() {
         this(null);
@@ -149,6 +154,26 @@ public abstract class BaseSqlContext implements SqlContext {
         this.errorIfAny = errorIfAny;
         endExecution();
         logMetric();
+        logSqlTransaction();
+    }
+
+    @Override
+    public void populateQueryRows(int rows) {
+        this.recordRows = rows;
+    }
+
+    @Override
+    public void populateDatabase(String database) {
+        this.database = database;
+    }
+
+    @Override
+    public void populateSql(String sql) {
+        this.sql = sql;
+    }
+
+    protected void logSqlTransaction() {
+        LOGGER.logSqlTransaction(this);
     }
 
     @Override
@@ -215,5 +240,65 @@ public abstract class BaseSqlContext implements SqlContext {
 
     public void setReadStrategy(String readStrategy) {
         this.readStrategy = readStrategy;
+    }
+
+    public long getSqlTransactionStartTime() {
+        return sqlTransactionStartTime;
+    }
+
+    public void setSqlTransactionStartTime(long sqlTransactionStartTime) {
+        this.sqlTransactionStartTime = sqlTransactionStartTime;
+    }
+
+    public Set<String> getTables() {
+        return tables;
+    }
+
+    public String getCallerClass() {
+        return callerClass;
+    }
+
+    public String getCallerMethod() {
+        return callerMethod;
+    }
+
+    public OperationType getOperation() {
+        return operation;
+    }
+
+    public long getExecutionStartTime() {
+        return executionStartTime;
+    }
+
+    public String getUcsValidation() {
+        return ucsValidation;
+    }
+
+    public String getDalValidation() {
+        return dalValidation;
+    }
+
+    public Throwable getErrorIfAny() {
+        return errorIfAny;
+    }
+
+    public long getExecutionEndTime() {
+        return executionEndTime;
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public long getRecordRows() {
+        return recordRows;
+    }
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public String getParams() {
+        return params;
     }
 }

@@ -33,4 +33,10 @@ public interface SqlContext {
 
     void populateReadStrategy(String readStrategy);
 
+    void populateQueryRows(int rows);
+
+    void populateDatabase(String database);
+
+    void populateSql(String sql);
+
 }

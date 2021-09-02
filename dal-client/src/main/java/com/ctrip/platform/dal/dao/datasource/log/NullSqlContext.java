@@ -49,4 +49,18 @@ public class NullSqlContext implements SqlContext {
 
     }
 
+    @Override
+    public void populateQueryRows(int rows) {
+
+    }
+
+    @Override
+    public void populateDatabase(String database) {
+
+    }
+
+    @Override
+    public void populateSql(String sql) {
+
+    }
 }

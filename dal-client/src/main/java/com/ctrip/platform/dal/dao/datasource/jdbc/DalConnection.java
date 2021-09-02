@@ -38,9 +38,18 @@ public class DalConnection implements Connection {
             String dbName = connection.getCatalog();
             if (dbName != null)
                 this.context.populateDbName(dbName.toLowerCase());
+            populateSqlContext(connection);
         } catch (Throwable t) {
             // ignore
         }
+    }
+
+    private void populateSqlContext(Connection connection) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        if (metaData instanceof DalDatabaseMetaData)
+            context.populateDatabase(((DalDatabaseMetaData) metaData).getExtendedURL());
+        else
+            context.populateDatabase(metaData.getURL());
     }
 
     public Connection getConnection() {

@@ -17,6 +17,7 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection, String sql, SqlContext context) {
         super(preparedStatement, connection, context);
+        context.populateSql(sql);
         this.preparedStatement = preparedStatement;
         this.firstAlphaCharUc = SqlUtils.firstAlphaCharUc(sql);
     }

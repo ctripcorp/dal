@@ -63,4 +63,9 @@ public class NullSqlContext implements SqlContext {
     public void populateSql(String sql) {
 
     }
+
+    @Override
+    public void populateSqlTransaction(long millionSeconds) {
+
+    }
 }

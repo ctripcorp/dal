@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.cluster.config;
 
+import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
 import com.ctrip.platform.dal.cluster.shard.DatabaseShardImpl;
 
@@ -34,7 +35,9 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         DatabaseShardImpl databaseShard = new DatabaseShardImpl(this);
         for (DatabaseConfig databaseConfig : databaseConfigs)
             databaseShard.addDatabase(databaseConfig.generate());
-        if (!clusterConfig.getClusterType().isAllMaster())
+
+        ClusterRouteStrategyConfig strategyConfig = clusterConfig.getRouteStrategyConfig();
+        if (strategyConfig == null || !strategyConfig.multiMaster())
             databaseShard.initReadStrategy();
         return databaseShard;
     }

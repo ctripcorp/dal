@@ -11,6 +11,8 @@ public interface ClusterRouteStrategyConfig {
 
     String routeStrategyName();
 
+    boolean multiMaster();
+
     CaseInsensitiveProperties routeStrategyProperties();
 
 }

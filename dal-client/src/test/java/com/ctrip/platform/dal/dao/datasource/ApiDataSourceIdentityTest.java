@@ -9,6 +9,7 @@ import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ public class ApiDataSourceIdentityTest {
         Assert.assertEquals(DatabaseRole.MASTER, clusterInfo.getRole());
         Cluster cluster = clusterInfo.getCluster();
         Assert.assertEquals(DB_NAME, cluster.getClusterName());
-        Assert.assertEquals(ClusterType.MGR, cluster.getClusterType());
+        Assert.assertEquals(ClusterType.NORMAL, cluster.getClusterType());
         Assert.assertEquals(DatabaseCategory.MYSQL, cluster.getDatabaseCategory());
         Assert.assertFalse(cluster.dbShardingEnabled());
         Assert.assertEquals(3, cluster.getDatabases().size());
@@ -81,7 +82,7 @@ public class ApiDataSourceIdentityTest {
         Assert.assertTrue(zones.contains("z2"));
         Assert.assertTrue(zones.contains("z3"));
         ClusterRouteStrategyConfig routeStrategy = cluster.getRouteStrategyConfig();
-        Assert.assertEquals(ClusterType.MGR.defaultRouteStrategies(), routeStrategy.routeStrategyName());
+        Assert.assertEquals(MultiMasterEnum.OrderedAccessStrategy.getAlias(), routeStrategy.routeStrategyName());
         CaseInsensitiveProperties properties = routeStrategy.routeStrategyProperties();
         Assert.assertEquals("z3,z2,z1", properties.get(DataSourceConfigureConstants.ZONES_PRIORITY));
         Assert.assertEquals("10000", properties.get(DataSourceConfigureConstants.FAILOVER_TIME_MS));

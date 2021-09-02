@@ -16,4 +16,7 @@ public interface MultiHostStrategy extends RouteStrategy, ConnectionFactoryAware
     String VALIDATE_PERIOD_MS = "fixedValidatePeriodMS";
 
     String ZONE_PRIORITY = "zonesPriority";
+
+    String MULTI_MASTER = "multiMaster";
+
 }

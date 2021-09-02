@@ -89,6 +89,11 @@ public class MultiHostDataSourceTest {
             }
 
             @Override
+            public boolean multiMaster() {
+                return false;
+            }
+
+            @Override
             public CaseInsensitiveProperties routeStrategyProperties() {
                 return null;
             }

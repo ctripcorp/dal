@@ -325,7 +325,7 @@ public class ForceSwitchableDataSourceTest {
         Assert.assertEquals("jdbc:mysql://127.0.0.1:12345/kevin?useUnicode=true&characterEncoding=UTF-8", url);
     }
 
-    // Discarded: replaced with DAL Cluster MGR
+    // Discarded: replaced with DAL Cluster OrderedAccessStrategy
 //    @Test
     public void testSwitchMGRToNormal() throws Exception {
         IDataSourceConfigureProvider nullProvider = new ModifyDataSourceConfigureProvider();
@@ -373,7 +373,7 @@ public class ForceSwitchableDataSourceTest {
         Assert.assertEquals("jdbc:mysql:replication://address=(type=master)(protocol=tcp)(host=10.2.7.196)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.184)(port=3306),address=((type=master)(protocol=tcp)(host=10.2.7.187)(port=3306)/kevin", url);
     }
 
-    // Discarded: replaced with DAL Cluster MGR
+    // Discarded: replaced with DAL Cluster OrderedAccessStrategy
 //    @Test
     public void testMGRForceSwitch() throws Exception {
         DataSourceConfigure config = new DataSourceConfigure("mgr");

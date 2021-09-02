@@ -11,12 +11,15 @@ import com.ctrip.platform.dal.cluster.multihost.DefaultClusterRouteStrategyConfi
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy.MULTI_MASTER;
 
 /**
  * @author c7ch23en
@@ -101,7 +104,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
 
     private ClusterConfig buildMultiHostClusterConfig(MultiHostConnectionStringConfigure configure) {
         ClusterConfigWithNoVersion clusterConfig =
-                new ClusterConfigWithNoVersion(configure.getName(), ClusterType.MGR, DatabaseCategory.MYSQL);
+                new ClusterConfigWithNoVersion(configure.getName(), ClusterType.NORMAL, DatabaseCategory.MYSQL);
         DatabaseShardConfigImpl databaseShardConfig = new DatabaseShardConfigImpl(clusterConfig, 0);
         List<HostSpec> hosts = configure.getHosts();
         hosts.forEach(host -> {
@@ -116,7 +119,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         });
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(ClusterType.MGR.defaultRouteStrategies());
+                new DefaultClusterRouteStrategyConfig(MultiMasterEnum.OrderedAccessStrategy.getAlias());  // todo for ob get for obApi
         if (configure.getZonesPriority() != null)
             routeStrategy.setProperty(DataSourceConfigureConstants.ZONES_PRIORITY,
                     configure.getZonesPriority());
@@ -129,6 +132,8 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         if (configure.getFixedValidatePeriodMS() != null)
             routeStrategy.setProperty(DataSourceConfigureConstants.FIXED_VALIDATE_PERIOD_MS,
                     String.valueOf(configure.getFixedValidatePeriodMS()));
+        routeStrategy.setProperty(MULTI_MASTER,
+                    String.valueOf(configure.isMultiMaster()));
         clusterConfig.setRouteStrategyConfig(routeStrategy);
         clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;

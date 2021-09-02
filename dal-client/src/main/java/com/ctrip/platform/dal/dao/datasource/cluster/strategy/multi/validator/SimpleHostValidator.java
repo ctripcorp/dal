@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 
 import java.sql.Connection;
@@ -80,6 +79,6 @@ public class SimpleHostValidator extends AbstractHostValidator implements HostVa
 
     @Override
     protected String getCatLogType() {
-        return "DAL." + ClusterType.OB.getValue();
+        return "DAL.OB";
     }
 }

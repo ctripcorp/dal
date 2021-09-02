@@ -22,6 +22,8 @@ public interface MultiHostConnectionStringConfigure extends DalConnectionStringC
 
     Long getFixedValidatePeriodMS();
 
+    boolean isMultiMaster();
+
     @Override
     default String getHostName() {
         return null;

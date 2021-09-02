@@ -1,15 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
 import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
-
-import static com.ctrip.platform.dal.cluster.cluster.ClusterType.MGR;
-import static com.ctrip.platform.dal.cluster.cluster.ClusterType.OB;
 
 /**
  * @author c7ch23en
@@ -18,11 +13,8 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
 
     private final ClusterRouteStrategyConfig routeStrategyConfig;
 
-    private ClusterType clusterType;
-
-    public MultiHostClusterPropertiesAdapter(ClusterRouteStrategyConfig routeStrategyConfig, ClusterType clusterType, String clusterName) {
+    public MultiHostClusterPropertiesAdapter(ClusterRouteStrategyConfig routeStrategyConfig, String clusterName) {
         this.routeStrategyConfig = routeStrategyConfig;
-        this.clusterType = clusterType;
         setClusterName(clusterName);
     }
 
@@ -41,6 +33,11 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     }
 
     @Override
+    public boolean multiMaster() {
+        return routeStrategyConfig.multiMaster();
+    }
+
+    @Override
     public CaseInsensitiveProperties routeStrategyProperties() {
         return routeStrategyConfig.routeStrategyProperties();
     }
@@ -48,21 +45,12 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     @Override
     public RouteStrategy getRouteStrategy() {
         String strategyName = routeStrategyName();
-        RouteStrategy strategy;
-        if (MGR.equals(clusterType) && MGR.defaultRouteStrategies().equalsIgnoreCase(strategyName)) {
-            strategy = new MGRStrategy();
-        } else if (OB.equals(clusterType) && OB.defaultRouteStrategies().equalsIgnoreCase(strategyName)) {
-            strategy = new OBStrategy();
-        } else {
-            try {
-                Class clazz = Class.forName(strategyName);
-                strategy = (RouteStrategy) clazz.newInstance();
-            } catch (Throwable t) {
-                String msg = "Errored constructing route strategy: " + strategyName;
-                throw new DalRuntimeException(msg, t);
-            }
+        String clazz = MultiMasterEnum.parse(strategyName);
+        try {
+            return  (com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy)Class.forName(clazz).newInstance();
+        } catch (Throwable t) {
+            String msg = "Errored constructing route strategy: " + strategyName;
+            throw new DalRuntimeException(msg, t);
         }
-
-        return strategy;
     }
 }

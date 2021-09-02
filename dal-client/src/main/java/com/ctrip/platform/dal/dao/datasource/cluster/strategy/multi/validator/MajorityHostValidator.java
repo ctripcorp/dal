@@ -75,6 +75,11 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
     }
 
     @Override
+    protected String getCatLogType() {
+        return "Dal.MGR";
+    }
+
+    @Override
     public boolean validate(HostConnection connection) throws SQLException {
         try {
             HostSpec currentHost = connection.getHost();

@@ -102,6 +102,11 @@ public class MockConnectionStringConfigureProvider extends ListenableSupport<Dal
                 }
 
                 @Override
+                public boolean isMultiMaster() {
+                    return true;
+                }
+
+                @Override
                 public String getName() {
                     return dbName;
                 }

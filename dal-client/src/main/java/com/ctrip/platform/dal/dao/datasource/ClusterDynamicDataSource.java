@@ -85,7 +85,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     protected DataSource createInnerDataSource() {
         if (cluster == null)
             throw new DalRuntimeException("null cluster");
-        return !cluster.getClusterType().isAllMaster() ? createStandaloneDataSource() : createMultiHostDataSource();
+        return !cluster.getRouteStrategyConfig().multiMaster() ? createStandaloneDataSource() : createMultiHostDataSource();
     }
 
     protected DataSource createStandaloneDataSource() {
@@ -300,7 +300,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     }
 
     private HostAndPort buildHostAndPort(Cluster cluster) {
-        if (cluster.getClusterType() == ClusterType.MGR) {
+        if (cluster.getRouteStrategyConfig().multiMaster()) {
             StringBuilder hosts = new StringBuilder();
             StringBuilder hostsWithPorts = new StringBuilder();
             Set<Integer> ports = new HashSet<>();

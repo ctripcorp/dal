@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
@@ -257,9 +256,7 @@ public abstract class AbstractHostValidator implements HostValidator {
         addToBlackListPresent(hostSpec);
     }
 
-    protected String getCatLogType() {
-        return "DAL." + ClusterType.MGR.getValue();
-    }
+    abstract protected String getCatLogType();
 
     abstract protected void doAsyncValidate(HostSpec host);
 

@@ -13,6 +13,7 @@ import com.ctrip.platform.dal.cluster.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.platform.dal.cluster.sharding.strategy.*;
 import com.ctrip.platform.dal.cluster.util.SPIUtils;
 import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -263,7 +264,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     }
 
     private void parseRouteStrategies(ClusterConfigImpl clusterConfig, Node routeStrategiesNode) {
-        List<Node> routeStrategyNodes = getRouteStrategyNodes(clusterConfig.getClusterType(), routeStrategiesNode);
+        List<Node> routeStrategyNodes = getRouteStrategyNodes(routeStrategiesNode);
         if (routeStrategyNodes.size() > 1)
             throw new ClusterRuntimeException("multiple routeStrategies configured");
         if (routeStrategyNodes.size() == 1) {
@@ -280,19 +281,23 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
     }
 
-    protected List<Node> getRouteStrategyNodes(ClusterType clusterType, Node routeStrategiesNode) {
-        List<Node> readStrategyNodes = new ArrayList<>();
-        // mgr-strategy
-        List<Node> mgrStrategyNodes = getChildNodes(routeStrategiesNode, clusterType.defaultRouteStrategies());
+    protected List<Node> getRouteStrategyNodes(Node routeStrategiesNode) {
+        List<Node> strategyNodes = new ArrayList<>();
+        // multihost-strategy
+        for (MultiMasterEnum multiMasterEnum : MultiMasterEnum.values()){
+            Node node = getChildNode(routeStrategiesNode, multiMasterEnum.getAlias());
+            if (node != null)
+                strategyNodes.add(node);
+        }
+
         // read-strategy
         for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()){
             Node node = getChildNode(routeStrategiesNode, readStrategyEnum.name());
             if (node != null)
-                readStrategyNodes.add(node);
+                strategyNodes.add(node);
         }
-        readStrategyNodes.addAll(mgrStrategyNodes);
 
-        return readStrategyNodes;
+        return strategyNodes;
     }
 
     private void parseDrcConfig(ClusterConfigImpl clusterConfig, Node clusterNode) {

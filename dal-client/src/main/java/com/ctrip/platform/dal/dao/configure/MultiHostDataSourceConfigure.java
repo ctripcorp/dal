@@ -17,6 +17,7 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
     private Long failoverTimeMS;
     private Long blacklistTimeoutMS;
     private Long fixedValidatePeriodMS;
+    private boolean multiMaster = true;
 
     public MultiHostDataSourceConfigure(String dbName) {
         this.dbName = dbName;
@@ -52,6 +53,11 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
         return fixedValidatePeriodMS;
     }
 
+    @Override
+    public boolean isMultiMaster() {
+        return multiMaster;
+    }
+
     public void addHost(HostSpec host) {
         hosts.add(host);
     }
@@ -72,4 +78,7 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
         this.fixedValidatePeriodMS = fixedValidatePeriodMS;
     }
 
+    public void setMultiMaster(boolean multiMaster) {
+        this.multiMaster = multiMaster;
+    }
 }

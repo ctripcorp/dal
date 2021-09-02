@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.cluster.multihost;
 import com.ctrip.platform.dal.cluster.exception.ClusterRuntimeException;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy.MULTI_MASTER;
+
 /**
  * @author c7ch23en
  */
@@ -18,6 +20,11 @@ public class DefaultClusterRouteStrategyConfig implements ClusterRouteStrategyCo
     @Override
     public String routeStrategyName() {
         return strategyName;
+    }
+
+    @Override
+    public boolean multiMaster() {
+        return properties.getBool(MULTI_MASTER, false);
     }
 
     @Override

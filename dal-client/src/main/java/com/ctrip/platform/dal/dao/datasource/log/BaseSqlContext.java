@@ -117,6 +117,7 @@ public abstract class BaseSqlContext implements SqlContext {
 
     @Override
     public void populateCaller(String callerClass, String callerMethod) {
+
         this.callerClass = callerClass;
         this.callerMethod = callerMethod;
     }
@@ -179,6 +180,11 @@ public abstract class BaseSqlContext implements SqlContext {
     @Override
     public void populateReadStrategy(String readStrategy) {
         this.readStrategy = readStrategy;
+    }
+
+    @Override
+    public void populateSqlTransaction(long millionSeconds) {
+        this.sqlTransactionStartTime = millionSeconds;
     }
 
     protected void logMetric() {

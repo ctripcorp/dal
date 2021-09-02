@@ -39,4 +39,6 @@ public interface SqlContext {
 
     void populateSql(String sql);
 
+    void populateSqlTransaction(long millionSeconds);
+
 }

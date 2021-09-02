@@ -348,6 +348,7 @@ public class DalStatement implements Statement {
             context.populateCaller();
             context.populateOperationType(operation);
             context.startExecution();
+            context.populateSqlTransaction(System.currentTimeMillis());
             context.populateReadStrategy(GroupConnection.getLogContext().getReadStrategy());
         } catch (Throwable t) {
             // ignore

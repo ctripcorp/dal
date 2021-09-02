@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.cluster.Cluster;
 import com.ctrip.platform.dal.cluster.cluster.ClusterType;
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.database.Database;
 import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
 import com.ctrip.platform.dal.cluster.database.DatabaseRole;
@@ -9,7 +10,6 @@ import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -82,7 +82,7 @@ public class ApiDataSourceIdentityTest {
         Assert.assertTrue(zones.contains("z2"));
         Assert.assertTrue(zones.contains("z3"));
         ClusterRouteStrategyConfig routeStrategy = cluster.getRouteStrategyConfig();
-        Assert.assertEquals(MultiMasterEnum.OrderedAccessStrategy.getAlias(), routeStrategy.routeStrategyName());
+        Assert.assertEquals(RouteStrategyEnum.WRITE_ORDERED.getAlias(), routeStrategy.routeStrategyName());
         CaseInsensitiveProperties properties = routeStrategy.routeStrategyProperties();
         Assert.assertEquals("z3,z2,z1", properties.get(DataSourceConfigureConstants.ZONES_PRIORITY));
         Assert.assertEquals("10000", properties.get(DataSourceConfigureConstants.FAILOVER_TIME_MS));

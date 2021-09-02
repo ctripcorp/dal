@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
@@ -45,7 +45,7 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     @Override
     public RouteStrategy getRouteStrategy() {
         String strategyName = routeStrategyName();
-        String clazz = MultiMasterEnum.parse(strategyName);
+        String clazz = RouteStrategyEnum.parse(strategyName);
         try {
             return  (com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy)Class.forName(clazz).newInstance();
         } catch (Throwable t) {

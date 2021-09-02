@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy;
@@ -34,7 +34,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         mgrRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public String routeStrategyName() {
-                return MultiMasterEnum.OrderedAccessStrategy.name();
+                return RouteStrategyEnum.WRITE_ORDERED.name();
             }
 
             @Override
@@ -51,7 +51,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         obRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public String routeStrategyName() {
-                return MultiMasterEnum.LocalizedAccessStrategy.name();
+                return RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.name();
             }
 
             @Override
@@ -87,13 +87,13 @@ public class MultiHostClusterPropertiesAdapterTest {
     public void getRouteStrategy() {
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, CLUSTER_NAME);
         String routeStrategy = clusterPropertiesAdapter.routeStrategyName();
-        Assert.assertEquals(MultiMasterEnum.OrderedAccessStrategy.name(), routeStrategy);
+        Assert.assertEquals(RouteStrategyEnum.WRITE_ORDERED.name(), routeStrategy);
         RouteStrategy multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
         Assert.assertTrue(multiHostStrategy instanceof MGRStrategy);
 
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(obRouteStrategyConfig, CLUSTER_NAME);
         routeStrategy = clusterPropertiesAdapter.routeStrategyName();
-        Assert.assertEquals(MultiMasterEnum.LocalizedAccessStrategy.name(), routeStrategy);
+        Assert.assertEquals(RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.name(), routeStrategy);
         multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
         Assert.assertTrue(multiHostStrategy instanceof OBStrategy);
 

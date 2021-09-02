@@ -3,7 +3,7 @@ package com.ctrip.platform.dal.cluster.config;
 import com.ctrip.platform.dal.cluster.base.PropertyAccessor;
 import com.ctrip.platform.dal.cluster.cluster.ClusterType;
 import com.ctrip.platform.dal.cluster.cluster.DrcConsistencyTypeEnum;
-import com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum;
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
 import com.ctrip.platform.dal.cluster.database.DatabaseRole;
 import com.ctrip.platform.dal.cluster.exception.ClusterConfigException;
@@ -13,7 +13,6 @@ import com.ctrip.platform.dal.cluster.sharding.idgen.ClusterIdGeneratorConfig;
 import com.ctrip.platform.dal.cluster.sharding.strategy.*;
 import com.ctrip.platform.dal.cluster.util.SPIUtils;
 import com.ctrip.platform.dal.cluster.util.StringUtils;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -259,7 +258,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     }
 
     protected void initReadStrategy(ClusterConfigImpl clusterConfig) {
-        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(ReadStrategyEnum.READ_MASTER.name());
+        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(RouteStrategyEnum.READ_MASTER.name());
         clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
     }
 
@@ -283,17 +282,13 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
 
     protected List<Node> getRouteStrategyNodes(Node routeStrategiesNode) {
         List<Node> strategyNodes = new ArrayList<>();
-        // multihost-strategy
-        for (MultiMasterEnum multiMasterEnum : MultiMasterEnum.values()){
-            Node node = getChildNode(routeStrategiesNode, multiMasterEnum.getAlias());
-            if (node != null)
-                strategyNodes.add(node);
-        }
 
-        // read-strategy
-        for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()){
+        for (RouteStrategyEnum readStrategyEnum : RouteStrategyEnum.values()){
             Node node = getChildNode(routeStrategiesNode, readStrategyEnum.name());
-            if (node != null)
+            if (node != null && !strategyNodes.contains(node))
+                strategyNodes.add(node);
+            node = getChildNode(routeStrategiesNode, readStrategyEnum.getAlias());
+            if (node != null && !strategyNodes.contains(node))
                 strategyNodes.add(node);
         }
 

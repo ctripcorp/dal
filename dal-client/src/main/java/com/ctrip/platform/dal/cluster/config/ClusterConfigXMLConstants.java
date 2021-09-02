@@ -21,8 +21,6 @@ public interface ClusterConfigXMLConstants {
     String ID_GENERATORS = "IdGenerators";
     String ID_GENERATOR = "IdGenerator";
     String ROUTE_STRATEGIES = "RouteStrategies";
-    String ORDERED_ACCESS_STRATEGY = "OrderedAccessStrategy";
-    String LOCALIZED_ACCESS_STRATEGY = "LocalizedAccessStrategy";
     String UNIT_STRATEGY_ID = "UnitStrategyId";
     String CONSISTENCY_TYPE = "ConsistencyType";
     String ZONE_ID = "ZoneId";

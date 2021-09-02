@@ -1,21 +1,21 @@
 package com.ctrip.platform.dal.cluster.shard.read;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum;
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.exception.HostNotExpectedException;
 
 import java.util.*;
 
-import static com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum.READ_SLAVES_FIRST;
+import static com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum.READ_SLAVES_FIRST;
 import static com.ctrip.platform.dal.dao.DalHintEnum.routeStrategy;
 
 public class ReadSlavesFirstStrategy implements RouteStrategy {
 
     protected HashMap<String, List<HostSpec>> hostMap = new HashMap<>();
-    protected HashMap<ReadStrategyEnum, RouteStrategy> routeStrategies = new HashMap<>();
+    protected HashMap<RouteStrategyEnum, RouteStrategy> routeStrategies = new HashMap<>();
     protected final String ZONE_MISS = "%s hostspec of %s zone message missed.";
 
-    private ReadStrategyEnum readStrategyEnum = READ_SLAVES_FIRST;
+    private RouteStrategyEnum readStrategyEnum = READ_SLAVES_FIRST;
     private Set<HostSpec> hostSpecs;
 
     @Override
@@ -81,7 +81,7 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
     }
 
     protected HostSpec dalHintsRoute (Map<String, Object> map) {
-        ReadStrategyEnum strategyEnum = (ReadStrategyEnum)map.get(routeStrategy);
+        RouteStrategyEnum strategyEnum = (RouteStrategyEnum)map.get(routeStrategy);
         map.remove(routeStrategy);
         if (readStrategyEnum.equals(strategyEnum))
             return this.pickRead(map);

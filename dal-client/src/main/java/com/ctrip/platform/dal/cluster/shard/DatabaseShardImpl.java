@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.cluster.shard;
 
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum;
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.config.DatabaseShardConfigImpl;
 import com.ctrip.platform.dal.cluster.database.ConnectionString;
 import com.ctrip.platform.dal.cluster.database.Database;
@@ -28,7 +28,7 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     public void initReadStrategy() {
-        String clazz = ReadStrategyEnum.parse(databaseShardConfig.getClusterConfig().getRouteStrategyConfig().routeStrategyName());
+        String clazz = RouteStrategyEnum.parse(databaseShardConfig.getClusterConfig().getRouteStrategyConfig().routeStrategyName());
         try{
             routeStrategy = (RouteStrategy)Class.forName(clazz).newInstance();
         } catch (Throwable t) {

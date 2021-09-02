@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.cluster.cluster;
 
-public enum ReadStrategyEnum {
+public enum RouteStrategyEnum {
 
     READ_MASTER("ReadMasterStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterStrategy"),
     READ_SLAVES_FIRST("ReadSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadSlavesFirstStrategy"),
@@ -8,30 +8,25 @@ public enum ReadStrategyEnum {
     READ_CURRENT_ZONE_SLAVES_FIRST("ReadCurrentZoneSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadCurrentZoneSlavesFirstStrategy"),
     READ_CURRENT_ZONE_SLAVES_ONLY("ReadCurrentZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadCurrentZoneSlavesOnlyStrategy"),
     READ_MASTER_ZONE_SLAVES_FIRST("ReadMasterZoneSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesFirstStrategy"),
-    READ_MASTER_ZONE_SLAVES_ONLY("ReadMasterZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesOnlyStrategy");
+    READ_MASTER_ZONE_SLAVES_ONLY("ReadMasterZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesOnlyStrategy"),
+
+    WRITE_ORDERED("OrderedAccessStrategy", "com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy"),
+    WRITE_CURRENT_ZONE_FIRST("LocalizedAccessStrategy", "com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy");
 
     private String alias;
     private String clazz;
 
-    ReadStrategyEnum(String alias, String clazz) {
+    RouteStrategyEnum(String alias, String clazz) {
         this.alias = alias;
         this.clazz = clazz;
     }
 
-    public static String getStrategyName(String alias) {
-        for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()) {
-            if (readStrategyEnum.alias.equalsIgnoreCase(alias))
-                return readStrategyEnum.clazz;
+    public static String parse(String strategyName) {
+        for (RouteStrategyEnum routeStrategyEnum : RouteStrategyEnum.values()) {
+            if (routeStrategyEnum.name().equalsIgnoreCase(strategyName) || routeStrategyEnum.getAlias().equalsIgnoreCase(strategyName))
+                return routeStrategyEnum.clazz;
         }
-        return alias;
-    }
-
-    public static String parse(String name) {
-        for (ReadStrategyEnum readStrategyEnum : ReadStrategyEnum.values()) {
-            if (readStrategyEnum.name().equalsIgnoreCase(name))
-                return readStrategyEnum.clazz;
-        }
-        return name;
+        return strategyName;
     }
 
     public String getClazz() {

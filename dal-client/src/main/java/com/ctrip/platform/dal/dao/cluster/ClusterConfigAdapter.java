@@ -4,14 +4,13 @@ import com.ctrip.platform.dal.cluster.Cluster;
 import com.ctrip.platform.dal.cluster.base.ListenableSupport;
 import com.ctrip.platform.dal.cluster.base.Listener;
 import com.ctrip.platform.dal.cluster.cluster.ClusterType;
-import com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum;
+import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.config.*;
 import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
 import com.ctrip.platform.dal.cluster.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiMasterEnum;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
@@ -119,7 +118,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         });
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(MultiMasterEnum.OrderedAccessStrategy.getAlias());  // todo for ob get for obApi
+                new DefaultClusterRouteStrategyConfig(RouteStrategyEnum.WRITE_ORDERED.getAlias());  // todo for ob get for obApi
         if (configure.getZonesPriority() != null)
             routeStrategy.setProperty(DataSourceConfigureConstants.ZONES_PRIORITY,
                     configure.getZonesPriority());
@@ -153,7 +152,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         databaseShardConfig.addDatabaseConfig(databaseConfig);
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
         // todo-lhj  make configurable RouteStrategy of
-        clusterConfig.setRouteStrategyConfig(new DefaultClusterRouteStrategyConfig(ReadStrategyEnum.READ_MASTER.name()));
+        clusterConfig.setRouteStrategyConfig(new DefaultClusterRouteStrategyConfig(RouteStrategyEnum.READ_MASTER.name()));
         clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;
     }

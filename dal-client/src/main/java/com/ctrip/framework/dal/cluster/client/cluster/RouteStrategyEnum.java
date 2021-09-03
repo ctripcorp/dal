@@ -1,17 +1,21 @@
 package com.ctrip.framework.dal.cluster.client.cluster;
 
+import com.ctrip.framework.dal.cluster.client.shard.read.*;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy;
+
 public enum RouteStrategyEnum {
 
-    READ_MASTER("ReadMasterStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterStrategy"),
-    READ_SLAVES_FIRST("ReadSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadSlavesFirstStrategy"),
-    READ_SLAVES_ONLY("ReadSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadSlavesOnlyStrategy"),
-    READ_CURRENT_ZONE_SLAVES_FIRST("ReadCurrentZoneSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadCurrentZoneSlavesFirstStrategy"),
-    READ_CURRENT_ZONE_SLAVES_ONLY("ReadCurrentZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadCurrentZoneSlavesOnlyStrategy"),
-    READ_MASTER_ZONE_SLAVES_FIRST("ReadMasterZoneSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesFirstStrategy"),
-    READ_MASTER_ZONE_SLAVES_ONLY("ReadMasterZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesOnlyStrategy"),
+    READ_MASTER("ReadMasterStrategy", ReadMasterStrategy.class.getName()),
+    READ_SLAVES_FIRST("ReadSlavesFirstStrategy", ReadSlavesFirstStrategy.class.getName()),
+    READ_SLAVES_ONLY("ReadSlavesOnlyStrategy", ReadSlavesOnlyStrategy.class.getName()),
+    READ_CURRENT_ZONE_SLAVES_FIRST("ReadCurrentZoneSlavesFirstStrategy", ReadCurrentZoneSlavesFirstStrategy.class.getName()),
+    READ_CURRENT_ZONE_SLAVES_ONLY("ReadCurrentZoneSlavesOnlyStrategy", ReadCurrentZoneSlavesOnlyStrategy.class.getName()),
+    READ_MASTER_ZONE_SLAVES_FIRST("ReadMasterZoneSlavesFirstStrategy", ReadMasterZoneSlavesFirstStrategy.class.getName()),
+    READ_MASTER_ZONE_SLAVES_ONLY("ReadMasterZoneSlavesOnlyStrategy", ReadMasterZoneSlavesOnlyStrategy.class.getName()),
 
-    WRITE_ORDERED("OrderedAccessStrategy", "com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.mgr.MGRStrategy"),
-    WRITE_CURRENT_ZONE_FIRST("LocalizedAccessStrategy", "com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.OBStrategy");
+    WRITE_ORDERED("OrderedAccessStrategy", MGRStrategy.class.getName()),
+    WRITE_CURRENT_ZONE_FIRST("LocalizedAccessStrategy", OBStrategy.class.getName());
 
     private String alias;
     private String clazz;

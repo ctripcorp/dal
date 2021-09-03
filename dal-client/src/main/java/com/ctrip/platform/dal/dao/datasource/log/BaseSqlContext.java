@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource.log;
 
 import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ValidationResult;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
@@ -17,6 +19,8 @@ public abstract class BaseSqlContext implements SqlContext {
 
     private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private static final EnvUtils ENV_UTILS = DalElementFactory.DEFAULT.getEnvUtils();
+    private static final DalPropertiesLocator dalPropertiesLocator = DalPropertiesManager.getInstance().getDalPropertiesLocator();
+    private static final Set<String> daoPackages = dalPropertiesLocator.getDaoPackagesPath();
 
     private static final String METRIC_NAME = "arch.dal.sql.cost";
     private static final long TICKS_PER_MILLISECOND = 10000;
@@ -105,7 +109,7 @@ public abstract class BaseSqlContext implements SqlContext {
                         excluded = true;
                         break;
                     }
-                if (!excluded) {
+                if (!excluded && includeAssignedPackages(caller)) {
                     populateCaller(caller.getClassName(), caller.getMethodName());
                     break;
                 }
@@ -113,6 +117,14 @@ public abstract class BaseSqlContext implements SqlContext {
         } catch (Throwable t) {
             // ignore
         }
+    }
+
+    protected boolean includeAssignedPackages(StackTraceElement caller) {
+        for (String pack : daoPackages) {
+            if (caller.getClassName().startsWith(pack))
+                return true;
+        }
+        return false;
     }
 
     @Override

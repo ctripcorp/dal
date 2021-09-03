@@ -1,8 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
-
-import com.ctrip.platform.dal.cluster.config.ClusterConfig;
-import com.ctrip.platform.dal.cluster.config.DalConfigCustomizedOption;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 
 /**
  * @author c7ch23en

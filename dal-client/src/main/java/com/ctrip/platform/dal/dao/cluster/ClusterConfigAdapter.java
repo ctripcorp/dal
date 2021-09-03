@@ -1,17 +1,20 @@
 package com.ctrip.platform.dal.dao.cluster;
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.base.ListenableSupport;
-import com.ctrip.platform.dal.cluster.base.Listener;
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
-import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
-import com.ctrip.platform.dal.cluster.config.*;
-import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
-import com.ctrip.platform.dal.cluster.multihost.DefaultClusterRouteStrategyConfig;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.DatabaseConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
+import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
-import com.ctrip.platform.dal.cluster.base.HostSpec;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 

@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
-import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
-import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 

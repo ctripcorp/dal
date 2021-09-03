@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostValidatorAware;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;

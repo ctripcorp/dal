@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.exception.HostNotExpectedException;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 import com.ctrip.platform.dal.dao.DalHints;
 
 /**

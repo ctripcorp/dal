@@ -1,10 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource.log;
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
-import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
-import com.ctrip.platform.dal.cluster.config.LocalizationState;
-import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 
 import java.util.Map;
 

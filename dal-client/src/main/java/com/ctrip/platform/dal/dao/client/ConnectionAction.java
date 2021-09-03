@@ -1,21 +1,10 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.sql.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
-import com.ctrip.platform.dal.dao.DalClientFactory;
-import com.ctrip.platform.dal.dao.DalCommand;
-import com.ctrip.platform.dal.dao.DalEventEnum;
-import com.ctrip.platform.dal.dao.DalHintEnum;
-import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.dao.StatementParameters;
-import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.configure.ClusterDatabaseSet;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
@@ -28,6 +17,11 @@ import com.ctrip.platform.dal.dao.task.DalContextConfigure;
 import com.ctrip.platform.dal.dao.task.DalTaskContext;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.TransactionSystemException;
+
+import java.sql.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class ConnectionAction<T> {
     private static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();

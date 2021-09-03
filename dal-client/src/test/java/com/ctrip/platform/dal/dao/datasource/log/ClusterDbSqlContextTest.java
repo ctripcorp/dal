@@ -1,21 +1,21 @@
 package com.ctrip.platform.dal.dao.datasource.log;
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.base.Listener;
-import com.ctrip.platform.dal.cluster.cluster.ClusterSwitchedEvent;
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
-import com.ctrip.platform.dal.cluster.cluster.DrcConsistencyTypeEnum;
-import com.ctrip.platform.dal.cluster.config.DalConfigCustomizedOption;
-import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
-import com.ctrip.platform.dal.cluster.config.LocalizationState;
-import com.ctrip.platform.dal.cluster.database.Database;
-import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
-import com.ctrip.platform.dal.cluster.database.DatabaseRole;
-import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
-import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
-import com.ctrip.platform.dal.cluster.sharding.context.DbShardContext;
-import com.ctrip.platform.dal.cluster.sharding.context.TableShardContext;
-import com.ctrip.platform.dal.cluster.sharding.idgen.ClusterIdGeneratorConfig;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterSwitchedEvent;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
+import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
+import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
+import com.ctrip.framework.dal.cluster.client.sharding.context.TableShardContext;
+import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorConfig;
 import org.junit.Assert;
 import org.junit.Test;
 

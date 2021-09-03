@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
 
-import com.ctrip.platform.dal.cluster.config.DalConfigCustomizedOption;
-import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 
 public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOption {
 

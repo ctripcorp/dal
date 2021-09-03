@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;

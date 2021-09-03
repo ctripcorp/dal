@@ -1,9 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ShardMetaGenerator;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.ob.ZoneDividedStrategyContext;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

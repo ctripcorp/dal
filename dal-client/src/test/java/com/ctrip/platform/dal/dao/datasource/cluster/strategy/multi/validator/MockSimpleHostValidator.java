@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 
 import java.sql.Connection;
 import java.util.List;

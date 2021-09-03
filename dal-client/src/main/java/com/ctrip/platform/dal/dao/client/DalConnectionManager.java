@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.client;
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
-import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;

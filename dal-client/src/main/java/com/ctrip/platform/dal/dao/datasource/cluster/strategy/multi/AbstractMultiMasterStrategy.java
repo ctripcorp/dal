@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionFactory;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ConnectionFactoryAware;
@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig.CLUSTER_NAME;
+import static com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig.CLUSTER_NAME;
 
 /**
  * @Author limingdong

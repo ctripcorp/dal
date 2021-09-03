@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.platform.dal.cluster.database.ConnectionString;
-import com.ctrip.platform.dal.cluster.database.Database;
-import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.configure.DalConnectionString;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;

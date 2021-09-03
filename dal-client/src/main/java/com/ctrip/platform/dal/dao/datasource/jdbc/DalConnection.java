@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
-import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
@@ -9,7 +9,6 @@ import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;

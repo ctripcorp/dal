@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.platform.dal.cluster.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 
 /**
  * @author c7ch23en

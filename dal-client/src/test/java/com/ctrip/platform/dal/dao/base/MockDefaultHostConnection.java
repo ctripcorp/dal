@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.base;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
 
 import java.sql.*;

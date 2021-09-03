@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.helper.RequestContext;
 import com.ctrip.platform.dal.exceptions.DalException;

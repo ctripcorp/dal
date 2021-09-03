@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;

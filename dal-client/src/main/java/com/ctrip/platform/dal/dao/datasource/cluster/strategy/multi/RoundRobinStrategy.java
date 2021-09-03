@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Author limingdong
  * @create 2021/8/18
  */
-public class RoundRobinStrategy extends AbstractMultiHostStrategy implements RouteStrategy {
+public class RoundRobinStrategy extends AbstractMultiMasterStrategy implements RouteStrategy {
 
     private AtomicInteger index = new AtomicInteger(0);
 

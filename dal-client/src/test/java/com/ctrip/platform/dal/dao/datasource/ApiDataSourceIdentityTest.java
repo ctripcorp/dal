@@ -9,7 +9,7 @@ import com.ctrip.platform.dal.cluster.database.DatabaseRole;
 import com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -84,10 +84,10 @@ public class ApiDataSourceIdentityTest {
         ClusterRouteStrategyConfig routeStrategy = cluster.getRouteStrategyConfig();
         Assert.assertEquals(RouteStrategyEnum.WRITE_ORDERED.getAlias(), routeStrategy.routeStrategyName());
         CaseInsensitiveProperties properties = routeStrategy.routeStrategyProperties();
-        Assert.assertEquals("z3,z2,z1", properties.get(DataSourceConfigureConstants.ZONES_PRIORITY));
-        Assert.assertEquals("10000", properties.get(DataSourceConfigureConstants.FAILOVER_TIME_MS));
-        Assert.assertNull(properties.get(DataSourceConfigureConstants.BLACKLIST_TIMEOUT_MS));
-        Assert.assertNull(properties.get(DataSourceConfigureConstants.FIXED_VALIDATE_PERIOD_MS));
+        Assert.assertEquals("z3,z2,z1", properties.get(MultiMasterStrategy.ZONES_PRIORITY));
+        Assert.assertEquals("10000", properties.get(MultiMasterStrategy.FAILOVER_TIME_MS));
+        Assert.assertNull(properties.get(MultiMasterStrategy.BLACKLIST_TIMEOUT_MS));
+        Assert.assertNull(properties.get(MultiMasterStrategy.FIXED_VALIDATE_PERIOD_MS));
     }
 
 }

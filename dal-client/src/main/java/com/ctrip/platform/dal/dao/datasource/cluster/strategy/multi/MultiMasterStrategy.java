@@ -7,15 +7,15 @@ import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
  * @Author limingdong
  * @create 2021/8/26
  */
-public interface MultiHostStrategy extends RouteStrategy, ConnectionFactoryAware {
+public interface MultiMasterStrategy extends RouteStrategy, ConnectionFactoryAware {
 
-    String FAIL_OVER_TIME_MS = "failoverTimeMS";
+    String FAILOVER_TIME_MS = "failoverTimeMS";
 
-    String BLACK_LIST_TIMEOUT_MS = "blacklistTimeoutMS";
+    String BLACKLIST_TIMEOUT_MS = "blacklistTimeoutMS";
 
-    String VALIDATE_PERIOD_MS = "fixedValidatePeriodMS";
+    String FIXED_VALIDATE_PERIOD_MS = "fixedValidatePeriodMS";
 
-    String ZONE_PRIORITY = "zonesPriority";
+    String ZONES_PRIORITY = "zonesPriority";
 
     String MULTI_MASTER = "multiMaster";
 

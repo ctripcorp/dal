@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy.ZONE_PRIORITY;
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy.ZONES_PRIORITY;
 
 
 /**
@@ -21,7 +21,7 @@ public class MGRStrategyTest extends ShardMetaGenerator {
     @Before
     public void setUp() throws Exception {
         VALUE = getRequestZone() + "," + SHARB + "," + SHAOY;
-        caseInsensitiveProperties.set(ZONE_PRIORITY, VALUE);
+        caseInsensitiveProperties.set(ZONES_PRIORITY, VALUE);
         super.setUp();
     }
 

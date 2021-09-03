@@ -51,7 +51,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         obRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public String routeStrategyName() {
-                return RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.name();
+                return RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias();
             }
 
             @Override
@@ -93,7 +93,7 @@ public class MultiHostClusterPropertiesAdapterTest {
 
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(obRouteStrategyConfig, CLUSTER_NAME);
         routeStrategy = clusterPropertiesAdapter.routeStrategyName();
-        Assert.assertEquals(RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.name(), routeStrategy);
+        Assert.assertEquals(RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias(), routeStrategy);
         multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
         Assert.assertTrue(multiHostStrategy instanceof OBStrategy);
 

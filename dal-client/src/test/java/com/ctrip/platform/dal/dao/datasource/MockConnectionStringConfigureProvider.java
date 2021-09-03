@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.cluster.base.ListenableSupport;
+import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.MultiHostConnectionStringConfigure;
 import com.ctrip.platform.dal.cluster.base.HostSpec;
@@ -104,6 +105,11 @@ public class MockConnectionStringConfigureProvider extends ListenableSupport<Dal
                 @Override
                 public boolean isMultiMaster() {
                     return true;
+                }
+
+                @Override
+                public DBModel getDbModel() {
+                    return DBModel.MGR;
                 }
 
                 @Override

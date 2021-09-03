@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
-import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy.BLACK_LIST_TIMEOUT_MS;
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy.BLACKLIST_TIMEOUT_MS;
 
 /**
  * @Author limingdong
@@ -27,7 +27,7 @@ public class RoundRobinAccessStrategyTest extends ShardMetaGenerator {
 
     @Before
     public void setUp() throws Exception {
-        caseInsensitiveProperties.set(BLACK_LIST_TIMEOUT_MS, String.valueOf(custom_black_list_timeout));
+        caseInsensitiveProperties.set(BLACKLIST_TIMEOUT_MS, String.valueOf(custom_black_list_timeout));
         super.setUp();
     }
 

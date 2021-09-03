@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.common.enums;
 
 public enum DBModel {
-    STANDALONE("standalone"),MGR("mgr");
+    STANDALONE("standalone"),MGR("mgr"), OB("ob");
 
     private String name;
 
@@ -22,4 +22,6 @@ public enum DBModel {
         }
         return null;
     }
+
+
 }

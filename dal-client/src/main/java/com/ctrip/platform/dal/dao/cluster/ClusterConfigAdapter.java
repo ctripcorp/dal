@@ -8,9 +8,11 @@ import com.ctrip.platform.dal.cluster.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.cluster.config.*;
 import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
 import com.ctrip.platform.dal.cluster.multihost.DefaultClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
 import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy.MULTI_MASTER;
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy.MULTI_MASTER;
 
 /**
  * @author c7ch23en
@@ -117,19 +119,21 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
             databaseShardConfig.addDatabaseConfig(databaseConfig);
         });
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
+        DBModel dbModel = configure.getDbModel();
+        String routeStrategyName = DBModel.MGR == dbModel ? RouteStrategyEnum.WRITE_ORDERED.getAlias() : RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias();
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(RouteStrategyEnum.WRITE_ORDERED.getAlias());  // todo for ob get for obApi
+                new DefaultClusterRouteStrategyConfig(routeStrategyName);
         if (configure.getZonesPriority() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.ZONES_PRIORITY,
+            routeStrategy.setProperty(MultiMasterStrategy.ZONES_PRIORITY,
                     configure.getZonesPriority());
         if (configure.getFailoverTimeMS() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.FAILOVER_TIME_MS,
+            routeStrategy.setProperty(MultiMasterStrategy.FAILOVER_TIME_MS,
                     String.valueOf(configure.getFailoverTimeMS()));
         if (configure.getBlacklistTimeoutMS() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.BLACKLIST_TIMEOUT_MS,
+            routeStrategy.setProperty(MultiMasterStrategy.BLACKLIST_TIMEOUT_MS,
                     String.valueOf(configure.getBlacklistTimeoutMS()));
         if (configure.getFixedValidatePeriodMS() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.FIXED_VALIDATE_PERIOD_MS,
+            routeStrategy.setProperty(MultiMasterStrategy.FIXED_VALIDATE_PERIOD_MS,
                     String.valueOf(configure.getFixedValidatePeriodMS()));
         routeStrategy.setProperty(MULTI_MASTER,
                     String.valueOf(configure.isMultiMaster()));

@@ -6,8 +6,8 @@ import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.datasource.cluster.ZonedHostSorter;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.HostConnectionValidatorHolder;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.AbstractMultiHostStrategy;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiHostStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.AbstractMultiMasterStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.MajorityHostValidator;
@@ -19,7 +19,7 @@ import java.util.Set;
  * @Author limingdong
  * @create 2021/8/25
  */
-public class MGRStrategy extends AbstractMultiHostStrategy implements MultiHostStrategy, HostConnectionValidatorHolder {
+public class MGRStrategy extends AbstractMultiMasterStrategy implements MultiMasterStrategy, HostConnectionValidatorHolder {
 
     private static final String CONNECTION_HOST_CHANGE = "Router::connectionHostChange:%s";
 
@@ -35,7 +35,7 @@ public class MGRStrategy extends AbstractMultiHostStrategy implements MultiHostS
 
     @Override
     protected void doBuildOrderHosts() {
-        List<String> zoneOrder = strategyOptions.getStringList(ZONE_PRIORITY, ",", null);
+        List<String> zoneOrder = strategyOptions.getStringList(ZONES_PRIORITY, ",", null);
         ZonedHostSorter sorter = new ZonedHostSorter(zoneOrder);
         this.orderHosts = sorter.sort(configuredHosts);
     }

@@ -21,7 +21,7 @@ import static com.ctrip.platform.dal.cluster.multihost.ClusterRouteStrategyConfi
  * @Author limingdong
  * @create 2021/8/25
  */
-public abstract class AbstractMultiHostStrategy implements MultiHostStrategy, ConnectionFactoryAware {
+public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy, ConnectionFactoryAware {
 
     protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     protected static final String ROUTER_ORDER_HOSTS = "Router::cluster:%s";
@@ -64,9 +64,9 @@ public abstract class AbstractMultiHostStrategy implements MultiHostStrategy, Co
         if (this instanceof HostValidatorAware) {
             return;
         }
-        long failOverTime = strategyOptions.getLong(FAIL_OVER_TIME_MS, 10000);
-        long blackListTimeOut = strategyOptions.getLong(BLACK_LIST_TIMEOUT_MS, 10000);
-        long fixedValidatePeriod = strategyOptions.getLong(VALIDATE_PERIOD_MS, 30000);
+        long failOverTime = strategyOptions.getLong(FAILOVER_TIME_MS, 10000);
+        long blackListTimeOut = strategyOptions.getLong(BLACKLIST_TIMEOUT_MS, 10000);
+        long fixedValidatePeriod = strategyOptions.getLong(FIXED_VALIDATE_PERIOD_MS, 30000);
         this.hostValidator = newHostValidator(configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
     }
 

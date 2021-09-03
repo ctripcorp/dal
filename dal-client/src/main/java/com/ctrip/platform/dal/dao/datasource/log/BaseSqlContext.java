@@ -319,4 +319,8 @@ public abstract class BaseSqlContext implements SqlContext {
     public String getParams() {
         return params;
     }
+
+    public String getCaller() {
+        return callerClass + callerMethod;
+    }
 }

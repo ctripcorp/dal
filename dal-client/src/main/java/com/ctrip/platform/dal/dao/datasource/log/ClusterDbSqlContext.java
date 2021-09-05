@@ -82,6 +82,14 @@ public class ClusterDbSqlContext extends BaseSqlContext {
         return context;
     }
 
+    public String getClusterName() {
+        return cluster.getClusterName();
+    }
+
+    public Integer getShard() {
+        return shard;
+    }
+
     public void populateShard(Integer shard) {
         this.shard = shard;
     }

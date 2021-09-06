@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.Executor;
 
 public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
@@ -45,6 +44,9 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private boolean closed = false;
     private String catalog;
     private String schema;
+
+    // not thread safe, just record for test
+    protected volatile Connection lastRealConnection;
 
 
     public GroupConnection(GroupDataSource groupDataSource) {
@@ -92,6 +94,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
                 }
             }
         }
+        lastRealConnection = rConnection;
 
         return rConnection;
     }
@@ -121,7 +124,6 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     }
 
     protected Connection getWriteConnection() throws SQLException {
-        System.out.println("master");
         if (wConnection == null) {
             synchronized (this) {
                 if (wConnection == null) {
@@ -142,6 +144,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
                 }
             }
         }
+        lastRealConnection = wConnection;
 
         return wConnection;
     }
@@ -161,7 +164,6 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         }
 
         SqlType sqlType = SqlUtils.getSqlType(sql);
-        System.out.println(sql + ":" + sqlType.value());
         if (sqlType.isRead()) {
             return getReadConnection();
         } else {

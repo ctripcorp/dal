@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
@@ -18,6 +19,7 @@ public class DalStatement implements Statement {
     private Statement statement;
     protected DalConnection connection;
     private SqlContext context;
+    protected StatementParameters logParameters = null;
 
     public DalStatement(Statement statement, DalConnection connection, SqlContext context) {
         this.statement = statement;
@@ -350,6 +352,7 @@ public class DalStatement implements Statement {
             context.startExecution();
             context.populateSqlTransaction(System.currentTimeMillis());
             context.populateReadStrategy(GroupConnection.getLogContext().getReadStrategy());
+            context.populateParameters(logParameters);
         } catch (Throwable t) {
             // ignore
         }

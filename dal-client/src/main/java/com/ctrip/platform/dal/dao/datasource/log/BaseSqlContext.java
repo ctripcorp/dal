@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.log;
 
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.Version;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
@@ -197,6 +198,12 @@ public abstract class BaseSqlContext implements SqlContext {
     @Override
     public void populateSqlTransaction(long millionSeconds) {
         this.sqlTransactionStartTime = millionSeconds;
+    }
+
+    @Override
+    public void populateParameters(StatementParameters parameters) {
+        if (parameters != null)
+            params = parameters.toLogString();
     }
 
     protected void logMetric() {

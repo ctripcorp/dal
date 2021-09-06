@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionDelegate;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
@@ -23,6 +24,7 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
     private static final String ASYNC_VALIDATE_RESULT = "Validator::asyncValidateResult:";
     private static final String VALIDATE_RESULT_DETAIL ="Validator::validateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
     private static final String DOUBLE_CHECK_VALIDATE_RESULT_DETAIL ="Validator::doubleCheckValidateResultDetail:MEMBER_ID=%s MEMBER_STATE=%s CURRENT_MEMBER_ID=%s";
+    private static final String CREATE_CONNECTION_FAILED = "Router::createConnectionFailed";
 
     private static ValidateResult defaultValidateResult = new ValidateResult();
     private static volatile ExecutorService doubleCheckService = Executors.newFixedThreadPool(2);
@@ -83,6 +85,15 @@ public class MajorityHostValidator extends AbstractHostValidator implements Host
     public boolean validate(HostConnection connection) throws SQLException {
         try {
             HostSpec currentHost = connection.getHost();
+            if (connection.isWrapperFor(ConnectionDelegate.class)) {
+                ConnectionDelegate connectionDelegate = connection.unwrap(ConnectionDelegate.class);
+                if (connectionDelegate.getDelegated() == null) {
+                    LOGGER.warn(CREATE_CONNECTION_FAILED + currentHost.toString());
+                    LOGGER.logEvent(CAT_LOG_TYPE, CREATE_CONNECTION_FAILED, currentHost.toString());
+                    asyncValidate(orderHosts);
+                    return false;
+                }
+            }
             ValidateResult validateResult = validateAndUpdate(connection, currentHost, configuredHosts.size());
             LOGGER.info(VALIDATE_RESULT +  currentHost.toString() + ":" + validateResult.validateResult);
             LOGGER.logEvent(CAT_LOG_TYPE, currentHost.toString() + ":" + validateResult.validateResult, validateResult.toString());

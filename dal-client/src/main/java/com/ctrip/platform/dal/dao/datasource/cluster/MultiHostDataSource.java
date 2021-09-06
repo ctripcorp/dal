@@ -87,7 +87,13 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     public Connection getConnection() throws SQLException {
         DalHints dalHints = new DalHints();
         HostSpec hostSpec = routeStrategy.pickNode(dalHints);
-        Connection targetConnection = connFactory.getPooledConnectionForHost(hostSpec);
+        Connection targetConnection;
+        try {
+            targetConnection = connFactory.getPooledConnectionForHost(hostSpec);
+        } catch (Exception e) {
+            routeStrategy.interceptException(null, new DefaultHostConnection(null, hostSpec));
+            throw e;
+        }
         return new DefaultHostConnection(targetConnection, hostSpec);
     }
 

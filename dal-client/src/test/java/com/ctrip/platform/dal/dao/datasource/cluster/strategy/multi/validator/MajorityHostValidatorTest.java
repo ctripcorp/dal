@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.base.MockConnection;
 import com.ctrip.platform.dal.dao.base.MockDefaultHostConnection;
 import com.ctrip.platform.dal.dao.base.MockResultSet;
 import com.ctrip.platform.dal.dao.base.MockStatement;
+import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -98,7 +99,12 @@ public class MajorityHostValidatorTest extends AbstractHostValidatorTest {
     }
 
     @Test
-    public void validate() throws SQLException, InterruptedException {
+    public void failToNullConnection() throws SQLException {
+        MockMajorityHostValidator validator = new MockMajorityHostValidator(configuredHost, orderedHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
+        DefaultHostConnection defaultHostConnection = new DefaultHostConnection(null, hostSpec1);
+
+        assertEquals(false, validator.validate(defaultHostConnection));
+        assertEquals(true, validator.available(hostSpec1));
     }
 
     @Test

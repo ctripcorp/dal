@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.util.CaseInsensitiveProperties;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
-import com.ctrip.platform.dal.dao.datasource.cluster.strategy.MultiHostStrategy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,13 +79,18 @@ public class MultiHostDataSourceTest {
     private MultiHostClusterProperties mockClusterProperties() {
         return new MultiHostClusterProperties() {
             @Override
-            public MultiHostStrategy getMultiHostStrategy() {
+            public RouteStrategy getRouteStrategy() {
                 return null;
             }
 
             @Override
             public String routeStrategyName() {
                 return null;
+            }
+
+            @Override
+            public boolean multiMaster() {
+                return false;
             }
 
             @Override

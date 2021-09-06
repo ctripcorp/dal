@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.config.DalConfigCustomizedOption;
-import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.annotation.Database;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;

@@ -1,9 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import com.ctrip.platform.dal.cluster.cluster.DrcConsistencyTypeEnum;
-import com.ctrip.platform.dal.cluster.config.LocalizationConfig;
-import com.ctrip.platform.dal.cluster.config.LocalizationConfigImpl;
-import com.ctrip.platform.dal.cluster.config.LocalizationState;
+import com.ctrip.framework.dal.cluster.client.cluster.DrcConsistencyTypeEnum;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.LocalizationState;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.exceptions.DalException;

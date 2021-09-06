@@ -1,8 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 
-import com.ctrip.platform.dal.cluster.database.ConnectionString;
-import com.ctrip.platform.dal.cluster.database.Database;
+import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
+import com.ctrip.framework.dal.cluster.client.database.Database;
 
 public class TagDataSourceIdentity extends TraceableClusterDataSourceIdentity {
 

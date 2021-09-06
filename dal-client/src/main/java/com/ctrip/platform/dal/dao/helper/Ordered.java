@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.helper;
 
 
-import com.ctrip.platform.dal.cluster.base.ComponentOrdered;
+import com.ctrip.framework.dal.cluster.client.base.ComponentOrdered;
 
 public interface Ordered extends ComponentOrdered {
 }

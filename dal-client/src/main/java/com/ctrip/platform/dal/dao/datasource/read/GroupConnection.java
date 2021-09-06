@@ -1,14 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.base.HostSpec;
-import com.ctrip.platform.dal.cluster.database.Database;
-import com.ctrip.platform.dal.cluster.shard.DatabaseShard;
-import com.ctrip.platform.dal.cluster.shard.read.RouterType;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
+import com.ctrip.framework.dal.cluster.client.shard.read.RouterType;
 import com.ctrip.platform.dal.common.enums.SqlType;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.configure.IntegratedConfigProvider;
 import com.ctrip.platform.dal.dao.datasource.log.DataSourceLogContext;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import org.apache.commons.lang.StringUtils;
@@ -114,11 +114,10 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         return dataSource.getConnection();
     }
 
-    protected Map<String, Object> buildContext() {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("slaveOnly", false);
-        map.put("isPro", false);
-        return map;
+    protected DalHints buildContext() {
+        // todo-lhj dalhints需要测试是否需要初始化什么？
+        DalHints dalHints = new DalHints();
+        return dalHints;
     }
 
     protected Connection getWriteConnection() throws SQLException {

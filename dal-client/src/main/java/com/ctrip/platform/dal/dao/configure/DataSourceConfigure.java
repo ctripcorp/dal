@@ -1,10 +1,11 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.EncryptionHelper;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +21,7 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
     private DalConnectionString connectionString;
     private DataSourceIdentity dataSourceId;
     private HostSpec host;
-    private ConnectionValidator validator;
+    private HostConnectionValidator validator;
 
     public DataSourceConfigure() {
     }
@@ -267,25 +268,25 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
 
     @Override
     public String getZonesPriority() {
-        String value = getProperty(ZONES_PRIORITY);
+        String value = getProperty(MultiMasterStrategy.ZONES_PRIORITY);
         return StringUtils.isNotEmpty(value) ? value : getProperty(IDC_PRIORITY);
     }
 
     @Override
     public Long getFailoverTimeMS() {
-        String value = getProperty(FAILOVER_TIME_MS);
+        String value = getProperty(MultiMasterStrategy.FAILOVER_TIME_MS);
         return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
     }
 
     @Override
     public Long getBlacklistTimeoutMS() {
-        String value = getProperty(BLACKLIST_TIMEOUT_MS);
+        String value = getProperty(MultiMasterStrategy.BLACKLIST_TIMEOUT_MS);
         return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
     }
 
     @Override
     public Long getFixedValidatePeriodMS() {
-        String value = getProperty(FIXED_VALIDATE_PERIOD_MS);
+        String value = getProperty(MultiMasterStrategy.FIXED_VALIDATE_PERIOD_MS);
         return StringUtils.isNotEmpty(value) ? Long.parseLong(value) : null;
     }
 
@@ -476,11 +477,11 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         this.host = host;
     }
 
-    public ConnectionValidator getValidator() {
+    public HostConnectionValidator getValidator() {
         return validator;
     }
 
-    public void setValidator(ConnectionValidator validator) {
+    public void setValidator(HostConnectionValidator validator) {
         this.validator = validator;
     }
 

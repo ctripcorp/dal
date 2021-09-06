@@ -1,22 +1,29 @@
 package com.ctrip.platform.dal.dao.cluster;
 
-import com.ctrip.platform.dal.cluster.Cluster;
-import com.ctrip.platform.dal.cluster.base.ListenableSupport;
-import com.ctrip.platform.dal.cluster.base.Listener;
-import com.ctrip.platform.dal.cluster.cluster.ClusterType;
-import com.ctrip.platform.dal.cluster.cluster.ReadStrategyEnum;
-import com.ctrip.platform.dal.cluster.config.*;
-import com.ctrip.platform.dal.cluster.database.DatabaseCategory;
-import com.ctrip.platform.dal.cluster.multihost.DefaultClusterRouteStrategyConfig;
+import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
+import com.ctrip.framework.dal.cluster.client.base.Listener;
+import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
+import com.ctrip.framework.dal.cluster.client.config.ClusterConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.DatabaseConfigImpl;
+import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
+import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
+import com.ctrip.framework.dal.cluster.client.multihost.DefaultClusterRouteStrategyConfig;
+import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.ConnectionStringConfigureProvider;
-import com.ctrip.platform.dal.cluster.base.HostSpec;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy.MULTI_MASTER;
 
 /**
  * @author c7ch23en
@@ -101,7 +108,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
 
     private ClusterConfig buildMultiHostClusterConfig(MultiHostConnectionStringConfigure configure) {
         ClusterConfigWithNoVersion clusterConfig =
-                new ClusterConfigWithNoVersion(configure.getName(), ClusterType.MGR, DatabaseCategory.MYSQL);
+                new ClusterConfigWithNoVersion(configure.getName(), ClusterType.NORMAL, DatabaseCategory.MYSQL);
         DatabaseShardConfigImpl databaseShardConfig = new DatabaseShardConfigImpl(clusterConfig, 0);
         List<HostSpec> hosts = configure.getHosts();
         hosts.forEach(host -> {
@@ -115,20 +122,24 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
             databaseShardConfig.addDatabaseConfig(databaseConfig);
         });
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
+        DBModel dbModel = configure.getDbModel();
+        String routeStrategyName = DBModel.MGR == dbModel ? RouteStrategyEnum.WRITE_ORDERED.getAlias() : RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias();
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(ClusterType.MGR.defaultRouteStrategies());
+                new DefaultClusterRouteStrategyConfig(routeStrategyName);
         if (configure.getZonesPriority() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.ZONES_PRIORITY,
+            routeStrategy.setProperty(MultiMasterStrategy.ZONES_PRIORITY,
                     configure.getZonesPriority());
         if (configure.getFailoverTimeMS() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.FAILOVER_TIME_MS,
+            routeStrategy.setProperty(MultiMasterStrategy.FAILOVER_TIME_MS,
                     String.valueOf(configure.getFailoverTimeMS()));
         if (configure.getBlacklistTimeoutMS() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.BLACKLIST_TIMEOUT_MS,
+            routeStrategy.setProperty(MultiMasterStrategy.BLACKLIST_TIMEOUT_MS,
                     String.valueOf(configure.getBlacklistTimeoutMS()));
         if (configure.getFixedValidatePeriodMS() != null)
-            routeStrategy.setProperty(DataSourceConfigureConstants.FIXED_VALIDATE_PERIOD_MS,
+            routeStrategy.setProperty(MultiMasterStrategy.FIXED_VALIDATE_PERIOD_MS,
                     String.valueOf(configure.getFixedValidatePeriodMS()));
+        routeStrategy.setProperty(MULTI_MASTER,
+                    String.valueOf(configure.isMultiMaster()));
         clusterConfig.setRouteStrategyConfig(routeStrategy);
         clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;
@@ -148,7 +159,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         databaseShardConfig.addDatabaseConfig(databaseConfig);
         clusterConfig.addDatabaseShardConfig(databaseShardConfig);
         // todo-lhj  make configurable RouteStrategy of
-        clusterConfig.setRouteStrategyConfig(new DefaultClusterRouteStrategyConfig(ReadStrategyEnum.READ_MASTER.name()));
+        clusterConfig.setRouteStrategyConfig(new DefaultClusterRouteStrategyConfig(RouteStrategyEnum.READ_MASTER.name()));
         clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;
     }

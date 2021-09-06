@@ -4,7 +4,7 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
@@ -25,13 +25,13 @@ public class DalConnectionPool extends ConnectionPool {
     private static ConnectionListener connectionListener = ServiceLoaderHelper.getInstance(ConnectionListener.class);
     private static ThreadLocal<Long> poolWaitTime = new ThreadLocal<>();
 
-    private final ConnectionValidator clusterConnValidator;
+    private final HostConnectionValidator clusterConnValidator;
 
     public DalConnectionPool(PoolConfiguration prop) throws SQLException {
         this(prop, null);
     }
 
-    public DalConnectionPool(PoolConfiguration prop, ConnectionValidator clusterConnValidator) throws SQLException {
+    public DalConnectionPool(PoolConfiguration prop, HostConnectionValidator clusterConnValidator) throws SQLException {
         super(prop);
         this.clusterConnValidator = clusterConnValidator;
     }

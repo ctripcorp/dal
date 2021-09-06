@@ -2,7 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
-import com.ctrip.platform.dal.dao.datasource.cluster.validator.ConnectionValidator;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.tomcat.DalTomcatDataSource;
 import com.ctrip.platform.dal.dao.helper.*;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -33,7 +33,7 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
     private AtomicInteger referenceCount = new AtomicInteger(0);
     private volatile boolean closed = false;
 
-    private final ConnectionValidator clusterConnValidator;
+    private final HostConnectionValidator clusterConnValidator;
 
     // sync create pool
     public SingleDataSource(String name, DataSourceConfigure dataSourceConfigure) {
@@ -118,7 +118,7 @@ public class SingleDataSource implements DataSourceConfigureConstants, DataSourc
         return dataSourceRef.get();
     }
 
-    private void preHandleValidator(PoolProperties poolProperties, ConnectionValidator clusterConnValidator) {
+    private void preHandleValidator(PoolProperties poolProperties, HostConnectionValidator clusterConnValidator) {
         if (poolProperties == null)
             return;
         Validator validator = poolProperties.getValidator();

@@ -1,15 +1,11 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import com.ctrip.platform.dal.common.enums.DatabaseCategory;
-import org.apache.tomcat.jdbc.pool.PooledConnection;
-
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
-import com.ctrip.platform.dal.exceptions.DalException;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class DalConnection {
     private Integer oldIsolationLevel;

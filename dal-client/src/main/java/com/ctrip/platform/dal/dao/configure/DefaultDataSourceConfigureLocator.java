@@ -1,6 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.IPDomainStatus;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
@@ -11,6 +11,8 @@ import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.PoolPropertiesHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.TimeoutCollection;
+import com.ctrip.platform.dal.dao.log.TimeoutStatsLogger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +22,7 @@ import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.
 
 public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLocator {
     protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    protected static final TimeoutStatsLogger timeoutStatsLogger = DalElementFactory.DEFAULT.getTimeoutStatsLogger();
 
     protected PoolPropertiesHelper poolPropertiesHelper = PoolPropertiesHelper.getInstance();
 
@@ -44,6 +47,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
     private static final String STATEMENT_INTERCEPTORS_VALUE_FORMAT2 = ";statementInterceptors=%s";
     private static final String CONNECTION_PROPERTIES_SEPARATOR = ";";
     private static final String CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR = "=";
+    private static final Long LONG_ZERO = new Long(0);
 
     private String FINAL_OVERRIDE_RESULT_FORMAT = "Final override result: %s";
     protected String POOLPROPERTIES_MERGEPOOLPROPERTIES_FORMAT = "PoolProperties::mergePoolProperties:%s";
@@ -251,8 +255,87 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         // override config from connection settings,datasource.xml
         overrideConnectionStringConfigureAndDataSourceXml(connectionStringConfigure, c, connectionString, name);
 
+        frameworkScheduleTimeoutLog(wrapper);
+
         LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
                 String.format(FINAL_OVERRIDE_RESULT_FORMAT, poolPropertiesHelper.propertiesToString(c.toProperties())));
+    }
+
+    protected void frameworkScheduleTimeoutLog(PropertiesWrapper wrapper) {
+        try{
+            Properties defaultProperties = wrapper.getAppProperties();
+            Map<String, Properties> datasourceProperties = wrapper.getDatasourceProperties();
+
+            timeoutStatsLogger.register(mergeTimeoutCollection(defaultProperties, datasourceProperties));
+        } catch (Throwable t) {
+            LOGGER.warn("Error while record timeoutStats", t);
+        }
+
+    }
+
+    protected Map<String, TimeoutCollection> mergeTimeoutCollection(Properties defaultProperties, Map<String, Properties> datasourceProperties) {
+        TimeoutCollection defaultCollection = parseTimeoutCollection(defaultProperties);
+        Map<String, TimeoutCollection> map = new HashMap<>();
+        map.put("dal_default", defaultCollection);
+
+        if (!(datasourceProperties == null || datasourceProperties.isEmpty())) {
+            for (String entry : datasourceProperties.keySet()) {
+                map.put(entry, parseTimeoutCollection(datasourceProperties.get(entry)).overrideBy(defaultCollection));
+            }
+        }
+
+        return map;
+    }
+
+    protected TimeoutCollection parseTimeoutCollection(Properties properties) {
+        TimeoutCollection collection = new TimeoutCollection();
+        if (properties.containsKey(MAXWAIT))
+            collection.setConnectionPoolBorrowTimeout(parseLong(properties.getProperty(MAXWAIT)));
+
+        Map<String, Long> customTimeout = new HashMap<>();
+        if (properties.containsKey(REMOVEABANDONEDTIMEOUT))
+            customTimeout.put(REMOVEABANDONEDTIMEOUT, parseLong(properties.getProperty(REMOVEABANDONEDTIMEOUT)));
+        if (properties.containsKey(SERVER_WAIT_TIMEOUT))
+            customTimeout.put(SERVER_WAIT_TIMEOUT, parseLong(properties.getProperty(SERVER_WAIT_TIMEOUT)));
+        collection.setCustomTimeouts(customTimeout);
+
+        String connectionProperties = properties.getProperty(CONNECTIONPROPERTIES);
+        if (StringUtils.isTrimmedEmpty(connectionProperties))
+            return collection;
+        String[] stringProperties = connectionProperties.split(CONNECTION_PROPERTIES_SEPARATOR);
+
+        boolean socketFlag = false, connectFlag = false;
+        for (String property : stringProperties) {
+            if (socketFlag && connectFlag)
+                return collection;
+            if (property.trim().startsWith(SOCKET_TIMEOUT)) {
+                String[] timeout = property.trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
+                collection.setSocketTimeout(parseLong(timeout[1]));
+                socketFlag = true;
+            }else if (property.trim().startsWith(CONNECT_TIMEOUT)) {
+                String[] timeout = property.trim().split(CONNECTION_PROPERTIES_KEY_VALUE_SEPARATOR);
+                collection.setConnectTimeout(parseLong(timeout[1]));
+                connectFlag = true;
+            }
+        }
+
+        if (!socketFlag)
+            collection.setSocketTimeout(0);
+
+        if (!connectFlag)
+            collection.setConnectTimeout(0);
+
+        return collection;
+    }
+
+    protected Long parseLong(String value) {
+        if (StringUtils.isTrimmedEmpty(value))
+            return LONG_ZERO;
+        try{
+            return Long.parseLong(value);
+        } catch (Throwable t) {
+            return LONG_ZERO;
+        }
     }
 
     private void overrideAppLevelProperties(PropertiesWrapper wrapper, DataSourceConfigure c, String logName) {
@@ -526,6 +609,7 @@ public class DefaultDataSourceConfigureLocator implements DataSourceConfigureLoc
         String[] properties = connectionProperties.split(CONNECTION_PROPERTIES_SEPARATOR);
 
         boolean added = false;
+
         for (int index = 0; index < properties.length; index++) {
             if (properties[index].trim().startsWith(STATEMENT_INTERCEPTORS_KEY)) {
                 added = true;

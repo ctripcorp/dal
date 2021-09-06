@@ -1,7 +1,7 @@
 package com.ctrip.platform.dal.dao.configure;
 
 
-import com.ctrip.platform.dal.cluster.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 
 /**
  * @author c7ch23en

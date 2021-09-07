@@ -98,12 +98,12 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             parseIdGenerators(clusterConfig, idGeneratorsNode);
 
         Node routeStrategiesNode = getChildNode(clusterNode, ROUTE_STRATEGIES);
-        if (!StringUtils.isEmpty(customizedOption.getReadStrategy())) {
-            initReadStrategy(clusterConfig, customizedOption);
+        if (!StringUtils.isEmpty(customizedOption.getRouteStrategy())) {
+            initRouteStrategy(clusterConfig, customizedOption);
         } else if (routeStrategiesNode != null)
             parseRouteStrategies(clusterConfig, routeStrategiesNode);
         else
-            initReadStrategy(clusterConfig);
+            initRouteStrategy(clusterConfig);
 
         parseDrcConfig(clusterConfig, clusterNode);
 
@@ -251,12 +251,12 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
     }
 
-    protected void initReadStrategy(ClusterConfigImpl clusterConfig, DalConfigCustomizedOption customizedOption) {
-        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(customizedOption.getReadStrategy());
+    protected void initRouteStrategy(ClusterConfigImpl clusterConfig, DalConfigCustomizedOption customizedOption) {
+        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(customizedOption.getRouteStrategy(), customizedOption.multiMaster());
         clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
     }
 
-    protected void initReadStrategy(ClusterConfigImpl clusterConfig) {
+    protected void initRouteStrategy(ClusterConfigImpl clusterConfig) {
         DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(RouteStrategyEnum.READ_MASTER.name());
         clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
     }

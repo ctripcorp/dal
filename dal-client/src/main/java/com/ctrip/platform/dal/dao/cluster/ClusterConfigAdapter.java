@@ -125,7 +125,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         DBModel dbModel = configure.getDbModel();
         String routeStrategyName = DBModel.MGR == dbModel ? RouteStrategyEnum.WRITE_ORDERED.getAlias() : RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias();
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(routeStrategyName);
+                new DefaultClusterRouteStrategyConfig(routeStrategyName, configure.isMultiMaster());
         if (configure.getZonesPriority() != null)
             routeStrategy.setProperty(MultiMasterStrategy.ZONES_PRIORITY,
                     configure.getZonesPriority());
@@ -138,8 +138,6 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         if (configure.getFixedValidatePeriodMS() != null)
             routeStrategy.setProperty(MultiMasterStrategy.FIXED_VALIDATE_PERIOD_MS,
                     String.valueOf(configure.getFixedValidatePeriodMS()));
-        routeStrategy.setProperty(MULTI_MASTER,
-                    String.valueOf(configure.isMultiMaster()));
         clusterConfig.setRouteStrategyConfig(routeStrategy);
         clusterConfig.setCustomizedOption(new DefaultDalConfigCustomizedOption());
         return clusterConfig;

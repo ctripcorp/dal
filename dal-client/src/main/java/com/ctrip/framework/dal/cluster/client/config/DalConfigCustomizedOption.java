@@ -38,7 +38,9 @@ public interface DalConfigCustomizedOption {
 
     DalConfigCustomizedOption clone();
 
-    String getReadStrategy();
+    String getRouteStrategy();
+
+    boolean multiMaster();
 
     String getTag();
 }

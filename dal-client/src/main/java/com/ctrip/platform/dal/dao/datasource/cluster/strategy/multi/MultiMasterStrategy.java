@@ -10,13 +10,18 @@ import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 public interface MultiMasterStrategy extends RouteStrategy, ConnectionFactoryAware {
 
     String FAILOVER_TIME_MS = "failoverTimeMS";
+    long DEFAULT_FAILOVER_TIME_MS_VALUE = 10000;
 
     String BLACKLIST_TIMEOUT_MS = "blacklistTimeoutMS";
+    long DEFAULT_BLACKLIST_TIMEOUT_MS_VALUE = 10000;
 
     String FIXED_VALIDATE_PERIOD_MS = "fixedValidatePeriodMS";
+    long DEFAULT_FIXED_VALIDATE_PERIOD_MS_VALUE = 30000;
 
     String ZONES_PRIORITY = "zonesPriority";
+    String DEFAULT_ZONES_PRIORITY_VALUE = "shaoy,sharb,shajq,shafq";
 
     String MULTI_MASTER = "multiMaster";
+    boolean DEFAULT_MULTI_MASTER_VALUE = true;
 
 }

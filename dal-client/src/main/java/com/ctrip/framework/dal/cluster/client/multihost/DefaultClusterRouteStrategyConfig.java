@@ -14,7 +14,12 @@ public class DefaultClusterRouteStrategyConfig implements ClusterRouteStrategyCo
     private final CaseInsensitiveProperties properties = new CaseInsensitiveProperties();
 
     public DefaultClusterRouteStrategyConfig(String strategyName) {
+        this(strategyName, false);
+    }
+
+    public DefaultClusterRouteStrategyConfig(String strategyName, boolean multiMaster) {
         this.strategyName = strategyName;
+        setProperty(MULTI_MASTER, String.valueOf(multiMaster));
     }
 
     @Override

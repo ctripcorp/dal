@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig.CLUSTER_NAME;
+import static com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig.DEFAULT_CLUSTER_NAME_VALUE;
 
 /**
  * @Author limingdong
@@ -40,8 +41,8 @@ public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy
     @Override
     public void init(Set<HostSpec> hostSpecs, CaseInsensitiveProperties strategyProperties) {
         this.configuredHosts = new HashSet<>(hostSpecs);
-        this.strategyOptions = strategyProperties;
-        this.cluster = strategyProperties.getString(CLUSTER_NAME, "unknown-cluster");
+        initProperties(strategyProperties);
+        this.cluster = strategyProperties.getString(CLUSTER_NAME, DEFAULT_CLUSTER_NAME_VALUE);
         CAT_LOG_TYPE = getCatLogType();
         buildOrderHosts();
         buildHostValidator();
@@ -64,9 +65,9 @@ public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy
         if (this instanceof HostValidatorAware) {
             return;
         }
-        long failOverTime = strategyOptions.getLong(FAILOVER_TIME_MS, 10000);
-        long blackListTimeOut = strategyOptions.getLong(BLACKLIST_TIMEOUT_MS, 10000);
-        long fixedValidatePeriod = strategyOptions.getLong(FIXED_VALIDATE_PERIOD_MS, 30000);
+        long failOverTime = strategyOptions.getLong(FAILOVER_TIME_MS, DEFAULT_FAILOVER_TIME_MS_VALUE);
+        long blackListTimeOut = strategyOptions.getLong(BLACKLIST_TIMEOUT_MS, DEFAULT_BLACKLIST_TIMEOUT_MS_VALUE);
+        long fixedValidatePeriod = strategyOptions.getLong(FIXED_VALIDATE_PERIOD_MS, DEFAULT_FIXED_VALIDATE_PERIOD_MS_VALUE);
         this.hostValidator = newHostValidator(configuredHosts, orderHosts, failOverTime, blackListTimeOut, fixedValidatePeriod);
     }
 
@@ -88,6 +89,21 @@ public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy
     @Override
     public void dispose() {
         hostValidator.destroy();
+    }
+
+    protected void initProperties(CaseInsensitiveProperties strategyProperties) {
+        putIfAbsent(strategyProperties, FAILOVER_TIME_MS, String.valueOf(DEFAULT_FAILOVER_TIME_MS_VALUE));
+        putIfAbsent(strategyProperties, BLACKLIST_TIMEOUT_MS, String.valueOf(DEFAULT_BLACKLIST_TIMEOUT_MS_VALUE));
+        putIfAbsent(strategyProperties, FIXED_VALIDATE_PERIOD_MS, String.valueOf(DEFAULT_FIXED_VALIDATE_PERIOD_MS_VALUE));
+        putIfAbsent(strategyProperties, ZONES_PRIORITY, String.valueOf(DEFAULT_ZONES_PRIORITY_VALUE));
+        putIfAbsent(strategyProperties, MULTI_MASTER, String.valueOf(DEFAULT_MULTI_MASTER_VALUE));
+        putIfAbsent(strategyProperties, CLUSTER_NAME, DEFAULT_CLUSTER_NAME_VALUE);
+    }
+
+    protected void putIfAbsent(CaseInsensitiveProperties strategyProperties, String key, String value) {
+        if (strategyProperties.get(key) == null) {
+            strategyProperties.set(key, value);
+        }
     }
 
     abstract protected void doBuildOrderHosts();

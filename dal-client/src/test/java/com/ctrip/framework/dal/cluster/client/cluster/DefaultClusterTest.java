@@ -70,8 +70,13 @@ public class DefaultClusterTest {
             }
 
             @Override
-            public String getReadStrategy() {
+            public String getRouteStrategy() {
                 return null;
+            }
+
+            @Override
+            public boolean multiMaster() {
+                return false;
             }
 
             @Override

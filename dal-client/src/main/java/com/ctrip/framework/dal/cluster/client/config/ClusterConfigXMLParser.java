@@ -252,7 +252,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
     }
 
     protected void initRouteStrategy(ClusterConfigImpl clusterConfig, DalConfigCustomizedOption customizedOption) {
-        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(customizedOption.getRouteStrategy(), customizedOption.multiMaster());
+        DefaultClusterRouteStrategyConfig routeStrategyConfig = new DefaultClusterRouteStrategyConfig(customizedOption.getRouteStrategy());
         clusterConfig.setRouteStrategyConfig(routeStrategyConfig);
     }
 

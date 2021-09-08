@@ -33,6 +33,11 @@ public class MultiHostClusterPropertiesAdapterTest {
     public void setUp() throws Exception {
         mgrRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
+            public RouteStrategy generate() {
+                return null;
+            }
+
+            @Override
             public String routeStrategyName() {
                 return RouteStrategyEnum.WRITE_ORDERED.name();
             }
@@ -50,6 +55,11 @@ public class MultiHostClusterPropertiesAdapterTest {
 
         obRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
+            public RouteStrategy generate() {
+                return null;
+            }
+
+            @Override
             public String routeStrategyName() {
                 return RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias();
             }
@@ -66,6 +76,11 @@ public class MultiHostClusterPropertiesAdapterTest {
         };
 
         customRouteStrategyConfig = new ClusterRouteStrategyConfig() {
+            @Override
+            public RouteStrategy generate() {
+                return null;
+            }
+
             @Override
             public String routeStrategyName() {
                 return CUSTOM_STRATEGY;
@@ -88,13 +103,13 @@ public class MultiHostClusterPropertiesAdapterTest {
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, CLUSTER_NAME);
         String routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(RouteStrategyEnum.WRITE_ORDERED.name(), routeStrategy);
-        RouteStrategy multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
+        RouteStrategy multiHostStrategy = clusterPropertiesAdapter.generate();
         Assert.assertTrue(multiHostStrategy instanceof MGRStrategy);
 
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(obRouteStrategyConfig, CLUSTER_NAME);
         routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias(), routeStrategy);
-        multiHostStrategy = clusterPropertiesAdapter.getRouteStrategy();
+        multiHostStrategy = clusterPropertiesAdapter.generate();
         Assert.assertTrue(multiHostStrategy instanceof OBStrategy);
 
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(mgrRouteStrategyConfig, CLUSTER_NAME);
@@ -106,6 +121,6 @@ public class MultiHostClusterPropertiesAdapterTest {
         clusterPropertiesAdapter = new MultiHostClusterPropertiesAdapter(customRouteStrategyConfig, CLUSTER_NAME);
         String routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(CUSTOM_STRATEGY, routeStrategy);
-        clusterPropertiesAdapter.getRouteStrategy();
+        clusterPropertiesAdapter.generate();
     }
 }

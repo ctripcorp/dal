@@ -13,7 +13,6 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
     private String tag;
-    private boolean multiMaster = false;
 
     @Override
     public String getConsistencyTypeCustomizedClass() {
@@ -43,11 +42,6 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public String getRouteStrategy() {
         return readStrategy;
-    }
-
-    @Override
-    public boolean multiMaster() {
-        return multiMaster;
     }
 
     @Override
@@ -90,11 +84,6 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
-    public DefaultDalConfigCustomizedOption multiMaster(boolean multiMaster) {
-        this.multiMaster = multiMaster;
-        return this;
-    }
-
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
@@ -104,7 +93,6 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
                 .ignoreShardingResourceNotFound(this.ignoreShardingResourceNotFound)
                 .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
                 .readStrategy(this.readStrategy)
-                .tag(this.tag)
-                .multiMaster(this.multiMaster);
+                .tag(this.tag);
     }
 }

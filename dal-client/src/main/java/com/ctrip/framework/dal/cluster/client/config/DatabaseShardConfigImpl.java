@@ -36,9 +36,7 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         for (DatabaseConfig databaseConfig : databaseConfigs)
             databaseShard.addDatabase(databaseConfig.generate());
 
-        ClusterRouteStrategyConfig strategyConfig = clusterConfig.getRouteStrategyConfig();
-        if (strategyConfig == null || !strategyConfig.multiMaster())
-            databaseShard.initReadStrategy();
+        databaseShard.initReadStrategy();
         return databaseShard;
     }
 

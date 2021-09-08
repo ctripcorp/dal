@@ -125,7 +125,7 @@ public class ClusterConfigAdapter extends ListenableSupport<ClusterConfig> imple
         DBModel dbModel = configure.getDbModel();
         String routeStrategyName = DBModel.MGR == dbModel ? RouteStrategyEnum.WRITE_ORDERED.getAlias() : RouteStrategyEnum.WRITE_CURRENT_ZONE_FIRST.getAlias();
         DefaultClusterRouteStrategyConfig routeStrategy =
-                new DefaultClusterRouteStrategyConfig(routeStrategyName, configure.isMultiMaster());
+                new DefaultClusterRouteStrategyConfig(routeStrategyName);
         if (configure.getZonesPriority() != null)
             routeStrategy.setProperty(MultiMasterStrategy.ZONES_PRIORITY,
                     configure.getZonesPriority());

@@ -79,7 +79,7 @@ public class MultiHostDataSourceTest {
     private MultiHostClusterProperties mockClusterProperties() {
         return new MultiHostClusterProperties() {
             @Override
-            public RouteStrategy getRouteStrategy() {
+            public RouteStrategy generate() {
                 return null;
             }
 

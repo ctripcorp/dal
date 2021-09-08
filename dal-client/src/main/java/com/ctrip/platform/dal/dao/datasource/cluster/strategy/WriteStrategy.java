@@ -8,7 +8,7 @@ import com.ctrip.platform.dal.dao.DalHints;
  * @Author limingdong
  * @create 2021/8/25
  */
-public interface WriteStrategy extends RouteStrategyLifecycle, ExceptionInterceptor {
+public interface WriteStrategy extends RouteStrategy {
 
     HostSpec pickWrite(DalHints hints) throws HostNotExpectedException;
 }

@@ -58,7 +58,7 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     }
 
     protected RouteStrategy prepareRouteStrategy() {
-        RouteStrategy strategy = this.clusterProperties.getRouteStrategy();
+        RouteStrategy strategy = this.clusterProperties.generate();
         strategy.init(shardMeta.configuredHosts(), clusterProperties.routeStrategyProperties());
 
         if (strategy instanceof ConnectionFactoryAware) {

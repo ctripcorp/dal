@@ -18,6 +18,10 @@ public interface RouteStrategy extends RouteStrategyLifecycle, ExceptionIntercep
 
     HostSpec pickNode(DalHints hints) throws HostNotExpectedException;
 
+    default boolean multiMaster() {
+        return false;
+    }
+
     default  <T> T unwrap(Class<T> iface) throws SQLException {
         try {
             return iface.cast(this);

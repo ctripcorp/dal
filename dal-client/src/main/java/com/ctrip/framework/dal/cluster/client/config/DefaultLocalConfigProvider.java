@@ -64,11 +64,6 @@ public class DefaultLocalConfigProvider implements ClusterConfigProvider {
                 }
 
                 @Override
-                public boolean multiMaster() {
-                    return false;
-                }
-
-                @Override
                 public String getTag() {
                     return null;
                 }

@@ -7,6 +7,7 @@ import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
+import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.shard.read.RouteStrategy;
 
 import java.util.*;
@@ -28,6 +29,10 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     public void initReadStrategy() {
+        ClusterRouteStrategyConfig config = databaseShardConfig.getClusterConfig().getRouteStrategyConfig();
+        if (config != null && !config.multiMaster()) {
+            //todo lmd init
+        }
         String clazz = RouteStrategyEnum.parse(databaseShardConfig.getClusterConfig().getRouteStrategyConfig().routeStrategyName());
         try{
             routeStrategy = (RouteStrategy)Class.forName(clazz).newInstance();

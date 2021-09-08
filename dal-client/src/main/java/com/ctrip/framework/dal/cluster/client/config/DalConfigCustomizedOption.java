@@ -40,7 +40,5 @@ public interface DalConfigCustomizedOption {
 
     String getRouteStrategy();
 
-    boolean multiMaster();
-
     String getTag();
 }

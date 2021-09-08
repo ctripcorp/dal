@@ -9,6 +9,10 @@ import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
  */
 public interface MultiMasterStrategy extends RouteStrategy, ConnectionFactoryAware {
 
+    default boolean multiMaster() {
+        return true;
+    }
+
     String FAILOVER_TIME_MS = "failoverTimeMS";
     long DEFAULT_FAILOVER_TIME_MS_VALUE = 10000;
 

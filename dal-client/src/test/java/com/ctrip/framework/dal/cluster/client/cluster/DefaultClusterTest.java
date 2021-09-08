@@ -75,11 +75,6 @@ public class DefaultClusterTest {
             }
 
             @Override
-            public boolean multiMaster() {
-                return false;
-            }
-
-            @Override
             public String getTag() {
                 return null;
             }

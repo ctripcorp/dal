@@ -1,10 +1,8 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
-import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
-import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 
 /**
  * @author c7ch23en
@@ -43,14 +41,7 @@ public class MultiHostClusterPropertiesAdapter implements MultiHostClusterProper
     }
 
     @Override
-    public RouteStrategy getRouteStrategy() {
-        String strategyName = routeStrategyName();
-        String clazz = RouteStrategyEnum.parse(strategyName);
-        try {
-            return  (com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy)Class.forName(clazz).newInstance();
-        } catch (Throwable t) {
-            String msg = "Errored constructing route strategy: " + strategyName;
-            throw new DalRuntimeException(msg, t);
-        }
+    public RouteStrategy generate() {
+        return routeStrategyConfig.generate();
     }
 }

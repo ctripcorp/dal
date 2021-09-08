@@ -92,12 +92,13 @@ public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy
     }
 
     protected void initProperties(CaseInsensitiveProperties strategyProperties) {
-        putIfAbsent(strategyProperties, FAILOVER_TIME_MS, String.valueOf(DEFAULT_FAILOVER_TIME_MS_VALUE));
-        putIfAbsent(strategyProperties, BLACKLIST_TIMEOUT_MS, String.valueOf(DEFAULT_BLACKLIST_TIMEOUT_MS_VALUE));
-        putIfAbsent(strategyProperties, FIXED_VALIDATE_PERIOD_MS, String.valueOf(DEFAULT_FIXED_VALIDATE_PERIOD_MS_VALUE));
-        putIfAbsent(strategyProperties, ZONES_PRIORITY, String.valueOf(DEFAULT_ZONES_PRIORITY_VALUE));
-        putIfAbsent(strategyProperties, MULTI_MASTER, String.valueOf(DEFAULT_MULTI_MASTER_VALUE));
-        putIfAbsent(strategyProperties, CLUSTER_NAME, DEFAULT_CLUSTER_NAME_VALUE);
+        this.strategyOptions = strategyProperties;
+        putIfAbsent(this.strategyOptions, FAILOVER_TIME_MS, String.valueOf(DEFAULT_FAILOVER_TIME_MS_VALUE));
+        putIfAbsent(this.strategyOptions, BLACKLIST_TIMEOUT_MS, String.valueOf(DEFAULT_BLACKLIST_TIMEOUT_MS_VALUE));
+        putIfAbsent(this.strategyOptions, FIXED_VALIDATE_PERIOD_MS, String.valueOf(DEFAULT_FIXED_VALIDATE_PERIOD_MS_VALUE));
+        putIfAbsent(this.strategyOptions, ZONES_PRIORITY, String.valueOf(DEFAULT_ZONES_PRIORITY_VALUE));
+        putIfAbsent(this.strategyOptions, MULTI_MASTER, String.valueOf(DEFAULT_MULTI_MASTER_VALUE));
+        putIfAbsent(this.strategyOptions, CLUSTER_NAME, DEFAULT_CLUSTER_NAME_VALUE);
     }
 
     protected void putIfAbsent(CaseInsensitiveProperties strategyProperties, String key, String value) {

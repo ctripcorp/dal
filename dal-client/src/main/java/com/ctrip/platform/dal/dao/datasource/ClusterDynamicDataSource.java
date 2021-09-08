@@ -163,6 +163,8 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
             return new TagDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()), clusterInfo.getTag());
         if (clusterInfo.getRole() == DatabaseRole.MASTER)
             return new TraceableClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
+        if (clusterInfo.getRole() == DatabaseRole.SLAVES)
+            return new TraceableClusterDataSourceIdentity(cluster.getSlavesOnShard(clusterInfo.getShardIndex()).get(clusterInfo.getSlaveIndex()));
         else {
             List<Database> slaves = cluster.getSlavesOnShard(clusterInfo.getShardIndex());
             if (slaves == null || slaves.size() == 0)

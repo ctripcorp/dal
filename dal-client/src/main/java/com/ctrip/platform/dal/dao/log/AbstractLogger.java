@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.log;
 
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,4 +115,8 @@ public abstract class AbstractLogger implements ILogger {
     @Override
     public void logMetric(String metricName, long duration, Map<String, String> tags) {}
 
+    @Override
+    public void logSqlTransaction(SqlContext sqlContext) {
+
+    }
 }

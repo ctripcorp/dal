@@ -1,6 +1,5 @@
 package com.ctrip.framework.dal.cluster.client.config;
 
-import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShardImpl;
 

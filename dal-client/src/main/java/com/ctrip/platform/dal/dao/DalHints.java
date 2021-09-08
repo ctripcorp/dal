@@ -560,4 +560,8 @@ public class DalHints {
     public RouteStrategyEnum getRouteStrategy() {
         return (RouteStrategyEnum)get(DalHintEnum.routeStrategy);
     }
+
+    public void cleanRouteStrategy() {
+        hints.remove(DalHintEnum.routeStrategy);
+    }
 }

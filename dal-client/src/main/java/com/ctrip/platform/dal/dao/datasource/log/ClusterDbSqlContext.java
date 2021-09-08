@@ -78,7 +78,16 @@ public class ClusterDbSqlContext extends BaseSqlContext {
         ClusterDbSqlContext context = new ClusterDbSqlContext(cluster, shard, role,
                 getClientVersion(), getClientZone(), getDbName());
         context.populateDbZone(getDbZone());
+        context.populateDatabase(getDatabase());
         return context;
+    }
+
+    public String getClusterName() {
+        return cluster.getClusterName();
+    }
+
+    public Integer getShard() {
+        return shard;
     }
 
     public void populateShard(Integer shard) {

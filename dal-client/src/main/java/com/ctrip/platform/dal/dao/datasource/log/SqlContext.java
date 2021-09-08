@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource.log;
 
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.datasource.ValidationResult;
 
 import java.util.Set;
@@ -30,5 +31,17 @@ public interface SqlContext {
     void endExecution(Throwable errorIfAny);
 
     SqlContext fork();
+
+    void populateReadStrategy(String readStrategy);
+
+    void populateQueryRows(int rows);
+
+    void populateDatabase(String database);
+
+    void populateSql(String sql);
+
+    void populateSqlTransaction(long millionSeconds);
+
+    void populateParameters(StatementParameters parameters);
 
 }

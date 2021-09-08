@@ -3,24 +3,34 @@ package com.ctrip.framework.dal.cluster.client.shard.read;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.DalHintEnum;
+import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ReadStrategy;
+import com.ctrip.platform.dal.dao.helper.DalElementFactory;
+import com.ctrip.platform.dal.dao.helper.EnvUtils;
 
+import java.sql.SQLException;
 import java.util.*;
 
 import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_SLAVES_FIRST;
-import static com.ctrip.platform.dal.dao.DalHintEnum.routeStrategy;
 
-public class ReadSlavesFirstStrategy implements RouteStrategy {
+public class ReadSlavesFirstStrategy implements ReadStrategy {
 
+    protected static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
     protected HashMap<String, List<HostSpec>> hostMap = new HashMap<>();
-    protected HashMap<RouteStrategyEnum, RouteStrategy> routeStrategies = new HashMap<>();
+    protected HashMap<RouteStrategyEnum, ReadStrategy> routeStrategies = new HashMap<>();
     protected final String ZONE_MISS = "%s hostspec of %s zone message missed.";
 
     private RouteStrategyEnum readStrategyEnum = READ_SLAVES_FIRST;
-    private Set<HostSpec> hostSpecs;
+    protected Set<HostSpec> hostSpecs;
+    protected CaseInsensitiveProperties strategyProperties;
 
     @Override
-    public void init(Set<HostSpec> hostSpecs) {
+    public void init(Set<HostSpec> hostSpecs, CaseInsensitiveProperties strategyProperties) {
         this.hostSpecs = hostSpecs;
+        this.strategyProperties = strategyProperties;
         List<HostSpec> masters = new ArrayList<>();
         List<HostSpec> slaves = new ArrayList<>();
 
@@ -36,11 +46,11 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
     }
 
     @Override
-    public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
-        if (map.get(routeStrategy) != null)
-            return dalHintsRoute(map);
+    public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {
+        if (dalHints.getRouteStrategy() != null)
+            return dalHintsRoute(dalHints);
 
-        if ((boolean)map.get(slaveOnly) && (boolean)map.get(isPro))
+        if (dalHints.is(DalHintEnum.slaveOnly) && envUtils.isProd())
             return slaveOnly();
 
         List<HostSpec> slaves = hostMap.get(slaveRole);
@@ -80,18 +90,18 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
         return hostSpecs.get((int)(Math.random() * hostSpecs.size()));
     }
 
-    protected HostSpec dalHintsRoute (Map<String, Object> map) {
-        RouteStrategyEnum strategyEnum = (RouteStrategyEnum)map.get(routeStrategy);
-        map.remove(routeStrategy);
+    protected HostSpec dalHintsRoute (DalHints dalHints) {
+        RouteStrategyEnum strategyEnum = dalHints.getRouteStrategy();
+        dalHints.cleanRouteStrategy();
         if (readStrategyEnum.equals(strategyEnum))
-            return this.pickRead(map);
+            return this.pickRead(dalHints);
 
         if (routeStrategies.get(strategyEnum) == null) {
             synchronized (routeStrategies) {
                 if (routeStrategies.get(strategyEnum) == null) {
                     try {
-                        RouteStrategy tempRouteStrategy = (RouteStrategy)Class.forName(strategyEnum.getClazz()).newInstance();
-                        tempRouteStrategy.init(hostSpecs);
+                        ReadStrategy tempRouteStrategy = (ReadStrategy)Class.forName(strategyEnum.getClazz()).newInstance();
+                        tempRouteStrategy.init(hostSpecs, strategyProperties);
                         routeStrategies.put(strategyEnum, tempRouteStrategy);
                     } catch (Throwable e) {
 
@@ -100,16 +110,21 @@ public class ReadSlavesFirstStrategy implements RouteStrategy {
             }
         }
 
-        return routeStrategies.get(strategyEnum).pickRead(map);
-    }
-
-    @Override
-    public void onChange(Set<HostSpec> hostSpecs) {
-
+        return routeStrategies.get(strategyEnum).pickRead(dalHints);
     }
 
     @Override
     public void dispose() {
 
+    }
+
+    @Override
+    public SQLException interceptException(SQLException sqlEx, HostConnection conn) {
+        return null;
+    }
+
+    @Override
+    public HostSpec pickNode(DalHints hints) throws HostNotExpectedException {
+        return pickRead(hints);
     }
 }

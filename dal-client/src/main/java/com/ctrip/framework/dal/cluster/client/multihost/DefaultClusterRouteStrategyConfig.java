@@ -1,7 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.multihost;
 
 import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
@@ -50,8 +49,6 @@ public class DefaultClusterRouteStrategyConfig implements ClusterRouteStrategyCo
     }
 
     public void setProperty(String name, String value) {
-        if (properties.get(name) != null)
-            throw new ClusterRuntimeException("Duplicate property: " + name);
         properties.set(name, value);
     }
 

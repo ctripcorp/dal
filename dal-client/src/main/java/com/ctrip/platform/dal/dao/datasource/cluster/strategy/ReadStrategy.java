@@ -10,5 +10,16 @@ import com.ctrip.platform.dal.dao.DalHints;
  */
 public interface ReadStrategy extends RouteStrategy {
 
+    boolean enable = false;
+
+    // constant
+    String masterRole = "master";
+    String slaveRole = "slave";
+    String slaveOnly = "slaveOnly";
+    String isPro = "isPro";
+
+    // message
+    String NO_HOST_AVAILABLE = "No %s available";
+
     HostSpec pickRead(DalHints hints) throws HostNotExpectedException;
 }

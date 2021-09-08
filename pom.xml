@@ -15,8 +15,8 @@
     <packaging>pom</packaging>
 
     <modules>
+<!--        <module>dal-cluster-client</module>-->
         <module>dal-client</module>
-        <!--<module>dal-cluster-client</module>-->
         <!--<module>dao-gen-core</module>
         <module>dal-dao-gen</module>-->
     </modules>
@@ -25,7 +25,7 @@
         <java.version>1.8</java.version>
         <javax.activation.version>1.1.1</javax.activation.version>
 
-        <!--<dal-cluster-client.version>${project.version}</dal-cluster-client.version>-->
+        <dal-cluster-client.version>${project.version}</dal-cluster-client.version>
         <dal-client.version>${project.version}</dal-client.version>
 
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
@@ -98,11 +98,11 @@
                 <version>${javax.activation.version}</version>
             </dependency>
 
-            <!--<dependency>-->
-                <!--<groupId>com.ctrip.framework.dal</groupId>-->
-                <!--<artifactId>dal-cluster-client</artifactId>-->
-                <!--<version>${dal-cluster-client.version}</version>-->
-            <!--</dependency>-->
+            <dependency>
+                <groupId>com.ctrip.framework.dal</groupId>
+                <artifactId>dal-cluster-client</artifactId>
+                <version>${dal-cluster-client.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.ctrip.platform</groupId>
                 <artifactId>dal-client</artifactId>

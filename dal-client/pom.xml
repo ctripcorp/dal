@@ -13,10 +13,10 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>com.ctrip.framework.dal</groupId>-->
-            <!--<artifactId>dal-cluster-client</artifactId>-->
-        <!--</dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.ctrip.framework.dal</groupId>-->
+<!--            <artifactId>dal-cluster-client</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

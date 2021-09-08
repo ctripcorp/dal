@@ -6,11 +6,7 @@ import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
-<<<<<<< HEAD
-import com.ctrip.framework.dal.cluster.client.shard.read.RouteStrategy;
-=======
 import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
->>>>>>> ctrip-master
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

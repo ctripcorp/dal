@@ -1,14 +1,13 @@
 package com.ctrip.framework.dal.cluster.client.shard;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.config.DatabaseShardConfigImpl;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
-import com.ctrip.framework.dal.cluster.client.shard.read.RouteStrategy;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ReadStrategy;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +20,7 @@ public class DatabaseShardImpl implements DatabaseShard {
     private DatabaseShardConfigImpl databaseShardConfig;
     private List<Database> masters = new LinkedList<>();
     private List<Database> slaves = new LinkedList<>();
-    private RouteStrategy routeStrategy;
+    private ReadStrategy routeStrategy;
     private ConcurrentHashMap<HostSpec, Database> hostToDataBase = new ConcurrentHashMap<>();
 
     public DatabaseShardImpl(DatabaseShardConfigImpl databaseShardConfig) {
@@ -30,15 +29,10 @@ public class DatabaseShardImpl implements DatabaseShard {
 
     public void initReadStrategy() {
         ClusterRouteStrategyConfig config = databaseShardConfig.getClusterConfig().getRouteStrategyConfig();
-        if (config != null && !config.multiMaster()) {
-            //todo lmd init
+        if (config == null || config.multiMaster()) {
+            return;
         }
-        String clazz = RouteStrategyEnum.parse(databaseShardConfig.getClusterConfig().getRouteStrategyConfig().routeStrategyName());
-        try{
-            routeStrategy = (RouteStrategy)Class.forName(clazz).newInstance();
-        } catch (Throwable t) {
-            throw new ClusterRuntimeException(t);
-        }
+        routeStrategy = (ReadStrategy) config.generate();
 
         List<Database> databases = new ArrayList<>();
         databases.addAll(masters);
@@ -52,7 +46,7 @@ public class DatabaseShardImpl implements DatabaseShard {
         });
 
         try{
-            routeStrategy.init(hostSpecs);
+            routeStrategy.init(hostSpecs, new CaseInsensitiveProperties());
         } catch (DalMetadataException error) {
             throw new DalMetadataException(databaseShardConfig.getClusterConfig().getClusterName() + error.getMessage());
         }
@@ -74,7 +68,7 @@ public class DatabaseShardImpl implements DatabaseShard {
     }
 
     @Override
-    public RouteStrategy getRouteStrategy() {
+    public ReadStrategy getRouteStrategy() {
         return routeStrategy;
     }
 

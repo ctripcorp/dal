@@ -3,11 +3,11 @@ package com.ctrip.framework.dal.cluster.client.shard.read;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
+import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.platform.dal.dao.DalHints;
 
 import java.util.*;
-
-import static com.ctrip.platform.dal.dao.DalHintEnum.routeStrategy;
 
 public class ReadCurrentZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     protected String currentZone;
@@ -16,8 +16,8 @@ public class ReadCurrentZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     private final String HOST_SPEC_ERROR = " of %s zone msg lost";
 
     @Override
-    public void init(Set<HostSpec> hostSpecs) {
-        super.init(hostSpecs);
+    public void init(Set<HostSpec> hostSpecs, CaseInsensitiveProperties strategyProperties) {
+        super.init(hostSpecs, strategyProperties);
         for (HostSpec hostSpec : hostSpecs) {
             if (StringUtils.isTrimmedEmpty(hostSpec.zone()))
                 throw new DalMetadataException(String.format(HOST_SPEC_ERROR, hostSpec.toString()));
@@ -32,16 +32,11 @@ public class ReadCurrentZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     }
 
     @Override
-    public HostSpec pickRead(Map<String, Object> map) throws HostNotExpectedException {
-        if (map.get(routeStrategy) != null)
-            return dalHintsRoute(map);
+    public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {
+        if (dalHints.getRouteStrategy() != null)
+            return dalHintsRoute(dalHints);
 
         return null;
-    }
-
-    @Override
-    public void onChange(Set<HostSpec> hostSpecs) {
-
     }
 
     @Override

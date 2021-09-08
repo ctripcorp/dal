@@ -34,7 +34,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         mgrRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                return doGenerate(routeStrategyName());
             }
 
             @Override
@@ -56,7 +56,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         obRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                return doGenerate(routeStrategyName());
             }
 
             @Override
@@ -78,7 +78,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         customRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                return doGenerate(routeStrategyName());
             }
 
             @Override
@@ -122,5 +122,15 @@ public class MultiHostClusterPropertiesAdapterTest {
         String routeStrategy = clusterPropertiesAdapter.routeStrategyName();
         Assert.assertEquals(CUSTOM_STRATEGY, routeStrategy);
         clusterPropertiesAdapter.generate();
+    }
+
+    private RouteStrategy doGenerate(String strategyName) {
+        String clazz = RouteStrategyEnum.parse(strategyName);
+        try {
+            return  (com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy)Class.forName(clazz).newInstance();
+        } catch (Throwable t) {
+            String msg = "Error constructing route strategy: " + strategyName;
+            throw new DalRuntimeException(msg, t);
+        }
     }
 }

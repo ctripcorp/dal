@@ -23,7 +23,7 @@ public interface MultiMasterStrategy extends RouteStrategy, ConnectionFactoryAwa
     long DEFAULT_FIXED_VALIDATE_PERIOD_MS_VALUE = 30000;
 
     String ZONES_PRIORITY = "zonesPriority";
-    String DEFAULT_ZONES_PRIORITY_VALUE = "shaoy,sharb,shajq,shafq";
+    String DEFAULT_ZONES_PRIORITY_VALUE = "sharb,shaxy,shafq,shajq,shaoy";
 
     String MULTI_MASTER = "multiMaster";
     boolean DEFAULT_MULTI_MASTER_VALUE = true;

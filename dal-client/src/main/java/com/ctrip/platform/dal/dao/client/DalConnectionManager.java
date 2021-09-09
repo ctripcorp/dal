@@ -21,6 +21,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
+import static com.ctrip.platform.dal.dao.log.LogUtils.logReadStrategy;
+
 public class DalConnectionManager {
 	private DalConfigure config;
 	private String logicDbName;
@@ -165,7 +167,7 @@ public class DalConnectionManager {
 
 	protected DataBase clusterSelect(DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) {
 		Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
-		GroupConnection.logReadStrategy(cluster);
+		logReadStrategy(cluster);
 		DatabaseShard databaseShard;
 		if (StringUtils.isEmpty(shard)) {
 			Set<Integer> shards = cluster.getAllDbShards();

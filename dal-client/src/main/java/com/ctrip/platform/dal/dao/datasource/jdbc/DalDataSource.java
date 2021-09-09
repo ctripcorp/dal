@@ -6,7 +6,6 @@ import com.ctrip.platform.dal.dao.datasource.cluster.DataSourceDelegate;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.datasource.monitor.DataSourceMonitor;
 import com.ctrip.platform.dal.dao.datasource.monitor.DefaultDataSourceMonitor;
-import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,7 +23,6 @@ public abstract class DalDataSource extends DataSourceDelegate {
 
     @Override
     public Connection getConnection() throws SQLException {
-        GroupConnection.getLogContext().setSqlTransactionStartTime(System.currentTimeMillis());
         Connection connection = super.getConnection();
         return new DalConnection(connection, this, createSqlContext());
     }

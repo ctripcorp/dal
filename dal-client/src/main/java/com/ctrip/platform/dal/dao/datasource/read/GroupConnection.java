@@ -17,15 +17,10 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
 
+import static com.ctrip.platform.dal.dao.log.LogUtils.logReadStrategy;
+
 public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
-    private static final ThreadLocal<DataSourceLogContext> logContext = new ThreadLocal(){
-
-        @Override
-        protected Object initialValue() {
-            return new DataSourceLogContext();
-        }
-    };
     private static final String SQL_FORCE_WRITE_HINT = "/*+dal:write*/";
 
     private ClusterInfo clusterInfo;
@@ -506,21 +501,5 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return this.getClass().isAssignableFrom(iface);
-    }
-
-    public static DataSourceLogContext getLogContext() {
-        return logContext.get();
-    }
-
-    public static void logReadStrategy(Cluster cluster) {
-        try {
-            getLogContext().setReadStrategy(cluster.getCustomizedOption().getRouteStrategy());
-        } catch (Throwable t) {
-
-        }
-    }
-
-    public static void markLogged(boolean hasLogged) {
-        getLogContext().setHasLogged(hasLogged);
     }
 }

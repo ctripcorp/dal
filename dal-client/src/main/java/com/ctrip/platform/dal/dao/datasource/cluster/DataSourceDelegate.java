@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
+import static com.ctrip.platform.dal.dao.log.LogUtils.*;
+
 /**
  * @author c7ch23en
  */
@@ -16,7 +18,10 @@ public abstract class DataSourceDelegate implements DataSource, Delegate<DataSou
 
     @Override
     public Connection getConnection() throws SQLException {
-        return getDelegated().getConnection();
+        sqlTransactionStart();
+        Connection connection = getDelegated().getConnection();
+        connectionInterval();
+        return connection;
     }
 
     @Override

@@ -366,8 +366,8 @@ public class DalStatement implements Statement {
 
     private void afterExecution(Throwable errorIfAny) {
         try {
-            clearLogContext();
             context.endExecution(errorIfAny);
+            clearLogContext();
         } catch (Throwable t) {
             // ignore
         }

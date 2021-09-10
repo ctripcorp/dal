@@ -209,7 +209,7 @@ public abstract class BaseSqlContext implements SqlContext {
     }
 
     protected void logMetric() {
-        LOGGER.logMetric(METRIC_NAME, getExecutionTime() * TICKS_PER_MILLISECOND, toMetricTags());
+        LOGGER.logMetric(METRIC_NAME + ".test", getExecutionTime() * TICKS_PER_MILLISECOND, toMetricTags());
     }
 
     protected long getExecutionTime() {

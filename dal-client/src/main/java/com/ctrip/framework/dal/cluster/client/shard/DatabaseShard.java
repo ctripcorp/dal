@@ -1,7 +1,7 @@
 package com.ctrip.framework.dal.cluster.client.shard;
 
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ReadStrategy;
 
 import java.util.List;
@@ -19,6 +19,6 @@ public interface DatabaseShard {
 
     ReadStrategy getRouteStrategy();
 
-    Database parseFromHostSpec(HostSpec hostSpec);
+    Database selectDatabaseFromReadStrategy(DalHints dalHints);
 
 }

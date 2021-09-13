@@ -184,8 +184,7 @@ public class DalConnectionManager {
 			return new ClusterDataBase(databaseShard.getMasters().iterator().next());
 		}
 
-		HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(hints);
-		return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
+		return new ClusterDataBase(databaseShard.selectDatabaseFromReadStrategy(hints));
 	}
 
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

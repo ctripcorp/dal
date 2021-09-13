@@ -26,6 +26,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     public static final String CUSTOM_DAL_CLIENT = "customDalClient";
     public static final String TABLE_PARSER_CACHE_KEY_BYTES = "tableParserCacheKeyBytes";
     public static final String ENABLE_UCS_CONTEXT_LOG = "enableUcsContextLog";
+    public static final String MYBATIS_LOG_ENABLE = "mybatisLogEnable";
     public static final String DATASOURCE_MONITOR_FILTER_EXCEPTIONS = "datasourceMonitorFilterExceptions";
     public static final String DAO_PACKAGE_PATH = "daoPackagePath";
 
@@ -162,6 +163,11 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
             result.add(pack.trim());
         }
         return result;
+    }
+
+    @Override
+    public boolean mybatisLogEnable() {
+        return Boolean.valueOf(getProperty(MYBATIS_LOG_ENABLE, "false"));
     }
 
     private String getProperty(String name, String defaultValue) {

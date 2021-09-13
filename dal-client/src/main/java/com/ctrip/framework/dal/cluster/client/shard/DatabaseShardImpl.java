@@ -7,6 +7,7 @@ import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ReadStrategy;
 
 import java.util.*;
@@ -72,9 +73,13 @@ public class DatabaseShardImpl implements DatabaseShard {
         return routeStrategy;
     }
 
-    @Override
-    public Database parseFromHostSpec(HostSpec hostSpec) {
+    private Database parseFromHostSpec(HostSpec hostSpec) {
         return hostToDataBase.get(hostSpec);
+    }
+
+    @Override
+    public Database selectDatabaseFromReadStrategy(DalHints dalHints) {
+        return parseFromHostSpec(routeStrategy.pickRead(dalHints));
     }
 
     public void addDatabase(Database database) {

@@ -96,23 +96,21 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
     protected Connection pickRead() throws SQLException {
         DatabaseShard databaseShard = clusterInfo.getCluster().getDatabaseShard(shardIndex);
-        HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(buildContext());
-        DataSource dataSource = readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+        DataSource dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
         if (dataSource == null) {
             synchronized (groupDataSource) {
-                dataSource = readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+                dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
                 if (dataSource == null) {
                     groupDataSource.init();
                     this.readDataSource = groupDataSource.readDataSource;
-                    this.readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+                    this.readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
                 }
             }
         }
-        System.out.println(hostSpec);
         return dataSource.getConnection();
     }
 
-    protected DalHints buildContext() {
+    protected DalHints buildReadStrategyContext() {
         // todo-lhj dalhints需要测试是否需要初始化什么？
         DalHints dalHints = new DalHints();
         return dalHints;

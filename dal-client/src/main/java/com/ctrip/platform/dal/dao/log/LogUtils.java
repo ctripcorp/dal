@@ -45,7 +45,7 @@ public class LogUtils {
         try {
             getLogContext().setReadStrategy(cluster.getCustomizedOption().getRouteStrategy());
         } catch (Throwable t) {
-
+            // no need to do
         }
     }
 

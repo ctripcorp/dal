@@ -166,11 +166,15 @@ public abstract class BaseSqlContext implements SqlContext {
 
     @Override
     public void endExecution(Throwable errorIfAny) {
-        this.errorIfAny = errorIfAny;
-        endExecution();
-        logMetric();
-        if (!getLogContext().isHasLogged())
-            logSqlTransaction();
+        try{
+            this.errorIfAny = errorIfAny;
+            endExecution();
+            logMetric();
+            if (!getLogContext().isHasLogged())
+                logSqlTransaction();
+        } catch (Throwable t) {
+            // just catch exception avoid affect follow method
+        }
     }
 
     @Override
@@ -209,7 +213,7 @@ public abstract class BaseSqlContext implements SqlContext {
     }
 
     protected void logMetric() {
-        LOGGER.logMetric(METRIC_NAME + ".test", getExecutionTime() * TICKS_PER_MILLISECOND, toMetricTags());
+        LOGGER.logMetric(METRIC_NAME, getExecutionTime() * TICKS_PER_MILLISECOND, toMetricTags());
     }
 
     protected long getExecutionTime() {

@@ -10,11 +10,11 @@ public class LocalContextReadWriteStrategy {
         return shouldReadFromMaster != null && shouldReadFromMaster;
     }
 
-    protected static void setReadFromMaster() {
+    public static void setReadFromMaster() {
         forceMaster.set(true);
     }
 
-    protected static void clearContext() {
+    public static void clearContext() {
         forceMaster.remove();
     }
 }

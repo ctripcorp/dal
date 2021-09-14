@@ -8,12 +8,6 @@ import java.util.Set;
 
 public interface RouteStrategy {
 
-    boolean enable = false;
-    boolean readOnly = false;
-    boolean failoverToMaster = true;
-    // todo-lhj 默认值设置定义
-    int slavesFailOverDelayTimeMS = 1000;
-
     // constant
     String masterRole = "master";
     String slaveRole = "slave";

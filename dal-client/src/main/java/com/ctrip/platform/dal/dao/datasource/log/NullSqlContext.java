@@ -46,7 +46,7 @@ public class NullSqlContext implements SqlContext {
     }
 
     @Override
-    public void populateReadStrategy(String readStrategy) {
+    public void populateConnectionObtained(long millionSeconds) {
 
     }
 

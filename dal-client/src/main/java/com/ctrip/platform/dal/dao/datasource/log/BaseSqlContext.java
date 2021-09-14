@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ctrip.platform.dal.dao.log.LogUtils.getLogContext;
+
 /**
  * @author c7ch23en
  */
@@ -42,7 +44,6 @@ public abstract class BaseSqlContext implements SqlContext {
     protected static final String UCS_VALIDATION = "UcsValidation";
     protected static final String DAL_VALIDATION = "DalValidation";
     protected static final String STATUS = "Status";
-    protected static final String READ_STRATEGY = "ReadStrategy";
 
     protected static final String CHANNEL_DATASOURCE = "DAL.DataSource";
     protected static final String STATUS_FAIL = "fail";
@@ -63,8 +64,8 @@ public abstract class BaseSqlContext implements SqlContext {
     private String dalValidation;
     private Throwable errorIfAny;
     private long executionEndTime;
-    private String readStrategy;
     private long sqlTransactionStartTime;
+    private long connectionObtainedTime;
     private long recordRows;
     private String sql;
     private String database;
@@ -165,10 +166,14 @@ public abstract class BaseSqlContext implements SqlContext {
 
     @Override
     public void endExecution(Throwable errorIfAny) {
-        this.errorIfAny = errorIfAny;
-        endExecution();
-        logMetric();
-        logSqlTransaction();
+        try {
+            this.errorIfAny = errorIfAny;
+            endExecution();
+            logMetric();
+        } finally {
+            if (!getLogContext().isHasLogged())
+                logSqlTransaction();
+        }
     }
 
     @Override
@@ -191,11 +196,6 @@ public abstract class BaseSqlContext implements SqlContext {
     }
 
     @Override
-    public void populateReadStrategy(String readStrategy) {
-        this.readStrategy = readStrategy;
-    }
-
-    @Override
     public void populateSqlTransaction(long millionSeconds) {
         this.sqlTransactionStartTime = millionSeconds;
     }
@@ -204,6 +204,11 @@ public abstract class BaseSqlContext implements SqlContext {
     public void populateParameters(StatementParameters parameters) {
         if (parameters != null)
             params = parameters.toLogString();
+    }
+
+    @Override
+    public void populateConnectionObtained(long millionSeconds) {
+        this.connectionObtainedTime = millionSeconds;
     }
 
     protected void logMetric() {
@@ -227,7 +232,6 @@ public abstract class BaseSqlContext implements SqlContext {
         addTag(tags, OP_TYPE, operation);
         addTag(tags, UCS_VALIDATION, ucsValidation);
         addTag(tags, DAL_VALIDATION, dalValidation);
-        addTag(tags, READ_STRATEGY, readStrategy);
         addTag(tags, STATUS, errorIfAny != null ? STATUS_FAIL : STATUS_SUCCESS);
         return tags;
     }
@@ -257,14 +261,6 @@ public abstract class BaseSqlContext implements SqlContext {
 
     protected String getDbZone() {
         return dbZone;
-    }
-
-    public String getReadStrategy() {
-        return readStrategy;
-    }
-
-    public void setReadStrategy(String readStrategy) {
-        this.readStrategy = readStrategy;
     }
 
     public long getSqlTransactionStartTime() {
@@ -329,5 +325,13 @@ public abstract class BaseSqlContext implements SqlContext {
 
     public String getCaller() {
         return callerClass + callerMethod;
+    }
+
+    public long getConnectionObtainedTime() {
+        return connectionObtainedTime;
+    }
+
+    public void setConnectionObtainedTime(long connectionObtainedTime) {
+        this.connectionObtainedTime = connectionObtainedTime;
     }
 }

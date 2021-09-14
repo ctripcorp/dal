@@ -32,7 +32,7 @@ public interface SqlContext {
 
     SqlContext fork();
 
-    void populateReadStrategy(String readStrategy);
+    void populateConnectionObtained(long millionSeconds);
 
     void populateQueryRows(int rows);
 

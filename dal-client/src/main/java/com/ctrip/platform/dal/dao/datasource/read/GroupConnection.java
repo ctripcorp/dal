@@ -1,15 +1,12 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
 
-import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.shard.read.RouterType;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.datasource.log.DataSourceLogContext;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import com.ctrip.platform.dal.dao.strategy.LocalContextReadWriteStrategy;
 import org.apache.commons.lang.StringUtils;
@@ -18,15 +15,10 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
 
+import static com.ctrip.platform.dal.dao.log.LogUtils.logReadStrategy;
+
 public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
-    private static final ThreadLocal<DataSourceLogContext> logContext = new ThreadLocal(){
-
-        @Override
-        protected Object initialValue() {
-            return new DataSourceLogContext();
-        }
-    };
     private static final String SQL_FORCE_WRITE_HINT = "/*+dal:write*/";
 
     private ClusterInfo clusterInfo;
@@ -102,24 +94,22 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
     protected Connection pickRead() throws SQLException {
         DatabaseShard databaseShard = clusterInfo.getCluster().getDatabaseShard(shardIndex);
-        HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(buildContext());
-        DataSource dataSource = readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+        DataSource dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
         if (dataSource == null) {
             synchronized (groupDataSource) {
-                dataSource = readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+                dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
                 if (dataSource == null) {
                     groupDataSource.init();
                     this.readDataSource = groupDataSource.readDataSource;
-                    this.readDataSource.get(databaseShard.parseFromHostSpec(hostSpec));
+                    this.readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
                 }
             }
         }
-        System.out.println(hostSpec);
         return dataSource.getConnection();
     }
 
-    protected DalHints buildContext() {
-        // todo-lhj dalhints需要测试是否需要初始化什么？
+    protected DalHints buildReadStrategyContext() {
+        // todo-lhj dalhints需要测试是否需要初始化: 识别sql中的hints，并填入dalhints中
         DalHints dalHints = new DalHints();
         return dalHints;
     }
@@ -152,9 +142,9 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
     Connection getRealConnection(String sql, boolean forceWrite) throws SQLException {
         logReadStrategy(clusterInfo.getCluster());
-        if (this.routerType == RouterType.SLAVE_ONLY) {
+        if (this.routerType == RouterType.READ_ONLY) {
             return getReadConnection();
-        } else if (this.routerType == RouterType.MASTER_ONLY) {
+        } else if (this.routerType == RouterType.WRITE_ONLY) {
             return getWriteConnection();
         }
 
@@ -276,7 +266,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             return wConnection.getMetaData();
         }
 
-        if(RouterType.SLAVE_ONLY == routerType) {
+        if(RouterType.READ_ONLY == routerType) {
             return getReadConnection().getMetaData();
         }
 
@@ -286,7 +276,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
     @Override
     public boolean isReadOnly() throws SQLException {
-        if (routerType != null && routerType == RouterType.SLAVE_ONLY) {
+        if (routerType != null && routerType == RouterType.READ_ONLY) {
             return true;
         } else {
             return false;
@@ -308,7 +298,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             return wConnection.getCatalog();
         }
 
-        if(RouterType.SLAVE_ONLY == routerType) {
+        if(RouterType.READ_ONLY == routerType) {
             return getReadConnection().getCatalog();
         }
 
@@ -491,7 +481,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             return wConnection.getSchema();
         }
 
-        if(RouterType.SLAVE_ONLY == routerType) {
+        if(RouterType.READ_ONLY == routerType) {
             return getReadConnection().getSchema();
         }
         return getWriteConnection().getSchema();
@@ -509,21 +499,5 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return this.getClass().isAssignableFrom(iface);
-    }
-
-    public static DataSourceLogContext getLogContext() {
-        return logContext.get();
-    }
-
-    public static void logReadStrategy(Cluster cluster) {
-        try {
-            getLogContext().setReadStrategy(cluster.getCustomizedOption().getRouteStrategy());
-        } catch (Throwable t) {
-
-        }
-    }
-
-    public static void markLogged(boolean hasLogged) {
-        getLogContext().setHasLogged(hasLogged);
     }
 }

@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource.jdbc;
 
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
+import com.ctrip.platform.dal.dao.datasource.log.ClusterDbSqlContext;
 import com.ctrip.platform.dal.dao.datasource.log.OperationType;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
@@ -11,6 +12,9 @@ import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.sql.*;
 import java.util.Collection;
+
+import static com.ctrip.platform.dal.dao.log.LogUtils.clearLogContext;
+import static com.ctrip.platform.dal.dao.log.LogUtils.getLogContext;
 
 public class DalStatement implements Statement {
 
@@ -350,9 +354,11 @@ public class DalStatement implements Statement {
             context.populateCaller();
             context.populateOperationType(operation);
             context.startExecution();
-            context.populateSqlTransaction(System.currentTimeMillis());
-            context.populateReadStrategy(GroupConnection.getLogContext().getReadStrategy());
+            context.populateSqlTransaction(getLogContext().getSqlTransactionStartTime());
             context.populateParameters(logParameters);
+            context.populateConnectionObtained(getLogContext().getConnectionObtained());
+            if (context instanceof ClusterDbSqlContext)
+                ((ClusterDbSqlContext) context).setReadStrategy(getLogContext().getReadStrategy());
         } catch (Throwable t) {
             // ignore
         }
@@ -361,6 +367,7 @@ public class DalStatement implements Statement {
     private void afterExecution(Throwable errorIfAny) {
         try {
             context.endExecution(errorIfAny);
+            clearLogContext();
         } catch (Throwable t) {
             // ignore
         }

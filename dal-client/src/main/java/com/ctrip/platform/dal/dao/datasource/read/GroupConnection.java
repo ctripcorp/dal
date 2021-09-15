@@ -8,6 +8,7 @@ import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
+import com.ctrip.platform.dal.dao.strategy.LocalContextReadWriteStrategy;
 import org.apache.commons.lang.StringUtils;
 
 import javax.sql.DataSource;
@@ -150,6 +151,8 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         if (forceWrite) {
             return getWriteConnection();
         } else if (!autoCommit || StringUtils.trimToEmpty(sql).contains(SQL_FORCE_WRITE_HINT)) {
+            return getWriteConnection();
+        }else if (LocalContextReadWriteStrategy.getReadFromMaster()){
             return getWriteConnection();
         }
 

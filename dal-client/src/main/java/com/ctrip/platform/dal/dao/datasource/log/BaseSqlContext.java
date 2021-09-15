@@ -167,14 +167,13 @@ public abstract class BaseSqlContext implements SqlContext {
 
     @Override
     public void endExecution(Throwable errorIfAny) {
-        try{
+        try {
             this.errorIfAny = errorIfAny;
             endExecution();
             logMetric();
+        } finally {
             if (!getLogContext().isHasLogged())
                 logSqlTransaction();
-        } catch (Throwable t) {
-            // just catch exception avoid affect follow method
         }
     }
 

@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -201,9 +202,13 @@ public abstract class BaseSqlContext implements SqlContext {
     }
 
     @Override
-    public void populateParameters(StatementParameters parameters) {
-        if (parameters != null)
-            params = parameters.toLogString();
+    public void populateParameters(List<StatementParameters> parameters) {
+        StringBuilder sb = new StringBuilder();
+
+        for (StatementParameters param : parameters) {
+            sb.append(param.toLogString());
+        }
+        params = sb.toString();
     }
 
     @Override

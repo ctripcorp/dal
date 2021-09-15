@@ -11,7 +11,9 @@ import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static com.ctrip.platform.dal.dao.log.LogUtils.clearLogContext;
 import static com.ctrip.platform.dal.dao.log.LogUtils.getLogContext;
@@ -24,6 +26,7 @@ public class DalStatement implements Statement {
     protected DalConnection connection;
     private SqlContext context;
     protected StatementParameters logParameters = null;
+    protected List<StatementParameters> batchStatementParameters = new ArrayList<>();
 
     public DalStatement(Statement statement, DalConnection connection, SqlContext context) {
         this.statement = statement;
@@ -355,7 +358,10 @@ public class DalStatement implements Statement {
             context.populateOperationType(operation);
             context.startExecution();
             context.populateSqlTransaction(getLogContext().getSqlTransactionStartTime());
-            context.populateParameters(logParameters);
+            if (batchStatementParameters.isEmpty()) {
+                batchStatementParameters.add(logParameters);
+            }
+            context.populateParameters(batchStatementParameters);
             context.populateConnectionObtained(getLogContext().getConnectionObtained());
             if (context instanceof ClusterDbSqlContext)
                 ((ClusterDbSqlContext) context).setReadStrategy(getLogContext().getReadStrategy());

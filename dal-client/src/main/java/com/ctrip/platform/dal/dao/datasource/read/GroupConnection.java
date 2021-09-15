@@ -100,7 +100,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
                 if (dataSource == null) {
                     groupDataSource.init();
                     this.readDataSource = groupDataSource.readDataSource;
-                    this.readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
+                    dataSource = this.readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
                 }
             }
         }

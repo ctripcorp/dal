@@ -6,7 +6,7 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 public class GroupClusterInfo extends ClusterInfo {
 
     protected Integer slaveIndex;
-    protected final String ID_FORMAT = "%s-%d-%s-%d";
+    protected final String ID_FORMAT = "%s-%d-%s-%d"; //clusterName-shardIndex-role-slaveIndex
 
     public GroupClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, boolean dbSharding, Cluster cluster, Integer slaveIndex) {
         this.clusterName = clusterName;

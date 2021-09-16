@@ -500,7 +500,7 @@ public class RefreshableDataSourceTest {
         }
     }
 
-    @Test
+//    @Test
     public void testGetConnection() throws Exception {
         Properties p1 = new Properties();
         p1.setProperty("userName", "root");

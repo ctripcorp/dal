@@ -1,9 +1,3 @@
-/**
- * Project: zebra-client
- *
- * File Created at Feb 25, 2014
- *
- */
 package com.ctrip.platform.dal.dao.datasource.read.param;
 
 import java.io.Serializable;

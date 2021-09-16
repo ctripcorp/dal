@@ -14,7 +14,7 @@ public abstract class AbstractUnsupportedOperationConnection implements Connecti
 
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
-        throw new UnsupportedOperationException("dal-datasource does not support nativeSQL");
+        // no need to do
     }
 
     @Override
@@ -30,11 +30,6 @@ public abstract class AbstractUnsupportedOperationConnection implements Connecti
     @Override
     public void setHoldability(int holdability) throws SQLException {
         throw new UnsupportedOperationException("dal does not support setHoldability");
-    }
-
-    @Override
-    public int getHoldability() throws SQLException {
-        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     @Override
@@ -69,7 +64,7 @@ public abstract class AbstractUnsupportedOperationConnection implements Connecti
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
-
+        throw new UnsupportedOperationException("dal does not support setClientInfo");
     }
 
     @Override

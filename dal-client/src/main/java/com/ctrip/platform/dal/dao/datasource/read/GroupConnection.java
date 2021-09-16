@@ -4,6 +4,7 @@ package com.ctrip.platform.dal.dao.datasource.read;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.shard.read.RouterType;
+import com.ctrip.framework.dal.cluster.client.util.ExceptionUtils;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
@@ -247,6 +248,8 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             rConnection = null;
             wConnection = null;
         }
+
+        ExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
     }
 
     @Override
@@ -485,6 +488,11 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             return getReadConnection().getSchema();
         }
         return getWriteConnection().getSchema();
+    }
+
+    @Override
+    public int getHoldability() throws SQLException {
+        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     @Override

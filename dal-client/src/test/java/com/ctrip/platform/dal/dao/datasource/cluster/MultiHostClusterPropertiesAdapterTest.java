@@ -34,7 +34,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         mgrRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                return new MGRStrategy();
             }
 
             @Override
@@ -56,7 +56,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         obRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                return new OBStrategy();
             }
 
             @Override
@@ -78,7 +78,7 @@ public class MultiHostClusterPropertiesAdapterTest {
         customRouteStrategyConfig = new ClusterRouteStrategyConfig() {
             @Override
             public RouteStrategy generate() {
-                return null;
+                throw new DalRuntimeException("no class");
             }
 
             @Override

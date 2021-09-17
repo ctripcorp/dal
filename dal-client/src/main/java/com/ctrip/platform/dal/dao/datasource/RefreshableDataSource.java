@@ -15,7 +15,6 @@ import com.ctrip.platform.dal.dao.configure.DataSourceConfigureChangeListener;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalConnection;
 import com.ctrip.platform.dal.dao.datasource.jdbc.DalDataSource;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
-import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -302,7 +301,6 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
 
     @Override
     public Connection getConnection() throws SQLException {
-        GroupConnection.getLogContext().setSqlTransactionStartTime(System.currentTimeMillis());
         Connection connection = getDataSource().getConnection();
         if (dataSourceSwitchListeners.size() > 0) {
             String currentServer = null;

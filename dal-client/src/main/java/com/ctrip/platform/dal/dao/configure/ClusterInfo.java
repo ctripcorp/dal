@@ -10,17 +10,13 @@ import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 
 public class ClusterInfo {
 
-    private static final String ID_FORMAT = "%s-%d-%s";
-    private static final String TAG = "-%s";
-    private static final String SLAVE_INDEX = "-%d";
+    protected final String ID_FORMAT = "%s-%d-%s";
 
-    private String clusterName;
-    private Integer shardIndex;
-    private DatabaseRole role;
-    private String tag;
-    private boolean dbSharding;
-    private Cluster cluster;
-    private Integer slaveIndex;
+    protected String clusterName;
+    protected Integer shardIndex;
+    protected DatabaseRole role;
+    protected boolean dbSharding;
+    protected Cluster cluster;
 
     public ClusterInfo() {}
 
@@ -29,21 +25,19 @@ public class ClusterInfo {
     }
 
     public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, boolean dbSharding, Cluster cluster) {
-        this(clusterName, shardIndex, role, null, dbSharding, cluster);
-    }
-
-    public ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, String tag, boolean dbSharding, Cluster cluster) {
-        this(clusterName, shardIndex, role, tag, dbSharding, cluster, null);
-    }
-
-    private ClusterInfo(String clusterName, Integer shardIndex, DatabaseRole role, String tag, boolean dbSharding, Cluster cluster, Integer slaveIndex) {
         this.clusterName = clusterName;
         this.shardIndex = shardIndex;
         this.role = role;
-        this.tag = tag;
         this.dbSharding = dbSharding;
         this.cluster = cluster;
-        this.slaveIndex = slaveIndex;
+    }
+
+    public ClusterInfo cloneMaster() {
+        return new ClusterInfo(clusterName, shardIndex, DatabaseRole.MASTER, dbSharding, cluster);
+    }
+
+    public GroupClusterInfo cloneSlaveWithIndex(Integer slaveIndex) {
+        return new GroupClusterInfo(clusterName, shardIndex, DatabaseRole.SLAVE, dbSharding, cluster, slaveIndex);
     }
 
     public String getClusterName() {
@@ -70,30 +64,13 @@ public class ClusterInfo {
         return cluster;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public Integer getSlaveIndex() {
-        return slaveIndex;
-    }
-
     public DataSourceIdentity toDataSourceIdentity() {
         return new SimpleClusterDataSourceIdentity(this, cluster);
     }
 
-    public ClusterInfo defineRoleClone(DatabaseRole role, Integer slaveIndex) {
-        return new ClusterInfo(clusterName, shardIndex, role, tag, dbSharding, cluster, slaveIndex);
-    }
-
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null));
-        if (!StringUtils.isEmpty(tag))
-            sb.append(String.format(TAG, tag));
-        if (slaveIndex != null)
-            sb.append(String.format(SLAVE_INDEX, slaveIndex));
-        return sb.toString();
+        return String.format(ID_FORMAT, clusterName, shardIndex, role != null ? role.getValue() : null);
     }
 
     static class SimpleClusterDataSourceIdentity implements DataSourceIdentity, IClusterDataSourceIdentity {

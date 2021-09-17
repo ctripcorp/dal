@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.datasource.log;
 import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.datasource.ValidationResult;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -46,7 +47,7 @@ public class NullSqlContext implements SqlContext {
     }
 
     @Override
-    public void populateReadStrategy(String readStrategy) {
+    public void populateConnectionObtained(long millionSeconds) {
 
     }
 
@@ -71,7 +72,7 @@ public class NullSqlContext implements SqlContext {
     }
 
     @Override
-    public void populateParameters(StatementParameters parameters) {
+    public void populateParameters(List<StatementParameters> parameters) {
 
     }
 }

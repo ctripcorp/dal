@@ -10,8 +10,6 @@ import java.util.logging.Logger;
 
 public abstract class AbstractDataSource implements DataSource {
 
-    protected String configManagerType;
-
     private int loginTimeout = 0;
 
     private PrintWriter out = null;
@@ -50,12 +48,6 @@ public abstract class AbstractDataSource implements DataSource {
         }
 
         return iface.isAssignableFrom(this.getClass());
-    }
-
-    public void setConfigManagerType(String configManagerType) {
-        if (StringUtils.isNotBlank(configManagerType)) {
-            this.configManagerType = configManagerType;
-        }
     }
 
     @Override

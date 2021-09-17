@@ -182,4 +182,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     public Set<String> getDaoPackagesPath() {
         return new HashSet<>();
     }
+
+    @Override
+    public boolean mybatisLogEnable() {
+        return false;
+    }
 }

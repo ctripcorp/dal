@@ -558,7 +558,9 @@ public class DalHints {
     }
 
     public RouteStrategyEnum getRouteStrategy() {
-        return (RouteStrategyEnum)get(DalHintEnum.routeStrategy);
+        if (hints.containsKey(DalHintEnum.routeStrategy))
+            return (RouteStrategyEnum)get(DalHintEnum.routeStrategy);
+        return null;
     }
 
     public void cleanRouteStrategy() {

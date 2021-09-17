@@ -41,4 +41,6 @@ public interface DalPropertiesLocator {
 
     Set<String> getDaoPackagesPath();
 
+    boolean mybatisLogEnable();
+
 }

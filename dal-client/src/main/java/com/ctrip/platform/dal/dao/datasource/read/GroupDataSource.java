@@ -42,24 +42,25 @@ public class GroupDataSource extends AbstractDataSource {
     }
 
     protected void init() {
-        if (routerType == RouterType.MASTER_ONLY) {
-            writeDataSource = createWriteDataSource();
+        if (routerType == RouterType.WRITE_ONLY) {
+           createWriteDataSource();
             return;
         }
 
-        writeDataSource = createWriteDataSource();
+        createWriteDataSource();
         createReadDataSource();
     }
 
     protected DataSource createWriteDataSource() {
-        ClusterInfo masterClusterInfo = clusterInfo.defineRoleClone(DatabaseRole.MASTER, null);
-        return locator.getDataSource(masterClusterInfo);
+        ClusterInfo masterClusterInfo = clusterInfo.cloneMaster();
+        writeDataSource = locator.getDataSource(masterClusterInfo);
+        return writeDataSource;
     }
 
     protected void createReadDataSource() {
         int slaveIndex = 0;
         for (Database database : cluster.getSlavesOnShard(clusterInfo.getShardIndex())) {
-            ClusterInfo slaveClusterInfo = clusterInfo.defineRoleClone(DatabaseRole.SLAVES, slaveIndex);
+            ClusterInfo slaveClusterInfo = clusterInfo.cloneSlaveWithIndex(slaveIndex);
             readDataSource.put(database, locator.getDataSource(slaveClusterInfo));
             slaveIndex++;
         }

@@ -5,6 +5,7 @@ public class DataSourceLogContext {
     private volatile boolean hasLogged = false;
     private String readStrategy;
     private long sqlTransactionStartTime;
+    private long connectionObtained;
 
     public boolean isHasLogged() {
         return hasLogged;
@@ -30,8 +31,18 @@ public class DataSourceLogContext {
         this.sqlTransactionStartTime = sqlTransactionStartTime;
     }
 
+    public long getConnectionObtained() {
+        return connectionObtained;
+    }
+
+    public void setConnectionObtained(long connectionObtained) {
+        this.connectionObtained = connectionObtained;
+    }
+
     public void clear() {
         hasLogged = false;
         readStrategy = null;
+        sqlTransactionStartTime = 0;
+        connectionObtained = 0;
     }
 }

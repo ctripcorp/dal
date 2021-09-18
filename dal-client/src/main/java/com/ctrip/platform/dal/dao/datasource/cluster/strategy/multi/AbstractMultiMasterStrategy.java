@@ -27,6 +27,7 @@ public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy
     protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     protected static final String ROUTER_ORDER_HOSTS = "Router::cluster:%s";
     protected static final String ORDER_HOSTS = "orderHosts:%s";
+    protected static final String CURRENT_HOST = "Router::currentHost:";
     private static final String ROUTER_INITIALIZE = "Router::initialize";
     private static final String INITIALIZE_MSG = "configuredHosts:%s;strategyOptions:%s";
 
@@ -43,16 +44,16 @@ public abstract class AbstractMultiMasterStrategy implements MultiMasterStrategy
         this.configuredHosts = new HashSet<>(hostSpecs);
         initProperties(strategyProperties);
         this.cluster = strategyProperties.getString(CLUSTER_NAME, DEFAULT_CLUSTER_NAME_VALUE);
-        CAT_LOG_TYPE = getCatLogType();
+        CAT_LOG_TYPE = getCatLogType(strategyProperties);
         buildOrderHosts();
         buildHostValidator();
         LOGGER.info(ROUTER_INITIALIZE + ":" + String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
         LOGGER.logEvent(CAT_LOG_TYPE, ROUTER_INITIALIZE, String.format(INITIALIZE_MSG, configuredHosts.toString(), strategyOptions.toString()));
     }
 
-    protected String getCatLogType() {
-        String clazzName = getClass().getSimpleName();
-        return clazzName.replaceAll("Strategy", "");
+    protected String getCatLogType(CaseInsensitiveProperties strategyProperties) {
+        String catType = strategyProperties.getString(CAT_TYPE, getClass().getSimpleName().replaceAll("Strategy", ""));
+        return "DAL." + catType;
     }
 
     protected void buildOrderHosts() {

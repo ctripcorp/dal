@@ -28,4 +28,6 @@ public interface MultiMasterStrategy extends RouteStrategy, ConnectionFactoryAwa
     String MULTI_MASTER = "multiMaster";
     boolean DEFAULT_MULTI_MASTER_VALUE = true;
 
+    String CAT_TYPE = "catType";
+
 }

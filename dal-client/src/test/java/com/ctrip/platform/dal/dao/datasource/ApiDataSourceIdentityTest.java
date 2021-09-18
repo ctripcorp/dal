@@ -2,14 +2,14 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConfig;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.MultiMasterStrategy;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -55,7 +55,7 @@ public class ApiDataSourceIdentityTest {
         Assert.assertEquals(DatabaseRole.MASTER, clusterInfo.getRole());
         Cluster cluster = clusterInfo.getCluster();
         Assert.assertEquals(DB_NAME, cluster.getClusterName());
-        Assert.assertEquals(ClusterType.MGR, cluster.getClusterType());
+        Assert.assertEquals(ClusterType.NORMAL, cluster.getClusterType());
         Assert.assertEquals(DatabaseCategory.MYSQL, cluster.getDatabaseCategory());
         Assert.assertFalse(cluster.dbShardingEnabled());
         Assert.assertEquals(3, cluster.getDatabases().size());
@@ -82,12 +82,12 @@ public class ApiDataSourceIdentityTest {
         Assert.assertTrue(zones.contains("z2"));
         Assert.assertTrue(zones.contains("z3"));
         ClusterRouteStrategyConfig routeStrategy = cluster.getRouteStrategyConfig();
-        Assert.assertEquals(ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY, routeStrategy.routeStrategyName());
+        Assert.assertEquals(RouteStrategyEnum.WRITE_ORDERED.getAlias(), routeStrategy.routeStrategyName());
         CaseInsensitiveProperties properties = routeStrategy.routeStrategyProperties();
-        Assert.assertEquals("z3,z2,z1", properties.get(DataSourceConfigureConstants.ZONES_PRIORITY));
-        Assert.assertEquals("10000", properties.get(DataSourceConfigureConstants.FAILOVER_TIME_MS));
-        Assert.assertNull(properties.get(DataSourceConfigureConstants.BLACKLIST_TIMEOUT_MS));
-        Assert.assertNull(properties.get(DataSourceConfigureConstants.FIXED_VALIDATE_PERIOD_MS));
+        Assert.assertEquals("z3,z2,z1", properties.get(MultiMasterStrategy.ZONES_PRIORITY));
+        Assert.assertEquals("10000", properties.get(MultiMasterStrategy.FAILOVER_TIME_MS));
+        Assert.assertNull(properties.get(MultiMasterStrategy.BLACKLIST_TIMEOUT_MS));
+        Assert.assertNull(properties.get(MultiMasterStrategy.FIXED_VALIDATE_PERIOD_MS));
     }
 
 }

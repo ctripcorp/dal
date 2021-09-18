@@ -79,7 +79,7 @@ public class ClusterDataSource extends DalDataSource implements DataSource,
                 DataSourceConfigure config = provider.getDataSourceConfigure(id);
                 dataSourceConfigs.put(host, config);
             });
-            MultiHostClusterProperties properties = new MultiHostClusterPropertiesAdapter(cluster.getRouteStrategyConfig());
+            MultiHostClusterProperties properties = new MultiHostClusterPropertiesAdapter(cluster.getRouteStrategyConfig(), cluster.getClusterName());
             LOGGER.logEvent(DalLogTypes.DAL_DATASOURCE, String.format(CAT_LOG_NAME_MULTI_HOST, getClusterName()), "");
             return new MultiHostDataSource(buildShardMeta(dataSourceConfigs.keySet()), dataSourceConfigs, properties);
         } catch (Throwable t) {

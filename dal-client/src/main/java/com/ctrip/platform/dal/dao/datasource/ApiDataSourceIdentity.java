@@ -6,7 +6,7 @@ import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.util.ObjectHolder;
 import com.ctrip.platform.dal.dao.cluster.ClusterConfigAdapter;
 import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
-import com.ctrip.platform.dal.dao.configure.*;
+import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.datasource.log.NullSqlContext;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;

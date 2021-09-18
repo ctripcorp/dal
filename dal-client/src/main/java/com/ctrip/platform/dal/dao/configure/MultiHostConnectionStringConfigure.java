@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
+
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.platform.dal.common.enums.DBModel;
 
 import java.util.List;
 
@@ -20,6 +22,10 @@ public interface MultiHostConnectionStringConfigure extends DalConnectionStringC
     Long getBlacklistTimeoutMS();
 
     Long getFixedValidatePeriodMS();
+
+    boolean isMultiMaster();
+
+    DBModel getDbModel();
 
     @Override
     default String getHostName() {

@@ -1,7 +1,5 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;

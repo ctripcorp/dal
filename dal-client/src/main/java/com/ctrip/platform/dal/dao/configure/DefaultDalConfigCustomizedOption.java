@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 
@@ -39,7 +40,7 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     }
 
     @Override
-    public String getReadStrategy() {
+    public String getRouteStrategy() {
         return readStrategy;
     }
 

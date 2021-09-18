@@ -4,10 +4,6 @@ import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigParser;
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
-
-import java.io.InputStream;
-import java.net.URL;
 
 /**
  * @author c7ch23en

@@ -1,9 +1,10 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.base.ListenableSupport;
+import com.ctrip.platform.dal.common.enums.DBModel;
 import com.ctrip.platform.dal.dao.configure.DalConnectionStringConfigure;
 import com.ctrip.platform.dal.dao.configure.MultiHostConnectionStringConfigure;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +100,16 @@ public class MockConnectionStringConfigureProvider extends ListenableSupport<Dal
                 @Override
                 public Long getFixedValidatePeriodMS() {
                     return null;
+                }
+
+                @Override
+                public boolean isMultiMaster() {
+                    return true;
+                }
+
+                @Override
+                public DBModel getDbModel() {
+                    return DBModel.MGR;
                 }
 
                 @Override

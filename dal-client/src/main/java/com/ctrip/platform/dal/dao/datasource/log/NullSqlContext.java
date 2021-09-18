@@ -1,7 +1,9 @@
 package com.ctrip.platform.dal.dao.datasource.log;
 
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.datasource.ValidationResult;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,4 +46,33 @@ public class NullSqlContext implements SqlContext {
         return this;
     }
 
+    @Override
+    public void populateConnectionObtained(long millionSeconds) {
+
+    }
+
+    @Override
+    public void populateQueryRows(int rows) {
+
+    }
+
+    @Override
+    public void populateDatabase(String database) {
+
+    }
+
+    @Override
+    public void populateSql(String sql) {
+
+    }
+
+    @Override
+    public void populateSqlTransaction(long millionSeconds) {
+
+    }
+
+    @Override
+    public void populateParameters(List<StatementParameters> parameters) {
+
+    }
 }

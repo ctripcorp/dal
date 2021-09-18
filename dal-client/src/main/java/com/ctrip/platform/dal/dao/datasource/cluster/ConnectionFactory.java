@@ -12,7 +12,4 @@ import java.sql.SQLException;
 public interface ConnectionFactory {
 
     Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException;
-
-    Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException;
-
 }

@@ -35,7 +35,7 @@ public class DatabaseShardConfigImpl implements DatabaseShardConfig {
         DatabaseShardImpl databaseShard = new DatabaseShardImpl(this);
         for (DatabaseConfig databaseConfig : databaseConfigs)
             databaseShard.addDatabase(databaseConfig.generate());
-        if (!ClusterType.MGR.equals(clusterConfig.getClusterType()))
+        if (!clusterConfig.getClusterType().isAllMaster())
             databaseShard.initReadStrategy();
         return databaseShard;
     }

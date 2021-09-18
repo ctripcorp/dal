@@ -19,10 +19,12 @@ public class ClusterDbSqlContext extends BaseSqlContext {
     protected static final String DB_KEY = "DB";
     protected static final String CLUSTER_TYPE = "ClusterType";
     protected static final String UCS_STRATEGY = "UcsStrategy";
+    protected static final String READ_STRATEGY = "ReadStrategy";
 
     private final Cluster cluster;
     private Integer shard;
     private DatabaseRole role;
+    private String readStrategy;
 
     public ClusterDbSqlContext(Cluster cluster, Integer shard, DatabaseRole role) {
         this(cluster, shard, role, null);
@@ -49,6 +51,7 @@ public class ClusterDbSqlContext extends BaseSqlContext {
         addTag(tags, CLUSTER, cluster.getClusterName());
         addTag(tags, SHARD, shard);
         addTag(tags, ROLE, role);
+        addTag(tags, READ_STRATEGY, readStrategy);
         addTag(tags, DB_KEY, String.format("%s-%s-%s", cluster, shard, role));
         ClusterType type = cluster.getClusterType();
         if (type == ClusterType.DRC) {
@@ -78,7 +81,16 @@ public class ClusterDbSqlContext extends BaseSqlContext {
         ClusterDbSqlContext context = new ClusterDbSqlContext(cluster, shard, role,
                 getClientVersion(), getClientZone(), getDbName());
         context.populateDbZone(getDbZone());
+        context.populateDatabase(getDatabase());
         return context;
+    }
+
+    public String getClusterName() {
+        return cluster.getClusterName();
+    }
+
+    public Integer getShard() {
+        return shard;
     }
 
     public void populateShard(Integer shard) {
@@ -87,6 +99,14 @@ public class ClusterDbSqlContext extends BaseSqlContext {
 
     public void populateRole(DatabaseRole role) {
         this.role = role;
+    }
+
+    public String getReadStrategy() {
+        return readStrategy;
+    }
+
+    public void setReadStrategy(String readStrategy) {
+        this.readStrategy = readStrategy;
     }
 
 }

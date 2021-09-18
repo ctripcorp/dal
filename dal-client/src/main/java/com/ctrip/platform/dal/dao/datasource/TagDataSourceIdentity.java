@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 

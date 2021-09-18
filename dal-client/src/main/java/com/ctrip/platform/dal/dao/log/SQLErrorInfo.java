@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.log;
 
+
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 
 import java.util.HashMap;

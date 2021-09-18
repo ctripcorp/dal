@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.configure;
 
+
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
+import com.ctrip.platform.dal.common.enums.DBModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,8 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
     private Long failoverTimeMS;
     private Long blacklistTimeoutMS;
     private Long fixedValidatePeriodMS;
+    private boolean multiMaster = true;
+    private DBModel dbModel;
 
     public MultiHostDataSourceConfigure(String dbName) {
         this.dbName = dbName;
@@ -51,6 +55,11 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
         return fixedValidatePeriodMS;
     }
 
+    @Override
+    public boolean isMultiMaster() {
+        return multiMaster;
+    }
+
     public void addHost(HostSpec host) {
         hosts.add(host);
     }
@@ -71,4 +80,15 @@ public class MultiHostDataSourceConfigure extends DataSourceConfigure implements
         this.fixedValidatePeriodMS = fixedValidatePeriodMS;
     }
 
+    public void setMultiMaster(boolean multiMaster) {
+        this.multiMaster = multiMaster;
+    }
+
+    public DBModel getDbModel() {
+        return dbModel;
+    }
+
+    public void setDbModel(DBModel dbModel) {
+        this.dbModel = dbModel;
+    }
 }

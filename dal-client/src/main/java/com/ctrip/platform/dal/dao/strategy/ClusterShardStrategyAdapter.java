@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.strategy;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 import com.ctrip.framework.dal.cluster.client.sharding.context.*;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;

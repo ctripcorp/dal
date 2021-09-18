@@ -1,6 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 
 import java.util.Set;

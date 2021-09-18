@@ -43,10 +43,6 @@ public interface DataSourceConfigureConstants {
     String LOCAL_ACCESS = "localAccess";
     String IDC_PRIORITY = "idcPriority";
     String IDC_PRIORITY_SEPARATOR = ",";
-    String ZONES_PRIORITY = "zonesPriority";
-    String FAILOVER_TIME_MS = "failoverTimeMS";
-    String BLACKLIST_TIMEOUT_MS = "blacklistTimeoutMS";
-    String FIXED_VALIDATE_PERIOD_MS = "fixedValidatePeriodMS";
 
     // This is for typo error
     String INIT_SQL2 = "initSQL";

@@ -9,7 +9,6 @@ import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
-import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
@@ -38,9 +37,18 @@ public class DalConnection implements Connection {
             String dbName = connection.getCatalog();
             if (dbName != null)
                 this.context.populateDbName(dbName.toLowerCase());
+            populateMetaData(connection);
         } catch (Throwable t) {
             // ignore
         }
+    }
+
+    private void populateMetaData(Connection connection) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        if (metaData instanceof DalDatabaseMetaData)
+            context.populateDatabase(((DalDatabaseMetaData) metaData).getExtendedURL());
+        else
+            context.populateDatabase(metaData.getURL());
     }
 
     public Connection getConnection() {

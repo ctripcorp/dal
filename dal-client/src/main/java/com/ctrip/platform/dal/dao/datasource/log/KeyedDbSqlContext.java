@@ -36,6 +36,7 @@ public class KeyedDbSqlContext extends BaseSqlContext {
     public SqlContext fork() {
         KeyedDbSqlContext context = new KeyedDbSqlContext(databaseKey, getClientVersion(), getClientZone(), getDbName());
         context.populateDbZone(getDbZone());
+        context.populateDatabase(getDatabase());
         return context;
     }
 

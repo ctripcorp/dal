@@ -1,5 +1,13 @@
 package com.ctrip.platform.dal.dao.status;
 
+import com.ctrip.platform.dal.dao.Version;
+import com.ctrip.platform.dal.dao.configure.DalConfigure;
+import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,17 +15,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ctrip.platform.dal.dao.Version;
-import com.ctrip.platform.dal.dao.configure.DalConfigure;
-import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 
 /**
  * TODO add logic DB level markdown control

@@ -65,6 +65,7 @@ public class MGRStrategy extends AbstractMultiMasterStrategy implements MultiMas
                 currentHost = hostSpec;
             }
         }
+        LOGGER.logEvent(CAT_LOG_TYPE, CURRENT_HOST + hostSpec.toString(), cluster);
     }
 
     @Override

@@ -37,8 +37,6 @@ public class ConnectionStringParser {
     public static final String DEFAULT_PORT = "3306";
     public static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
     public static final String DRIVER_SQLSERVRE = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    public static final int DEFAULT_CONNECT_TIMEOUT = 1200;
-
 
     private static final Pattern hostPortPatternInMySQLURL = Pattern.compile("(jdbc:mysql://)([[^\\f\\n\\r\\t\\v=/]:]+):([^/]+)");
     private static final Pattern complexHostPatternInMySQLURL = Pattern.compile("(\\(host|,host)=([^\\),]+)", Pattern.CASE_INSENSITIVE);
@@ -190,21 +188,6 @@ public class ConnectionStringParser {
         }
 
         return new HostAndPort(url);
-    }
-
-    public static long parseConnectTimeout(String connectionProperties) {
-        long connectTimeout = DEFAULT_CONNECT_TIMEOUT;
-        if (StringUtils.isEmpty(connectionProperties)) {
-            return connectTimeout;
-        }
-
-        Matcher matcher = connectTimeoutPattern.matcher(connectionProperties);
-        if (matcher.find()) {
-            String connectTimeoutString = matcher.group(2);
-            connectTimeout = Long.parseLong(connectTimeoutString);
-        }
-
-        return connectTimeout;
     }
 
     private static Integer parseInt(String str) {

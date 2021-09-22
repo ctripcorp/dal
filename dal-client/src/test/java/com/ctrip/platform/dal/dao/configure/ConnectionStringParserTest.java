@@ -3,8 +3,6 @@ package com.ctrip.platform.dal.dao.configure;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.ctrip.platform.dal.dao.configure.ConnectionStringParser.DEFAULT_CONNECT_TIMEOUT;
-
 /**
  * @author c7ch23en
  */
@@ -130,16 +128,6 @@ public class ConnectionStringParserTest {
         HostAndPort domainAndPort = ConnectionStringParser.parseHostPortFromURL(domainUrl);
         Assert.assertEquals("test.db.com", domainAndPort.getHost());
         Assert.assertEquals(1433, domainAndPort.getPort().intValue());
-    }
-
-    @Test
-    public void testParseConnectTimeout() {
-        String connectionProperties = "sendTimeAsDateTime=false;sendStringParametersAsUnicode=false;rewriteBatchedStatements=true;allowMultiQueries=true;useUnicode=true;characterEncoding=UTF-8;useSSL=false;socketTimeout=100000;connectTimeout=5200;loginTimeout=2";
-        long connectTimeout = ConnectionStringParser.parseConnectTimeout(connectionProperties);
-        Assert.assertEquals(5200, connectTimeout);
-
-        connectTimeout = ConnectionStringParser.parseConnectTimeout(null);
-        Assert.assertEquals(DEFAULT_CONNECT_TIMEOUT, connectTimeout);
     }
 
 }

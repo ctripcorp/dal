@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.tomcat;
 
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
+import com.ctrip.platform.dal.dao.configure.ConnectionStringParser;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
@@ -26,6 +27,7 @@ public class DalConnectionPool extends ConnectionPool {
     private static ThreadLocal<Long> poolWaitTime = new ThreadLocal<>();
 
     private final HostConnectionValidator clusterConnValidator;
+    private long connectTimeout;
 
     public DalConnectionPool(PoolConfiguration prop) throws SQLException {
         this(prop, null);
@@ -34,6 +36,7 @@ public class DalConnectionPool extends ConnectionPool {
     public DalConnectionPool(PoolConfiguration prop, HostConnectionValidator clusterConnValidator) throws SQLException {
         super(prop);
         this.clusterConnValidator = clusterConnValidator;
+        this.connectTimeout = ConnectionStringParser.parseConnectTimeout(getPoolProperties().getConnectionProperties());
     }
 
     @Override
@@ -53,9 +56,13 @@ public class DalConnectionPool extends ConnectionPool {
             logger.error("[borrowConnection]" + this, e);
         }
 
-        return super.borrowConnection(now, con, username, password);
+        PooledConnection pooledConnection = super.borrowConnection(now, con, username, password);
+        if (con.getLastConnected() > now && con.getLastConnected() - now < connectTimeout) {
+            connectionListener.onRecreateConnection(getName(), getConnection(con));
+            preHandleConnection(pooledConnection);
+        }
+        return pooledConnection;
     }
-
 
     @Override
     protected PooledConnection createConnection(long now, PooledConnection notUsed, String username, String password)

@@ -41,7 +41,10 @@ public class OBStrategy extends AbstractMultiMasterStrategy implements MultiMast
 
     @Override
     public HostSpec pickNode(DalHints hints) throws HostNotExpectedException {
-        return delegate.pickNode(hints);
+        HostSpec hostSpec =  delegate.pickNode(hints);
+        LOGGER.logEvent(CAT_LOG_TYPE, CURRENT_HOST + hostSpec.toString(), cluster);
+        return hostSpec;
+
     }
 
     // for test

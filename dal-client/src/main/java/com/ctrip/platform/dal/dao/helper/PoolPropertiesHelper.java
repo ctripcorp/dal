@@ -33,6 +33,7 @@ public class PoolPropertiesHelper implements DataSourceConfigureConstants {
         properties.setTestWhileIdle(config.getBooleanProperty(TESTWHILEIDLE, DEFAULT_TESTWHILEIDLE));
         properties.setTestOnBorrow(config.getBooleanProperty(TESTONBORROW, DEFAULT_TESTONBORROW));
         properties.setTestOnReturn(config.getBooleanProperty(TESTONRETURN, DEFAULT_TESTONRETURN));
+        properties.setDefaultAutoCommit(config.getBooleanProperty(DEFAULT_AUTOCOMMIT, DEFAULT_AUTO_COMMIT));
 
         properties.setValidationQuery(config.getProperty(VALIDATIONQUERY, DEFAULT_VALIDATIONQUERY));
         properties.setValidationQueryTimeout(config.getValidationQueryTimeout());

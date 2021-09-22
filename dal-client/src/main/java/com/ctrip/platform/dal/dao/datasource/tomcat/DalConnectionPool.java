@@ -57,7 +57,7 @@ public class DalConnectionPool extends ConnectionPool {
         }
 
         PooledConnection pooledConnection = super.borrowConnection(now, con, username, password);
-        if (con.getLastConnected() > now && con.getLastConnected() - now < connectTimeout) {
+        if (con.getLastConnected() > now) {
             connectionListener.onRecreateConnection(getName(), getConnection(con));
             preHandleConnection(pooledConnection);
         }

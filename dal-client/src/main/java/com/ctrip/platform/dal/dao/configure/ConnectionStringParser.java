@@ -25,7 +25,6 @@ public class ConnectionStringParser {
     private static final Pattern dbcharsetPattern = Pattern.compile("(charset)=([^;]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern dbportPattern = Pattern.compile("(port)=([^;]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern versionPattern = Pattern.compile("(version)=([^;]+)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern connectTimeoutPattern = Pattern.compile("(connectTimeout)=([^;]+)", Pattern.CASE_INSENSITIVE);
 
     private static final String PORT_SPLIT = ",";
     public static final String MYSQL_URL_PREFIX="jdbc:mysql://";

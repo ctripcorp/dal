@@ -165,12 +165,7 @@ public abstract class AbstractHostValidator implements HostValidator {
     }
 
     protected Connection getConnection(HostSpec host) throws SQLException {
-        try {
-            return connectionFactory.getPooledConnectionForHost(host);
-        } catch (SQLException e) {
-            addToPreAbsentAndBlackPresent(host);
-            throw e;
-        }
+        return connectionFactory.getPooledConnectionForHost(host);
     }
 
     private boolean isDestroy() {
@@ -239,11 +234,6 @@ public abstract class AbstractHostValidator implements HostValidator {
     protected void addToBlackAndRemoveFromPre(HostSpec hostSpec) {
         addToBlackList(hostSpec);
         removeFromPreBlackList(hostSpec);
-    }
-
-    private void addToPreAndRemoveFromBlack(HostSpec hostSpec) {
-        addToPreAbsent(hostSpec);
-        removeFromBlackList(hostSpec);
     }
 
     protected void removeFromAllBlackList(HostSpec hostSpec) {

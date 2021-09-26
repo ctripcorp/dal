@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
@@ -94,10 +95,10 @@ public class DataSourceLocator {
         return ds;
     }
 
-    public DataSource getDataSource(ClusterInfo clusterInfo) {
+    public DataSource getDataSource(ClusterInfo clusterInfo, DalConfigCustomizedOption customizedOption) {
         Cluster cluster = clusterInfo.getCluster();
         if (cluster == null) {
-            cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), new DefaultDalConfigCustomizedOption());
+            cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), customizedOption);
             clusterInfo.setCluster(cluster);
         }
         DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
@@ -118,6 +119,10 @@ public class DataSourceLocator {
             }
         }
         return ds;
+    }
+
+    public DataSource getDataSource(ClusterInfo clusterInfo) {
+        return getDataSource(clusterInfo, new DefaultDalConfigCustomizedOption());
     }
 
     public void removeDataSource(DataSourceIdentity id) {

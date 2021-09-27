@@ -87,12 +87,12 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
-                .databaseRole(this.databaseRole)
-                .shardIndex(this.shardIndex)
-                .forceInitialize(this.forceInitialize)
-                .ignoreShardingResourceNotFound(this.ignoreShardingResourceNotFound)
-                .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
-                .readStrategy(this.readStrategy)
-                .tag(this.tag);
+                .databaseRole(this.getDatabaseRole())
+                .shardIndex(this.getShardIndex())
+                .forceInitialize(this.isForceInitialize())
+                .ignoreShardingResourceNotFound(this.isIgnoreShardingResourceNotFound())
+                .consistencyTypeCustomizedClass(this.getConsistencyTypeCustomizedClass())
+                .readStrategy(this.getRouteStrategy())
+                .tag(this.getTag());
     }
 }

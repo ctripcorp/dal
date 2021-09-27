@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.configure.dalproperties;
 import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
+import com.ctrip.platform.dal.dao.log.LogFilter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -186,5 +187,16 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     @Override
     public boolean mybatisLogEnable() {
         return false;
+    }
+
+    @Override
+    public LogFilter exceptionLogFilter() throws Exception {
+        return new LogFilter() {
+
+            @Override
+            public boolean filter(Throwable throwable) {
+                return false;
+            }
+        };
     }
 }

@@ -7,6 +7,7 @@ import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.LogFilter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,6 +28,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     public static final String TABLE_PARSER_CACHE_KEY_BYTES = "tableParserCacheKeyBytes";
     public static final String ENABLE_UCS_CONTEXT_LOG = "enableUcsContextLog";
     public static final String MYBATIS_LOG_ENABLE = "mybatisLogEnable";
+    public static final String EXCEPTION_LOG_FILTER = "exceptionLogFilter";
     public static final String DATASOURCE_MONITOR_FILTER_EXCEPTIONS = "datasourceMonitorFilterExceptions";
     public static final String DAO_PACKAGE_PATH = "daoPackagePath";
 
@@ -42,6 +44,7 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
 
     private static final String DEFAULT_DRC_STAGE = "test";
     private static final String DEFAULT_DRC_LOCALIZED = "false";
+    private static final String DEFAULT_EXCEPTION_LOG_FILTER = "";
 
     private AtomicReference<TableParseSwitch> tableParseSwitchRef = new AtomicReference<>(TableParseSwitch.ON);
     private AtomicReference<ImplicitAllShardsSwitch> implicitAllShardsSwitchRef = new AtomicReference<>(ImplicitAllShardsSwitch.OFF);
@@ -168,6 +171,22 @@ public class DefaultDalPropertiesLocator implements DalPropertiesLocator {
     @Override
     public boolean mybatisLogEnable() {
         return Boolean.valueOf(getProperty(MYBATIS_LOG_ENABLE, "false"));
+    }
+
+    @Override
+    public LogFilter exceptionLogFilter() throws Exception {
+        String className = getProperty(EXCEPTION_LOG_FILTER);
+        if (StringUtils.isTrimmedEmpty(className)) {
+
+            return new LogFilter() {
+                @Override
+                public boolean filter(Throwable throwable) {
+                    return false;
+                }
+            };
+        }
+
+        return (LogFilter)Class.forName(className).newInstance();
     }
 
     private String getProperty(String name, String defaultValue) {

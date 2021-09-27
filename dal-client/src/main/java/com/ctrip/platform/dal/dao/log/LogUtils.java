@@ -1,6 +1,8 @@
 package com.ctrip.platform.dal.dao.log;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesLocator;
+import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.IClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.log.DataSourceLogContext;
@@ -12,6 +14,21 @@ import java.util.Map;
  * @author c7ch23en
  */
 public class LogUtils {
+
+    private static LogFilter logFilter;
+
+    static {
+        try {
+            logFilter = DalPropertiesManager.getInstance().getDalPropertiesLocator().exceptionLogFilter();
+        } catch (Exception e) {
+            logFilter = new LogFilter() {
+                @Override
+                public boolean filter(Throwable throwable) {
+                    return false;
+                }
+            };
+        }
+    }
 
     private static final ThreadLocal<DataSourceLogContext> logContext = new ThreadLocal(){
 
@@ -62,6 +79,10 @@ public class LogUtils {
             return properties;
         }
         return null;
+    }
+
+    public static boolean ignoreError(Throwable throwable) {
+        return logFilter.filter(throwable);
     }
 
 }

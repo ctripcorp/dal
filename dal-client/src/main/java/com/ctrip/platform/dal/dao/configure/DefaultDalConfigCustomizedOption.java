@@ -54,12 +54,12 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     }
 
     @Override
-    public CustomDataSourceFactory dataSourceFactory() {
+    public CustomDataSourceFactory getDataSourceFactory() {
         return dataSourceFactory;
     }
 
     @Override
-    public JdbcDriver jdbcDriver() {
+    public JdbcDriver getJdbcDriver() {
         return jdbcDriver;
     }
 

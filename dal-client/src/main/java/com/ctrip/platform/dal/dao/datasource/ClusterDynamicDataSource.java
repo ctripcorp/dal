@@ -89,7 +89,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
         if (cluster == null)
             throw new DalRuntimeException("null cluster");
         DalConfigCustomizedOption configCustomizedOption = cluster.getCustomizedOption();
-        if (configCustomizedOption != null && configCustomizedOption.dataSourceFactory() != null) {
+        if (configCustomizedOption != null && configCustomizedOption.getDataSourceFactory() != null) {
             return createCustomDataSource();
         }
         return !cluster.getRouteStrategyConfig().multiMaster() ? createStandaloneDataSource() : createMultiHostDataSource();
@@ -97,7 +97,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
 
     protected DataSource createCustomDataSource() {
         DalConfigCustomizedOption customizedOption = cluster.getCustomizedOption();
-        CustomDataSourceFactory customDataSourceFactory = customizedOption.dataSourceFactory();
+        CustomDataSourceFactory customDataSourceFactory = customizedOption.getDataSourceFactory();
         List<Database> databases = cluster.getDatabases();
         Set<HostSpec> hostsInfos = new HashSet<>();
         AtomicReference<Properties> properties = new AtomicReference<>();
@@ -109,8 +109,8 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
                 DataSourceIdentity id = new ClusterDataSourceIdentity(database);
                 DataSourceConfigure config = provider.getDataSourceConfigure(id);
                 properties.get().putAll(config.getProperties());
-                if (customizedOption.jdbcDriver() != null) {
-                    properties.get().setProperty(DRIVER_CLASS_NAME, customizedOption.jdbcDriver().driverClassName());
+                if (customizedOption.getJdbcDriver() != null) {
+                    properties.get().setProperty(DRIVER_CLASS_NAME, customizedOption.getJdbcDriver().driverClassName());
                 }
             }
             hostsInfos.add(host);

@@ -44,7 +44,7 @@ public interface DalConfigCustomizedOption {
 
     String getTag();
 
-    CustomDataSourceFactory dataSourceFactory();
+    CustomDataSourceFactory getDataSourceFactory();
 
-    JdbcDriver jdbcDriver();
+    JdbcDriver getJdbcDriver();
 }

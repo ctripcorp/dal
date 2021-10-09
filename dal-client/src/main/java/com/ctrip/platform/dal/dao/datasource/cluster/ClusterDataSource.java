@@ -33,14 +33,14 @@ import java.util.Set;
 public class ClusterDataSource extends DalDataSource implements DataSource,
         ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
 
-    private static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
+    protected static final ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
 
-    private static final String CAT_LOG_NAME_MULTI_HOST = "createMultiHostDataSource:%s";
-    private static final String CAT_LOG_NAME_MULTI_HOST_FAIL = "createMultiHostDataSource:EXCEPTION:%s";
+    protected static final String CAT_LOG_NAME_MULTI_HOST = "createMultiHostDataSource:%s";
+    protected static final String CAT_LOG_NAME_MULTI_HOST_FAIL = "createMultiHostDataSource:EXCEPTION:%s";
 
     private final DataSourceIdentity id;
-    private final Cluster cluster;
-    private final DataSourceConfigureProvider provider;
+    protected final Cluster cluster;
+    protected final DataSourceConfigureProvider provider;
     private final MultiHostDataSource delegated;
 
     public ClusterDataSource(DataSourceIdentity id, Cluster cluster, DataSourceConfigureProvider provider) {

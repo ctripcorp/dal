@@ -1,12 +1,14 @@
 package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactory;
 import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
@@ -21,15 +23,15 @@ import com.ctrip.platform.dal.exceptions.UnsupportedFeatureException;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.DRIVER_CLASS_NAME;
 
 public class ClusterDynamicDataSource extends DataSourceDelegate implements DataSource,
         ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener, IForceSwitchableDataSource {
@@ -86,7 +88,34 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     protected DataSource createInnerDataSource() {
         if (cluster == null)
             throw new DalRuntimeException("null cluster");
+        DalConfigCustomizedOption configCustomizedOption = cluster.getCustomizedOption();
+        if (configCustomizedOption != null && configCustomizedOption.dataSourceFactory() != null) {
+            return createCustomDataSource();
+        }
         return !cluster.getRouteStrategyConfig().multiMaster() ? createStandaloneDataSource() : createMultiHostDataSource();
+    }
+
+    protected DataSource createCustomDataSource() {
+        DalConfigCustomizedOption customizedOption = cluster.getCustomizedOption();
+        CustomDataSourceFactory customDataSourceFactory = customizedOption.dataSourceFactory();
+        List<Database> databases = cluster.getDatabases();
+        Set<HostSpec> hostsInfos = new HashSet<>();
+        AtomicReference<Properties> properties = new AtomicReference<>();
+        databases.forEach(database -> {
+            ConnectionString connString = database.getConnectionString();
+            HostSpec host = HostSpec.of(connString.getPrimaryHost(), connString.getPrimaryPort(), database.getZone());
+            if (properties.get() == null) {
+                properties.set(new Properties());
+                DataSourceIdentity id = new ClusterDataSourceIdentity(database);
+                DataSourceConfigure config = provider.getDataSourceConfigure(id);
+                properties.get().putAll(config.getProperties());
+                if (customizedOption.jdbcDriver() != null) {
+                    properties.get().setProperty(DRIVER_CLASS_NAME, customizedOption.jdbcDriver().driverClassName());
+                }
+            }
+            hostsInfos.add(host);
+        });
+        return customDataSourceFactory.createDataSource(hostsInfos, properties.get());
     }
 
     protected DataSource createStandaloneDataSource() {

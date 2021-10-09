@@ -3,6 +3,8 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
+import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactory;
+import com.ctrip.framework.dal.cluster.client.extended.JdbcDriver;
 
 public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOption {
 
@@ -13,6 +15,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
     private String tag;
+    private CustomDataSourceFactory dataSourceFactory;
+    private JdbcDriver jdbcDriver;
 
     @Override
     public String getConsistencyTypeCustomizedClass() {
@@ -47,6 +51,16 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public String getTag() {
         return tag;
+    }
+
+    @Override
+    public CustomDataSourceFactory dataSourceFactory() {
+        return dataSourceFactory;
+    }
+
+    @Override
+    public JdbcDriver jdbcDriver() {
+        return jdbcDriver;
     }
 
     public DefaultDalConfigCustomizedOption consistencyTypeCustomizedClass(String clazz) {
@@ -84,6 +98,16 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
+    public DefaultDalConfigCustomizedOption dataSourceFactory(CustomDataSourceFactory dataSourceFactory) {
+        this.dataSourceFactory = dataSourceFactory;
+        return this;
+    }
+
+    public DefaultDalConfigCustomizedOption jdbcDriver(JdbcDriver jdbcDriver) {
+        this.jdbcDriver = jdbcDriver;
+        return this;
+    }
+
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
@@ -93,6 +117,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
                 .ignoreShardingResourceNotFound(this.ignoreShardingResourceNotFound)
                 .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
                 .readStrategy(this.readStrategy)
-                .tag(this.tag);
+                .tag(this.tag)
+                .dataSourceFactory(this.dataSourceFactory)
+                .jdbcDriver(this.jdbcDriver);
     }
 }

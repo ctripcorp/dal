@@ -1,7 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.shard.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.base.NullHostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
@@ -50,7 +49,7 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
     @Override
     public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {
         HostSpec hostSpec = hintsRoute(dalHints);
-        if (!(hostSpec instanceof NullHostSpec))
+        if (hostSpec != null)
             return hostSpec;
 
         return pickSlaveFirst();
@@ -74,7 +73,7 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
         if (dalHints.is(DalHintEnum.slaveOnly) && envUtils.isProd())
             return slaveOnly();
 
-        return new NullHostSpec();
+        return null;
     }
 
     protected HostSpec pickMaster() {
@@ -89,7 +88,7 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
 
     protected List<HostSpec> getHostByRole(String role) {
         List<HostSpec> slaves = hostMap.get(role);
-        if (slaves == null || slaves.size() < 1)
+        if (slaves == null || slaves.size() == 0)
             throw new HostNotExpectedException(String.format(NO_HOST_AVAILABLE, role));
         return slaves;
     }

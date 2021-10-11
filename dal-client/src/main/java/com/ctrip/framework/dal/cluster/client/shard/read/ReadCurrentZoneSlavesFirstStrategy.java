@@ -1,7 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.shard.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.base.NullHostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
@@ -24,7 +23,7 @@ public class ReadCurrentZoneSlavesFirstStrategy extends ReadCurrentZoneSlavesOnl
     @Override
     public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {
         HostSpec hostSpec = hintsRoute(dalHints);
-        if (!(hostSpec instanceof NullHostSpec))
+        if (hostSpec != null)
             return hostSpec;
 
         hostSpec = pickCurrentZoneSlave();

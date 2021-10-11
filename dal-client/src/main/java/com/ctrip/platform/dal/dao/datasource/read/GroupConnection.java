@@ -200,7 +200,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
         SqlType sqlType = SqlUtils.getSqlType(sql);
         if (sqlType.isRead()) {
-            return getReadConnection();
+            return getReadConnection(dalHints);
         } else {
             return getWriteConnection();
         }

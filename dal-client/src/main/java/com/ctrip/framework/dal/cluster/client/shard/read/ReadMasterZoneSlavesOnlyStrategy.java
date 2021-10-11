@@ -1,7 +1,6 @@
 package com.ctrip.framework.dal.cluster.client.shard.read;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.base.NullHostSpec;
 import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
 import com.ctrip.framework.dal.cluster.client.exception.HostNotExpectedException;
@@ -12,9 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
-import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_MASTER_ZONE_SLAVES_FIRST;
 import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_MASTER_ZONE_SLAVES_ONLY;
-import static com.ctrip.platform.dal.dao.DalHintEnum.routeStrategy;
 
 public class ReadMasterZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     protected RouteStrategyEnum readStrategyEnum = READ_MASTER_ZONE_SLAVES_ONLY;
@@ -30,6 +27,10 @@ public class ReadMasterZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     public void init(Set<HostSpec> hostSpecs, CaseInsensitiveProperties strategyProperties) {
         super.init(hostSpecs, strategyProperties);
         for (HostSpec hostSpec : hostSpecs) {
+            if (hostSpec.isMaster()){
+                masterZone = hostSpec.getTrimLowerCaseZone();
+                continue;
+            }
 
             if (!zoneToHost.containsKey(hostSpec.getTrimLowerCaseZone())) {
                 List<HostSpec> hosts = new ArrayList<>();
@@ -38,24 +39,22 @@ public class ReadMasterZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
             } else {
                 zoneToHost.get(hostSpec.getTrimLowerCaseZone()).add(hostSpec);
             }
-            if (hostSpec.isMaster())
-                masterZone = hostSpec.getTrimLowerCaseZone();
         }
+
+        if (StringUtils.isTrimmedEmpty(masterZone))
+            throw new DalMetadataException(ZONE_MSG_LOST);
     }
 
     @Override
     public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {
         HostSpec hostSpec = hintsRoute(dalHints);
-        if (!(hostSpec instanceof NullHostSpec))
+        if (hostSpec != null)
             return hostSpec;
 
         return pickMasterZoneSlaveOnly();
     }
 
     protected HostSpec pickMasterZoneSlaveOnly() {
-        if (StringUtils.isTrimmedEmpty(masterZone))
-            throw new DalMetadataException(ZONE_MSG_LOST);
-
         List<HostSpec> masterZoneHost = zoneToHost.get(masterZone);
         if (CollectionUtils.isEmpty(masterZoneHost))
             throw new DalMetadataException(String.format(NO_DATABASE_IN_MASTER_ZONE, masterZone));

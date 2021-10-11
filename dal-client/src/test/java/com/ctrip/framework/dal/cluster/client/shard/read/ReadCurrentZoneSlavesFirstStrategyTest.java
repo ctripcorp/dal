@@ -19,28 +19,34 @@ public class ReadCurrentZoneSlavesFirstStrategyTest {
         strategy.init(produceHostSpec(), null);
 
         List<HostSpec> list = null;
+        int count = 0;
         for (String zone : strategy.zoneToHost.keySet()) {
             switch (zone) {
                 case "shaoy":
+                    count++;
                     list = strategy.zoneToHost.get(zone);
                     assertEquals(2, list.size());
                     assertEquals(true, list.containsAll(DalCollections.arrayList(HostSpec.of("ip0", 0, "shaoy"), HostSpec.of("ip1", 1, "shaoy"))));
                     break;
                 case "sharb":
+                    count++;
                     list = strategy.zoneToHost.get(zone);
                     assertEquals(1, list.size());
                     assertEquals(true, list.containsAll(DalCollections.arrayList(HostSpec.of("ip2", 2, "sharb", true))));
                     break;
                 case "shafq":
+                    count++;
                     list = strategy.zoneToHost.get(zone);
                     assertEquals(3, list.size());
                     assertEquals(true, list.containsAll(DalCollections.arrayList(HostSpec.of("ip3", 3, "shafq"), HostSpec.of("ip4", 4, "shafq"), HostSpec.of("ip5", 5, "shafq"))));
                     break;
             }
         }
+
+        assertEquals(3, count);
     }
 
-    private Set<HostSpec> produceHostSpec() {
+    public static Set<HostSpec> produceHostSpec() {
         HashSet<HostSpec> set = new HashSet<>();
         set.add(HostSpec.of("ip0", 0, " shaoy"));
         set.add(HostSpec.of("ip1", 1, "shaoy "));
@@ -51,6 +57,34 @@ public class ReadCurrentZoneSlavesFirstStrategyTest {
         return set;
     }
 
+    public static Set<HostSpec> masterZoneHasSlave() {
+        HashSet<HostSpec> set = new HashSet<>();
+        set.add(HostSpec.of("ip0", 0, " shaoy"));
+        set.add(HostSpec.of("ip1", 1, "shaoy "));
+        set.add(HostSpec.of("ip2", 2, " sharb ", true));
+        set.add(HostSpec.of("ip6", 6, " sharb "));
+        set.add(HostSpec.of("ip3", 3, "  shafq  "));
+        set.add(HostSpec.of("ip4", 4, "shafq"));
+        set.add(HostSpec.of("ip5", 5, "shafq"));
+        return set;
+    }
+
+    public static Set<HostSpec> noMasterHostSpecs() {
+        HashSet<HostSpec> set = new HashSet<>();
+        set.add(HostSpec.of("ip0", 0, " shaoy"));
+        set.add(HostSpec.of("ip1", 1, "shaoy "));
+        set.add(HostSpec.of("ip2", 2, " sharb "));
+        set.add(HostSpec.of("ip3", 3, "  shafq  "));
+        set.add(HostSpec.of("ip4", 4, "shafq"));
+        set.add(HostSpec.of("ip5", 5, "shafq"));
+        return set;
+    }
+
+    public static Set<HostSpec> noSlaveHostSpecs() {
+        HashSet<HostSpec> set = new HashSet<>();
+        set.add(HostSpec.of("ip", 0, "shaoy", true));
+        return set;
+    }
 
     @Test
     public void pickRead() {
@@ -59,10 +93,11 @@ public class ReadCurrentZoneSlavesFirstStrategyTest {
         strategy.currentZone = "shaoy";
 
         HostSpec hostSpec = strategy.pickRead(new DalHints());
-        assertEquals("SHAOY", hostSpec.zone());
+        assertEquals(strategy.currentZone, hostSpec.getTrimLowerCaseZone());
 
         strategy.currentZone = "sharb";
-        assertEquals("SHARB", hostSpec.zone());
+        hostSpec = strategy.pickRead(new DalHints());
+        assertEquals(strategy.currentZone, hostSpec.getTrimLowerCaseZone());
     }
 
 

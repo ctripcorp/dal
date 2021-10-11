@@ -19,12 +19,10 @@ public class HostSpecTest {
         hostSpec = HostSpec.of("ip0", 0, "   ");
         try {
             hostSpec.getTrimLowerCaseZone();
+            fail();
         } catch (Throwable e) {
             assertEquals(true, e instanceof DalMetadataException);
             assertEquals(String.format(" of %s zone msg lost", hostSpec.toString()), e.getMessage());
-            return;
         }
-
-        assertEquals(true, false);
     }
 }

@@ -39,7 +39,7 @@ public class DatabaseConfigImpl implements DatabaseConfig {
         DatabaseCategory databaseCategory = databaseShardConfig.getClusterConfig().getDatabaseCategory();
         if (databaseCategory == null)
             throw new ClusterConfigException("undefined database category");
-        else if (databaseCategory == DatabaseCategory.MYSQL)
+        else if (databaseCategory == DatabaseCategory.MYSQL || databaseCategory == DatabaseCategory.CUSTOM)
             return new MySqlDatabase(this);
         else
             throw new ClusterConfigException(String.format("unsupported database category: %s", databaseCategory.getValue()));

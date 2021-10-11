@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants.DB_NAME;
+import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.CONNECTION_URL;
 import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.DRIVER_CLASS_NAME;
 
 public class ClusterDynamicDataSource extends DataSourceDelegate implements DataSource,
@@ -112,6 +114,8 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
                 if (customizedOption.getJdbcDriver() != null) {
                     properties.get().setProperty(DRIVER_CLASS_NAME, customizedOption.getJdbcDriver().driverClassName());
                 }
+                properties.get().setProperty(DB_NAME, database.getConnectionString().getDbName());
+                properties.get().remove(CONNECTION_URL);
             }
             hostsInfos.add(host);
         });

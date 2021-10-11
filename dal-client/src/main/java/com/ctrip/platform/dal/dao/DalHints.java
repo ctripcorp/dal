@@ -553,7 +553,8 @@ public class DalHints {
     }
 
     public DalHints routeStrategy(RouteStrategyEnum readStrategyEnum) {
-        set(DalHintEnum.routeStrategy, readStrategyEnum);
+        if (readStrategyEnum != null)
+            set(DalHintEnum.routeStrategy, readStrategyEnum);
         return this;
     }
 

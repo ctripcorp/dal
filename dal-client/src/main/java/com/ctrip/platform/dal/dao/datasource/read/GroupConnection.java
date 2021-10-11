@@ -1,11 +1,13 @@
 package com.ctrip.platform.dal.dao.datasource.read;
 
 
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.shard.read.RouterType;
 import com.ctrip.framework.dal.cluster.client.util.ExceptionUtils;
 import com.ctrip.platform.dal.common.enums.SqlType;
+import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
@@ -20,7 +22,14 @@ import static com.ctrip.platform.dal.dao.log.LogUtils.logReadStrategy;
 
 public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
-    private static final String SQL_FORCE_WRITE_HINT = "/*+dal:write*/";
+    private static final String COMMENT_START = "/*";
+    private static final String COMMENT_END = "*/";
+    private static final String COMMENT_SEPARATOR = ":";
+
+    private static final String ROUTE_TYPE = "route"; // /*route:read*/ or /*route:write*/
+    private static final String STRATEGY_TYPE = "strategy"; /*strategy:READ_MASTER*/
+    private static final String CUSTOM_TYPE = "custom"; /*custom:key1=value1;key2=value2;key3=value3*/
+
 
     private ClusterInfo clusterInfo;
     private Integer shardIndex;
@@ -74,7 +83,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         return pstmt;
     }
 
-    protected Connection getReadConnection() throws SQLException {
+    protected Connection getReadConnection(DalHints dalHints) throws SQLException {
         if (rConnection == null) {
             synchronized (this) {
                 if (rConnection == null) {
@@ -93,25 +102,55 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         return rConnection;
     }
 
-    protected Connection pickRead() throws SQLException {
+    protected Connection getReadConnection() throws SQLException {
+        return getReadConnection(new DalHints());
+    }
+
+    protected Connection pickRead(DalHints dalHints) throws SQLException {
         DatabaseShard databaseShard = clusterInfo.getCluster().getDatabaseShard(shardIndex);
-        DataSource dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
+        DataSource dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(dalHints));
         if (dataSource == null) {
             synchronized (groupDataSource) {
-                dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
+                dataSource = readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(dalHints));
                 if (dataSource == null) {
                     groupDataSource.init();
                     this.readDataSource = groupDataSource.readDataSource;
-                    dataSource = this.readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(buildReadStrategyContext()));
+                    dataSource = this.readDataSource.get(databaseShard.selectDatabaseFromReadStrategy(dalHints));
                 }
             }
         }
         return dataSource.getConnection();
     }
 
-    protected DalHints buildReadStrategyContext() {
-        // todo-lhj dalhints需要测试是否需要初始化: 识别sql中的hints，并填入dalhints中
+    protected Connection pickRead() throws SQLException {
+        return pickRead(new DalHints());
+    }
+
+    protected DalHints buildReadStrategyContext(String sql) {
+        String trimSql = sql.trim();
         DalHints dalHints = new DalHints();
+        if (!trimSql.startsWith(COMMENT_START))
+            return dalHints;
+        String comment = trimSql.substring(2, trimSql.indexOf(COMMENT_END)).toLowerCase();
+
+        int commentSeparator = comment.indexOf(COMMENT_SEPARATOR);
+        if (commentSeparator < 0)
+            return dalHints;
+        String type = comment.substring(0, commentSeparator);
+        String value = comment.substring(commentSeparator + 1);
+        switch (type) {
+            case ROUTE_TYPE:
+                if (value.startsWith("w"))
+                    dalHints.masterOnly();
+                else dalHints.slaveOnly();
+                break;
+            case STRATEGY_TYPE:
+                dalHints.routeStrategy(RouteStrategyEnum.parseEnum(value));
+                break;
+            case CUSTOM_TYPE:
+                dalHints.set(DalHintEnum.userDefined1, value);
+                break;
+        }
         return dalHints;
     }
 
@@ -149,9 +188,11 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             return getWriteConnection();
         }
 
+        DalHints dalHints = buildReadStrategyContext(sql);
+
         if (forceWrite) {
             return getWriteConnection();
-        } else if (!autoCommit || StringUtils.trimToEmpty(sql).contains(SQL_FORCE_WRITE_HINT)) {
+        } else if (!autoCommit || dalHints.is(DalHintEnum.masterOnly)) {
             return getWriteConnection();
         }else if (LocalContextReadWriteStrategy.getReadFromMaster()){
             return getWriteConnection();

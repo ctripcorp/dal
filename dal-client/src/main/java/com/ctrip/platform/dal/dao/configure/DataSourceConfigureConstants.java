@@ -103,6 +103,7 @@ public interface DataSourceConfigureConstants {
     String USE_LOCAL_CONFIG = "useLocalConfig";
     String IGNORE_EXTERNAL_EXCEPTION = "ignoreExternalException";
     String CUSTOM_DATASOURCE_FACTORY = "customDataSourceFactory";
+    String CUSTOM_DATASOURCE_FACTORY_TYPE = "customDataSourceFactoryType";
     String DATABASE_CONFIG_LOCATION = "databaseConfigLocation";
     String SERVICE_ADDRESS = "serviceAddress";
     String TIMEOUT = "timeout";

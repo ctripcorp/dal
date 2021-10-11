@@ -14,4 +14,12 @@ import java.util.Set;
 public interface CustomDataSourceFactory extends DataSourceConfigureConstants {
 
     DataSource createDataSource(Set<HostSpec> hosts, Properties info);
+
+    default String type() {
+        return Type.ch.name();
+    }
+
+    enum Type {
+        ch()
+    }
 }

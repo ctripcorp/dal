@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.helper.RequestContext;
+import com.ctrip.platform.dal.dao.log.LogUtils;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
@@ -416,7 +417,8 @@ public class DalHints {
             return;
 
         // Just make sure error is not swallowed by us
-        DalClientFactory.getDalLogger().error(msg, e);
+        if (!LogUtils.ignoreError(e))
+            DalClientFactory.getDalLogger().error(msg, e);
 
         if (isStopOnError())
             throw DalException.wrap(e);

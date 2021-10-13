@@ -2,8 +2,6 @@ package com.ctrip.framework.dal.cluster.client.config;
 
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.exception.ClusterConfigException;
-import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactory;
-import com.ctrip.framework.dal.cluster.client.extended.JdbcDriver;
 import com.ctrip.framework.dal.cluster.client.util.FileUtils;
 
 import java.io.InputStream;
@@ -71,12 +69,12 @@ public class DefaultLocalConfigProvider implements ClusterConfigProvider {
                 }
 
                 @Override
-                public CustomDataSourceFactory getDataSourceFactory() {
+                public String getDataSourceFactory() {
                     return null;
                 }
 
                 @Override
-                public JdbcDriver getJdbcDriver() {
+                public String getJdbcDriver() {
                     return null;
                 }
             });

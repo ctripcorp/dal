@@ -24,6 +24,7 @@ public interface ClusterConfigXMLConstants {
     String UNIT_STRATEGY_ID = "UnitStrategyId";
     String CONSISTENCY_TYPE = "ConsistencyType";
     String ZONE_ID = "ZoneId";
+    String CUSTOM_CONFIG = "CustomConfig";
 
     // XML attributes
     String NAME = "name";

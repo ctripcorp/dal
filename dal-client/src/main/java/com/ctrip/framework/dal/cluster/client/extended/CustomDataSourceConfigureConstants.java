@@ -11,4 +11,6 @@ public interface CustomDataSourceConfigureConstants extends DataSourceConfigureC
 
     String DB_NAME = ClusterConfigXMLConstants.DB_NAME;
 
+    String DATASOURCE_FACTORY = "dataSourceFactory";
+
 }

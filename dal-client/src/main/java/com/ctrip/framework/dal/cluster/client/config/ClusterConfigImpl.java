@@ -12,6 +12,7 @@ import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -32,6 +33,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
     private String zoneId;
     private DrcConsistencyTypeEnum drcConsistencyType;
     private DalConfigCustomizedOption customizedOption; // this variable is from dal.config or datasource parameter
+    private Properties customProperties;
 
     private final AtomicReference<Cluster> generatedClusterRef = new AtomicReference<>();
 
@@ -83,6 +85,7 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
             localizationState = LocalizationState.PREPARED;
         cluster.setLocalizationConfig(new LocalizationConfigImpl(unitStrategyId, zoneId, localizationState, drcConsistencyType));
         cluster.setCustomizedOption(customizedOption);
+        cluster.setCustomProperties(customProperties);
         cluster.validate();
         return cluster;
     }
@@ -169,6 +172,14 @@ public class ClusterConfigImpl extends UnsupportedListenable<ClusterConfig> impl
 
     public ShardStrategy getDefaultShardStrategy() {
         return defaultShardStrategy;
+    }
+
+    public Properties getCustomProperties() {
+        return customProperties;
+    }
+
+    public void setCustomProperties(Properties customProperties) {
+        this.customProperties = customProperties;
     }
 
     @Override

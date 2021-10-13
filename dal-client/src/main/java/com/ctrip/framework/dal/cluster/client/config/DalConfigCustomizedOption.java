@@ -2,8 +2,6 @@ package com.ctrip.framework.dal.cluster.client.config;
 
 
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactory;
-import com.ctrip.framework.dal.cluster.client.extended.JdbcDriver;
 
 public interface DalConfigCustomizedOption {
 
@@ -44,7 +42,7 @@ public interface DalConfigCustomizedOption {
 
     String getTag();
 
-    CustomDataSourceFactory getDataSourceFactory();
+    String getDataSourceFactory();
 
-    JdbcDriver getJdbcDriver();
+    String getJdbcDriver();
 }

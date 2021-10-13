@@ -14,6 +14,7 @@ import com.ctrip.framework.dal.cluster.client.sharding.strategy.ModShardStrategy
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.NonsupportCustomStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.ShardStrategy;
 import com.ctrip.framework.dal.cluster.client.sharding.strategy.UserHintStrategy;
+import com.ctrip.framework.dal.cluster.client.util.PropertiesUtils;
 import com.ctrip.framework.dal.cluster.client.util.SPIUtils;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import org.w3c.dom.*;
@@ -21,10 +22,12 @@ import org.xml.sax.InputSource;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author c7ch23en
@@ -59,7 +62,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         }
     }
 
-    private ClusterConfig parse(Document doc, DalConfigCustomizedOption customizedOption) {
+    private ClusterConfig parse(Document doc, DalConfigCustomizedOption customizedOption) throws IOException {
         Element root = doc.getDocumentElement();
         if (root == null || !DAL.equalsIgnoreCase(root.getTagName()))
             throw new ClusterConfigException("root element should be <DAL>");
@@ -69,7 +72,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         return parseCluster(clusterNode, customizedOption);
     }
 
-    private ClusterConfig parseCluster(Node clusterNode, DalConfigCustomizedOption customizedOption) {
+    private ClusterConfig parseCluster(Node clusterNode, DalConfigCustomizedOption customizedOption) throws IOException {
         String name = getAttribute(clusterNode, NAME);
         if (StringUtils.isEmpty(name))
             throw new ClusterConfigException("cluster name undefined");
@@ -294,7 +297,7 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
         return strategyNodes;
     }
 
-    private void parseDrcConfig(ClusterConfigImpl clusterConfig, Node clusterNode) {
+    private void parseDrcConfig(ClusterConfigImpl clusterConfig, Node clusterNode) throws IOException {
         Node unitStrategyIdNode = getChildNode(clusterNode, UNIT_STRATEGY_ID);
         if (unitStrategyIdNode != null) {
             String unitStrategyIdText = unitStrategyIdNode.getTextContent();
@@ -311,6 +314,14 @@ public class ClusterConfigXMLParser implements ClusterConfigParser, ClusterConfi
             String zoneIdText = zoneIdNode.getTextContent();
             if (!StringUtils.isEmpty(zoneIdText)) {
                 clusterConfig.setZoneId(zoneIdText);
+            }
+        }
+        Node customConfigNode = getChildNode(clusterNode, CUSTOM_CONFIG);
+        if (customConfigNode != null) {
+            String customConfigText = customConfigNode.getTextContent();
+            if (!StringUtils.isEmpty(customConfigText)) {
+                Properties properties = PropertiesUtils.toProperties(customConfigText);
+                clusterConfig.setCustomProperties(properties);
             }
         }
         Node unitConsistencyStrategyNode = getChildNode(clusterNode, CONSISTENCY_TYPE);

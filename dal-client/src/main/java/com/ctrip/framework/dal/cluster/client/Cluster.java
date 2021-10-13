@@ -15,6 +15,7 @@ import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGeneratorC
 
 import java.sql.Wrapper;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -57,6 +58,8 @@ public interface Cluster extends Listenable<ClusterSwitchedEvent>, Wrapper {
     LocalizationConfig getLastLocalizationConfig();
 
     DalConfigCustomizedOption getCustomizedOption();
+
+    Properties getCustomProperties();
 
     DatabaseShard getDatabaseShard(int shardIndex);
 

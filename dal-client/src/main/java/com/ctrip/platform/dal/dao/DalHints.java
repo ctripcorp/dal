@@ -417,8 +417,7 @@ public class DalHints {
             return;
 
         // Just make sure error is not swallowed by us
-        if (!LogUtils.ignoreError(e))
-            DalClientFactory.getDalLogger().error(msg, e);
+        DalClientFactory.getDalLogger().error(msg, e);
 
         if (isStopOnError())
             throw DalException.wrap(e);

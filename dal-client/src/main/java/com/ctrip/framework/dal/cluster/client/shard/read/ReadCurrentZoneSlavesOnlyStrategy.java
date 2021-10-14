@@ -17,7 +17,6 @@ import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.R
 public class ReadCurrentZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
     protected String currentZone = envUtils.getZone();
     protected Map<String, List<HostSpec>> zoneToHost = new HashMap<>();
-    protected RouteStrategyEnum readStrategyEnum = READ_CURRENT_ZONE_SLAVES_ONLY;
 
     private final static String ZONE_MSG_LOST = " can't get zone msg";
     private final static String NO_DATABASE_IN_CURRENT_ZONE = " has no database in %s";

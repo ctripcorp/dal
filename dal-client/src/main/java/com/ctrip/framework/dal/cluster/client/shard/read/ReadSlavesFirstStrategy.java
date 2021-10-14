@@ -22,9 +22,7 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
     protected static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
     protected HashMap<String, List<HostSpec>> hostMap = new HashMap<>();
     protected HashMap<RouteStrategyEnum, ReadStrategy> routeStrategies = new HashMap<>();
-    protected final String ZONE_MISS = "%s hostspec of %s zone message missed.";
 
-    protected RouteStrategyEnum readStrategyEnum = READ_SLAVES_FIRST;
     protected Set<HostSpec> hostSpecs;
     protected CaseInsensitiveProperties strategyProperties;
 
@@ -102,8 +100,6 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
     protected HostSpec dalHintsRoute (DalHints dalHints) {
         RouteStrategyEnum strategyEnum = dalHints.getRouteStrategy();
         dalHints.cleanRouteStrategy();
-        if (readStrategyEnum.equals(strategyEnum))
-            return this.pickRead(dalHints);
 
         if (routeStrategies.get(strategyEnum) == null) {
             synchronized (routeStrategies) {

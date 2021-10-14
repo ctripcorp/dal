@@ -87,7 +87,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         if (rConnection == null) {
             synchronized (this) {
                 if (rConnection == null) {
-                    rConnection = pickRead();
+                    rConnection = pickRead(dalHints);
                 }
                 if (catalog != null) {
                     rConnection.setCatalog(catalog);

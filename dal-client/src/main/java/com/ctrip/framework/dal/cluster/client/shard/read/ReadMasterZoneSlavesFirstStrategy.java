@@ -13,7 +13,6 @@ import java.util.Set;
 import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_MASTER_ZONE_SLAVES_FIRST;
 
 public class ReadMasterZoneSlavesFirstStrategy extends ReadMasterZoneSlavesOnlyStrategy {
-    protected RouteStrategyEnum readStrategyEnum = READ_MASTER_ZONE_SLAVES_FIRST;
 
     @Override
     public void init(Set<HostSpec> hostSpecs, CaseInsensitiveProperties strategyProperties) {

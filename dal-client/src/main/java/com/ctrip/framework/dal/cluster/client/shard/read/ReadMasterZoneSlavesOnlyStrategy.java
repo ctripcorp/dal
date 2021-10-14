@@ -14,7 +14,6 @@ import java.util.*;
 import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_MASTER_ZONE_SLAVES_ONLY;
 
 public class ReadMasterZoneSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
-    protected RouteStrategyEnum readStrategyEnum = READ_MASTER_ZONE_SLAVES_ONLY;
     protected Map<String, List<HostSpec>> zoneToHost = new HashMap<>();
     protected String masterZone;
 

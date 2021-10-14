@@ -9,7 +9,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_MASTER;
 
 public class ReadMasterStrategy extends ReadSlavesFirstStrategy {
-    protected RouteStrategyEnum readStrategyEnum = READ_MASTER;
 
     @Override
     public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {

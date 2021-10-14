@@ -8,7 +8,6 @@ import com.ctrip.platform.dal.dao.DalHints;
 import static com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum.READ_SLAVES_ONLY;
 
 public class ReadSlavesOnlyStrategy extends ReadSlavesFirstStrategy {
-    protected RouteStrategyEnum readStrategyEnum = READ_SLAVES_ONLY;
 
     @Override
     public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {

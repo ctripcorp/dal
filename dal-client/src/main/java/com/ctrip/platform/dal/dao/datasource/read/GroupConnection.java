@@ -29,6 +29,8 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private static final String ROUTE_TYPE = "route"; // /*route:read*/ or /*route:write*/
     private static final String STRATEGY_TYPE = "strategy"; /*strategy:READ_MASTER*/
     private static final String CUSTOM_TYPE = "custom"; /*custom:key1=value1;key2=value2;key3=value3*/
+    private static final String WRITE = "write";
+    private static final String READ = "read";
 
 
     private ClusterInfo clusterInfo;
@@ -140,9 +142,10 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         String value = comment.substring(commentSeparator + 1);
         switch (type) {
             case ROUTE_TYPE:
-                if (value.startsWith("w"))
+                if (WRITE.equals(value))
                     dalHints.masterOnly();
-                else dalHints.slaveOnly();
+                else if (READ.equals(value))
+                    dalHints.slaveOnly();
                 break;
             case STRATEGY_TYPE:
                 dalHints.routeStrategy(RouteStrategyEnum.parseEnum(value));

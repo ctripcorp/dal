@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceConfigureConstants.DATASOURCE_FACTORY;
+import static com.ctrip.platform.dal.dao.configure.DataSourceConfigureConstants.DRIVER_CLASS_NAME;
+
 public class DalConfigureFactory implements DalConfigConstants {
     private static DalConfigureFactory factory = new DalConfigureFactory();
 
@@ -249,6 +252,8 @@ public class DalConfigureFactory implements DalConfigConstants {
         ((DefaultDalConfigCustomizedOption)defaultOption)
                 .consistencyTypeCustomizedClass(getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null))
                 .readStrategy(getAttribute(clusterNode, ROUTE_STRATEGY, ""))
+                .delegate(getAttribute(clusterNode, DATASOURCE_FACTORY, ""))
+                .jdbcDriver(getAttribute(clusterNode, DRIVER_CLASS_NAME, ""))
                 // todo-lhj what's default tag
                 .tag(getAttribute(clusterNode, TAG, "tag"));
     }

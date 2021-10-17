@@ -46,4 +46,6 @@ public interface DalPropertiesLocator {
 
     LogFilter exceptionLogFilter() throws Exception;
 
+    long shutdownDelayMS();
+
 }

@@ -263,13 +263,19 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
                     LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName,
                             String.format("old isForceSwitched before force switch: %s, old poolCreated before force switch: %s",
                                     currentStatus.isForceSwitched(), currentStatus.isPoolCreated()));
-                    DataSourceConfigure dataSourceConfig = getSingleDataSource().getDataSourceConfigure().clone();
-                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("previous host(s): %s:%s", currentStatus.getHostName(), currentStatus.getPort()));
-                    dataSourceConfig.replaceURL(ip, port);
-                    LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new host(s): %s:%s", ip, port));
                     getExecutor().submit(() -> {
                         try {
-                            switchDataSource(new RefreshableDataSource(dataSourceId, dataSourceConfig));
+                            DataSource newDataSource;
+                            if (DatabaseCategory.CUSTOM == cluster.getDatabaseCategory()) {
+                                newDataSource = createCustomDataSource();
+                            } else {
+                                DataSourceConfigure dataSourceConfig = getSingleDataSource().getDataSourceConfigure().clone();
+                                LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("previous host(s): %s:%s", currentStatus.getHostName(), currentStatus.getPort()));
+                                dataSourceConfig.replaceURL(ip, port);
+                                LOGGER.logEvent(DalLogTypes.DAL_CONFIGURE, logName, String.format("new host(s): %s:%s", ip, port));
+                                newDataSource = new RefreshableDataSource(dataSourceId, dataSourceConfig);
+                            }
+                            switchDataSource(newDataSource);
                             status.set(ForceSwitchedStatus.ForceSwitched);
                             currentHost.set(new HostAndPort(null, ip, port));
                         } catch (Throwable t) {

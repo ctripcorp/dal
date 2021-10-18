@@ -26,7 +26,7 @@ public class ReadCurrentZoneSlavesOnlyStrategyTest {
             fail();
         } catch (Throwable t) {
             assertEquals(true, t instanceof DalMetadataException);
-            assertEquals(" can't get zone msg", t.getMessage());
+            assertEquals(" has no database in ", t.getMessage());
         }
 
         strategy.currentZone = "shaxy";

@@ -42,7 +42,7 @@ public class ReadMasterZoneSlavesOnlyStrategyTest {
             }
         }
 
-        assertEquals(3, count);
+        assertEquals(2, count);
 
 
         ReadMasterZoneSlavesOnlyStrategy strategy1 = new ReadMasterZoneSlavesOnlyStrategy();

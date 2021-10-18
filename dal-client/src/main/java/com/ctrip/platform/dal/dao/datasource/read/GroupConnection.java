@@ -6,13 +6,13 @@ import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.shard.read.RouterType;
 import com.ctrip.framework.dal.cluster.client.util.ExceptionUtils;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.SqlType;
 import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.ClusterInfo;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 import com.ctrip.platform.dal.dao.strategy.LocalContextReadWriteStrategy;
-import org.apache.commons.lang.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -129,8 +129,10 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     }
 
     protected DalHints buildReadStrategyContext(String sql) {
-        String trimSql = sql.trim();
         DalHints dalHints = new DalHints();
+        if (StringUtils.isEmpty(sql))
+            return dalHints;
+        String trimSql = sql.trim();
         if (!trimSql.startsWith(COMMENT_START))
             return dalHints;
         String comment = trimSql.substring(2, trimSql.indexOf(COMMENT_END)).toLowerCase();

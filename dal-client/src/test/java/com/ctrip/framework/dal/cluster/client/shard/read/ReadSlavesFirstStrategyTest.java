@@ -43,7 +43,7 @@ public class ReadSlavesFirstStrategyTest {
     public void hintsRoute() {
         strategy.init(set, null);
 
-        DalHints dalHints = new DalHints().routeStrategy(RouteStrategyEnum.READ_MASTER_ZONE_SLAVES_ONLY);
+        DalHints dalHints = new DalHints().routeStrategy(RouteStrategyEnum.READ_MASTER);
         assertEquals("sharb", strategy.hintsRoute(dalHints).getTrimLowerCaseZone());
 
         DalHints dalHints1 = new DalHints().masterOnly();

@@ -1,0 +1,14 @@
+<DAL>
+    <Cluster name="chcluster" dbCategory="ch" type="normal" version="1">
+        <CustomConfig>dataSourceFactory=com.ctrip.datasource.datasource.UTTestCHDataSourceFactory&#xD;driverClassName=ru.yandex.clickhouse.ClickHouseDriver</CustomConfig>
+        <DatabaseShards>
+            <DatabaseShard index="0" masterDomain="dst56614" masterPort="3306">
+                <Database role="master" ip="dst56614" port="3306" dbName="cluster_rw_master" uid="root" pwd="!QAZ@WSX1qaz2wsx" zone="shaoy"/>
+            </DatabaseShard>
+        </DatabaseShards>
+        <RouteStrategies>
+            <WRITE_CURRENT_ZONE_FIRST>
+            </WRITE_CURRENT_ZONE_FIRST>
+        </RouteStrategies>
+    </Cluster>
+</DAL>

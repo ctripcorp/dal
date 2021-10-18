@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao;
 
 
+import com.ctrip.platform.dal.common.enums.DatabaseCategoryTest;
 import com.ctrip.platform.dal.dao.helper.EntityManagerTest.EntityManagerTest;
 import com.ctrip.platform.dal.dao.helper.SqlUtilsTest;
 import com.ctrip.platform.dal.dao.task._AllTests;
@@ -33,7 +34,9 @@ import org.junit.runners.Suite.SuiteClasses;
 		com.ctrip.platform.dal.dao.markdown._AllTests.class,
 
 		// group datasource
-		SqlUtilsTest.class
+		SqlUtilsTest.class,
+
+		DatabaseCategoryTest.class
 
 })
 

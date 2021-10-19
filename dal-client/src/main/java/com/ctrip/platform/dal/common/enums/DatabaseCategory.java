@@ -265,7 +265,7 @@ public enum DatabaseCategory {
             return DatabaseCategory.Oracle;
         }
         else {
-            throw new RuntimeException("connection url unrecognized");
+            return DatabaseCategory.Custom;
         }
     }
 

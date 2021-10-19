@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.common.enums;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -9,6 +10,8 @@ import org.junit.Test;
 public class DatabaseCategoryTest {
 
     private DatabaseCategory databaseCategory = DatabaseCategory.Custom;
+
+    private String connectionUrl = "jdbc:clickhouse://%s:%s/%s?ssl=false&user=%s&password=%s&use_server_time_zone=false&use_time_zone=UTC";
 
     @Test(expected = UnsupportedOperationException.class)
     public void testUnsupportedOperationQuote() {
@@ -43,6 +46,16 @@ public class DatabaseCategoryTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testUnsupportedOperationIsSpecificException() {
         databaseCategory.isSpecificException(null);
+    }
+
+    @Test
+    public void testMatchWith() {
+        Assert.assertEquals(databaseCategory, DatabaseCategory.matchWith(com.ctrip.framework.dal.cluster.client.database.DatabaseCategory.CUSTOM));
+    }
+
+    @Test
+    public void testMatchWithConnectionUrl() {
+        Assert.assertEquals(databaseCategory, DatabaseCategory.matchWithConnectionUrl(connectionUrl));
     }
 
 }

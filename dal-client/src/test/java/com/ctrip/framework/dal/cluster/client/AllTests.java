@@ -3,6 +3,7 @@ package com.ctrip.framework.dal.cluster.client;
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultClusterTest;
 import com.ctrip.framework.dal.cluster.client.cluster.DefaultLocalConfigProviderTest;
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParserTest;
+import com.ctrip.framework.dal.cluster.client.database.DummyDatabaseTest;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitivePropertiesTest;
 import com.ctrip.framework.dal.cluster.client.util.ObjectHolderTest;
 import com.ctrip.framework.dal.cluster.client.util.PropertiesUtilsTest;
@@ -16,6 +17,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         ClusterConfigXMLParserTest.class,
         PropertiesUtilsTest.class,
+        DummyDatabaseTest.class,
         DefaultClusterTest.class,
         DefaultLocalConfigProviderTest.class,
         ObjectHolderTest.class,

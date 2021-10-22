@@ -250,7 +250,8 @@ public class DalConfigureFactory implements DalConfigConstants {
                 .consistencyTypeCustomizedClass(getAttribute(clusterNode, CONSISTENCY_TYPE_CUSTOMIZED_CLASS, null))
                 .readStrategy(getAttribute(clusterNode, ROUTE_STRATEGY, ""))
                 // todo-lhj what's default tag
-                .tag(getAttribute(clusterNode, TAG, "tag"));
+                .tag(getAttribute(clusterNode, TAG, ""))
+                .queryConsistent(Boolean.valueOf(getAttribute(clusterNode, QUERY_CONSISTENT, "false")));
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {

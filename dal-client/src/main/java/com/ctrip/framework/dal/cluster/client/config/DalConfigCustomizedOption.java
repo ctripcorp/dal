@@ -41,4 +41,6 @@ public interface DalConfigCustomizedOption {
     String getRouteStrategy();
 
     String getTag();
+
+    boolean isQueryConsistent();
 }

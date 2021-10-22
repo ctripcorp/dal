@@ -31,6 +31,7 @@ public interface DalConfigConstants {
     String CONSISTENCY_TYPE_CUSTOMIZED_CLASS = "consistencyTypeCustomizedClass";
     String ROUTE_STRATEGY = "routeStrategy";
     String TAG = "tag";
+    String QUERY_CONSISTENT = "queryConsistent";
 
     String ID_GENERATOR = "idGenerator";
     String ID_GENERATOR_FACTORY = "factory";

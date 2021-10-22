@@ -32,17 +32,16 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
     private static final String WRITE = "write";
     private static final String READ = "read";
 
-
     private ClusterInfo clusterInfo;
     private Integer shardIndex;
-
     private DataSource writeDataSource;
     Map<Database, DataSource> readDataSource;
+    private RouterType routerType;
+    private final boolean queryConsistent;
 
     private volatile GroupDataSource groupDataSource;
     private volatile Connection rConnection;
     private volatile Connection wConnection;
-    private RouterType routerType;
     private List<Statement> openedStatements = new ArrayList<Statement>();
     private int transactionIsolation = -1;
     private boolean autoCommit = true;
@@ -61,6 +60,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         this.readDataSource = groupDataSource.readDataSource;
         this.shardIndex = clusterInfo.getShardIndex();
         this.routerType = groupDataSource.routerType;
+        this.queryConsistent = clusterInfo.getCluster().getCustomizedOption().isQueryConsistent();
     }
 
     private void checkClosed() throws SQLException {
@@ -181,7 +181,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
             }
         }
         lastRealConnection = wConnection;
-
+        PrimaryVisitedManager.setPrimaryVisited();
         return wConnection;
     }
 
@@ -195,7 +195,7 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
 
         DalHints dalHints = buildReadStrategyContext(sql);
 
-        if (forceWrite) {
+        if (forceWrite || (queryConsistent && PrimaryVisitedManager.getPrimaryVisited())) {
             return getWriteConnection();
         } else if (!autoCommit || dalHints.is(DalHintEnum.masterOnly)) {
             return getWriteConnection();
@@ -263,7 +263,9 @@ public class GroupConnection extends AbstractUnsupportedOperationConnection {
         if (closed) {
             return;
         }
+
         closed = true;
+        PrimaryVisitedManager.clear();
 
         final List<SQLException> exceptions = new LinkedList<SQLException>();
 

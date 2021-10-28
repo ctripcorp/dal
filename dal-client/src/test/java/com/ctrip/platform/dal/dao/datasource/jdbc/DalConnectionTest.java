@@ -22,7 +22,7 @@ public class DalConnectionTest {
     {
         properties.setProperty(USER_NAME, "root");
         properties.setProperty(PASSWORD, "!QAZ@WSX1qaz2wsx");
-        properties.setProperty(CONNECTION_URL, "jdbc:mysql://10.32.20.125:3306/llj_test");
+        properties.setProperty(CONNECTION_URL, "jdbc:mysql://10.32.20.116:3306/llj_test");
         properties.setProperty(DRIVER_CLASS_NAME, "com.mysql.jdbc.Driver");
         DataSourceConfigure configure = new DataSourceConfigure("DalService2DB_w", properties);
         try {

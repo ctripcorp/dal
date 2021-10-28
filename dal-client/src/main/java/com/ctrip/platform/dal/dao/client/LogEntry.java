@@ -5,10 +5,12 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.helper.DefaultTableParser;
-import com.ctrip.platform.dal.dao.helper.LoggerHelper;
 import com.ctrip.platform.dal.dao.helper.TableParser;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class LogEntry implements ILogEntry{
     private static volatile ThreadLocal<String> currentCaller;
@@ -57,6 +59,7 @@ public class LogEntry implements ILogEntry{
 	private Cluster cluster;
 	private Long connectionId;
 	private Integer localPort;
+	private Integer queryTimeout;
 
 	/**
      * Internal performance recorder for performance cost in each stage.
@@ -518,4 +521,14 @@ public class LogEntry implements ILogEntry{
 	public void setLocalPort(Integer localPort) {
 		this.localPort = localPort;
 	}
+
+
+	public Integer getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(Integer queryTimeout) {
+		this.queryTimeout = queryTimeout;
+	}
+
 }

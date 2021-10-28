@@ -4,9 +4,9 @@ import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.dao.configure.DalExtendedPoolConfiguration;
 import com.ctrip.platform.dal.dao.datasource.ConnectionListener;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.cluster.ConnectionValidator;
 import com.ctrip.platform.dal.dao.datasource.cluster.DefaultHostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.ConnectionUtils;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.LoggerHelper;
@@ -18,20 +18,23 @@ import org.apache.tomcat.jdbc.pool.ConnectionPool;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PooledConnection;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DalConnectionPool extends ConnectionPool {
     private static ILogger logger = DalElementFactory.DEFAULT.getILogger();
     private static ConnectionListener connectionListener = ServiceLoaderHelper.getInstance(ConnectionListener.class);
     private static ThreadLocal<Long> poolWaitTime = new ThreadLocal<>();
 
-    private final ConnectionValidator clusterConnValidator;
+    private final HostConnectionValidator clusterConnValidator;
 
     public DalConnectionPool(PoolConfiguration prop) throws SQLException {
         this(prop, null);
     }
 
-    public DalConnectionPool(PoolConfiguration prop, ConnectionValidator clusterConnValidator) throws SQLException {
+    public DalConnectionPool(PoolConfiguration prop, HostConnectionValidator clusterConnValidator) throws SQLException {
         super(prop);
         this.clusterConnValidator = clusterConnValidator;
     }
@@ -53,9 +56,13 @@ public class DalConnectionPool extends ConnectionPool {
             logger.error("[borrowConnection]" + this, e);
         }
 
-        return super.borrowConnection(now, con, username, password);
+        PooledConnection pooledConnection = super.borrowConnection(now, con, username, password);
+        if (con.getLastConnected() > now) {
+            connectionListener.onRecreateConnection(getName(), getConnection(con));
+            preHandleConnection(pooledConnection);
+        }
+        return pooledConnection;
     }
-
 
     @Override
     protected PooledConnection createConnection(long now, PooledConnection notUsed, String username, String password)

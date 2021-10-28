@@ -1,10 +1,14 @@
 package com.ctrip.platform.dal.dao.log;
 
+import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
+
 import java.util.Map;
 
 public interface ILogger {
 
     void logEvent(String type, String name, String message);
+
+    void logSqlTransaction(SqlContext sqlContext);
 
     void logTransaction(String type, String name, String message, Callback callback) throws Exception;
 

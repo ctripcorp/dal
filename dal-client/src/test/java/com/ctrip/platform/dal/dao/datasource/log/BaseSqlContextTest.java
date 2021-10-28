@@ -66,8 +66,8 @@ public class BaseSqlContextTest {
         Assert.assertEquals(CLIENT_ZONE, tags.get(BaseSqlContext.CLIENT_ZONE));
         Assert.assertEquals(DB_NAME, tags.get(BaseSqlContext.DB_NAME));
         Assert.assertEquals(DB_ZONE, tags.get(BaseSqlContext.DB_ZONE));
-        Assert.assertEquals("pkg.caller.test.TestCaller", tags.get(BaseSqlContext.DAO));
-        Assert.assertEquals("call", tags.get(BaseSqlContext.METHOD));
+        Assert.assertEquals("dao", tags.get(BaseSqlContext.DAO));
+        Assert.assertEquals("method", tags.get(BaseSqlContext.METHOD));
         Assert.assertEquals(OP_TYPE.name(), tags.get(BaseSqlContext.OP_TYPE));
         Assert.assertEquals(UCS_VALIDATION, tags.get(BaseSqlContext.UCS_VALIDATION));
         Assert.assertEquals(DAL_VALIDATION, tags.get(BaseSqlContext.DAL_VALIDATION));

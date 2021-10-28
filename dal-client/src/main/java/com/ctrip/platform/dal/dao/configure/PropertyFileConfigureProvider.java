@@ -1,13 +1,5 @@
 package com.ctrip.platform.dal.dao.configure;
 
-import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.platform.dal.dao.DalClientFactory;
@@ -15,6 +7,14 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesManager;
 import com.ctrip.platform.dal.dao.datasource.ClusterDataSourceIdentity;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
+
+import java.io.File;
+import java.io.FileReader;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 public class PropertyFileConfigureProvider implements IntegratedConfigProvider {
 

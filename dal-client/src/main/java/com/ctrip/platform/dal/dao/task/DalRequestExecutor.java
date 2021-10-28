@@ -1,24 +1,11 @@
 package com.ctrip.platform.dal.dao.task;
 
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.*;
 import com.ctrip.platform.dal.dao.client.DalLogger;
 import com.ctrip.platform.dal.dao.client.LogContext;
 import com.ctrip.platform.dal.dao.client.LogEntry;
 import com.ctrip.platform.dal.dao.configure.DalConfigure;
-import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfig;
 import com.ctrip.platform.dal.dao.configure.DalThreadPoolExecutorConfigBuilder;
 import com.ctrip.platform.dal.dao.configure.DatabaseSet;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
@@ -26,6 +13,15 @@ import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Common request executor that support execute request that is of pojo or
@@ -216,7 +212,7 @@ public class DalRequestExecutor {
 			if(request.isCrossShard())
 				result = crossShardExecute(logContext, hints, request, callback);
 			else
-				result = nonCrossShardExecute(logContext, hints, request);
+				result = nonCrossShardExecute(logContext, hints, request, callback);
 
 			if(result == null && !nullable)
 				throw new DalException(ErrorCode.AssertNull);
@@ -236,13 +232,24 @@ public class DalRequestExecutor {
 		return result;
 	}
 
-	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request) throws Exception {
+	private <T> T nonCrossShardExecute(LogContext logContext, DalHints hints, DalRequest<T> request, ShardExecutionCallback<T> callback) throws Exception {
         logContext.setSingleTask(true);
 		String logicDbName = request.getLogicDbName();
 		TaskCallable<T> task = request.createTask();
 		String shard = task.getPreparedDbShard();
 	    Callable<T> taskWrapper = new RequestTaskWrapper<T>(logicDbName, shard, task, logContext);
-		T result = taskWrapper.call();
+		T result = null;
+		ShardExecutionResult<T> executionResult;
+		Throwable error = null;
+		try {
+			result = taskWrapper.call();
+			executionResult = new ShardExecutionResultImpl<>(null, null, result);
+		} catch (Throwable t) {
+			error = t;
+			executionResult = new ShardExecutionResultImpl<>(null, null, task, error);
+		}
+
+		hints.handleError("There is an error during nonCrossShard execution: ", error, callback, executionResult);
 
 		logContext.setStatementExecuteTime(task.getDalTaskContext().getStatementExecuteTime());
 		logContext.setEntries(toList(task.getDalTaskContext().getLogEntry()));
@@ -314,7 +321,7 @@ public class DalRequestExecutor {
 				executionResult = new ShardExecutionResultImpl<>(dbShard, null, partial);
 			} catch (Throwable e) {
 				error = e;
-				executionResult = new ShardExecutionResultImpl<>(dbShard, null, e);
+				executionResult = new ShardExecutionResultImpl<>(dbShard, null, tasks.get(dbShard), e);
 			}
 			hints.handleError("There is error during parallel execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(entry.getKey());
@@ -341,7 +348,7 @@ public class DalRequestExecutor {
 				executionResult = new ShardExecutionResultImpl<>(shard, null, partial);
 			} catch (Throwable e) {
 				error = e;
-				executionResult = new ShardExecutionResultImpl<>(shard, null, e);
+				executionResult = new ShardExecutionResultImpl<>(shard, null, tasks.get(shard), e);
 			}
 			hints.handleError("There is error during sequential execution: ", error, callback, executionResult);
 			TaskCallable task = tasks.get(shard);

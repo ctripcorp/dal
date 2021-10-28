@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.datasource;
 
+import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.ConnectionString;
@@ -7,10 +8,9 @@ import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.ForceSwitchedStatus;
-import com.ctrip.platform.dal.dao.configure.ClusterInfo;
-import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.cluster.*;
+import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
+import com.ctrip.platform.dal.dao.datasource.cluster.DataSourceDelegate;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.ServiceLoaderHelper;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
@@ -24,7 +24,8 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -85,7 +86,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     protected DataSource createInnerDataSource() {
         if (cluster == null)
             throw new DalRuntimeException("null cluster");
-        return cluster.getClusterType() != ClusterType.MGR ? createStandaloneDataSource() : createMultiHostDataSource();
+        return !cluster.getRouteStrategyConfig().multiMaster() ? createStandaloneDataSource() : createMultiHostDataSource();
     }
 
     protected DataSource createStandaloneDataSource() {
@@ -158,10 +159,15 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     }
 
     private DataSourceIdentity getStandaloneDataSourceIdentity(ClusterInfo clusterInfo, Cluster cluster) {
-        if (!StringUtils.isEmpty(clusterInfo.getTag()))
-            return new TagDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()), clusterInfo.getTag());
-        if (clusterInfo.getRole() == DatabaseRole.MASTER)
+        if (clusterInfo instanceof TagClusterInfo) {
+            return new TagDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()), ((TagClusterInfo) clusterInfo).getTag());
+        }
+        if (clusterInfo.getRole() == DatabaseRole.MASTER) {
             return new TraceableClusterDataSourceIdentity(cluster.getMasterOnShard(clusterInfo.getShardIndex()));
+        }
+        if (clusterInfo instanceof GroupClusterInfo) {
+            return new TraceableClusterDataSourceIdentity(cluster.getSlavesOnShard(clusterInfo.getShardIndex()).get(((GroupClusterInfo) clusterInfo).getSlaveIndex()));
+        }
         else {
             List<Database> slaves = cluster.getSlavesOnShard(clusterInfo.getShardIndex());
             if (slaves == null || slaves.size() == 0)
@@ -300,7 +306,7 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
     }
 
     private HostAndPort buildHostAndPort(Cluster cluster) {
-        if (cluster.getClusterType() == ClusterType.MGR) {
+        if (cluster.getRouteStrategyConfig().multiMaster()) {
             StringBuilder hosts = new StringBuilder();
             StringBuilder hostsWithPorts = new StringBuilder();
             Set<Integer> ports = new HashSet<>();

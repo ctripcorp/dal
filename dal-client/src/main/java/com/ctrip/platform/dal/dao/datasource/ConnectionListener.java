@@ -8,6 +8,8 @@ public interface ConnectionListener extends Ordered {
 
     void onCreateConnection(String poolDesc, Connection connection, DataSourceIdentity dataSourceId, long startTime);
 
+    void onRecreateConnection(String poolDesc, Connection connection);
+
     void onCreateConnectionFailed(String poolDesc, String connDesc, DataSourceIdentity dataSourceId, Throwable exception, long startTime);
 
     void onReleaseConnection(String poolDesc, Connection connection);

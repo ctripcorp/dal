@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.configure;
 
+
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 
@@ -11,7 +12,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private Integer shardIndex;
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
-    private String tag;
+    private String tag = "";
+    private boolean queryConsistent;
 
     @Override
     public String getConsistencyTypeCustomizedClass() {
@@ -39,13 +41,18 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     }
 
     @Override
-    public String getReadStrategy() {
+    public String getRouteStrategy() {
         return readStrategy;
     }
 
     @Override
     public String getTag() {
         return tag;
+    }
+
+    @Override
+    public boolean isQueryConsistent() {
+        return queryConsistent;
     }
 
     public DefaultDalConfigCustomizedOption consistencyTypeCustomizedClass(String clazz) {
@@ -83,15 +90,21 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
+    public DefaultDalConfigCustomizedOption queryConsistent(boolean queryConsistent) {
+        this.queryConsistent = queryConsistent;
+        return this;
+    }
+
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
-                .databaseRole(this.databaseRole)
-                .shardIndex(this.shardIndex)
-                .forceInitialize(this.forceInitialize)
-                .ignoreShardingResourceNotFound(this.ignoreShardingResourceNotFound)
-                .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
-                .readStrategy(this.readStrategy)
-                .tag(this.tag);
+                .databaseRole(this.getDatabaseRole())
+                .shardIndex(this.getShardIndex())
+                .forceInitialize(this.isForceInitialize())
+                .ignoreShardingResourceNotFound(this.isIgnoreShardingResourceNotFound())
+                .consistencyTypeCustomizedClass(this.getConsistencyTypeCustomizedClass())
+                .readStrategy(this.getRouteStrategy())
+                .tag(this.getTag())
+                .queryConsistent(this.isQueryConsistent());
     }
 }

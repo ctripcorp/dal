@@ -1,12 +1,11 @@
 package com.ctrip.platform.dal.dao.configure.dalproperties;
 
-import com.ctrip.framework.dal.cluster.client.base.UnsupportedListenable;
 import com.ctrip.platform.dal.common.enums.ImplicitAllShardsSwitch;
 import com.ctrip.platform.dal.common.enums.TableParseSwitch;
 import com.ctrip.platform.dal.dao.configure.ErrorCodeInfo;
+import com.ctrip.platform.dal.dao.log.LogFilter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocator {
@@ -178,5 +177,31 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
     @Override
     public String ignoreExceptionsForDataSourceMonitor() {
         return "";
+    }
+
+    @Override
+    public Set<String> getDaoPackagesPath() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public boolean mybatisLogEnable() {
+        return false;
+    }
+
+    @Override
+    public LogFilter exceptionLogFilter() throws Exception {
+        return new LogFilter() {
+
+            @Override
+            public boolean filter(Throwable throwable) {
+                return false;
+            }
+        };
+    }
+
+    @Override
+    public long shutdownDelayMS() {
+        return 0;
     }
 }

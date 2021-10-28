@@ -10,6 +10,7 @@ public interface DataSourceConfigureConstants {
     String TESTWHILEIDLE = "testWhileIdle";
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";
+    String DEFAULT_AUTOCOMMIT = "defaultAutoCommit";
     String VALIDATIONQUERY = "validationQuery";
     // validationQueryTimeout -> validationTimeoutMillis
     String VALIDATIONQUERYTIMEOUT = "validationTimeoutMillis";
@@ -25,6 +26,8 @@ public interface DataSourceConfigureConstants {
     String LOGABANDONED = "logAbandoned";
     String MINEVICTABLEIDLETIMEMILLIS = "minEvictableIdleTimeMillis";
     String CONNECTIONPROPERTIES = "connectionProperties";
+    String SOCKET_TIMEOUT = "socketTimeout";
+    String CONNECT_TIMEOUT = "connectTimeout";
     String INIT_SQL = "initSql";
     String STATEMENT_INTERCEPTORS_KEY = "statementInterceptors";
 
@@ -41,10 +44,6 @@ public interface DataSourceConfigureConstants {
     String LOCAL_ACCESS = "localAccess";
     String IDC_PRIORITY = "idcPriority";
     String IDC_PRIORITY_SEPARATOR = ",";
-    String ZONES_PRIORITY = "zonesPriority";
-    String FAILOVER_TIME_MS = "failoverTimeMS";
-    String BLACKLIST_TIMEOUT_MS = "blacklistTimeoutMS";
-    String FIXED_VALIDATE_PERIOD_MS = "fixedValidatePeriodMS";
 
     // This is for typo error
     String INIT_SQL2 = "initSQL";
@@ -64,6 +63,7 @@ public interface DataSourceConfigureConstants {
     // **********Pool properties default value**********
     boolean DEFAULT_TESTWHILEIDLE = false;
     boolean DEFAULT_TESTONBORROW = true;
+    boolean DEFAULT_AUTO_COMMIT = true;
     boolean DEFAULT_TESTONRETURN = false;
     String DEFAULT_VALIDATIONQUERY = "SELECT 1";
     // 1s -> 250ms

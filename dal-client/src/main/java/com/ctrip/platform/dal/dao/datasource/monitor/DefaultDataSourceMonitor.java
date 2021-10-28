@@ -59,14 +59,15 @@ public class DefaultDataSourceMonitor implements DataSourceMonitor {
         if (e == null)
             return true;
 
-        Throwable t1 = e;
-        for (Class clazz : ignoreExceptions)
+        for (Class clazz : ignoreExceptions) {
+            Throwable t1 = e;
             while (t1 != null && (t1 instanceof SQLException)) {
                 if (clazz.isInstance(t1)) {
                     return true;
                 }
                 t1 = t1.getCause();
             }
+        }
 
         return false;
     }

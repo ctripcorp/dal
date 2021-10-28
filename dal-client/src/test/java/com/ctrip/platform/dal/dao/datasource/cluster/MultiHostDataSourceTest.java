@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitiveProperties;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class MultiHostDataSourceTest {
     public void testNormal() throws Exception {
         MultiHostDataSource dataSource = new MockMultiHostDataSource(mockDataSourceConfigs(),
                 mockClusterProperties(), "zone1");
-        HostSpec expectedHost = HostSpec.of("10.32.20.125", 3306);
+        HostSpec expectedHost = HostSpec.of("10.32.20.116", 3306);
         testNormal(dataSource, expectedHost);
     }
 
@@ -57,7 +58,7 @@ public class MultiHostDataSourceTest {
 
     private Map<HostSpec, DataSourceConfigure> mockDataSourceConfigs() {
         Map<HostSpec, DataSourceConfigure> dataSourceConfigs = new HashMap<>();
-        HostSpec host1 = HostSpec.of("10.32.20.125", 3306, "zone1");
+        HostSpec host1 = HostSpec.of("10.32.20.116", 3306, "zone1");
         dataSourceConfigs.put(host1, mockDataSourceConfig(host1));
         HostSpec host2 = HostSpec.of("dst56614", 3306, "zone2");
         dataSourceConfigs.put(host2, mockDataSourceConfig(host2));
@@ -78,8 +79,18 @@ public class MultiHostDataSourceTest {
     private MultiHostClusterProperties mockClusterProperties() {
         return new MultiHostClusterProperties() {
             @Override
+            public RouteStrategy generate() {
+                return null;
+            }
+
+            @Override
             public String routeStrategyName() {
                 return null;
+            }
+
+            @Override
+            public boolean multiMaster() {
+                return false;
             }
 
             @Override

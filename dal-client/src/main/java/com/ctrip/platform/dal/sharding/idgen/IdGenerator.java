@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.sharding.idgen;
 
+
 import com.ctrip.framework.dal.cluster.client.sharding.idgen.ClusterIdGenerator;
 
 /**

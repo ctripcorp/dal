@@ -58,7 +58,7 @@ public class DefaultTableParser implements TableParser {
     public Set<String> getTablesFromSqls(String... sqls) {
         long startTime = System.currentTimeMillis();
         Set<String> tableSet = new HashSet<>();
-        if (sqls == null || sqls.length == 0)
+        if (sqls == null || sqls.length == 0 || cacheInitSize <= 0)
             return tableSet;
         // parse batch sqls
         for (String sql : sqls) {

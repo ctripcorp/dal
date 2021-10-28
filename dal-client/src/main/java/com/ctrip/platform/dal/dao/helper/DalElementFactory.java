@@ -4,6 +4,7 @@ import com.ctrip.platform.dal.dao.configure.dalproperties.DalPropertiesProvider;
 import com.ctrip.platform.dal.dao.datasource.DatasourceBackgroundExecutor;
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.TimeoutStatsLogger;
 
 /**
  * Created by lilj on 2018/7/31.
@@ -21,5 +22,7 @@ public interface DalElementFactory extends Ordered {
     LocalizationValidatorFactory getLocalizationValidatorFactory();
 
     EnvUtils getEnvUtils();
+
+    TimeoutStatsLogger getTimeoutStatsLogger();
 
 }

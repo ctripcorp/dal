@@ -6,4 +6,5 @@ import com.ctrip.framework.dal.cluster.client.multihost.ClusterRouteStrategyConf
  * @author c7ch23en
  */
 public interface MultiHostClusterProperties extends ClusterRouteStrategyConfig {
+
 }

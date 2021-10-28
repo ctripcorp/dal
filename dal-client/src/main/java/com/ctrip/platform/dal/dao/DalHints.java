@@ -12,8 +12,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
+import com.ctrip.framework.dal.cluster.client.cluster.RouteStrategyEnum;
 import com.ctrip.platform.dal.dao.client.DalHA;
 import com.ctrip.platform.dal.dao.helper.RequestContext;
+import com.ctrip.platform.dal.dao.log.LogUtils;
 import com.ctrip.platform.dal.exceptions.DalException;
 
 /**
@@ -549,5 +551,21 @@ public class DalHints {
 
     public Class getResultClass() {
         return get(DalHintEnum.resultClass) == null ? null : (Class)get(DalHintEnum.resultClass);
+    }
+
+    public DalHints routeStrategy(RouteStrategyEnum readStrategyEnum) {
+        if (readStrategyEnum != null)
+            set(DalHintEnum.routeStrategy, readStrategyEnum);
+        return this;
+    }
+
+    public RouteStrategyEnum getRouteStrategy() {
+        if (hints.containsKey(DalHintEnum.routeStrategy))
+            return (RouteStrategyEnum)get(DalHintEnum.routeStrategy);
+        return null;
+    }
+
+    public void cleanRouteStrategy() {
+        hints.remove(DalHintEnum.routeStrategy);
     }
 }

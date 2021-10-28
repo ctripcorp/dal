@@ -1,12 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Set;
-
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
@@ -14,12 +9,19 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
+import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
 import com.ctrip.platform.dal.exceptions.DalException;
 import com.ctrip.platform.dal.exceptions.DalRuntimeException;
 import com.ctrip.platform.dal.exceptions.ErrorCode;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Set;
+
+import static com.ctrip.platform.dal.dao.log.LogUtils.logReadStrategy;
 
 public class DalConnectionManager {
 	private DalConfigure config;
@@ -146,7 +148,7 @@ public class DalConnectionManager {
 	}
 
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
-		if (dbSet instanceof ClusterDatabaseSet && !ClusterType.MGR.equals(((ClusterDatabaseSet) dbSet).getCluster().getClusterType())) {
+		if (dbSet instanceof ClusterDatabaseSet && !((ClusterDatabaseSet) dbSet).getCluster().getRouteStrategyConfig().multiMaster()) {
 			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
 		}
 
@@ -165,6 +167,7 @@ public class DalConnectionManager {
 
 	protected DataBase clusterSelect(DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) {
 		Cluster cluster = ((ClusterDatabaseSet) dbSet).getCluster();
+		logReadStrategy(cluster);
 		DatabaseShard databaseShard;
 		if (StringUtils.isEmpty(shard)) {
 			Set<Integer> shards = cluster.getAllDbShards();
@@ -181,8 +184,7 @@ public class DalConnectionManager {
 			return new ClusterDataBase(databaseShard.getMasters().iterator().next());
 		}
 
-		HostSpec hostSpec = databaseShard.getRouteStrategy().pickRead(config.getSelector().parseDalHints(hints));
-		return new ClusterDataBase(databaseShard.parseFromHostSpec(hostSpec));
+		return new ClusterDataBase(databaseShard.selectDatabaseFromReadStrategy(hints));
 	}
 
 	public <T> T doInConnection(ConnectionAction<T> action, DalHints hints)

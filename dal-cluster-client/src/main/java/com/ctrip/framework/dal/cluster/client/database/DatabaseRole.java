@@ -8,7 +8,9 @@ import com.ctrip.framework.dal.cluster.client.exception.ClusterRuntimeException;
 public enum DatabaseRole {
 
     MASTER("master"),
-    SLAVE("slave");
+    SLAVE("slave"),
+    MIX("mix"),
+    SLAVES("mix-read");
 
     private String value;
 
@@ -21,10 +23,9 @@ public enum DatabaseRole {
     }
 
     public static DatabaseRole parse(String value) {
-        if (MASTER.getValue().equalsIgnoreCase(value))
-            return MASTER;
-        if (SLAVE.getValue().equalsIgnoreCase(value))
-            return SLAVE;
+        for (DatabaseRole role : DatabaseRole.values())
+            if (role.getValue().equalsIgnoreCase(value))
+                return role;
         throw new ClusterRuntimeException("invalid database role");
     }
 

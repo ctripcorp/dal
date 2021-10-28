@@ -2,13 +2,13 @@ package com.ctrip.framework.dal.cluster.client.cluster;
 
 public enum ReadStrategyEnum {
 
-    READ_MASTER("ReadMasterStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadMasterStrategy"),
-    READ_SLAVES_FIRST("ReadSlavesFirstStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadSlavesFirstStrategy"),
-    READ_SLAVES_ONLY("ReadSlavesOnlyStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadSlavesOnlyStrategy"),
-    READ_CURRENT_ZONE_SLAVES_FIRST("ReadCurrentZoneSlavesFirstStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadCurrentZoneSlavesFirstStrategy"),
-    READ_CURRENT_ZONE_SLAVES_ONLY("ReadCurrentZoneSlavesOnlyStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadCurrentZoneSlavesOnlyStrategy"),
-    READ_MASTER_ZONE_SLAVES_FIRST("ReadMasterZoneSlavesFirstStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadMasterZoneSlavesFirstStrategy"),
-    READ_MASTER_ZONE_SLAVES_ONLY("ReadMasterZoneSlavesOnlyStrategy", "com.ctrip.framework.dal.cluster.client.shard.read.ReadMasterZoneSlavesOnlyStrategy");
+    READ_MASTER("ReadMasterStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterStrategy"),
+    READ_SLAVES_FIRST("ReadSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadSlavesFirstStrategy"),
+    READ_SLAVES_ONLY("ReadSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadSlavesOnlyStrategy"),
+    READ_CURRENT_ZONE_SLAVES_FIRST("ReadCurrentZoneSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadCurrentZoneSlavesFirstStrategy"),
+    READ_CURRENT_ZONE_SLAVES_ONLY("ReadCurrentZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadCurrentZoneSlavesOnlyStrategy"),
+    READ_MASTER_ZONE_SLAVES_FIRST("ReadMasterZoneSlavesFirstStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesFirstStrategy"),
+    READ_MASTER_ZONE_SLAVES_ONLY("ReadMasterZoneSlavesOnlyStrategy", "com.ctrip.platform.dal.cluster.shard.read.ReadMasterZoneSlavesOnlyStrategy");
 
     private String alias;
     private String clazz;
@@ -32,6 +32,10 @@ public enum ReadStrategyEnum {
                 return readStrategyEnum.clazz;
         }
         return name;
+    }
+
+    public String getClazz() {
+        return this.clazz;
     }
 
 

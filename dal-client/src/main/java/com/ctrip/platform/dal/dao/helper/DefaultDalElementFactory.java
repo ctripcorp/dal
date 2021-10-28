@@ -9,9 +9,12 @@ import com.ctrip.platform.dal.dao.datasource.DefaultLocalizationValidatorFactory
 import com.ctrip.platform.dal.dao.datasource.LocalizationValidatorFactory;
 import com.ctrip.platform.dal.dao.log.DefaultLoggerImpl;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.TimeoutCollection;
+import com.ctrip.platform.dal.dao.log.TimeoutStatsLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -107,6 +110,17 @@ public class DefaultDalElementFactory implements DalElementFactory {
     @Override
     public EnvUtils getEnvUtils() {
         return envUtilsHolder.getOrCreate(DefaultEnvUtils::new);
+    }
+
+    @Override
+    public TimeoutStatsLogger getTimeoutStatsLogger() {
+        // This is for ctrip log timeout params; it's no use in open-source
+        return new TimeoutStatsLogger() {
+            @Override
+            public void register(Map<String, TimeoutCollection> timeoutCollectionMap) {
+
+            }
+        };
     }
 
     @Override

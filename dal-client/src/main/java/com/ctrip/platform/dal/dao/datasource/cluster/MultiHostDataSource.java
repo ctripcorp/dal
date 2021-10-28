@@ -1,17 +1,19 @@
 package com.ctrip.platform.dal.dao.datasource.cluster;
 
 import com.ctrip.framework.dal.cluster.client.base.HostSpec;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLConstants;
+import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.DataSourceConfigure;
 import com.ctrip.platform.dal.dao.datasource.ClosableDataSource;
 import com.ctrip.platform.dal.dao.datasource.DataSourceCreator;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSource;
 import com.ctrip.platform.dal.dao.datasource.SingleDataSourceWrapper;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ConnectionFactoryAware;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.HostConnectionValidatorHolder;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.RouteStrategy;
+import com.ctrip.platform.dal.dao.datasource.cluster.strategy.multi.validator.HostConnectionValidator;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
 import com.ctrip.platform.dal.dao.log.ILogger;
-import com.ctrip.platform.dal.exceptions.DalRuntimeException;
-import com.ctrip.platform.dal.exceptions.InvalidConnectionException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -34,9 +36,9 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     private final Map<HostSpec, DataSourceConfigure> dataSourceConfigs;
     private final Map<HostSpec, SingleDataSource> wrappedDataSources = new HashMap<>();
     private final ConnectionFactory connFactory;
-    private final MGRStrategy mgrStrategy;
+    private final RouteStrategy routeStrategy;
     private final MultiHostClusterProperties clusterProperties;
-    private final ConnectionValidator connValidator;
+    private HostConnectionValidator connValidator;
 
     private final AtomicBoolean isDetecting = new AtomicBoolean(false);
     private final AtomicLong lastDetectedTime = new AtomicLong(0);
@@ -47,41 +49,24 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
         this.dataSourceConfigs = dataSourceConfigs;
         this.clusterProperties = clusterProperties;
         this.connFactory = prepareConnectionFactory();
-        this.mgrStrategy = prepareRouteStrategy();
-        this.connValidator = this.mgrStrategy.getConnectionValidator();
+        this.routeStrategy = prepareRouteStrategy();
         prepareDataSources();
     }
 
     protected ConnectionFactory prepareConnectionFactory() {
-        return new ConnectionFactory() {
-            @Override
-            public Connection getPooledConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return wrappedDataSources.get(host).getDataSource().getConnection();
-            }
-
-            @Override
-            public Connection createConnectionForHost(HostSpec host) throws SQLException, InvalidConnectionException {
-                return getPooledConnectionForHost(host);
-            }
-        };
+        return host -> wrappedDataSources.get(host).getDataSource().getConnection();
     }
 
-    protected MGRStrategy prepareRouteStrategy() {
-        String strategyName = clusterProperties.routeStrategyName();
-        MGRStrategy strategy;
-        if (ClusterConfigXMLConstants.ORDERED_ACCESS_STRATEGY.equalsIgnoreCase(strategyName))
-            strategy = new OrderedAccessStrategy();
-        else {
-            try {
-                Class clazz = Class.forName(strategyName);
-                strategy = (MGRStrategy) clazz.newInstance();
-            } catch (Throwable t) {
-                String msg = "Errored constructing route strategy: " + strategyName;
-                LOGGER.error(msg, t);
-                throw new DalRuntimeException(msg, t);
-            }
+    protected RouteStrategy prepareRouteStrategy() {
+        RouteStrategy strategy = this.clusterProperties.generate();
+        strategy.init(shardMeta.configuredHosts(), clusterProperties.routeStrategyProperties());
+
+        if (strategy instanceof ConnectionFactoryAware) {
+            ((ConnectionFactoryAware) strategy).setConnectionFactory(this.connFactory);
         }
-        strategy.initialize(shardMeta, connFactory, clusterProperties.routeStrategyProperties());
+        if (strategy instanceof HostConnectionValidatorHolder) {
+            this.connValidator = ((HostConnectionValidatorHolder) strategy).getHostConnectionValidator();
+        }
         return strategy;
     }
 
@@ -100,7 +85,16 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
 
     @Override
     public Connection getConnection() throws SQLException {
-        return mgrStrategy.pickConnection(buildRequestContext());
+        DalHints dalHints = new DalHints();
+        HostSpec hostSpec = routeStrategy.pickNode(dalHints);
+        Connection targetConnection;
+        try {
+            targetConnection = connFactory.getPooledConnectionForHost(hostSpec);
+        } catch (Exception e) {
+            routeStrategy.interceptException(null, new DefaultHostConnection(null, hostSpec));
+            throw e;
+        }
+        return new DefaultHostConnection(targetConnection, hostSpec);
     }
 
     protected RequestContext buildRequestContext() {
@@ -118,8 +112,8 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
             if (dataSource != null)
                 DataSourceCreator.getInstance().returnDataSource(dataSource);
         });
-        if (mgrStrategy != null) {
-            mgrStrategy.destroy();
+        if (routeStrategy != null) {
+            routeStrategy.dispose();
         }
     }
 
@@ -134,27 +128,26 @@ public class MultiHostDataSource extends DataSourceDelegate implements DataSourc
     }
 
     @Override
-    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {}
+    public void forceRefreshDataSource(String name, DataSourceConfigure configure) {
+    }
 
     public void handleException(SQLException e, boolean isUpdateOperation, Connection connection) {
         if (e != null && System.currentTimeMillis() - lastDetectedTime.get() > DETECTION_INTERVAL_MS &&
                 isDetecting.compareAndSet(false, true))
-//            executor.submit(() -> {
-                try {
-                    LOGGER.warn("Execution error in MultiHostDataSource", e);
-                    HostConnection conn;
-                    if (connection.isWrapperFor(HostConnection.class))
-                        conn = connection.unwrap(HostConnection.class);
-                    else
-                        conn = new DefaultHostConnection(connection, null);
-                    connValidator.validate(conn);
-                } catch (Throwable t) {
-                    // ignore
-                } finally {
-                    lastDetectedTime.set(System.currentTimeMillis());
-                    isDetecting.set(false);
-                }
-//            });
+            try {
+                LOGGER.warn("Execution error in MultiHostDataSource", e);
+                HostConnection conn;
+                if (connection.isWrapperFor(HostConnection.class))
+                    conn = connection.unwrap(HostConnection.class);
+                else
+                    conn = new DefaultHostConnection(connection, null);
+                routeStrategy.interceptException(e, conn);
+            } catch (Throwable t) {
+                // ignore
+            } finally {
+                lastDetectedTime.set(System.currentTimeMillis());
+                isDetecting.set(false);
+            }
     }
 
 }

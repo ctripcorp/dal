@@ -10,6 +10,7 @@ import java.sql.DatabaseMetaData;
 public abstract class AbstractConnectionListener implements ConnectionListener {
     protected static ILogger LOGGER = DalElementFactory.DEFAULT.getILogger();
     private String ON_CREATE_CONNECTION_FORMAT = "[onCreateConnection]%s, %s";
+    private String ON_RECREATE_CONNECTION_FORMAT = "[onRecreateConnection]%s, %s";
     private String ON_CREATE_CONNECTION_FAILED_FORMAT = "[onCreateConnectionFailed]%s, %s";
     private String ON_RELEASE_CONNECTION_FORMAT = "[onReleaseConnection]%s, %s";
     private String ON_ABANDON_CONNECTION_FORMAT = "[onAbandonConnection]%s, %s";
@@ -23,8 +24,20 @@ public abstract class AbstractConnectionListener implements ConnectionListener {
         doOnCreateConnection(poolDesc, connection, dataSourceId, startTime);
     }
 
+    @Override
+    public void onRecreateConnection(String poolDesc, Connection connection) {
+        if (connection == null)
+            return;
+
+        doOnRecreateConnection(poolDesc, connection);
+    }
+
     protected void doOnCreateConnection(String poolDesc, Connection connection, DataSourceIdentity dataSourceId, long startTime) {
         logInfo(ON_CREATE_CONNECTION_FORMAT, poolDesc, connection);
+    }
+
+    protected void doOnRecreateConnection(String poolDesc, Connection connection) {
+        logInfo(ON_RECREATE_CONNECTION_FORMAT, poolDesc, connection);
     }
 
     @Override

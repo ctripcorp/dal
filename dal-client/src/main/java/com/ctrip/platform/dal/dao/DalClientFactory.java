@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
@@ -30,6 +31,7 @@ public class DalClientFactory {
     private static final String THREAD_NAME = "DAL-DalClientFactory-ShutdownHook";
     private static final String CREATE_CUSTOMER_CLIENT_ERROR = "Error while creating customer DalClient";
     private static final String CUSTOM_DAL_CLIENT_CLASS = "customDalClient";
+    private static final long SHUTDOWN_DELAY_MS = DalPropertiesManager.getInstance().getDalPropertiesLocator().shutdownDelayMS();
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -180,6 +182,13 @@ public class DalClientFactory {
         if (configureRef.get() == null) {
             iLogger.warn("Dal Java Client Factory is already shutdown.");
             return;
+        }
+
+        iLogger.info("Waiting to shutdown Dal Java Client Factory");
+        try {
+            TimeUnit.MILLISECONDS.sleep(SHUTDOWN_DELAY_MS);
+        } catch (InterruptedException e) {
+            // nothing need to do
         }
 
         synchronized (DalClientFactory.class) {

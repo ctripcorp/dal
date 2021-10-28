@@ -1,5 +1,7 @@
 package com.ctrip.platform.dal.dao.datasource.jdbc;
 
+import com.ctrip.platform.dal.dao.StatementParameter;
+import com.ctrip.platform.dal.dao.StatementParameters;
 import com.ctrip.platform.dal.dao.datasource.log.SqlContext;
 import com.ctrip.platform.dal.dao.helper.SqlUtils;
 
@@ -17,8 +19,10 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     public DalPreparedStatement(PreparedStatement preparedStatement, DalConnection connection, String sql, SqlContext context) {
         super(preparedStatement, connection, context);
+        context.populateSql(sql);
         this.preparedStatement = preparedStatement;
         this.firstAlphaCharUc = SqlUtils.firstAlphaCharUc(sql);
+        logParameters = new StatementParameters();
     }
 
     public PreparedStatement getPreparedStatement() {
@@ -35,73 +39,95 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
         return executeStatement(() -> preparedStatement.executeUpdate(), true);
     }
 
+    private void recordParamWithNoError(StatementParameter statementParameter) {
+        try {
+            logParameters.add(statementParameter);
+        } catch (Throwable t) {
+            // just for log, no need to do
+        }
+    }
+
     @Override
     public void setNull(int parameterIndex, int sqlType) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, sqlType, null));
         preparedStatement.setNull(parameterIndex, sqlType);
     }
 
     @Override
     public void setBoolean(int parameterIndex, boolean x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.BOOLEAN, x));
         preparedStatement.setBoolean(parameterIndex, x);
     }
 
     @Override
     public void setByte(int parameterIndex, byte x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.TINYINT, x));
         preparedStatement.setByte(parameterIndex, x);
     }
 
     @Override
     public void setShort(int parameterIndex, short x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.SMALLINT, x));
         preparedStatement.setShort(parameterIndex, x);
     }
 
     @Override
     public void setInt(int parameterIndex, int x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.INTEGER, x));
         preparedStatement.setInt(parameterIndex, x);
     }
 
     @Override
     public void setLong(int parameterIndex, long x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.BIGINT, x));
         preparedStatement.setLong(parameterIndex, x);
     }
 
     @Override
     public void setFloat(int parameterIndex, float x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.FLOAT, x));
         preparedStatement.setFloat(parameterIndex, x);
     }
 
     @Override
     public void setDouble(int parameterIndex, double x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.DOUBLE, x));
         preparedStatement.setDouble(parameterIndex, x);
     }
 
     @Override
     public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.DECIMAL, x));
         preparedStatement.setBigDecimal(parameterIndex, x);
     }
 
     @Override
     public void setString(int parameterIndex, String x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.VARCHAR, x));
         preparedStatement.setString(parameterIndex, x);
     }
 
     @Override
     public void setBytes(int parameterIndex, byte[] x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.BINARY, x));
         preparedStatement.setBytes(parameterIndex, x);
     }
 
     @Override
     public void setDate(int parameterIndex, Date x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.DATE, x));
         preparedStatement.setDate(parameterIndex, x);
     }
 
     @Override
     public void setTime(int parameterIndex, Time x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.TIME, x));
         preparedStatement.setTime(parameterIndex, x);
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.TIMESTAMP, x));
         preparedStatement.setTimestamp(parameterIndex, x);
     }
 
@@ -127,11 +153,13 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, targetSqlType, x));
         preparedStatement.setObject(parameterIndex, x, targetSqlType);
     }
 
     @Override
     public void setObject(int parameterIndex, Object x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, x));
         preparedStatement.setObject(parameterIndex, x);
     }
 
@@ -142,7 +170,17 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public void addBatch() throws SQLException {
+        addBatchLogParams();
         preparedStatement.addBatch();
+    }
+
+    private void addBatchLogParams() {
+        try {
+            batchStatementParameters.add(logParameters);
+            logParameters = new StatementParameters();
+        } catch (Throwable e) {
+            // just for log, no need to do
+        }
     }
 
     @Override
@@ -157,11 +195,13 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public void setBlob(int parameterIndex, Blob x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.BLOB, x));
         preparedStatement.setBlob(parameterIndex, x);
     }
 
     @Override
     public void setClob(int parameterIndex, Clob x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.CLOB, x));
         preparedStatement.setClob(parameterIndex, x);
     }
 
@@ -177,26 +217,31 @@ public class DalPreparedStatement extends DalStatement implements PreparedStatem
 
     @Override
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.DATE, x));
         preparedStatement.setDate(parameterIndex, x, cal);
     }
 
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.TIME, x));
         preparedStatement.setTime(parameterIndex, x, cal);
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.TIMESTAMP, x));
         preparedStatement.setTimestamp(parameterIndex, x, cal);
     }
 
     @Override
     public void setNull(int parameterIndex, int sqlType, String typeName) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, sqlType, null));
         preparedStatement.setNull(parameterIndex, sqlType, typeName);
     }
 
     @Override
     public void setURL(int parameterIndex, URL x) throws SQLException {
+        recordParamWithNoError(new StatementParameter(parameterIndex, Types.DATALINK, x));
         preparedStatement.setURL(parameterIndex, x);
     }
 

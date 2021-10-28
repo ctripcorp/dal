@@ -1,26 +1,22 @@
 package com.ctrip.platform.dal.dao.datasource;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.DataSource;
-
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.cluster.ClusterType;
-import com.ctrip.framework.dal.cluster.client.cluster.DrcCluster;
+import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.LocalizationConfig;
 import com.ctrip.framework.dal.cluster.client.database.Database;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
 import com.ctrip.platform.dal.dao.cluster.ClusterManager;
 import com.ctrip.platform.dal.dao.cluster.ClusterManagerImpl;
-import com.ctrip.platform.dal.dao.cluster.DynamicCluster;
-import com.ctrip.framework.dal.cluster.client.config.ClusterConfig;
 import com.ctrip.platform.dal.dao.configure.*;
-import com.ctrip.platform.dal.dao.datasource.cluster.ClusterDataSource;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.ILogger;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataSourceLocator {
 
@@ -56,7 +52,7 @@ public class DataSourceLocator {
     }
 
     /**
-     * This is used for initialize datasource for thirdparty framework
+     * This is used for initialize datasource for thirdparty platform
      */
     public DataSourceLocator() {
         this(new DefaultDataSourceConfigureProvider());
@@ -99,10 +95,12 @@ public class DataSourceLocator {
         return ds;
     }
 
-    public DataSource getDataSource(ClusterInfo clusterInfo) {
-        // todo-lhj 为什么根据clusterInfo还要重新创建一遍cluster
-        Cluster cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), new DefaultDalConfigCustomizedOption());
-        clusterInfo.setCluster(cluster);
+    public DataSource getDataSource(ClusterInfo clusterInfo, DalConfigCustomizedOption customizedOption) {
+        Cluster cluster = clusterInfo.getCluster();
+        if (cluster == null) {
+            cluster = clusterManager.getOrCreateCluster(clusterInfo.getClusterName(), customizedOption);
+            clusterInfo.setCluster(cluster);
+        }
         DataSourceIdentity id = clusterInfo.toDataSourceIdentity();
         DataSource ds = cache.get(id);
         if (ds == null) {
@@ -121,6 +119,10 @@ public class DataSourceLocator {
             }
         }
         return ds;
+    }
+
+    public DataSource getDataSource(ClusterInfo clusterInfo) {
+        return getDataSource(clusterInfo, new DefaultDalConfigCustomizedOption());
     }
 
     public void removeDataSource(DataSourceIdentity id) {

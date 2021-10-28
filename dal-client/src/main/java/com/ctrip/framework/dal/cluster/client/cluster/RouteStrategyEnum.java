@@ -33,6 +33,14 @@ public enum RouteStrategyEnum {
         return strategyName;
     }
 
+    public static RouteStrategyEnum parseEnum(String strategyName) {
+        for (RouteStrategyEnum routeStrategyEnum : RouteStrategyEnum.values()) {
+            if (routeStrategyEnum.name().equalsIgnoreCase(strategyName) || routeStrategyEnum.getAlias().equalsIgnoreCase(strategyName))
+                return routeStrategyEnum;
+        }
+        return null;
+    }
+
     public String getClazz() {
         return this.clazz;
     }

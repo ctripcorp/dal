@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.client;
 
 import java.util.Map;
 
+import com.ctrip.platform.dal.dao.log.LogUtils;
 import com.ctrip.platform.dal.dao.markdown.MarkDownInfo;
 import com.ctrip.platform.dal.dao.markdown.MarkupInfo;
 import com.ctrip.platform.dal.dao.task.DalRequest;
@@ -51,7 +52,8 @@ public class DalSafeLogger implements DalLogger {
     @Override
     public void error(String msg, Throwable e) {
         try{
-            logger.error(msg, e);
+            if (!LogUtils.ignoreError(e))
+                logger.error(msg, e);
         }catch(Throwable e1){
             e1.printStackTrace();
         }

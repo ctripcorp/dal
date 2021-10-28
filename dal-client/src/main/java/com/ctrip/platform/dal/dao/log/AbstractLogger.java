@@ -85,7 +85,8 @@ public abstract class AbstractLogger implements ILogger {
     @Override
     public void error(final String msg, final Throwable e) {
         try {
-            LOGGER.error(e.getMessage(), e);
+            if (!LogUtils.ignoreError(e))
+                LOGGER.error(e.getMessage(), e);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

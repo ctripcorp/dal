@@ -71,7 +71,7 @@ public class ClusterDbSqlContextTest extends BaseSqlContextTest {
         Assert.assertEquals(ROLE.getValue(), tags.get(ClusterDbSqlContext.ROLE));
     }
 
-    private Cluster mockCluster() {
+    public static Cluster mockCluster() {
         return new Cluster() {
             @Override
             public String getClusterName() {

@@ -5,6 +5,7 @@ import com.ctrip.framework.dal.cluster.client.cluster.DefaultLocalConfigProvider
 import com.ctrip.framework.dal.cluster.client.config.ClusterConfigXMLParserTest;
 import com.ctrip.framework.dal.cluster.client.database.DummyDatabaseTest;
 import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactoryTest;
+import com.ctrip.framework.dal.cluster.client.shard.read.*;
 import com.ctrip.framework.dal.cluster.client.util.CaseInsensitivePropertiesTest;
 import com.ctrip.framework.dal.cluster.client.util.ObjectHolderTest;
 import com.ctrip.framework.dal.cluster.client.util.PropertiesUtilsTest;
@@ -23,7 +24,12 @@ import org.junit.runners.Suite;
         DefaultClusterTest.class,
         DefaultLocalConfigProviderTest.class,
         ObjectHolderTest.class,
-        CaseInsensitivePropertiesTest.class
+        CaseInsensitivePropertiesTest.class,
+        ReadCurrentZoneSlavesFirstStrategyTest.class,
+        ReadCurrentZoneSlavesOnlyStrategyTest.class,
+        ReadMasterZoneSlavesFirstStrategyTest.class,
+        ReadMasterZoneSlavesOnlyStrategyTest.class,
+        ReadSlavesFirstStrategyTest.class
 })
 // test: 30/30 passed/all env:fat
 public class AllTests {

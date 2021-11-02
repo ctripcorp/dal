@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource.monitor;
 
 import com.ctrip.platform.dal.dao.datasource.DataSourceName;
 import com.ctrip.platform.dal.dao.util.ThreadUtils;
+import com.mysql.jdbc.MysqlDataTruncation;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import org.junit.Assert;
@@ -259,8 +260,9 @@ public class DefaultDataSourceMonitorTest {
 
     @Test
     public void isExecuteException() {
-        DefaultDataSourceMonitorDelegate delegate = createMonitor("com.mysql.jdbc.exceptions.MySQLSyntaxErrorException, com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException");
+        DefaultDataSourceMonitorDelegate delegate = createMonitor("com.mysql.jdbc.exceptions.MySQLSyntaxErrorException, com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException, ,java.sql.SQLWarning");
         Assert.assertEquals(true, delegate.isExecuteException(mockException("com.mysql.jdbc.exceptions.MySQLSyntaxErrorException")));
+        Assert.assertEquals(true, delegate.isExecuteException(new MysqlDataTruncation("", 1, false, false, 100, 1000, 100)));
         Assert.assertEquals(false, delegate.isExecuteException(mockException()));
     }
 

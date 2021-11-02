@@ -1,5 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
+import com.ctrip.platform.dal.dao.log.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,8 @@ public class DefaultLogger extends LoggerAdapter implements DalLogger {
 
 	@Override
 	public void error(final String desc, final Throwable e) {
-        call(new Runnable() {public void run() {
+		if (!LogUtils.ignoreError(e))
+        	call(new Runnable() {public void run() {
             logger.error(desc, e);
         }});
 	}

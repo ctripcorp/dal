@@ -199,4 +199,9 @@ public abstract class AbstractDalPropertiesLocator implements DalPropertiesLocat
             }
         };
     }
+
+    @Override
+    public long shutdownDelayMS() {
+        return 0;
+    }
 }

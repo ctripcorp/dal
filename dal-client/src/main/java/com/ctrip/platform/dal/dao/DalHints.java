@@ -417,8 +417,7 @@ public class DalHints {
             return;
 
         // Just make sure error is not swallowed by us
-        if (!LogUtils.ignoreError(e))
-            DalClientFactory.getDalLogger().error(msg, e);
+        DalClientFactory.getDalLogger().error(msg, e);
 
         if (isStopOnError())
             throw DalException.wrap(e);
@@ -555,7 +554,8 @@ public class DalHints {
     }
 
     public DalHints routeStrategy(RouteStrategyEnum readStrategyEnum) {
-        set(DalHintEnum.routeStrategy, readStrategyEnum);
+        if (readStrategyEnum != null)
+            set(DalHintEnum.routeStrategy, readStrategyEnum);
         return this;
     }
 

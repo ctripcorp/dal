@@ -1,5 +1,8 @@
 package com.ctrip.framework.dal.cluster.client.base;
 
+import com.ctrip.framework.dal.cluster.client.exception.DalMetadataException;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +14,9 @@ public class HostSpec {
     private final int m_port;
     private final String m_zone;
     private final boolean isMaster;
+
+    private final static String HOST_SPEC_ERROR = " of %s zone msg lost";
+    private volatile String trim_lower_zone = null;
 
     public static HostSpec of(String host, int port) {
         return new HostSpec(host, port);
@@ -71,6 +77,17 @@ public class HostSpec {
     @Override
     public String toString() {
         return m_host + ':' + m_port + "::" + m_zone + "::" + isMaster;
+    }
+
+    public String getTrimLowerCaseZone() {
+        if (trim_lower_zone != null)
+            return trim_lower_zone;
+
+        if (StringUtils.isTrimmedEmpty(m_zone))
+            throw new DalMetadataException(String.format(HOST_SPEC_ERROR, toString()));
+
+        trim_lower_zone = m_zone.trim().toLowerCase();
+        return trim_lower_zone;
     }
 
 }

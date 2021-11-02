@@ -10,6 +10,7 @@ import com.ctrip.platform.dal.dao.datasource.cluster.HostConnection;
 import com.ctrip.platform.dal.dao.datasource.cluster.strategy.ReadStrategy;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.helper.EnvUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -21,9 +22,7 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
     protected static final EnvUtils envUtils = DalElementFactory.DEFAULT.getEnvUtils();
     protected HashMap<String, List<HostSpec>> hostMap = new HashMap<>();
     protected HashMap<RouteStrategyEnum, ReadStrategy> routeStrategies = new HashMap<>();
-    protected final String ZONE_MISS = "%s hostspec of %s zone message missed.";
 
-    private RouteStrategyEnum readStrategyEnum = READ_SLAVES_FIRST;
     protected Set<HostSpec> hostSpecs;
     protected CaseInsensitiveProperties strategyProperties;
 
@@ -47,17 +46,32 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
 
     @Override
     public HostSpec pickRead(DalHints dalHints) throws HostNotExpectedException {
+        HostSpec hostSpec = hintsRoute(dalHints);
+        if (hostSpec != null)
+            return hostSpec;
+
+        return pickSlaveFirst();
+    }
+
+    protected HostSpec pickSlaveFirst() {
+        List<HostSpec> slaves = hostMap.get(slaveRole);
+        if (CollectionUtils.isEmpty(slaves))
+            return pickMaster();
+
+        return choseByRandom(slaves);
+    }
+
+    protected HostSpec hintsRoute(DalHints dalHints) {
         if (dalHints.getRouteStrategy() != null)
             return dalHintsRoute(dalHints);
+
+        if (dalHints.is(DalHintEnum.masterOnly))
+            return pickMaster();
 
         if (dalHints.is(DalHintEnum.slaveOnly) && envUtils.isProd())
             return slaveOnly();
 
-        List<HostSpec> slaves = hostMap.get(slaveRole);
-        if (slaves == null || slaves.isEmpty())
-            return pickMaster();
-
-        return choseByRandom(slaves);
+        return null;
     }
 
     protected HostSpec pickMaster() {
@@ -72,17 +86,10 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
 
     protected List<HostSpec> getHostByRole(String role) {
         List<HostSpec> slaves = hostMap.get(role);
-        if (slaves == null || slaves.size() < 1)
+        if (slaves == null || slaves.size() == 0)
             throw new HostNotExpectedException(String.format(NO_HOST_AVAILABLE, role));
         return slaves;
     }
-
-    protected HostSpec loadBalancePickHost(List<HostSpec> hostSpecs) {
-        // todo-lhj load-balance strategy implement
-        return hostSpecs.iterator().next();
-    }
-
-
 
     protected HostSpec choseByRandom(List<HostSpec> hostSpecs) {
         if (hostSpecs == null || hostSpecs.size() == 0)
@@ -93,8 +100,6 @@ public class ReadSlavesFirstStrategy implements ReadStrategy {
     protected HostSpec dalHintsRoute (DalHints dalHints) {
         RouteStrategyEnum strategyEnum = dalHints.getRouteStrategy();
         dalHints.cleanRouteStrategy();
-        if (readStrategyEnum.equals(strategyEnum))
-            return this.pickRead(dalHints);
 
         if (routeStrategies.get(strategyEnum) == null) {
             synchronized (routeStrategies) {

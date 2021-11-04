@@ -25,6 +25,7 @@ CREATE TABLE `alldbs` (
 	,`db_password` VARCHAR(200) NULL DEFAULT NULL
 	,`db_catalog` VARCHAR(200) NULL DEFAULT NULL
 	,`db_providerName` VARCHAR(100) NULL DEFAULT NULL
+	,`mode_type`     VARCHAR(20)   NULL DEFAULT NULL comment '数据库连接类型：dalcluster/titankey'
 	,PRIMARY KEY (`id`)
 	,UNIQUE INDEX `unique_key`(`dbname`)
 	,INDEX `FK_Reference_3`(`dal_group_id`)
@@ -68,6 +69,7 @@ CREATE TABLE `databaseset` (
 	,`groupId` INT (11) NULL DEFAULT NULL
 	,`update_user_no` VARCHAR(45) NULL DEFAULT NULL
 	,`update_time` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+	,`mode_type`     VARCHAR(20)   NULL DEFAULT NULL comment '数据库连接类型：dalcluster/titankey'
 	,PRIMARY KEY (`id`)
 	,UNIQUE INDEX `AK_unique_key`(`name`)
 	,INDEX `FK_Reference_4`(`groupId`)
@@ -145,6 +147,7 @@ CREATE TABLE `task_auto` (
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
 	,`hints` VARCHAR(200) NULL DEFAULT NULL
+	,`mode_type`     VARCHAR(20)   NULL DEFAULT NULL comment '数据库连接类型：dalcluster/titankey'
 	,PRIMARY KEY (`id`)
 	);
 
@@ -170,6 +173,7 @@ CREATE TABLE `task_sql` (
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
 	,`hints` VARCHAR(200) NULL DEFAULT NULL
+	,`mode_type`     VARCHAR(20)   NULL DEFAULT NULL comment '数据库连接类型：dalcluster/titankey'
 	,PRIMARY KEY (`id`)
 	);
 
@@ -193,6 +197,7 @@ CREATE TABLE `task_table` (
 	,`api_list` TEXT NULL
 	,`approved` INT (11) NULL DEFAULT NULL
 	,`approveMsg` LONGTEXT NULL
+	,`mode_type`     VARCHAR(20)   NULL DEFAULT NULL comment '数据库连接类型：dalcluster/titankey'
 	,PRIMARY KEY (`id`)
 	);
 

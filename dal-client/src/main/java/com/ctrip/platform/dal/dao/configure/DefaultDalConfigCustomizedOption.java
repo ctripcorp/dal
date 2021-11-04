@@ -12,7 +12,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private Integer shardIndex;
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
-    private String tag;
+    private String tag = "";
+    private boolean queryConsistent;
 
     @Override
     public String getConsistencyTypeCustomizedClass() {
@@ -47,6 +48,11 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public String getTag() {
         return tag;
+    }
+
+    @Override
+    public boolean isQueryConsistent() {
+        return queryConsistent;
     }
 
     public DefaultDalConfigCustomizedOption consistencyTypeCustomizedClass(String clazz) {
@@ -84,6 +90,11 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
+    public DefaultDalConfigCustomizedOption queryConsistent(boolean queryConsistent) {
+        this.queryConsistent = queryConsistent;
+        return this;
+    }
+
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
@@ -93,6 +104,7 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
                 .ignoreShardingResourceNotFound(this.isIgnoreShardingResourceNotFound())
                 .consistencyTypeCustomizedClass(this.getConsistencyTypeCustomizedClass())
                 .readStrategy(this.getRouteStrategy())
-                .tag(this.getTag());
+                .tag(this.getTag())
+                .queryConsistent(this.isQueryConsistent());
     }
 }

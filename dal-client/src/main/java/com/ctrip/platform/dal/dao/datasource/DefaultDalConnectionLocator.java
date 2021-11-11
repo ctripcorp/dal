@@ -58,24 +58,34 @@ public class DefaultDalConnectionLocator extends InjectableComponentSupport impl
     public Connection getConnection(String name, ConnectionAction action) throws Exception {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         DataSource dataSource = locator.getDataSource(keyName);
-        if (dataSource instanceof RefreshableDataSource) {
-
-        }
+        logConnectionUrl(dataSource, action);
         return dataSource.getConnection();
+    }
+
+    // in case we can't log sql.database if there is exception while create a connection
+    private void logConnectionUrl(DataSource dataSource, ConnectionAction action) {
+        try{
+            if (dataSource instanceof SingleDataSourceWrapper) {
+                SingleDataSource singleDataSource = ((SingleDataSourceWrapper) dataSource).getSingleDataSource();
+                if (singleDataSource != null) {
+                    action.entry.setDbUrl(singleDataSource.getDataSourceConfigure().getConnectionUrl());
+                }
+            }
+        } catch (Throwable t) {
+            // no need to do
+        }
     }
 
     @Override
     public Connection getConnection(DataSourceIdentity id) throws Exception {
-        DataSource dataSource = locator.getDataSource(id);
-        if (dataSource instanceof RefreshableDataSource) {
-            ((RefreshableDataSource) dataSource).getConnectionUrl();
-        }
-        return dataSource.getConnection();
+        return getConnection(id, null);
     }
 
     @Override
     public Connection getConnection(DataSourceIdentity id, ConnectionAction action) throws Exception {
-        return null;
+        DataSource dataSource = locator.getDataSource(id);
+        logConnectionUrl(dataSource, action);
+        return dataSource.getConnection();
     }
 
     @Override

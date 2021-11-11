@@ -211,7 +211,6 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
         SingleDataSource singleDataSource = getSingleDataSource();
         if (singleDataSource == null)
             throw new IllegalStateException("SingleDataSource can't be null.");
-        LogUtils.setDatabase(singleDataSource.getDataSourceConfigure().getConnectionUrl());
         DataSource dataSource = singleDataSource.getDataSource();
         if (dataSource == null)
             throw new IllegalStateException("DataSource can't be null.");

@@ -11,6 +11,7 @@ public interface DataSourceConfigureConstants {
     String TESTONBORROW = "testOnBorrow";
     String TESTONRETURN = "testOnReturn";
     String DEFAULT_AUTOCOMMIT = "defaultAutoCommit";
+    String LOGVALIDATIONERRORS = "logValidationErrors";
     String VALIDATIONQUERY = "validationQuery";
     // validationQueryTimeout -> validationTimeoutMillis
     String VALIDATIONQUERYTIMEOUT = "validationTimeoutMillis";
@@ -64,6 +65,7 @@ public interface DataSourceConfigureConstants {
     boolean DEFAULT_TESTWHILEIDLE = false;
     boolean DEFAULT_TESTONBORROW = true;
     boolean DEFAULT_AUTO_COMMIT = true;
+    boolean DEFAULT_LOGVALIDATIONERRORS = true;
     boolean DEFAULT_TESTONRETURN = false;
     String DEFAULT_VALIDATIONQUERY = "SELECT 1";
     // 1s -> 250ms

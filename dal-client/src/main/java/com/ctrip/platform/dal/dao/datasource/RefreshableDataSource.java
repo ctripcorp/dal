@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.LogUtils;
 
 public class RefreshableDataSource extends DalDataSource implements DataSource,
         ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
@@ -166,6 +167,10 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
         return id;
     }
 
+    public String getConnectionUrl() {
+        return dataSourceReference.get().getDataSourceConfigure().getConnectionUrl();
+    }
+
     @Override
     protected SqlContext createSqlContext() {
         return id.createSqlContext();
@@ -206,6 +211,7 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
         SingleDataSource singleDataSource = getSingleDataSource();
         if (singleDataSource == null)
             throw new IllegalStateException("SingleDataSource can't be null.");
+        LogUtils.setDatabase(singleDataSource.getDataSourceConfigure().getConnectionUrl());
         DataSource dataSource = singleDataSource.getDataSource();
         if (dataSource == null)
             throw new IllegalStateException("DataSource can't be null.");

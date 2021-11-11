@@ -48,7 +48,7 @@ public class DalConnectionManager {
 		return logger;
 	}
 
-	public DalConnection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
+	public DalConnection getNewConnection(DalHints hints, boolean useMaster, ConnectionAction action)
 			throws SQLException {
 		DalConnection connHolder = null;
 		String realDbName = logicDbName;
@@ -58,7 +58,7 @@ public class DalConnectionManager {
 				throw new DalException(ErrorCode.MarkdownLogicDb, logicDbName);
 
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
-			boolean isSelect = operation == DalEventEnum.QUERY;
+			boolean isSelect = action.operation == DalEventEnum.QUERY;
 
 			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
 

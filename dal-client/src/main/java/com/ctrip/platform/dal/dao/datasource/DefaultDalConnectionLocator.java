@@ -2,6 +2,7 @@ package com.ctrip.platform.dal.dao.datasource;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
 import com.ctrip.framework.dal.cluster.client.database.Database;
+import com.ctrip.platform.dal.dao.client.ConnectionAction;
 import com.ctrip.platform.dal.dao.client.DalConnectionLocator;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.helper.ConnectionStringKeyHelper;
@@ -50,15 +51,31 @@ public class DefaultDalConnectionLocator extends InjectableComponentSupport impl
 
     @Override
     public Connection getConnection(String name) throws Exception {
+        return getConnection(name, null);
+    }
+
+    @Override
+    public Connection getConnection(String name, ConnectionAction action) throws Exception {
         String keyName = ConnectionStringKeyHelper.getKeyName(name);
         DataSource dataSource = locator.getDataSource(keyName);
+        if (dataSource instanceof RefreshableDataSource) {
+
+        }
         return dataSource.getConnection();
     }
 
     @Override
     public Connection getConnection(DataSourceIdentity id) throws Exception {
         DataSource dataSource = locator.getDataSource(id);
+        if (dataSource instanceof RefreshableDataSource) {
+            ((RefreshableDataSource) dataSource).getConnectionUrl();
+        }
         return dataSource.getConnection();
+    }
+
+    @Override
+    public Connection getConnection(DataSourceIdentity id, ConnectionAction action) throws Exception {
+        return null;
     }
 
     @Override

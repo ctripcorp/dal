@@ -6,6 +6,7 @@ public class DataSourceLogContext {
     private String readStrategy;
     private long sqlTransactionStartTime;
     private long connectionObtained;
+    private String database;
 
     public boolean isHasLogged() {
         return hasLogged;
@@ -37,6 +38,14 @@ public class DataSourceLogContext {
 
     public void setConnectionObtained(long connectionObtained) {
         this.connectionObtained = connectionObtained;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
+    }
+
+    public String getDatabase() {
+        return this.database;
     }
 
     public void clear() {

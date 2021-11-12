@@ -12,9 +12,10 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private Integer shardIndex;
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
-    private String tag;
     private String delegate;
     private String jdbcDriver;
+    private String tag = "";
+    private boolean queryConsistent;
 
     @Override
     public String getConsistencyTypeCustomizedClass() {
@@ -59,6 +60,11 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     @Override
     public String getJdbcDriver() {
         return jdbcDriver;
+    }
+
+    @Override
+    public boolean isQueryConsistent() {
+        return queryConsistent;
     }
 
     public DefaultDalConfigCustomizedOption consistencyTypeCustomizedClass(String clazz) {
@@ -106,6 +112,11 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
+    public DefaultDalConfigCustomizedOption queryConsistent(boolean queryConsistent) {
+        this.queryConsistent = queryConsistent;
+        return this;
+    }
+
     @Override
     public DefaultDalConfigCustomizedOption clone() {
         return new DefaultDalConfigCustomizedOption()
@@ -117,6 +128,7 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
                 .readStrategy(this.readStrategy)
                 .tag(this.tag)
                 .delegate(this.delegate)
-                .jdbcDriver(this.jdbcDriver);
+                .jdbcDriver(this.jdbcDriver)
+                .queryConsistent(this.isQueryConsistent());
     }
 }

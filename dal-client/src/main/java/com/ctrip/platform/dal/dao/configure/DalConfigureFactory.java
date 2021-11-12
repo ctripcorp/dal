@@ -255,7 +255,8 @@ public class DalConfigureFactory implements DalConfigConstants {
                 .delegate(getAttribute(clusterNode, DATASOURCE_FACTORY, ""))
                 .jdbcDriver(getAttribute(clusterNode, DRIVER_CLASS_NAME, ""))
                 // todo-lhj what's default tag
-                .tag(getAttribute(clusterNode, TAG, "tag"));
+                .tag(getAttribute(clusterNode, TAG, ""))
+                .queryConsistent(Boolean.valueOf(getAttribute(clusterNode, QUERY_CONSISTENT, "false")));
     }
 
     private DatabaseSet readDatabaseSet(Node databaseSetNode) throws Exception {

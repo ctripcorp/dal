@@ -77,6 +77,11 @@ public class DefaultLocalConfigProvider implements ClusterConfigProvider {
                 public String getJdbcDriver() {
                     return null;
                 }
+
+                @Override
+                public boolean isQueryConsistent() {
+                    return false;
+                }
             });
         } catch (Throwable t) {
             throw new ClusterConfigException("Load cluster config failed, cluster name: " + clusterName, t);

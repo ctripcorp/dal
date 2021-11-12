@@ -88,6 +88,11 @@ public class DefaultClusterTest {
             public String getJdbcDriver() {
                 return null;
             }
+
+            @Override
+            public boolean isQueryConsistent() {
+                return false;
+            }
         };
     }
 

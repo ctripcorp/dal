@@ -47,4 +47,6 @@ public interface DalConfigCustomizedOption {
     CustomDataSourceFactory getDataSourceFactory();
 
     JdbcDriver getJdbcDriver();
+
+    boolean isQueryConsistent();
 }

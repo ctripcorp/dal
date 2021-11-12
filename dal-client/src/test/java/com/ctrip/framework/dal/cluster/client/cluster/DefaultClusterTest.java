@@ -78,6 +78,11 @@ public class DefaultClusterTest {
             public String getTag() {
                 return null;
             }
+
+            @Override
+            public boolean isQueryConsistent() {
+                return false;
+            }
         };
     }
 

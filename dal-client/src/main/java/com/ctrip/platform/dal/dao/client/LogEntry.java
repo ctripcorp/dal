@@ -1,6 +1,7 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
+import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.common.enums.DatabaseCategory;
 import com.ctrip.platform.dal.common.enums.ShardingCategory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
@@ -207,7 +208,8 @@ public class LogEntry implements ILogEntry{
 	}
 
 	public void setDbUrl(String dbUrl) {
-		this.dbUrl = dbUrl;
+		if (!StringUtils.isTrimmedEmpty(dbUrl))
+			this.dbUrl = dbUrl;
 	}
 
 	public String getServerAddress() {
@@ -417,7 +419,8 @@ public class LogEntry implements ILogEntry{
      * Clear curent caller of threadlocal
      */
     public static void clearCurrentCaller() {
-        currentCaller.remove();
+    	if (currentCaller != null)
+        	currentCaller.remove();
     }
 
     public synchronized static void init(){

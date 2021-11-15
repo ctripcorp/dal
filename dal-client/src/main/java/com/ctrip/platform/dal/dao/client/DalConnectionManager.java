@@ -48,7 +48,7 @@ public class DalConnectionManager {
 		return logger;
 	}
 
-	public DalConnection getNewConnection(DalHints hints, boolean useMaster, DalEventEnum operation)
+	public DalConnection getNewConnection(DalHints hints, boolean useMaster, ConnectionAction action)
 			throws SQLException {
 		DalConnection connHolder = null;
 		String realDbName = logicDbName;
@@ -58,9 +58,9 @@ public class DalConnectionManager {
 				throw new DalException(ErrorCode.MarkdownLogicDb, logicDbName);
 
 			boolean isMaster = hints.is(DalHintEnum.masterOnly) || useMaster;
-			boolean isSelect = operation == DalEventEnum.QUERY;
+			boolean isSelect = action.operation == DalEventEnum.QUERY;
 
-			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect);
+			connHolder = getConnectionFromDSLocator(hints, isMaster, isSelect, action);
 
 			connHolder.setAutoCommit(true);
 			connHolder.applyHints(hints);
@@ -102,7 +102,7 @@ public class DalConnectionManager {
 	}
 
 	private DalConnection getConnectionFromDSLocator(DalHints hints,
-													 boolean isMaster, boolean isSelect) throws SQLException {
+													 boolean isMaster, boolean isSelect, ConnectionAction action) throws SQLException {
 		Connection conn;
 		DatabaseSet dbSet = config.getDatabaseSet(logicDbName);
 		String shardId = null;
@@ -126,19 +126,19 @@ public class DalConnectionManager {
 			DbMeta meta;
 			if (selectedDataBase instanceof ClusterDataBase) {
 				ClusterDataBase clusterDataBase = (ClusterDataBase) selectedDataBase;
-				conn = locator.getConnection(clusterDataBase);
+				conn = locator.getConnection(clusterDataBase, action);
 				meta = DbMeta.createIfAbsent(clusterDataBase, dbSet.getDatabaseCategory(), conn);
 				if (shardId == null)
 					shardId = String.valueOf(clusterDataBase.getDatabase().getShardIndex());
 			}
 			else if (selectedDataBase instanceof ProviderDataBase) {
 				DataSourceIdentity id = selectedDataBase.getDataSourceIdentity();
-				conn = locator.getConnection(id);
+				conn = locator.getConnection(id, action);
 				meta = DbMeta.createIfAbsent(id, dbSet.getDatabaseCategory(), conn);
 			}
 			else {
 				String allInOneKey = selectedDataBase.getConnectionString();
-				conn = locator.getConnection(allInOneKey);
+				conn = locator.getConnection(allInOneKey, action);
 				meta = DbMeta.createIfAbsent(allInOneKey, dbSet.getDatabaseCategory(), conn);
 			}
 			return new DalConnection(conn, selectedDataBase.isMaster(), shardId, meta);

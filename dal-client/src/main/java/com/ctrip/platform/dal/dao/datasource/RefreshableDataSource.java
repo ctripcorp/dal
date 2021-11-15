@@ -20,6 +20,7 @@ import com.ctrip.platform.dal.dao.helper.CustomThreadFactory;
 import com.ctrip.platform.dal.dao.helper.DalElementFactory;
 import com.ctrip.platform.dal.dao.log.DalLogTypes;
 import com.ctrip.platform.dal.dao.log.ILogger;
+import com.ctrip.platform.dal.dao.log.LogUtils;
 
 public class RefreshableDataSource extends DalDataSource implements DataSource,
         ClosableDataSource, SingleDataSourceWrapper, DataSourceConfigureChangeListener {
@@ -164,6 +165,10 @@ public class RefreshableDataSource extends DalDataSource implements DataSource,
 
     public DataSourceIdentity getId() {
         return id;
+    }
+
+    public String getConnectionUrl() {
+        return dataSourceReference.get().getDataSourceConfigure().getConnectionUrl();
     }
 
     @Override

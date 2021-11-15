@@ -33,7 +33,7 @@ public class DalTransactionManager {
 
         if (transaction == null) {
             transaction =
-                    new DalTransaction(getConnection(hints, true, action.operation), connManager.getLogicDbName());
+                    new DalTransaction(getConnection(hints, true, action), connManager.getLogicDbName());
 
             transactionHolder.set(transaction);
         } else {
@@ -95,8 +95,8 @@ public class DalTransactionManager {
         transaction.setRollbackErrorMessage(e);
     }
 
-    public DalConnection getConnection(DalHints hints, DalEventEnum operation) throws SQLException {
-        return getConnection(hints, false, operation);
+    public DalConnection getConnection(DalHints hints, ConnectionAction action) throws SQLException {
+        return getConnection(hints, false, action);
     }
 
     public static String getLogicDbName() {
@@ -111,11 +111,11 @@ public class DalTransactionManager {
         return isInTransaction() ? transactionHolder.get().getConnection().getMeta() : null;
     }
 
-    private DalConnection getConnection(DalHints hints, boolean useMaster, DalEventEnum operation) throws SQLException {
+    private DalConnection getConnection(DalHints hints, boolean useMaster, ConnectionAction action) throws SQLException {
         DalTransaction transaction = transactionHolder.get();
 
         if (transaction == null) {
-            return connManager.getNewConnection(hints, useMaster, operation);
+            return connManager.getNewConnection(hints, useMaster, action);
         } else {
             transaction.validate(connManager.getLogicDbName(), connManager.evaluateShard(hints));
             return transaction.getConnection();

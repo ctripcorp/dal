@@ -419,7 +419,8 @@ public class LogEntry implements ILogEntry{
      * Clear curent caller of threadlocal
      */
     public static void clearCurrentCaller() {
-        currentCaller.remove();
+    	if (currentCaller != null)
+        	currentCaller.remove();
     }
 
     public synchronized static void init(){

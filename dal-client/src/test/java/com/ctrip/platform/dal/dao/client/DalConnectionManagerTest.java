@@ -3,6 +3,7 @@ package com.ctrip.platform.dal.dao.client;
 import com.ctrip.platform.dal.dao.DalClientFactory;
 import com.ctrip.platform.dal.dao.DalEventEnum;
 import com.ctrip.platform.dal.dao.DalHints;
+import com.ctrip.platform.dal.dao.base.MockConnectionAction;
 import org.junit.*;
 import com.ctrip.platform.dal.dao.task.SqlServerTestInitializer;
 
@@ -54,7 +55,7 @@ public class DalConnectionManagerTest {
 		
 		try {
 			DalConnectionManager test = getDalConnectionManager(noShardDb);
-			DalConnection conn = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+			DalConnection conn = test.getNewConnection(hints, useMaster, new MockConnectionAction(DalEventEnum.BATCH_CALL));
 			assertNotNull(conn);
 			assertNotNull(conn.getConn());
 			conn.getConn().close();
@@ -147,7 +148,7 @@ public class DalConnectionManagerTest {
 			final DalConnectionManager test = getDalConnectionManager(noShardDb);
 			ConnectionAction<Object> action = new ConnectionAction<Object>() {
 				public Object execute() throws Exception {
-					connHolder = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+					connHolder = test.getNewConnection(hints, useMaster, new MockConnectionAction(DalEventEnum.BATCH_CALL));
 					statement = connHolder.getConn().createStatement();
 					rs = statement.executeQuery("select * from " + SqlServerTestInitializer.TABLE_NAME);
 					rs.next();
@@ -177,7 +178,7 @@ public class DalConnectionManagerTest {
 			final DalConnectionManager test = getDalConnectionManager(noShardDb);
 			action = new ConnectionAction<Object>() {
 				public Object execute() throws Exception {
-					connHolder = test.getNewConnection(hints, useMaster, DalEventEnum.BATCH_CALL);
+					connHolder = test.getNewConnection(hints, useMaster, new MockConnectionAction(DalEventEnum.BATCH_CALL));
 					
 					statement = connHolder.getConn().createStatement();
 					rs = statement.executeQuery("select * from City");

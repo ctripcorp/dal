@@ -11,11 +11,10 @@
 
     <groupId>com.ctrip.platform</groupId>
     <artifactId>dal-client-parent</artifactId>
-    <version>2.3.23</version>
+    <version>2.3.25</version>
     <packaging>pom</packaging>
 
     <modules>
-<!--        <module>dal-cluster-client</module>-->
         <module>dal-client</module>
         <!--<module>dao-gen-core</module>
         <module>dal-dao-gen</module>-->

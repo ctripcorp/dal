@@ -54,6 +54,14 @@ public class LogUtils {
         getLogContext().setHasLogged(hasLogged);
     }
 
+    public static void setDatabase(String database) {
+        logContext.get().setDatabase(database);
+    }
+
+    public static String getDatabase() {
+        return logContext.get().getDatabase();
+    }
+
     public static void clearLogContext() {
         logContext.get().clear();
     }

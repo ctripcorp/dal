@@ -523,7 +523,7 @@ public class DalDirectClient implements DalContextClient, DalClientExtension {
         action.beginConnect();
 
         long connCost = System.currentTimeMillis();
-        action.connHolder = transManager.getConnection(hints, action.operation);
+        action.connHolder = transManager.getConnection(hints, action);
         Connection conn = action.connHolder.getConn();
         connCost = System.currentTimeMillis() - connCost;
         action.entry.setConnectionCost(connCost);

@@ -3,8 +3,6 @@ package com.ctrip.platform.dal.dao.configure;
 
 import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactory;
-import com.ctrip.framework.dal.cluster.client.extended.JdbcDriver;
 
 public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOption {
 
@@ -14,8 +12,8 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     private Integer shardIndex;
     private DatabaseRole databaseRole = DatabaseRole.MASTER;
     private String readStrategy;
-    private CustomDataSourceFactory dataSourceFactory;
-    private JdbcDriver jdbcDriver;
+    private String delegate;
+    private String jdbcDriver;
     private String tag = "";
     private boolean queryConsistent;
 
@@ -55,12 +53,12 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
     }
 
     @Override
-    public CustomDataSourceFactory getDataSourceFactory() {
-        return dataSourceFactory;
+    public String getDataSourceFactory() {
+        return delegate;
     }
 
     @Override
-    public JdbcDriver getJdbcDriver() {
+    public String getJdbcDriver() {
         return jdbcDriver;
     }
 
@@ -104,12 +102,12 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
         return this;
     }
 
-    public DefaultDalConfigCustomizedOption dataSourceFactory(CustomDataSourceFactory dataSourceFactory) {
-        this.dataSourceFactory = dataSourceFactory;
+    public DefaultDalConfigCustomizedOption delegate(String clazz) {
+        this.delegate = clazz;
         return this;
     }
 
-    public DefaultDalConfigCustomizedOption jdbcDriver(JdbcDriver jdbcDriver) {
+    public DefaultDalConfigCustomizedOption jdbcDriver(String jdbcDriver) {
         this.jdbcDriver = jdbcDriver;
         return this;
     }
@@ -129,7 +127,7 @@ public class DefaultDalConfigCustomizedOption implements DalConfigCustomizedOpti
                 .consistencyTypeCustomizedClass(this.consistencyTypeCustomizedClass)
                 .readStrategy(this.readStrategy)
                 .tag(this.tag)
-                .dataSourceFactory(this.dataSourceFactory)
+                .delegate(this.delegate)
                 .jdbcDriver(this.jdbcDriver)
                 .queryConsistent(this.isQueryConsistent());
     }

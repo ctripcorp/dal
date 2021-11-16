@@ -165,6 +165,36 @@ public enum DatabaseCategory {
 
             return errorCode.startsWith("08");
         }
+    },
+    Custom("", "", new int[] {-1}, new int[] {-1}) {
+
+        public String quote(String fieldName) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isTimeOutException(ErrorContext ctx) {
+            throw new UnsupportedOperationException();
+        }
+
+        public String buildList(String effectiveTableName, String columns, String whereExp) {
+            throw new UnsupportedOperationException();
+        }
+
+        public String buildTop(String effectiveTableName, String columns, String whereExp, int count) {
+            throw new UnsupportedOperationException();
+        }
+
+        public String buildPage(String effectiveTableName, String columns, String whereExp, int start, int count) {
+            throw new UnsupportedOperationException();
+        }
+
+        public String buildPage(String selectSqlTemplate, int start, int count) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isSpecificException(SQLException exception) {
+            throw new UnsupportedOperationException();
+        }
     };
 
     private String nullableUpdateTpl;
@@ -212,6 +242,8 @@ public enum DatabaseCategory {
             return DatabaseCategory.MySql;
         else if (category == com.ctrip.framework.dal.cluster.client.database.DatabaseCategory.SQLSERVER)
             return DatabaseCategory.SqlServer;
+        else if (category == com.ctrip.framework.dal.cluster.client.database.DatabaseCategory.CUSTOM)
+            return DatabaseCategory.Custom;
         throw new RuntimeException("category unrecognized");
     }
 
@@ -233,7 +265,7 @@ public enum DatabaseCategory {
             return DatabaseCategory.Oracle;
         }
         else {
-            throw new RuntimeException("connection url unrecognized");
+            return DatabaseCategory.Custom;
         }
     }
 

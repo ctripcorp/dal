@@ -10,7 +10,7 @@ import com.ctrip.platform.dal.dao.DalResultSetExtractor;
 import com.ctrip.platform.dal.dao.DalRowMapper;
 
 public class DalRowMapperExtractor <T> implements DalResultSetExtractor<List<T>>, HintsAwareExtractor<List<T>> {
-	private static final int COUNT_LIMIT = 5000000;
+	private static final int COUNT_LIMIT = 10000;
 
 	private DalRowMapper<T> mapper;
 	private int start;

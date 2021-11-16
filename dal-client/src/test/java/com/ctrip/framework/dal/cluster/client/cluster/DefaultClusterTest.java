@@ -7,8 +7,6 @@ import com.ctrip.framework.dal.cluster.client.config.DalConfigCustomizedOption;
 import com.ctrip.framework.dal.cluster.client.config.DefaultLocalConfigProvider;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseCategory;
 import com.ctrip.framework.dal.cluster.client.database.DatabaseRole;
-import com.ctrip.framework.dal.cluster.client.extended.CustomDataSourceFactory;
-import com.ctrip.framework.dal.cluster.client.extended.JdbcDriver;
 import com.ctrip.framework.dal.cluster.client.sharding.context.DbShardContext;
 import com.ctrip.framework.dal.cluster.client.sharding.context.MappedShardData;
 import com.ctrip.framework.dal.cluster.client.sharding.context.ShardData;
@@ -82,12 +80,12 @@ public class DefaultClusterTest {
             }
 
             @Override
-            public CustomDataSourceFactory getDataSourceFactory() {
+            public String getDataSourceFactory() {
                 return null;
             }
 
             @Override
-            public JdbcDriver getJdbcDriver() {
+            public String getJdbcDriver() {
                 return null;
             }
 

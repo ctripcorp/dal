@@ -15,7 +15,11 @@ public interface DalConnectionLocator extends DalComponent {
 	
 	Connection getConnection(String name) throws Exception;
 
+	Connection getConnection(String name, ConnectionAction action) throws Exception;
+
 	Connection getConnection(DataSourceIdentity id) throws Exception;
+
+	Connection getConnection(DataSourceIdentity id, ConnectionAction action) throws Exception;
 
 	IntegratedConfigProvider getIntegratedConfigProvider();
 

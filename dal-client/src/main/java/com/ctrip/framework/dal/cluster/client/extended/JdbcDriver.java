@@ -6,7 +6,5 @@ package com.ctrip.framework.dal.cluster.client.extended;
  */
 public interface JdbcDriver {
 
-    String KEY_DRIVER = "driverClass";
-
     String driverClassName();
 }

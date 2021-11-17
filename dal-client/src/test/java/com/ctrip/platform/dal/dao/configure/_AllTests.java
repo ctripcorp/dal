@@ -8,6 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
         ClasspathResourceLoaderTest.class,
         CommonFileLoaderTest.class,
+        ClusterDataBaseAdapterTest.class,
         InjectableComponentTest.class,
         LocalDatabaseSetAdapterTest.class,
         LocalDefaultDatabaseSetTest.class,

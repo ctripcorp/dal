@@ -1,7 +1,6 @@
 package com.ctrip.platform.dal.dao.client;
 
 import com.ctrip.framework.dal.cluster.client.Cluster;
-import com.ctrip.framework.dal.cluster.client.base.HostSpec;
 import com.ctrip.framework.dal.cluster.client.shard.DatabaseShard;
 import com.ctrip.framework.dal.cluster.client.util.StringUtils;
 import com.ctrip.platform.dal.dao.DalEventEnum;
@@ -9,7 +8,6 @@ import com.ctrip.platform.dal.dao.DalHintEnum;
 import com.ctrip.platform.dal.dao.DalHints;
 import com.ctrip.platform.dal.dao.configure.*;
 import com.ctrip.platform.dal.dao.datasource.DataSourceIdentity;
-import com.ctrip.platform.dal.dao.datasource.read.GroupConnection;
 import com.ctrip.platform.dal.dao.markdown.MarkdownManager;
 import com.ctrip.platform.dal.dao.status.DalStatusManager;
 import com.ctrip.platform.dal.dao.strategy.DalShardingStrategy;
@@ -129,7 +127,7 @@ public class DalConnectionManager {
 				conn = locator.getConnection(clusterDataBase, action);
 				meta = DbMeta.createIfAbsent(clusterDataBase, dbSet.getDatabaseCategory(), conn);
 				if (shardId == null)
-					shardId = String.valueOf(clusterDataBase.getDatabase().getShardIndex());
+					shardId = clusterDataBase.getSharding();
 			}
 			else if (selectedDataBase instanceof ProviderDataBase) {
 				DataSourceIdentity id = selectedDataBase.getDataSourceIdentity();
@@ -150,6 +148,8 @@ public class DalConnectionManager {
 	private DataBase select(String logicDbName, DatabaseSet dbSet, DalHints hints, String shard, boolean isMaster, boolean isSelect) throws DalException {
 		if (dbSet instanceof ClusterDatabaseSet && !((ClusterDatabaseSet) dbSet).getCluster().getRouteStrategyConfig().multiMaster()) {
 			return clusterSelect(dbSet, hints, shard, isMaster, isSelect);
+		} else if (dbSet instanceof ClusterDatabaseSet && ((ClusterDatabaseSet) dbSet).getCluster().getRouteStrategyConfig().multiMaster()) {
+			return new ClusterDataBaseAdapter(((ClusterDatabaseSet) dbSet).getCluster());
 		}
 
 		SelectionContext context = new SelectionContext(logicDbName, hints, shard, isMaster, isSelect);

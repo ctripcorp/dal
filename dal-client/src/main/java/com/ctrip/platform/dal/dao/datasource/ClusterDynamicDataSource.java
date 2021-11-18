@@ -131,7 +131,10 @@ public class ClusterDynamicDataSource extends DataSourceDelegate implements Data
 
     private CustomDataSourceFactory getCustomDataSourceFactory() {
         DalConfigCustomizedOption customizedOption = cluster.getCustomizedOption();
-        String clazz = customizedOption.getDataSourceFactory();
+        String clazz = null;
+        if (customizedOption != null) {
+            clazz = customizedOption.getDataSourceFactory();
+        }
         if (StringUtils.isEmpty(clazz)) {
             Properties properties = cluster.getCustomProperties();
             clazz = properties.getProperty(DATASOURCE_FACTORY);

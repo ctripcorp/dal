@@ -98,11 +98,13 @@ public class DalConnectionPool extends ConnectionPool {
         try {
             if (con.getConnection().isClosed()) {
                 con.setDiscarded(true);
-                logger.info(String.format("set discarded for {}", getName()));
+                logger.info(String.format("set discarded for %s", getName()));
             }
         } catch (SQLException e) {
             logger.error("[returnConnection]" + this, e);
         }
+        
+        super.returnConnection(con);
     }
 
     @Override

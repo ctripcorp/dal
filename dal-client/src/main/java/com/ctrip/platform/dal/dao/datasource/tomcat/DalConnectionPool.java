@@ -94,6 +94,24 @@ public class DalConnectionPool extends ConnectionPool {
     }
 
     @Override
+    protected void returnConnection(PooledConnection con) {
+        try {
+            if (con.getConnection().isClosed() && !con.isDiscarded()) {
+                con.setDiscarded(true);
+                String poolUrl = con.getPoolProperties().getUrl();
+                String connUrl = ConnectionUtils.getConnectionUrl(con.getConnection(), poolUrl);
+                String logName = String.format("Connection::discardConnection:%s", connUrl);
+                logger.logTransaction(DalLogTypes.DAL_DATASOURCE, logName, poolUrl, System.currentTimeMillis());
+                logger.warn(String.format("Connection marked discarded: %s", connUrl));
+            }
+        } catch (SQLException e) {
+            logger.error("[returnConnection]" + this, e);
+        }
+
+        super.returnConnection(con);
+    }
+
+    @Override
     protected void release(PooledConnection con) {
         try {
             connectionListener.onReleaseConnection(getName(), getConnection(con));

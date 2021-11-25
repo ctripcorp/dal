@@ -22,5 +22,8 @@ public class OrderedComparatorTest {
         Assert.assertEquals(-1, orderedComparator.compare(ordered3, ordered4));
 
         Assert.assertEquals(1, orderedComparator.compare(ordered1, ordered3));
+        Assert.assertEquals(-1, orderedComparator.compare(ordered3, ordered1));
+        Assert.assertEquals(0, orderedComparator.compare(ordered3, ordered3));
+        Assert.assertEquals(0, orderedComparator.compare(ordered1, ordered1));
     }
 }

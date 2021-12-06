@@ -365,6 +365,7 @@ public class DalStatement implements Statement {
             context.populateConnectionObtained(getLogContext().getConnectionObtained());
             if (context instanceof ClusterDbSqlContext)
                 ((ClusterDbSqlContext) context).setReadStrategy(getLogContext().getReadStrategy());
+            context.populateEncryptParams(getLogContext().getParamsEncryptInSqlContext());
         } catch (Throwable t) {
             // ignore
         }

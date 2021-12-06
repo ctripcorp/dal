@@ -71,6 +71,7 @@ public abstract class BaseSqlContext implements SqlContext {
     private String sql;
     private String database;
     private String params;
+    private boolean encryptParams = true;
 
     public BaseSqlContext() {
         this(null);
@@ -214,6 +215,15 @@ public abstract class BaseSqlContext implements SqlContext {
     @Override
     public void populateConnectionObtained(long millionSeconds) {
         this.connectionObtainedTime = millionSeconds;
+    }
+
+    @Override
+    public void populateEncryptParams(boolean isEncrypt) {
+        this.encryptParams = isEncrypt;
+    }
+
+    public boolean isEncryptParams() {
+        return encryptParams;
     }
 
     protected void logMetric() {

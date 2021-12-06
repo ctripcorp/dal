@@ -45,4 +45,6 @@ public interface SqlContext {
 
     void populateParameters(List<StatementParameters> parameters);
 
+    void populateEncryptParams(boolean isEncrypt);
+
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 public class LogUtils {
 
     private static LogFilter logFilter;
+    private static boolean ignoreParamsEncryptGlobal = false;
 
     static {
         try {
@@ -93,4 +94,19 @@ public class LogUtils {
         return logFilter.filter(throwable);
     }
 
+    public static void ignoreParamsEncryptInSqlContext(){
+        logContext.get().setParamsEncryptInSqlContext(false);
+    }
+
+    public static void ignoreParamsEncryptGlobal(){
+        ignoreParamsEncryptGlobal = true;
+    }
+
+    public static void encryptParamsGlobal(){
+        ignoreParamsEncryptGlobal = false;
+    }
+
+    public static boolean shouldIgnoreParamsEncryptGlobal(){
+        return ignoreParamsEncryptGlobal;
+    }
 }

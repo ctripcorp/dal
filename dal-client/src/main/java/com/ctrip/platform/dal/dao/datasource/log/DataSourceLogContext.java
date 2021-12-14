@@ -7,6 +7,7 @@ public class DataSourceLogContext {
     private long sqlTransactionStartTime;
     private long connectionObtained;
     private String database;
+    private boolean paramsEncryptInSqlContext = true;
 
     public boolean isHasLogged() {
         return hasLogged;
@@ -48,10 +49,19 @@ public class DataSourceLogContext {
         return this.database;
     }
 
+    public void setParamsEncryptInSqlContext(boolean paramsEncrypt){
+        this.paramsEncryptInSqlContext = paramsEncrypt;
+    }
+
+    public boolean getParamsEncryptInSqlContext(){
+        return this.paramsEncryptInSqlContext;
+    }
+
     public void clear() {
         hasLogged = false;
         readStrategy = null;
         sqlTransactionStartTime = 0;
         connectionObtained = 0;
+        paramsEncryptInSqlContext = true;
     }
 }

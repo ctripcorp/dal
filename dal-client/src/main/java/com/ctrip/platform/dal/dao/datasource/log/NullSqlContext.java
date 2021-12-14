@@ -75,4 +75,9 @@ public class NullSqlContext implements SqlContext {
     public void populateParameters(List<StatementParameters> parameters) {
 
     }
+
+    @Override
+    public void populateEncryptParams(boolean isEncrypt) {
+
+    }
 }

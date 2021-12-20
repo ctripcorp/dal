@@ -373,8 +373,8 @@ public class DataSourceConfigure extends AbstractDataSourceConfigure
         dataSourceConfigure.setVersion(version);
         dataSourceConfigure.setConnectionString(connectionString == null ? null : connectionString.clone());
         dataSourceConfigure.setDataSourceId(dataSourceId);
-//        dataSourceConfigure.setHost(host);
-//        dataSourceConfigure.setValidator(validator);
+        dataSourceConfigure.setHost(host);
+        dataSourceConfigure.setValidator(validator);
         return dataSourceConfigure;
     }
 
